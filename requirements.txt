@@ -1,0 +1,4 @@
+pyramid==1.5.7
+SPARQLWrapper==1.6.4
+nose
+webtest
