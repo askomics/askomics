@@ -1,0 +1,42 @@
+from pyramid.config import Configurator
+from pyramid.session import SignedCookieSessionFactory
+
+def main(global_config, **settings):
+    """ This function returns a Pyramid WSGI application.
+    """
+    my_session_factory = SignedCookieSessionFactory('itsaseekreet')
+
+    config = Configurator(settings=settings)
+    config.set_session_factory(my_session_factory)
+
+    config.include('pyramid_chameleon')
+    config.add_static_view('static', 'static', cache_max_age=3600)
+
+    # Askomics routes
+    config.add_route('home', '/')
+    config.add_route('start_point', '/startpoints')
+    config.add_route('statistics', '/statistics')
+    config.add_route('expand', '/neighbours')
+    config.add_route('link_attribute', '/link')
+    config.add_route('query', '/results')
+    config.add_route('attribute_value', '/category_value')
+    config.add_route('source_file_overview', '/source_file_overview')
+    config.add_route('load_data_into_graph', '/load_data_into_graph')
+    config.add_route('clean_ttl_directory', '/clean_ttl_directory')
+
+    config.add_route('ttl', '/ttl/{name:.*}')
+
+    # Data upload routes
+    # Inspired from https://github.com/blueimp/jQuery-File-Upload/ and https://github.com/grooverdan/pyramid-jQuery-File-Upload-demo/
+    config.add_route('uploadform', '/up/')
+    config.add_route('upload_delete', '/up/file{sep:/*}{name:.*}&_method=DELETE')
+    config.add_route('upload', '/up/file{sep:/*}{name:.*}')
+
+
+    # TODO no absolute path to static files
+    # TODO check what is cors (iframe redirect?)
+    # TODO check security (delete truc/../../../)
+    # TODO change noscript url
+
+    config.scan()
+    return config.make_wsgi_app()

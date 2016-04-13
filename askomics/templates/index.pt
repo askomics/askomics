@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="${request.locale_name}">
+    <head>
+        <meta charset="utf-8">
+        <title>Visual SPARQL query builder for an RDF database</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js" charset="utf-8"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>
+        <!-- The Templates plugin is included to render the upload/download listings -->
+        <script src="//blueimp.github.io/JavaScript-Templates/js/tmpl.min.js"></script>
+
+        <script src="static/js/bootstrap.js"></script>
+        <script src="static/js/rest.js"></script>
+        <script src="static/js/query-handler.js"></script>
+        <script src="static/js/graph.js"></script>
+        <script src="static/js/askomics.js"></script>
+        <script src="static/js/integration.js"></script>
+
+        <link href="static/css/bootstrap.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="static/css/style.css">
+    </head>
+
+    <body>
+        <nav class="navbar navbar-default">
+            <div id="navbar_content" class="container">
+                <div class="navbar-header">
+                    <a class="navbar-brand site-header" href="/">${project}</a>
+                </div>
+
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav navbar-right">
+                        <li id="interrogation" class="active"><a href="#" onclick="loadStartPoints();">Ask!</a></li>
+                        <li id="integration"><a href="#">Upload</a></li>
+                        <li id="statistics"><a href="#" onclick="loadStatistics();" >Stats</a></li>
+                        <li id="about"><a href="#">About</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <div id="content_interrogation" class="container">
+            <div id="init" class="row">
+                <div class="form-group">
+                    <label for="startpoint" class="col-md-offset-2">Please select a start point for your query :</label>
+                    <select id='startpoints' size='4' class="form-control col-md-offset-2"></select>
+                </div>
+                <button  id="starter" class="btn btn-default col-md-offset-2" onclick="startVisualisation()">Start</button>
+                <br><br><br>
+                <div class="col-md-offset-2"><p>Or upload a sparql query file</p>
+                    <div class="uploadBtn btn btn-default">
+                        <span>Upload query</span>
+                        <input id="uploadBtn" type="file" class="upload">
+                    </div>
+                </div>
+            </div>
+            <div id="queryBuilder" class="row" hidden>
+                <div id="graph" class="col-md-6">
+                    <div class="uploadBtn btn btn-default">
+                        <span>Upload query</span>
+                        <input id="uploadBtn" type="file" class="upload">
+                    </div>
+                    <div class="btn-group btn-group-query">
+                        <a id="btn-qdown" type="button" class="btn btn-default" href="" download="query.sparql">Download query</a>
+                    </div>
+                    <div id="svgdiv"></div>
+                    <div id="uploadedQuery" class="uploadedQuery" hidden contenteditable></div>
+                    <form id="form-down" >
+                        <div class="btn-group">
+                            <button id="btn-down" type="submit" class="btn btn-default">
+                                <span class="glyphicon glyphicon-save"></span>
+                            </button>
+                            <button id="btn-file" type="button" class="btn btn-default" onclick="launchQuery(1,10000, false)">
+                                Generate a results file (max 10000 lines)
+                            </button>
+                        </div>
+                        <div class="btn-group btn-group-query">
+                            <button type="button" class="btn btn-default" onclick="formatQuery()">Launch query</button>
+                            <button type="button" class="btn btn-default" onclick="window.location.reload()">Reset</button>
+                        </div>
+                    </form>
+                </div>
+                <div id="nodeDetails" class="col-md-6">
+                    <h3 class="header-div">Filter <span id="nodeName" class="label label-default"></span> on
+                    <div class="btn-group btn-group-query">
+                        <span id="showNode" class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
+                        <span id="deleteNode" class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span>
+                    </div></h3>
+
+                    <hr/>
+                </div>
+            </div>
+            <div id="results" class="row"></div>
+        </div>
+
+        <div id="content_integration" class="container" hidden>
+            <div id="overview" class="row"></div>
+        </div>
+        <div id="content_statistics" class="container" hidden>
+            <div id="overview" class="row"></div>
+        </div>
+
+        <div id="content_about" class="container" hidden>
+          <hr/>
+          <h3 class="header-div">Project</h3>
+          <p>
+          AskOmics is being developed by Charles Bettembourg and Fabrice Legeai as
+          a contribution to the <a href="http://www.agence-nationale-recherche.fr/?Project=ANR-11-BSV6-0017">MiRNAdapt project</a>,
+          but should be applicable to any RDF dataset.
+          </p>
+          <p>
+          It is based on an abstract representation of the MiRNAdapt data which
+          was created manually but should be replaced by the result of RDFmap in
+          the future.
+          </p>
+          <p>
+          AskOmics uses <a href="http://d3js.org/">D3.js</a> to provide a visual
+          representation of the abstraction as a graph.
+          By starting from a node of interest and iteratively selecting its
+          neighbors, the user creates a path on the abstraction graph.
+          This path can then be transformed into a SPARQL query that can be
+          executed on the original dataset.
+         </p>
+          <hr/>
+          <h3 class="header-div">Contributors</h3>
+           <ul>
+            <li>Olivier Dameron</li>
+            <li>Charles Bettembourg</li>
+            <li>Anthony Bretaudeau</li>
+            <li>Yvanne Chaussin</li>
+            <li>Aurélie Evrard</li>
+            <li>Olivier Filangi</li>
+            <li>Fabrice Legeai</li>
+          </ul>
+        </div>
+
+        <!-- Modal  -->
+        <div class="modal fade" id="waitModal"  role="dialog" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true" >
+          <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title" id="waitLabel">Please Wait</h4>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
+            </div><!-- /.modal-content -->
+          </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
+    </body>
+</html>

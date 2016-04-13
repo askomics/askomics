@@ -1,0 +1,225 @@
+.link {
+    stroke: #2E2E2E;
+    stroke-width: 2px;
+}
+
+.node {
+    stroke: #fff;
+    stroke-width: 2px;
+}
+
+.textClass {
+    stroke: #323232;
+    font-family: "Lucida Grande", "Droid Sans", Arial, Helvetica, sans-serif;
+    font-weight: normal;
+    stroke-width: .5;
+    font-size: 14px;
+}
+
+.site-header {
+    text-transform: full-width;
+    font-weight: bold;
+}
+
+.tableHeader {
+    text-align: center;
+}
+
+.header-div {
+    text-transform: full-width;
+    margin-top: -1px;
+    font-size: 20px;
+}
+
+.btn-group-query {
+    float: right;
+}
+
+.display {
+    float: right;
+    right: 3%;
+    font-size: 16px;
+    padding-top: 5px;
+}
+
+.div-details {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.glyphicon:hover {
+    cursor: pointer;
+    color: chocolate;
+}
+
+#btn-file {
+    float: left;
+}
+
+#startpoints {
+    width: 30%;
+}
+
+#queryBuilder {
+    max-height: 400px;
+}
+
+#svgdiv {
+    max-height: 380px;
+    background: Gainsboro;
+    border: 1px solid;
+}
+
+#results, #init {
+    margin-top: 40px;
+}
+
+.csvtable {
+    margin:0px;padding:0px;
+    display: inline-block;
+    box-shadow: 10px 10px 5px #888888;
+    border:1px solid #000000;
+    
+    -moz-border-radius-bottomleft:0px;
+    -webkit-border-bottom-left-radius:0px;
+    border-bottom-left-radius:0px;
+    
+    -moz-border-radius-bottomright:0px;
+    -webkit-border-bottom-right-radius:0px;
+    border-bottom-right-radius:0px;
+    
+    -moz-border-radius-topright:0px;
+    -webkit-border-top-right-radius:0px;
+    border-top-right-radius:0px;
+    
+    -moz-border-radius-topleft:0px;
+    -webkit-border-top-left-radius:0px;
+    border-top-left-radius:0px;
+}.csvtable table{
+    border-collapse: collapse;
+        border-spacing: 0;
+    width:auto;
+    height:100%;
+    margin:0px;padding:0px;
+}.csvtable tr:last-child td:last-child {
+    -moz-border-radius-bottomright:0px;
+    -webkit-border-bottom-right-radius:0px;
+    border-bottom-right-radius:0px;
+}
+.csvtable table tr:first-child td:first-child {
+    -moz-border-radius-topleft:0px;
+    -webkit-border-top-left-radius:0px;
+    border-top-left-radius:0px;
+}
+.csvtable table tr:first-child td:last-child {
+    -moz-border-radius-topright:0px;
+    -webkit-border-top-right-radius:0px;
+    border-top-right-radius:0px;
+}.csvtable tr:last-child td:first-child{
+    -moz-border-radius-bottomleft:0px;
+    -webkit-border-bottom-left-radius:0px;
+    border-bottom-left-radius:0px;
+}.csvtable tr:hover td{
+    
+}
+.csvtable tr:nth-child(odd){ background-color:#e5e5e5; }
+.csvtable tr:nth-child(even)    { background-color:#ffffff; }
+.csvtable td{
+    vertical-align:middle;
+    border:1px solid #000000;
+    border-width:0px 1px 1px 0px;
+    text-align:left;
+    padding:7px;
+    font-size:12px;
+    font-family:Arial;
+    font-weight:normal;
+    color:#000000;
+}.csvtable tr:last-child td{
+    border-width:0px 1px 0px 0px;
+}.csvtable tr td:last-child{
+    border-width:0px 0px 1px 0px;
+}.csvtable tr:last-child td:last-child{
+    border-width:0px 0px 0px 0px;
+}
+.csvtable tr:first-child td{
+/*     background:-o-linear-gradient(bottom, #cccccc 5%, #b2b2b2 100%); */
+/*     background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #cccccc), color-stop(1, #b2b2b2) ); */
+/*     background:-moz-linear-gradient( center top, #cccccc 5%, #b2b2b2 100% ); */
+/*     filter:progid:DXImageTransform.Microsoft.gradient(startColorstr="#cccccc", endColorstr="#b2b2b2"); */
+/*     background: -o-linear-gradient(top,#cccccc,b2b2b2); */
+/*     background-color:#cccccc; */
+    border:0px solid #000000;
+    text-align:center;
+    border-width:0px 0px 1px 1px;
+    font-size:16px;
+    font-family:Arial;
+    font-weight:bold;
+    color:#000000;
+}
+/*.csvtable tr:first-child:hover td{
+    background:-o-linear-gradient(bottom, #cccccc 5%, #b2b2b2 100%);
+    background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #cccccc), color-stop(1, #b2b2b2) );
+    background:-moz-linear-gradient( center top, #cccccc 5%, #b2b2b2 100% );
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr="#cccccc", endColorstr="#b2b2b2");
+    background: -o-linear-gradient(top,#cccccc,b2b2b2);
+    background-color:#cccccc;
+}*/
+.csvtable tr:first-child td:first-child{
+    border-width:0px 0px 1px 0px;
+}
+.csvtable tr:first-child td:last-child{
+    border-width:0px 0px 1px 1px;
+}
+
+.fileTypeSelection label {
+    display: inline-block;
+}
+.fileTypeSelection input {
+    display: inline-block;
+}
+
+
+pre {
+    font-family:"Courier New";
+    text-align: left; 
+    height: auto;
+    width: auto;
+    max-width: 800px;
+    max-height: 200px;
+    overflow: auto;
+    background-color: #eeeeee;
+    word-break: normal !important;
+    word-wrap: normal !important;
+    white-space: pre !important;
+}
+
+div.uploadedQuery {
+    font-family:"Courier New";
+    text-align: left; 
+    height: auto;
+    width: auto;
+    max-width: 100%;
+    max-height: 300px;
+    overflow: auto;
+    background-color: #eeeeee;
+    word-break: normal !important;
+    word-wrap: normal !important;
+    white-space: pre !important;
+}
+
+.uploadBtn {
+    position: relative; 
+    overflow: hidden; 
+    margin: auto;
+}
+.uploadBtn input.upload {
+    position: absolute; 
+    top: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    font-size: 20px;
+    cursor: pointer;
+    opacity: 0;
+    filter: alpha(opacity=0);
+}

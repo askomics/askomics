@@ -1,0 +1,16 @@
+__pycache__
+*.pyc
+*.csv
+*.egg-info
+*.egg
+
+*.cpython-33.pyc
+Askomics/askomics/files/*
+Askomics/askomics/results/*
+build/
+dist/
+eggs/
+.eggs/
+sdist/
+pyramid.log
+pyramid.pid

@@ -1,0 +1,8 @@
+SELECT DISTINCT ?nodeUri ?nodeLabel ?relationUri ?relationLabel ?propertyType
+FROM #graph#
+WHERE { ?relationUri rdfs:domain/^rdfs:subClassOf* #nodeClass# .
+        ?relationUri rdfs:range/rdfs:subClassOf* #neighborClass# .
+        ?relationUri rdf:type ?propertyType .
+        OPTIONAL { ?relationUri rdfs:label ?relationLabel } .
+        OPTIONAL { ?nodeUri rdfs:label ?nodeLabel }
+      }

@@ -1,0 +1,4 @@
+SELECT DISTINCT ?nodeUri ?nodeLabel
+FROM #graph#
+WHERE {?nodeUri displaySetting:startPoint "true"^^xsd:boolean .
+       ?nodeUri rdfs:label ?nodeLabel }

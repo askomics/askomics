@@ -1,0 +1,35 @@
+0.0
+---
+
+-  Initial version
+
+0.1
+---
+
+-	Add of new route name and URL
+
+Route_Name		Request		URL				 	Comment
+home			GET			/					
+startpoints		GET			/start_point		
+expand			POST		/neighbours	
+query			POST		/results
+
+-	Add of LibPy the new structure of the cgi-bin
+
+Problems :
+-	Possible problem with the file "params" because of his access path
+-	Params.py not compatible with Python3 because of ConfigParser
+
+0.2
+---
+- Python 3 supported.
+- Add of Attribute.py which represents a node attribute.
+- TripleStoreExplorer.py partially documented.
+- Changes made on get_neighbor_from_node which aims to deal with attributes and specified link.
+- When selected, a node becomes red.
+
+0.3
+---
+- Use of Bootstrap (HTML framework)
+- Attributes displayed in the interface (but they still can't be used as columns in the table of results)
+- askomics.js separated into 2 files (askomics.js and query-handler.js)
