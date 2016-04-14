@@ -1,14 +1,14 @@
 # AskOmics
 
 AskOmics is a visual SPARQL query builder for RDF database. One of its advantages
-is that you don't need to know how to use SPARQL or the struvture of your database.
+is that you don't need to know how to use SPARQL or the structure of your database.
 
 ------------------
 ## Getting started
 
 ### Requirements
 
-If you want to use AskOmics, you'll need :
+If you want to use AskOmics, you will need :
 
 * [Python 3.2](https://www.python.org/downloads/) (or greater)
 * [Pyramid 1.5](http://www.pylonsproject.org) (or greater)
@@ -50,7 +50,7 @@ $ pip install "SPARQLWrapper==1.6.4"
 
 ### Install AskOmics in your Virtual Python Environment
 
-To be able to launch AskOmics, you'll need to install it in your virtual environment.
+To be able to launch AskOmics, you will need to install it in your virtual environment.
 
 If you want to develop AskOmics:
 ```
@@ -79,7 +79,7 @@ $ pserve production.ini
 
 ### Using AskOmics
 
-Once launched, askomics will be available at http://localhost:6543/
+Once launched, AskOmics will be available at http://localhost:6543/
 
 ### Running tests
 
