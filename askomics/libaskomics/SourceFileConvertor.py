@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from glob import glob
+import logging
 import os.path
 import re
 
@@ -23,8 +24,22 @@ class SourceFileConvertor(ParamManager):
             * the generation of the part of the domain code that wan be automatically generated.
     """
 
-    def __init__(self, settings, session):
+    def __init__(self, settings, session, type_dict=None, delims=None):
+        #FIXME: Can we get dict()s from config ?
+        self.type_dict = {
+            'Numeric' : 'xsd:decimal',
+            'Text'    : 'xsd:string',
+            'Category': ':',
+            'Entity'  : ':'} if type_dict is None else type_dict
+
+        self.delims = {
+            'Numeric' : ('', ''),
+            'Text'    : ('"', '"'),
+            'Category': (':', ''),
+            'Entity'  : (':', '')} if delims is None else delims
+
         ParamManager.__init__(self, settings, session)
+        self.log = logging.getLogger(__name__)
 
     def get_template(self, template_file):
         """
@@ -66,55 +81,49 @@ class SourceFileConvertor(ParamManager):
             if match:
                 continue
 
-            val_cell_type = {}
+            val_cell_type = {} # :: Column Index -> Set Values
             with open(curr_file, 'r') as src:
-                cpt = 0
                 content = []
-                for line in src:
+                for cpt, line in enumerate(src):
+                    cells = line.rstrip('\r\n').split()
                     if cpt == 1:
                         cell_types = []
                         col_cpt = 0
-                        for cell in line.rstrip('\r\n').split():
+                        for cell in cells:
                             if col_cpt == 0:
                                 curr_cell_type = "Entity"
-                            elif cell.isdigit() or is_float(cell):
+                            elif is_decimal(cell):
                                 curr_cell_type = "Numeric"
                             else:
                                 curr_cell_type = "Text"
                                 #OFI : We try to guess if the present colonne is a 'Category'
-                                val_cell_type[col_cpt] = []
-                                val_cell_type[col_cpt].append(cell)
+                                val_cell_type.setdefault(col_cpt, set()).add(cell)
 
                             cell_types.append(">" + curr_cell_type)
                             col_cpt += 1
-                        content.append(cell_types)
-                    content.append(line.rstrip('\r\n').split())
+                        content.append(cell_types) #FIXME: infered column types should be stored elsewhere.
+                    content.append(cells)
                     if cpt > 1:
-                        col_cpt = 0
-                        for cell in line.rstrip('\r\n').split():
+                        for col_cpt, cell in enumerate(cells):
                             if col_cpt in val_cell_type:
-                                val_cell_type[col_cpt].append(cell)
-                            col_cpt += 1
-                    cpt += 1
+                                val_cell_type[col_cpt].add(cell)
                     if cpt == int(limit):
                         break
 
 
-                for col_cpt in val_cell_type.keys():
-                    dic_category = {}
-                    for value in val_cell_type[col_cpt]:
-                        if value in dic_category:
-                            dic_category[value] += 1
-                        else:
-                            dic_category[value] = 1
-                    if len(dic_category) < cpt/2:
+                for col_cpt, categories in val_cell_type.items():
+                    if len(categories) < len(content) / 2:
                         content[1][col_cpt] = ">Category"
 
                 source_files.append(SourceFile(curr_file.split('/')[-1], content))
 
+                self.log.debug("Infered types from first lines of {}: {}.".format(curr_file, dict(zip(content[0],content[1]))))
+
         return source_files
 
-    def get_turtle(self, file_name, col_types, limit, start_position_list, attribute_list_output, attribute_has_header_domain_list_output, request_output_domain, request_abstraction_output):
+    # FIXME: attribute_has_header_domain_list_output not used.
+    def get_turtle(self, file_name, col_types, limit,
+                   start_position_list, attribute_list_output, attribute_has_header_domain_list_output, request_output_domain, request_abstraction_output):
         """
         :param file_name: the name of a tabulated file
         :param col_types: a dict with the column number as key and the type of this column content as value
@@ -132,10 +141,9 @@ class SourceFileConvertor(ParamManager):
         else:
             max_lines = 0
 
-        delims = {"Numeric": ('', ''), "Text": ('"', '"'), "Category": (":", ""), "Entity": (":", "")}
-        col_types = key_to_int(col_types)
-        category_domain_code_dict = {}
-        relation_code_dict = {}
+        col_types = {int(k):v for k,v in col_types.items()}
+        category_domain_code_dict = {} # Header -> Categories domain
+        relation_code_dict = {} # Header -> EntityLabel -> Cells
         attribute_code = ""
         relation_code = []
         domain_code = []
@@ -151,39 +159,41 @@ class SourceFileConvertor(ParamManager):
             # ================= HEADER treatment ===============
             # headers[col_cpt]  => column name (markeur, chromosome, qtl, etc...)
             # col_types[col_cpt] => column type (Entity, Category, Text, etc...)
-            cells = line.split()
-            for col_cpt in range(0, len(cells)):
+            headers = line.split()
+            for col_cpt, cell in enumerate(headers):
+                cell = cell.rstrip('\r\n')
                 if col_cpt in col_types.keys():
-                    headers[col_cpt] = cells[col_cpt].rstrip('\r\n')
                     # startpositions handling
                     if col_types[col_cpt] == "Entity (Start)":
                         if max_lines == 0:
-                            start_position_list.append(":" + cells[col_cpt].rstrip('\r\n') + ' displaySetting:startPoint "true"^^xsd:boolean .\n')
+                            start_position_list.append(":" + cell + ' displaySetting:startPoint "true"^^xsd:boolean .\n')
                         col_types[col_cpt] = "Entity"
                     # Column is an attribute, add it to namespace "displaysetting:attribute"
                     if col_types[col_cpt] != "Entity": ##### VOIR POUR CATEGORY OFI.....
-                        attributes_setting_list.append(":" + cells[col_cpt].rstrip('\r\n') + ' displaySetting:attribute "true"^^xsd:boolean .\n')
+                        attributes_setting_list.append(":" + cell + ' displaySetting:attribute "true"^^xsd:boolean .\n')
 
 
             cpt = 1
             # ================= Input handling ===============
             for line in src:
                 cells = line.split()
+                entityLabel = cells[0]
                 if len(cells) <= 0:
                     continue
-                attribute_code += ":" + cells[0] + " rdf:type :" + headers[0] + " ;\n"
-                attribute_code += (len(cells[0]) + 1) * " " + " rdfs:label \"" + cells[0] + "\" ;\n"
-                for i in range(1, len(cells)):
-                    if i in col_types.keys():
-                        if col_types[i] == "Category":
-                            category_domain_code_dict.setdefault(headers[i], []).append(cells[i].rstrip('\r\n'))
-                        if col_types[i] == "Entity":
-                            if headers[i] not in relation_code_dict.keys():
-                                relation_code_dict[headers[i]] = {}
-                            relation_code_dict[headers[i]].setdefault(cells[0], []).append(cells[i].rstrip('\r\n'))
+                attribute_code += ":" + entityLabel + " rdf:type :" + headers[0] + " ;\n"
+                attribute_code += (len(entityLabel) + 1) * " " + " rdfs:label \"" + entityLabel + "\" ;\n"
+                for i, (header, cell) in enumerate(zip(headers, cells)):
+                    if i != 0 and i in col_types:
+                        col_type = col_types[i]
+                        cell = cell.rstrip('\r\n')
+                        if col_type == "Category":
+                            category_domain_code_dict.setdefault(header, set()).add(cell)
+                        if col_type == "Entity":
+                            relation_code_dict.setdefault(header, {}).setdefault(entityLabel, []).append(cell)
                         else:
                             # Associate entity with a value and the relation has_ (example transcriptX has_taxon Brassica_napus)
-                            attribute_code += (len(cells[0]) + 1) * " " + " :has_" + headers[i] + " " + delims[col_types[i]][0] + cells[i].rstrip('\r\n') + delims[col_types[i]][1] + " ;\n"
+                            attribute_code += (len(entityLabel) + 1) * " " + " :has_" + header + " " \
+                                              + self.delims[col_type][0] + cell + self.delims[col_type][1] + " ;\n"
                 attribute_code = attribute_code[:-2] + ".\n"
                 cpt += 1
                 if cpt == max_lines:
@@ -192,17 +202,13 @@ class SourceFileConvertor(ParamManager):
                     attribute_list_output.append(attribute_code)
                     attribute_code = ""
 
-        for header in category_domain_code_dict.keys():
-            category_domain_code_dict[header] = list(set(category_domain_code_dict[header]))
-
-
-        for header in relation_code_dict.keys():
+        for header, ref_entity2target_entities in relation_code_dict.items():
             curr_relation_code = ""
-            attribute_has_header_domain_list_output[header] = []
-            for ref_entity in relation_code_dict[header].keys():
+            ref_entity_has_code = []
+            for ref_entity, target_entities in ref_entity2target_entities.items():
                 curr_entity_code = ""
                 first_line = True
-                for target_entity in relation_code_dict[header][ref_entity]:
+                for target_entity in target_entities:
                     if first_line:
                         indent = len(ref_entity) * " " + len("has_" + header) * " " + 4 * " "
                         curr_entity_code += ":" + ref_entity + " :has_" + header + " :" + target_entity + " ,\n"
@@ -211,19 +217,23 @@ class SourceFileConvertor(ParamManager):
                         curr_entity_code += indent + ":" + target_entity + " ,\n"
                 curr_entity_code = curr_entity_code[:-2] + ".\n"
                 if max_lines == 0:
-                    attribute_has_header_domain_list_output[header].append(curr_entity_code)
-
+                    ref_entity_has_code.append(curr_entity_code)
                 curr_relation_code += curr_entity_code
+            #FIXME: Attribute_has_header_domain_list_output is the main output of this function.
+            # It contains the has_ relations for all the entities column.
+            # --> This is mad: it's an argument mutated by reference !
+            # "relation_code" is properly accumulated from the start, but is only used for the (broken) preview
+            attribute_has_header_domain_list_output[header] = ref_entity_has_code
             relation_code.append(curr_relation_code)
 
         # Category type handling
         #----------------------------
-        for header in category_domain_code_dict.keys():
+        for header, categories in category_domain_code_dict.items():
             curr_category_code = ":" + header + " displaySetting:has_category :"
             indent = len(header) * " " + len("displaySetting:has_category") * " " + 3 * " "
-            curr_category_code += (" , \n" + indent + ":").join(category_domain_code_dict[header]) + " .\n"
+            curr_category_code += (" , \n" + indent + ":").join(categories) + " .\n"
             domain_code.append(curr_category_code)
-            for item in category_domain_code_dict[header]:
+            for item in categories:
                 domain_code.append(":" + item + " rdf:type :" + header + " ;\n" + len(item) * " " + "  rdfs:label \"" + item + "\" .\n")
         attributes_setting_list.extend(domain_code)
 
@@ -248,51 +258,42 @@ class SourceFileConvertor(ParamManager):
 
         results = ql.process_query(query)
         if results == []:
-            return [], [header for header in headers.values()], []
+            return [], headers, []
         bdd_relations, new_headers, missing_headers, present_headers = [], [], [], []
         for result in results:
-            bdd_relations.append(result["relation"].replace(self.get_param("askomics.prefix"), "").replace("has_", ""))
-        for bdd_relation in bdd_relations:
-            if bdd_relation not in headers.values():
+            bdd_relation = result["relation"].replace(self.get_param("askomics.prefix"), "").replace("has_", "")
+            bdd_relations.append(bdd_relation)
+            if bdd_relation not in headers:
+                self.log.warning('Relation "%s" not found in tables columns: %s.', bdd_relation, repr(headers))
                 missing_headers.append(bdd_relation)
-        for header in headers.values():
-            if header not in bdd_relations and header != curr_entity:
-                new_headers.append(header)
-            elif header not in missing_headers and header != curr_entity:
-                present_headers.append(header)
+        for header in headers:
+            if header != curr_entity:
+                if header not in bdd_relations:
+                    self.log.info('Adding column "%s".', header)
+                    new_headers.append(header)
+                elif header not in missing_headers:
+                    present_headers.append(header)
         return missing_headers, new_headers, present_headers
 
     # FIXME file_name is not used
     def generate_abstraction(self, file_name, headers, col_types, abstraction_output_request):
         """ write the abstraction file according to the headers of the files to convert """
 
-        type_dict = {"Numeric": "xsd:decimal", "Text": "xsd:string", "Category": ":", "Entity": ":"}
-        abstacted_entities, abstracted_relations = [], []
-        for key in headers.keys():
-            key_type = col_types[key]
-            if key == 0:
-                ref_entity = headers[key]
-                abstacted_entities.append(AbstractedEntity(ref_entity))
-            else:
-                abstracted_relations.append(AbstractedRelation(key_type, headers[key], ref_entity, type_dict[key_type]))
-
-        for entity in abstacted_entities:
-            abstraction_output_request.append(entity.get_turtle())
-
-        for relation in abstracted_relations:
-            abstraction_output_request.append(relation.get_turtle())
-
+        ref_entity = headers[0]
+        assert all(type(key) is int for key in col_types)
+        abstraction_output_request.append(AbstractedEntity(ref_entity).get_turtle())
+        abstraction_output_request.extend(
+            AbstractedRelation(key_type, headers[key], ref_entity, self.type_dict[key_type]).get_turtle()
+            for key, key_type in col_types.items()
+            if key != 0)
 
 # TODO move these to some place more appropriate
-def key_to_int(dic):
-    new_dic = {}
-    for key in dic.keys():
-        new_dic[int(key)] = dic[key]
-    return new_dic
-
-def is_float(value):
-  try:
-    float(value)
-    return True
-  except ValueError:
-    return False
+def is_decimal(value):
+    if value.isdigit():
+        return True
+    else:
+        try:
+            float(value)
+            return True
+        except ValueError:
+            return False
