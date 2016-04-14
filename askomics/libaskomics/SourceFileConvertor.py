@@ -183,9 +183,9 @@ class SourceFileConvertor(ParamManager):
                 attribute_code += ":" + entityLabel + " rdf:type :" + headers[0] + " ;\n"
                 attribute_code += (len(entityLabel) + 1) * " " + " rdfs:label \"" + entityLabel + "\" ;\n"
                 for i, (header, cell) in enumerate(zip(headers, cells)):
-                    cell = cell.rstrip('\r\n')
-                    col_type = col_types.get(i)
-                    if col_type is not None:
+                    if i != 0 and i in col_types:
+                        col_type = col_types[i]
+                        cell = cell.rstrip('\r\n')
                         if col_type == "Category":
                             category_domain_code_dict.setdefault(header, set()).add(cell)
                         if col_type == "Entity":
@@ -280,11 +280,12 @@ class SourceFileConvertor(ParamManager):
         """ write the abstraction file according to the headers of the files to convert """
 
         ref_entity = headers[0]
+        assert all(type(key) is int for key in col_types)
         abstraction_output_request.append(AbstractedEntity(ref_entity).get_turtle())
         abstraction_output_request.extend(
-            AbstractedRelation(key_type, headers[int(key)], ref_entity, self.type_dict[key_type]).get_turtle()
+            AbstractedRelation(key_type, headers[key], ref_entity, self.type_dict[key_type]).get_turtle()
             for key, key_type in col_types.items()
-            if key != '0')
+            if key != 0)
 
 # TODO move these to some place more appropriate
 def is_decimal(value):
