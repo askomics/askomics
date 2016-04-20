@@ -131,28 +131,47 @@ class AskView(object):
         Convert tabulated files to turtle according to the type of the columns set by the user
         """
         data = {}
-        sfc = SourceFileConvertor(self.settings, self.request.session)
 
         body = self.request.json_body
         file_name = body["file_name"]
         col_types = body["col_types"]
 
-        start_position_list = []
-        attribute_list_output = []
-        request_output_has_header_domain = {}
-        request_output_domain = []
-        request_abstraction_output = []
+        sfc = SourceFileConvertor(self.settings, self.request.session)
 
-        missing_headers, new_headers, present_headers, attribute_code, relation_code, domain_code = sfc.get_turtle(file_name, col_types, True, start_position_list, attribute_list_output, request_output_has_header_domain, request_output_domain, request_abstraction_output)
+        src_file = sfc.get_source_file(file_name)
+        src_file.set_forced_column_types(col_types)
+
+        content_ttl = src_file.get_preview_turtle()
+        abstraction_ttl = src_file.get_abstraction()
+        domain_knowledge_ttl = src_file.get_domain_knowledge()
+
+        data["content_ttl"] = content_ttl
+        data["abstraction_ttl"] = abstraction_ttl
+        data["domain_knowledge_ttl"] = domain_knowledge_ttl
+
+        return data
+
+    @view_config(route_name='check_existing_data', request_method='POST')
+    def check_existing_data(self):
+        """
+        Compare what the user data and what is already in the triple store
+        """
+
+        data = {}
+
+        body = self.request.json_body
+        file_name = body["file_name"]
+        col_types = body["col_types"]
+        sfc = SourceFileConvertor(self.settings, self.request.session)
+
+        src_file = sfc.get_source_file(file_name)
+        src_file.set_forced_column_types(col_types)
+
+        missing_headers, new_headers, present_headers = src_file.compare_to_database()
 
         data["missing_headers"] = missing_headers
         data["new_headers"] = new_headers
         data["present_headers"] = present_headers
-        data["attribute_code"] = attribute_code
-        data["relation_code"] = relation_code
-        data["domain_code"] = domain_code
-
-        return data
 
     @view_config(route_name='load_data_into_graph', request_method='POST')
     def load_data_into_graph(self):

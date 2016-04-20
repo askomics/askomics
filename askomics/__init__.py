@@ -23,6 +23,7 @@ def main(global_config, **settings):
     config.add_route('source_file_overview', '/source_file_overview')
     config.add_route('load_data_into_graph', '/load_data_into_graph')
     config.add_route('preview_ttl', '/preview_ttl')
+    config.add_route('check_existing_data', '/check_existing_data')
     config.add_route('clean_ttl_directory', '/clean_ttl_directory')
 
     config.add_route('ttl', '/ttl/{name:.*}')
