@@ -17,6 +17,7 @@ from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
 from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
 from askomics.libaskomics.rdfdb.ResultsBuilder import ResultsBuilder
 from askomics.libaskomics.graph.Node import Node
+from askomics.libaskomics.source_file.SourceFile import SourceFile
 
 @view_defaults(renderer='json', route_name='start_point')
 class AskView(object):
@@ -101,35 +102,40 @@ class AskView(object):
 
         return data
 
-    @view_config(route_name='source_file_overview', request_method='GET')
+    @view_config(route_name='source_file_overview', request_method='GET') # FIXME rename?
     def source_file_overview(self):
-        """ Get the first lines of the tabulated files to convert """
-        data = {}
+        """
+        Get the first lines of the tabulated files to convert
+        """
         sfc = SourceFileConvertor(self.settings, self.request.session)
 
-        pm = ParamManager(self.settings, self.request.session)
+        source_files = sfc.get_source_files(int(self.settings["askomics.overview_lines_limit"]))
 
-        source_files_first_lines = sfc.get_first_lines(int(self.settings["askomics.overview_lines_limit"])) # FIXME handle default value/value validation
-        html_template = sfc.get_template(pm.ASKOMICS_html_template) # FIXME there must be a more elegant solution
-        #turtle_template = sfc.get_template(self.settings["askomics.turtle_template"]) # FIXME there must be a more elegant solution
+        data = {}
+        data['files'] = []
 
-        turtle_template = pm.turtle_template()
-        data["sourceFiles"] = {s.get_name(): s.to_dict() for s in source_files_first_lines}
-        data["html_template"] = html_template
-        data["turtle_template"] = turtle_template
+        for src_file in source_files:
+            infos = {}
+            infos['name'] = src_file.name
+            infos['headers'] = src_file.get_headers()
+            infos['preview_data'] = src_file.get_preview_data()
+            infos['column_types'] = src_file.guess_column_types(infos['preview_data'])
+
+            data['files'].append(infos)
 
         return data
 
-    @view_config(route_name='load_data_into_graph', request_method='POST')
-    def load_data_into_graph(self):
-        """ Convert tabulated files to turtle according to the type of the columns set by the user """
+    @view_config(route_name='preview_ttl', request_method='POST')
+    def preview_ttl(self):
+        """
+        Convert tabulated files to turtle according to the type of the columns set by the user
+        """
         data = {}
         sfc = SourceFileConvertor(self.settings, self.request.session)
 
         body = self.request.json_body
         file_name = body["file_name"]
         col_types = body["col_types"]
-        limit = body["limit"]
 
         start_position_list = []
         attribute_list_output = []
@@ -137,72 +143,95 @@ class AskView(object):
         request_output_domain = []
         request_abstraction_output = []
 
-        missing_headers, new_headers, present_headers, attribute_code, relation_code, domain_code = sfc.get_turtle(file_name, col_types, limit, start_position_list, attribute_list_output, request_output_has_header_domain, request_output_domain, request_abstraction_output)
+        missing_headers, new_headers, present_headers, attribute_code, relation_code, domain_code = sfc.get_turtle(file_name, col_types, True, start_position_list, attribute_list_output, request_output_has_header_domain, request_output_domain, request_abstraction_output)
+
+        data["missing_headers"] = missing_headers
+        data["new_headers"] = new_headers
+        data["present_headers"] = present_headers
+        data["attribute_code"] = attribute_code
+        data["relation_code"] = relation_code
+        data["domain_code"] = domain_code
+
+        return data
+
+    @view_config(route_name='load_data_into_graph', request_method='POST')
+    def load_data_into_graph(self):
+        """
+        Load tabulated files to triple store according to the type of the columns set by the user
+        """
+        data = {}
+        sfc = SourceFileConvertor(self.settings, self.request.session)
+
+        body = self.request.json_body
+        file_name = body["file_name"]
+        col_types = body["col_types"]
+
+        start_position_list = []
+        attribute_list_output = []
+        request_output_has_header_domain = {}
+        request_output_domain = []
+        request_abstraction_output = []
+
+        missing_headers, new_headers, present_headers, attribute_code, relation_code, domain_code = sfc.get_turtle(file_name, col_types, False, start_position_list, attribute_list_output, request_output_has_header_domain, request_output_domain, request_abstraction_output)
 
         ql = QueryLauncher(self.settings, self.request.session)
 
-        if not limit:
-            # use insert data instead of load sparql procedure when a dataset is small.....
-            if len(attribute_list_output)+len(request_abstraction_output)+len(request_output_domain) > 200:
-                first = True
-                keep_going = True
-                data["temp_ttl_file"] = []
-                while keep_going:
-                    with tempfile.NamedTemporaryFile(dir="askomics/ttl/", suffix=".ttl", mode="w", delete=False) as fp:
-                        # Temp files are removed by clean_ttl_directory route
-                        l_empty = []
-                        ql.build_query_load(l_empty, fp, header=True)
-                        if first:
-                            for header_sparql_request in request_output_has_header_domain.values():
-                                if len(header_sparql_request) > 0:
-                                    self.log.info("header_sparql_request - Number of object:"+str(len(header_sparql_request)))
-                                    ql.build_query_load(header_sparql_request, fp)
+        # use insert data instead of load sparql procedure when a dataset is small.....
+        if len(attribute_list_output)+len(request_abstraction_output)+len(request_output_domain) > 200:
+            first = True
+            keep_going = True
+            data["temp_ttl_file"] = []
+            while keep_going:
+                with tempfile.NamedTemporaryFile(dir="askomics/ttl/", suffix=".ttl", mode="w", delete=False) as fp:
+                    # Temp files are removed by clean_ttl_directory route
+                    l_empty = []
+                    ql.build_query_load(l_empty, fp, header=True)
+                    if first:
+                        for header_sparql_request in request_output_has_header_domain.values():
+                            if len(header_sparql_request) > 0:
+                                self.log.info("header_sparql_request - Number of object:"+str(len(header_sparql_request)))
+                                ql.build_query_load(header_sparql_request, fp)
 
-                            if len(request_abstraction_output) > 0:
-                                self.log.info("request_abstraction_output - Number of object:"+str(len(request_abstraction_output)))
-                                ql.build_query_load(request_abstraction_output, fp)
+                        if len(request_abstraction_output) > 0:
+                            self.log.info("request_abstraction_output - Number of object:"+str(len(request_abstraction_output)))
+                            ql.build_query_load(request_abstraction_output, fp)
 
-                            if len(request_output_domain) > 0:
-                                self.log.info("request_output_domain - Number of object:"+str(len(request_output_domain)))
-                                ql.build_query_load(request_output_domain, fp)
+                        if len(request_output_domain) > 0:
+                            self.log.info("request_output_domain - Number of object:"+str(len(request_output_domain)))
+                            ql.build_query_load(request_output_domain, fp)
 
-                            if len(start_position_list) > 0:
-                                self.log.info("start_position_list - Number of object:"+str(len(start_position_list)))
-                                ql.build_query_load(start_position_list, fp)
+                        if len(start_position_list) > 0:
+                            self.log.info("start_position_list - Number of object:"+str(len(start_position_list)))
+                            ql.build_query_load(start_position_list, fp)
 
-                        first = False
+                    first = False
 
-                        if len(attribute_list_output) > 0:
-                            subattribute_list_output = attribute_list_output[:min(60000, len(attribute_list_output))]
-                            del attribute_list_output[:min(60000, len(attribute_list_output))]
-                            if len(attribute_list_output) == 0:
-                                keep_going = False
-                            self.log.info("subattribute_list_output - Number of object:"+str(len(subattribute_list_output)))
-                            ql.build_query_load(subattribute_list_output, fp)
-                        else:
+                    if len(attribute_list_output) > 0:
+                        subattribute_list_output = attribute_list_output[:min(60000, len(attribute_list_output))]
+                        del attribute_list_output[:min(60000, len(attribute_list_output))]
+                        if len(attribute_list_output) == 0:
                             keep_going = False
+                        self.log.info("subattribute_list_output - Number of object:"+str(len(subattribute_list_output)))
+                        ql.build_query_load(subattribute_list_output, fp)
+                    else:
+                        keep_going = False
 
-                        urlbase = re.search(r'(http:\/\/.*)\/.*', self.request.current_route_url())
-                        ql.update_query_load(fp, urlbase.group(1))
-                        data["temp_ttl_file"].append(fp.name)
-            else:
-                self.log.info(" ===> insert update nb object:"+str(len(attribute_list_output)+len(request_abstraction_output)+len(request_output_domain)))
-                for header_sparql_request in request_output_has_header_domain.values():
-                    if len(header_sparql_request) > 0:
-                        ql.update_query_insert_data(header_sparql_request)
-                if len(request_abstraction_output) > 0:
-                    ql.update_query_insert_data(request_abstraction_output)
-                if len(request_output_domain) > 0:
-                    ql.update_query_insert_data(request_output_domain)
-                if len(start_position_list) > 0:
-                    ql.update_query_insert_data(start_position_list)
-                if len(attribute_list_output) > 0:
-                    ql.update_query_insert_data(attribute_list_output)
-
-
-        #f = open('askomics/ttl/Insert.ttl', 'r')
-        #urlbase = m = re.search('(http:\/\/.*)\/.*', self.request.current_route_url())
-        #ql.update_query_load(f,urlbase.group(1))
+                    urlbase = re.search(r'(http:\/\/.*)\/.*', self.request.current_route_url())
+                    ql.update_query_load(fp, urlbase.group(1))
+                    data["temp_ttl_file"].append(fp.name)
+        else:
+            self.log.info(" ===> insert update nb object:"+str(len(attribute_list_output)+len(request_abstraction_output)+len(request_output_domain)))
+            for header_sparql_request in request_output_has_header_domain.values():
+                if len(header_sparql_request) > 0:
+                    ql.update_query_insert_data(header_sparql_request)
+            if len(request_abstraction_output) > 0:
+                ql.update_query_insert_data(request_abstraction_output)
+            if len(request_output_domain) > 0:
+                ql.update_query_insert_data(request_output_domain)
+            if len(start_position_list) > 0:
+                ql.update_query_insert_data(start_position_list)
+            if len(attribute_list_output) > 0:
+                ql.update_query_insert_data(attribute_list_output)
 
         data["missing_headers"] = missing_headers
         data["new_headers"] = new_headers

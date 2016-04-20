@@ -1,71 +1,114 @@
+/**
+ * Register event handlers for integration
+ */
+$(function () {
 
-function formatValidIdNameFile(filename) {
-  var idValidName = filename.replace(".","_dot_");
-  return idValidName;
+    // Generate preview data
+    $("#content_integration").on('change', '.toggle_column', function(event) {
+        previewTtl($(event.target).parent('.template-source_file'));
+    });
+
+    $("#content_integration").on('change', '.column_type', function(event) {
+        previewTtl($(event.target).parent('.template-source_file'));
+    });
+
+    $("#content_integration").on('click', '.preview_button', function(event) {
+        previewTtl($(event.target).parent('.template-source_file'));
+    });
+
+    $("#content_integration").on('click', '.load_data', function(event) {
+        loadSourceFile($(event.target).parent('.template-source_file'));
+    });
+});
+
+/**
+ * Transform an array of column content to an array of row content
+ */
+function cols2rows(items) {
+    var out = [];
+
+    for(var i=0, l=items.length; i<l; i++) {
+        for(var j=0, m=items[i].length; j<m; j++) {
+            if (!(j in out))  {
+                out[j] = []
+            }
+            out[j][i] = items[i][j];
+        }
+    }
+
+    return out;
 }
 
-function displayTable(src) {
-    // Create the tables giving an overview of the tabulated files to convert.
-    $('div#content_integration').empty().data({ turtle_template: src.turtle_template });
-    var htmlCode = "";
+/**
+ * Show preview data on the page
+ */
+function displayTable(data) {
+    // Transform columns to rows
+    for(var i=0, l=data.files.length; i<l; i++) {
+        data.files[i]['preview_data'] = cols2rows(data.files[i]['preview_data']);
+    }
 
-    $.each(src.sourceFiles, function(key, value) {
+    // display received data
+    var template = $('#template-source_file-preview').html();
 
-        var idValidName = formatValidIdNameFile(value.name);
-        for (var line of src.html_template.slice(0,8)) {
-            htmlCode += line.replace(/#FILENAME#/g, value.name);
-        }
-        var cpt = 0;
-        //var headers = [];
-        for (var line of value.content) {
-            if (cpt == 1) {
-                htmlCode += "                            <tr id='colType_" + idValidName + "'>";// style='display: none'
-            } else {
-                htmlCode += "                            <tr>";
-            }
-            var colCpt = 0;
-            for (var cell of line) {
-                if (cpt === 0) {
-                    htmlCode += "<td id=\"" + idValidName + "_" + cell + "\"><label>";
-                    // If First Colonne (Entity)
-                    if (colCpt === 0) {
-                        // we hide the checkbox
-                        htmlCode += "<input type='checkbox' style='display:none' id='header_" + idValidName + "_" + colCpt + "' value=" + colCpt + " onchange='fillTtl(\"" + value.name + "\")' checked /> ";
-                    } else {
-                        htmlCode += "<input type='checkbox' id='header_" + idValidName + "_" + colCpt + "' value=" + colCpt + " onchange='fillTtl(\"" + value.name + "\")' checked /> ";
-                    }
-                    htmlCode += cell + "</label></td>";
-                } else if (cpt == 1) {
-                  //  $('input[name=radioName]:checked').val()
-                      // The first colonne is the Entity, so only possibility:  Entity , Entity (Start)
-                      if (colCpt === 0) {
-                        htmlCode += "<td><select id='type_" + idValidName + "_" + colCpt + "' onchange='fillTtl(\"" + value.name + "\")'><optgroup label='Relationship'><option>Entity (Start)</option><option>Entity</option></optgroup></select></td>".replace(cell, " selected" + cell);
-                      } else {
-                        htmlCode += "<td><select id='type_" + idValidName + "_" + colCpt + "' onchange='fillTtl(\"" + value.name + "\")'><optgroup label='Attributes'><option>Numeric</option><option>Text</option><option>Category</option></optgroup><optgroup label='Relationship'><option>Entity</option></optgroup></optgroup></select></td>".replace(cell, " selected" + cell);
-                      }
-                } else {
-                    htmlCode += "<td>" + cell + "</td>";
-                }
-                colCpt++;
-            }
-            htmlCode += "</tr>\n";
-            cpt++;
-        }
+    var templateScript = Handlebars.compile(template);
+    var html = templateScript(data);
 
-        for (var line of src.html_template.slice(8,12)) {
-            htmlCode += line.replace(/#FILENAME#/g, value.name);
+    $("#content_integration").html(html);
+}
+
+/**
+ * Get ttl representation of preview data
+ */
+function previewTtl(file_elem) {
+
+    // Get column types
+    file_name = file_elem.find('.file_name').text();
+
+    col_types = file_elem.find('.column_type').map(function() {
+        return $(this).val();
+    }).get();
+
+    var service = new RestServiceJs("preview_ttl");
+    var model = { 'file_name': file_name,
+                  'col_types': col_types };
+
+    service.post(model, function(src) {
+        $('#ttl_' + idValidName).html(turtle_template + src.attribute_code + src.relation_code + src.domain_code);
+        for (var header of src.present_headers) {
+            $('#' + idValidName + "_" + header).attr("bgcolor", "green");
         }
-        for (var line of src.turtle_template) {
-            htmlCode += line.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        }
-        for (var line of src.html_template.slice(12,19)) {
-            htmlCode += line.replace(/#FILENAME#/g, value.name);
+        for (var n_header of src.new_headers) {
+            $('#' + idValidName + "_" + n_header).attr("bgcolor", "blue");
         }
     });
-    $('div#content_integration').html(htmlCode);
+
+
+// FIXME debug
+    return true;
+
+
+
+    // Conversion to turtle
+    var turtle_template = "";
+    for (var line of $("#content_integration").data().turtle_template) {
+        turtle_template += line.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    var rawLength = ($("#colType_" + idValidName).html().match(/<td>/g) || []).length;
+    var col_types = {};
+
+    for (var i = 0; i < rawLength; i++) {
+        if ($('#header_' + idValidName + '_' + i).prop('checked')) {
+            col_types[i] = ($('#type_' + idValidName + '_' + i).find(":selected").html());
+        }
+    }
 }
 
-function fillTtl(file_name, limit) {
+/**
+ * Load a source_file into the triplestore
+ */
+function loadSourceFile(file_elem) {
 
     var idValidName = formatValidIdNameFile(file_name);
     // Conversion to turtle

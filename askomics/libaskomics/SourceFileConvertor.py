@@ -1,6 +1,3 @@
-#! /usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 from glob import glob
 import logging
 import os.path
@@ -12,6 +9,7 @@ from askomics.libaskomics.integration.AbstractedRelation import AbstractedRelati
 from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
 from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
 from askomics.libaskomics.ParamManager import ParamManager
+from askomics.libaskomics.source_file.SourceFile import SourceFile
 
 class SourceFileConvertor(ParamManager):
     """
@@ -52,74 +50,19 @@ class SourceFileConvertor(ParamManager):
         with open(template_file) as template:
             return template.readlines()
 
-    def get_source_files_list(self):
+    def get_source_files(self, limit):
         """
         :return: List of the file to convert paths
         :rtype: List
         """
-        source_files_dir = self.get_source_file_directory()
-        source_files_list = glob(source_files_dir + '/*')
-        return source_files_list
+        src_dir = self.get_source_file_directory()
+        paths = glob(src_dir + '/*')
 
-    def get_first_lines(self, limit):
-        """
-        Read and return the first lines of a list of files.
+        files = []
+        for p in paths:
+            files.append(SourceFile(p, limit))
 
-        :param limit: the number of lines to read.
-        :return: for each file, return its name and the content of its limit first lines
-        :rtype: List
-        """
-        source_files_list = self.get_source_files_list()
-        source_files = []
-
-        for curr_file in source_files_list:
-            #ignore directory
-            if os.path.isdir(curr_file):
-                continue
-            #ignore file type
-            match = re.search(".type$", curr_file)
-            if match:
-                continue
-
-            val_cell_type = {} # :: Column Index -> Set Values
-            with open(curr_file, 'r') as src:
-                content = []
-                for cpt, line in enumerate(src):
-                    cells = line.rstrip('\r\n').split()
-                    if cpt == 1:
-                        cell_types = []
-                        col_cpt = 0
-                        for cell in cells:
-                            if col_cpt == 0:
-                                curr_cell_type = "Entity"
-                            elif is_decimal(cell):
-                                curr_cell_type = "Numeric"
-                            else:
-                                curr_cell_type = "Text"
-                                #OFI : We try to guess if the present colonne is a 'Category'
-                                val_cell_type.setdefault(col_cpt, set()).add(cell)
-
-                            cell_types.append(">" + curr_cell_type)
-                            col_cpt += 1
-                        content.append(cell_types) #FIXME: infered column types should be stored elsewhere.
-                    content.append(cells)
-                    if cpt > 1:
-                        for col_cpt, cell in enumerate(cells):
-                            if col_cpt in val_cell_type:
-                                val_cell_type[col_cpt].add(cell)
-                    if cpt == int(limit):
-                        break
-
-
-                for col_cpt, categories in val_cell_type.items():
-                    if len(categories) < len(content) / 2:
-                        content[1][col_cpt] = ">Category"
-
-                source_files.append(SourceFile(curr_file.split('/')[-1], content))
-
-                self.log.debug("Infered types from first lines of {}: {}.".format(curr_file, dict(zip(content[0],content[1]))))
-
-        return source_files
+        return files
 
     # FIXME: attribute_has_header_domain_list_output not used.
     def get_turtle(self, file_name, col_types, limit,
@@ -286,14 +229,3 @@ class SourceFileConvertor(ParamManager):
             AbstractedRelation(key_type, headers[key], ref_entity, self.type_dict[key_type]).get_turtle()
             for key, key_type in col_types.items()
             if key != 0)
-
-# TODO move these to some place more appropriate
-def is_decimal(value):
-    if value.isdigit():
-        return True
-    else:
-        try:
-            float(value)
-            return True
-        except ValueError:
-            return False
