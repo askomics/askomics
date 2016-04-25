@@ -18,7 +18,7 @@ class SourceFileTests(unittest.TestCase):
 
     def test_load_headers_from_file(self):
 
-        assert self.srcfile.get_headers() == ['head1', 'head2', 'head3']
+        assert self.srcfile.headers == ['head1', 'head2', 'head3']
 
     def test_load_preview_from_file(self):
 
