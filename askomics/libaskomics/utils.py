@@ -52,9 +52,9 @@ class HaveCachedProperties(object):
 
     def get_cache(self):
         """Explicit access (as a dictionary) to all the values cached in the attributes of this object.
-        Return the subset of self.__dict__ for keys in self.getCachedProperties().
+        Return the subset of self.__dict__ for keys in self.get_cached_properties().
         """
-        properties = set(self.getCachedProperties())
+        properties = set(self.get_cached_properties())
         # The caches are stored in the instance dictionary with the same names than the properties
         return {attr: cache for attr, cache in self.__dict__.items() if attr in properties}
 
@@ -67,7 +67,7 @@ class HaveCachedProperties(object):
         is equivalent to:
             self.set_cache(cache_dict, reset=True)
         """
-        properties = set(self.getCachedProperties())
+        properties = set(self.get_cached_properties())
         if not reset:
             properties &= cache_dict.keys()
 
@@ -80,7 +80,7 @@ class HaveCachedProperties(object):
 
     def reset_cache(self):
         "Equivalent to self.set_cache({}, reset=True) or del self.cache"
-        for key in self.getCachedProperties():
+        for key in self.get_cached_properties():
             self.__dict__.pop(key, None)
 
     cache = property(get_cache, set_cache, reset_cache,

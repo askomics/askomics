@@ -9,7 +9,7 @@ from itertools import count
 import os.path
 
 
-from askomics.libaskomics.utils import cached_property, HaveCachedProperties, pformatGenericObject
+from askomics.libaskomics.utils import cached_property, HaveCachedProperties, pformat_generic_object
 
 class SourceFileSyntaxError(SyntaxError):
     pass
@@ -54,7 +54,7 @@ class SourceFile(HaveCachedProperties):
         """
         with open(self.path, 'r') as tabfile:
             dialect = csv.Sniffer().sniff(tabfile.read(self.preview_limit))
-            self.log.debug("CSV dialect in %r: %s" % (self.path, pformatGenericObject(dialect)))
+            self.log.debug("CSV dialect in %r: %s" % (self.path, pformat_generic_object(dialect)))
             return dialect
 
     @cached_property
