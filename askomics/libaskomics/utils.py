@@ -1,5 +1,6 @@
 """Some python magic to provide utility Bases, decorators, utility functions, etc. """
 
+import sys
 from pprint import pformat
 
 __all__ = ['pformatGenericObject',
@@ -9,7 +10,11 @@ __all__ = ['pformatGenericObject',
 def pformatGenericObject(obj):
     "Pretty print a object and its attributes to string"
     pubattrs = {k:v for k, v in obj.__dict__.items() if not k.startswith('_') }
-    name = getattr(obj, '__qualname__', type(obj).__qualname__)
+
+    if sys.version_info >= (3,3):
+        name = getattr(obj, '__qualname__', type(obj).__qualname__)
+    else:
+        name = getattr(obj, '__name__', type(obj).__name__)
     return "{0}({1})".format(name, pformat(pubattrs))
 
 class cached_property(object):
