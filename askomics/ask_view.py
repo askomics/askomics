@@ -117,7 +117,7 @@ class AskView(object):
         for src_file in source_files:
             infos = {}
             infos['name'] = src_file.name
-            infos['headers'] = src_file.get_headers()
+            infos['headers'] = src_file.headers
             infos['preview_data'] = src_file.get_preview_data()
             infos['column_types'] = src_file.guess_column_types(infos['preview_data'])
 

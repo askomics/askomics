@@ -4,10 +4,17 @@ Classes to import data from source files
 import re
 import logging
 import csv
+from collections import defaultdict
 from itertools import count
 import os.path
 
-class SourceFile(object):
+
+from ..utils import cached_property, HaveCachedProperties, pformatGenericObject
+
+class SourceFileSyntaxError(SyntaxError):
+    pass
+
+class SourceFile(HaveCachedProperties):
     """
     Class representing a source file.
     """
@@ -40,15 +47,18 @@ class SourceFile(object):
 
         self.reset_cache()
 
-    def reset_cache(self):
+    @cached_property
+    def dialect(self):
         """
-        Delete any cached content concerning the file
+        Use csv.Sniffer to predict the CSV/TSV dialect
         """
-        self.headers = None
+        with open(self.path, 'r') as tabfile:
+            dialect = csv.Sniffer().sniff(tabfile.read(self.preview_limit))
+            self.log.debug("CSV dialect in %r: %s" % (self.path, pformatGenericObject(dialect)))
+            return dialect
 
-        self.category_values = None
-
-    def get_headers(self, delimiter='\t'):
+    @cached_property
+    def headers(self):
         """
         Read and return the column headers.
 
@@ -57,23 +67,19 @@ class SourceFile(object):
         :rtype: List
         """
 
-        # Return cached list if we have it
-        if self.headers:
-            return self.headers
-
-        self.headers = []
+        headers = []
         with open(self.path, 'r') as tabfile:
             # Load the file with reader
-            tabreader = csv.reader(tabfile, delimiter=delimiter)
+            tabreader = csv.reader(tabfile, dialect=self.dialect)
 
             # first line is header
-            self.headers = next(tabreader)
-            if self.headers[0].startswith('#'):
-                self.headers[0] = re.sub('^#+', '', s) # Remove leading comment signs
+            headers = next(tabreader)
+            if headers[0].startswith('#'):
+                headers[0] = re.sub('^#+', '', s) # Remove leading comment signs
 
-        return self.headers
+        return headers
 
-    def get_preview_data(self, delimiter='\t'):
+    def get_preview_data(self):
         """
         Read and return the values from the first lines of file.
 
@@ -84,19 +90,15 @@ class SourceFile(object):
 
         with open(self.path, 'r') as tabfile:
             # Load the file with reader
-            tabreader = csv.reader(tabfile, delimiter=delimiter)
+            tabreader = csv.reader(tabfile, dialect=self.dialect)
 
             count = 0
 
-            next(tabreader) # Skip header
+            header = next(tabreader) # Skip header
 
             # Loop on lines
-            data = []
+            data = [[] for x in range(len(header))]
             for row in tabreader:
-
-                if not data:
-                    data = [[] for x in range(len(row))]
-
                 # skip commented lines (# char at the begining)
                 if row[0].startswith('#'):
                     continue
@@ -120,11 +122,7 @@ class SourceFile(object):
         :return: List of guessed column types
         """
 
-        types = []
-        for col in columns:
-            types.append(self.guess_values_type(col))
-
-        return types
+        return [self.guess_values_type(col) for col in columns]
 
     def guess_values_type(self, values):
         """
@@ -137,19 +135,13 @@ class SourceFile(object):
         # First check if category
         if len(set(values)) < len(values) / 2:
             return 'category'
-
-        # Then numeric
-        num = True
-        for val in values:
-            num = num and self.is_decimal(val)
-
-        if num:
+        elif all(self.is_decimal(val) for val in values): # Then numeric
             return 'numeric'
+        else: # default is text
+            return 'text'
 
-        # default is text
-        return 'text'
-
-    def is_decimal(self, value):
+    @staticmethod
+    def is_decimal(value):
         """
         Determine if given value is a decimal (integer or float) or not
 
@@ -190,7 +182,7 @@ class SourceFile(object):
         """
 
         ttl = ''
-        ref_entity = self.get_headers()[0]
+        ref_entity = self.headers[0]
 
         # Store the main entity
         ttl += AbstractedEntity(ref_entity).get_turtle()
@@ -198,7 +190,7 @@ class SourceFile(object):
         # Store all the relations
         for key, key_type in self.forced_column_types.items():
             if key != 0:
-                ttl += AbstractedRelation(key_type, self.get_headers()[key], ref_entity, self.type_dict[key_type]).get_turtle()
+                ttl += AbstractedRelation(key_type, self.headers[key], ref_entity, self.type_dict[key_type]).get_turtle()
 
         # Store the startpoint status
         if self.forced_column_types[0] == 'entity_start':
@@ -233,15 +225,47 @@ class SourceFile(object):
         # FIXME what do we do if self.category_values is empty or if it contains data from preview only?
         # FIXME maybe we could allow to get domain only when full turtle has been generated?
 
+
+    @cached_property
+    def category_values(self):
+        self.log.warning("category_values are computed independently, get_turtle should be used to generate both at once")
+        category_values = defaultdict(set) # key=name of a column of 'category' type -> list of found values
+
+        with open(self.path, 'r') as tabfile:
+            # Load the file with reader
+            tabreader = csv.reader(tabfile, dialect=self.dialect)
+            next(tabreader) # Skip header
+
+            # Loop on lines
+            for row_number, row in enumerate(tabreader):
+                # skip commented lines (# char at the begining)
+                if row[0].startswith('#'):
+                    continue
+
+                if len(row) != len(self.headers):
+                    e = SourceFileSyntaxError('Invalid line found: %s columns expected, found %s' %s (str(self.headers), str(len(row))))
+                    e.filename = self.path
+                    e.lineno = row_number
+                    log.error(repr(e))
+                    raise e #FIXME: Do we want to read the file anyway ?
+
+                for i, (header, current_type) in enumerate(zip(self.headers, self.forced_column_types)):
+                    if current_type == 'category':
+                        # This is a category, keep track of allowed values for this column
+                        self.category_values.setdefault(header, set()).add(row[i])
+
+
+        return category_values
+
     def get_turtle(self, preview_only=False):
         # TODO make this a generator to avoid loading all data in memory, and allow writing in streaming mode
         # TODO use rdflib
 
-        self.category_values = {} # key=name of a column of 'category' type -> list of found values
+        self.category_values = defaultdict(set) # key=name of a column of 'category' type -> list of found values
 
         with open(self.path, 'r') as tabfile:
             # Load the file with reader
-            tabreader = csv.reader(tabfile, delimiter=delimiter)
+            tabreader = csv.reader(tabfile, dialect=self.dialect)
 
             count = 0
 
@@ -251,36 +275,37 @@ class SourceFile(object):
 
             # Loop on lines
             for row in tabreader:
-
                 # skip commented lines (# char at the begining)
                 if row[0].startswith('#'):
                     continue
 
-                if len(row) != len(self.get_headers()):
-                    log.error('Invalid line found: %s columns expected, found %s' %s (str(self.get_headers()), str(len(row))))
-                    # TODO catch error somewhere
-                    continue
+                if len(row) != len(self.headers):
+                    e = SourceFileSyntaxError('Invalid line found: %s columns expected, found %s' %s (str(self.headers), str(len(row))))
+                    e.filename = self.path
+                    e.lineno = row_number
+                    log.error(repr(e))
+                    raise e #FIXME: Do we want to read the file anyway ?
 
                 # Create the entity (first column)
                 entity_label = row[0]
                 indent = (len(entity_label) + 1) * " "
-                ttl += ":" + entity_label + " rdf:type :" + self.get_headers[0] + " ;\n"
+                ttl += ":" + entity_label + " rdf:type :" + self.headers[0] + " ;\n"
                 ttl += indent + " rdfs:label \"" + entity_label + "\" ;\n"
 
                 # Add data from other columns
-                for i, header in enumerate(self.get_headers()):
+                for i, header in enumerate(self.headers):
                     current_type = self.forced_column_types[i]
                     #if current_type == 'entity':
                         #relations.setdefault(header, {}).setdefault(entity_label, []).append(row[i]) # FIXME only useful if we want to check for duplicates
                     #else
                     if current_type == 'category':
                         # This is a category, keep track of allowed values for this column
-                        self.category_values.setdefault(header, set()).add(row[i])
+                        self.category_values[header].add(row[i])
 
                     # Create link to value
                     ttl += indent + " :has_" + header + " " + self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " ;\n"
 
-                ttl = attribute_code[:-2] + ".\n"
+                ttl = attribute_code[:-2] + ".\n" #FIXME: Something is missing here
 
                 # Stop after x lines
                 count += 1
@@ -295,7 +320,7 @@ class SourceFile(object):
 
         :return: a tuple containing 2 Lists: missing headers, new headers, and present headers
         """
-        curr_entity = self.get_headers()[0]
+        curr_entity = self.headers[0]
 
         sqb = SparqlQueryBuilder(self.settings, self.session)
         ql = QueryLauncher(self.settings, self.session)
@@ -307,7 +332,7 @@ class SourceFile(object):
 
         if results == []:
             # No results, everything is new
-            return [], self.get_headers(), []
+            return [], self.headers, []
 
         bdd_relations = []
         new_headers = []
@@ -317,11 +342,11 @@ class SourceFile(object):
         for result in results:
             bdd_relation = result["relation"].replace(self.get_param("askomics.prefix"), "").replace("has_", "")
             bdd_relations.append(bdd_relation)
-            if bdd_relation not in self.get_headers():
+            if bdd_relation not in self.headers:
                 self.log.warning('Expected relation "%s" but did not find it source file: %s.', bdd_relation, repr(headers))
                 missing_headers.append(bdd_relation)
 
-        for header in self.get_headers():
+        for header in self.headers:
             if header != curr_entity:
                 if header not in bdd_relations:
                     self.log.debug('New class detected "%s".', header)
