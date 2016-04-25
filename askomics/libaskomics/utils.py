@@ -3,11 +3,11 @@
 import sys
 from pprint import pformat
 
-__all__ = ['pformatGenericObject',
+__all__ = ['pformat_generic_object',
            'cached_property', 'HaveCachedProperties']
 
 
-def pformatGenericObject(obj):
+def pformat_generic_object(obj):
     "Pretty print a object and its attributes to string"
     pubattrs = {k:v for k, v in obj.__dict__.items() if not k.startswith('_') }
 
@@ -45,7 +45,7 @@ class cached_property(object):
 class HaveCachedProperties(object):
     """Provide cache management for classes using cached_property."""
     @classmethod
-    def getCachedProperties(cls):
+    def get_cached_properties(cls):
         # cached_property instances are in the class dict with other class attributes
         return (attr for attr, cp in cls.__dict__.items()
                 if isinstance(cp, cached_property))

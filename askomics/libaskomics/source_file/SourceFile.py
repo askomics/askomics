@@ -9,7 +9,7 @@ from itertools import count
 import os.path
 
 
-from ..utils import cached_property, HaveCachedProperties, pformatGenericObject
+from askomics.libaskomics.utils import cached_property, HaveCachedProperties, pformatGenericObject
 
 class SourceFileSyntaxError(SyntaxError):
     pass
@@ -228,6 +228,9 @@ class SourceFile(HaveCachedProperties):
 
     @cached_property
     def category_values(self):
+        """
+        A (lazily cached) dictionary mapping from column name (header) to the set of unique values.
+        """
         self.log.warning("category_values are computed independently, get_turtle should be used to generate both at once")
         category_values = defaultdict(set) # key=name of a column of 'category' type -> list of found values
 
