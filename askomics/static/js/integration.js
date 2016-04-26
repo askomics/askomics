@@ -88,18 +88,26 @@ function displayTable(data) {
  */
 function previewTtl(file_elem) {
 
-    // Get column types
-    file_name = file_elem.find('.file_name').text();
+    var file_name = file_elem.find('.file_name').text();
 
-    col_types = file_elem.find('.column_type').map(function() {
+    // Get column types
+    var col_types = file_elem.find('.column_type').map(function() {
         return $(this).val();
     }).get();
 
+    // Find which column is disabled
+    var disabled_columns = [];
+    file_elem.find('.toggle_column').each(function( index ) {
+        console.log("col "+index+" is "+$(this).is(':checked'))
+        if (!$(this).is(':checked')) {
+            disabled_columns.push(index + 1);
+        }
+    });
+
     var service = new RestServiceJs("preview_ttl");
     var model = { 'file_name': file_name,
-                  'col_types': col_types };
-
-    // FIXME we need to handle disabled columns too
+                  'col_types': col_types,
+                  'disabled_columns': disabled_columns };
 
     service.post(model, function(data) {
 

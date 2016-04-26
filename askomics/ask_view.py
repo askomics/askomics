@@ -138,11 +138,13 @@ class AskView(object):
         body = self.request.json_body
         file_name = body["file_name"]
         col_types = body["col_types"]
+        disabled_columns = body["disabled_columns"]
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
 
         src_file = sfc.get_source_file(file_name)
         src_file.set_forced_column_types(col_types)
+        src_file.set_disabled_columns(disabled_columns)
 
         content_ttl = src_file.get_preview_turtle()
         abstraction_ttl = src_file.get_abstraction()

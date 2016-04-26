@@ -169,6 +169,15 @@ class SourceFile(HaveCachedProperties):
 
         self.forced_column_types = types
 
+    def set_disabled_columns(self, disabled_columns):
+        """
+        Set manually curated types for column
+
+        :param disabled_columns: a List of column ids (0 based) that should not be imported
+        """
+
+        self.disabled_columns = disabled_columns
+
     def get_abstraction(self):
         # TODO use rdflib or other abstraction layer to create rdf
         """
@@ -185,7 +194,8 @@ class SourceFile(HaveCachedProperties):
 
         # Store all the relations
         for key, key_type in enumerate(self.forced_column_types[1:]):
-            ttl += AbstractedRelation(key_type, self.headers[key], ref_entity, self.type_dict[key_type]).get_turtle()
+            if key not in self.disabled_columns:
+                ttl += AbstractedRelation(key_type, self.headers[key], ref_entity, self.type_dict[key_type]).get_turtle()
 
         # Store the startpoint status
         if self.forced_column_types[0] == 'entity_start':
@@ -247,7 +257,6 @@ class SourceFile(HaveCachedProperties):
                         # This is a category, keep track of allowed values for this column
                         self.category_values.setdefault(header, set()).add(row[i])
 
-
         return category_values
 
     def get_preview_turtle(self):
@@ -298,18 +307,19 @@ class SourceFile(HaveCachedProperties):
 
                 # Add data from other columns
                 for i, header in enumerate(self.headers):
-                    current_type = self.forced_column_types[i]
-                    #if current_type == 'entity':
-                        #relations.setdefault(header, {}).setdefault(entity_label, []).append(row[i]) # FIXME only useful if we want to check for duplicates
-                    #else
-                    if current_type == 'category':
-                        # This is a category, keep track of allowed values for this column
-                        self.category_values[header].add(row[i])
+                    if i not in self.disabled_columns:
+                        current_type = self.forced_column_types[i]
+                        #if current_type == 'entity':
+                            #relations.setdefault(header, {}).setdefault(entity_label, []).append(row[i]) # FIXME only useful if we want to check for duplicates
+                        #else
+                        if current_type == 'category':
+                            # This is a category, keep track of allowed values for this column
+                            self.category_values[header].add(row[i])
 
-                    # Create link to value
-                    if row[i]: # Empty values are just ignored
-                        ttl += indent + " :has_" + header + " " + self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " ;\n"
-                    # FIXME we will need to store undefined values one day if we want to be able to query on this
+                        # Create link to value
+                        if row[i]: # Empty values are just ignored
+                            ttl += indent + " :has_" + header + " " + self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " ;\n"
+                        # FIXME we will need to store undefined values one day if we want to be able to query on this
 
                 ttl = ttl[:-2] + ".\n"
 
