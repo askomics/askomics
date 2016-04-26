@@ -82,6 +82,8 @@ function previewTtl(file_elem) {
     var model = { 'file_name': file_name,
                   'col_types': col_types };
 
+    // FIXME we need to handle disabled columns too
+
     service.post(model, function(data) {
 
         // display received data

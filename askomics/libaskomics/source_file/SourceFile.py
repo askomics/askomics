@@ -67,7 +67,6 @@ class SourceFile(HaveCachedProperties):
         """
         Read and return the column headers.
 
-        :param delimiter: the character delimiting columns.
         :return: a List of column headers
         :rtype: List
         """
@@ -88,7 +87,6 @@ class SourceFile(HaveCachedProperties):
         """
         Read and return the values from the first lines of file.
 
-        :param delimiter: the character delimiting columns.
         :return: a List of List of column values
         :rtype: List
         """
@@ -165,6 +163,8 @@ class SourceFile(HaveCachedProperties):
     def set_forced_column_types(self, types):
         """
         Set manually curated types for column
+
+        :param types: a List of column types ('entity', 'entity_start', 'numeric', 'text' or 'category')
         """
 
         self.forced_column_types = types
@@ -261,6 +261,8 @@ class SourceFile(HaveCachedProperties):
 
     def get_turtle(self, preview_only=False):
         # TODO make this a generator to avoid loading all data in memory, and allow writing in streaming mode
+        #      hum, not sure if it's not better to first parse the whole file before touching the db in case the file is malformatted
+        #      see if we can rollback in case of error
         # TODO use rdflib or other abstraction layer to create rdf
 
         self.category_values = defaultdict(set) # key=name of a column of 'category' type -> list of found values
