@@ -5,19 +5,26 @@ $(function () {
 
     // Generate preview data
     $("#content_integration").on('change', '.toggle_column', function(event) {
-        previewTtl($(event.target).parent('.template-source_file'));
+        var block = $(event.target).closest('.template-source_file');
+        if (block.find('.preview_field').is(':visible')) {
+            previewTtl(block);
+        }
     });
 
     $("#content_integration").on('change', '.column_type', function(event) {
-        previewTtl($(event.target).parent('.template-source_file'));
+        var block = $(event.target).closest('.template-source_file');
+        if (block.find('.preview_field').is(':visible')) {
+            previewTtl(block);
+        }
     });
 
     $("#content_integration").on('click', '.preview_button', function(event) {
-        previewTtl($(event.target).parent('.template-source_file'));
+        var block = $(event.target).closest('.template-source_file');
+        previewTtl(block);
     });
 
     $("#content_integration").on('click', '.load_data', function(event) {
-        loadSourceFile($(event.target).parent('.template-source_file'));
+        loadSourceFile($(event.target).closest('.template-source_file'));
     });
 });
 
