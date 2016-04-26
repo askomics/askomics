@@ -76,15 +76,13 @@ class ParamManager(object):
 
         return obj
 
-    def turtle_template(self):
+    def get_turtle_template(self):
         header = ""
 
         for key, value in self.ASKOMICS_prefix.items():
             header += "@prefix "+key+":<"+value+"> .\n"
 
         header += "@base" +"<"+self.get_param("askomics.prefix")+"> .\n"
-        header += "<" + self.get_param("askomics.prefix")+" rdf:type owl:Ontology .\n"
-        header += "\n"
-        header += "## Individuals\n"
+        header += "<" + self.get_param("askomics.prefix")+" rdf:type owl:Ontology ."
 
         return header

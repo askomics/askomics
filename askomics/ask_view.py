@@ -148,6 +148,7 @@ class AskView(object):
         abstraction_ttl = src_file.get_abstraction()
         domain_knowledge_ttl = src_file.get_domain_knowledge()
 
+        data["header"] = sfc.get_turtle_template()
         data["content_ttl"] = content_ttl
         data["abstraction_ttl"] = abstraction_ttl
         data["domain_knowledge_ttl"] = domain_knowledge_ttl
