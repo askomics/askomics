@@ -64,6 +64,23 @@ function displayTable(data) {
     var html = templateScript(data);
 
     $("#content_integration").html(html);
+
+    // Select the correct type for each column
+    for(var i=0, l=data.files.length; i<l; i++) {
+
+        if ('column_types' in data.files[i]) {
+
+            var cols = data.files[i]['column_types'];
+            for(var j=0, m=cols.length; j<m; j++) {
+                var selectbox = $('div#content_integration div.template-source_file:eq(' + i + ') select.column_type:eq(' + j + ')');
+                var values = selectbox.find("option").map(function() { return $(this).val(); });
+
+                if ($.inArray( cols[j], values) >= 0) {
+                    selectbox.val(cols[j]);
+                }
+            }
+        }
+    }
 }
 
 /**

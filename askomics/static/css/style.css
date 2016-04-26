@@ -210,3 +210,7 @@ div.uploadedQuery {
     margin: auto;
     display: none;
 }
+
+.template-source_file {
+    margin-bottom: 4em;
+}

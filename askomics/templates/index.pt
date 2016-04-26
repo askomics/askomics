@@ -215,7 +215,6 @@
                         <input type="button" class="load_data" value="Insert in database" />
                     {{/if}}
                 </div>
-                <br><br><hr><br>
             {{/each}}
         </script>
 
