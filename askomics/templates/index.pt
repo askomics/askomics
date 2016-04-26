@@ -154,60 +154,64 @@
                 <div class="template-source_file" style='text-align:center'>
                     <h4 class="file_name">{{ this.name }}</h4>
                     <br>
-                    <table class='preview_table'>
-                        <thead>
-                            <tr>
-                            {{#each headers}}
-                                <th>
-                                    {{#unless @first}}
-                                        <input type='checkbox' class='toggle_column' checked />
-                                    {{/unless}}
-                                    {{ this }}
-                                </th>
-                            {{/each}}
-
-                            </tr>
-                            <tr>
-                            {{#each headers}}
-                                <th>
-                                    <select class='column_type'>
-                                        {{#if @first}}
-                                            <optgroup label='Relationship'>
-                                                <option value='entity_start'>Entity (Start)</option>
-                                                <option value='entity'>Entity</option>
-                                        {{else}}
-                                            <optgroup label='Attributes'>
-                                                <option value='numeric'>Numeric</option>
-                                                <option value='text'>Text</option>
-                                                <option value='category'>Category</option>
-                                            </optgroup>
-                                            <optgroup label='Relationship'>
-                                                <option value='entity'>Entity</option>
-                                            </optgroup>
-                                        {{/if}}
-                                    </select>
-                                </th>
-                            {{/each}}
-
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {{#each preview_data}}
+                    {{#if error}}
+                        <p class="error">{{ error }}</p>
+                    {{else}}
+                        <table class='preview_table'>
+                            <thead>
                                 <tr>
-                                    {{#each this}}
-                                        <td>
-                                            {{ this }}
-                                        </td>
-                                    {{/each}}
+                                {{#each headers}}
+                                    <th>
+                                        {{#unless @first}}
+                                            <input type='checkbox' class='toggle_column' checked />
+                                        {{/unless}}
+                                        {{ this }}
+                                    </th>
+                                {{/each}}
+
                                 </tr>
-                            {{/each}}
-                        </tbody>
-                    </table>
-                    <div align="center">
-                        <pre class='preview_field'></pre>
-                    </div>
-                    <input type="button" class="preview_button" value="Preview RDF" />
-                    <input type="button" class="load_data" value="Insert in database" />
+                                <tr>
+                                {{#each headers}}
+                                    <th>
+                                        <select class='column_type'>
+                                            {{#if @first}}
+                                                <optgroup label='Relationship'>
+                                                    <option value='entity_start'>Entity (Start)</option>
+                                                    <option value='entity'>Entity</option>
+                                            {{else}}
+                                                <optgroup label='Attributes'>
+                                                    <option value='numeric'>Numeric</option>
+                                                    <option value='text'>Text</option>
+                                                    <option value='category'>Category</option>
+                                                </optgroup>
+                                                <optgroup label='Relationship'>
+                                                    <option value='entity'>Entity</option>
+                                                </optgroup>
+                                            {{/if}}
+                                        </select>
+                                    </th>
+                                {{/each}}
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{#each preview_data}}
+                                    <tr>
+                                        {{#each this}}
+                                            <td>
+                                                {{ this }}
+                                            </td>
+                                        {{/each}}
+                                    </tr>
+                                {{/each}}
+                            </tbody>
+                        </table>
+                        <div align="center">
+                            <pre class='preview_field'></pre>
+                        </div>
+                        <input type="button" class="preview_button" value="Preview RDF" />
+                        <input type="button" class="load_data" value="Insert in database" />
+                    {{/if}}
                 </div>
                 <br><br><hr><br>
             {{/each}}

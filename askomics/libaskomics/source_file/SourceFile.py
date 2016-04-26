@@ -53,7 +53,8 @@ class SourceFile(HaveCachedProperties):
         Use csv.Sniffer to predict the CSV/TSV dialect
         """
         with open(self.path, 'r') as tabfile:
-            dialect = csv.Sniffer().sniff(tabfile.read(self.preview_limit))
+            # The sniffer needs to have enough data to guess, and we restrict to a list of allowed delimiters to avoid strange results
+            dialect = csv.Sniffer().sniff(tabfile.read(1024*16), delimiters=',\t ')
             self.log.debug("CSV dialect in %r: %s" % (self.path, pformat_generic_object(dialect)))
             return dialect
 
@@ -308,7 +309,7 @@ class SourceFile(HaveCachedProperties):
                     # Create link to value
                     ttl += indent + " :has_" + header + " " + self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " ;\n"
 
-                ttl = attribute_code[:-2] + ".\n" #FIXME: Something is missing here
+                ttl = ttl[:-2] + ".\n" #FIXME why do we do this?
 
                 # Stop after x lines
                 count += 1

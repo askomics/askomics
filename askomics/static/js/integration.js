@@ -45,7 +45,9 @@ function cols2rows(items) {
 function displayTable(data) {
     // Transform columns to rows
     for(var i=0, l=data.files.length; i<l; i++) {
-        data.files[i]['preview_data'] = cols2rows(data.files[i]['preview_data']);
+        if ('preview_data' in data.files[i]) {
+            data.files[i]['preview_data'] = cols2rows(data.files[i]['preview_data']);
+        }
     }
 
     // display received data
