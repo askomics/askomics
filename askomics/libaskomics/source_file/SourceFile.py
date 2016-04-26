@@ -305,7 +305,9 @@ class SourceFile(HaveCachedProperties):
                         self.category_values[header].add(row[i])
 
                     # Create link to value
-                    ttl += indent + " :has_" + header + " " + self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " ;\n"
+                    if row[i]: # Empty values are just ignored
+                        ttl += indent + " :has_" + header + " " + self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " ;\n"
+                    # FIXME we will need to store undefined values one day if we want to be able to query on this
 
                 ttl = ttl[:-2] + ".\n"
 
