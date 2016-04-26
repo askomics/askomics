@@ -7,4 +7,5 @@ The following individuals have contributed code to AskOmics (alphabetic order):
 * Yvanne Chaussin <chaussin.yvanne@gmail.com>
 * Olivier Dameron <olivier.dameron@univ-rennes1.fr>
 * Olivier Filangi <olivier.filangi@rennes.inra.fr>
-* Fabrice Legei <fabrice.legeai@rennes.inra.fr>
+* Fabrice Legeai <fabrice.legeai@rennes.inra.fr>
+* Maël Kerbiriou <mael.kerbiriou@etudiant.univ-rennes1.fr>

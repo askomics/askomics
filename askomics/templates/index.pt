@@ -130,6 +130,7 @@
             <li>Aurélie Evrard</li>
             <li>Olivier Filangi</li>
             <li>Fabrice Legeai</li>
+            <li>Maël Kerbiriou</li>
           </ul>
         </div>
 
@@ -206,15 +207,36 @@
                                 {{/each}}
                             </tbody>
                         </table>
-                        <div align="center">
-                            <pre class='preview_field'></pre>
-                        </div>
+                        <br><br>
+                        <pre class='preview_field'>
+                        </pre>
+                        <br>
                         <input type="button" class="preview_button" value="Preview RDF" />
                         <input type="button" class="load_data" value="Insert in database" />
                     {{/if}}
                 </div>
                 <br><br><hr><br>
             {{/each}}
+        </script>
+
+        <!-- The template to display ttl preview -->
+        <script id="template-ttl-preview" type="text/x-handlebars-template">=============
+=  Content  =
+=============
+
+{{ content_ttl }}
+
+=================
+=  Abstraction  =
+=================
+
+{{ abstraction_ttl }}
+
+======================
+=  Domain knowledge  =
+======================
+
+{{ domain_knowledge_ttl }}
         </script>
     </body>
 </html>

@@ -109,7 +109,7 @@ class AskView(object):
         """
         sfc = SourceFileConvertor(self.settings, self.request.session)
 
-        source_files = sfc.get_source_files(int(self.settings["askomics.overview_lines_limit"]))
+        source_files = sfc.get_source_files()
 
         data = {}
         data['files'] = []

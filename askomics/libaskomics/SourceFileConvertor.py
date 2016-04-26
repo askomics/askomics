@@ -3,11 +3,6 @@ import logging
 import os.path
 import re
 
-from askomics.libaskomics.integration.SourceFile import SourceFile
-from askomics.libaskomics.integration.AbstractedEntity import AbstractedEntity
-from askomics.libaskomics.integration.AbstractedRelation import AbstractedRelation
-from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
-from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
 from askomics.libaskomics.ParamManager import ParamManager
 from askomics.libaskomics.source_file.SourceFile import SourceFile
 
@@ -27,7 +22,7 @@ class SourceFileConvertor(ParamManager):
         ParamManager.__init__(self, settings, session)
         self.log = logging.getLogger(__name__)
 
-    def get_source_files(self, limit):
+    def get_source_files(self):
         """
         :return: List of the file to convert paths
         :rtype: List
@@ -37,7 +32,7 @@ class SourceFileConvertor(ParamManager):
 
         files = []
         for p in paths:
-            files.append(SourceFile(p, limit))
+            files.append(SourceFile(p, int(self.settings["askomics.overview_lines_limit"])))
 
         return files
 

@@ -75,36 +75,17 @@ function previewTtl(file_elem) {
     var model = { 'file_name': file_name,
                   'col_types': col_types };
 
-    service.post(model, function(src) {
-        $('#ttl_' + idValidName).html(turtle_template + src.attribute_code + src.relation_code + src.domain_code);
-        for (var header of src.present_headers) {
-            $('#' + idValidName + "_" + header).attr("bgcolor", "green");
-        }
-        for (var n_header of src.new_headers) {
-            $('#' + idValidName + "_" + n_header).attr("bgcolor", "blue");
-        }
+    service.post(model, function(data) {
+
+        // display received data
+        var template = $('#template-ttl-preview').html();
+
+        var templateScript = Handlebars.compile(template);
+        var html = templateScript(data);
+
+        file_elem.find(".preview_field").html(html);
+        file_elem.find(".preview_field").show();
     });
-
-
-// FIXME debug
-    return true;
-
-
-
-    // Conversion to turtle
-    var turtle_template = "";
-    for (var line of $("#content_integration").data().turtle_template) {
-        turtle_template += line.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    }
-
-    var rawLength = ($("#colType_" + idValidName).html().match(/<td>/g) || []).length;
-    var col_types = {};
-
-    for (var i = 0; i < rawLength; i++) {
-        if ($('#header_' + idValidName + '_' + i).prop('checked')) {
-            col_types[i] = ($('#type_' + idValidName + '_' + i).find(":selected").html());
-        }
-    }
 }
 
 /**

@@ -203,3 +203,10 @@ div.uploadedQuery {
     opacity: 0;
     filter: alpha(opacity=0);
 }
+
+.preview_field {
+    font-family:"Courier New", Courier, monospace;
+    border: 1px solid black;
+    margin: auto;
+    display: none;
+}

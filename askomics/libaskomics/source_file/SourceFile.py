@@ -10,6 +10,8 @@ import os.path
 
 
 from askomics.libaskomics.utils import cached_property, HaveCachedProperties, pformat_generic_object
+from askomics.libaskomics.integration.AbstractedEntity import AbstractedEntity
+from askomics.libaskomics.integration.AbstractedRelation import AbstractedRelation
 
 class SourceFileSyntaxError(SyntaxError):
     pass
@@ -35,13 +37,15 @@ class SourceFile(HaveCachedProperties):
             'numeric' : 'xsd:decimal',
             'text'    : 'xsd:string',
             'category': ':',
-            'entity'  : ':'}
+            'entity'  : ':',
+            'entity_start'  : ':'}
 
         self.delims = {
             'numeric' : ('', ''),
             'text'    : ('"', '"'),
             'category': (':', ''),
-            'entity'  : (':', '')}
+            'entity'  : (':', ''),
+            'entity_start'  : (':', '')}
 
         self.log = logging.getLogger(__name__)
 
@@ -165,17 +169,8 @@ class SourceFile(HaveCachedProperties):
 
         self.forced_column_types = types
 
-    def get_preview_turtle():
-        """
-        Get a preview of turtle representation of data in the source file.
-
-        This is a shortcut to get_turtle(preview_only=True)
-        :return: ttl preview
-        """
-        return self.get_turtle(True)
-
     def get_abstraction(self):
-        # TODO use rdflib
+        # TODO use rdflib or other abstraction layer to create rdf
         """
         Get the abstraction representing the source file in ttl format
 
@@ -189,9 +184,8 @@ class SourceFile(HaveCachedProperties):
         ttl += AbstractedEntity(ref_entity).get_turtle()
 
         # Store all the relations
-        for key, key_type in self.forced_column_types.items():
-            if key != 0:
-                ttl += AbstractedRelation(key_type, self.headers[key], ref_entity, self.type_dict[key_type]).get_turtle()
+        for key, key_type in enumerate(self.forced_column_types[1:]):
+            ttl += AbstractedRelation(key_type, self.headers[key], ref_entity, self.type_dict[key_type]).get_turtle()
 
         # Store the startpoint status
         if self.forced_column_types[0] == 'entity_start':
@@ -199,32 +193,27 @@ class SourceFile(HaveCachedProperties):
         else:
             ttl += ":" + ref_entity + ' displaySetting:attribute "true"^^xsd:boolean .\n'
 
+        return ttl
+
     def get_domain_knowledge(self):
-        # TODO use rdflib
+        # TODO use rdflib or other abstraction layer to create rdf
         """
         Get the domain knowledge representing the source file in ttl format
 
         :return: ttl content for the domain knowledge
         """
 
-        if self.category_values == None:
-            # FIXME throw an error: we need to call get_turtle first!!
-            log.error('You must call get_turtle before calling get_abstraction')
-            return
-
         ttl = ''
 
         for header, categories in self.category_values.items():
             indent = len(header) * " " + len("displaySetting:has_category") * " " + 3 * " "
-            ttl = ":" + header + " displaySetting:has_category :"
+            ttl += ":" + header + " displaySetting:has_category :"
             ttl += (" , \n" + indent + ":").join(categories) + " .\n"
 
             for item in categories:
                 ttl += ":" + item + " rdf:type :" + header + " ;\n" + len(item) * " " + "  rdfs:label \"" + item + "\" .\n"
 
-        # TODO we should return the category values, but they need to be generated first by get_turtle (we should not parse the file 2 times)
-        # FIXME what do we do if self.category_values is empty or if it contains data from preview only?
-        # FIXME maybe we could allow to get domain only when full turtle has been generated?
+        return ttl
 
 
     @cached_property
@@ -261,9 +250,18 @@ class SourceFile(HaveCachedProperties):
 
         return category_values
 
+    def get_preview_turtle(self):
+        """
+        Get a preview of turtle representation of data in the source file.
+
+        This is a shortcut to get_turtle(preview_only=True)
+        :return: ttl preview
+        """
+        return self.get_turtle(True)
+
     def get_turtle(self, preview_only=False):
         # TODO make this a generator to avoid loading all data in memory, and allow writing in streaming mode
-        # TODO use rdflib
+        # TODO use rdflib or other abstraction layer to create rdf
 
         self.category_values = defaultdict(set) # key=name of a column of 'category' type -> list of found values
 
@@ -309,7 +307,7 @@ class SourceFile(HaveCachedProperties):
                     # Create link to value
                     ttl += indent + " :has_" + header + " " + self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " ;\n"
 
-                ttl = ttl[:-2] + ".\n" #FIXME why do we do this?
+                ttl = ttl[:-2] + ".\n"
 
                 # Stop after x lines
                 count += 1
