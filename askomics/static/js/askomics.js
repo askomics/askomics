@@ -150,13 +150,9 @@ $(function () {
 
     // Get the overview of files to integrate
     $("#integration").click(function() {
-        //var service = new RestServiceJs("source_file_overview");
-        //service.getAll(function(src) {displayTable(src)});
-
         var service = new RestServiceJs("up/");
         service.getAll(function(formHtmlforUploadFiles) {
           $('div#content_integration').html(formHtmlforUploadFiles.html);
-        //  console.log(JSON.stringify(formHtmlforUploadFiles));
         });
     });
 

@@ -20,7 +20,7 @@ def main(global_config, **settings):
     config.add_route('link_attribute', '/link')
     config.add_route('query', '/results')
     config.add_route('attribute_value', '/category_value')
-    config.add_route('source_file_overview', '/source_file_overview')
+    config.add_route('source_files_overview', '/source_files_overview')
     config.add_route('load_data_into_graph', '/load_data_into_graph')
     config.add_route('preview_ttl', '/preview_ttl')
     config.add_route('check_existing_data', '/check_existing_data')

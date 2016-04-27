@@ -102,8 +102,8 @@ class AskView(object):
 
         return data
 
-    @view_config(route_name='source_file_overview', request_method='GET') # FIXME rename?
-    def source_file_overview(self):
+    @view_config(route_name='source_files_overview', request_method='GET')
+    def source_files_overview(self):
         """
         Get the first lines of the tabulated files to convert
         """

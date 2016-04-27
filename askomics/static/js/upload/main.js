@@ -48,7 +48,7 @@ $(function () {
 
     // Integrate button
     $('.integrate-button').click(function() {
-        var service = new RestServiceJs("source_file_overview");
+        var service = new RestServiceJs("source_files_overview");
         service.getAll(function(data) {
             displayTable(data);
         });
