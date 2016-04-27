@@ -193,8 +193,8 @@ class SourceFile(HaveCachedProperties):
         ttl += AbstractedEntity(ref_entity).get_turtle()
 
         # Store all the relations
-        for key, key_type in enumerate(self.forced_column_types[1:]):
-            if key not in self.disabled_columns:
+        for key, key_type in enumerate(self.forced_column_types):
+            if key > 0 and key not in self.disabled_columns:
                 ttl += AbstractedRelation(key_type, self.headers[key], ref_entity, self.type_dict[key_type]).get_turtle()
 
         # Store the startpoint status
@@ -296,7 +296,7 @@ class SourceFile(HaveCachedProperties):
                     e = SourceFileSyntaxError('Invalid line found: %s columns expected, found %s' %s (str(self.headers), str(len(row))))
                     e.filename = self.path
                     e.lineno = row_number
-                    log.error(repr(e))
+                    self.log.error(repr(e))
                     raise e #FIXME: Do we want to read the file anyway ?
 
                 # Create the entity (first column)
@@ -306,7 +306,7 @@ class SourceFile(HaveCachedProperties):
                 ttl += indent + " rdfs:label \"" + entity_label + "\" ;\n"
 
                 # Add data from other columns
-                for i, header in enumerate(self.headers):
+                for i, header in enumerate(self.headers[1:]): # Skip the first column
                     if i not in self.disabled_columns:
                         current_type = self.forced_column_types[i]
                         #if current_type == 'entity':

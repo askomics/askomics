@@ -100,7 +100,7 @@ function previewTtl(file_elem) {
     file_elem.find('.toggle_column').each(function( index ) {
         console.log("col "+index+" is "+$(this).is(':checked'))
         if (!$(this).is(':checked')) {
-            disabled_columns.push(index + 1);
+            disabled_columns.push(index + 1); // +1 to take into account the first non-disablable column
         }
     });
 
