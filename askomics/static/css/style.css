@@ -215,3 +215,27 @@ div.uploadedQuery {
 .template-source_file {
     margin-bottom: 4em;
 }
+
+p.warning {
+    background-image: url("/static/images/icons/warning.png");
+    background-repeat: no-repeat;
+    display: inline;
+    font-size: 24px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 0 0 30px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+p.error {
+    background-image: url('/static/images/icons/error.png');
+    background-repeat: no-repeat;
+    display: inline;
+    font-size: 24px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 0 0 30px;
+    text-align: center;
+    vertical-align: middle;
+}

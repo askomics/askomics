@@ -15,7 +15,6 @@ class ParamManager(object):
         self.ASKOMICS_has_category_query_file = "hasCategoryQuery.sparql"
         self.ASKOMICS_initial_query = "initialQuery.sparql"
         self.ASKOMICS_get_class_info_from_abstraction_queryFile = "getClassInfoFromAbstractionQuery.sparql"
-        self.ASKOMICS_insert_data_query = "InsertDataQuery.sparql"
 
         self.ASKOMICS_prefix = {"": self.get_param("askomics.prefix"),
                                 "displaySetting": self.get_param("askomics.display_setting"),
@@ -57,16 +56,6 @@ class ParamManager(object):
 
         return header
 
-    def header_ttl_config(self):
-        header = ""
-
-        for key, value in self.ASKOMICS_prefix.items():
-            header += "@prefix "+key+": <"+value+"> .\n"
-
-        header += "\n"
-
-        return header
-
     def remove_prefix(self, obj):
         for key, value in self.ASKOMICS_prefix.items():
             new = key
@@ -83,6 +72,6 @@ class ParamManager(object):
             header += "@prefix "+key+":<"+value+"> .\n"
 
         header += "@base" +"<"+self.get_param("askomics.prefix")+"> .\n"
-        header += "<" + self.get_param("askomics.prefix")+" rdf:type owl:Ontology ."
+        header += "<" + self.get_param("askomics.prefix")+"> rdf:type owl:Ontology ."
 
         return header

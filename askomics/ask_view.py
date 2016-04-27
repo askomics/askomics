@@ -105,7 +105,7 @@ class AskView(object):
     @view_config(route_name='source_files_overview', request_method='GET')
     def source_files_overview(self):
         """
-        Get the first lines of the tabulated files to convert
+        Get preview data for all the available files
         """
         sfc = SourceFileConvertor(self.settings, self.request.session)
 
@@ -189,92 +189,74 @@ class AskView(object):
         Load tabulated files to triple store according to the type of the columns set by the user
         """
         data = {}
-        sfc = SourceFileConvertor(self.settings, self.request.session)
 
         body = self.request.json_body
         file_name = body["file_name"]
         col_types = body["col_types"]
+        disabled_columns = body["disabled_columns"]
 
-        start_position_list = []
-        attribute_list_output = []
-        request_output_has_header_domain = {}
-        request_output_domain = []
-        request_abstraction_output = []
+        sfc = SourceFileConvertor(self.settings, self.request.session)
 
-        missing_headers, new_headers, present_headers, attribute_code, relation_code, domain_code = sfc.get_turtle(file_name, col_types, False, start_position_list, attribute_list_output, request_output_has_header_domain, request_output_domain, request_abstraction_output)
+        src_file = sfc.get_source_file(file_name)
+        src_file.set_forced_column_types(col_types)
+        src_file.set_disabled_columns(disabled_columns)
+
+        header_ttl = sfc.get_turtle_template()
+        content_ttl = src_file.get_turtle()
+        abstraction_ttl = src_file.get_abstraction()
+        domain_knowledge_ttl = src_file.get_domain_knowledge()
 
         ql = QueryLauncher(self.settings, self.request.session)
 
-        # use insert data instead of load sparql procedure when a dataset is small.....
-        if len(attribute_list_output)+len(request_abstraction_output)+len(request_output_domain) > 200:
-            first = True
-            keep_going = True
-            data["temp_ttl_file"] = []
-            while keep_going:
-                with tempfile.NamedTemporaryFile(dir="askomics/ttl/", suffix=".ttl", mode="w", delete=False) as fp:
-                    # Temp files are removed by clean_ttl_directory route
-                    l_empty = []
-                    ql.build_query_load(l_empty, fp, header=True)
-                    if first:
-                        for header_sparql_request in request_output_has_header_domain.values():
-                            if len(header_sparql_request) > 0:
-                                self.log.info("header_sparql_request - Number of object:"+str(len(header_sparql_request)))
-                                ql.build_query_load(header_sparql_request, fp)
+        # use insert data instead of load sparql procedure when the dataset is small
+        if len(content_ttl) > 200000: # FIXME make this a setting?
 
-                        if len(request_abstraction_output) > 0:
-                            self.log.info("request_abstraction_output - Number of object:"+str(len(request_abstraction_output)))
-                            ql.build_query_load(request_abstraction_output, fp)
+            with tempfile.NamedTemporaryFile(dir="askomics/ttl/", suffix=".ttl", mode="w", delete=False) as fp:
+                # The temp file is deleted automatically
+                # It must be accessed by http => in askomics/ttl/ dir
 
-                        if len(request_output_domain) > 0:
-                            self.log.info("request_output_domain - Number of object:"+str(len(request_output_domain)))
-                            ql.build_query_load(request_output_domain, fp)
+                fp.write(header_ttl + '\n')
+                fp.write(content_ttl + '\n') # TODO make chunks if too long! (see generator)
+                fp.write(abstraction_ttl + '\n')
+                fp.write(domain_knowledge_ttl + '\n')
 
-                        if len(start_position_list) > 0:
-                            self.log.info("start_position_list - Number of object:"+str(len(start_position_list)))
-                            ql.build_query_load(start_position_list, fp)
+                urlbase = re.search(r'(http:\/\/.*)\/.*', self.request.current_route_url())
+                url = urlbase.group(1)+"/ttl/"+os.path.basename(fp.name)
+                try:
+                    res = ql.load_data(url)
+                except Exception as e:
+                    data['status'] = 'failed'
+                    data['error'] = 'Error while loading data: '+str(e)
+                    data['url'] = url
 
-                    first = False
+                    # There is an error, keep the temp file to investigate
+                    # FIXME this should be deactivated in prod mode
 
-                    if len(attribute_list_output) > 0:
-                        subattribute_list_output = attribute_list_output[:min(60000, len(attribute_list_output))]
-                        del attribute_list_output[:min(60000, len(attribute_list_output))]
-                        if len(attribute_list_output) == 0:
-                            keep_going = False
-                        self.log.info("subattribute_list_output - Number of object:"+str(len(subattribute_list_output)))
-                        ql.build_query_load(subattribute_list_output, fp)
-                    else:
-                        keep_going = False
+                    return data
 
-                    urlbase = re.search(r'(http:\/\/.*)\/.*', self.request.current_route_url())
-                    ql.update_query_load(fp, urlbase.group(1))
-                    data["temp_ttl_file"].append(fp.name)
+                os.remove(fp.name) # Everything ok, remove temp file
+                data['status'] = 'ok' # FIXME send useful info
+
         else:
-            self.log.info(" ===> insert update nb object:"+str(len(attribute_list_output)+len(request_abstraction_output)+len(request_output_domain)))
-            for header_sparql_request in request_output_has_header_domain.values():
-                if len(header_sparql_request) > 0:
-                    ql.update_query_insert_data(header_sparql_request)
-            if len(request_abstraction_output) > 0:
-                ql.update_query_insert_data(request_abstraction_output)
-            if len(request_output_domain) > 0:
-                ql.update_query_insert_data(request_output_domain)
-            if len(start_position_list) > 0:
-                ql.update_query_insert_data(start_position_list)
-            if len(attribute_list_output) > 0:
-                ql.update_query_insert_data(attribute_list_output)
+            try:
+                ql.insert_data(content_ttl, header_ttl) # TODO make chunks if too long! (see generator)
+                ql.insert_data(abstraction_ttl, header_ttl)
+                ql.insert_data(domain_knowledge_ttl, header_ttl)
+            except Exception as e:
+                data['status'] = 'failed'
+                data['error'] = 'Error while inserting data: '+str(e)
 
-        data["missing_headers"] = missing_headers
-        data["new_headers"] = new_headers
-        data["present_headers"] = present_headers
-        data["attribute_code"] = attribute_code
-        data["relation_code"] = relation_code
-        data["domain_code"] = domain_code
-
+                return data
 
         return data
 
     @view_config(route_name='clean_ttl_directory', request_method='POST')
     def clean_ttl_directory(self):
-        """ Convert tabulated files to turtle according to the type of the columns set by the user """
+        """
+        Delete temporary ttl files created while loading data in the triplestore
+        """
+        # FIXME looks dangerous... I'd feel better if it was done at the end of load_data_into_graph (I think it is not asynchronous?)
+
         data = {}
 
         if "files_to_delete" in self.request.json_body:

@@ -213,7 +213,8 @@
                         <pre class='preview_field'>
                         </pre>
                         <br>
-                        <p class="message" style="display: none"></p>
+                        <p class="message warning" style="display: none"></p><br />
+                        <p class="insert_status warning" style="display: none"></p><br />
                         <input type="button" class="preview_button" value="Preview RDF" />
                         <input type="button" class="load_data" value="Insert in database" />
                     {{/if}}

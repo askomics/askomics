@@ -179,48 +179,43 @@ function checkExistingData(file_elem) {
  */
 function loadSourceFile(file_elem) {
 
-    var idValidName = formatValidIdNameFile(file_name);
-    // Conversion to turtle
-    if (typeof limit === 'undefined') { limit = true; }
-    var turtle_template = "";
-    for (var line of $("#content_integration").data().turtle_template) {
-        turtle_template += line.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    }
+    var file_name = file_elem.find('.file_name').text();
 
-    var rawLength = ($("#colType_" + idValidName).html().match(/<td>/g) || []).length;
-    var col_types = {};
+    // Get column types
+    var col_types = file_elem.find('.column_type').map(function() {
+        return $(this).val();
+    }).get();
 
-    for (var i = 0; i < rawLength; i++) {
-        if ($('#header_' + idValidName + '_' + i).prop('checked')) {
-            col_types[i] = ($('#type_' + idValidName + '_' + i).find(":selected").html());
+    // Find which column is disabled
+    var disabled_columns = [];
+    file_elem.find('.toggle_column').each(function( index ) {
+        if (!$(this).is(':checked')) {
+            disabled_columns.push(index + 1); // +1 to take into account the first non-disablable column
         }
-    }
+    });
 
-    if (! limit)
-      $('#waitModal').modal('show');
+    $('#waitModal').modal('show');
 
     var service = new RestServiceJs("load_data_into_graph");
     var model = { 'file_name': file_name,
                   'col_types': col_types,
-                  'limit': limit };
+                  'disabled_columns': disabled_columns  };
 
-    service.post(model, function(src) {
-        $('#ttl_' + idValidName).html(turtle_template + src.attribute_code + src.relation_code + src.domain_code);
-        for (var header of src.present_headers) {
-            $('#' + idValidName + "_" + header).attr("bgcolor", "green");
+    service.post(model, function(data) {
+        $('#waitModal').modal('hide');
+
+        if (data.status != "ok") {
+            file_elem.find(".insert_status").first().html(data.error + "<br>You can view the ttl file here: <a href=\""+data.url+"\">"+data.url+"</a>");
+            file_elem.find(".insert_status").first().show();
         }
-        for (var n_header of src.new_headers) {
-            $('#' + idValidName + "_" + n_header).attr("bgcolor", "blue");
+        else {
+            file_elem.find(".insert_status").first().html("");
+            file_elem.find(".insert_status").first().hide();
         }
 
-        if (! limit) {
-          $('#waitModal').modal('hide');
-
-          var serviceClean = new RestServiceJs("clean_ttl_directory");
-          var modelClean = { 'files_to_delete' : src.temp_ttl_file};
-          serviceClean.post(modelClean, function(src) {
-              console.log("clean ttl directory...");
-            });
-        }
+        // Check what is in the db now
+        $('.template-source_file').each(function( index ) {
+            checkExistingData($(this));
+        });
     });
 }

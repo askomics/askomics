@@ -381,6 +381,8 @@ class SourceFile(ParamManager, HaveCachedProperties):
                 self.log.warning('Expected relation "%s" but did not find corresponding source file: %s.', rel, repr(headers))
                 missing_headers.append(rel)
 
+        headers_status.append('present') # There are some existing relations, it means the entity is present
+
         for header in self.headers[1:]:
             if header not in self.existing_relations:
                 self.log.debug('New class detected "%s".', header)
