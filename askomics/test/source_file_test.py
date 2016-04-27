@@ -3,6 +3,9 @@ import unittest
 import json
 import tempfile, shutil
 
+from pyramid import testing
+from pyramid.paster import get_appsettings
+
 from askomics.libaskomics.source_file.SourceFile import SourceFile
 
 SIMPLE_SOURCE_FILE = os.path.join( os.path.dirname( __file__ ), "..", "test-data", "sourcefile.tsv.simple" )
@@ -11,7 +14,11 @@ class SourceFileTests(unittest.TestCase):
 
     def setUp( self ):
         self.temp_directory = tempfile.mkdtemp()
-        self.srcfile = SourceFile(SIMPLE_SOURCE_FILE, 10)
+        self.settings = get_appsettings('development.ini', name='main')
+
+        request = testing.DummyRequest()
+
+        self.srcfile = SourceFile(self.settings, request.session, SIMPLE_SOURCE_FILE, 10)
 
     def tearDown( self ):
         shutil.rmtree( self.temp_directory )

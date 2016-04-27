@@ -32,7 +32,7 @@ class SourceFileConvertor(ParamManager):
 
         files = []
         for p in paths:
-            files.append(SourceFile(p, int(self.settings["askomics.overview_lines_limit"])))
+            files.append(SourceFile(self.settings, self.session, p, int(self.settings["askomics.overview_lines_limit"])))
 
         return files
 

@@ -8,7 +8,9 @@ from collections import defaultdict
 from itertools import count
 import os.path
 
-
+from askomics.libaskomics.ParamManager import ParamManager
+from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
+from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
 from askomics.libaskomics.utils import cached_property, HaveCachedProperties, pformat_generic_object
 from askomics.libaskomics.integration.AbstractedEntity import AbstractedEntity
 from askomics.libaskomics.integration.AbstractedRelation import AbstractedRelation
@@ -16,12 +18,14 @@ from askomics.libaskomics.integration.AbstractedRelation import AbstractedRelati
 class SourceFileSyntaxError(SyntaxError):
     pass
 
-class SourceFile(HaveCachedProperties):
+class SourceFile(ParamManager, HaveCachedProperties):
     """
     Class representing a source file.
     """
 
-    def __init__(self, path, preview_limit):
+    def __init__(self, settings, session, path, preview_limit):
+
+        ParamManager.__init__(self, settings, session)
 
         self.path = path
 
@@ -330,45 +334,59 @@ class SourceFile(HaveCachedProperties):
 
         return ttl
 
-    def compare_to_database(self):
+    @cached_property
+    def existing_relations(self):
         """
-        Ask the database to compare the headers of a file to convert to the corresponding data in the database
+        Fetch from triplestore the existing relations if entities of the same name exist
 
-        :return: a tuple containing 2 Lists: missing headers, new headers, and present headers
+        :return: a List of relation names
+        :rtype: List
         """
-        curr_entity = self.headers[0]
+
+        existing_relations = []
 
         sqb = SparqlQueryBuilder(self.settings, self.session)
         ql = QueryLauncher(self.settings, self.session)
 
         sparql_template = self.get_template_sparql(self.ASKOMICS_get_class_info_from_abstraction_queryFile)
-        query = sqb.load_from_file(sparql_template, {"#nodeClass#": curr_entity}).query
+        query = sqb.load_from_file(sparql_template, {"#nodeClass#": self.headers[0]}).query
 
         results = ql.process_query(query)
 
-        if results == []:
-            # No results, everything is new
-            return [], self.headers, []
+        for rel in results:
+            existing_relations.append(rel["relation"].replace(self.get_param("askomics.prefix"), "").replace("has_", ""))
 
-        bdd_relations = []
-        new_headers = []
+        return existing_relations
+
+    def compare_to_database(self):
+        """
+        Ask the database to compare the headers of a file to convert to the corresponding data in the database
+
+        :return: a tuple containing 2 Lists: status of asked headers, and missing headers
+        """
+
+        headers_status = []
         missing_headers = []
-        present_headers = []
 
-        for result in results:
-            bdd_relation = result["relation"].replace(self.get_param("askomics.prefix"), "").replace("has_", "")
-            bdd_relations.append(bdd_relation)
-            if bdd_relation not in self.headers:
-                self.log.warning('Expected relation "%s" but did not find it source file: %s.', bdd_relation, repr(headers))
-                missing_headers.append(bdd_relation)
+        if self.existing_relations == []:
+            # No results, everything is new
+            for k, h in enumerate(self.headers):
+                headers_status.append('new')
 
-        for header in self.headers:
-            if header != curr_entity:
-                if header not in bdd_relations:
-                    self.log.debug('New class detected "%s".', header)
-                    new_headers.append(header)
-                elif header not in missing_headers:
-                    self.log.debug('Known class detected "%s".', header)
-                    present_headers.append(header)
+            return headers_status, missing_headers
 
-        return missing_headers, new_headers, present_headers
+
+        for rel in self.existing_relations:
+            if rel not in self.headers:
+                self.log.warning('Expected relation "%s" but did not find corresponding source file: %s.', rel, repr(headers))
+                missing_headers.append(rel)
+
+        for header in self.headers[1:]:
+            if header not in self.existing_relations:
+                self.log.debug('New class detected "%s".', header)
+                headers_status.append('new')
+            elif header not in missing_headers:
+                self.log.debug('Known class detected "%s".', header)
+                headers_status.append('present')
+
+        return headers_status, missing_headers

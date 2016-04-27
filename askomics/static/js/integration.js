@@ -9,6 +9,7 @@ $(function () {
         if (block.find('.preview_field').is(':visible')) {
             previewTtl(block);
         }
+        checkExistingData(block);
     });
 
     $("#content_integration").on('change', '.column_type', function(event) {
@@ -16,6 +17,7 @@ $(function () {
         if (block.find('.preview_field').is(':visible')) {
             previewTtl(block);
         }
+        checkExistingData(block);
     });
 
     $("#content_integration").on('click', '.preview_button', function(event) {
@@ -78,6 +80,9 @@ function displayTable(data) {
                 if ($.inArray( cols[j], values) >= 0) {
                     selectbox.val(cols[j]);
                 }
+
+                // Check what is in the db
+                checkExistingData($('div#content_integration div.template-source_file:eq(' + i + ')'));
             }
         }
     }
@@ -118,6 +123,54 @@ function previewTtl(file_elem) {
 
         file_elem.find(".preview_field").html(html);
         file_elem.find(".preview_field").show();
+    });
+}
+
+/**
+ * Compare the user data and what is already in the triple store
+ */
+function checkExistingData(file_elem) {
+
+    var file_name = file_elem.find('.file_name').text();
+
+    // Get column types
+    var col_types = file_elem.find('.column_type').map(function() {
+        return $(this).val();
+    }).get();
+
+    // Find which column is disabled
+    var disabled_columns = [];
+    file_elem.find('.toggle_column').each(function( index ) {
+        if (!$(this).is(':checked')) {
+            disabled_columns.push(index + 1); // +1 to take into account the first non-disablable column
+        }
+    });
+
+    var service = new RestServiceJs("check_existing_data");
+    var model = { 'file_name': file_name,
+                  'col_types': col_types,
+                  'disabled_columns': disabled_columns };
+
+    service.post(model, function(data) {
+        file_elem.find('.column_header').each(function( index ) {
+            if (data.headers_status[index] == 'present') {
+                $(this).find(".relation_present").first().show();
+                $(this).find(".relation_new").first().hide();
+            }
+            else {
+                $(this).find(".relation_present").first().hide();
+                $(this).find(".relation_new").first().show();
+            }
+        });
+
+        if (data.missing_headers.length > 0) {
+            file_elem.find(".message").first().html("The following columns are missing: " + data.missing_headers.join(', '));
+            file_elem.find(".message").first().show();
+        }
+        else {
+            file_elem.find(".message").first().html("");
+            file_elem.find(".message").first().hide();
+        }
     });
 }
 

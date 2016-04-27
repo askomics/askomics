@@ -160,7 +160,7 @@ class AskView(object):
     @view_config(route_name='check_existing_data', request_method='POST')
     def check_existing_data(self):
         """
-        Compare what the user data and what is already in the triple store
+        Compare the user data and what is already in the triple store
         """
 
         data = {}
@@ -168,16 +168,20 @@ class AskView(object):
         body = self.request.json_body
         file_name = body["file_name"]
         col_types = body["col_types"]
+        disabled_columns = body["disabled_columns"]
+
         sfc = SourceFileConvertor(self.settings, self.request.session)
 
         src_file = sfc.get_source_file(file_name)
         src_file.set_forced_column_types(col_types)
+        src_file.set_disabled_columns(disabled_columns)
 
-        missing_headers, new_headers, present_headers = src_file.compare_to_database()
+        headers_status, missing_headers = src_file.compare_to_database()
 
+        data["headers_status"] = headers_status
         data["missing_headers"] = missing_headers
-        data["new_headers"] = new_headers
-        data["present_headers"] = present_headers
+
+        return data
 
     @view_config(route_name='load_data_into_graph', request_method='POST')
     def load_data_into_graph(self):
