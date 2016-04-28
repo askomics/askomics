@@ -84,6 +84,7 @@ class QueryLauncher(ParamManager):
             fp.write(table)
         return "/static/results/"+os.path.basename(fp.name)
 
+    # TODO see if we can make a rollback in case of malformed data
     def load_data(self, url):
         """
         Load a ttl file accessible from http into the triple store using LOAD method
@@ -96,10 +97,11 @@ class QueryLauncher(ParamManager):
         query_string = "LOAD <"+url+"> INTO GRAPH"+ " <" + self.get_param("askomics.graph")+ ">"
         res = self.execute_query(query_string)
 
-        self.log.debug(res.info()) # FIXME what do we get (status?)
+        self.log.debug(res.info())
 
-        return res # FIXME should return something (status)
+        return res
 
+    # TODO see if we can make a rollback in case of malformed data
     def insert_data(self, ttl_string, ttl_header=""):
         """
         Load a ttl string into the triple store using INSERT DATA method
@@ -109,7 +111,7 @@ class QueryLauncher(ParamManager):
         :return: The status
         """
 
-        self.log.debug("Loading into triple store (INSERT DATA method) the content: "+ttl_string[:100]+"[...]")
+        self.log.debug("Loading into triple store (INSERT DATA method) the content: "+ttl_string[:500]+"[...]")
 
         query_string = ttl_header
         query_string += "\n"
@@ -122,6 +124,6 @@ class QueryLauncher(ParamManager):
 
         res = self.execute_query(query_string)
 
-        self.log.debug(res.info()) # FIXME what do we get (status?)
+        self.log.debug(res.info())
 
-        return res # FIXME should return something (status)
+        return res

@@ -205,12 +205,19 @@ function loadSourceFile(file_elem) {
         $('#waitModal').modal('hide');
 
         if (data.status != "ok") {
-            file_elem.find(".insert_status").first().html(data.error + "<br>You can view the ttl file here: <a href=\""+data.url+"\">"+data.url+"</a>");
+            file_elem.find(".insert_status").first().html(data.error);
+            if ('url' in data) {
+                file_elem.find(".insert_status").first().append("<br>You can view the ttl file here: <a href=\""+data.url+"\">"+data.url+"</a>");
+            }
+            file_elem.find(".insert_status").first().addClass('error');
+            file_elem.find(".insert_status").first().removeClass('success');
             file_elem.find(".insert_status").first().show();
         }
         else {
-            file_elem.find(".insert_status").first().html("");
-            file_elem.find(".insert_status").first().hide();
+            file_elem.find(".insert_status").first().html("Inserted " + data.total_triple_count + " lines");
+            file_elem.find(".insert_status").first().addClass('success');
+            file_elem.find(".insert_status").first().removeClass('error');
+            file_elem.find(".insert_status").first().show();
         }
 
         // Check what is in the db now

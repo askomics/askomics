@@ -146,7 +146,7 @@ class AskView(object):
         src_file.set_forced_column_types(col_types)
         src_file.set_disabled_columns(disabled_columns)
 
-        content_ttl = src_file.get_preview_turtle()
+        content_ttl = '\n'.join(src_file.get_turtle(preview_only=True))
         abstraction_ttl = src_file.get_abstraction()
         domain_knowledge_ttl = src_file.get_domain_knowledge()
 
@@ -183,6 +183,39 @@ class AskView(object):
 
         return data
 
+    def load_data_from_file(self, fp):
+
+        data = {}
+
+        fp.flush() # This is required as otherwise, data might not be really wrtten to the file before being sent to triplestore
+
+        ql = QueryLauncher(self.settings, self.request.session)
+
+        urlbase = re.search(r'(http:\/\/.*)\/.*', self.request.current_route_url())
+        urlbase = urlbase.group(1)
+        url = urlbase+"/ttl/"+os.path.basename(fp.name)
+        try:
+            res = ql.load_data(url)
+        except Exception as e:
+            data['status'] = 'failed'
+            data['error'] = 'Error while loading data: '+str(e)
+            if self.settings["askomics.debug"]:
+                # There is an error, keep the temp file to investigate
+                data['url'] = url
+            else:
+                os.remove(fp.name) # Everything ok, remove temp file
+
+            # There is an error, keep the temp file to investigate
+            # FIXME this should be deactivated in prod mode
+
+            return data
+
+        if not self.settings["askomics.debug"]:
+            os.remove(fp.name) # Everything ok, remove temp file
+
+        data['status'] = 'ok'
+        return data
+
     @view_config(route_name='load_data_into_graph', request_method='POST')
     def load_data_into_graph(self):
         """
@@ -208,45 +241,122 @@ class AskView(object):
 
         ql = QueryLauncher(self.settings, self.request.session)
 
+        method = 'load' # FIXME how do we decide? We don't know the size of what we want to insert as we use a generator
+
         # use insert data instead of load sparql procedure when the dataset is small
-        if len(content_ttl) > 200000: # FIXME make this a setting?
+        total_triple_count = 0
+        chunk_count = 1
+        if method == 'load':
 
-            with tempfile.NamedTemporaryFile(dir="askomics/ttl/", suffix=".ttl", mode="w", delete=False) as fp:
-                # The temp file is deleted automatically
-                # It must be accessed by http => in askomics/ttl/ dir
+            fp = None
 
-                fp.write(header_ttl + '\n')
-                fp.write(content_ttl + '\n') # TODO make chunks if too long! (see generator)
-                fp.write(abstraction_ttl + '\n')
-                fp.write(domain_knowledge_ttl + '\n')
+            triple_count = 0
+            for triple in content_ttl:
+                if not fp:
+                    # Temp file must be accessed by http so we place it in askomics/ttl/ dir
+                    fp = tempfile.NamedTemporaryFile(dir="askomics/ttl/", suffix=".ttl", mode="w", delete=False)
+                    fp.write(header_ttl + '\n')
 
-                urlbase = re.search(r'(http:\/\/.*)\/.*', self.request.current_route_url())
-                url = urlbase.group(1)+"/ttl/"+os.path.basename(fp.name)
+                fp.write(triple + '\n')
+
+                triple_count += 1
+
+                if triple_count > int(self.settings['askomics.max_content_size_to_update_database']):
+                    # We have reached the maximum chunk size, load it and then we will start a new chunk
+                    self.log.debug("Loading ttl chunk %s file %s" % (chunk_count, fp.name))
+                    fp.close()
+                    data = self.load_data_from_file(fp)
+                    if data['status'] == 'failed':
+                        return data
+
+                    fp = None
+                    total_triple_count += triple_count
+                    triple_count = 0
+                    chunk_count += 1
+
+            # Load the last chunk
+            if triple_count > 0:
+                self.log.debug("Loading ttl chunk %s (last) file %s" % (chunk_count, fp.name))
+                fp.close()
+                data = self.load_data_from_file(fp)
+                if data['status'] == 'failed':
+                    return data
+
+            total_triple_count += triple_count
+
+            # Data is inserted, now insert the abstraction
+            os.remove(fp.name) # Everything ok, remove previous temp file
+            fp = tempfile.NamedTemporaryFile(dir="askomics/ttl/", suffix=".ttl", mode="w", delete=False)
+            fp.write(header_ttl + '\n')
+            fp.write(abstraction_ttl + '\n')
+            fp.write(domain_knowledge_ttl + '\n')
+
+            self.log.debug("Loading ttl abstraction file %s" % (fp.name))
+            fp.close()
+            data = self.load_data_from_file(fp)
+            if data['status'] == 'failed':
+                return data
+            data['total_triple_count'] = total_triple_count
+
+        else:
+
+            sqb = SparqlQueryBuilder(self.settings, self.request.session)
+            header_ttl = sqb.header_sparql_config()
+
+            triple_count = 0
+            chunk = ""
+            for triple in content_ttl:
+
+                chunk += triple + '\n'
+
+                triple_count += 1
+
+                if triple_count > int(self.settings['askomics.max_content_size_to_update_database']) / 10: # FIXME the limit is much lower than for load
+                    # We have reached the maximum chunk size, load it and then we will start a new chunk
+                    self.log.debug("Inserting ttl chunk %s" % (chunk_count))
+                    try:
+                        ql.insert_data(chunk, header_ttl)
+                    except Exception as e:
+                        data['status'] = 'failed'
+                        data['error'] = 'Error while inserting data: '+str(e)
+
+                        return data
+
+                    chunk = ""
+                    total_triple_count += triple_count
+                    triple_count = 0
+                    chunk_count += 1
+
+            # Load the last chunk
+            if triple_count > 0:
+                self.log.debug("Inserting ttl chunk %s (last)" % (chunk_count))
+
                 try:
-                    res = ql.load_data(url)
+                    ql.insert_data(chunk, header_ttl)
                 except Exception as e:
                     data['status'] = 'failed'
-                    data['error'] = 'Error while loading data: '+str(e)
-                    data['url'] = url
-
-                    # There is an error, keep the temp file to investigate
-                    # FIXME this should be deactivated in prod mode
+                    data['error'] = 'Error while inserting data: '+str(e)
 
                     return data
 
-                os.remove(fp.name) # Everything ok, remove temp file
-                data['status'] = 'ok' # FIXME send useful info
+            total_triple_count += triple_count
 
-        else:
+            # Data is inserted, now insert the abstraction
+
+            chunk += abstraction_ttl + '\n'
+            chunk += domain_knowledge_ttl + '\n'
+
+            self.log.debug("Inserting ttl abstraction")
             try:
-                ql.insert_data(content_ttl, header_ttl) # TODO make chunks if too long! (see generator)
-                ql.insert_data(abstraction_ttl, header_ttl)
-                ql.insert_data(domain_knowledge_ttl, header_ttl)
+                ql.insert_data(chunk, header_ttl)
             except Exception as e:
                 data['status'] = 'failed'
                 data['error'] = 'Error while inserting data: '+str(e)
 
                 return data
+
+            data['status'] = 'ok'
+            data['total_triple_count'] = total_triple_count
 
         return data
 

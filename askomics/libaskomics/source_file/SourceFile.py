@@ -55,6 +55,9 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         self.reset_cache()
 
+        # FIXME this is a temp fix as cached_property and yield stuff are not friends
+        self.category_values = defaultdict(set) # key=name of a column of 'category' type -> list of found values
+
     @cached_property
     def dialect(self):
         """
@@ -263,22 +266,8 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         return category_values
 
-    def get_preview_turtle(self):
-        """
-        Get a preview of turtle representation of data in the source file.
-
-        This is a shortcut to get_turtle(preview_only=True)
-        :return: ttl preview
-        """
-        return self.get_turtle(True)
-
     def get_turtle(self, preview_only=False):
-        # TODO make this a generator to avoid loading all data in memory, and allow writing in streaming mode
-        #      hum, not sure if it's not better to first parse the whole file before touching the db in case the file is malformatted
-        #      see if we can rollback in case of error
         # TODO use rdflib or other abstraction layer to create rdf
-
-        self.category_values = defaultdict(set) # key=name of a column of 'category' type -> list of found values
 
         with open(self.path, 'r') as tabfile:
             # Load the file with reader
@@ -288,10 +277,11 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
             next(tabreader) # Skip header
 
-            ttl = ""
-
             # Loop on lines
             for row in tabreader:
+
+                ttl = ""
+
                 # skip commented lines (# char at the begining)
                 if row[0].startswith('#'):
                     continue
@@ -325,14 +315,14 @@ class SourceFile(ParamManager, HaveCachedProperties):
                             ttl += indent + " :has_" + header + " " + self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " ;\n"
                         # FIXME we will need to store undefined values one day if we want to be able to query on this
 
-                ttl = ttl[:-2] + ".\n"
+                ttl = ttl[:-2] + "."
+
+                yield ttl
 
                 # Stop after x lines
                 count += 1
                 if preview_only and count > self.preview_limit:
-                    break
-
-        return ttl
+                    return
 
     @cached_property
     def existing_relations(self):
