@@ -204,11 +204,12 @@ class SourceFile(ParamManager, HaveCachedProperties):
             if key > 0 and key not in self.disabled_columns:
                 ttl += AbstractedRelation(key_type, self.headers[key], ref_entity, self.type_dict[key_type]).get_turtle()
 
+            if key > 0 and key_type != 'entity':
+                ttl += ":" + self.headers[key] + ' displaySetting:attribute "true"^^xsd:boolean .\n'
+
         # Store the startpoint status
         if self.forced_column_types[0] == 'entity_start':
             ttl += ":" + ref_entity + ' displaySetting:startPoint "true"^^xsd:boolean .\n'
-        else:
-            ttl += ":" + ref_entity + ' displaySetting:attribute "true"^^xsd:boolean .\n'
 
         return ttl
 

@@ -187,7 +187,8 @@ class AskView(object):
 
         data = {}
 
-        fp.flush() # This is required as otherwise, data might not be really wrtten to the file before being sent to triplestore
+        if not fp.closed:
+            fp.flush() # This is required as otherwise, data might not be really written to the file before being sent to triplestore
 
         ql = QueryLauncher(self.settings, self.request.session)
 
@@ -206,7 +207,6 @@ class AskView(object):
                 os.remove(fp.name) # Everything ok, remove temp file
 
             # There is an error, keep the temp file to investigate
-            # FIXME this should be deactivated in prod mode
 
             return data
 
@@ -360,26 +360,11 @@ class AskView(object):
 
         return data
 
-    @view_config(route_name='clean_ttl_directory', request_method='POST')
-    def clean_ttl_directory(self):
-        """
-        Delete temporary ttl files created while loading data in the triplestore
-        """
-        # FIXME looks dangerous... I'd feel better if it was done at the end of load_data_into_graph (I think it is not asynchronous?)
-
-        data = {}
-
-        if "files_to_delete" in self.request.json_body:
-            for ifile in self.request.json_body["files_to_delete"]:
-                if os.path.exists(ifile):
-                    os.remove(ifile)
-
-        return data
-
     @view_config(route_name='expand', request_method='POST')
     def expansion(self):
-        """ Get the neighbours of a node """
-        self.log.debug("== Expand ==")
+        """
+        Get the neighbours of a node
+        """
 
         data = {}
         tse = TripleStoreExplorer(self.settings, self.request.session)

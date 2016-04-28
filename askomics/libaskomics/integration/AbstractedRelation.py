@@ -11,8 +11,8 @@ class AbstractedRelation(object):
         - DatatypeProperty binds an instance of a class with a string
           or a numeric value.
     In Askomics, an ObjectProperty can be represented as:
-        - a node on the display graph (relation_type = Entity).
-        - an attribute of a node (relation_type = Category).
+        - a node on the display graph (relation_type = entity).
+        - an attribute of a node (relation_type = category).
     All DatatypeProperty are represented as nodes attributes.
     Each relation has an uri composed by the database prefix (:), "has_"
     and an identifier that is the header of the tabulated file being
@@ -26,7 +26,7 @@ class AbstractedRelation(object):
     def __init__(self, relation_type, identifier, rdfs_domain, rdfs_range):
         self.uri = ":has_" + identifier
         self.label = "has_" + identifier
-        if relation_type == "Entity" or relation_type == "Category":
+        if relation_type == "entity" or relation_type == "category":
             self.relation_type = "owl:ObjectProperty"
             self.rdfs_range = ":" + identifier
         else:
@@ -43,7 +43,7 @@ class AbstractedRelation(object):
         self.label = "has_" + identifier
 
     def set_relation_type(self, relation_type):
-        if relation_type == "Entity" or relation_type == "Category":
+        if relation_type == "entity" or relation_type == "category":
             self.relation_type = "owl:ObjectProperty"
         else:
             self.relation_type = "owl:DatatypeProperty"
