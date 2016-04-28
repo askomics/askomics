@@ -1,3 +1,3 @@
-SELECT DISTINCT ?#setting#
-FROM #graph#
-WHERE { <#nodeClass#> displaySetting:#setting# ?#setting# . }
+SELECT DISTINCT ?$setting
+FROM $graph
+WHERE { <$nodeClass> displaySetting:$setting ?$setting . }

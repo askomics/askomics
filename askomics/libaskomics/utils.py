@@ -1,11 +1,28 @@
-"""Some python magic to provide utility Bases, decorators, utility functions, etc. """
+"""Some reusable utilities : Bases, decorators, utility functions, etc.
+Also a place to isolate "python magic" tricks.
+"""
 
 import sys
 from pprint import pformat
+from itertools import chain, repeat, islice
 
-__all__ = ['pformat_generic_object',
-           'cached_property', 'HaveCachedProperties']
+# Names exported :
+__all__ = [
+    # Utility functions
+        'pformat_generic_object',
+    # Itertools additions :
+        'intersperse_chain',
+        'prefix_lines',
+    # Decorators
+        'cached_property',
+    # Bases and mixins
+        'HaveCachedProperties',
+    ]
 
+
+#
+# Utility functions
+#
 
 def pformat_generic_object(obj):
     "Pretty print a object and its attributes to string"
@@ -17,8 +34,34 @@ def pformat_generic_object(obj):
         name = getattr(obj, '__name__', type(obj).__name__)
     return "{0}({1})".format(name, pformat(pubattrs))
 
+#
+# Itertools additions :
+#
+def intersperse_chain(delimiter, iterators):
+    """ yield delimiter between the elements of each iterators.
+    >>> list(intersperse_chain('sep', [['str1', 'str2'], ['str3', 'str4'], ['str5']]))
+    ['str1', 'str2', 'sep', 'str3', 'str4', 'sep', 'str5']
+    """
+    iterators = iter(iterators)
+    yield from next(iterators)
+    for it in iterators:
+        yield delimiter
+        yield from it
+
+def prefix_lines(prefix, strings):
+    r"""
+    >>> list(prefix_lines('\t', ['line1', 'line2']))
+    ['\tline1', '\tline2']
+    """
+    return (prefix + s for s in strings)
+
+
+#
+# Decorators
+#
+
 class cached_property(object):
-    """Like @property on a member function, but cache the calculation in
+    """Like @property on a member function, but also cache the calculation in
     self.__dict__[function name].
     The function is called only once since the cache stored as an instance
     attribute override the property residing in the class attributes. Following accesses
@@ -41,9 +84,12 @@ class cached_property(object):
         value = obj.__dict__[self.func.__name__] = self.func(obj)
         return value
 
+#
+# Bases and mixins
+#
 
 class HaveCachedProperties(object):
-    """Provide cache management for classes using cached_property."""
+    """Provide cache management for classes with @cached_property attributes."""
     @classmethod
     def get_cached_properties(cls):
         # cached_property instances are in the class dict with other class attributes
