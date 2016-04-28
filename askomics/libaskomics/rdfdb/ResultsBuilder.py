@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
-
+from pprint import pformat
 import logging
 from askomics.libaskomics.ParamManager import ParamManager
 
@@ -62,9 +62,9 @@ class ResultsBuilder(ParamManager):
             del entity_attribute_list[elt]
             del entity_name_list[elt]
 
-        self.log.debug("\nentity_name_list\n")
-        self.log.debug(entity_name_list)
-        self.log.debug("\nentity_attribute_list\n")
-        self.log.debug(entity_attribute_list)
+        if self.log.isEnabledFor(logging.DEBUG):
+            self.log.debug("organize_attribute_and_entity() output:\n%s", pformat(dict(
+                entity_name_list=entity_name_list,
+                entity_attribute_list=entity_attribute_list)))
 
         return entity_name_list, entity_attribute_list

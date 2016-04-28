@@ -126,7 +126,7 @@ class SparqlQueryBuilder(ParamManager):
 
     def load_from_query_json(self, json):
         """  Get a sparql query from a json """
-        self.log.debug('load_from_query_json, json input: \n%s', pformat(json))
+        self.log.debug('---------- JSON QUERY ------------\n%s', pformat(json))
 
         # Rewrite the query deleting virtual relation
         # FIXME: Better way to do this ?
@@ -150,7 +150,6 @@ class SparqlQueryBuilder(ParamManager):
         for prefix, uri_base in self.ASKOMICS_prefix.items():
             query = query.replace(uri_base, prefix + ':')
 
-        self.log.debug('load_from_query_json, query output: \n%s', query)
         prefix = self.header_sparql_config()
         return SparqlQuery(prefix + query)
 
