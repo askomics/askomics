@@ -7,6 +7,7 @@ import csv
 from collections import defaultdict
 from itertools import count
 import os.path
+import tempfile
 
 from askomics.libaskomics.ParamManager import ParamManager
 from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
@@ -54,9 +55,6 @@ class SourceFile(ParamManager, HaveCachedProperties):
         self.log = logging.getLogger(__name__)
 
         self.reset_cache()
-
-        # FIXME this is a temp fix as cached_property and yield stuff are not friends
-        self.category_values = defaultdict(set) # key=name of a column of 'category' type -> list of found values
 
     @cached_property
     def dialect(self):
@@ -239,7 +237,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
         """
         A (lazily cached) dictionary mapping from column name (header) to the set of unique values.
         """
-        self.log.warning("category_values are computed independently, get_turtle should be used to generate both at once")
+        self.log.warning("category_values will be computed independently, get_turtle should be used to generate both at once (better performances)")
         category_values = defaultdict(set) # key=name of a column of 'category' type -> list of found values
 
         with open(self.path, 'r') as tabfile:
@@ -269,6 +267,8 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
     def get_turtle(self, preview_only=False):
         # TODO use rdflib or other abstraction layer to create rdf
+
+        self.category_values = defaultdict(set) # key=name of a column of 'category' type -> list of found values
 
         with open(self.path, 'r') as tabfile:
             # Load the file with reader
@@ -301,8 +301,8 @@ class SourceFile(ParamManager, HaveCachedProperties):
                 ttl += indent + " rdfs:label \"" + entity_label + "\" ;\n"
 
                 # Add data from other columns
-                for i, header in enumerate(self.headers[1:]): # Skip the first column
-                    if i not in self.disabled_columns:
+                for i, header in enumerate(self.headers): # Skip the first column
+                    if i > 0 and i not in self.disabled_columns:
                         current_type = self.forced_column_types[i]
                         #if current_type == 'entity':
                             #relations.setdefault(header, {}).setdefault(entity_label, []).append(row[i]) # FIXME only useful if we want to check for duplicates
@@ -383,3 +383,183 @@ class SourceFile(ParamManager, HaveCachedProperties):
                 headers_status.append('present')
 
         return headers_status, missing_headers
+
+    def persist(self, urlbase):
+        """
+        Store the current source file in the triple store
+
+        :param urlbase: the base URL of current askomics instance. It is used to let triple stores access some askomics temporary ttl files using http.
+        :return: a dictionnary with information on the success or failure of the operation
+        :rtype: Dict
+        """
+
+        header_ttl = self.get_turtle_template()
+        content_ttl = self.get_turtle()
+
+        ql = QueryLauncher(self.settings, self.session)
+
+        method = 'load' # FIXME how do we decide? We don't know the size of what we want to insert as we use a generator
+
+        # use insert data instead of load sparql procedure when the dataset is small
+        total_triple_count = 0
+        chunk_count = 1
+        if method == 'load':
+
+            fp = None
+
+            triple_count = 0
+            for triple in content_ttl:
+                if not fp:
+                    # Temp file must be accessed by http so we place it in askomics/ttl/ dir
+                    fp = tempfile.NamedTemporaryFile(dir="askomics/ttl/", suffix=".ttl", mode="w", delete=False)
+                    fp.write(header_ttl + '\n')
+
+                fp.write(triple + '\n')
+
+                triple_count += 1
+
+                if triple_count > int(self.settings['askomics.max_content_size_to_update_database']):
+                    # We have reached the maximum chunk size, load it and then we will start a new chunk
+                    self.log.debug("Loading ttl chunk %s file %s" % (chunk_count, fp.name))
+                    fp.close()
+                    data = self.load_data_from_file(fp, urlbase)
+                    if data['status'] == 'failed':
+                        return data
+
+                    fp = None
+                    total_triple_count += triple_count
+                    triple_count = 0
+                    chunk_count += 1
+
+            # Load the last chunk
+            if triple_count > 0:
+                self.log.debug("Loading ttl chunk %s (last) file %s" % (chunk_count, fp.name))
+                fp.close()
+                data = self.load_data_from_file(fp, urlbase)
+                if data['status'] == 'failed':
+                    return data
+
+            total_triple_count += triple_count
+
+            # Data is inserted, now insert the abstraction
+
+            # We get the abstraction now as we need first to parse the whole file to have category_values
+            abstraction_ttl = self.get_abstraction()
+            domain_knowledge_ttl = self.get_domain_knowledge()
+
+            os.remove(fp.name) # Everything ok, remove previous temp file
+            fp = tempfile.NamedTemporaryFile(dir="askomics/ttl/", suffix=".ttl", mode="w", delete=False)
+            fp.write(header_ttl + '\n')
+            fp.write(abstraction_ttl + '\n')
+            fp.write(domain_knowledge_ttl + '\n')
+
+            self.log.debug("Loading ttl abstraction file %s" % (fp.name))
+            fp.close()
+            data = self.load_data_from_file(fp, urlbase)
+            if data['status'] == 'failed':
+                return data
+            data['total_triple_count'] = total_triple_count
+
+        else:
+
+            sqb = SparqlQueryBuilder(self.settings, self.session)
+            header_ttl = sqb.header_sparql_config()
+
+            triple_count = 0
+            chunk = ""
+            for triple in content_ttl:
+
+                chunk += triple + '\n'
+
+                triple_count += 1
+
+                if triple_count > int(self.settings['askomics.max_content_size_to_update_database']) / 10: # FIXME the limit is much lower than for load
+                    # We have reached the maximum chunk size, load it and then we will start a new chunk
+                    self.log.debug("Inserting ttl chunk %s" % (chunk_count))
+                    try:
+                        ql.insert_data(chunk, header_ttl)
+                    except Exception as e:
+                        data['status'] = 'failed'
+                        data['error'] = 'Error while inserting data: '+str(e)
+
+                        return data
+
+                    chunk = ""
+                    total_triple_count += triple_count
+                    triple_count = 0
+                    chunk_count += 1
+
+            # Load the last chunk
+            if triple_count > 0:
+                self.log.debug("Inserting ttl chunk %s (last)" % (chunk_count))
+
+                try:
+                    ql.insert_data(chunk, header_ttl)
+                except Exception as e:
+                    data['status'] = 'failed'
+                    data['error'] = 'Error while inserting data: '+str(e)
+
+                    return data
+
+            total_triple_count += triple_count
+
+            # Data is inserted, now insert the abstraction
+
+            # We get the abstraction now as we need first to parse the whole file to have category_values
+            abstraction_ttl = self.get_abstraction()
+            domain_knowledge_ttl = self.get_domain_knowledge()
+
+            chunk += abstraction_ttl + '\n'
+            chunk += domain_knowledge_ttl + '\n'
+
+            self.log.debug("Inserting ttl abstraction")
+            try:
+                ql.insert_data(chunk, header_ttl)
+            except Exception as e:
+                data['status'] = 'failed'
+                data['error'] = 'Error while inserting data: '+str(e)
+
+                return data
+
+            data['status'] = 'ok'
+            data['total_triple_count'] = total_triple_count
+
+        return data
+
+    def load_data_from_file(self, fp, urlbase):
+        """
+        Load a locally created ttl file in the triplestore using http
+
+        :param fp: a file handle for the file to load
+        :param urlbase:the base URL of current askomics instance. It is used to let triple stores access some askomics temporary ttl files using http.
+        :return: a dictionnary with information on the success or failure of the operation
+        """
+
+        data = {}
+
+        if not fp.closed:
+            fp.flush() # This is required as otherwise, data might not be really written to the file before being sent to triplestore
+
+        ql = QueryLauncher(self.settings, self.session)
+
+        url = urlbase+"/ttl/"+os.path.basename(fp.name)
+        try:
+            res = ql.load_data(url)
+        except Exception as e:
+            data['status'] = 'failed'
+            data['error'] = 'Error while loading data: '+str(e)
+            if self.settings["askomics.debug"]:
+                # There is an error, keep the temp file to investigate
+                data['url'] = url
+            else:
+                os.remove(fp.name) # Everything ok, remove temp file
+
+            # There is an error, keep the temp file to investigate
+
+            return data
+
+        if not self.settings["askomics.debug"]:
+            os.remove(fp.name) # Everything ok, remove temp file
+
+        data['status'] = 'ok'
+        return data
