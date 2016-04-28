@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 from pprint import pformat
+from collections import defaultdict
 import logging
 from askomics.libaskomics.ParamManager import ParamManager
 
@@ -15,49 +16,49 @@ class ResultsBuilder(ParamManager):
 
         self.log = logging.getLogger(__name__)
 
-    def build_csv_table(self, results):
+    def gen_csv_table(self, results, sep='\t'):
         """  """
-        results_table = ""
         sparql_variables = results[0].keys()
+        yield sep.join(sparql_variables)
+        yield from ( sep.join(result[var] for var in sparql_variables)
+                    for result in results)
 
-        sp = "\t"
-        results_table = sp.join(sparql_variables)
-        results_table += "\n"
-
-        for result in results:
-            for sv in sparql_variables:
-                results_table += result[sv] + '\t'
-            results_table = results_table[:-1] + '\n'
-
-        return results_table.replace(self.get_param("askomics.prefix"), '')
+    def build_csv_table(self, results, sep='\t'):
+        csv = '\n'.join(self.gen_csv_table(results, sep))
+        #FIXME: We really should exploit rdfs:label here. That mean it should be queried.
+        csv = csv.replace(self.get_param("askomics.prefix"), '')
+        return  csv
 
     def organize_attribute_and_entity(self, results, constraints): # FIXME results is unused
         """
         results : results from the query sparql
         constraints : information about attribute/entity variable used in the sparql query
         """
-        entity_attribute_list = {}
+
+        # Mapping: Entity variable -> Attribute variable -> Attribute name (predicate without has_)
+        entity_attribute_list = defaultdict(dict)
+        # Mapping Entity variable -> entity name
         entity_name_list = {}
         for c in constraints:
-            if c['type'] == 'node': # because category are node as entity
+            if c['type'] == 'node': # because categories are node as entities
+                entity_var = c['id']
                 entity_name = c['uri'].replace(self.get_param("askomics.prefix"), '')
-                entity_name_list[c['id']] = entity_name
-                entity_attribute_list[c['id']] = {}
-
-        for c in constraints:
-            if c['type'] == 'attribute':
-                attribute_name = c['uri'].replace(self.get_param("askomics.prefix"), '')
-                attribute_name = attribute_name.replace('has_', '')
-                entity_attribute_list[c['parent']][c['id']] = attribute_name
+                entity_name_list[entity_var] = entity_name
+                # Touch to create an empty dict if the variable is not the subject of an attribute
+                entity_attribute_list[entity_var]
+            elif c['type'] == 'attribute':
+                attribute_name = c['uri'] \
+                    .replace(self.get_param("askomics.prefix"), '') \
+                    .replace('has_', '')
+                entity_var = c['parent']
+                attr_var = c['id']
+                entity_attribute_list[entity_var][attr_var] = attribute_name
 
         #removing all empty node. means they are category...
-        remove_item = []
-
-        for elem in entity_attribute_list.values():
-            for elt_att in elem:
-                if elt_att in  entity_attribute_list:
-                    remove_item.append(elt_att)
-
+        remove_item = [ elt_att
+                        for elem in entity_attribute_list.values()
+                        for elt_att in elem
+                        if elt_att in entity_attribute_list]
         for elt in remove_item:
             del entity_attribute_list[elt]
             del entity_name_list[elt]
