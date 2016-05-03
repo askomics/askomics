@@ -20,6 +20,8 @@ AskOmics also uses the following bundled libraries:
 * [D3.js](http://d3js.org)
 * [jQuery](http://jquery.com)
 * [jQuery-File-Upload](https://github.com/blueimp/jQuery-File-Upload)
+* [Handlebars.js](http://handlebarsjs.com/)
+* [Google Material icons](https://design.google.com/icons/)
 
 #### Browser compatibility
 

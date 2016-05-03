@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-import tempfile
 import re
 
 from pyramid.view import view_config, view_defaults
@@ -17,6 +16,7 @@ from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
 from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
 from askomics.libaskomics.rdfdb.ResultsBuilder import ResultsBuilder
 from askomics.libaskomics.graph.Node import Node
+from askomics.libaskomics.source_file.SourceFile import SourceFile
 
 @view_defaults(renderer='json', route_name='start_point')
 class AskView(object):
@@ -101,135 +101,117 @@ class AskView(object):
 
         return data
 
-    @view_config(route_name='source_file_overview', request_method='GET')
-    def source_file_overview(self):
-        """ Get the first lines of the tabulated files to convert """
-        data = {}
+    @view_config(route_name='source_files_overview', request_method='GET')
+    def source_files_overview(self):
+        """
+        Get preview data for all the available files
+        """
         sfc = SourceFileConvertor(self.settings, self.request.session)
 
-        pm = ParamManager(self.settings, self.request.session)
+        source_files = sfc.get_source_files()
 
-        source_files_first_lines = sfc.get_first_lines(int(self.settings["askomics.overview_lines_limit"])) # FIXME handle default value/value validation
-        html_template = sfc.get_template(pm.ASKOMICS_html_template) # FIXME there must be a more elegant solution
-        #turtle_template = sfc.get_template(self.settings["askomics.turtle_template"]) # FIXME there must be a more elegant solution
+        data = {}
+        data['files'] = []
 
-        turtle_template = pm.turtle_template()
-        data["sourceFiles"] = {s.get_name(): s.to_dict() for s in source_files_first_lines}
-        data["html_template"] = html_template
-        data["turtle_template"] = turtle_template
+        for src_file in source_files:
+            infos = {}
+            infos['name'] = src_file.name
+            try:
+                infos['headers'] = src_file.headers
+                infos['preview_data'] = src_file.get_preview_data()
+                infos['column_types'] = src_file.guess_column_types(infos['preview_data'])
+            except Exception as e:
+                infos['error'] = 'Could not read input file, are you sure it is a valid tabular file?'
+
+            data['files'].append(infos)
+
+        return data
+
+    @view_config(route_name='preview_ttl', request_method='POST')
+    def preview_ttl(self):
+        """
+        Convert tabulated files to turtle according to the type of the columns set by the user
+        """
+        data = {}
+
+        body = self.request.json_body
+        file_name = body["file_name"]
+        col_types = body["col_types"]
+        disabled_columns = body["disabled_columns"]
+
+        sfc = SourceFileConvertor(self.settings, self.request.session)
+
+        src_file = sfc.get_source_file(file_name)
+        src_file.set_forced_column_types(col_types)
+        src_file.set_disabled_columns(disabled_columns)
+
+        content_ttl = '\n'.join(src_file.get_turtle(preview_only=True))
+        abstraction_ttl = src_file.get_abstraction()
+        domain_knowledge_ttl = src_file.get_domain_knowledge()
+
+        data["header"] = sfc.get_turtle_template()
+        data["content_ttl"] = content_ttl
+        data["abstraction_ttl"] = abstraction_ttl
+        data["domain_knowledge_ttl"] = domain_knowledge_ttl
+
+        return data
+
+    @view_config(route_name='check_existing_data', request_method='POST')
+    def check_existing_data(self):
+        """
+        Compare the user data and what is already in the triple store
+        """
+
+        data = {}
+
+        body = self.request.json_body
+        file_name = body["file_name"]
+        col_types = body["col_types"]
+        disabled_columns = body["disabled_columns"]
+
+        sfc = SourceFileConvertor(self.settings, self.request.session)
+
+        src_file = sfc.get_source_file(file_name)
+        src_file.set_forced_column_types(col_types)
+        src_file.set_disabled_columns(disabled_columns)
+
+        headers_status, missing_headers = src_file.compare_to_database()
+
+        data["headers_status"] = headers_status
+        data["missing_headers"] = missing_headers
 
         return data
 
     @view_config(route_name='load_data_into_graph', request_method='POST')
     def load_data_into_graph(self):
-        """ Convert tabulated files to turtle according to the type of the columns set by the user """
+        """
+        Load tabulated files to triple store according to the type of the columns set by the user
+        """
         data = {}
-        sfc = SourceFileConvertor(self.settings, self.request.session)
 
         body = self.request.json_body
         file_name = body["file_name"]
         col_types = body["col_types"]
-        limit = body["limit"]
+        disabled_columns = body["disabled_columns"]
 
-        start_position_list = []
-        attribute_list_output = []
-        request_output_has_header_domain = {}
-        request_output_domain = []
-        request_abstraction_output = []
+        sfc = SourceFileConvertor(self.settings, self.request.session)
 
-        missing_headers, new_headers, present_headers, attribute_code, relation_code, domain_code = sfc.get_turtle(file_name, col_types, limit, start_position_list, attribute_list_output, request_output_has_header_domain, request_output_domain, request_abstraction_output)
+        src_file = sfc.get_source_file(file_name)
+        src_file.set_forced_column_types(col_types)
+        src_file.set_disabled_columns(disabled_columns)
 
-        ql = QueryLauncher(self.settings, self.request.session)
+        urlbase = re.search(r'(http:\/\/.*)\/.*', self.request.current_route_url())
+        urlbase = urlbase.group(1)
 
-        if not limit:
-            # use insert data instead of load sparql procedure when a dataset is small.....
-            if len(attribute_list_output)+len(request_abstraction_output)+len(request_output_domain) > 200:
-                first = True
-                keep_going = True
-                data["temp_ttl_file"] = []
-                while keep_going:
-                    with tempfile.NamedTemporaryFile(dir="askomics/ttl/", suffix=".ttl", mode="w", delete=False) as fp:
-                        # Temp files are removed by clean_ttl_directory route
-                        l_empty = []
-                        ql.build_query_load(l_empty, fp, header=True)
-                        if first:
-                            for header_sparql_request in request_output_has_header_domain.values():
-                                if len(header_sparql_request) > 0:
-                                    self.log.info("header_sparql_request - Number of object:"+str(len(header_sparql_request)))
-                                    ql.build_query_load(header_sparql_request, fp)
-
-                            if len(request_abstraction_output) > 0:
-                                self.log.info("request_abstraction_output - Number of object:"+str(len(request_abstraction_output)))
-                                ql.build_query_load(request_abstraction_output, fp)
-
-                            if len(request_output_domain) > 0:
-                                self.log.info("request_output_domain - Number of object:"+str(len(request_output_domain)))
-                                ql.build_query_load(request_output_domain, fp)
-
-                            if len(start_position_list) > 0:
-                                self.log.info("start_position_list - Number of object:"+str(len(start_position_list)))
-                                ql.build_query_load(start_position_list, fp)
-
-                        first = False
-
-                        if len(attribute_list_output) > 0:
-                            subattribute_list_output = attribute_list_output[:min(60000, len(attribute_list_output))]
-                            del attribute_list_output[:min(60000, len(attribute_list_output))]
-                            if len(attribute_list_output) == 0:
-                                keep_going = False
-                            self.log.info("subattribute_list_output - Number of object:"+str(len(subattribute_list_output)))
-                            ql.build_query_load(subattribute_list_output, fp)
-                        else:
-                            keep_going = False
-
-                        urlbase = re.search(r'(http:\/\/.*)\/.*', self.request.current_route_url())
-                        ql.update_query_load(fp, urlbase.group(1))
-                        data["temp_ttl_file"].append(fp.name)
-            else:
-                self.log.info(" ===> insert update nb object:"+str(len(attribute_list_output)+len(request_abstraction_output)+len(request_output_domain)))
-                for header_sparql_request in request_output_has_header_domain.values():
-                    if len(header_sparql_request) > 0:
-                        ql.update_query_insert_data(header_sparql_request)
-                if len(request_abstraction_output) > 0:
-                    ql.update_query_insert_data(request_abstraction_output)
-                if len(request_output_domain) > 0:
-                    ql.update_query_insert_data(request_output_domain)
-                if len(start_position_list) > 0:
-                    ql.update_query_insert_data(start_position_list)
-                if len(attribute_list_output) > 0:
-                    ql.update_query_insert_data(attribute_list_output)
-
-
-        #f = open('askomics/ttl/Insert.ttl', 'r')
-        #urlbase = m = re.search('(http:\/\/.*)\/.*', self.request.current_route_url())
-        #ql.update_query_load(f,urlbase.group(1))
-
-        data["missing_headers"] = missing_headers
-        data["new_headers"] = new_headers
-        data["present_headers"] = present_headers
-        data["attribute_code"] = attribute_code
-        data["relation_code"] = relation_code
-        data["domain_code"] = domain_code
-
-
-        return data
-
-    @view_config(route_name='clean_ttl_directory', request_method='POST')
-    def clean_ttl_directory(self):
-        """ Convert tabulated files to turtle according to the type of the columns set by the user """
-        data = {}
-
-        if "files_to_delete" in self.request.json_body:
-            for ifile in self.request.json_body["files_to_delete"]:
-                if os.path.exists(ifile):
-                    os.remove(ifile)
+        data = src_file.persist(urlbase)
 
         return data
 
     @view_config(route_name='expand', request_method='POST')
     def expansion(self):
-        """ Get the neighbours of a node """
-        self.log.debug("== Expand ==")
+        """
+        Get the neighbours of a node
+        """
 
         data = {}
         tse = TripleStoreExplorer(self.settings, self.request.session)

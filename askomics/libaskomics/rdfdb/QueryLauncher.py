@@ -84,46 +84,46 @@ class QueryLauncher(ParamManager):
             fp.write(table)
         return "/static/results/"+os.path.basename(fp.name)
 
+    # TODO see if we can make a rollback in case of malformed data
+    def load_data(self, url):
+        """
+        Load a ttl file accessible from http into the triple store using LOAD method
 
-    def build_query_load(self, query_string_list, fpfile, header=False):
-        #with tempfile.NamedTemporaryFile(dir="askomics/ttl/", suffix=".ttl",mode="w",delete=False) as fp:
-        if header:
-            fpfile.write(self.header_ttl_config())
+        :param url: URL of the file to load
+        :return: The status
+        """
+        self.log.debug("Loading into triple store (LOAD method) the content of: "+url)
 
-        sub_query_string_list = ""
-        for i, elt in enumerate(query_string_list): # FIXME i is unused
-            sub_query_string_list += elt + "\n"
-        if len(sub_query_string_list) > 0:
-            fpfile.write(sub_query_string_list)
-        return
-
-
-    def update_query_load(self, fpfile, url):
-        self.log.debug("==================>"+url)
-        query_string = "LOAD <"+url+"/ttl/"+os.path.basename(fpfile.name)+"> INTO GRAPH"+ " <" + self.get_param("askomics.graph")+ ">"
-        self.log.debug(query_string)
+        query_string = "LOAD <"+url+"> INTO GRAPH"+ " <" + self.get_param("askomics.graph")+ ">"
         res = self.execute_query(query_string)
+
         self.log.debug(res.info())
-        return
 
-    def update_query_insert_data(self, query_string_list):
-        header_sparql = self.header_sparql_config()
-        max_list = int(self.get_param("askomics.max_content_size_to_update_database"))
-        #f = open('Insert.txt', 'a')
-        while query_string_list:
-            sub_query_string_list = query_string_list[:min(max_list, len(query_string_list))]
-            del query_string_list[:min(max_list, len(query_string_list))]
-            query_string = header_sparql
-            query_string += "\n"
-            query_string += "INSERT DATA {\n"
-            query_string += "GRAPH "+ "<" + self.get_param("askomics.graph")+ ">" +"\n"
-            query_string += "{\n"
-            for i, elt in enumerate(sub_query_string_list): # FIXME i is unused
-                query_string += elt + "\n"
-            query_string += "}\n"
-            query_string += "}\n"
-            self.log.debug(query_string[:2000])
-            res = self.execute_query(query_string)
-            self.log.debug(res.info())
+        return res
 
-        return
+    # TODO see if we can make a rollback in case of malformed data
+    def insert_data(self, ttl_string, ttl_header=""):
+        """
+        Load a ttl string into the triple store using INSERT DATA method
+
+        :param ttl_string: ttl content to load
+        :param ttl_header: the ttl header associated with ttl_string
+        :return: The status
+        """
+
+        self.log.debug("Loading into triple store (INSERT DATA method) the content: "+ttl_string[:500]+"[...]")
+
+        query_string = ttl_header
+        query_string += "\n"
+        query_string += "INSERT DATA {\n"
+        query_string += "GRAPH "+ "<" + self.get_param("askomics.graph")+ ">" +"\n"
+        query_string += "{\n"
+        query_string += ttl_string + "\n"
+        query_string += "}\n"
+        query_string += "}\n"
+
+        res = self.execute_query(query_string)
+
+        self.log.debug(res.info())
+
+        return res

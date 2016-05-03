@@ -153,16 +153,14 @@ class TripleStoreExplorer(ParamManager, CounterManager):
         which can be specified or normal neighbor).
 
         :param node: Source node
-        :type node: Node
         :param uri_new_instance : uri of the new element asked ("None" value instanciate all elements)
         :return: A tuple (attribute, node, link) which contains in first position
                 a list of all the attribute of our node class, follows by a list of all the nodes in
-                relation with our source node and finnally a list which contains all the
+                relation with our source node and finally a list which contains all the
                 links to those nodes.
         :rtype: (Attribute list, Node list, Link list)
 
         """
-        self.log.debug(" =========== TripleStoreExplorer:get_neighbours_for_node ===========")
         results = {'direct':[], 'reverse':[]}
         nodes = []
         links = []
@@ -172,7 +170,7 @@ class TripleStoreExplorer(ParamManager, CounterManager):
         sqb = SparqlQueryBuilder(self.settings, self.session)
         ql = QueryLauncher(self.settings, self.session)
 
-        # Search for shortcuts if there is.
+        # Search for shortcuts if there are.
         if len(node.get_shortcuts()) > 0:
             sparql_template = self.get_template_sparql(self.ASKOMICS_neighbor_query_following_shortcuts_file)
 
@@ -239,7 +237,7 @@ class TripleStoreExplorer(ParamManager, CounterManager):
                 att_h = self.has_setting(result["nodeUri"], 'attribute')
                 rel_h = self.has_setting(result["relationUri"], 'attribute')
 
-                if att_h or rel_h or (result["propertyType"] == self.ASKOMICS_prefix["owl"] + "DatatypeProperty"):
+                if att_h or rel_h or (result["propertyType"] == self.ASKOMICS_prefix["owl"] + "DatatypeProperty"): # FIXME doesn't detect categories
                     self.log.debug("====>ATTRIB")
                     attribute_id = node.get_id() + '_' + neighbor_label + str(self.get_new_id(node.get_id() + '_' + neighbor_label))
                     attributes.append(
@@ -284,6 +282,5 @@ class TripleStoreExplorer(ParamManager, CounterManager):
                                 spec_clause))
                     if go_out_loop:
                         break
-
 
         return (attributes, nodes, links)

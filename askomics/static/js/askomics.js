@@ -150,13 +150,9 @@ $(function () {
 
     // Get the overview of files to integrate
     $("#integration").click(function() {
-        //var service = new RestServiceJs("source_file_overview");
-        //service.getAll(function(src) {displayTable(src)});
-
         var service = new RestServiceJs("up/");
         service.getAll(function(formHtmlforUploadFiles) {
           $('div#content_integration').html(formHtmlforUploadFiles.html);
-        //  console.log(JSON.stringify(formHtmlforUploadFiles));
         });
     });
 
@@ -191,5 +187,11 @@ $(function () {
     // Node deletion
     $("#deleteNode").click(function() {
         graph.removeNode($("#nodeName").text());
+    });
+
+    // A helper for handlebars
+    Handlebars.registerHelper('nl2br', function(text) {
+        var nl2br = (text + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1' + '<br>' + '$2');
+        return new Handlebars.SafeString(nl2br);
     });
 });
