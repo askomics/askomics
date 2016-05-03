@@ -8,6 +8,7 @@ from pyramid.view import view_config, view_defaults
 from pyramid.response import FileResponse
 
 import logging
+from pprint import pformat
 
 from askomics.libaskomics.ParamManager import ParamManager
 from askomics.libaskomics.TripleStoreExplorer import TripleStoreExplorer
@@ -258,20 +259,11 @@ class AskView(object):
 
         data["last_new_counter"] = tse.get_counter()
 
-        self.log.debug("Counters: "+str(data["last_new_counter"]))
-
-        self.log.debug("------LINKS-----")
-        for i in data["links"]:
-            self.log.debug(i)
-            self.log.debug("")
-        self.log.debug("-----NODES------")
-        for i in data["nodes"]:
-            self.log.debug(i)
-            self.log.debug("")
-        self.log.debug("----ATTRIBUTES-------")
-        for i in data["attributes"]:
-            self.log.debug(i)
-            self.log.debug("")
+        if self.log.isEnabledFor(logging.DEBUG):
+            self.log.debug("Counters: "+str(data["last_new_counter"]))
+            self.log.debug("------LINKS-----\n%s", pformat(data["links"]))
+            self.log.debug("------NODES-----\n%s", pformat(data["nodes"]))
+            self.log.debug("---ATTRIBUTES---\n%s", pformat(data["attributes"]))
 
         return data
 
@@ -354,9 +346,7 @@ class AskView(object):
                 for res in results
             ]
 
-        self.log.debug("== results ==")
-        for elt in results:
-            self.log.debug(elt)
+        self.log.debug("== results ==\n%s", pformat(results))
 
     #    data['query'] = query
 
