@@ -3,9 +3,18 @@
 import os, time, tempfile
 from pprint import pformat
 from SPARQLWrapper import SPARQLWrapper, JSON
+import requests
 import logging
 
 from askomics.libaskomics.ParamManager import ParamManager
+
+class SPARQLError(RuntimeError):
+    """
+    The SPARQLError returns an error message when a query sends by requests module encounters an error.
+    """
+    def __init__(self, response):
+        self.status_code = response.status_code
+        super().__init__(response.text)
 
 class QueryLauncher(ParamManager):
     """
@@ -123,6 +132,29 @@ class QueryLauncher(ParamManager):
         res = self.execute_query(query_string)
 
         return res
+
+    def fuseki_load_data(self, filename):
+        """
+        Load a ttl file into the triple store using requests module and Fuseki
+        upload method which allows upload of big data into Fuseki (instead of LOAD method).
+
+        :param filename: name of the file, fp.name from Source.py
+        :return: response of the request and queryTime
+        """
+        data = {'graph': self.get_param("askomics.graph")}
+        files = [('file', (os.path.basename(filename), open(filename), 'text/turtle'))]
+
+        t0 = time.time()
+        response = requests.post(self.get_param("askomics.file_upload_url"), data=data, files=files)
+        if response.status_code != 200:
+            raise SPARQLError(response)
+
+        response.raw.read()
+
+        t1 = time.time()
+        queryTime = t1 - t0
+
+        return response, queryTime
 
 
     # TODO see if we can make a rollback in case of malformed data

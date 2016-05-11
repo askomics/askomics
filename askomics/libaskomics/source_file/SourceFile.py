@@ -520,6 +520,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
     def load_data_from_file(self, fp, urlbase):
         """
         Load a locally created ttl file in the triplestore using http (with load_data(url)) or with the filename for Fuseki (with fuseki_load_data(fp.name)).
+
         :param fp: a file handle for the file to load
         :param urlbase:the base URL of current askomics instance. It is used to let triple stores access some askomics temporary ttl files using http.
         :return: a dictionnary with information on the success or failure of the operation
@@ -532,7 +533,10 @@ class SourceFile(ParamManager, HaveCachedProperties):
         url = urlbase+"/ttl/"+os.path.basename(fp.name)
         data = {}
         try:
-            res = ql.load_data(url)
+            if self.is_defined("askomics.file_upload_url"):
+                res, queryTime = ql.fuseki_load_data(fp.name)
+            else:
+                res = ql.load_data(url)
             data['status'] = 'ok'
         except Exception as e:
             self._format_exception(e, data=data)
