@@ -136,7 +136,7 @@ class SparqlQueryBuilder(ParamManager):
         for c in json['constraint']:
             if c['type'] == 'link':
                 query += '\n\t?{0} {1} ?{2} .'.format(c['src'], c['uri'], c['tg'])
-            elif c['type'] == 'node':
+            elif c['type'] == 'node': # FIXME this line and following can be commented to speedup queries on fuseki (but risk of collision if attributes of different classes have the same name)
                 query += '\n\t?{0} a {1} .'.format(c['id'], c['uri'])
             elif c['type'] == 'attribute':
                 query += '\n\t?{0} {1} ?{2} .'.format(c['parent'], c['uri'], c['id'])
