@@ -102,6 +102,21 @@ class AskView(object):
 
         return data
 
+
+    @view_config(route_name='empty_database', request_method='GET')
+    def empty_database(self):
+        """
+        Delete all triples in the triplestore
+        """
+
+        self.log.debug("=== DELETE ALL TRIPLES ===")
+
+        sqb = SparqlQueryBuilder(self.settings, self.request.session)
+        ql = QueryLauncher(self.settings, self.request.session)
+
+        ql.process_query(sqb.get_delete_query_string().query)
+
+
     @view_config(route_name='source_files_overview', request_method='GET')
     def source_files_overview(self):
         """

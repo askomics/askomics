@@ -57,7 +57,8 @@ function loadStatistics() {
     $('#content_statistics')
     .append($("<p></p>").text("Number of triples  : "+stats.ntriples))
     .append($("<p></p>").text("Number of entities : "+stats.nentities))
-    .append($("<p></p>").text("Number of classes : "+stats.nclasses));
+    .append($("<p></p>").text("Number of classes : "+stats.nclasses))
+    .append($('<p><button id="btn-empty" onclick="emptyDatabase()" class="btn btn-danger">Empty database</button></p>'));
 
     table=$("<table></table>").addClass('table').addClass('table-bordered');
     th = $("<tr></tr>").addClass("table-bordered").attr("style", "text-align:center;");
@@ -114,6 +115,15 @@ function loadStatistics() {
     $('#content_statistics').append(table);
 
   });
+}
+
+function emptyDatabase() {
+    $('#waitModal').modal('show');
+    var service = new RestServiceJs("empty_database");
+    service.getAll(function(empty_db){
+        loadStatistics();
+        $('#waitModal').modal('hide');
+    });
 }
 
 
