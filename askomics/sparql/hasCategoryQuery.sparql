@@ -1,9 +1,9 @@
 SELECT DISTINCT ?label
-FROM #graph#
+FROM $graph
 WHERE {
-    ?elt rdf:type <#entity#> .
-    ?elt <#category#> ?o .
-    <#nodeClass#> displaySetting:has_category ?o .
+    ?elt rdf:type <$entity> .
+    ?elt <$category> ?o .
+    <$nodeClass> displaySetting:has_category ?o .
 		?o rdfs:label ?label .
 }
 ORDER BY asc(?label)

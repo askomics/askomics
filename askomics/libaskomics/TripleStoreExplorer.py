@@ -47,7 +47,7 @@ class TripleStoreExplorer(ParamManager, CounterManager):
         sqb = SparqlQueryBuilder(self.settings, self.session)
         ql = QueryLauncher(self.settings, self.session)
         sparql_template = self.get_template_sparql(self.ASKOMICS_setting_query_file)
-        query = sqb.load_from_file(sparql_template, {"#nodeClass#": uri, "#setting#": setting}).query
+        query = sqb.load_from_file(sparql_template, {"nodeClass": uri, "setting": setting}).query
         results = ql.process_query(query)
 
         return [res[setting] for res in results]
@@ -67,7 +67,7 @@ class TripleStoreExplorer(ParamManager, CounterManager):
         sqb = SparqlQueryBuilder(self.settings, self.session)
         ql = QueryLauncher(self.settings, self.session)
         sparql_template = self.get_template_sparql(self.ASKOMICS_has_category_query_file)
-        query = sqb.load_from_file(sparql_template, {"#nodeClass#": uri_category, "#category#" : category, "#entity#" : entity}).query
+        query = sqb.load_from_file(sparql_template, {"nodeClass": uri_category, "category" : category, "entity" : entity}).query
         results = ql.process_query(query)
 
         return [res["label"] for res in results]
@@ -114,14 +114,15 @@ class TripleStoreExplorer(ParamManager, CounterManager):
         sqb = SparqlQueryBuilder(self.settings, self.session)
         ql = QueryLauncher(self.settings, self.session)
 
-        parent = uri.rsplit('#', 1)[-1] + str(self.get_new_id(uri.rsplit('#', 1)[-1]))
+        fragment = uri.rsplit('#', 1)[-1]
+        parent = fragment + str(self.get_new_id(fragment))
 
         # Send a request to know all the neighbors of a node (from uri).
         sparql_template = self.get_template_sparql(self.ASKOMICS_neighbor_query_file)
 
         query = sqb.load_from_file(sparql_template, {
-            "#nodeClass#": "<" + uri + ">",
-            "#neighborClass#": "?nodeUri"
+            "nodeClass": '<%s>' % uri,
+            "neighborClass": "?nodeUri"
             }).query
 
         results = (ql.process_query(query))
@@ -175,7 +176,7 @@ class TripleStoreExplorer(ParamManager, CounterManager):
             sparql_template = self.get_template_sparql(self.ASKOMICS_neighbor_query_following_shortcuts_file)
 
             for shortcut in node.get_shortcuts():
-                query = sqb.load_from_file(sparql_template, {"#nodeClass#": node.get_uri(), "#shortcut#": shortcut}).query
+                query = sqb.load_from_file(sparql_template, {"nodeClass": node.get_uri(), "shortcut": shortcut}).query
                 results["direct"] = ql.process_query(query)
 
                 for result in results["direct"]:
@@ -186,13 +187,13 @@ class TripleStoreExplorer(ParamManager, CounterManager):
         sparql_template = self.get_template_sparql(self.ASKOMICS_neighbor_query_file)
 
         query = sqb.load_from_file(sparql_template, {
-            "#nodeClass#": "<" + node.get_uri() + ">",
-            "#neighborClass#": "?nodeUri"
+            "nodeClass": '<%s>' % node.get_uri(),
+            "neighborClass": "?nodeUri"
             }).query
 
         reverse_query = sqb.load_from_file(sparql_template, {
-            "#nodeClass#": "?nodeUri",
-            "#neighborClass#": "<" + node.get_uri() + ">"
+            "nodeClass": "?nodeUri",
+            "neighborClass": '<%s>' % node.get_uri()
             }).query
 
         results["direct"].extend(ql.process_query(query))

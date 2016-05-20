@@ -1,8 +1,8 @@
 SELECT DISTINCT ?nodeUri ?nodeLabel ?relationUri ?relationLabel
-FROM #graph#
-WHERE {#nodeClass# rdfs:subClassOf [ a owl:Restriction ;
-                                     owl:onProperty ?relationUri ;
-                                     owl:someValuesFrom #neighborClass# ] .
+FROM $graph
+WHERE {$nodeClass rdfs:subClassOf [ a owl:Restriction ;
+                                    owl:onProperty ?relationUri ;
+                                    owl:someValuesFrom $neighborClass ] .
        OPTIONAL {?nodeUri rdfs:label ?nodeLabel } .
        ?relationUri rdfs:label ?relationLabel
       }

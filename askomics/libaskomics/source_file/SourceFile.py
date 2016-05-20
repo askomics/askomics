@@ -340,7 +340,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
         ql = QueryLauncher(self.settings, self.session)
 
         sparql_template = self.get_template_sparql(self.ASKOMICS_get_class_info_from_abstraction_queryFile)
-        query = sqb.load_from_file(sparql_template, {"#nodeClass#": self.headers[0]}).query
+        query = sqb.load_from_file(sparql_template, {"nodeClass": self.headers[0]}).query
 
         results = ql.process_query(query)
 
