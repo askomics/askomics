@@ -194,7 +194,7 @@ function loadSourceFile(file_elem) {
         }
     });
 
-    $('#waitModal').modal('show');
+    displayModal('Please wait', 'Close');
 
     var service = new RestServiceJs("load_data_into_graph");
     var model = { 'file_name': file_name,
@@ -202,7 +202,7 @@ function loadSourceFile(file_elem) {
                   'disabled_columns': disabled_columns  };
 
     service.post(model, function(data) {
-        $('#waitModal').modal('hide');
+        hideModal();
 
         if (data.status != "ok") {
             file_elem.find(".insert_status").first().html(data.error);

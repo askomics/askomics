@@ -195,7 +195,7 @@ function launchQuery(exp, lim, roq) {
     }
 
     if (!roq)
-      $('#waitModal').modal('show');
+      displayModal('Please wait', 'Close');
 
     var jdata = { 'display':display,
                   'constraint':constraint,
@@ -214,10 +214,10 @@ function launchQuery(exp, lim, roq) {
             $("a#btn-qdown").attr("href", "data:text/plain;charset=UTF-8," + encodeURIComponent(data.query));
         } else if (exp === 0) {
             displayResults(data);
-            $('#waitModal').modal('hide');
+            hideModal();
         } else {
             provideDownloadLink(data);
-            $('#waitModal').modal('hide');
+            hideModal();
         }
     });
 }

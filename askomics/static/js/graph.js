@@ -104,7 +104,7 @@ function detailsOf(elemUri, elemId, attributes, nameDiv, data) {
         var inp = $("<select/>").attr("id",id).addClass("form-control").attr("multiple","multiple");
         //var inp = $("<div/>").attr("id",id).addClass("form-control");
         if (attributes[i].type_uri.indexOf("http://www.w3.org/2001/XMLSchema#") < 0) {
-            $('#waitModal').modal('show');
+            displayModal('Please wait', 'Close');
             inp.attr("list", "opt_" + id);
             //console.log(JSON.stringify(nameDiv));
             var service = new RestServiceJs("category_value");
@@ -132,7 +132,7 @@ function detailsOf(elemUri, elemId, attributes, nameDiv, data) {
                   inp.append($("<option></option>").attr("value", d.value[0]).append(d.value[0]));
                 }
               //  inp.append(datalist);
-              $('#waitModal').modal('hide');
+              hideModal();
             });
         } else {
             // OFI -> new adding filter on numeric

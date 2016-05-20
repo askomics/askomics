@@ -48,8 +48,10 @@ function loadStartPoints() {
   });
 }
 
-function loadStatistics() {
-  $('#waitModal').modal('show');
+function loadStatistics(modal) {
+  if (modal) {
+    displayModal('Please Wait', 'Close');
+  };
 
   var service = new RestServiceJs("statistics");
   service.getAll(function(stats) {
@@ -58,7 +60,9 @@ function loadStatistics() {
     .append($("<p></p>").text("Number of triples  : "+stats.ntriples))
     .append($("<p></p>").text("Number of entities : "+stats.nentities))
     .append($("<p></p>").text("Number of classes : "+stats.nclasses))
-    .append($('<p><button id="btn-empty" onclick="emptyDatabase()" class="btn btn-danger">Empty database</button></p>'));
+    .append($("<div id='deleteButtons'></div>"));
+
+    $("#deleteButtons").append("<p><button id='btn-empty' onclick='emptyDatabase(false)' class='btn btn-danger'>Empty database</button></p>");
 
     table=$("<table></table>").addClass('table').addClass('table-bordered');
     th = $("<tr></tr>").addClass("table-bordered").attr("style", "text-align:center;");
@@ -111,19 +115,49 @@ function loadStatistics() {
       table.append(tr);
     });
 
-    $('#waitModal').modal('hide');
+    if (modal) {
+        hideModal();
+    };
     $('#content_statistics').append(table);
 
   });
 }
 
-function emptyDatabase() {
-    $('#waitModal').modal('show');
-    var service = new RestServiceJs("empty_database");
-    service.getAll(function(empty_db){
-        loadStatistics();
-        $('#waitModal').modal('hide');
-    });
+function emptyDatabase(value) {
+    if (!value) {
+        no = 'no';
+        $("#deleteButtons").empty();
+        $("#deleteButtons")
+        .append('<p>Delete all data ? ')
+        .append("<button id='btn-empty' onclick='emptyDatabase(true)' class='btn btn-danger'>Yes</button> ")
+        .append("<button id='btn-empty' onclick='emptyDatabase(no)' class='btn btn-default'>No</button></p>");
+        return;
+    }
+
+    if (value == 'no') {
+        $("#deleteButtons").empty();
+        $("#deleteButtons").append("<p><button id='btn-empty' onclick='emptyDatabase(false)' class='btn btn-danger'>Empty database</button></p>");
+        return
+    }
+
+    if (value) {
+        displayModal('Please wait during deletion', 'Close');
+        var service = new RestServiceJs("empty_database");
+            service.getAll(function(empty_db){
+            hideModal();
+            loadStatistics(false);
+        });
+    }
+}
+
+function displayModal(message, button) {
+    $('#modalMessage').text(message);
+    $('#modalButton').text(button);
+    $('#modal').modal('show');
+}
+
+function hideModal(){
+    $('#modal').modal('hide');
 }
 
 
