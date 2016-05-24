@@ -152,13 +152,13 @@
         <!-- The template to display preview of source files -->
         <script id="template-source_file-preview" type="text/x-handlebars-template">
             {{#each files}}
-                <div class="template-source_file" style='text-align:center'>
+                <form class="template-source_file form-horizontal text-center">
                     <h4 class="file_name">{{ this.name }}</h4>
                     <br>
                     {{#if error}}
                         <p class="error">{{ error }}</p>
                     {{else}}
-                        <table class='preview_table'>
+                        <table class='table table-striped preview_table'>
                             <thead>
                                 <tr>
                                 {{#each headers}}
@@ -167,6 +167,7 @@
                                             <input type='checkbox' class='toggle_column' checked />
                                         {{/unless}}
                                         {{ this }}
+
                                         <img src='/static/images/icons/ok.png' class='relation_present' title='Data with this name is already present in the database' width='24' height='24' />
                                         <img src='/static/images/icons/new.png' class='relation_new' title='No data with this name was found in the database' width='24' height='24' />
                                     </th>
@@ -176,7 +177,7 @@
                                 <tr>
                                 {{#each headers}}
                                     <th>
-                                        <select class='column_type'>
+                                        <select class='column_type form-control'>
                                             {{#if @first}}
                                                 <optgroup label='Relationship'>
                                                     <option value='entity_start'>Entity (Start)</option>
@@ -209,16 +210,17 @@
                                 {{/each}}
                             </tbody>
                         </table>
-                        <br><br>
-                        <pre class='preview_field'>
-                        </pre>
-                        <br>
-                        <p class="message warning" style="display: none"></p><br />
-                        <p class="insert_status" style="display: none"></p><br />
-                        <input type="button" class="preview_button" value="Preview RDF" />
-                        <input type="button" class="load_data" value="Insert in database" />
+                        <pre class='preview_field'></pre>
+                        <p class="insert_status text-left alert hidden"></p>
+                        <div class="form-group form-inline">
+                            <div class="btn-group" role="group" aria-label="metadata">
+                                <input type="button" class="btn btn-success preview_button" value="Preview RDF" />
+                                <input type="button" class="btn btn-primary load_data" value="Insert in database" />
+                            </div>
+                        </div>
                     {{/if}}
-                </div>
+                </form>
+                <hr />
             {{/each}}
         </script>
 
