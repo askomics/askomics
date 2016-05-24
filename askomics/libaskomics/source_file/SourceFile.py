@@ -534,7 +534,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
         data = {}
         try:
             if self.is_defined("askomics.file_upload_url"):
-                res, queryTime = ql.fuseki_load_data(fp.name)
+                res = ql.fuseki_load_data(fp.name)
             else:
                 res = ql.load_data(url)
             data['status'] = 'ok'
