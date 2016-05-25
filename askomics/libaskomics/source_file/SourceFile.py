@@ -553,11 +553,11 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         self.log.error("Error in %s while %s: %s", __name__, ctx, '\n'.join(fexception + ftb))
 
-        error = '<strong>Error while %s:</strong> ' % ctx
-        error += '<br/>'.join(map(escape, fexception))
+        fexception = escape('\n'.join(fexception))
+        error = '<strong>Error while %s:</strong><pre>%s</pre>' % (ctx, fexception)
 
         if self.settings["askomics.debug"]:
-            error += """<br /><strong>Traceback</strong> (most recent call last): <br />
+            error += """<p><strong>Traceback</strong> (most recent call last): <br />
                     <ul>
                         <li><pre>%s</pre></li>
                     </ul>
