@@ -114,14 +114,7 @@ function previewTtl(file_elem) {
                   'disabled_columns': disabled_columns };
 
     service.post(model, function(data) {
-
-        // display received data
-        var template = $('#template-ttl-preview').html();
-
-        var templateScript = Handlebars.compile(template);
-        var html = templateScript(data);
-
-        file_elem.find(".preview_field").html(html);
+        file_elem.find(".preview_field").html(data);
         file_elem.find(".preview_field").show();
     });
 }

@@ -223,27 +223,5 @@
                 <hr />
             {{/each}}
         </script>
-
-        <!-- The template to display ttl preview -->
-        <script id="template-ttl-preview" type="text/x-handlebars-template">{{ header }}
-
-=============
-=  Content  =
-=============
-
-{{ content_ttl }}
-
-=================
-=  Abstraction  =
-=================
-
-{{ abstraction_ttl }}
-
-======================
-=  Domain knowledge  =
-======================
-
-{{ domain_knowledge_ttl }}
-        </script>
     </body>
 </html>
