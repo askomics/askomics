@@ -39,7 +39,8 @@ class AskView(object):
 
         nodes = tse.get_start_points()
 
-        data["nodes"] = {n.get_id(): n.to_dict() for n in nodes}
+        #data["nodes"] = {n.get_id(): n.to_dict() for n in nodes}
+        data["nodes"] = {n.get_uri(): n.to_dict() for n in nodes}
         data["last_new_counter"] = tse.get_counter()
 
         return data
@@ -223,6 +224,24 @@ class AskView(object):
             for ifile in self.request.json_body["files_to_delete"]:
                 if os.path.exists(ifile):
                     os.remove(ifile)
+
+        return data
+
+    @view_config(route_name='getUserAbstraction', request_method='POST')
+    def getUserAbstraction(self):
+        """ Get the user asbtraction to manage relation inside javascript """
+        self.log.debug("== getUserAbstraction ==")
+
+        #data = {}
+        tse = TripleStoreExplorer(self.settings, self.request.session)
+
+        body = self.request.json_body
+
+        data = tse.getUserAbstraction()
+
+        #data["nodes"] = [n.to_dict() for n in nodes]
+        #data["links"] = [l.to_dict() for l in links]
+        #data["attributes"] = [a.to_dict() for a in attributes]
 
         return data
 

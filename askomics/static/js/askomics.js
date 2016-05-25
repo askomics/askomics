@@ -1,4 +1,6 @@
 var graph;
+var ASQB;
+var DK;
 
 function startVisualisation() {
     // Initialize the graph with the selected start point.
@@ -6,16 +8,30 @@ function startVisualisation() {
     $("#queryBuilder").show();
     d3.select("svg").remove();
 
+    // Keep only the selected node
+    //$("#svgdiv").data().last_new_counter = {};
+    //$("#svgdiv").data().last_new_counter[startPoint.label] = 1 ;
+
+    //console.log("last counter");
+    //console.log($("#svgdiv").data().last_new_counter);
+
+    /* To manage construction of SPARQL Query */
+    AGB = new AskomicsGraphBuilder();
+    /* To manage information about User Datasrtucture  */
+    DK = new AskomicsUserAbstraction();
+    /* Request information in the model layer */
+    DK.updateOntology();
+
+    /* Get information about start point to bgin query */
     var startPoint = $('#startpoints').find(":selected").data("value");
+    /* Setting up an ID for the first variate */
+    AGB.setStartpoint(startPoint);
+
+
     addConstraint('node',startPoint.id,startPoint.uri);
 
-    // Keep only the selected node
-    $("#svgdiv").data().last_new_counter = {};
-    $("#svgdiv").data().last_new_counter[startPoint.label] = 1 ;
+    graph = new myGraph(AGB,DK);
 
-    console.log($("#svgdiv").data().last_new_counter);
-
-    graph = new myGraph("#svgdiv");
     graph.addNode(startPoint);
     addDisplay(startPoint.id);
 
@@ -35,6 +51,8 @@ function loadStartPoints() {
         last_counter: startPointsDict.last_new_counter });
 
       $("#startpoints").empty();
+
+      console.log("STARTS:"+JSON.stringify(startPointsDict));
 
       $.each(startPointsDict.nodes, function(key, value) {
           $("#startpoints").append($("<option></option>").attr("data-value", JSON.stringify(value)).text(value.label));

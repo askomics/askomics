@@ -1,3 +1,162 @@
+/*
+  CLASSE AskomicsUserAbstraction
+  Manage Abstraction storing in the TPS.
+*/
+var AskomicsUserAbstraction = function () {
+    const prefix = {
+      'rdf': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
+      'xsd': 'http://www.w3.org/2001/XMLSchema#',
+      'rdfs':'http://www.w3.org/2000/01/rdf-schema#',
+      'owl': 'http://www.w3.org/2002/07/owl#'
+    }
+    /* Ontology is save locally to avoid request with TPS  */
+    /* --------------------------------------------------- */
+    var tripletSubjectRelationObject = [];
+    var entityInformationList = {};
+    /* load ontology */
+    AskomicsUserAbstraction.prototype.updateOntology = function() {
+
+      var service = new RestServiceJs("userAbstraction");
+      service.post({}, function(resultListTripletSubjectRelationObject) {
+
+        /* All relation are stored in tripletSubjectRelationObject */
+        tripletSubjectRelationObject = resultListTripletSubjectRelationObject['relations'];
+
+        entityInformationList = {};
+        /* All information about an entity available in TPS are stored in entityInformationList */
+        for (entry in resultListTripletSubjectRelationObject['entities']){
+          uri = resultListTripletSubjectRelationObject['entities'][entry]['entity'];
+          rel = resultListTripletSubjectRelationObject['entities'][entry]['attribut'];
+          val = resultListTripletSubjectRelationObject['entities'][entry]['value'];
+          console.log(uri);
+          if ( ! (uri in entityInformationList) ) {
+              entityInformationList[uri] = {};
+          }
+          entityInformationList[uri][rel] = val;
+        }
+
+        console.log("<=== entityInformationList ===> ");
+        console.log(JSON.stringify(entityInformationList));
+      });
+    }
+
+    /* Get value of an attribut with RDF format like rdfs:label */
+    AskomicsUserAbstraction.prototype.getAttrib = function(uriEntity,attrib) {
+        if (!(uriEntity in entityInformationList)) {
+          console.error(JSON.stringify(uriEntity) + " is not referenced in the user abstraction !");
+          return;
+        }
+        attrib_longterm = attrib ;
+        for (p in prefix) {
+          i = attrib_longterm.search(p+":");
+          if ( i != - 1) {
+            attrib_longterm = attrib_longterm.replace(p+":",prefix[p]);
+            break;
+          }
+        }
+
+        if (!(attrib_longterm in entityInformationList[uriEntity])) {
+          console.error(JSON.stringify(uriEntity) + '['+JSON.stringify(attrib)+']' + " is not referenced in the user abstraction !");
+          return;
+        }
+        return entityInformationList[uri][attrib_longterm];
+    }
+
+    /* build node from user abstraction infomation */
+    AskomicsUserAbstraction.prototype.buildBaseNode  = function(uriEntity) {
+      var node = {
+        uri : uriEntity,
+        label : this.getAttrib(uriEntity,'rdfs:label')
+      } ;
+      return node;
+    }
+
+
+    /*
+    Get
+    - relations with UriSelectedNode as a subject or object
+    - objects link with Subject UriSelectedNode
+    - Subjects link with Subject UriSelectedNode
+     */
+
+    AskomicsUserAbstraction.prototype.getRelationsObjectsAndSubjectsWithURI = function(UriSelectedNode) {
+      console.log('getRelationsFromSubject '+UriSelectedNode);
+      console.log('tripletSubjectRelationObject '+JSON.stringify(tripletSubjectRelationObject));
+
+      var objectsTarget = {} ;
+      var subjectsTarget = {} ;
+    //  var relationsRes = [];
+
+      for (i in tripletSubjectRelationObject) {
+        if ( tripletSubjectRelationObject[i]['object'] == UriSelectedNode ) {
+          if (! (tripletSubjectRelationObject[i]['subject'] in subjectsTarget) ) {
+            subjectsTarget[tripletSubjectRelationObject[i]['subject']] = [] ;
+          }
+          subjectsTarget[tripletSubjectRelationObject[i]['subject']].push(tripletSubjectRelationObject[i]['relation']);
+        }
+        if ( tripletSubjectRelationObject[i]['subject'] == UriSelectedNode ) {
+          if (! (tripletSubjectRelationObject[i]['object'] in objectsTarget) ) {
+            objectsTarget[tripletSubjectRelationObject[i]['object']] = [];
+          }
+          objectsTarget[tripletSubjectRelationObject[i]['object']].push(tripletSubjectRelationObject[i]['relation']);
+        }
+      }
+
+      console.log('objects:'+JSON.stringify(objectsTarget));
+      console.log('subjects:'+JSON.stringify(subjectsTarget));
+
+      // TODO: Manage Doublons and remove it....
+
+      return [objectsTarget, subjectsTarget];
+    }
+
+  }
+
+
+/* constructeur de AskomicsGraphBuilder */
+  var AskomicsGraphBuilder = function () {
+    /* ========================================= ATTRIBUTES ============================================= */
+    var SPARQLIDgeneration = {} ; /* { <ENT1> : 5, ... }  last index used to named variable */
+    var IGgeneration = 0;
+
+    /* create and return a new ID to instanciate a new SPARQL variate */
+    AskomicsGraphBuilder.prototype.setSPARQLVariateId = function(node) {
+      lab = node.label
+      if ( ! SPARQLIDgeneration[lab] ) {
+        SPARQLIDgeneration[lab] = 0 ;
+      }
+
+      SPARQLIDgeneration[lab]++ ;
+      node.SPARQLid = lab+SPARQLIDgeneration[lab];
+      console.log("AskomicsGraphBuilder.prototype.SPARQLIDgeneration:"+JSON.stringify(node));
+      return node;
+    }
+
+    AskomicsGraphBuilder.prototype.setIdNode = function(node) {
+      node.id = IGgeneration;
+      IGgeneration++;
+      return node;
+    }
+
+    AskomicsGraphBuilder.prototype.setStartpoint = function(node) {
+      this.setSPARQLVariateId(node);
+      this.setIdNode(node);
+      node.name = node.SPARQLid;
+      return node;
+    }
+
+    AskomicsGraphBuilder.prototype.setSuggestedNode = function(node,x,y) {
+      node.suggested = true;
+      node.x = x;
+      node.y = y;
+      this.setIdNode(node);
+      node.name = node.label;
+      return node;
+    }
+  }
+
+//********************************************************************************************************************************************************************
+
 var expanded = [];
 
 function keepNodesOnTop() {
@@ -15,9 +174,7 @@ function build_link(l, src, target) {
   console.log("target: "+target.id);
   v = {
       "source": (l.source_id != src.id ? target : src),
-      "source_uri": l.source_uri,
       "target": (l.target_id != src.id ? target : src),
-      "target_uri": l.target_uri,
       "relation": l.relation_label,
       "relation_uri": l.relation_uri,
       "specified_by": {"uri": l.spec_uri, "relation": ""},
@@ -27,6 +184,64 @@ function build_link(l, src, target) {
   };
   console.log("built link: "+JSON.stringify(v));
   return v;
+}
+
+function insertSuggestions2(slt_node, nodeList, linkList) {
+    console.log("running insertSuggestions");
+    console.log("selected node is: "+JSON.stringify(slt_node));
+    console.log("current node list is: "+JSON.stringify(nodeList));
+    console.log("current link list is: "+JSON.stringify(linkList));
+
+    /* get All suggested node and relation associated to get orientation of arc */
+    tab = DK.getRelationsObjectsAndSubjectsWithURI(slt_node.uri);
+    objectsTarget = tab[0];  /* All triplets which slt_node URI are the subject */
+    subjectsTarget = tab[1]; /* All triplets which slt_node URI are the object */
+
+    var suggestedList = {} ;
+
+    for ( uri in objectsTarget ) {
+      suggestedNode = DK.buildBaseNode(uri);
+      AGB.setSuggestedNode(suggestedNode,slt_node.x,slt_node.y);
+      console.log("ADD OBJET:"+JSON.stringify(suggestedNode));
+      nodeList.push(suggestedNode);
+      suggestedList[uri] = suggestedNode ;
+
+      for (i in objectsTarget[uri]) {
+        link = {
+          source: slt_node,
+          target: suggestedList[uri],
+          relation: objectsTarget[uri][i],
+          label: objectsTarget[uri][i],
+          parent_id: slt_node.id,
+          child_id: suggestedList[uri].id
+        }
+        linkList.push(link);
+      }
+    }
+
+    for ( uri in subjectsTarget ) {
+      if ( ! (uri in suggestedList) ) {
+        suggestedNode = DK.buildBaseNode(uri);
+        AGB.setSuggestedNode(suggestedNode,slt_node.x,slt_node.y);
+        console.log("ADD SUJET:"+JSON.stringify(suggestedNode));
+        nodeList.push(suggestedNode);
+      }
+      suggestedList[uri] = suggestedNode ;
+      for (i in subjectsTarget[uri]) {
+        link = {
+          source: suggestedList[uri],
+          target: slt_node,
+          relation: subjectsTarget[uri][i],
+          label: subjectsTarget[uri][i],
+          parent_id: slt_node.id,
+          child_id: suggestedList[uri].id
+        }
+        linkList.push(link);
+      }
+    }
+
+    // add neighbours of a node to the graph as propositions.
+
 }
 
 function insertSuggestions(prev_node, slt_node, expansionDict, nodeList, linkList) {
@@ -254,7 +469,7 @@ function detailsOf(elemUri, elemId, attributes, nameDiv, data) {
     $("#nodeDetails").append(details);
 }
 
-function myGraph() {
+function myGraph(AGB,DK) {
     // d3.js graph
 
     // set up the D3 visualisation in the specified element
@@ -585,13 +800,23 @@ function myGraph() {
                             if ((l.child_id == slt_data.id) && (l.parent_id == prev_data.id)) {
                                 addConstraint('link',
                                     l.source.id,
-                                    l.relation_uri,
+                                    l.relation,
                                     l.target.id);
                             }
                         }
                     }
 
+                    console.log("PREV:"+JSON.stringify(prev_data));
+                    console.log("SLT:"+JSON.stringify(slt_data));
+
+                    insertSuggestions2(slt_data, nodes, links);
+
+                    update();
+                    keepNodesOnTop();
+
                     // Get the neighbours of a node using REST service
+
+/*
                     var service = new RestServiceJs("neighbours");
                     var model = {
                                   'source_previous_node': prev_data,
@@ -614,9 +839,11 @@ function myGraph() {
                                     && (hasConstraint(l.child_id, l.parent_id, ['node', 'clause', 'attribute']))) {
                                 addConstraint('clause', l.relation, l.special_clause.replace(/#src#/g, '?' + l.child_id).replace(/#tg#/g, '?' + l.parent_id));
                             }
+
                         }
 
                         detailsOf(slt_data.uri, slt_data.id, expansion.attributes);
+
 
                         $("#showNode").removeClass('glyphicon-eye-close');
                         $("#showNode").addClass('glyphicon-eye-open');
@@ -630,9 +857,8 @@ function myGraph() {
                         // save the query in the download button
                         launchQuery(0, 30, true);
                     });
+                    */
                 });
-
-        var elt = $("<tspan></tspan>");
 
         nodeEnter.append("svg:text").append("tspan")
                 .attr("class", "textClass")
@@ -643,15 +869,15 @@ function myGraph() {
                 })
                 .text(function (d) {
                     var re = new RegExp(/(\d+)$/);
-                    var labelEntity = d.id.replace(re,"");
+                    var labelEntity = d.name.replace(re,"");
 
                     return labelEntity;
                   }).append("tspan").attr("font-size","7").attr("baseline-shift","sub")
                   .text(function (d) {
                       var re = new RegExp(/(\d+)$/);
-                      var indiceEntity = d.id.match(re);
+                      var indiceEntity = d.name.match(re);
 
-                      if ( indiceEntity.length>0 )
+                      if ( indiceEntity && indiceEntity.length>0 )
                         return indiceEntity[0];
                       else
                         return "";

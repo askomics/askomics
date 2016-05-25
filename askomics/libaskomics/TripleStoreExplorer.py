@@ -91,11 +91,47 @@ class TripleStoreExplorer(ParamManager, CounterManager):
         for result in results:
             uri = result["nodeUri"]
             label = result["nodeLabel"]
-            node_id = label + str(self.get_new_id(label))
-            shortcuts_list = self.has_setting(uri, 'shortcut')
-            nodes.append(Node(node_id, uri, label, shortcuts_list))
+            #node_id = label + str(self.get_new_id(label)) #FIXME ID have to be manage in Javascript View
+            shortcuts_list = self.has_setting(uri, 'shortcut') #FIXME Utility of this ?
+            nodes.append(Node(uri, label, shortcuts_list))
 
         return nodes
+
+    def getUserAbstraction(self):
+        """
+        Get the user abstraction (relation and entity as subject and object)
+
+        :return:
+        :rtype:
+        """
+        data = {}
+
+        self.log.debug(" =========== TripleStoreExplorer:getUserAbstraction ===========")
+        sqb = SparqlQueryBuilder(self.settings, self.session)
+        ql = QueryLauncher(self.settings, self.session)
+
+        sparql_template = self.get_template_sparql(self.ASKOMICS_abstractionRelationUser)
+        query = sqb.load_from_file(sparql_template, {}).query
+        results = ql.process_query(query)
+
+        data['relations'] = results
+
+        listEntities = {}
+
+        for elt in results:
+            if not elt['object'] in listEntities:
+                listEntities[elt['object']]=0
+            if not elt['subject'] in listEntities:
+                listEntities[elt['subject']]=0
+
+        sparql_template = self.get_template_sparql(self.ASKOMICS_abstractionEntityUser)
+        query = sqb.load_from_file(sparql_template, {"#entities#" : ' '.join(["<"+s+">" for s in listEntities.keys()])}).query
+        results = ql.process_query(query)
+
+        data['entities'] = results
+
+        return data
+
 
     def get_attributes_of(self, uri):
         """

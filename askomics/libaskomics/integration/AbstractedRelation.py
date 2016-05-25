@@ -24,16 +24,26 @@ class AbstractedRelation(object):
     """
 
     def __init__(self, relation_type, identifier, rdfs_domain, rdfs_range):
-        self.uri = ":has_" + identifier
-        self.label = "has_" + identifier
+
+        idx = identifier.find("@")
+        type_range = identifier
+
+        if idx  != -1:
+            type_range = identifier[idx+1:len(identifier)]
+            identifier = identifier[0:idx]
+        else:
+            identifier = "has_"+identifier
+            
+        self.uri = ":"+identifier
+        self.label = identifier
         if relation_type == "Entity" or relation_type == "Category":
             self.relation_type = "owl:ObjectProperty"
-            self.rdfs_range = ":" + identifier
+            self.rdfs_range = ":" + type_range
         else:
             self.relation_type = "owl:DatatypeProperty"
             self.rdfs_range = rdfs_range
-        self.rdfs_domain = ":" + rdfs_domain
 
+        self.rdfs_domain = ":" + rdfs_domain
         self.log = logging.getLogger(__name__)
 
     def set_uri(self, identifier):

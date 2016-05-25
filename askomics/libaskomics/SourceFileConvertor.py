@@ -195,21 +195,29 @@ class SourceFileConvertor(ParamManager):
         for header in category_domain_code_dict.keys():
             category_domain_code_dict[header] = list(set(category_domain_code_dict[header]))
 
-
         for header in relation_code_dict.keys():
             curr_relation_code = ""
             attribute_has_header_domain_list_output[header] = []
+            # Removing @ from the heasder for relation
+            idx = header.find("@");
+            headername = header
+            if idx != -1:
+                headername = header[0:idx]
+
             for ref_entity in relation_code_dict[header].keys():
                 curr_entity_code = ""
                 first_line = True
                 for target_entity in relation_code_dict[header][ref_entity]:
                     if first_line:
-                        indent = len(ref_entity) * " " + len("has_" + header) * " " + 4 * " "
-                        curr_entity_code += ":" + ref_entity + " :has_" + header + " :" + target_entity + " ,\n"
+                        # MODIF OFI ==> RELATION est le nom de l'entete avec suppression du @
+                        indent = len(ref_entity) * " " + len(headername) * " " + 4 * " "
+                        curr_entity_code += ":" + ref_entity + " :" + headername + " :" + target_entity + " ,\n"
                         first_line = False
                     else:
                         curr_entity_code += indent + ":" + target_entity + " ,\n"
                 curr_entity_code = curr_entity_code[:-2] + ".\n"
+                #print("========================"+curr_entity_code)
+
                 if max_lines == 0:
                     attribute_has_header_domain_list_output[header].append(curr_entity_code)
 

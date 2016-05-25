@@ -1,0 +1,9 @@
+SELECT ?subject ?relation ?object
+FROM  #graph#
+WHERE {
+  ?subject rdf:type owl:Class .
+  ?object rdf:type owl:Class .
+  ?relation rdf:type owl:ObjectProperty;
+            rdfs:domain ?subject;
+            rdfs:range ?object.
+}

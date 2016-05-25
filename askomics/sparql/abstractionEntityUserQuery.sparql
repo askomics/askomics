@@ -1,0 +1,6 @@
+SELECT ?entity ?attribut ?value
+FROM  #graph#
+WHERE {
+	?entity ?attribut ?value.
+  VALUES ?entity { #entities# }
+}
