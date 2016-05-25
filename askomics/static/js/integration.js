@@ -1,114 +1,228 @@
+/**
+ * Register event handlers for integration
+ */
+$(function () {
 
-function formatValidIdNameFile(filename) {
-  var idValidName = filename.replace(".","_dot_");
-  return idValidName;
+    // Generate preview data
+    $("#content_integration").on('change', '.toggle_column', function(event) {
+        var block = $(event.target).closest('.template-source_file');
+        if (block.find('.preview_field').is(':visible')) {
+            previewTtl(block);
+        }
+        checkExistingData(block);
+    });
+
+    $("#content_integration").on('change', '.column_type', function(event) {
+        var block = $(event.target).closest('.template-source_file');
+        if (block.find('.preview_field').is(':visible')) {
+            previewTtl(block);
+        }
+        checkExistingData(block);
+    });
+
+    $("#content_integration").on('click', '.preview_button', function(event) {
+        var block = $(event.target).closest('.template-source_file');
+        previewTtl(block);
+    });
+
+    $("#content_integration").on('click', '.load_data', function(event) {
+        loadSourceFile($(event.target).closest('.template-source_file'));
+    });
+});
+
+/**
+ * Transform an array of column content to an array of row content
+ */
+function cols2rows(items) {
+    var out = [];
+
+    for(var i=0, l=items.length; i<l; i++) {
+        for(var j=0, m=items[i].length; j<m; j++) {
+            if (!(j in out))  {
+                out[j] = []
+            }
+            out[j][i] = items[i][j];
+        }
+    }
+
+    return out;
 }
 
-function displayTable(src) {
-    // Create the tables giving an overview of the tabulated files to convert.
-    $('div#content_integration').empty().data({ turtle_template: src.turtle_template });
-    var htmlCode = "";
-
-    $.each(src.sourceFiles, function(key, value) {
-
-        var idValidName = formatValidIdNameFile(value.name);
-        for (var line of src.html_template.slice(0,8)) {
-            htmlCode += line.replace(/#FILENAME#/g, value.name);
+/**
+ * Show preview data on the page
+ */
+function displayTable(data) {
+    // Transform columns to rows
+    for(var i=0, l=data.files.length; i<l; i++) {
+        if ('preview_data' in data.files[i]) {
+            data.files[i]['preview_data'] = cols2rows(data.files[i]['preview_data']);
         }
-        var cpt = 0;
-        //var headers = [];
-        for (var line of value.content) {
-            if (cpt == 1) {
-                htmlCode += "                            <tr id='colType_" + idValidName + "'>";// style='display: none'
-            } else {
-                htmlCode += "                            <tr>";
-            }
-            var colCpt = 0;
-            for (var cell of line) {
-                if (cpt === 0) {
-                    htmlCode += "<td id=\"" + idValidName + "_" + cell + "\"><label>";
-                    // If First Colonne (Entity)
-                    if (colCpt === 0) {
-                        // we hide the checkbox
-                        htmlCode += "<input type='checkbox' style='display:none' id='header_" + idValidName + "_" + colCpt + "' value=" + colCpt + " onchange='fillTtl(\"" + value.name + "\")' checked /> ";
-                    } else {
-                        htmlCode += "<input type='checkbox' id='header_" + idValidName + "_" + colCpt + "' value=" + colCpt + " onchange='fillTtl(\"" + value.name + "\")' checked /> ";
-                    }
-                    htmlCode += cell + "</label></td>";
-                } else if (cpt == 1) {
-                  //  $('input[name=radioName]:checked').val()
-                      // The first colonne is the Entity, so only possibility:  Entity , Entity (Start)
-                      if (colCpt === 0) {
-                        htmlCode += "<td><select id='type_" + idValidName + "_" + colCpt + "' onchange='fillTtl(\"" + value.name + "\")'><optgroup label='Relationship'><option>Entity (Start)</option><option>Entity</option></optgroup></select></td>".replace(cell, " selected" + cell);
-                      } else {
-                        htmlCode += "<td><select id='type_" + idValidName + "_" + colCpt + "' onchange='fillTtl(\"" + value.name + "\")'><optgroup label='Attributes'><option>Numeric</option><option>Text</option><option>Category</option></optgroup><optgroup label='Relationship'><option>Entity</option></optgroup></optgroup></select></td>".replace(cell, " selected" + cell);
-                      }
-                } else {
-                    htmlCode += "<td>" + cell + "</td>";
+    }
+
+    // display received data
+    var template = $('#template-source_file-preview').html();
+
+    var templateScript = Handlebars.compile(template);
+    var html = templateScript(data);
+
+    $("#content_integration").html(html);
+
+    // Select the correct type for each column
+    for(var i=0, l=data.files.length; i<l; i++) {
+
+        if ('column_types' in data.files[i]) {
+
+            var cols = data.files[i]['column_types'];
+            for(var j=0, m=cols.length; j<m; j++) {
+                var selectbox = $('div#content_integration div.template-source_file:eq(' + i + ') select.column_type:eq(' + j + ')');
+                var values = selectbox.find("option").map(function() { return $(this).val(); });
+
+                if ($.inArray( cols[j], values) >= 0) {
+                    selectbox.val(cols[j]);
                 }
-                colCpt++;
-            }
-            htmlCode += "</tr>\n";
-            cpt++;
-        }
 
-        for (var line of src.html_template.slice(8,12)) {
-            htmlCode += line.replace(/#FILENAME#/g, value.name);
+                // Check what is in the db
+                checkExistingData($('div#content_integration div.template-source_file:eq(' + i + ')'));
+            }
         }
-        for (var line of src.turtle_template) {
-            htmlCode += line.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        }
-        for (var line of src.html_template.slice(12,19)) {
-            htmlCode += line.replace(/#FILENAME#/g, value.name);
+    }
+}
+
+/**
+ * Get ttl representation of preview data
+ */
+function previewTtl(file_elem) {
+
+    var file_name = file_elem.find('.file_name').text();
+
+    // Get column types
+    var col_types = file_elem.find('.column_type').map(function() {
+        return $(this).val();
+    }).get();
+
+    // Find which column is disabled
+    var disabled_columns = [];
+    file_elem.find('.toggle_column').each(function( index ) {
+        if (!$(this).is(':checked')) {
+            disabled_columns.push(index + 1); // +1 to take into account the first non-disablable column
         }
     });
-    $('div#content_integration').html(htmlCode);
+
+    var service = new RestServiceJs("preview_ttl");
+    var model = { 'file_name': file_name,
+                  'col_types': col_types,
+                  'disabled_columns': disabled_columns };
+
+    service.post(model, function(data) {
+
+        // display received data
+        var template = $('#template-ttl-preview').html();
+
+        var templateScript = Handlebars.compile(template);
+        var html = templateScript(data);
+
+        file_elem.find(".preview_field").html(html);
+        file_elem.find(".preview_field").show();
+    });
 }
 
-function fillTtl(file_name, limit) {
+/**
+ * Compare the user data and what is already in the triple store
+ */
+function checkExistingData(file_elem) {
 
-    var idValidName = formatValidIdNameFile(file_name);
-    // Conversion to turtle
-    if (typeof limit === 'undefined') { limit = true; }
-    var turtle_template = "";
-    for (var line of $("#content_integration").data().turtle_template) {
-        turtle_template += line.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    }
+    var file_name = file_elem.find('.file_name').text();
 
-    var rawLength = ($("#colType_" + idValidName).html().match(/<td>/g) || []).length;
-    var col_types = {};
+    // Get column types
+    var col_types = file_elem.find('.column_type').map(function() {
+        return $(this).val();
+    }).get();
 
-    for (var i = 0; i < rawLength; i++) {
-        if ($('#header_' + idValidName + '_' + i).prop('checked')) {
-            col_types[i] = ($('#type_' + idValidName + '_' + i).find(":selected").html());
+    // Find which column is disabled
+    var disabled_columns = [];
+    file_elem.find('.toggle_column').each(function( index ) {
+        if (!$(this).is(':checked')) {
+            disabled_columns.push(index + 1); // +1 to take into account the first non-disablable column
         }
-    }
+    });
 
-    if (! limit)
-      $('#waitModal').modal('show');
+    var service = new RestServiceJs("check_existing_data");
+    var model = { 'file_name': file_name,
+                  'col_types': col_types,
+                  'disabled_columns': disabled_columns };
+
+    service.post(model, function(data) {
+        file_elem.find('.column_header').each(function( index ) {
+            if (data.headers_status[index] == 'present') {
+                $(this).find(".relation_present").first().show();
+                $(this).find(".relation_new").first().hide();
+            }
+            else {
+                $(this).find(".relation_present").first().hide();
+                $(this).find(".relation_new").first().show();
+            }
+        });
+
+        if (data.missing_headers.length > 0) {
+            file_elem.find(".message").first().html("The following columns are missing: " + data.missing_headers.join(', '));
+            file_elem.find(".message").first().show();
+        }
+        else {
+            file_elem.find(".message").first().html("");
+            file_elem.find(".message").first().hide();
+        }
+    });
+}
+
+/**
+ * Load a source_file into the triplestore
+ */
+function loadSourceFile(file_elem) {
+
+    var file_name = file_elem.find('.file_name').text();
+
+    // Get column types
+    var col_types = file_elem.find('.column_type').map(function() {
+        return $(this).val();
+    }).get();
+
+    // Find which column is disabled
+    var disabled_columns = [];
+    file_elem.find('.toggle_column').each(function( index ) {
+        if (!$(this).is(':checked')) {
+            disabled_columns.push(index + 1); // +1 to take into account the first non-disablable column
+        }
+    });
+
+    $('#waitModal').modal('show');
 
     var service = new RestServiceJs("load_data_into_graph");
     var model = { 'file_name': file_name,
                   'col_types': col_types,
-                  'limit': limit };
+                  'disabled_columns': disabled_columns  };
 
-    service.post(model, function(src) {
-        $('#ttl_' + idValidName).html(turtle_template + src.attribute_code + src.relation_code + src.domain_code);
-        for (var header of src.present_headers) {
-            $('#' + idValidName + "_" + header).attr("bgcolor", "green");
+    service.post(model, function(data) {
+        $('#waitModal').modal('hide');
+
+        if (data.status != "ok") {
+            file_elem.find(".insert_status").first().html(data.error);
+            if ('url' in data) {
+                file_elem.find(".insert_status").first().append("<br>You can view the ttl file here: <a href=\""+data.url+"\">"+data.url+"</a>");
+            }
+            file_elem.find(".insert_status").first().addClass('error');
+            file_elem.find(".insert_status").first().removeClass('success');
+            file_elem.find(".insert_status").first().show();
         }
-        for (var n_header of src.new_headers) {
-            $('#' + idValidName + "_" + n_header).attr("bgcolor", "blue");
+        else {
+            file_elem.find(".insert_status").first().html("Inserted " + data.total_triple_count + " lines");
+            file_elem.find(".insert_status").first().addClass('success');
+            file_elem.find(".insert_status").first().removeClass('error');
+            file_elem.find(".insert_status").first().show();
         }
 
-        if (! limit) {
-          $('#waitModal').modal('hide');
-
-          var serviceClean = new RestServiceJs("clean_ttl_directory");
-          var modelClean = { 'files_to_delete' : src.temp_ttl_file};
-          serviceClean.post(modelClean, function(src) {
-              console.log("clean ttl directory...");
-            });
-        }
+        // Check what is in the db now
+        $('.template-source_file').each(function( index ) {
+            checkExistingData($(this));
+        });
     });
 }

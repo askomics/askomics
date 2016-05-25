@@ -16,7 +16,7 @@ requires = [
     ]
 
 setup(name='Askomics',
-      version='0.1',
+      version='1.3',
       description='Askomics',
       long_description=README + '\n\n' + CHANGES,
       classifiers=[

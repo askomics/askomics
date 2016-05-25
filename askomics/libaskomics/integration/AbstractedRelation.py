@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+from askomics.libaskomics.utils import pformat_generic_object
 
 class AbstractedRelation(object):
     """
@@ -11,8 +12,8 @@ class AbstractedRelation(object):
         - DatatypeProperty binds an instance of a class with a string
           or a numeric value.
     In Askomics, an ObjectProperty can be represented as:
-        - a node on the display graph (relation_type = Entity).
-        - an attribute of a node (relation_type = Category).
+        - a node on the display graph (relation_type = entity).
+        - an attribute of a node (relation_type = category).
     All DatatypeProperty are represented as nodes attributes.
     Each relation has an uri composed by the database prefix (:), "has_"
     and an identifier that is the header of the tabulated file being
@@ -24,7 +25,6 @@ class AbstractedRelation(object):
     """
 
     def __init__(self, relation_type, identifier, rdfs_domain, rdfs_range):
-
         idx = identifier.find("@")
         type_range = identifier
 
@@ -33,10 +33,11 @@ class AbstractedRelation(object):
             identifier = identifier[0:idx]
         else:
             identifier = "has_"+identifier
-            
+
         self.uri = ":"+identifier
         self.label = identifier
         if relation_type == "Entity" or relation_type == "Category":
+
             self.relation_type = "owl:ObjectProperty"
             self.rdfs_range = ":" + type_range
         else:
@@ -53,7 +54,7 @@ class AbstractedRelation(object):
         self.label = "has_" + identifier
 
     def set_relation_type(self, relation_type):
-        if relation_type == "Entity" or relation_type == "Category":
+        if relation_type == "entity" or relation_type == "category":
             self.relation_type = "owl:ObjectProperty"
         else:
             self.relation_type = "owl:DatatypeProperty"
@@ -83,11 +84,7 @@ class AbstractedRelation(object):
         return self.rdfs_range
 
     def print_attr(self):
-        self.log.debug("uri = " + self.uri)
-        self.log.debug("label = " + self.label)
-        self.log.debug("relation_type = " + self.relation_type)
-        self.log.debug("domain = " + self.rdfs_domain)
-        self.log.debug("range = " + self.rdfs_range)
+        self.log.debug(pformat_generic_object(self))
 
     def to_dict(self):
         return {"uri": self.uri,

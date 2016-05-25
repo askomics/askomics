@@ -10,6 +10,7 @@
         <script src="//blueimp.github.io/JavaScript-Templates/js/tmpl.min.js"></script>
 
         <script src="static/js/bootstrap.js"></script>
+        <script src="static/js/handlebars-v4.0.5.js"></script>
         <script src="static/js/rest.js"></script>
         <script src="static/js/query-handler.js"></script>
         <script src="static/js/graph.js"></script>
@@ -95,7 +96,7 @@
             <div id="overview" class="row"></div>
         </div>
         <div id="content_statistics" class="container" hidden>
-            <div id="overview" class="row"></div>
+            <div id="statistics" class="row"></div>
         </div>
 
         <div id="content_about" class="container" hidden>
@@ -129,6 +130,7 @@
             <li>Aurélie Evrard</li>
             <li>Olivier Filangi</li>
             <li>Fabrice Legeai</li>
+            <li>Maël Kerbiriou</li>
           </ul>
         </div>
 
@@ -146,5 +148,100 @@
             </div><!-- /.modal-content -->
           </div><!-- /.modal-dialog -->
         </div><!-- /.modal -->
+
+        <!-- The template to display preview of source files -->
+        <script id="template-source_file-preview" type="text/x-handlebars-template">
+            {{#each files}}
+                <div class="template-source_file" style='text-align:center'>
+                    <h4 class="file_name">{{ this.name }}</h4>
+                    <br>
+                    {{#if error}}
+                        <p class="error">{{ error }}</p>
+                    {{else}}
+                        <table class='preview_table'>
+                            <thead>
+                                <tr>
+                                {{#each headers}}
+                                    <th class='column_header'>
+                                        {{#unless @first}}
+                                            <input type='checkbox' class='toggle_column' checked />
+                                        {{/unless}}
+                                        {{ this }}
+                                        <img src='/static/images/icons/ok.png' class='relation_present' title='Data with this name is already present in the database' width='24' height='24' />
+                                        <img src='/static/images/icons/new.png' class='relation_new' title='No data with this name was found in the database' width='24' height='24' />
+                                    </th>
+                                {{/each}}
+
+                                </tr>
+                                <tr>
+                                {{#each headers}}
+                                    <th>
+                                        <select class='column_type'>
+                                            {{#if @first}}
+                                                <optgroup label='Relationship'>
+                                                    <option value='entity_start'>Entity (Start)</option>
+                                                    <option value='entity'>Entity</option>
+                                            {{else}}
+                                                <optgroup label='Attributes'>
+                                                    <option value='numeric'>Numeric</option>
+                                                    <option value='text'>Text</option>
+                                                    <option value='category'>Category</option>
+                                                </optgroup>
+                                                <optgroup label='Relationship'>
+                                                    <option value='entity'>Entity</option>
+                                                </optgroup>
+                                            {{/if}}
+                                        </select>
+                                    </th>
+                                {{/each}}
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{#each preview_data}}
+                                    <tr>
+                                        {{#each this}}
+                                            <td>
+                                                {{ this }}
+                                            </td>
+                                        {{/each}}
+                                    </tr>
+                                {{/each}}
+                            </tbody>
+                        </table>
+                        <br><br>
+                        <pre class='preview_field'>
+                        </pre>
+                        <br>
+                        <p class="message warning" style="display: none"></p><br />
+                        <p class="insert_status" style="display: none"></p><br />
+                        <input type="button" class="preview_button" value="Preview RDF" />
+                        <input type="button" class="load_data" value="Insert in database" />
+                    {{/if}}
+                </div>
+            {{/each}}
+        </script>
+
+        <!-- The template to display ttl preview -->
+        <script id="template-ttl-preview" type="text/x-handlebars-template">{{ header }}
+
+=============
+=  Content  =
+=============
+
+{{ content_ttl }}
+
+=================
+=  Abstraction  =
+=================
+
+{{ abstraction_ttl }}
+
+======================
+=  Domain knowledge  =
+======================
+
+{{ domain_knowledge_ttl }}
+        </script>
     </body>
 </html>

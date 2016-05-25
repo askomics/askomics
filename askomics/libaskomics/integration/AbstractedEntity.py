@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+from askomics.libaskomics.utils import pformat_generic_object
 
 class AbstractedEntity(object):
     """
@@ -22,8 +23,7 @@ class AbstractedEntity(object):
         return self.label
 
     def print_attr(self):
-        self.log.debug("uri = " + self.uri)
-        self.log.debug("label = " + self.label)
+        self.log.debug(pformat_generic_object(self))
 
     def to_dict(self):
         return {"uri": self.uri,

@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 import os, time, tempfile
+from pprint import pformat
 from SPARQLWrapper import SPARQLWrapper, JSON
 import logging
 
@@ -20,7 +21,18 @@ class QueryLauncher(ParamManager):
 
         self.log = logging.getLogger(__name__)
 
-    def execute_query(self, query):
+    def execute_query(self, query, log_raw_results=True):
+        """Params:
+            - libaskomics.rdfdb.SparqlQuery
+            - log_raw_results: if True the raw json response is logged. Set to False
+            if you're doing a select and parsing the results with parse_results.
+        """
+        if self.log.isEnabledFor(logging.DEBUG):
+            # Prefixes should always be the same, so drop them for logging
+            query_log = '\n'.join(line for line in query.split('\n')
+                                  if not line.startswith('PREFIX '))
+            self.log.debug("----------- QUERY --------------\n%s", query_log)
+
         urlupdate = None
         if self.is_defined("askomics.updatepoint"):
             urlupdate = self.get_param("askomics.updatepoint")
@@ -55,26 +67,38 @@ class QueryLauncher(ParamManager):
             data_endpoint.setReturnFormat(JSON)
             results = data_endpoint.query().convert()
 
+        if log_raw_results and self.log.isEnabledFor(logging.DEBUG):
+            self.log.debug("------- RAW RESULTS --------------\n%s", pformat(results))
+
+
         return results
 
     def parse_results(self, json_res):
-
-        return [
-            {
-                sparql_variable: entry[sparql_variable]["value"]
-                for sparql_variable in entry.keys()
-            } for entry in json_res["results"]["bindings"]
+        parsed =  [
+                {
+                    sparql_variable: entry[sparql_variable]["value"]
+                    for sparql_variable in entry.keys()
+                } for entry in json_res["results"]["bindings"]
             ]
+
+        # debug log is guarded since formatting is time consuming
+        if self.log.isEnabledFor(logging.DEBUG):
+            if not parsed:
+                self.log.debug("-------- NO RESULTS --------------")
+            else:
+                if len(parsed) > 10:
+                    log_res = pformat(parsed[:10])[:-1]
+                    log_res += ',\n  ...] (%d results omitted)' % (len(parsed) - 10, )
+                else:
+                    log_res = pformat(parsed)
+                self.log.debug("----------- RESULTS --------------\n%s", log_res)
+
+        return parsed
 
 
     def process_query(self, query):
-        self.log.debug("----------- QUERY --------------")
-        self.log.debug(query)
-        json_query = self.execute_query(query)
+        json_query = self.execute_query(query, log_raw_results=False)
         results = self.parse_results(json_query)
-        self.log.debug("----------- RESULTS --------------")
-        self.log.debug(results)
-
         return results
 
     def format_results_csv(self, table):
@@ -84,46 +108,43 @@ class QueryLauncher(ParamManager):
             fp.write(table)
         return "/static/results/"+os.path.basename(fp.name)
 
+    # TODO see if we can make a rollback in case of malformed data
+    def load_data(self, url):
+        """
+        Load a ttl file accessible from http into the triple store using LOAD method
 
-    def build_query_load(self, query_string_list, fpfile, header=False):
-        #with tempfile.NamedTemporaryFile(dir="askomics/ttl/", suffix=".ttl",mode="w",delete=False) as fp:
-        if header:
-            fpfile.write(self.header_ttl_config())
+        :param url: URL of the file to load
+        :return: The status
+        """
+        self.log.debug("Loading into triple store (LOAD method) the content of: %s", url)
 
-        sub_query_string_list = ""
-        for i, elt in enumerate(query_string_list): # FIXME i is unused
-            sub_query_string_list += elt + "\n"
-        if len(sub_query_string_list) > 0:
-            fpfile.write(sub_query_string_list)
-        return
-
-
-    def update_query_load(self, fpfile, url):
-        self.log.debug("==================>"+url)
-        query_string = "LOAD <"+url+"/ttl/"+os.path.basename(fpfile.name)+"> INTO GRAPH"+ " <" + self.get_param("askomics.graph")+ ">"
-        self.log.debug(query_string)
+        query_string = "LOAD <"+url+"> INTO GRAPH"+ " <" + self.get_param("askomics.graph")+ ">"
         res = self.execute_query(query_string)
-        self.log.debug(res.info())
-        return
 
-    def update_query_insert_data(self, query_string_list):
-        header_sparql = self.header_sparql_config()
-        max_list = int(self.get_param("askomics.max_content_size_to_update_database"))
-        #f = open('Insert.txt', 'a')
-        while query_string_list:
-            sub_query_string_list = query_string_list[:min(max_list, len(query_string_list))]
-            del query_string_list[:min(max_list, len(query_string_list))]
-            query_string = header_sparql
-            query_string += "\n"
-            query_string += "INSERT DATA {\n"
-            query_string += "GRAPH "+ "<" + self.get_param("askomics.graph")+ ">" +"\n"
-            query_string += "{\n"
-            for i, elt in enumerate(sub_query_string_list): # FIXME i is unused
-                query_string += elt + "\n"
-            query_string += "}\n"
-            query_string += "}\n"
-            self.log.debug(query_string[:2000])
-            res = self.execute_query(query_string)
-            self.log.debug(res.info())
+        return res
 
-        return
+
+    # TODO see if we can make a rollback in case of malformed data
+    def insert_data(self, ttl_string, ttl_header=""):
+        """
+        Load a ttl string into the triple store using INSERT DATA method
+
+        :param ttl_string: ttl content to load
+        :param ttl_header: the ttl header associated with ttl_string
+        :return: The status
+        """
+
+        self.log.debug("Loading into triple store (INSERT DATA method) the content: "+ttl_string[:500]+"[...]")
+
+        query_string = ttl_header
+        query_string += "\n"
+        query_string += "INSERT DATA {\n"
+        query_string += "GRAPH "+ "<" + self.get_param("askomics.graph")+ ">" +"\n"
+        query_string += "{\n"
+        query_string += ttl_string + "\n"
+        query_string += "}\n"
+        query_string += "}\n"
+
+        res = self.execute_query(query_string)
+
+        return res

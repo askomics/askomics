@@ -1,7 +1,7 @@
 SELECT DISTINCT ?relation
-FROM #graph#
+FROM $graph
 WHERE {?class rdf:type owl:Class .
        OPTIONAL { ?relation rdfs:domain ?class } .
        OPTIONAL { ?relation rdfs:range ?range } .
-       VALUES ?class { :#nodeClass# }
+       VALUES ?class { :$nodeClass }
       }
