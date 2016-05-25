@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e;
 
 AGRAPHUSER=test
 AGRAPHPASS=xyzzy
@@ -13,6 +14,13 @@ function usage {
     echo " - args2: deployment mode, production or development (default=prod)"
     exit 1
 }
+
+#trap to remove service docker launch by this script
+function remove_services_docker {
+  sudo docker rm -f `sudo docker ps -n=2 | grep askomics | awk '{print $1}'` 2>/dev/null
+}
+trap remove_services_docker ERR
+
 
 DIRROOT=`dirname $0`
 
