@@ -243,8 +243,6 @@ function insertSuggestions2(slt_node, nodeList, linkList) {
           relation: objectsTarget[uri][rel],
           label: DK.removePrefix(objectsTarget[uri][rel]),
           linkindex: slt_node.nlink[suggestedList[uri].id],
-          parent_id: slt_node.id,
-          child_id: suggestedList[uri].id
         }
 
         link.source.weight++;
@@ -260,14 +258,10 @@ function insertSuggestions2(slt_node, nodeList, linkList) {
         suggestedList[uri] = suggestedNode ;
         slt_node.nlink[suggestedList[uri].id] = 0;
         suggestedList[uri].nlink[slt_node.id] = 0;
-      } else {
-        console.log("EXIST*************************");
       }
 
       for (rel in subjectsTarget[uri]) {
-        console.log(slt_node.nlink[suggestedList[uri].id]);
         slt_node.nlink[suggestedList[uri].id]++;
-        console.log(slt_node.nlink[suggestedList[uri].id]);
         suggestedList[uri].nlink[slt_node.id]++;
 
         var link = {
@@ -276,17 +270,11 @@ function insertSuggestions2(slt_node, nodeList, linkList) {
           relation: subjectsTarget[uri][rel],
           label: DK.removePrefix(subjectsTarget[uri][rel]),
           linkindex: slt_node.nlink[suggestedList[uri].id],
-          parent_id: suggestedList[uri].id,
-          child_id:  slt_node.id
         }
         link.source.weight++;
-        console.log("++++++++++++++++++++++++LINK OBJ:"+JSON.stringify(link));
         linkList.push(link);
       }
     }
-    console.log("SLTNODE:"+JSON.stringify(linkList));
-    //throw new Error("Something went badly wrong!");
-    console.log("LINKS="+JSON.stringify(link));
     // add neighbours of a node to the graph as propositions.
 
 }
@@ -686,7 +674,7 @@ function myGraph(AGB,DK) {
                     .data(links, function (d) {
                        if (!d) return "0-0";
                         console.log("YOUPIE========>"+JSON.stringify(d));
-                        return d.parent_id + "-" + d.child_id;
+                        return d.source.id + "-" + d.target.id + "-" + d.linkindex ;
                     });
 
         vis.append("svg:defs").append("svg:marker")
@@ -702,7 +690,8 @@ function myGraph(AGB,DK) {
 
 
         link.enter().append("svg:path")
-            .attr("id", function (d) { return d.parent_id + "-" + d.child_id; })
+            .attr("id", function (d) { return d.source.id + "-" + d.target.id + "-" + d.linkindex ; })
+            .attr("label", function (d) { return d.label ; })
             .attr("class", "link")
             .attr("marker-end", "url(#marker)")
             .style("stroke-dasharray", "5,3")
@@ -769,10 +758,22 @@ function myGraph(AGB,DK) {
                 d3.select(this).style("stroke-width", 2);
             });
 
-        link.append("title")
-            .text(function (d) { return d.value; });
+        /* append for each link a label to print relation property name */
+        $('path').each(function (index, value) {
+          // No label to print
+          if ($(this).attr('label') === undefined )
+            return ;
 
-        link.exit().remove();
+          vis.append("text")
+                      .attr("style", "text-anchor:middle; font: 16px sans-serif;")
+                      .attr("dy", "-5")
+                      .append("textPath")
+                      .attr("xlink:href","#"+$(this).attr('id'))
+                      .attr("startOffset", "25%")
+                      .text($(this).attr('label'));
+        });
+
+        //link.exit().remove();
 
         var node = vis.selectAll("g.node")
                     .data(nodes, function (d) { return d.id; });
@@ -956,40 +957,24 @@ function myGraph(AGB,DK) {
             node.attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
 
             link.attr("d", function(d) {
-              var nlinks = d.source.nlink[d.target.id];
+              var nlinks = d.source.nlink[d.target.id]; // same as d.target.nlink[d.source.id]
               /* Manage a line if weigth = 1 */
-              console.log("--------------------------------"+d.label);
-
-            console.log(d.source.name+":"+d.source.nlink[d.target.id]);
-            console.log(d.target.name+":"+d.target.nlink[d.source.id]);
-            //  console.log(d.source.nlink[d.target.id]);
-            console.log(d.linkindex);
-              if ( nlinks == 1 ) {
+              if ( nlinks <= 1 ) {
                 return "M" + d.source.x + "," + d.source.y + "L" +d.target.x + "," + d.target.y  ;
-              }
-              /* sinon calcul d une courbure */
+              } else {
+                /* sinon calcul d une courbure */
                 var dx = d.target.x - d.source.x,
-                    dy = d.target.y - d.source.y,
-                    dr = Math.sqrt(dx * dx + dy * dy);
-                //console.log("DR:"+JSON.stringify(d.source.weight));
-                // get the total link numbers between source and target node
-                var lTotalLinkNum = nlinks; //mLinkNum[d.source.id + "," + d.target.id] || mLinkNum[d.target.id + "," + d.source.id];
+                  dy = d.target.y - d.source.y,
+                  dr = Math.sqrt(dx * dx + dy * dy);
 
-                if(lTotalLinkNum > 1)
-                {
+                // if there are multiple links between these two nodes, we need generate different dr for each path
+                dr = dr/(1 + (1/nlinks) * (d.linkindex - 1));
 
-                    // if there are multiple links between these two nodes, we need generate different dr for each path
-                    dr = dr/(1 + (1/lTotalLinkNum) * (d.linkindex - 1));
-                } else {
-                  console.log(d.source.nlink[d.target.id]);
-                  console.log(d.target.nlink[d.source.id]);
-                  console.log(d.linkindex);
-                  //dr = 0;
-                }
                 // generate svg path
                 return "M" + d.source.x + "," + d.source.y +
                        "A" + dr + "," + dr + " 0 0 1," + d.target.x + "," + d.target.y +
                        "A" + dr + "," + dr + " 0 0 0," + d.source.x + "," + d.source.y;
+              }
             });
 
 /*
