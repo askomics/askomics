@@ -1,5 +1,5 @@
 SELECT ?subject ?relation ?object
-FROM  #graph#
+FROM  $graph
 WHERE {
   ?subject rdf:type owl:Class .
   ?object rdf:type owl:Class .

@@ -28,6 +28,7 @@ class AbstractedRelation(object):
         idx = identifier.find("@")
         type_range = identifier
 
+        #Keep compatibility with old version
         if idx  != -1:
             type_range = identifier[idx+1:len(identifier)]
             identifier = identifier[0:idx]
@@ -36,8 +37,10 @@ class AbstractedRelation(object):
 
         self.uri = ":"+identifier
         self.label = identifier
-        if relation_type == "Entity" or relation_type == "Category":
+        print(relation_type)
+        print(identifier)
 
+        if relation_type == "entity" or relation_type == "Category":
             self.relation_type = "owl:ObjectProperty"
             self.rdfs_range = ":" + type_range
         else:

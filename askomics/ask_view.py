@@ -90,10 +90,7 @@ class AskView(object):
 
                 shortcuts_list = tse.has_setting(uri, 'shortcut')
 
-                src = Node(class_name, # We don't care about counter in stats
-                    uri,
-                    class_name,
-                    shortcuts_list)
+                src = Node(class_name,uri,class_name,shortcuts_list)
 
                 attributes, nodes, links = tse.get_neighbours_for_node(src, None)
 

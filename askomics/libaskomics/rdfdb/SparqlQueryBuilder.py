@@ -159,7 +159,7 @@ class SparqlQueryBuilder(ParamManager):
         """
 
         yield 'SELECT DISTINCT {projection_vars} FROM <{graph}>'.format(
-                projection_vars = ' '.join('?'+var['id'] for var in json['display'] if 'id' in var),
+                projection_vars = ' '.join('?'+str(var['id']) for var in json['display'] if 'id' in var),
                 graph = self.get_param("askomics.graph"),
             )
 

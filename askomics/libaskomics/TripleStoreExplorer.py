@@ -91,9 +91,9 @@ class TripleStoreExplorer(ParamManager, CounterManager):
         for result in results:
             uri = result["nodeUri"]
             label = result["nodeLabel"]
-            #node_id = label + str(self.get_new_id(label)) #FIXME ID have to be manage in Javascript View
+            node_id = label + str(self.get_new_id(label)) #FIXME ID have to be manage in Javascript View
             shortcuts_list = self.has_setting(uri, 'shortcut') #FIXME Utility of this ?
-            nodes.append(Node(uri, label, shortcuts_list))
+            nodes.append(Node(node_id, uri, label, shortcuts_list))
 
         return nodes
 
@@ -125,7 +125,7 @@ class TripleStoreExplorer(ParamManager, CounterManager):
                 listEntities[elt['subject']]=0
 
         sparql_template = self.get_template_sparql(self.ASKOMICS_abstractionEntityUser)
-        query = sqb.load_from_file(sparql_template, {"#entities#" : ' '.join(["<"+s+">" for s in listEntities.keys()])}).query
+        query = sqb.load_from_file(sparql_template, {"entities" : ' '.join(["<"+s+">" for s in listEntities.keys()])}).query
         results = ql.process_query(query)
 
         data['entities'] = results

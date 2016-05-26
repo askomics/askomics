@@ -41,6 +41,17 @@ var AskomicsUserAbstraction = function () {
     }
 
     /* Get value of an attribut with RDF format like rdfs:label */
+    AskomicsUserAbstraction.prototype.removePrefix = function(uriEntity) {
+      var idx =  uriEntity.indexOf("#");
+      if ( idx == -1 ) {
+        idx =  uriEntity.indexOf(":");
+        if ( idx == -1 ) return;
+      }
+      uriEntity = uriEntity.substr(idx+1,uriEntity.length);
+      return uriEntity;
+    }
+
+    /* Get value of an attribut with RDF format like rdfs:label */
     AskomicsUserAbstraction.prototype.getAttrib = function(uriEntity,attrib) {
         if (!(uriEntity in entityInformationList)) {
           console.error(JSON.stringify(uriEntity) + " is not referenced in the user abstraction !");
@@ -86,8 +97,12 @@ var AskomicsUserAbstraction = function () {
       var objectsTarget = {} ;
       var subjectsTarget = {} ;
     //  var relationsRes = [];
-
+      console.log("URI:"+UriSelectedNode);
       for (i in tripletSubjectRelationObject) {
+
+        console.log("objet:"+tripletSubjectRelationObject[i]['object']);
+        console.log("sujet:"+tripletSubjectRelationObject[i]['subject']);
+
         if ( tripletSubjectRelationObject[i]['object'] == UriSelectedNode ) {
           if (! (tripletSubjectRelationObject[i]['subject'] in subjectsTarget) ) {
             subjectsTarget[tripletSubjectRelationObject[i]['subject']] = [] ;
@@ -142,6 +157,8 @@ var AskomicsUserAbstraction = function () {
       this.setSPARQLVariateId(node);
       this.setIdNode(node);
       node.name = node.SPARQLid;
+      node.weight = 0;
+      node.nlink = {}; // number of relation with a node
       return node;
     }
 
@@ -151,6 +168,10 @@ var AskomicsUserAbstraction = function () {
       node.y = y;
       this.setIdNode(node);
       node.name = node.label;
+      node.weight = 0;
+      node.nlink = {}; // number of relation with a node.
+      // For a suggested node = number of relation between this and the current selected node
+      node.nlink[node.id] = 0;
       return node;
     }
   }
@@ -198,23 +219,35 @@ function insertSuggestions2(slt_node, nodeList, linkList) {
     subjectsTarget = tab[1]; /* All triplets which slt_node URI are the object */
 
     var suggestedList = {} ;
-
+    console.log(JSON.stringify(objectsTarget));
     for ( uri in objectsTarget ) {
+      /* creatin node */
       suggestedNode = DK.buildBaseNode(uri);
+      /* specific attribute for suggested node */
       AGB.setSuggestedNode(suggestedNode,slt_node.x,slt_node.y);
-      console.log("ADD OBJET:"+JSON.stringify(suggestedNode));
+      /* adding in the node list to create D3.js graph */
       nodeList.push(suggestedNode);
+      /* We create a unique instance and add all possible relation between selected node and this suggested node */
       suggestedList[uri] = suggestedNode ;
+      slt_node.nlink[suggestedList[uri].id] = 0;
+      suggestedList[uri].nlink[slt_node.id] = 0;
 
-      for (i in objectsTarget[uri]) {
-        link = {
+      for (rel in objectsTarget[uri]) {
+        /* increment the number of link between the two nodes */
+        slt_node.nlink[suggestedList[uri].id]++;
+        suggestedList[uri].nlink[slt_node.id]++;
+
+        var link = {
           source: slt_node,
           target: suggestedList[uri],
-          relation: objectsTarget[uri][i],
-          label: objectsTarget[uri][i],
+          relation: objectsTarget[uri][rel],
+          label: DK.removePrefix(objectsTarget[uri][rel]),
+          linkindex: slt_node.nlink[suggestedList[uri].id],
           parent_id: slt_node.id,
           child_id: suggestedList[uri].id
         }
+
+        link.source.weight++;
         linkList.push(link);
       }
     }
@@ -223,23 +256,37 @@ function insertSuggestions2(slt_node, nodeList, linkList) {
       if ( ! (uri in suggestedList) ) {
         suggestedNode = DK.buildBaseNode(uri);
         AGB.setSuggestedNode(suggestedNode,slt_node.x,slt_node.y);
-        console.log("ADD SUJET:"+JSON.stringify(suggestedNode));
         nodeList.push(suggestedNode);
+        suggestedList[uri] = suggestedNode ;
+        slt_node.nlink[suggestedList[uri].id] = 0;
+        suggestedList[uri].nlink[slt_node.id] = 0;
+      } else {
+        console.log("EXIST*************************");
       }
-      suggestedList[uri] = suggestedNode ;
-      for (i in subjectsTarget[uri]) {
-        link = {
+
+      for (rel in subjectsTarget[uri]) {
+        console.log(slt_node.nlink[suggestedList[uri].id]);
+        slt_node.nlink[suggestedList[uri].id]++;
+        console.log(slt_node.nlink[suggestedList[uri].id]);
+        suggestedList[uri].nlink[slt_node.id]++;
+
+        var link = {
           source: suggestedList[uri],
           target: slt_node,
-          relation: subjectsTarget[uri][i],
-          label: subjectsTarget[uri][i],
-          parent_id: slt_node.id,
-          child_id: suggestedList[uri].id
+          relation: subjectsTarget[uri][rel],
+          label: DK.removePrefix(subjectsTarget[uri][rel]),
+          linkindex: slt_node.nlink[suggestedList[uri].id],
+          parent_id: suggestedList[uri].id,
+          child_id:  slt_node.id
         }
+        link.source.weight++;
+        console.log("++++++++++++++++++++++++LINK OBJ:"+JSON.stringify(link));
         linkList.push(link);
       }
     }
-
+    console.log("SLTNODE:"+JSON.stringify(linkList));
+    //throw new Error("Something went badly wrong!");
+    console.log("LINKS="+JSON.stringify(link));
     // add neighbours of a node to the graph as propositions.
 
 }
@@ -632,14 +679,32 @@ function myGraph(AGB,DK) {
     };
 
     var update = function () {
-        var link = vis.selectAll("line")
+
+        console.log("============================== UPDATE ========================================");
+        console.log(JSON.stringify(links))
+        var link = vis.selectAll("path")
                     .data(links, function (d) {
+                       if (!d) return "0-0";
+                        console.log("YOUPIE========>"+JSON.stringify(d));
                         return d.parent_id + "-" + d.child_id;
                     });
 
-        link.enter().append("line")
+        vis.append("svg:defs").append("svg:marker")
+                       .attr("id", "marker")
+                       .attr("viewBox", "0 -5 10 10")
+                       .attr("refX", 15)
+                       .attr("refY", -1.5)
+                       .attr("markerWidth", 6)
+                       .attr("markerHeight", 6)
+                       .attr("orient", "auto")
+                       .append("path")
+                       .attr("d", "M0,-5L10,0L0,5");
+
+
+        link.enter().append("svg:path")
             .attr("id", function (d) { return d.parent_id + "-" + d.child_id; })
             .attr("class", "link")
+            .attr("marker-end", "url(#marker)")
             .style("stroke-dasharray", "5,3")
             .style("opacity", "0.3")
             .on('mousedown', function(d) {
@@ -890,15 +955,59 @@ function myGraph(AGB,DK) {
         force.on("tick", function () {
             node.attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
 
+            link.attr("d", function(d) {
+              var nlinks = d.source.nlink[d.target.id];
+              /* Manage a line if weigth = 1 */
+              console.log("--------------------------------"+d.label);
+
+            console.log(d.source.name+":"+d.source.nlink[d.target.id]);
+            console.log(d.target.name+":"+d.target.nlink[d.source.id]);
+            //  console.log(d.source.nlink[d.target.id]);
+            console.log(d.linkindex);
+              if ( nlinks == 1 ) {
+                return "M" + d.source.x + "," + d.source.y + "L" +d.target.x + "," + d.target.y  ;
+              }
+              /* sinon calcul d une courbure */
+                var dx = d.target.x - d.source.x,
+                    dy = d.target.y - d.source.y,
+                    dr = Math.sqrt(dx * dx + dy * dy);
+                //console.log("DR:"+JSON.stringify(d.source.weight));
+                // get the total link numbers between source and target node
+                var lTotalLinkNum = nlinks; //mLinkNum[d.source.id + "," + d.target.id] || mLinkNum[d.target.id + "," + d.source.id];
+
+                if(lTotalLinkNum > 1)
+                {
+
+                    // if there are multiple links between these two nodes, we need generate different dr for each path
+                    dr = dr/(1 + (1/lTotalLinkNum) * (d.linkindex - 1));
+                } else {
+                  console.log(d.source.nlink[d.target.id]);
+                  console.log(d.target.nlink[d.source.id]);
+                  console.log(d.linkindex);
+                  //dr = 0;
+                }
+                // generate svg path
+                return "M" + d.source.x + "," + d.source.y +
+                       "A" + dr + "," + dr + " 0 0 1," + d.target.x + "," + d.target.y +
+                       "A" + dr + "," + dr + " 0 0 0," + d.source.x + "," + d.source.y;
+            });
+
+/*
             link.attr("x1", function (d) { return d.source.x; })
                 .attr("y1", function (d) { return d.source.y; })
                 .attr("x2", function (d) { return d.target.x; })
                 .attr("y2", function (d) { return d.target.y; });
+*/
+                /*
+            link.append("svg:title")
+               .text(function(d, i) {
+                  return d.label;
+               });*/
         });
 
         // Restart the force layout.
         force.charge(-500)
-            .linkDistance(75)
+            .linkDistance(175)
             .size([w, h])
             .start();
     };
