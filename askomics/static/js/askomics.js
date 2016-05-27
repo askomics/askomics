@@ -136,7 +136,7 @@ function emptyDatabase(value) {
 
     if (value == 'no') {
         $("#deleteButtons").empty();
-        $("#deleteButtons").append("<p><button id='btn-empty' onclick='emptyDatabase(false)' class='btn btn-danger'>Empty database</button></p>");
+        $("#deleteButtons").append("<p><button id='btn-empty' onclick='emptyDatabase(false)' class='btn btn-danger'>Clean database</button></p>");
         return
     }
 
