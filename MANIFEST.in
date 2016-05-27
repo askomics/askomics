@@ -1,2 +1,3 @@
+include startVEnv.sh
 include *.txt *.ini *.cfg *.rst
 recursive-include askomics *.ico *.png *.css *.gif *.jpg *.pt *.txt *.mak *.mako *.js *.html *.xml
