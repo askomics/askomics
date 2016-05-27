@@ -1,5 +1,5 @@
 include startVEnv.sh
-include *.txt *.ini *.cfg *.rst
-recursive-include askomics *.ico *.png *.css *.gif *.jpg *.pt *.txt *.mak *.mako *.js *.html *.xml
+include *.txt configs/*.ini *.cfg *.rst *.md
+recursive-include askomics *.ico *.png *.css *.gif *.jpg *.pt *.txt *.mak *.mako *.js *.html *.xml *.ttf *.sparql
 prune askomics/static/results
 prune askomics/ttl

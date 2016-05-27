@@ -4,7 +4,7 @@ set -e
 
 DIR_ASKOMICS=$(dirname "$0")
 
-DIR_CONFIG="${DIR_ASKOMICS}"
+DIR_CONFIG="${DIR_ASKOMICS}/configs"
 DIR_VENV=${DIR_VENV:-"${DIR_ASKOMICS}/venv"}
 
 PYTHON=${PYTHON:-"python3"}
