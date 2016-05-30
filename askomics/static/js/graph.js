@@ -116,8 +116,6 @@ function detailsOf(elemUri, elemId, attributes, nameDiv, data) {
 
           //  console.log(attributes[i].uri);
             service.post(model, function(d) {
-              //  var datalist = $("<datalist></datalist>").attr("id", "opt_" + id);
-                inp.append($("<option></option>").attr("value", "").attr("selected", "selected"));
                 var sizeSelect = 3 ;
                 if ( d.value.length<3 ) sizeSelect = d.value.length;
                 if ( d.value.length === 0 ) sizeSelect = 1;
@@ -131,7 +129,6 @@ function detailsOf(elemUri, elemId, attributes, nameDiv, data) {
                 } else if (d.value.length == 1) {
                   inp.append($("<option></option>").attr("value", d.value[0]).append(d.value[0]));
                 }
-              //  inp.append(datalist);
               hideModal();
             });
         } else {
@@ -164,7 +161,13 @@ function detailsOf(elemUri, elemId, attributes, nameDiv, data) {
                 .addClass('glyphicon-eye-close')
                 .addClass('display');
 
-        details.append(lab).append(icon).append(inp);
+        var removeIcon = $('<span class="glyphicon glyphicon-remove display"></span>');
+        removeIcon.click(function() { inp.val(null).trigger("change"); });
+
+        details.append(lab)
+               .append(icon)
+               .append(removeIcon)
+               .append(inp);
 
         inp.change(function() {
             var value = $(this).find('#'+id).val();
@@ -181,7 +184,7 @@ function detailsOf(elemUri, elemId, attributes, nameDiv, data) {
             removeFilterNum(id);
             removeFilterStr(id);
 
-            if (value === "") {
+            if (value === "" || value === null) {
                 if (!isDisplayed(id)) {
                     removeConstraint(id);
 
@@ -626,9 +629,6 @@ function myGraph() {
 
                         if (prev_data)
                             hideSuggestions(prev_data.id); // Hide suggestions on previous node
-
-                        // save the query in the download button
-                        launchQuery(0, 30, true);
                     });
                 });
 
