@@ -139,13 +139,15 @@ class QueryLauncher(ParamManager):
 
         return res
 
-    def fuseki_load_data(self, filename):
+    def upload_data(self, filename):
         """
         Load a ttl file into the triple store using requests module and Fuseki
         upload method which allows upload of big data into Fuseki (instead of LOAD method).
 
         :param filename: name of the file, fp.name from Source.py
         :return: response of the request and queryTime
+
+        Not working for Virtuoso because there is no upload files url.
         """
         self.log.debug("Loading into triple store (HTTP method) the content of: %s", filename)
 
@@ -163,7 +165,7 @@ class QueryLauncher(ParamManager):
         queryTime = time1 - time0
 
         if self.log.isEnabledFor(logging.DEBUG):
-            self.log.debug("------- FUSEKI LOAD DONE --------- (t=%.3fs)\n%s", queryTime,  pformat(response))
+            self.log.debug("------- UPLOAD DONE --------- (t=%.3fs)\n%s", queryTime,  pformat(response))
 
         return response
 
