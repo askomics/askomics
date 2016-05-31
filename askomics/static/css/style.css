@@ -46,7 +46,7 @@ pre {
 
 .display {
     float: right;
-    right: 3%;
+    padding-right: 1%;
     font-size: 16px;
     padding-top: 5px;
 }

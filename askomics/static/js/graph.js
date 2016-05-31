@@ -67,6 +67,12 @@ function insertSuggestions(prev_node, slt_node, expansionDict, nodeList, linkLis
     $("#svgdiv").data({ last_counter: expansionDict.last_counter, last_new_counter : expansionDict.last_new_counter });
 }
 
+function makeRemoveIcon(field) {
+    var removeIcon = $('<span class="glyphicon glyphicon-remove display"></span>');
+    removeIcon.click(function() { field.val(null).trigger("change"); });
+    return removeIcon;
+}
+
 function detailsOf(elemUri, elemId, attributes, nameDiv, data) {
     // Add attributes of the selected node on the right side of AskOmics
 
@@ -84,7 +90,9 @@ function detailsOf(elemUri, elemId, attributes, nameDiv, data) {
         var nameLab = $("<label></label>").attr("for",elemId).text("Name");
         var nameInp = $("<input/>").attr("id", "lab_" + elemId).addClass("form-control");
 
-        details.append(nameLab).append(nameInp);
+        details.append(nameLab)
+               .append(makeRemoveIcon(nameInp))
+               .append(nameInp);
 
         nameInp.change(function(d) {
             var value = $(this).val();
@@ -146,7 +154,8 @@ function detailsOf(elemUri, elemId, attributes, nameDiv, data) {
 
               tr = $("<tr></tr>");
               tr.append($("<td></td>").append(v));
-              v = $("<input/>").attr("id",id).attr("type", "text").addClass("form-control");
+              v = $('<input type="text" class="form-control"/>').attr("id",id);
+              inp.val = v.val.bind(v);
               tr.append($("<td></td>").append(v));
               inp.append(tr);
             } else {
@@ -161,12 +170,9 @@ function detailsOf(elemUri, elemId, attributes, nameDiv, data) {
                 .addClass('glyphicon-eye-close')
                 .addClass('display');
 
-        var removeIcon = $('<span class="glyphicon glyphicon-remove display"></span>');
-        removeIcon.click(function() { inp.val(null).trigger("change"); });
-
         details.append(lab)
+               .append(makeRemoveIcon(inp))
                .append(icon)
-               .append(removeIcon)
                .append(inp);
 
         inp.change(function() {
