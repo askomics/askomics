@@ -1,14 +1,29 @@
+/*jshint esversion: 6 */
+
+/*
+
+http://yuml.me/diagram/scruffy/class/draw
+
+[AskomicsNode|*id:string;*x:float;*y:float;*weight:int|SPARQLid:string;suggested:bool;name:string;nlinks:Array(int)|doShiz()]<>-orders*>
+[AskomicsLinks|suggested:bool;uri:string;label:string;linkindex:int]
+[AskomicsLinks]<>--source[AskomicsNode]
+[AskomicsLinks]<>--target[AskomicsNode]
+[AskomicsGraphBuilder]
+[AskomicsUserAbstraction|tripletSubjectRelationObject:Array(Triple(Subject Relation Object));entityInformationList:Map(uri - Array(String))|updateOntology()]
+*/
+
 /*
   CLASSE AskomicsUserAbstraction
   Manage Abstraction storing in the TPS.
 */
 var AskomicsUserAbstraction = function () {
+    'use strict';
     const prefix = {
       'rdf': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
       'xsd': 'http://www.w3.org/2001/XMLSchema#',
       'rdfs':'http://www.w3.org/2000/01/rdf-schema#',
       'owl': 'http://www.w3.org/2002/07/owl#'
-    }
+    };
     /* Ontology is save locally to avoid request with TPS  */
     /* --------------------------------------------------- */
     var tripletSubjectRelationObject = [];
@@ -20,14 +35,13 @@ var AskomicsUserAbstraction = function () {
       service.post({}, function(resultListTripletSubjectRelationObject) {
 
         /* All relation are stored in tripletSubjectRelationObject */
-        tripletSubjectRelationObject = resultListTripletSubjectRelationObject['relations'];
-
+        tripletSubjectRelationObject = resultListTripletSubjectRelationObject.relations;
         entityInformationList = {};
         /* All information about an entity available in TPS are stored in entityInformationList */
-        for (entry in resultListTripletSubjectRelationObject['entities']){
-          uri = resultListTripletSubjectRelationObject['entities'][entry]['entity'];
-          rel = resultListTripletSubjectRelationObject['entities'][entry]['attribut'];
-          val = resultListTripletSubjectRelationObject['entities'][entry]['value'];
+        for (var entry in resultListTripletSubjectRelationObject.entities){
+          var uri = resultListTripletSubjectRelationObject.entities[entry].entity;
+          var rel = resultListTripletSubjectRelationObject.entities[entry].attribut;
+          var val = resultListTripletSubjectRelationObject.entities[entry].value;
           console.log(uri);
           if ( ! (uri in entityInformationList) ) {
               entityInformationList[uri] = {};
@@ -38,7 +52,7 @@ var AskomicsUserAbstraction = function () {
         console.log("<=== entityInformationList ===> ");
         console.log(JSON.stringify(entityInformationList));
       });
-    }
+    };
 
     /* Get value of an attribut with RDF format like rdfs:label */
     AskomicsUserAbstraction.prototype.removePrefix = function(uriEntity) {
@@ -49,7 +63,7 @@ var AskomicsUserAbstraction = function () {
       }
       uriEntity = uriEntity.substr(idx+1,uriEntity.length);
       return uriEntity;
-    }
+    };
 
     /* Get value of an attribut with RDF format like rdfs:label */
     AskomicsUserAbstraction.prototype.getAttrib = function(uriEntity,attrib) {
@@ -57,9 +71,9 @@ var AskomicsUserAbstraction = function () {
           console.error(JSON.stringify(uriEntity) + " is not referenced in the user abstraction !");
           return;
         }
-        attrib_longterm = attrib ;
-        for (p in prefix) {
-          i = attrib_longterm.search(p+":");
+        var attrib_longterm = attrib ;
+        for (var p in prefix) {
+          var i = attrib_longterm.search(p+":");
           if ( i != - 1) {
             attrib_longterm = attrib_longterm.replace(p+":",prefix[p]);
             break;
@@ -70,8 +84,8 @@ var AskomicsUserAbstraction = function () {
           console.error(JSON.stringify(uriEntity) + '['+JSON.stringify(attrib)+']' + " is not referenced in the user abstraction !");
           return;
         }
-        return entityInformationList[uri][attrib_longterm];
-    }
+        return entityInformationList[uriEntity][attrib_longterm];
+    };
 
     /* build node from user abstraction infomation */
     AskomicsUserAbstraction.prototype.buildBaseNode  = function(uriEntity) {
@@ -80,7 +94,7 @@ var AskomicsUserAbstraction = function () {
         label : this.getAttrib(uriEntity,'rdfs:label')
       } ;
       return node;
-    }
+    };
 
 
     /*
@@ -96,36 +110,28 @@ var AskomicsUserAbstraction = function () {
 
       var objectsTarget = {} ;
       var subjectsTarget = {} ;
-    //  var relationsRes = [];
-      console.log("URI:"+UriSelectedNode);
-      for (i in tripletSubjectRelationObject) {
 
-        console.log("objet:"+tripletSubjectRelationObject[i]['object']);
-        console.log("sujet:"+tripletSubjectRelationObject[i]['subject']);
+      for (var i in tripletSubjectRelationObject) {
 
-        if ( tripletSubjectRelationObject[i]['object'] == UriSelectedNode ) {
-          if (! (tripletSubjectRelationObject[i]['subject'] in subjectsTarget) ) {
-            subjectsTarget[tripletSubjectRelationObject[i]['subject']] = [] ;
+        if ( tripletSubjectRelationObject[i].object == UriSelectedNode ) {
+          if (! (tripletSubjectRelationObject[i].subject in subjectsTarget) ) {
+            subjectsTarget[tripletSubjectRelationObject[i].subject] = [];
           }
-          subjectsTarget[tripletSubjectRelationObject[i]['subject']].push(tripletSubjectRelationObject[i]['relation']);
+          subjectsTarget[tripletSubjectRelationObject[i].subject].push(tripletSubjectRelationObject[i].relation);
         }
-        if ( tripletSubjectRelationObject[i]['subject'] == UriSelectedNode ) {
-          if (! (tripletSubjectRelationObject[i]['object'] in objectsTarget) ) {
-            objectsTarget[tripletSubjectRelationObject[i]['object']] = [];
+        if ( tripletSubjectRelationObject[i].subject == UriSelectedNode ) {
+          if (! (tripletSubjectRelationObject[i].object in objectsTarget) ) {
+            objectsTarget[tripletSubjectRelationObject[i].object] = [];
           }
-          objectsTarget[tripletSubjectRelationObject[i]['object']].push(tripletSubjectRelationObject[i]['relation']);
+          objectsTarget[tripletSubjectRelationObject[i].object].push(tripletSubjectRelationObject[i].relation);
         }
       }
-
-      console.log('objects:'+JSON.stringify(objectsTarget));
-      console.log('subjects:'+JSON.stringify(subjectsTarget));
-
       // TODO: Manage Doublons and remove it....
 
       return [objectsTarget, subjectsTarget];
-    }
+    };
 
-  }
+  };
 
 
 /* constructeur de AskomicsGraphBuilder */
@@ -134,24 +140,115 @@ var AskomicsUserAbstraction = function () {
     var SPARQLIDgeneration = {} ; /* { <ENT1> : 5, ... }  last index used to named variable */
     var IGgeneration = 0;
 
+    /* We keep information about instancied Node and Link to be able to rebuild graph */
+    var _instanciedNodeGraph = [] ;
+    var _instanciedLinkGraph = [] ;
+
+    AskomicsGraphBuilder.prototype.addInstanciedElt = function(node) {
+      _instanciedNodeGraph.push(node);
+    };
+
+    AskomicsGraphBuilder.prototype.addInstanciedLink = function(link) {
+      _instanciedLinkGraph.push(link);
+    };
+
+    AskomicsGraphBuilder.prototype.findElt = function(_array,id)  {
+      var elt  ;
+      var indexElt = -1;
+      for (var i in _array ) {
+        if (_array[i].id == id ) {
+          elt = _array[i] ;
+          indexElt = i;
+          break;
+        }
+      }
+      return [indexElt,elt];
+    };
+    /*
+      remove a node and all node newest (and link) associated
+    */
+    AskomicsGraphBuilder.prototype.removeInstanciedNode = function(idNode) {
+
+      /* search link associated with this node and a node with a id > (newest than idNode)*/
+      var linkIndexToDelete = [];
+      for (var i in _instanciedLinkGraph ) {
+        var t1 = _instanciedLinkGraph[i].source.id == idNode,
+            t2 = _instanciedLinkGraph[i].target.id == idNode;
+        if (t1 || t2 ) {
+          // find a link associated with idNode
+          var currentNode = t1?_instanciedLinkGraph[i].source:_instanciedLinkGraph[i].target;
+          var targetNode = t1?_instanciedLinkGraph[i].target:_instanciedLinkGraph[i].source;
+
+          /* the second node is newest than idNode, we have to remove it ! */
+          if ( targetNode.id > currentNode.id ) {
+            // removing node
+            this.removeInstanciedNode(targetNode.id);
+            // removing link
+            linkIndexToDelete.push(i);
+            if ( t2.id in t1.nlink )
+              delete t1.nlink[t2.id];
+            if ( t1.id in t2.nlink )
+              delete t2.nlink[t1.id];
+          }
+        }
+      }
+      /* remove links */
+      for (var l=linkIndexToDelete.length-1;l>=0;l--) {
+        _instanciedLinkGraph.splice(linkIndexToDelete[l], 1);
+      }
+      /* remove the node */
+      for (var n in _instanciedNodeGraph) {
+        if ( _instanciedNodeGraph[n].id == idNode )
+          _instanciedNodeGraph.splice(n, 1);
+          return;
+      }
+    };
+    AskomicsGraphBuilder.prototype.removeInstanciedLink = function(idLink) {
+      // finding link
+      var t = findElt(_instanciedLinkGraph,idLink);
+
+      var indexLinkNode = t[0];
+      var linkNode = t[1] ;
+
+      if ( indexLinkNode === -1 ) {
+        throw new Error("AskomicsGraphBuilder.prototype.removeInstanciedLink id link unknown:"+idLink);
+      }
+
+      linkNode.source.id.nlink[linkNode.target.id]--;
+      linkNode.target.id.nlink[linkNode.source.id]--;
+      /* if no link between node then remove the newest node */
+      if ( linkNode.source.id.nlink[linkNode.target.id] <= 0 ) {
+        // keep the oldest node !
+        if ( linkNode.source.id > linkNode.target.id ) {
+          this.removeInstanciedNode(linkNode.source.id);
+        } else {
+          this.removeInstanciedNode(linkNode.target.id);
+        }
+      }
+      //removing the link
+      t = findElt(_instanciedLinkGraph,idLink);
+      if (t[0]>-1)
+        _instanciedLinkGraph.splice(t[0], 1);
+    };
+
     /* create and return a new ID to instanciate a new SPARQL variate */
-    AskomicsGraphBuilder.prototype.setSPARQLVariateId = function(node) {
-      lab = node.label
+    AskomicsGraphBuilder.prototype.setSPARQLVariateId = function(nodeOrLink) {
+      lab = nodeOrLink.label;
       if ( ! SPARQLIDgeneration[lab] ) {
         SPARQLIDgeneration[lab] = 0 ;
       }
 
       SPARQLIDgeneration[lab]++ ;
-      node.SPARQLid = lab+SPARQLIDgeneration[lab];
-      console.log("AskomicsGraphBuilder.prototype.SPARQLIDgeneration:"+JSON.stringify(node));
-      return node;
-    }
+      nodeOrLink.SPARQLid = lab+SPARQLIDgeneration[lab];
+      console.log("AskomicsGraphBuilder.prototype.SPARQLIDgeneration:"+JSON.stringify(nodeOrLink));
+      return nodeOrLink;
+    };
 
     AskomicsGraphBuilder.prototype.setIdNode = function(node) {
       node.id = IGgeneration;
       IGgeneration++;
       return node;
-    }
+    };
 
     AskomicsGraphBuilder.prototype.setStartpoint = function(node) {
       this.setSPARQLVariateId(node);
@@ -160,7 +257,7 @@ var AskomicsUserAbstraction = function () {
       node.weight = 0;
       node.nlink = {}; // number of relation with a node
       return node;
-    }
+    };
 
     AskomicsGraphBuilder.prototype.setSuggestedNode = function(node,x,y) {
       node.suggested = true;
@@ -170,11 +267,43 @@ var AskomicsUserAbstraction = function () {
       node.name = node.label;
       node.weight = 0;
       node.nlink = {}; // number of relation with a node.
-      // For a suggested node = number of relation between this and the current selected node
-      node.nlink[node.id] = 0;
       return node;
-    }
-  }
+    };
+
+    AskomicsGraphBuilder.prototype.toInstanciateNode = function(node) {
+      node.suggested = false;
+      this.setSPARQLVariateId(node);
+      node.name = node.SPARQLid;
+      _instanciedNodeGraph.push(node);
+    };
+
+    AskomicsGraphBuilder.prototype.isInstanciateNode = function(idNode) {
+
+      for (var n of _instanciedNodeGraph) {
+        if (n.id === idNode)
+          return true;
+      }
+      return false;
+    };
+    AskomicsGraphBuilder.prototype.toInstanciateLink = function(link) {
+      link.suggested = false;
+      this.setSPARQLVariateId(link);
+      //link.name = node.SPARQLid;
+      _instanciedLinkGraph.push(link);
+    };
+  };
+
+
+var AskomicsGraphView = function () {
+
+  AskomicsGraphView.prototype.solidifyLink = function(link) {
+    var id = link.source.id + "-" + link.target.id + "-" + link.linkindex;
+    $("#" + id).css("stroke-dasharray","");
+    $("#" + id).css("opacity","1");
+  };
+};
+
+
 
 //********************************************************************************************************************************************************************
 
@@ -188,23 +317,39 @@ function keepNodesOnTop() {
     });
 }
 
-function build_link(l, src, target) {
-  console.log("running build_link");
-  console.log("link: "+l);
-  console.log("source: "+src.id);
-  console.log("target: "+target.id);
-  v = {
-      "source": (l.source_id != src.id ? target : src),
-      "target": (l.target_id != src.id ? target : src),
-      "relation": l.relation_label,
-      "relation_uri": l.relation_uri,
-      "specified_by": {"uri": l.spec_uri, "relation": ""},
-      "special_clause": l.spec_clause,
-      "parent_id" : src.id,
-      "child_id" : target.id
-  };
-  console.log("built link: "+JSON.stringify(v));
-  return v;
+/* Remove all nodes and links suggestion */
+function removeSuggestions(nodeList,linkList) {
+  console.log(" === REMOVE SUGGESTION ===");
+
+  var removeL = [];
+  for (var idx in linkList) {
+    l = linkList[idx];
+    if ( l.suggested ) {
+      removeL.push(idx);
+      l.source.nlink[l.target.id]--; // decrease the number of link
+      l.target.nlink[l.source.id]--; // decrease the number of link
+      if ( l.source.nlink[l.target.id] <= 0 )
+        delete l.source.nlink[l.target.id];
+      if ( l.target.nlink[l.source.id] <= 0 )
+        delete l.source.nlink[l.target.id];
+    }
+  }
+  for (var j=removeL.length-1;j>=0;j--) {
+    console.log("REMOVE LINK:"+JSON.stringify(linkList[removeL[j]]));
+    linkList.splice(removeL[j],1);
+  }
+  var removeN = [];
+  // remove suggested node
+  for (var node in nodeList) {
+    if ( nodeList[node].suggested ) {
+      removeN.push(node);
+    }
+  }
+  for (var n2=removeN.length-1;n2>=0;n2--){
+    idxn = removeN[n2];
+console.log("REMOVE NODE:"+JSON.stringify(nodeList[idxn]));
+    nodeList.splice(idxn,1);
+  }
 }
 
 function insertSuggestions2(slt_node, nodeList, linkList) {
@@ -217,10 +362,11 @@ function insertSuggestions2(slt_node, nodeList, linkList) {
     tab = DK.getRelationsObjectsAndSubjectsWithURI(slt_node.uri);
     objectsTarget = tab[0];  /* All triplets which slt_node URI are the subject */
     subjectsTarget = tab[1]; /* All triplets which slt_node URI are the object */
+    var link = {} ;
 
     var suggestedList = {} ;
-    console.log(JSON.stringify(objectsTarget));
-    for ( uri in objectsTarget ) {
+
+    for (var uri in objectsTarget ) {
       /* creatin node */
       suggestedNode = DK.buildBaseNode(uri);
       /* specific attribute for suggested node */
@@ -232,25 +378,26 @@ function insertSuggestions2(slt_node, nodeList, linkList) {
       slt_node.nlink[suggestedList[uri].id] = 0;
       suggestedList[uri].nlink[slt_node.id] = 0;
 
-      for (rel in objectsTarget[uri]) {
+      for (var rel in objectsTarget[uri]) {
         /* increment the number of link between the two nodes */
         slt_node.nlink[suggestedList[uri].id]++;
         suggestedList[uri].nlink[slt_node.id]++;
 
-        var link = {
+        link = {
+          suggested : true,
+          uri   : objectsTarget[uri][rel],
           source: slt_node,
           target: suggestedList[uri],
-          relation: objectsTarget[uri][rel],
           label: DK.removePrefix(objectsTarget[uri][rel]),
           linkindex: slt_node.nlink[suggestedList[uri].id],
-        }
+        };
 
         link.source.weight++;
         linkList.push(link);
       }
     }
 
-    for ( uri in subjectsTarget ) {
+    for (uri in subjectsTarget ) {
       if ( ! (uri in suggestedList) ) {
         suggestedNode = DK.buildBaseNode(uri);
         AGB.setSuggestedNode(suggestedNode,slt_node.x,slt_node.y);
@@ -260,17 +407,18 @@ function insertSuggestions2(slt_node, nodeList, linkList) {
         suggestedList[uri].nlink[slt_node.id] = 0;
       }
 
-      for (rel in subjectsTarget[uri]) {
+      for (var rel2 in subjectsTarget[uri]) {
         slt_node.nlink[suggestedList[uri].id]++;
         suggestedList[uri].nlink[slt_node.id]++;
 
-        var link = {
+        link = {
+          suggested : true,
+          uri   : subjectsTarget[uri][rel2],
           source: suggestedList[uri],
           target: slt_node,
-          relation: subjectsTarget[uri][rel],
-          label: DK.removePrefix(subjectsTarget[uri][rel]),
+          label: DK.removePrefix(subjectsTarget[uri][rel2]),
           linkindex: slt_node.nlink[suggestedList[uri].id],
-        }
+        };
         link.source.weight++;
         linkList.push(link);
       }
@@ -279,43 +427,6 @@ function insertSuggestions2(slt_node, nodeList, linkList) {
 
 }
 
-function insertSuggestions(prev_node, slt_node, expansionDict, nodeList, linkList) {
-    console.log("running insertSuggestions");
-    console.log("selected node is: "+JSON.stringify(slt_node));
-    console.log("previous node is: "+JSON.stringify(prev_node));
-    console.log("current node list is: "+JSON.stringify(nodeList));
-    console.log("current link list is: "+JSON.stringify(linkList));
-
-    // add neighbours of a node to the graph as propositions.
-    for (suggestedNode of expansionDict.nodes) {
-        console.log("suggested node: "+JSON.stringify(suggestedNode));
-        suggestedNode.suggested = true;
-        suggestedNode.x = slt_node.x;
-        suggestedNode.y = slt_node.y;
-        nodeList.push(suggestedNode);
-
-        // Create links between entities
-        for (suggestedLink of expansionDict.links){
-            console.log("suggested link: "+JSON.stringify(suggestedLink));
-
-            if (((suggestedLink.source_id === slt_node.id) && (suggestedLink.target_id === suggestedNode.id)) // Same direction (src -> target) as selected
-                    || ((suggestedLink.source_id === suggestedNode.id) && (suggestedLink.target_id === slt_node.id))) { // Inverted direction (target -> src) but still a valid link
-                // We found a possible link between our 2 nodes (in the same direction or not)
-                linkList.push(build_link(suggestedLink, slt_node, suggestedNode));
-            } else if ((prev_node !== null) && (suggestedLink.source_id === prev_node.id) && (suggestedLink.target_id === suggestedNode.id)) {
-                console.log("3: link in same direction with previous"); // FIXME what are we trying to do?
-                linkList.push(build_link(suggestedLink, prev_node, suggestedNode));
-            } else if ((prev_node !== null) && (suggestedLink.source_id === suggestedNode.id) && (suggestedLink.target_id === prev_node.id)) {
-                console.log("4: inverted link with previous"); // FIXME what are we trying to do?
-                linkList.push(build_link(suggestedLink, prev_node, suggestedNode));
-            }
-            // else: suggested link is not ok, forget about it (not displayed, not kept in memory)
-        }
-    }
-
-   // save counter state
-    $("#svgdiv").data({ last_counter: expansionDict.last_counter, last_new_counter : expansionDict.last_new_counter });
-}
 
 function detailsOf(elemUri, elemId, attributes, nameDiv, data) {
     // Add attributes of the selected node on the right side of AskOmics
@@ -375,7 +486,7 @@ function detailsOf(elemUri, elemId, attributes, nameDiv, data) {
                 inp.attr("size",sizeSelect);
 
                 if ( d.value.length > 1 ) {
-                  for (v of d.value) {
+                  for (var v of d.value) {
                     inp.append($("<option></option>").attr("value", v).append(v));
                   }
                 } else if (d.value.length == 1) {
@@ -604,7 +715,7 @@ function myGraph(AGB,DK) {
     };
 
     var findParentId = function (id) {
-        for (l of links) {
+        for (var l of links) {
             if (l.child_id == id) return l.parent_id;
         }
         return null;
@@ -614,7 +725,7 @@ function myGraph(AGB,DK) {
         if ($("#node_" + id).length < 1) return;
 
         // Hide suggestions associated to the previously selected node
-        for (l of links) {
+        for (var l of links) {
             if (id != l.parent_id)
                 continue;
             if ((slt_elt) && (slt_data.id == l.child_id))
@@ -633,7 +744,7 @@ function myGraph(AGB,DK) {
         if (expanded.indexOf(id) < 0) return;
 
         // Show suggestions associated to the selected node.
-        for (l of links) {
+        for (var l of links) {
             if (id != l.parent_id)
                 continue;
 
@@ -667,13 +778,10 @@ function myGraph(AGB,DK) {
     };
 
     var update = function () {
+      var AGV = new AskomicsGraphView();
 
-        console.log("============================== UPDATE ========================================");
-        console.log(JSON.stringify(links))
-        var link = vis.selectAll("path")
+        var link = vis.selectAll(".link")
                     .data(links, function (d) {
-                       if (!d) return "0-0";
-                        console.log("YOUPIE========>"+JSON.stringify(d));
                         return d.source.id + "-" + d.target.id + "-" + d.linkindex ;
                     });
 
@@ -694,11 +802,11 @@ function myGraph(AGB,DK) {
             .attr("label", function (d) { return d.label ; })
             .attr("class", "link")
             .attr("marker-end", "url(#marker)")
-            .style("stroke-dasharray", "5,3")
-            .style("opacity", "0.3")
+            .style("stroke-dasharray","1,5")
+            .style("opacity", "0.3") /* default */
             .on('mousedown', function(d) {
                 // Mouse down on a link
-                var uri = d.specified_by.uri;
+                var uri = d.uri;
                 if (uri === "") return;
                 if (d.relation_label) return;
                 if (this.style[0] === "stroke-dasharray") return;
@@ -723,7 +831,7 @@ function myGraph(AGB,DK) {
             })
             .on('mouseup', function(d) {
                 // Mouse up on a link
-                if (d.specified_by.uri === "") return;
+                if (d.uri === "") return;
                 if (this.style[0] === "stroke-dasharray") return;
                 if (this === slt_elt) {
                     deselection(d.id,this);
@@ -747,14 +855,14 @@ function myGraph(AGB,DK) {
             })
             .on('mouseover', function(d) {
                 // Mouse over on a link
-                if (d.specified_by.uri === "") return;
+                if (d.uri === "") return;
                 if (this.style[0] == "stroke-dasharray") return;
 
                 d3.select(this).style("stroke-width", 4);
             })
             .on('mouseout', function(d) {
                 // Mouse out on a link
-                if (d.specified_by.uri === "") return;
+                if (d.uri === "") return;
                 d3.select(this).style("stroke-width", 2);
             });
 
@@ -765,15 +873,15 @@ function myGraph(AGB,DK) {
             return ;
 
           vis.append("text")
-                      .attr("style", "text-anchor:middle; font: 16px sans-serif;")
+                      .attr("style", "text-anchor:middle; font: 10px sans-serif;")
                       .attr("dy", "-5")
                       .append("textPath")
                       .attr("xlink:href","#"+$(this).attr('id'))
-                      .attr("startOffset", "25%")
+                      .attr("startOffset", "35%")
                       .text($(this).attr('label'));
         });
 
-        //link.exit().remove();
+
 
         var node = vis.selectAll("g.node")
                     .data(nodes, function (d) { return d.id; });
@@ -806,12 +914,12 @@ function myGraph(AGB,DK) {
                     swapSelection(this, d);
 
                     // Deselection of the previous element
-                    if (prev_data) {
-                        deselection(prev_data.id,prev_elt);
-                        hideSuggestions(prev_data.id);
-                    }
+                    //if (prev_data) {
+                    //    deselection(prev_data.id,prev_elt);
+                    //    hideSuggestions(prev_data.id);
+                    //}
                     // Show suggestions associated to the selected node.
-                    showSuggestions(slt_data.id);
+                    //showSuggestions(slt_data.id);
 
                     // Change eye if the selected node will be displayed
                     if (isDisplayed(slt_data.id)) {
@@ -838,16 +946,32 @@ function myGraph(AGB,DK) {
                     // Mouse up on a link
                     document.body.style.cursor = 'default';
 
-                    if (slt_data != d) return;
-                    if ($("#" + slt_data.id).length) return;
-                    if (expanded.indexOf(d.id) > -1) return;
+                  //  if (slt_data != d) return;
+                  //  if ($("#" + slt_data.id).length) return;
+                    console.log("instance"+d.id);
+                    if (AGB.isInstanciateNode(d.id))
+                      return;
+                    console.log("passe"+d.id);
 
-                    expanded.push(slt_data.id);
-                    addDisplay(slt_data.id);
-                    addConstraint('node', slt_data.id, slt_data.uri);
-
+                    /* fix the first link associted with the new instanciate node TODO: propose an interface to select the link */
+                    for (var l of links) {
+                        console.log(JSON.stringify(l));
+                        if ( l.suggested ) {
+                          if (l.source.id == slt_data.id || l.target.id == slt_data.id ) {
+                            AGB.toInstanciateLink(l);
+                            AGV.solidifyLink(l);
+                            break ; //only the link finded....
+                          }
+                        }
+                    }
                     // When selected a node is not considered suggested anymore.
-                    slt_data.suggested = false;
+                    AGB.toInstanciateNode(d);
+                      //slt_data.suggested = false;
+
+                    //expanded.push(slt_data.id);
+                    //addDisplay(slt_data.id);
+                    //addConstraint('node', slt_data.id, slt_data.uri);
+
                     d3.select(slt_elt).style("opacity", "1");
 
                     // If clicked on a node that is not a starting point
@@ -866,19 +990,20 @@ function myGraph(AGB,DK) {
                             if ((l.child_id == slt_data.id) && (l.parent_id == prev_data.id)) {
                                 addConstraint('link',
                                     l.source.id,
-                                    l.relation,
+                                    l.uri,
                                     l.target.id);
                             }
                         }
                     }
 
-                    console.log("PREV:"+JSON.stringify(prev_data));
-                    console.log("SLT:"+JSON.stringify(slt_data));
-
+                    /* remove old suggestion */
+                    removeSuggestions(nodes, links);
+                    /* insert new suggestion */
                     insertSuggestions2(slt_data, nodes, links);
 
                     update();
-                    keepNodesOnTop();
+
+              //      keepNodesOnTop();
 
                     // Get the neighbours of a node using REST service
 
@@ -950,7 +1075,7 @@ function myGraph(AGB,DK) {
                     })
                 ;
               //  .append("<tspan></tspan>").attr("dy","-10").text("2");
-
+        link.exit().remove();
         node.exit().remove();
 
         force.on("tick", function () {
@@ -991,7 +1116,7 @@ function myGraph(AGB,DK) {
         });
 
         // Restart the force layout.
-        force.charge(-500)
+        force.charge(-1000)
             .linkDistance(175)
             .size([w, h])
             .start();
