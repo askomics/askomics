@@ -33,7 +33,7 @@ class AbstractedRelation(object):
             type_range = identifier[idx+1:len(identifier)]
             identifier = identifier[0:idx]
         else:
-            identifier = "has_"+identifier
+            identifier = identifier
 
         self.uri = ":"+identifier
         self.label = identifier
@@ -51,10 +51,10 @@ class AbstractedRelation(object):
         self.log = logging.getLogger(__name__)
 
     def set_uri(self, identifier):
-        self.uri = ":has_" + identifier
+        self.uri = ":" + identifier
 
     def set_label(self, identifier):
-        self.label = "has_" + identifier
+        self.label = identifier
 
     def set_relation_type(self, relation_type):
         if relation_type == "entity" or relation_type == "category":

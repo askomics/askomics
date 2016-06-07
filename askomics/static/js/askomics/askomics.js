@@ -1,6 +1,4 @@
 var graph;
-var ASQB;
-var DK;
 
 function startVisualisation() {
     // Initialize the graph with the selected start point.
@@ -8,35 +6,31 @@ function startVisualisation() {
     $("#queryBuilder").show();
     d3.select("svg").remove();
 
-    // Keep only the selected node
-    //$("#svgdiv").data().last_new_counter = {};
-    //$("#svgdiv").data().last_new_counter[startPoint.label] = 1 ;
-
-    //console.log("last counter");
-    //console.log($("#svgdiv").data().last_new_counter);
-
+    //Following code is automatically executed at start or is triggered by the action of the user
     /* To manage construction of SPARQL Query */
-    AGB = new AskomicsGraphBuilder();
-    /* To manage information about User Datasrtucture  */
-    DK = new AskomicsUserAbstraction();
-    /* Request information in the model layer */
-    DK.updateOntology();
+    graphBuilder = new AskomicsGraphBuilder();
 
-    /* Get information about start point to bgin query */
-    var startPoint = $('#startpoints').find(":selected").data("value");
-    /* Setting up an ID for the first variate */
-    AGB.setStartpoint(startPoint);
+    /* To manage Graph view on UI */
+    graphView = new AskomicsGraphView();
+    /* To manage information about current node */
+    nodeView = new AskomicsNodeView();
+    /* To manage Attribute view on UI */
+    attributesView = new AskomicsAttributesView();
+    /* To manage Attribute view on UI */
+    linksView = new AskomicsLinksView();
+    /* To manage the D3.js Force Layout  */
+    forceLayoutManager = new AskomicsForceLayoutManager();
+    forceLayoutManager.start();
 
+    //addConstraint('node',startPoint.id,startPoint.uri);
 
-    addConstraint('node',startPoint.id,startPoint.uri);
+    //graph = new myGraph(graphBuilder,userAbstraction);
 
-    graph = new myGraph(AGB,DK);
-
-    graph.addNode(startPoint);
-    addDisplay(startPoint.id);
+    //graph.addNode(startPoint);
+    //addDisplay(startPoint.id);
 
     // Save initial query in the download button
-    launchQuery(0, 0, true);
+    //launchQuery(0, 0, true);
 }
 
 function loadStartPoints() {
@@ -136,7 +130,8 @@ function loadStatistics() {
 
 
 $(function () {
-    //Following code is automatically executed at start or is triggered by the action of the user
+    /* To manage information about User Datasrtucture  */
+    userAbstraction = new AskomicsUserAbstraction();
 
     // Startpoints definition
     loadStartPoints();

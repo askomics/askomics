@@ -9,8 +9,8 @@
         <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>
       -->
         <script src="static/js/third-party/d3.min.js" charset="utf-8"></script>
-        <script src="static/js/third-party/jquery.min.js"></script>
-        <script src="static/js/third-party/jquery-ui.min.js"></script>
+        <script src="static/js/third-party/jquery-1.12.4.min.js"></script>
+        <script src="static/js/third-party/jquery-ui-1.11.4/jquery-ui.min.js"></script>
 
         <!-- The Templates plugin is included to render the upload/download listings -->
         <script src="//blueimp.github.io/JavaScript-Templates/js/tmpl.min.js"></script>
@@ -18,10 +18,20 @@
         <script src="static/js/bootstrap.js"></script>
         <script src="static/js/handlebars-v4.0.5.js"></script>
         <script src="static/js/rest.js"></script>
-        <script src="static/js/query-handler.js"></script>
-        <script src="static/js/graph.js"></script>
-        <script src="static/js/askomics.js"></script>
-        <script src="static/js/integration.js"></script>
+
+
+        <script src="static/js/askomics/query-handler.js"></script>
+        <script src="static/js/askomics/graph.js"></script>
+        <script src="static/js/askomics/askomics.js"></script>
+        <script src="static/js/askomics/integration.js"></script>
+
+        <script src="static/js/askomics/AskomicsUserAbstraction.js"></script>
+        <script src="static/js/askomics/AskomicsGraphBuilder.js"></script>
+        <script src="static/js/askomics/AskomicsGraphView.js"></script>
+        <script src="static/js/askomics/AskomicsAttributesView.js"></script>
+        <script src="static/js/askomics/AskomicsNodeView.js"></script>
+        <script src="static/js/askomics/AskomicsLinksView.js"></script>
+        <script src="static/js/askomics/AskomicsForceLayoutManager.js"></script>
 
         <link href="static/css/bootstrap.css" rel="stylesheet">
         <link rel="stylesheet" type="text/css" href="static/css/style.css">
@@ -147,6 +157,20 @@
               <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                 <h4 class="modal-title" id="waitLabel">Please Wait</h4>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
+            </div><!-- /.modal-content -->
+          </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
+
+        <div class="modal fade" id="linksModal"  role="dialog" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true" >
+          <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title" id="listLink">Possible links</h4>
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>

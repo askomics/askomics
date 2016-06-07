@@ -6,13 +6,6 @@ var filter_str = [];
 
 /****************************************************************************/
 
-// take a string and return an entity with a sub index
-function formatLabelEntity(varEntity) {
-  var re = new RegExp(/(\d+)$/);
-  var indiceEntity = varEntity.match(re);
-  var labelEntity = varEntity.replace(re,"");
-  return $('<em></em>').text(labelEntity).append($('<sub></sub>').text(indiceEntity[0]));
-}
 
 /****************************************************************************/
 
@@ -260,13 +253,13 @@ function displayResults(data) {
          }
        }
 
-       for (i=0;i<listEntitySorted.length;i++ ) {
+       for (var i=0;i<listEntitySorted.length;i++ ) {
          var varEntity = listEntitySorted[i];
          var label = formatLabelEntity(varEntity);
 
          /* Calcul du nombre de colonne ncessaire à cet entity */
          var nAttributes = 1;
-         for (j in data.results_entity_attributes[varEntity]) {
+         for (var j in data.results_entity_attributes[varEntity]) {
            if ( isDisplayed(j) ) nAttributes++;
          }
          /* Fomattage en indicie du numero de l'entité */
@@ -276,7 +269,7 @@ function displayResults(data) {
 
        head.append(row);
        row = $('<tr></tr>');
-       for (i=0;i<listEntitySorted.length;i++ ) {
+       for (var i=0;i<listEntitySorted.length;i++ ) {
          var varEntity = listEntitySorted[i];
          row.append($('<th></th>').addClass("success").addClass("table-bordered").text("Name"));
 

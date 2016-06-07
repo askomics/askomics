@@ -1,0 +1,6 @@
+[AskomicsNode|*uri:string;label:string;id:string;*x:float;*y:float;*weight:int|SPARQLid:string;suggested:bool;name:string;nlinks:Array(int)|doShiz()]<>-orders*>
+[AskomicsLinks|suggested:bool;uri:string;label:string;linkindex:int]
+[AskomicsLinks{bg:green}]<>--source[AskomicsNode{bg:cornsilk}]
+[AskomicsLinks]<>--target[AskomicsNode]
+[AskomicsGraphBuilder]
+[AskomicsUserAbstraction|tripletSubjectRelationObject:Array(Triple(Subject Relation Object));entityInformationList:Map(uri - Array(String))|updateOntology()]

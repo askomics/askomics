@@ -222,8 +222,8 @@ class SourceFile(ParamManager, HaveCachedProperties):
         ttl = ''
 
         for header, categories in self.category_values.items():
-            indent = len(header) * " " + len("displaySetting:has_category") * " " + 3 * " "
-            ttl += ":" + header + " displaySetting:has_category :"
+            indent = len(header) * " " + len("displaySetting:category") * " " + 3 * " "
+            ttl += ":" + header + " displaySetting:category :"
             ttl += (" , \n" + indent + ":").join(categories) + " .\n"
 
             for item in categories:
@@ -307,9 +307,10 @@ class SourceFile(ParamManager, HaveCachedProperties):
                         #if current_type == 'entity':
                             #relations.setdefault(header, {}).setdefault(entity_label, []).append(row[i]) # FIXME only useful if we want to check for duplicates
                         #else
-                        
+
                         #OFI : manage new header with relation@type_entity
-                        relationName = ":has_" + header # manage old way
+                        #relationName = ":has_" + header # manage old way
+                        relationName = ":"+header # manage old way
                         if current_type == 'entity':
                             idx = header.find("@")
                             if ( idx > 0 ):

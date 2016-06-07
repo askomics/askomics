@@ -124,11 +124,18 @@ class TripleStoreExplorer(ParamManager, CounterManager):
             if not elt['subject'] in listEntities:
                 listEntities[elt['subject']]=0
 
+        filterEntities = ' '.join(["<"+s+">" for s in listEntities.keys()])
         sparql_template = self.get_template_sparql(self.ASKOMICS_abstractionEntityUser)
-        query = sqb.load_from_file(sparql_template, {"entities" : ' '.join(["<"+s+">" for s in listEntities.keys()])}).query
+        query = sqb.load_from_file(sparql_template, {"entities" : filterEntities }).query
         results = ql.process_query(query)
 
         data['entities'] = results
+
+        sparql_template = self.get_template_sparql(self.ASKOMICS_abstractionAttributesEntityUser)
+        query = sqb.load_from_file(sparql_template, {"entities" : filterEntities }).query
+        results = ql.process_query(query)
+
+        data['attributes'] = results
 
         return data
 
@@ -275,7 +282,6 @@ class TripleStoreExplorer(ParamManager, CounterManager):
                 rel_h = self.has_setting(result["relationUri"], 'attribute')
 
                 if att_h or rel_h or (result["propertyType"] == self.ASKOMICS_prefix["owl"] + "DatatypeProperty"): # FIXME doesn't detect categories
-                    self.log.debug("====>ATTRIB")
                     attribute_id = node.get_id() + '_' + neighbor_label + str(self.get_new_id(node.get_id() + '_' + neighbor_label))
                     attributes.append(
                         Attribute(attribute_id,
@@ -286,7 +292,6 @@ class TripleStoreExplorer(ParamManager, CounterManager):
                             )
                         )
                 else:
-                    self.log.debug("====>NODE")
                     self.log.debug(neighbor_label)
                     neighbor_id = neighbor_label + str(self.get_new_id(neighbor_label))
 

@@ -1,6 +1,6 @@
-SELECT ?entity ?attribut ?value
+SELECT ?entity ?property ?value
 FROM $graph
 WHERE {
-	?entity ?attribut ?value.
+	?entity ?property ?value.
   VALUES ?entity { $entities }
 }
