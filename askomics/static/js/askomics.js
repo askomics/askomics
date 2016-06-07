@@ -125,12 +125,11 @@ function loadStatistics(modal) {
 
 function emptyDatabase(value) {
     if (!value) {
-        no = 'no';
         $("#deleteButtons").empty();
         $("#deleteButtons")
         .append('<p>Delete all data ? ')
         .append("<button id='btn-empty' onclick='emptyDatabase(true)' class='btn btn-danger'>Yes</button> ")
-        .append("<button id='btn-empty' onclick='emptyDatabase(no)' class='btn btn-default'>No</button></p>");
+        .append("<button id='btn-empty' onclick='emptyDatabase(\"no\")' class='btn btn-default'>No</button></p>");
         return;
     }
 
