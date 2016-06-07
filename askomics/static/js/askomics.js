@@ -62,7 +62,7 @@ function loadStatistics(modal) {
     .append($("<p></p>").text("Number of classes : "+stats.nclasses))
     .append($("<div id='deleteButtons'></div>"));
 
-    $("#deleteButtons").append("<p><button id='btn-empty' onclick='emptyDatabase(false)' class='btn btn-danger'>Empty database</button></p>");
+    $("#deleteButtons").append("<p><button id='btn-empty' onclick='emptyDatabase(\"confirm\")' class='btn btn-danger'>Empty database</button></p>");
 
     table=$("<table></table>").addClass('table').addClass('table-bordered');
     th = $("<tr></tr>").addClass("table-bordered").attr("style", "text-align:center;");
@@ -124,22 +124,22 @@ function loadStatistics(modal) {
 }
 
 function emptyDatabase(value) {
-    if (!value) {
+    if (value == 'confirm') {
         $("#deleteButtons").empty();
         $("#deleteButtons")
         .append('<p>Delete all data ? ')
-        .append("<button id='btn-empty' onclick='emptyDatabase(true)' class='btn btn-danger'>Yes</button> ")
+        .append("<button id='btn-empty' onclick='emptyDatabase(\"yes\")' class='btn btn-danger'>Yes</button> ")
         .append("<button id='btn-empty' onclick='emptyDatabase(\"no\")' class='btn btn-default'>No</button></p>");
         return;
     }
 
     if (value == 'no') {
         $("#deleteButtons").empty();
-        $("#deleteButtons").append("<p><button id='btn-empty' onclick='emptyDatabase(false)' class='btn btn-danger'>Clear database</button></p>");
+        $("#deleteButtons").append("<p><button id='btn-empty' onclick='emptyDatabase(\"confirm\")' class='btn btn-danger'>Clear database</button></p>");
         return
     }
 
-    if (value) {
+    if (value == 'yes') {
         displayModal('Please wait during deletion', 'Close');
         var service = new RestServiceJs("empty_database");
             service.getAll(function(empty_db){
