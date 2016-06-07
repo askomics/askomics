@@ -144,6 +144,8 @@ class SparqlQueryBuilder(ParamManager):
             query = '\n'.join(query_lines)
 
 
+        # FIXME in generated query, possible to skip the '?foo a bar" cnostraints: speedup queries on fuseki (but risk of collision if attributes of different classes have the same name)
+
         # Replace all the uri by a prefix
         # FIXME: The frontend should tag all URIs and CURIEs nodes to differentiate them,
         # in order to allow URIs that can't be prefixed to be properly written between <>.
