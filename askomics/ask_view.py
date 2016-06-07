@@ -114,7 +114,7 @@ class AskView(object):
         sqb = SparqlQueryBuilder(self.settings, self.request.session)
         ql = QueryLauncher(self.settings, self.request.session)
 
-        ql.process_query(sqb.get_delete_query_string().query)
+        ql.execute_query(sqb.get_delete_query_string().query)
 
 
     @view_config(route_name='source_files_overview', request_method='GET')

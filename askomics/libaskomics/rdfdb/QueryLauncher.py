@@ -99,9 +99,6 @@ class QueryLauncher(ParamManager):
     def process_query(self, query):
         json_query = self.execute_query(query, log_raw_results=False)
 
-        if 'CLEAR GRAPH' in query:
-            return
-
         results = self.parse_results(json_query)
         return results
 
