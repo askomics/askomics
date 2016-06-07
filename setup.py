@@ -9,11 +9,11 @@ with open(os.path.join(here, 'CHANGES.txt')) as f:
     CHANGES = f.read()
 
 requires = [
-    'pyramid',
-    'pyramid_chameleon',
-    'pyramid_debugtoolbar',
-    'waitress',
-    'SPARQLWrapper',
+    'pyramid==1.7',
+    'pyramid-chameleon==0.3',
+    'pyramid-debugtoolbar==3.0.1',
+    'waitress==0.9.0',
+    'SPARQLWrapper==1.7.6',
     ]
 
 setup(name='Askomics',
@@ -34,7 +34,8 @@ setup(name='Askomics',
       include_package_data=True,
       zip_safe=False,
       install_requires=requires,
-      tests_require=['webtest'],
+      setup_requires=['nose>=1.3'],
+      tests_require=['webtest', 'coverage'],
       test_suite="askomics",
       entry_points="""\
       [paste.app_factory]
