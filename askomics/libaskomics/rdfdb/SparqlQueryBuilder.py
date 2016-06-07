@@ -215,3 +215,7 @@ class SparqlQueryBuilder(ParamManager):
         return self.prepare_query(
             'SELECT ?p (COUNT(?p) AS ?pTotal)\n FROM $graph'
             ' { ?node displaySetting:startPoint "true"^^xsd:boolean . }')
+
+    def get_delete_query_string(self):
+        return self.prepare_query(
+            'CLEAR GRAPH $graph')

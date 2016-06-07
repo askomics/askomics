@@ -32,7 +32,7 @@
                     <ul class="nav navbar-nav navbar-right">
                         <li id="interrogation" class="active"><a href="#" onclick="loadStartPoints();">Ask!</a></li>
                         <li id="integration"><a href="#">Upload</a></li>
-                        <li id="statistics"><a href="#" onclick="loadStatistics();" >Stats</a></li>
+                        <li id="statistics"><a href="#" onclick="loadStatistics(true);" >Stats</a></li>
                         <li id="about"><a href="#">About</a></li>
                     </ul>
                 </div>
@@ -135,15 +135,15 @@
         </div>
 
         <!-- Modal  -->
-        <div class="modal fade" id="waitModal"  role="dialog" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true" >
+        <div class="modal fade" id="modal"  role="dialog" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true" >
           <div class="modal-dialog modal-sm">
             <div class="modal-content">
               <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                <h4 class="modal-title" id="waitLabel">Please Wait</h4>
+                <h4 class="modal-title" id="modalMessage"></h4>
               </div>
               <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal" id="modalButton"></button>
               </div>
             </div><!-- /.modal-content -->
           </div><!-- /.modal-dialog -->

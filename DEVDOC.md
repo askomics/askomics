@@ -10,8 +10,8 @@ The HTML code of the interface is located in rdf-visual-query-builder/Askomics/a
     var service = new RestServiceJs("startpoints")
 ```
 
-All services are defined in two files: rdf-visual-query-builder/Askomics/askomics/__init__.py and rdf-visual-query-builder/Askomics/askomics/ask_view.py.
-The line "config.add_route('start_point', '/startpoints')" of __init__.py allows to call the "start_point @view_config" of ask_view.py which have a single function. This function uses a class of the python library to get the startpoints and return them to the jquery code in a dictionary called "data" in ask_view.py and "startPointsDict" in a callback function of askomics.js that fill the #startpoints div:
+All services are defined in two files: rdf-visual-query-builder/Askomics/askomics/\_\_init\_\_.py and rdf-visual-query-builder/Askomics/askomics/ask_view.py.
+The line "config.add_route('start_point', '/startpoints')" of \_\_init\_\_.py allows to call the "start_point @view_config" of ask_view.py which have a single function. This function uses a class of the python library to get the startpoints and return them to the jquery code in a dictionary called "data" in ask_view.py and "startPointsDict" in a callback function of askomics.js that fill the #startpoints div:
 
 ```
     service.getAll(function(startPointsDict) {

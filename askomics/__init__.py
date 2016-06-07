@@ -16,6 +16,7 @@ def main(global_config, **settings):
     config.add_route('home', '/')
     config.add_route('start_point', '/startpoints')
     config.add_route('statistics', '/statistics')
+    config.add_route('empty_database', '/empty_database')
     config.add_route('expand', '/neighbours')
     config.add_route('link_attribute', '/link')
     config.add_route('query', '/results')
