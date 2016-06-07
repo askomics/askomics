@@ -194,11 +194,7 @@ class AskView(object):
                     )
 
         formatter = HtmlFormatter(cssclass='preview_field', nowrap=True, nobackground=True)
-        data = highlight(data, TurtleLexer(), formatter)
-        #FIXME: style is inlined in the <pre>, it should be added to the <head>
-        style = '<style type="text/css" media=screen>%s</style>' % formatter.get_style_defs()
-
-        return style + data
+        return highlight(data, TurtleLexer(), formatter) # Formated html
 
     @view_config(route_name='check_existing_data', request_method='POST')
     def check_existing_data(self):

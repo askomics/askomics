@@ -17,8 +17,9 @@
         <script src="static/js/askomics.js"></script>
         <script src="static/js/integration.js"></script>
 
-        <link href="static/css/bootstrap.css" rel="stylesheet">
-        <link rel="stylesheet" type="text/css" href="static/css/style.css">
+        <link href="static/css/bootstrap.css" rel="stylesheet" type="text/css">
+        <link href="static/css/style.css" rel="stylesheet" type="text/css">
+        <link href="static/css/pygment.css" rel="stylesheet" type="text/css">
     </head>
 
     <body>
