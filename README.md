@@ -10,7 +10,7 @@ is that you don't need to know how to use SPARQL or the structure of your databa
 
 If you want to use AskOmics, you will need :
 
-* [Python 3.2](https://www.python.org/downloads/) (or greater)
+* [Python 3.3](https://www.python.org/downloads/) (or greater)
 * [Pyramid 1.5](http://www.pylonsproject.org) (or greater)
 * [SPARQLWrapper](https://rdflib.github.io/sparqlwrapper/) 1.6.4 (or greater)
 

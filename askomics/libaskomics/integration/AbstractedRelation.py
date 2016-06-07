@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+from askomics.libaskomics.utils import pformat_generic_object
 
 class AbstractedRelation(object):
     """
@@ -73,11 +74,7 @@ class AbstractedRelation(object):
         return self.rdfs_range
 
     def print_attr(self):
-        self.log.debug("uri = " + self.uri)
-        self.log.debug("label = " + self.label)
-        self.log.debug("relation_type = " + self.relation_type)
-        self.log.debug("domain = " + self.rdfs_domain)
-        self.log.debug("range = " + self.rdfs_range)
+        self.log.debug(pformat_generic_object(self))
 
     def to_dict(self):
         return {"uri": self.uri,

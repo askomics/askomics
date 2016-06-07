@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from askomics.libaskomics.graph.GraphElement import GraphElement
+from askomics.libaskomics.utils import pformat_generic_object
 
 import logging
 
@@ -54,14 +55,7 @@ class Link(GraphElement):
         return self.spec_clause
 
     def print_attr(self):
-        self.log.debug("source_uri =" + self.source_uri)
-        self.log.debug("source_id =" + self.source_id)
-        self.log.debug("target_uri =" + self.target_uri)
-        self.log.debug("target_id =" + self.target_id)
-        self.log.debug("relation_uri =" + self.relation_uri)
-        self.log.debug("relation_label =" + self.relation_label)
-        self.log.debug("spec_uri =" + self.spec_uri)
-        self.log.debug("spec_clause =" + self.spec_clause)
+        self.log.debug(pformat_generic_object(self))
 
     def to_dict(self):
         return {"source_uri": self.source_uri,
