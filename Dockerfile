@@ -29,6 +29,6 @@ RUN python3 setup.py develop #install
 # Launch Askomics
 #-------------------------------------------------------------------------------------------
 EXPOSE 6543
-CMD ["pserve","production.ini"]
+CMD ["pserve","configs/production.ini"]
 #ENTRYPOINT ["/bin/bash"]
 #CMD ["cat","/etc/hosts"]
