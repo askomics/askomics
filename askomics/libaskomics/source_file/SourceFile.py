@@ -533,7 +533,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
         url = urlbase+"/ttl/"+os.path.basename(fp.name)
         data = {}
         try:
-            if self.is_defined("askomics.file_upload_url") and "8890" not in self.get_param('askomics.file_upload_url'):
+            if self.is_defined("askomics.file_upload_url"):
                 res = ql.upload_data(fp.name)
             else:
                 res = ql.load_data(url)

@@ -14,6 +14,7 @@ requires = [
     'pyramid-debugtoolbar==3.0.1',
     'waitress==0.9.0',
     'SPARQLWrapper==1.7.6',
+    'requests==2.10.0',
     ]
 
 setup(name='Askomics',
