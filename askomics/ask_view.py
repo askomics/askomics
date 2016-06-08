@@ -9,6 +9,11 @@ from pyramid.response import FileResponse
 
 import logging
 from pprint import pformat
+import textwrap
+
+from pygments import highlight
+from pygments.lexers import TurtleLexer
+from pygments.formatters import HtmlFormatter
 
 from askomics.libaskomics.ParamManager import ParamManager
 from askomics.libaskomics.TripleStoreExplorer import TripleStoreExplorer
@@ -161,16 +166,35 @@ class AskView(object):
         src_file.set_forced_column_types(col_types)
         src_file.set_disabled_columns(disabled_columns)
 
-        content_ttl = '\n'.join(src_file.get_turtle(preview_only=True))
-        abstraction_ttl = src_file.get_abstraction()
-        domain_knowledge_ttl = src_file.get_domain_knowledge()
+        data = textwrap.dedent(
+        """
+        {header}
 
-        data["header"] = sfc.get_turtle_template()
-        data["content_ttl"] = content_ttl
-        data["abstraction_ttl"] = abstraction_ttl
-        data["domain_knowledge_ttl"] = domain_knowledge_ttl
+        #############
+        #  Content  #
+        #############
 
-        return data
+        {content_ttl}
+
+        #################
+        #  Abstraction  #
+        #################
+
+        {abstraction_ttl}
+
+        ######################
+        #  Domain knowledge  #
+        ######################
+
+        {domain_knowledge_ttl}
+        """).format(header=sfc.get_turtle_template(),
+                    content_ttl = '\n'.join(src_file.get_turtle(preview_only=True)),
+                    abstraction_ttl = src_file.get_abstraction(),
+                    domain_knowledge_ttl = src_file.get_domain_knowledge()
+                    )
+
+        formatter = HtmlFormatter(cssclass='preview_field', nowrap=True, nobackground=True)
+        return highlight(data, TurtleLexer(), formatter) # Formated html
 
     @view_config(route_name='check_existing_data', request_method='POST')
     def check_existing_data(self):
