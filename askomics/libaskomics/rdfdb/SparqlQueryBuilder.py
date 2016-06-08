@@ -128,32 +128,38 @@ class SparqlQueryBuilder(ParamManager):
         """  Get a sparql query from a json """
         self.log.debug('---------- JSON QUERY ------------\n%s', pformat(json))
 
-        # Rewrite the query deleting virtual relation
-        # FIXME: Better way to do this ?
-        query_lines = list(self.gen_query_from_json(json))
-        query = ''
-        for c in json['constraint']:
-            if c['type'] == 'clause':
-                relation = c['relation']
-                #FIXME: multiple iteration on query_lines, this is explain why the
-                # iterator is materialized as a list
-                for line in query_lines:
-                    if relation not in line and line + '\n' not in query:
-                        query += line + '\n'
-        if query == '':
-            query = '\n'.join(query_lines)
+        if json['uploaded']:
+            query = json['uploaded']
+        else:
+            # Rewrite the query deleting virtual relation
+            # FIXME: Better way to do this ?
+            query_lines = list(self.gen_query_from_json(json))
+            query = ''
+            for c in json['constraint']:
+                if c['type'] == 'clause':
+                    relation = c['relation']
+                    #FIXME: multiple iteration on query_lines, this is explain why the
+                    # iterator is materialized as a list
+                    for line in query_lines:
+                        if relation not in line and line + '\n' not in query:
+                            query += line + '\n'
+            if query == '':
+                query = '\n'.join(query_lines)
 
 
-        # FIXME in generated query, possible to skip the '?foo a bar" cnostraints: speedup queries on fuseki (but risk of collision if attributes of different classes have the same name)
+            # FIXME in generated query, possible to skip the '?foo a bar" cnostraints: speedup queries on fuseki (but risk of collision if attributes of different classes have the same name)
 
-        # Replace all the uri by a prefix
-        # FIXME: The frontend should tag all URIs and CURIEs nodes to differentiate them,
-        # in order to allow URIs that can't be prefixed to be properly written between <>.
-        for prefix, uri_base in self.ASKOMICS_prefix.items():
-            query = query.replace(uri_base, prefix + ':')
+            # Replace all the uri by a prefix
+            # FIXME: The frontend should tag all URIs and CURIEs nodes to differentiate them,
+            # in order to allow URIs that can't be prefixed to be properly written between <>.
+            for prefix, uri_base in self.ASKOMICS_prefix.items():
+                query = query.replace(uri_base, prefix + ':')
 
-        prefix = self.header_sparql_config()
-        return SparqlQuery(prefix + query)
+            query = self.header_sparql_config() + query
+
+        if 'LIMIT ' not in query and not json['return_only_query']:
+            query = query + 'LIMIT %d' % json['limit']
+        return SparqlQuery(query)
 
     def gen_query_from_json(self, json):
         """:return:A generator producing query line from json.
@@ -169,7 +175,7 @@ class SparqlQueryBuilder(ParamManager):
 
         yield from prefix_lines('\t', self.gen_constraint_SPARQL(json))
 
-        yield '}} LIMIT {limit}'.format_map(json)
+        yield '}'
 
     def gen_constraint_SPARQL(self, json):
         """:return: a generator of WHERE clauses from json."""

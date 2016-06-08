@@ -172,53 +172,51 @@ function delFromQuery(id) {
     removeFilterStr(id);
 }
 
-function formatQuery() {
-    $("input[type='checkbox']:checked").each(function() {
-        addDisplay($(this).attr('name'));
-    });
-    launchQuery(0, 30, false);
-}
 
-function launchQuery(exp, lim, roq) {
-    //     Get SPARQL query corresponding to the graph and launch it according
-    //     to given parameters.
+
+
+function prepareQuery(exp, lim, roq) {
+    //     Get JSON to ask for a SPARQL query corresponding to the graph
+    //     and launch it according to given parameters.
     //
     //     :exp: 0 = results overview
     //           1 = complete results file generation
     //     :lim: LIMIT value in the SPARQL query
     //     :roq: bool, if true, don't launch the query, only return it
+    return { 'display':display,
+              'constraint':constraint,
+              'filter_cat':filter_cat,
+              'filter_num':filter_num,
+              'filter_str':filter_str,
+              'export':exp,
+              'limit':lim,
+              'return_only_query':roq,
+              'uploaded':$("#uploadedQuery").text()
+          };
+}
 
-    if (exp == 1) {
-        $("#export").remove();
-        $("#btn-file").text("Generating results file, please wait...");
-        $("#btn-file").disabled = true;
-    }
-
-    if (!roq)
-      displayModal('Please wait', 'Close');
-
-    var jdata = { 'display':display,
-                  'constraint':constraint,
-                  'filter_cat':filter_cat,
-                  'filter_num':filter_num,
-                  'filter_str':filter_str,
-                  'export':exp,
-                  'limit':lim,
-                  'return_only_query':roq,
-                  'uploaded':$("#uploadedQuery").text() };
+function viewQueryResults() {
+    displayModal('Please wait', 'Close');
 
     var service = new RestServiceJs("results");
-
+    var jdata = prepareQuery(0, 30, false);
     service.post(jdata,function(data) {
-        if (roq) {
-            $("a#btn-qdown").attr("href", "data:text/plain;charset=UTF-8," + encodeURIComponent(data.query));
-        } else if (exp === 0) {
-            displayResults(data);
-            hideModal();
-        } else {
-            provideDownloadLink(data);
-            hideModal();
-        }
+        displayResults(data);
+        hideModal();
+    });
+}
+
+function generateResultFile(lim) {
+    displayModal('Please wait', 'Close');
+    $("#export").remove();
+    $("#btn-file").text("Generating results file, please wait...");
+    $("#btn-file").disabled = true;
+
+    var service = new RestServiceJs("results");
+    var jdata = prepareQuery(1, lim, false);
+    service.post(jdata, function(data) {
+        provideDownloadLink(data);
+        hideModal();
     });
 }
 

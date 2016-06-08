@@ -61,7 +61,7 @@
                         <input id="uploadBtn" type="file" class="upload">
                     </div>
                     <div class="btn-group btn-group-query">
-                        <a id="btn-qdown" type="button" class="btn btn-default" href="" download="query.sparql">Download query</a>
+                        <span id="btn-qdown" class="btn btn-default">Download query</span>
                     </div>
                     <div id="svgdiv"></div>
                     <div id="uploadedQuery" class="uploadedQuery" hidden contenteditable></div>
@@ -70,12 +70,12 @@
                             <button id="btn-down" type="submit" class="btn btn-default">
                                 <span class="glyphicon glyphicon-save"></span>
                             </button>
-                            <button id="btn-file" type="button" class="btn btn-default" onclick="launchQuery(1,10000, false)">
+                            <button id="btn-file" type="button" class="btn btn-default" onclick="generateResultFile(10000)">
                                 Generate a results file (max 10000 lines)
                             </button>
                         </div>
                         <div class="btn-group btn-group-query">
-                            <button type="button" class="btn btn-default" onclick="formatQuery()">Launch query</button>
+                            <button type="button" class="btn btn-default" onclick="viewQueryResults()">Launch query</button>
                             <button type="button" class="btn btn-default" onclick="window.location.reload()">Reset</button>
                         </div>
                     </form>

@@ -349,17 +349,10 @@ class AskView(object):
 
         export = bool(int(body['export']))
         sqb = SparqlQueryBuilder(self.settings, self.request.session)
-        return_only_query = bool(int(body['return_only_query']))
+        query = sqb.load_from_query_json(body).query
 
-        if body['uploaded'] != '':
-            if export:
-                query = body['uploaded'].replace('LIMIT 30', 'LIMIT 10000')
-            else:
-                query = body['uploaded']
-        else:
-            query = sqb.load_from_query_json(body).query
-
-        if return_only_query:
+        assert type(body['return_only_query']) is bool
+        if body['return_only_query']:
             data['query'] = query
             return data
 

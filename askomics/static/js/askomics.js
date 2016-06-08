@@ -18,9 +18,6 @@ function startVisualisation() {
     graph = new myGraph("#svgdiv");
     graph.addNode(startPoint);
     addDisplay(startPoint.id);
-
-    // Save initial query in the download button
-    launchQuery(0, 0, true);
 }
 
 function loadStartPoints() {
@@ -160,6 +157,21 @@ function hideModal(){
 }
 
 
+function downloadTextAsFile(filename, text) {
+    // Download text as file
+    var element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    element.setAttribute('download', filename);
+
+    element.style.display = 'none';
+    document.body.appendChild(element);
+
+    element.click();
+
+    document.body.removeChild(element);
+}
+
+
 $(function () {
     //Following code is automatically executed at start or is triggered by the action of the user
 
@@ -178,17 +190,19 @@ $(function () {
                 $("#nodeDetails").hide();
                 $("#queryBuilder").show();
                 $("#graph").attr("class", "col-md-12");
-                $("#uploadedQuery").show();
-                $("#uploadedQuery").text(contents);
-                $("a#btn-qdown").attr("href", "data:text/plain;charset=UTF-8," + encodeURIComponent(contents));
+                $("#uploadedQuery").text(contents).show();
             };
             fr.readAsText(uploadedFile);
         }
     });
 
-    // Update of the query to download if an uploaded query is edited in AskOmics
-    $("#uploadedQuery").bind("DOMSubtreeModified", function() {
-        $("a#btn-qdown").attr("href", "data:text/plain;charset=UTF-8," + encodeURIComponent($("#uploadedQuery").text()));
+    // Download query action
+    $("span#btn-qdown").click(function() {
+        var service = new RestServiceJs("results");
+        var jdata = prepareQuery(0, 0, true);
+        service.post(jdata,function(data) {
+            downloadTextAsFile("query.sparql", data.query);
+        });
     });
 
     // Get the overview of files to integrate
