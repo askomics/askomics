@@ -23,8 +23,7 @@ RUN . /usr/local/AskomicsWeb/askomics-env/bin/activate
 RUN mkdir -p /usr/local/AskomicsWeb
 COPY . /usr/local/AskomicsWeb/
 WORKDIR /usr/local/AskomicsWeb/
-RUN pip3 install  -r /usr/local/AskomicsWeb/requirements.txt
-RUN python3 setup.py develop #install
+RUN pip3 install -e .
 
 # Launch Askomics
 #-------------------------------------------------------------------------------------------
