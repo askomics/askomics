@@ -189,7 +189,7 @@ function launchQuery(exp, lim, roq) {
 
     if (!roq)
       $('#waitModal').modal('show');
-
+/*
     var jdata = { 'display':display,
                   'constraint':constraint,
                   'filter_cat':filter_cat,
@@ -199,8 +199,16 @@ function launchQuery(exp, lim, roq) {
                   'limit':lim,
                   'return_only_query':roq,
                   'uploaded':$("#uploadedQuery").text() };
+*/
+    var tab = graphBuilder.buildConstraintsGraph();
+    var jdata = {
+      'variates': tab[0],
+      'constraintesRelations': tab[1],
+      'constraintesFilters': []
+    };
+    var service = new RestServiceJs("sparqlquery");
 
-    var service = new RestServiceJs("results");
+
 
     service.post(jdata,function(data) {
         if (roq) {
@@ -225,9 +233,10 @@ function provideDownloadLink(data) {
 function displayResults(data) {
     // to clear and print new results
     $("#results").empty();
-
+    console.log("=================== DISPLAY RESULTS =============================");
+    console.log(JSON.stringify(data));
     if (data.results_entity_name.length > 0) {
-      for(i=0; i<data.results_entity_name.length; i++) {
+      for(var i=0; i<data.results_entity_name.length; i++) {
           $.each(data.results_entity_name[i], function(key, value) {
             body.append(value);
           });

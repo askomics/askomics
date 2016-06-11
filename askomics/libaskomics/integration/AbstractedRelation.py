@@ -40,9 +40,14 @@ class AbstractedRelation(object):
         print(relation_type)
         print(identifier)
 
-        if relation_type == "entity" or relation_type == "Category":
+        print("RELATIONTYPE:"+relation_type)
+
+        if relation_type == "entity":
             self.relation_type = "owl:ObjectProperty"
             self.rdfs_range = ":" + type_range
+        elif relation_type.lower() == "category":
+            self.relation_type = "owl:ObjectProperty"
+            self.rdfs_range = ":" + type_range+"Category"
         else:
             self.relation_type = "owl:DatatypeProperty"
             self.rdfs_range = rdfs_range

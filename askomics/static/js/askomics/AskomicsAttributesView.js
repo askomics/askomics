@@ -8,23 +8,23 @@ var AskomicsAttributesView = function () {
 
   var prefix = "view_";
 
-  AskomicsAttributesView.prototype.removeView = function (node) {
+  AskomicsAttributesView.prototype.remove = function (node) {
     $("#"+prefix+node.SPARQLid).remove();
   };
 
-  AskomicsAttributesView.prototype.showView = function (node) {
+  AskomicsAttributesView.prototype.show = function (node) {
     $("#"+prefix+node.SPARQLid).show();
   };
 
-  AskomicsAttributesView.prototype.hideView = function (node) {
+  AskomicsAttributesView.prototype.hide = function (node) {
     $("#"+prefix+node.SPARQLid).hide();
   };
 
-  AskomicsAttributesView.prototype.hideAllView = function (node) {
+  AskomicsAttributesView.prototype.hideAll = function (node) {
     $("div[id*='"+ prefix +"']" ).hide();
   };
 
-  AskomicsAttributesView.prototype.createView = function (node) {
+  AskomicsAttributesView.prototype.create = function (node) {
       // Add attributes of the selected node on the right side of AskOmics
 
       var elemUri = node.uri,
@@ -33,13 +33,6 @@ var AskomicsAttributesView = function () {
 
       var details = $("<div></div>").attr("id",nameDiv).addClass('div-details');
 
-      /*
-      var addSpecified = function(link) {
-          addConstraint('node', link.id, link.specified_by.uri);
-          addConstraint('link', link.parent_id, link.specified_by.relation, link.id);
-          addConstraint('link', link.child_id, link.specified_by.relation, link.id);
-      };
-*/
       var nameLab = $("<label></label>").attr("for",elemId).text("Name");
       var nameInp = $("<input/>").attr("id", "lab_" + elemId).addClass("form-control");
 
@@ -58,47 +51,53 @@ var AskomicsAttributesView = function () {
 
 
       attributes = userAbstraction.getAttributesWithURI(node.uri);
-
       $.each(attributes, function(i) {
-          graphBuilder.setSPARQLVariateId(attributes[i]);//TODO : change ==> the variable of DK is changed every times....
-          var id = attributes[i].id;
-          var lab = $("<label></label>").attr("for",attributes[i].label).text(attributes[i].label.replace("has_",""));
+
+          attribute = graphBuilder.buildAttributeOrCategoryForNode(attributes[i],node);
+
+          var id = attribute.id;
+
+          var lab = $("<label></label>").attr("for",attribute.label).text(attribute.label);
           var inp = $("<select/>").attr("id",id).addClass("form-control").attr("multiple","multiple");
-          //var inp = $("<div/>").attr("id",id).addClass("form-control");
-          if (attributes[i].type.indexOf("http://www.w3.org/2001/XMLSchema#") < 0) {
+          // **********************************************************************************************
+          // TODO: A COMMENCER ICI LE DEV POUR GESTION DES CATEGORIES !!!
+          // **********************************************************************************************
+
+          if (attribute.type.indexOf("http://www.w3.org/2001/XMLSchema#") < 0) {
+              var tab = graphBuilder.buildConstraintsGraph();
+              //var tab = [ [] , [] ];
+              var labelSparqlVarId = attribute.SPARQLid;
               $('#waitModal').modal('show');
               inp.attr("list", "opt_" + id);
               //console.log(JSON.stringify(nameDiv));
-              var service = new RestServiceJs("category_value");
+              var service = new RestServiceJs("sparqlquery");
               var model = {
-                'category_uri': attributes[i].type,
-                'entity': elemUri,
-                'category': attributes[i].uri
+                'variates': [ "?"+labelSparqlVarId ],
+                'constraintesRelations': tab[1],
+                'constraintesFilters': []
               };
 
-            //  console.log(attributes[i].uri);
+            //  console.log(attribute.uri);
+
               service.post(model, function(d) {
-                //  var datalist = $("<datalist></datalist>").attr("id", "opt_" + id);
                   inp.append($("<option></option>").attr("value", "").attr("selected", "selected"));
                   var sizeSelect = 3 ;
                   if ( d.value.length<3 ) sizeSelect = d.value.length;
                   if ( d.value.length === 0 ) sizeSelect = 1;
-                //  console.log(d.value.length);
                   inp.attr("size",sizeSelect);
 
                   if ( d.value.length > 1 ) {
                     for (var v of d.value) {
-                      inp.append($("<option></option>").attr("value", v).append(v));
+                      console.log("OOOOOOOOOOOOOOOOOOOOOOOOO  =>"+JSON.stringify(v));
+                      inp.append($("<option></option>").attr("value", v[labelSparqlVarId]).append(v[labelSparqlVarId]));
                     }
                   } else if (d.value.length == 1) {
-                    inp.append($("<option></option>").attr("value", d.value[0]).append(d.value[0]));
+                    inp.append($("<option></option>").attr("value", d.value[0][labelSparqlVarId]).append(d.value[0][labelSparqlVarId]));
                   }
-                //  inp.append(datalist);
                 $('#waitModal').modal('hide');
               });
           } else {
-              // OFI -> new adding filter on numeric
-              if (attributes[i].type.indexOf("decimal") >= 0) {
+              if (attribute.type.indexOf("decimal") >= 0) {
                 inp = $("<table></table>");
 
                 v = $("<select></select>").attr("id", "sel_" + id).addClass("form-control");
@@ -121,86 +120,28 @@ var AskomicsAttributesView = function () {
           // =============================================================================================
           //    Manage Attribute variate when eye is selected or deselected
           //
+
           var icon = $('<span></span>')
                   .attr('id', 'display_' + id)
                   .attr('aria-hidden','true')
                   .addClass('glyphicon')
-                  .addClass('glyphicon-eye-close')
+                  .addClass('glyphicon-eye-open')
                   .addClass('display');
 
           icon.click(function() {
               if (icon.hasClass('glyphicon-eye-close')) {
+
                   icon.removeClass('glyphicon-eye-close');
                   icon.addClass('glyphicon-eye-open');
-
-                  graphBuilder.setConstrainteWithAttribute(node,attributes[i].uri,attributes[i].type);
-
-                  if  (attributes[i].type.indexOf("http://www.w3.org/2001/XMLSchema#") < 0) {
-                      addConstraint('node',id,
-                                  attributes[i].type);
-                  }
-                  addConstraint('attribute',id,
-                                  attributes[i].uri,
-                                  attributes[i].parent);
+                  graphBuilder.activeAttributeFronNode(attribute.uri,node);
               } else {
-                          icon.removeClass('glyphicon-eye-open');
-                          icon.addClass('glyphicon-eye-close');
+                  icon.removeClass('glyphicon-eye-open');
+                  icon.addClass('glyphicon-eye-close');
+                  graphBuilder.unActiveAttributeFronNode(attribute.uri,node);
               }
           });
 
           details.append(lab).append(icon).append(inp);
-
-          // =============================================================================================
-
-          inp.change(function() {
-              var value = $(this).find('#'+id).val();
-
-              if ( typeof value === 'undefined' ) {
-                 value = $(this).find('#opt_'+id).val();
-              }
-
-              if ( typeof value === 'undefined' || value === '' ) {
-                value = $(this).val();
-              }
-
-              removeFilterCat(id);
-              removeFilterNum(id);
-              removeFilterStr(id);
-
-              if (value === "") {
-                  if (!isDisplayed(id)) {
-                      removeConstraint(id);
-
-                      // If no attributes of a link are selected, remove the from the query
-                      /*
-                      if ((data) && (!hasConstraint(null,data.id,['node', 'link']))) {
-                          removeConstraint(data.id);
-                      }*/
-                  }
-                  return;
-              }
-
-              // if specified link
-          //    if (data) addSpecified(data);
-
-              if  (attributes[i].type.indexOf("http://www.w3.org/2001/XMLSchema#") < 0) {
-                  addConstraint('node',id,
-                      attributes[i].type);
-              }
-
-              addConstraint('attribute',id,
-                  attributes[i].uri,
-                  attributes[i].parent);
-
-              if  (attributes[i].type.indexOf("#decimal") > 0) {
-                var operator = $(this).find('#sel_'+ id).val();
-                addFilterNum(id,value,operator);
-              } else if  (attributes[i].type.indexOf("#string") > 0) {
-                addFilterStr(id,value);
-              } else { /* Category */
-                addFilterCat(id,value);
-              }
-          });
 
           //$('#waitModal').modal('hide');
       });

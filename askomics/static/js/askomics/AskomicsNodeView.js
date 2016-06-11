@@ -4,6 +4,35 @@
   Manage Information Node View With a current selected node
 */
 var AskomicsNodeView = function () {
+  //var prefix = "nodeview_";
+
+  {
+    // Switch between close and open eye icon for unselected
+    $("#showNode").click(function() {
+        var sparqlId = $("#nodeName").text();
+        var node = graphBuilder.getInstanciedNodeFromSparqlId(sparqlId);
+        graphBuilder.switchActiveNode(node);
+
+        if (! node.actif) {
+            $(this).removeClass('glyphicon-eye-close');
+            $(this).addClass('glyphicon-eye-open');
+        } else {
+            $(this).removeClass('glyphicon-eye-open');
+            $(this).addClass('glyphicon-eye-close');
+        }
+    });
+
+    // Node deletion
+    $("#deleteNode").click(function() {
+        var sparqlId = $("#nodeName").text();
+        var node = graphBuilder.getInstanciedNodeFromSparqlId(sparqlId);
+        graphBuilder.removeInstanciedNode(node);
+        forceLayoutManager.removeSuggestions();
+        forceLayoutManager.update();
+        //$(this).removeNode($("#nodeName").text());
+    });
+
+  }
 
   // take a string and return an entity with a sub index
   AskomicsNodeView.prototype.formatLabelEntity = function(node) {
@@ -22,7 +51,7 @@ var AskomicsNodeView = function () {
     $("#deleteNode").hide();
   };
 
-  AskomicsNodeView.prototype.set = function (node) {
+  AskomicsNodeView.prototype.show = function (node) {
     if ( node === undefined ) {
       throw new Error("AskomicsNodeView.prototype.set : node is undefined !");
     }
@@ -32,7 +61,37 @@ var AskomicsNodeView = function () {
     $("#nodeName").html(this.formatLabelEntity(node));
     $("#showNode").show();
     $("#deleteNode").show();
-    $("#showNode").removeClass('glyphicon-eye-close');
-    $("#showNode").addClass('glyphicon-eye-open');
+    if ( node.actif ) {
+      $("#showNode").removeClass('glyphicon-eye-close');
+      $("#showNode").addClass('glyphicon-eye-open');
+    } else {
+      $("#showNode").removeClass('glyphicon-eye-open');
+      $("#showNode").addClass('glyphicon-eye-close');
+    }
+  };
+
+  AskomicsAttributesView.prototype.remove = function (node) {
+    //$("#"+prefix+node.SPARQLid).remove();
+  };
+
+  AskomicsAttributesView.prototype.show = function (node) {
+  //  $("#"+prefix+node.SPARQLid).show();
+  };
+
+  AskomicsNodeView.prototype.hide = function (node) {
+    //$("#"+prefix+node.SPARQLid).hide();
+  };
+
+  AskomicsNodeView.prototype.hideAll = function (node) {
+  //  $("div[id*='"+ prefix +"']" ).hide();
+  };
+
+  AskomicsNodeView.prototype.create = function (node) {
+  //  var nodeView = $("<div></div>").attr("id",prefix+node.SPARQLid);
+  };
+
+  AskomicsNodeView.prototype.getVisibleNodes = function (node) {
+
+
   };
 };

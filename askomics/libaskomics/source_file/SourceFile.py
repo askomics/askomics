@@ -223,7 +223,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         for header, categories in self.category_values.items():
             indent = len(header) * " " + len("displaySetting:category") * " " + 3 * " "
-            ttl += ":" + header + " displaySetting:category :"
+            ttl += ":" + header+"Category" + " displaySetting:category :"
             ttl += (" , \n" + indent + ":").join(categories) + " .\n"
 
             for item in categories:

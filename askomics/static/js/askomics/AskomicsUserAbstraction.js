@@ -17,15 +17,16 @@ var AskomicsUserAbstraction = function () {
     var tripletSubjectRelationObject = [];
     var entityInformationList = {};
     var attributesEntityList = {};
+    var categoriesEntityList = {};
     /*
     load ontology
     see template SPARQL to know sparql variable
     */
     /* Request information in the model layer */
     //this.updateOntology();
-    {
+    AskomicsUserAbstraction.prototype.loadUserAbstraction = function(uriEntity) {
+      $('#waitModal').modal('show');
     //AskomicsUserAbstraction.prototype.updateOntology = function() {
-      console.log(" ===================== updateOntology ===========================");
       var service = new RestServiceJs("userAbstraction");
       service.post({}, function(resultListTripletSubjectRelationObject) {
 
@@ -34,34 +35,57 @@ var AskomicsUserAbstraction = function () {
         entityInformationList = {};
         /* All information about an entity available in TPS are stored in entityInformationList */
         for (var entry in resultListTripletSubjectRelationObject.entities){
+          console.log("==============================================================================================");
+          console.log("ENTITE:"+JSON.stringify(resultListTripletSubjectRelationObject.attributes[entry2]));
+
           var uri = resultListTripletSubjectRelationObject.entities[entry].entity;
           var rel = resultListTripletSubjectRelationObject.entities[entry].property;
           var val = resultListTripletSubjectRelationObject.entities[entry].value;
-          console.log(uri);
+
           if ( ! (uri in entityInformationList) ) {
               entityInformationList[uri] = {};
           }
           entityInformationList[uri][rel] = val;
         }
-        console.log(")))))))))))))))))))))))))))))))))]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]");
-        console.log(JSON.stringify(resultListTripletSubjectRelationObject.attributes));
+        var attribute = {};
+        console.log("-------------------------------------------------------------------");
         for (var entry2 in resultListTripletSubjectRelationObject.attributes){
-          var uri = resultListTripletSubjectRelationObject.attributes[entry2].entity;
-          var attribute = {};
+          console.log("ATTRIBUTE:"+JSON.stringify(resultListTripletSubjectRelationObject.attributes[entry2]));
+          var uri2 = resultListTripletSubjectRelationObject.attributes[entry2].entity;
+          attribute = {};
           attribute.uri  = resultListTripletSubjectRelationObject.attributes[entry2].attribute;
           attribute.label = resultListTripletSubjectRelationObject.attributes[entry2].labelAttribute;
           attribute.type  = resultListTripletSubjectRelationObject.attributes[entry2].typeAttribute;
 
-          if ( ! (uri in attributesEntityList) ) {
-              attributesEntityList[uri] = [];
+          if ( ! (uri2 in attributesEntityList) ) {
+              attributesEntityList[uri2] = [];
           }
 
-          attributesEntityList[uri].push(attribute);
+          attributesEntityList[uri2].push(attribute);
           //TODO Force label in the first position to print the label at the first position
         }
 
+        console.log("-------------------------------------------------------------------");
+        for (var entry3 in resultListTripletSubjectRelationObject.categories){
+          console.log("CATEGORY:"+JSON.stringify(resultListTripletSubjectRelationObject.categories[entry3]));
+          var uri3 = resultListTripletSubjectRelationObject.categories[entry3].entity;
+          attribute = {};
+          attribute.uri  = resultListTripletSubjectRelationObject.categories[entry3].category;
+          attribute.label = resultListTripletSubjectRelationObject.categories[entry3].labelCategory;
+          attribute.type  = resultListTripletSubjectRelationObject.categories[entry3].typeCategory;
+
+          if ( ! (uri3 in attributesEntityList) ) {
+              attributesEntityList[uri3] = [];
+          }
+
+          attributesEntityList[uri3].push(attribute);
+          //TODO Force label in the first position to print the label at the first position
+        }
+
+        console.log("==============================================================================================");
         console.log("<=== entityInformationList ===> ");
         console.log(JSON.stringify(entityInformationList));
+        $('#waitModal').modal('hide');
       });
     }
 
@@ -73,6 +97,13 @@ var AskomicsUserAbstraction = function () {
         if ( idx == -1 ) return;
       }
       uriEntity = uriEntity.substr(idx+1,uriEntity.length);
+      return uriEntity;
+    };
+
+    AskomicsUserAbstraction.prototype.URI = function(uriEntity) {
+      if ( uriEntity.indexOf("#")>0 ) {
+        return '<'+uriEntity+">";
+      }
       return uriEntity;
     };
 
@@ -101,7 +132,7 @@ var AskomicsUserAbstraction = function () {
     /* build node from user abstraction infomation */
     AskomicsUserAbstraction.prototype.buildBaseNode  = function(uriEntity) {
       var node = {
-        uri : uriEntity,
+        uri   : uriEntity,
         label : this.getAttrib(uriEntity,'rdfs:label')
       } ;
       return node;
@@ -144,8 +175,8 @@ var AskomicsUserAbstraction = function () {
 
     /* return a list of attributes according a uri node */
     AskomicsUserAbstraction.prototype.getAttributesWithURI  = function(UriSelectedNode) {
-      console.log("===============>"+JSON.stringify(attributesEntityList));
-      console.log("===============>"+UriSelectedNode);
       return attributesEntityList[UriSelectedNode];
     };
+
+
   };

@@ -1,4 +1,4 @@
-SELECT ?entity ?attribute ?labelAttribute ?typeAttribute
+SELECT DISTINCT ?entity ?attribute ?labelAttribute ?typeAttribute
 FROM  $graph
 WHERE {
   ?entity rdf:type owl:Class .

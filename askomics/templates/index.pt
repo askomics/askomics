@@ -27,7 +27,6 @@
 
         <script src="static/js/askomics/AskomicsUserAbstraction.js"></script>
         <script src="static/js/askomics/AskomicsGraphBuilder.js"></script>
-        <script src="static/js/askomics/AskomicsGraphView.js"></script>
         <script src="static/js/askomics/AskomicsAttributesView.js"></script>
         <script src="static/js/askomics/AskomicsNodeView.js"></script>
         <script src="static/js/askomics/AskomicsLinksView.js"></script>

@@ -33,40 +33,61 @@
     /*
       remove a node and all node newest (and link) associated
     */
-    AskomicsGraphBuilder.prototype.removeInstanciedNode = function(idNode) {
-
+    AskomicsGraphBuilder.prototype.removeInstanciedNode = function(node) {
+      console.log("---------- removeInstanciedNode ---------------- ID:"+node.id);
+      if ( _instanciedNodeGraph[0].length <= 0 ) return ;
+      if ( _instanciedNodeGraph[0].id == node.id ) {
+        console.log("Impossible to remove the first node !");
+        return ;
+      }
+      console.log("_instanciedNodeGraph:"+JSON.stringify(_instanciedNodeGraph));
+      console.log("Length node "+_instanciedNodeGraph.length);
+      console.log("Removing "+node.id);
       /* search link associated with this node and a node with a id > (newest than idNode)*/
       var linkIndexToDelete = [];
       for (var i in _instanciedLinkGraph ) {
-        var t1 = _instanciedLinkGraph[i].source.id == idNode,
-            t2 = _instanciedLinkGraph[i].target.id == idNode;
+        var t1 = _instanciedLinkGraph[i].source.id == node.id,
+            t2 = _instanciedLinkGraph[i].target.id == node.id;
         if (t1 || t2 ) {
-          // find a link associated with idNode
+          // find a link associated with node.id
           var currentNode = t1?_instanciedLinkGraph[i].source:_instanciedLinkGraph[i].target;
           var targetNode = t1?_instanciedLinkGraph[i].target:_instanciedLinkGraph[i].source;
 
-          /* the second node is newest than idNode, we have to remove it ! */
+          /* the second node is newest than node.id, we have to remove it ! */
           if ( targetNode.id > currentNode.id ) {
             // removing node
-            this.removeInstanciedNode(targetNode.id);
-            // removing link
-            linkIndexToDelete.push(i);
-            if ( t2.id in t1.nlink )
-              delete t1.nlink[t2.id];
-            if ( t1.id in t2.nlink )
-              delete t2.nlink[t1.id];
+            this.removeInstanciedNode(targetNode);
           }
+          // removing link
+          linkIndexToDelete.push(i);
+          if ( currentNode.id in targetNode.nlink )
+            delete targetNode.nlink[currentNode.id];
+          if ( targetNode.id in currentNode.nlink )
+            delete currentNode.nlink[targetNode.id];
         }
       }
+        console.log("Length node "+_instanciedNodeGraph.length);
+      console.log("Nb link to delete:"+linkIndexToDelete.length);
       /* remove links */
       for (var l=linkIndexToDelete.length-1;l>=0;l--) {
+        console.log("remove link :"+linkIndexToDelete[l]);
+        console.log("object :"+_instanciedLinkGraph[linkIndexToDelete[l]]);
+        console.log("_instanciedLinkGraph:"+JSON.stringify(_instanciedLinkGraph));
         _instanciedLinkGraph.splice(linkIndexToDelete[l], 1);
       }
+      console.log("------------------------------------------------------");
+      console.log("_instanciedLinkGraph:"+JSON.stringify(_instanciedLinkGraph));
+
+      console.log("*********************Length node "+_instanciedNodeGraph.length);
       /* remove the node */
       for (var n in _instanciedNodeGraph) {
-        if ( _instanciedNodeGraph[n].id == idNode )
+        console.log("ID:"+_instanciedNodeGraph[n].id);
+        if ( _instanciedNodeGraph[n].id == node.id ) {
+           console.log("remove node :"+node.id);
           _instanciedNodeGraph.splice(n, 1);
+          console.log("_instanciedNodeGraph:"+JSON.stringify(_instanciedNodeGraph));
           return;
+        }
       }
     };
     AskomicsGraphBuilder.prototype.removeInstanciedLink = function(idLink) {
@@ -86,9 +107,9 @@
       if ( linkNode.source.id.nlink[linkNode.target.id] <= 0 ) {
         // keep the oldest node !
         if ( linkNode.source.id > linkNode.target.id ) {
-          this.removeInstanciedNode(linkNode.source.id);
+          this.removeInstanciedNode(linkNode.source);
         } else {
-          this.removeInstanciedNode(linkNode.target.id);
+          this.removeInstanciedNode(linkNode.target);
         }
       }
       //removing the link
@@ -109,39 +130,55 @@
       return nodeOrLinkOrAttribute;
     };
 
-    AskomicsGraphBuilder.prototype.setIdNode = function(node) {
+    AskomicsGraphBuilder.prototype.setId = function(node) {
       node.id = IGgeneration;
       IGgeneration++;
       return node;
     };
 
     AskomicsGraphBuilder.prototype.setStartpoint = function(node) {
-      this.setIdNode(node);
-      node.weight = 0;
-      node.nlink = {}; // number of relation with a node
+      this.setSuggestedNode(node,0,0);
       this.instanciateNode(node);
       return node;
     };
 
+
+    AskomicsGraphBuilder.prototype.getInstanciedNodeFromSparqlId = function(sparlId) {
+      for (var n of _instanciedNodeGraph) {
+        if (n.SPARQLid === sparlId ) return n;
+      }
+      throw new Error("AskomicsGraphBuilder.prototype.getInstanciedNodeFromSparqlId : could not find Instanciate Node with SparqlId:"+sparlId);
+    };
+
+
+    /* TODO : find a best solution to unactive a node without matching on sparql variable ID */
+    AskomicsGraphBuilder.prototype.switchActiveNode = function(node) {
+          node.actif = !node.actif ;
+    };
+
     AskomicsGraphBuilder.prototype.setSuggestedNode = function(node,x,y) {
       node.suggested = true;
+      node.actif = false ;
       node.x = x;
       node.y = y;
-      this.setIdNode(node);
+      this.setId(node);
       node.name = node.label;
       node.weight = 0;
       node.nlink = {}; // number of relation with a node.
+      node.attributes = {} ;
+      node.categories = {} ;
       return node;
     };
 
     AskomicsGraphBuilder.prototype.instanciateNode = function(node) {
       node.suggested = false;
+      node.actif = true ;
       this.setSPARQLVariateId(node);
       node.name = node.SPARQLid;
       _instanciedNodeGraph.push(node);
     };
 
-    AskomicsGraphBuilder.prototype.isInstanciateNode = function(node) {
+    AskomicsGraphBuilder.prototype.isInstanciatedNode = function(node) {
 
       for (var n of _instanciedNodeGraph) {
         if (n.id === node.id)
@@ -180,13 +217,126 @@
           else
             return "";
       };
-    /* Attach contrainte and variate to the node */
-   AskomicsGraphBuilder.prototype.setConstrainteWithAttribute = function(node,uriAtt,valueAtt) {
-     if ( ! ( attributes in node)) {
-       node.attributes = {} ;
-     }
 
-     node.attributes[uriAtt] = valueAtt ;
-     console.log("NODE:"+json.strinigify(node));
+    /* Build attribute with id, sparId inside a node from a generic uri attribute */
+    AskomicsGraphBuilder.prototype.setAttributeOrCategoryForNode = function(AttOrCatArray,attributeForUri,node) {
+      AttOrCatArray[attributeForUri.uri] = {} ;
+      AttOrCatArray[attributeForUri.uri].type = attributeForUri.type ;
+      AttOrCatArray[attributeForUri.uri].label = attributeForUri.label ;
+
+      this.setSPARQLVariateId(AttOrCatArray[attributeForUri.uri]);
+      this.setId(AttOrCatArray[attributeForUri.uri]);
+
+      /* by default all attributes is ask */
+      AttOrCatArray[attributeForUri.uri].actif = true ;
+      return AttOrCatArray[attributeForUri.uri];
+    };
+
+    AskomicsGraphBuilder.prototype.buildAttributeOrCategoryForNode = function(attributeForUri,node) {
+      if (attributeForUri.type.indexOf("http://www.w3.org/2001/XMLSchema#") < 0) {
+        return this.setAttributeOrCategoryForNode(node.categories,attributeForUri,node);
+      }else {
+        return this.setAttributeOrCategoryForNode(node.attributes,attributeForUri,node);
+      }
+    };
+
+    AskomicsGraphBuilder.prototype.activeAttributeFronNode = function(uriAtt,node) {
+      if ( attributeForUri.uri in node.attributes )
+        node.attributes[attributeForUri.uri].actif = true ;
+      else if ( attributeForUri.uri in node.categories )
+        node.categories[attributeForUri.uri].actif = true ;
+    };
+
+    AskomicsGraphBuilder.prototype.unActiveAttributeFronNode = function(uriAtt,node) {
+      if ( attributeForUri.uri in node.attributes )
+        node.attributes[attributeForUri.uri].actif = false ;
+      else if ( attributeForUri.uri in node.categories )
+        node.categories[attributeForUri.uri].actif = false ;
+    };
+
+
+    AskomicsGraphBuilder.prototype.synchronizeInstanciatedNodesAndLinks = function(nodes,links) {
+      var removeElt = [];
+      var present = false;
+      for ( var idn in nodes ) {
+        if ( nodes[idn].suggested ) continue ;
+        present = false ;
+        for (var n of _instanciedNodeGraph){
+            if (n.id == nodes[idn].id) {
+              present = true;
+              break;
+            }
+        }
+        if ( present ) continue ;
+        removeElt.push(idn);
+
+      }
+      for ( var i = removeElt.length-1;i>=0;i--) {
+        nodes.splice(removeElt[i],1);
+      }
+
+      removeElt = [];
+      for ( var idl in links ) {
+        if ( links[idl].suggested ) continue ;
+        present = false ;
+        for (var l of _instanciedLinkGraph){
+            if (l.id == links[idl].id) {
+              present = true;
+              break;
+            }
+        }
+        if ( present ) continue ;
+        removeElt.push(idl);
+
+      }
+      for ( var j = removeElt.length-1;j>=0;j--) {
+        links.splice(removeElt[j],1);
+      }
+    };
+
+    AskomicsGraphBuilder.prototype.buildConstraintsGraph = function() {
+      var variates = [] ;
+      var constraintRelations = [] ;
+      var dup_node_array = $.extend(true, [], _instanciedNodeGraph);
+      var dup_link_array = $.extend(true, [], _instanciedLinkGraph);
+      var ua = userAbstraction;
+
+      for (idx=dup_node_array.length-1;idx>=0;idx--) {
+        var node = dup_node_array[idx];
+        /* add node inside */
+        constraintRelations.push(["?"+node.SPARQLid,'rdf:type',ua.URI(node.uri)]);
+        /* find relation with this node and add it as a constraint  */
+        for (ilx=dup_link_array.length-1;ilx>=0;ilx--) {
+          if ( (dup_link_array[ilx].source.id == node.id) ||  (dup_link_array[ilx].target.id == node.id) ) {
+            constraintRelations.push(["?"+dup_link_array[ilx].source.SPARQLid,ua.URI(dup_link_array[ilx].uri),"?"+dup_link_array[ilx].target.SPARQLid]);
+            dup_link_array.splice(ilx,1);
+          }
+        }
+        /* adding variable node name */
+        if (node.actif) {
+          variates.push("?"+node.SPARQLid);
+        }
+        /* adding constraints about attributs about the current node */
+        for (var uri in node.attributes) {
+            constraintRelations.push(["?"+node.SPARQLid,ua.URI(uri),"?"+node.attributes[uri].SPARQLid]);
+            constraintRelations.push([ua.URI(uri),'rdfs:domain',ua.URI(node.uri)]);
+            constraintRelations.push([ua.URI(uri),'rdfs:range',ua.URI(node.attributes[uri].type)]);
+            constraintRelations.push([ua.URI(uri),'rdf:type',ua.URI('owl:DatatypeProperty')]);
+          if ( node.actif && node.attributes[uri].actif) {
+            variates.push("?"+node.attributes[uri].SPARQLid);
+          }
+        }
+        for (uri in node.categories) {
+            constraintRelations.push(["?"+node.SPARQLid,ua.URI(uri),"?EntCat"+node.categories[uri].SPARQLid]);
+            constraintRelations.push(["?EntCat"+node.categories[uri].SPARQLid,'rdfs:label',"?"+node.categories[uri].SPARQLid]);
+            //variates.push("?"+"EntCat"+node.categories[uri].SPARQLid);
+          if ( node.actif && node.categories[uri].actif) {
+            variates.push("?"+node.categories[uri].SPARQLid);
+          }
+        }
+        /* remove the node from the buffer list */
+        dup_node_array.splice(idx,1);
+      }
+      return [variates,constraintRelations] ;
     };
   };

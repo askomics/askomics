@@ -13,6 +13,7 @@ class ParamManager(object):
         self.ASKOMICS_abstractionRelationUser = "abstractionRelationUserQuery.sparql"
         self.ASKOMICS_abstractionEntityUser = "abstractionEntityUserQuery.sparql"
         self.ASKOMICS_abstractionAttributesEntityUser = "abstractionAttributesEntityUserQuery.sparql"
+        self.ASKOMICS_abstractionCategoriesEntityUser = "abstractionCategoriesEntityUserQuery.sparql"
         self.ASKOMICS_neighbor_query_following_shortcuts_file = "neighborQueryFollowingShortcuts.sparql"
         self.ASKOMICS_setting_query_file = "settingQuery.sparql"
         self.ASKOMICS_has_category_query_file = "hasCategoryQuery.sparql"

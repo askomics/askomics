@@ -9,9 +9,6 @@ function startVisualisation() {
     //Following code is automatically executed at start or is triggered by the action of the user
     /* To manage construction of SPARQL Query */
     graphBuilder = new AskomicsGraphBuilder();
-
-    /* To manage Graph view on UI */
-    graphView = new AskomicsGraphView();
     /* To manage information about current node */
     nodeView = new AskomicsNodeView();
     /* To manage Attribute view on UI */
@@ -132,6 +129,7 @@ function loadStatistics() {
 $(function () {
     /* To manage information about User Datasrtucture  */
     userAbstraction = new AskomicsUserAbstraction();
+    userAbstraction.loadUserAbstraction();
 
     // Startpoints definition
     loadStartPoints();
@@ -183,7 +181,7 @@ $(function () {
     });
 
     // Switch between close and open eye icon for unselected / selected attributes
-    $("#showNode").click(function() {
+  /*  $("#showNode").click(function() {
         var id = $("#nodeName").text();
         if ($(this).hasClass('glyphicon-eye-close')) {
             $(this).removeClass('glyphicon-eye-close');
@@ -195,13 +193,14 @@ $(function () {
             $(this).addClass('glyphicon-eye-close');
             removeDisplay(id);
         }
-    });
+    });*/
 
     // Node deletion
+    /*
     $("#deleteNode").click(function() {
         graph.removeNode($("#nodeName").text());
     });
-
+*/
     // A helper for handlebars
     Handlebars.registerHelper('nl2br', function(text) {
         var nl2br = (text + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1' + '<br>' + '$2');

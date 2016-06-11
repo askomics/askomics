@@ -137,6 +137,12 @@ class TripleStoreExplorer(ParamManager, CounterManager):
 
         data['attributes'] = results
 
+        sparql_template = self.get_template_sparql(self.ASKOMICS_abstractionCategoriesEntityUser)
+        query = sqb.load_from_file(sparql_template, {"entities" : filterEntities }).query
+        results = ql.process_query(query)
+
+        data['categories'] = results
+
         return data
 
 
@@ -188,6 +194,35 @@ class TripleStoreExplorer(ParamManager, CounterManager):
                     )
 
         return attributes
+
+    def build_sparql_query_from_json(self,variates,constraintesRelations,constraintesFilters):
+        print("variates")
+        print(variates)
+        print("constraintesRelations")
+        print(constraintesRelations)
+        print("constraintesFilters")
+        print(constraintesFilters)
+
+        req = ""
+        req += "SELECT DISTINCT "+' '.join(variates)+"\n"
+        req += "FROM "+ "<"+self.get_param("askomics.graph")+ ">"+"\n"
+        req += "WHERE {"+"\n"
+        for triplet in constraintesRelations:
+            req += triplet[0]+" "+triplet[1]+" "+triplet[2]+".\n"
+        req += "}"
+        print ("================== REQUETE ===========================")
+        print (req)
+
+        sqb = SparqlQueryBuilder(self.settings, self.session)
+        ql = QueryLauncher(self.settings, self.session)
+
+        prefixes = sqb.header_sparql_config()
+        results = ql.process_query(prefixes+req)
+
+        print ("=================== RESULTS =========================")
+        print(results)
+        print ("===@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ =========================")
+        return results
 
     def get_neighbours_for_node(self, node, uri_new_instance):
         """
