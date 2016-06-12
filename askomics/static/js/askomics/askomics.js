@@ -19,13 +19,6 @@ function startVisualisation() {
     forceLayoutManager = new AskomicsForceLayoutManager();
     forceLayoutManager.start();
 
-    //addConstraint('node',startPoint.id,startPoint.uri);
-
-    //graph = new myGraph(graphBuilder,userAbstraction);
-
-    //graph.addNode(startPoint);
-    //addDisplay(startPoint.id);
-
     // Save initial query in the download button
     //launchQuery(0, 0, true);
 }
@@ -129,7 +122,6 @@ function loadStatistics() {
 $(function () {
     /* To manage information about User Datasrtucture  */
     userAbstraction = new AskomicsUserAbstraction();
-    userAbstraction.loadUserAbstraction();
 
     // Startpoints definition
     loadStartPoints();
@@ -180,27 +172,6 @@ $(function () {
         e.preventDefault();
     });
 
-    // Switch between close and open eye icon for unselected / selected attributes
-  /*  $("#showNode").click(function() {
-        var id = $("#nodeName").text();
-        if ($(this).hasClass('glyphicon-eye-close')) {
-            $(this).removeClass('glyphicon-eye-close');
-            $(this).addClass('glyphicon-eye-open');
-
-            addDisplay(id);
-        } else {
-            $(this).removeClass('glyphicon-eye-open');
-            $(this).addClass('glyphicon-eye-close');
-            removeDisplay(id);
-        }
-    });*/
-
-    // Node deletion
-    /*
-    $("#deleteNode").click(function() {
-        graph.removeNode($("#nodeName").text());
-    });
-*/
     // A helper for handlebars
     Handlebars.registerHelper('nl2br', function(text) {
         var nl2br = (text + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1' + '<br>' + '$2');

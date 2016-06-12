@@ -25,17 +25,18 @@ var AskomicsUserAbstraction = function () {
     /* Request information in the model layer */
     //this.updateOntology();
     AskomicsUserAbstraction.prototype.loadUserAbstraction = function(uriEntity) {
-      $('#waitModal').modal('show');
+    //  $('#waitModal').modal('show');
     //AskomicsUserAbstraction.prototype.updateOntology = function() {
       var service = new RestServiceJs("userAbstraction");
-      service.post({}, function(resultListTripletSubjectRelationObject) {
+
+      service.postsync({}, function(resultListTripletSubjectRelationObject ) {
 
         /* All relation are stored in tripletSubjectRelationObject */
         tripletSubjectRelationObject = resultListTripletSubjectRelationObject.relations;
         entityInformationList = {};
         /* All information about an entity available in TPS are stored in entityInformationList */
         for (var entry in resultListTripletSubjectRelationObject.entities){
-          console.log("==============================================================================================");
+          console.log("========================= ABSTRACTION =====================================================================");
           console.log("ENTITE:"+JSON.stringify(resultListTripletSubjectRelationObject.attributes[entry2]));
 
           var uri = resultListTripletSubjectRelationObject.entities[entry].entity;
@@ -85,9 +86,9 @@ var AskomicsUserAbstraction = function () {
         console.log("==============================================================================================");
         console.log("<=== entityInformationList ===> ");
         console.log(JSON.stringify(entityInformationList));
-        $('#waitModal').modal('hide');
+        //$('#waitModal').modal('hide');
       });
-    }
+    };
 
     /* Get value of an attribut with RDF format like rdfs:label */
     AskomicsUserAbstraction.prototype.removePrefix = function(uriEntity) {

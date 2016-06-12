@@ -41,6 +41,8 @@ var AskomicsNodeView = function () {
 
     var re = new RegExp(/(\d+)$/);
     var indiceEntity = node.name.match(re);
+    if ( indiceEntity === null || indiceEntity.length <= 0 )
+      indiceEntity = ["unknown"];
     var labelEntity = node.name.replace(re,"");
     return $('<em></em>').text(labelEntity).append($('<sub></sub>').text(indiceEntity[0]));
   };
@@ -70,28 +72,22 @@ var AskomicsNodeView = function () {
     }
   };
 
-  AskomicsAttributesView.prototype.remove = function (node) {
+  AskomicsNodeView.prototype.remove = function (node) {
     //$("#"+prefix+node.SPARQLid).remove();
-  };
-
-  AskomicsAttributesView.prototype.show = function (node) {
-  //  $("#"+prefix+node.SPARQLid).show();
+    this.clean();
   };
 
   AskomicsNodeView.prototype.hide = function (node) {
     //$("#"+prefix+node.SPARQLid).hide();
+    this.clean();
   };
 
   AskomicsNodeView.prototype.hideAll = function (node) {
   //  $("div[id*='"+ prefix +"']" ).hide();
+  this.clean();
   };
 
   AskomicsNodeView.prototype.create = function (node) {
   //  var nodeView = $("<div></div>").attr("id",prefix+node.SPARQLid);
-  };
-
-  AskomicsNodeView.prototype.getVisibleNodes = function (node) {
-
-
   };
 };

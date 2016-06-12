@@ -13,6 +13,7 @@ var AskomicsAttributesView = function () {
   };
 
   AskomicsAttributesView.prototype.show = function (node) {
+    console.log("======> SHOW ATTRIBUTE VIEW");
     $("#"+prefix+node.SPARQLid).show();
   };
 
@@ -27,7 +28,7 @@ var AskomicsAttributesView = function () {
   AskomicsAttributesView.prototype.create = function (node) {
       // Add attributes of the selected node on the right side of AskOmics
 
-      var elemUri = node.uri,
+     var elemUri = node.uri,
           elemId  = node.SPARQLid,
           nameDiv = prefix+node.SPARQLid ;
 

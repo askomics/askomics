@@ -44,6 +44,8 @@ var AskomicsForceLayoutManager = function () {
   AskomicsForceLayoutManager.prototype.start = function () {
     /* Get information about start point to bgin query */
     var startPoint = $('#startpoints').find(":selected").data("value");
+    /* load abstraction */
+    userAbstraction.loadUserAbstraction();
     /* Setting up an ID for the first variate */
     graphBuilder.setStartpoint(startPoint);
     /* first node */
@@ -57,9 +59,6 @@ var AskomicsForceLayoutManager = function () {
     /* build graph */
     this.update();
   };
-
-
-
 
     AskomicsForceLayoutManager.prototype.updateInstanciateLinks = function(links) {
       for (var l of links) {
@@ -131,6 +130,7 @@ var AskomicsForceLayoutManager = function () {
     };
 
     AskomicsForceLayoutManager.prototype.insertSuggestions = function (node) {
+      console.log("==== SUGGESTIONS ===");
       if (selectNodes.length === 0 ) {
         this.insertSuggestionsWithNewNode(node);
       } else if (selectNodes.length === 1 ) {
@@ -349,14 +349,6 @@ var AskomicsForceLayoutManager = function () {
                   agv.updateInstanciatedNode(node);
                   nodeView.create(node);
                   attributesView.create(node);
-
-                  /* update node view  */
-                  nodeView.hideAll();
-                  nodeView.show(node);
-                  /* update right view with attribute view */
-                  attributesView.hideAll();
-                  attributesView.show(node);
-
                   /* remove old suggestion */
                   agv.removeSuggestions();
                   /* insert new suggestion */
@@ -364,8 +356,15 @@ var AskomicsForceLayoutManager = function () {
                   /* update graph */
                   forceLayoutManager.update();
                 }
+                linksView.create(d);
               }
-
+              /* update node view  */
+              nodeView.hideAll();
+              /* update right view with link view */
+              attributesView.hideAll();
+              /* update link view */
+              linksView.hideAll();
+              linksView.show(d);
           })
           .on('mouseup', function(d) {
               // Mouse up on a link
@@ -417,6 +416,7 @@ var AskomicsForceLayoutManager = function () {
                   agv.manageSelectedNodes(d);
               })
               .on('mouseup', function(d) {
+                console.log("mouse up NODE");
                   // Mouse up on a link
                   document.body.style.cursor = 'default';
                   // nothing todo for intance
@@ -430,6 +430,9 @@ var AskomicsForceLayoutManager = function () {
                     nodeView.create(d);
                     attributesView.create(d);
                   }
+
+                  linksView.hideAll();
+                  
                   /* update node view  */
                   nodeView.hideAll();
                   nodeView.show(d);
