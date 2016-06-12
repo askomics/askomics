@@ -207,8 +207,13 @@ class TripleStoreExplorer(ParamManager, CounterManager):
         req += "SELECT DISTINCT "+' '.join(variates)+"\n"
         req += "FROM "+ "<"+self.get_param("askomics.graph")+ ">"+"\n"
         req += "WHERE {"+"\n"
+
         for triplet in constraintesRelations:
             req += triplet[0]+" "+triplet[1]+" "+triplet[2]+".\n"
+
+        for userFilter in constraintesFilters:
+            req += userFilter+".\n"
+
         req += "}"
         print ("================== REQUETE ===========================")
         print (req)

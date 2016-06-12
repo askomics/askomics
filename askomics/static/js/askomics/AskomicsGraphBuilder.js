@@ -156,6 +156,7 @@
       node.nlink = {}; // number of relation with a node.
       node.attributes = {} ;
       node.categories = {} ;
+      node.filters = {} ;
       return node;
     };
 
@@ -217,7 +218,7 @@
       this.setId(AttOrCatArray[attributeForUri.uri]);
 
       /* by default all attributes is ask */
-      AttOrCatArray[attributeForUri.uri].actif = true ;
+      AttOrCatArray[attributeForUri.uri].actif = false ;
       return AttOrCatArray[attributeForUri.uri];
     };
 
@@ -291,6 +292,8 @@
     AskomicsGraphBuilder.prototype.buildConstraintsGraph = function() {
       var variates = [] ;
       var constraintRelations = [] ;
+      var filters = [];
+
       var dup_node_array = $.extend(true, [], _instanciedNodeGraph);
       var dup_link_array = $.extend(true, [], _instanciedLinkGraph);
       var ua = userAbstraction;
@@ -329,10 +332,16 @@
             variates.push("?"+node.categories[uri].SPARQLid);
           }
         }
+
+        for (var f in node.filters) {
+          console.log(f);
+          console.log(node.filters[f]);
+          filters.push(node.filters[f]);
+        }
         /* remove the node from the buffer list */
         dup_node_array.splice(idx,1);
       }
-      return [variates,constraintRelations] ;
+      return [variates,constraintRelations,filters] ;
     };
 
     AskomicsGraphBuilder.prototype.nodesDisplaying = function() {
@@ -357,5 +366,10 @@
           return list;
         }
       }
+    };
+
+    AskomicsGraphBuilder.prototype.setFilterAttributes= function(nodeId,SPARQLid,filter) {
+      var tab = this.findElt(_instanciedNodeGraph,nodeId);
+      tab[1].filters[SPARQLid] = filter;
     };
   };

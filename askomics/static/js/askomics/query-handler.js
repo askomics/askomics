@@ -117,7 +117,7 @@ function launchQuery(exp, lim, roq) {
     var jdata = {
       'variates': tab[0],
       'constraintesRelations': tab[1],
-      'constraintesFilters': []
+      'constraintesFilters': tab[2]
     };
     var service = new RestServiceJs("sparqlquery");
 
@@ -189,7 +189,7 @@ function displayResults(data) {
        row = $('<tr></tr>');
        for (i=0;i<nodeToDisplay.length;i++ ) {
          varEntity = nodeToDisplay[i];
-         row.append($('<th></th>').addClass("success").addClass("table-bordered").text("Name"));
+         row.append($('<th></th>').addClass("success").addClass("table-bordered").text("ID"));
 
          for (var att in activesAttributes[varEntity]) {
             row.append($('<th></th>').addClass("success").addClass("table-bordered").text(activesAttributes[varEntity][att]));

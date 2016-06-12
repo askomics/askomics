@@ -34,13 +34,21 @@ var AskomicsAttributesView = function () {
 
       var details = $("<div></div>").attr("id",nameDiv).addClass('div-details');
 
-      var nameLab = $("<label></label>").attr("for",elemId).text("Name");
-      var nameInp = $("<input/>").attr("id", "lab_" + elemId).addClass("form-control");
+      var nameLab = $("<label></label>").attr("for",elemId).text("ID");
+      var nameInp = $("<input/>").attr("nodeid", node.id).attr("sparqlid", node.SPARQLid).addClass("form-control");
 
       details.append(nameLab).append(nameInp);
 
       nameInp.change(function(d) {
         var value = $(this).val();
+        console.log("VALUE:"+$(this).attr('nodeid'));
+        console.log("VALUE:"+$(this).attr('sparqlid'));
+        nodeid = $(this).attr('nodeid');
+        sparlid = $(this).attr('sparqlid');
+
+        graphBuilder.setFilterAttributes(nodeid,sparlid,'FILTER ( regex(str(?'+sparlid+'), "'+$(this).val()+'", "i" ))');
+      //  userAbstraction.
+        /*
         removeFilterCat(elemId);
         removeFilterNum(elemId);
         removeFilterStr(elemId);
@@ -48,6 +56,7 @@ var AskomicsAttributesView = function () {
             return;
         }
         addFilterStr(elemId,value);
+        */
       });
 
 
@@ -120,14 +129,13 @@ var AskomicsAttributesView = function () {
           // =============================================================================================
           //    Manage Attribute variate when eye is selected or deselected
           //
-          console.log("ssssss)))))");
-          console.log(JSON.stringify(attribute));
+          var eyeLabel = attribute.actif?'glyphicon-eye-open':'glyphicon-eye-close';
           var icon = $('<span></span>')
                   .attr('atturi', attribute.id)
                   .attr('nodeid', node.id)
                   .attr('aria-hidden','true')
                   .addClass('glyphicon')
-                  .addClass('glyphicon-eye-open')
+                  .addClass(eyeLabel)
                   .addClass('display');
 
           icon.click(function(d) {
@@ -139,10 +147,8 @@ var AskomicsAttributesView = function () {
                   icon.addClass('glyphicon-eye-close');
               }
 
-              console.log("ATTRIBUTE)))))");
               var atturi = $(this).attr('atturi');
               var nodeid = $(this).attr('nodeid');
-              console.log(JSON.stringify(id));
               graphBuilder.switchActiveAttribute(atturi,nodeid);
           });
 
