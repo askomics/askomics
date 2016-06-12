@@ -1,83 +1,5 @@
 /*jshint esversion: 6 */
 
-/****************************************************************************/
-
-
-/****************************************************************************/
-
-function addFilterCat(id, value) {
-    filter_cat.push({'id': id, 'value': value});
-}
-
-function addFilterNum(id, value,operator) {
-    filter_num.push({'id': id, 'value': value , 'op' : operator});
-}
-
-function addFilterStr(id, value) {
-    filter_str.push({'id': id, 'value': value});
-}
-
-function removeFilterGen(filterArray,id) {
-    for (var i = filterArray.length-1; i >= 0; --i) {
-        if (filterArray[i].id == id) {
-            filterArray.splice(i,1);
-        }
-    }
-}
-
-function removeDisplay(id) {
-    removeFilterGen(display,id);
-}
-
-function removeFilterCat(id) {
-    removeFilterGen(filter_cat,id);
-}
-
-function removeFilterNum(id) {
-    removeFilterGen(filter_num,id);
-}
-
-function removeFilterStr(id) {
-    removeFilterGen(filter_str,id);
-}
-
-function removeConstraint(id, ignore) {
-    ignore = (ignore ? ignore : []);
-
-    for (var i = constraint.length-1; i >= 0; --i) {
-        if (ignore.indexOf(constraint[i].type) < 0) {
-            switch (constraint[i].type) {
-                case 'node':
-                    if (constraint[i].id == id)
-                        constraint.splice(i,1);
-                    break;
-                case 'link':
-                    if ((constraint[i].src == id) || (constraint[i].tg == id))
-                        constraint.splice(i,1);
-                    break;
-                case 'attribute':
-                    if (constraint[i].id == id)
-                        constraint.splice(i,1);
-                    break;
-                case 'clause':
-                    if (constraint[i].id == id)
-                        constraint.splice(i,1);
-                    break;
-            }
-        }
-    }
-}
-
-
-
-function delFromQuery(id) {
-    removeDisplay(id);
-    removeConstraint(id);
-    removeFilterCat(id);
-    removeFilterNum(id);
-    removeFilterStr(id);
-}
-
 function formatQuery() {
     $("input[type='checkbox']:checked").each(function() {
         addDisplay($(this).attr('name'));
@@ -102,17 +24,7 @@ function launchQuery(exp, lim, roq) {
 
     if (!roq)
       $('#waitModal').modal('show');
-/*
-    var jdata = { 'display':display,
-                  'constraint':constraint,
-                  'filter_cat':filter_cat,
-                  'filter_num':filter_num,
-                  'filter_str':filter_str,
-                  'export':exp,
-                  'limit':lim,
-                  'return_only_query':roq,
-                  'uploaded':$("#uploadedQuery").text() };
-*/
+
     var tab = graphBuilder.buildConstraintsGraph();
     var jdata = {
       'variates': tab[0],
@@ -142,20 +54,8 @@ function provideDownloadLink(data) {
 }
 
 function displayResults(data) {
-    //graphBuilder.attributesDisplaying
     // to clear and print new results
     $("#results").empty();
-    console.log("=================== DISPLAY RESULTS =============================");
-    console.log(JSON.stringify(data));
-    /*
-    if (data.values.length > 0) {
-      for(var i=0; i<data.values.length; i++) {
-          $.each(data.values[i], function(key, value) {
-            body.append(value);
-          });
-      }
-    }
-*/
     if (data.values.length > 0) {
        {
        /* new presentation by entity */

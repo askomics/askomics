@@ -359,8 +359,12 @@
         if (v.SPARQLid == SPARQLid ) {
           for (var uriAtt in v.attributes) {
             if (v.attributes[uriAtt].actif) {
-              console.log(v.attributes[uriAtt].SPARQLid+"is ACTIF!!!!!!!");
               list.push(v.attributes[uriAtt].SPARQLid);
+            }
+          }
+          for (var uriCat in v.categories) {
+            if (v.categories[uriCat].actif) {
+              list.push(v.categories[uriCat].SPARQLid);
             }
           }
           return list;
@@ -368,8 +372,12 @@
       }
     };
 
-    AskomicsGraphBuilder.prototype.setFilterAttributes= function(nodeId,SPARQLid,filter) {
+    AskomicsGraphBuilder.prototype.setFilterAttributes= function(nodeId,SPARQLid,value,filter) {
       var tab = this.findElt(_instanciedNodeGraph,nodeId);
-      tab[1].filters[SPARQLid] = filter;
+      if ($.trim(value) === "") {
+        delete tab[1].filters[SPARQLid];
+      } else {
+        tab[1].filters[SPARQLid] = filter;
+      }
     };
   };
