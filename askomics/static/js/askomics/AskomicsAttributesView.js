@@ -83,17 +83,16 @@ var AskomicsAttributesView = function () {
               service.post(model, function(d) {
                   inp.append($("<option></option>").attr("value", "").attr("selected", "selected"));
                   var sizeSelect = 3 ;
-                  if ( d.value.length<3 ) sizeSelect = d.value.length;
-                  if ( d.value.length === 0 ) sizeSelect = 1;
+                  if ( d.values.length<3 ) sizeSelect = d.values.length;
+                  if ( d.values.length === 0 ) sizeSelect = 1;
                   inp.attr("size",sizeSelect);
 
-                  if ( d.value.length > 1 ) {
-                    for (var v of d.value) {
-                      console.log("OOOOOOOOOOOOOOOOOOOOOOOOO  =>"+JSON.stringify(v));
+                  if ( d.values.length > 1 ) {
+                    for (var v of d.values) {
                       inp.append($("<option></option>").attr("value", v[labelSparqlVarId]).append(v[labelSparqlVarId]));
                     }
-                  } else if (d.value.length == 1) {
-                    inp.append($("<option></option>").attr("value", d.value[0][labelSparqlVarId]).append(d.value[0][labelSparqlVarId]));
+                  } else if (d.values.length == 1) {
+                    inp.append($("<option></option>").attr("value", d.values[0][labelSparqlVarId]).append(d.values[0][labelSparqlVarId]));
                   }
                 $('#waitModal').modal('hide');
               });
@@ -121,25 +120,30 @@ var AskomicsAttributesView = function () {
           // =============================================================================================
           //    Manage Attribute variate when eye is selected or deselected
           //
-
+          console.log("ssssss)))))");
+          console.log(JSON.stringify(attribute));
           var icon = $('<span></span>')
-                  .attr('id', 'display_' + id)
+                  .attr('atturi', attribute.id)
+                  .attr('nodeid', node.id)
                   .attr('aria-hidden','true')
                   .addClass('glyphicon')
                   .addClass('glyphicon-eye-open')
                   .addClass('display');
 
-          icon.click(function() {
+          icon.click(function(d) {
               if (icon.hasClass('glyphicon-eye-close')) {
-
                   icon.removeClass('glyphicon-eye-close');
                   icon.addClass('glyphicon-eye-open');
-                  graphBuilder.activeAttributeFronNode(attribute.uri,node);
               } else {
                   icon.removeClass('glyphicon-eye-open');
                   icon.addClass('glyphicon-eye-close');
-                  graphBuilder.unActiveAttributeFronNode(attribute.uri,node);
               }
+
+              console.log("ATTRIBUTE)))))");
+              var atturi = $(this).attr('atturi');
+              var nodeid = $(this).attr('nodeid');
+              console.log(JSON.stringify(id));
+              graphBuilder.switchActiveAttribute(atturi,nodeid);
           });
 
           details.append(lab).append(icon).append(inp);

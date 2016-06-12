@@ -40,9 +40,7 @@
         console.log("Impossible to remove the first node !");
         return ;
       }
-      console.log("_instanciedNodeGraph:"+JSON.stringify(_instanciedNodeGraph));
-      console.log("Length node "+_instanciedNodeGraph.length);
-      console.log("Removing "+node.id);
+
       /* search link associated with this node and a node with a id > (newest than idNode)*/
       var linkIndexToDelete = [];
       for (var i in _instanciedLinkGraph ) {
@@ -66,26 +64,17 @@
             delete currentNode.nlink[targetNode.id];
         }
       }
-        console.log("Length node "+_instanciedNodeGraph.length);
-      console.log("Nb link to delete:"+linkIndexToDelete.length);
+
       /* remove links */
       for (var l=linkIndexToDelete.length-1;l>=0;l--) {
-        console.log("remove link :"+linkIndexToDelete[l]);
-        console.log("object :"+_instanciedLinkGraph[linkIndexToDelete[l]]);
-        console.log("_instanciedLinkGraph:"+JSON.stringify(_instanciedLinkGraph));
         _instanciedLinkGraph.splice(linkIndexToDelete[l], 1);
       }
-      console.log("------------------------------------------------------");
-      console.log("_instanciedLinkGraph:"+JSON.stringify(_instanciedLinkGraph));
 
-      console.log("*********************Length node "+_instanciedNodeGraph.length);
       /* remove the node */
       for (var n in _instanciedNodeGraph) {
-        console.log("ID:"+_instanciedNodeGraph[n].id);
+
         if ( _instanciedNodeGraph[n].id == node.id ) {
-           console.log("remove node :"+node.id);
           _instanciedNodeGraph.splice(n, 1);
-          console.log("_instanciedNodeGraph:"+JSON.stringify(_instanciedNodeGraph));
           return;
         }
       }
@@ -240,20 +229,25 @@
       }
     };
 
-    AskomicsGraphBuilder.prototype.activeAttributeFronNode = function(uriAtt,node) {
-      if ( attributeForUri.uri in node.attributes )
-        node.attributes[attributeForUri.uri].actif = true ;
-      else if ( attributeForUri.uri in node.categories )
-        node.categories[attributeForUri.uri].actif = true ;
+    AskomicsGraphBuilder.prototype.switchActiveAttribute = function(uriId,nodeId) {
+      for (var node of _instanciedNodeGraph ) {
+        if (node.id == nodeId ) {
+          var a;
+          for (a in node.attributes ) {
+            if ( node.attributes[a].id == uriId ) {
+              node.attributes[a].actif = !node.attributes[a].actif ;
+              return ;
+            }
+          }
+          for (a in node.categories ) {
+            if ( node.categories[a].id == uriId ) {
+              node.categories[a].actif = !node.categories[a].actif ;
+              return ;
+            }
+          }
+        }
+      }
     };
-
-    AskomicsGraphBuilder.prototype.unActiveAttributeFronNode = function(uriAtt,node) {
-      if ( attributeForUri.uri in node.attributes )
-        node.attributes[attributeForUri.uri].actif = false ;
-      else if ( attributeForUri.uri in node.categories )
-        node.categories[attributeForUri.uri].actif = false ;
-    };
-
 
     AskomicsGraphBuilder.prototype.synchronizeInstanciatedNodesAndLinks = function(nodes,links) {
       var removeElt = [];
@@ -304,11 +298,12 @@
       for (idx=dup_node_array.length-1;idx>=0;idx--) {
         var node = dup_node_array[idx];
         /* add node inside */
-        constraintRelations.push(["?"+node.SPARQLid,'rdf:type',ua.URI(node.uri)]);
+        constraintRelations.push(["?"+'URI'+node.SPARQLid,'rdf:type',ua.URI(node.uri)]);
+        constraintRelations.push(["?"+'URI'+node.SPARQLid,'rdfs:label',"?"+node.SPARQLid]);
         /* find relation with this node and add it as a constraint  */
         for (ilx=dup_link_array.length-1;ilx>=0;ilx--) {
           if ( (dup_link_array[ilx].source.id == node.id) ||  (dup_link_array[ilx].target.id == node.id) ) {
-            constraintRelations.push(["?"+dup_link_array[ilx].source.SPARQLid,ua.URI(dup_link_array[ilx].uri),"?"+dup_link_array[ilx].target.SPARQLid]);
+            constraintRelations.push(["?"+'URI'+dup_link_array[ilx].source.SPARQLid,ua.URI(dup_link_array[ilx].uri),"?"+'URI'+dup_link_array[ilx].target.SPARQLid]);
             dup_link_array.splice(ilx,1);
           }
         }
@@ -318,7 +313,7 @@
         }
         /* adding constraints about attributs about the current node */
         for (var uri in node.attributes) {
-            constraintRelations.push(["?"+node.SPARQLid,ua.URI(uri),"?"+node.attributes[uri].SPARQLid]);
+            constraintRelations.push(["?"+'URI'+node.SPARQLid,ua.URI(uri),"?"+node.attributes[uri].SPARQLid]);
             constraintRelations.push([ua.URI(uri),'rdfs:domain',ua.URI(node.uri)]);
             constraintRelations.push([ua.URI(uri),'rdfs:range',ua.URI(node.attributes[uri].type)]);
             constraintRelations.push([ua.URI(uri),'rdf:type',ua.URI('owl:DatatypeProperty')]);
@@ -327,7 +322,7 @@
           }
         }
         for (uri in node.categories) {
-            constraintRelations.push(["?"+node.SPARQLid,ua.URI(uri),"?EntCat"+node.categories[uri].SPARQLid]);
+            constraintRelations.push(["?"+'URI'+node.SPARQLid,ua.URI(uri),"?EntCat"+node.categories[uri].SPARQLid]);
             constraintRelations.push(["?EntCat"+node.categories[uri].SPARQLid,'rdfs:label',"?"+node.categories[uri].SPARQLid]);
             //variates.push("?"+"EntCat"+node.categories[uri].SPARQLid);
           if ( node.actif && node.categories[uri].actif) {
@@ -338,5 +333,29 @@
         dup_node_array.splice(idx,1);
       }
       return [variates,constraintRelations] ;
+    };
+
+    AskomicsGraphBuilder.prototype.nodesDisplaying = function() {
+      var list = [];
+      for (var v of _instanciedNodeGraph) {
+        if (v.actif)
+          list.push(v.SPARQLid);
+      }
+      return list ;
+    };
+
+    AskomicsGraphBuilder.prototype.attributesDisplaying = function(SPARQLid) {
+      var list = [];
+      for (var v of _instanciedNodeGraph) {
+        if (v.SPARQLid == SPARQLid ) {
+          for (var uriAtt in v.attributes) {
+            if (v.attributes[uriAtt].actif) {
+              console.log(v.attributes[uriAtt].SPARQLid+"is ACTIF!!!!!!!");
+              list.push(v.attributes[uriAtt].SPARQLid);
+            }
+          }
+          return list;
+        }
+      }
     };
   };
