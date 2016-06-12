@@ -50,6 +50,8 @@ var AskomicsForceLayoutManager = function () {
     graphBuilder.setStartpoint(startPoint);
     /* first node */
     nodes.push(startPoint);
+    this.manageSelectedNodes(startPoint);
+
     attributesView.create(startPoint);
     /* update right view with attribute view */
     attributesView.show(startPoint);
@@ -58,6 +60,7 @@ var AskomicsForceLayoutManager = function () {
     this.insertSuggestions(startPoint);
     /* build graph */
     this.update();
+    $("#node_"+startPoint.id).css("fill", "mediumvioletred");
   };
 
     AskomicsForceLayoutManager.prototype.updateInstanciateLinks = function(links) {
@@ -103,36 +106,50 @@ var AskomicsForceLayoutManager = function () {
 
     /* Update the label of cercle when a node is instanciated */
     AskomicsForceLayoutManager.prototype.manageSelectedNodes = function(node) {
-      var agv = this ;
 
       if (! ctrlPressed) {
         $("[id*='node_']").each(function (index, value) {
           var n = {};
           n.uri = $(this).attr('uri') ;
-          $(this).css("fill",agv.getColorInstanciatedNode(n));
+          $(this).css("fill",forceLayoutManager.getColorInstanciatedNode(n));
         });
-
-        selectNodes = [] ;
+        /* if several node were selected or a diffente node were selected so select only the current node */
+        if ( selectNodes.length > 1 || (selectNodes.length===0) || (selectNodes[0].id != node.id) ) {
+          selectNodes = [] ;
+          selectNodes.push(node);
+          $("#node_"+node.id).css("fill", "mediumvioletred");
+        } else { /* deselection of node */
+          selectNodes = [] ;
+          $("#node_"+node.id).css("fill", forceLayoutManager.getColorInstanciatedNode(node));
+        }
       } else {
         // deselection case
         for ( var n in selectNodes ){
           if (selectNodes[n].id == node.id) {
             // remove the current node from the selected node list !
              selectNodes.splice(n,1);
-             $("#node_"+node.id).css("fill", agv.getColorInstanciatedNode(node));
+             $("#node_"+node.id).css("fill", forceLayoutManager.getColorInstanciatedNode(node));
              return;
           }
         }
-
+        selectNodes.push(node);
+        $("#node_"+node.id).css("fill", "mediumvioletred");
       }
-      selectNodes.push(node);
-      $("#node_"+node.id).css("fill", "mediumvioletred");
+    };
+
+    AskomicsForceLayoutManager.prototype.nodeIsSelected = function(node) {
+      if (selectNodes.length > 1) {
+        for (var i of selectNodes) {
+          if ( node.id == i.id ) return true;
+        }
+      }
+      return false;
     };
 
     AskomicsForceLayoutManager.prototype.insertSuggestions = function (node) {
       console.log("==== SUGGESTIONS ===");
       if (selectNodes.length === 0 ) {
-        this.insertSuggestionsWithNewNode(node);
+        return ;
       } else if (selectNodes.length === 1 ) {
         this.insertSuggestionsWithNewNode(selectNodes[0]);
       } else if (selectNodes.length === 2) {
@@ -309,7 +326,6 @@ var AskomicsForceLayoutManager = function () {
 
 
   AskomicsForceLayoutManager.prototype.update = function () {
-    var agv = this ;
     var link = vis.selectAll(".link")
                   .data(links, function (d) {
                       return d.source.id + "-" + d.target.id + "-" + d.linkindex ;
@@ -336,23 +352,23 @@ var AskomicsForceLayoutManager = function () {
           .attr("marker-end", "url(#marker)")
           .style("stroke-dasharray","2")
           .style("opacity", "0.3") /* default */
-          .on('mousedown', function(d) { // Mouse down on a link
+          .on('click', function(d) { // Mouse down on a link
               /* user want a new relation contraint betwwenn two node*/
               console.log("Link mouse down");
               if ( d.suggested ) {
                 ll = [d];
                 graphBuilder.instanciateLink(ll);
-                agv.updateInstanciateLinks(ll);
+                forceLayoutManager.updateInstanciateLinks(ll);
                 if ( d.source.suggested || d.target.suggested  ) {
                   var node = d.source.suggested?d.source:d.target;
                   graphBuilder.instanciateNode(node);
-                  agv.updateInstanciatedNode(node);
+                  forceLayoutManager.updateInstanciatedNode(node);
                   nodeView.create(node);
                   attributesView.create(node);
                   /* remove old suggestion */
-                  agv.removeSuggestions();
+                  forceLayoutManager.removeSuggestions();
                   /* insert new suggestion */
-                  agv.insertSuggestions(node);
+                  forceLayoutManager.insertSuggestions(node);
                   /* update graph */
                   forceLayoutManager.update();
                 }
@@ -365,20 +381,7 @@ var AskomicsForceLayoutManager = function () {
               /* update link view */
               linksView.hideAll();
               linksView.show(d);
-          })
-          .on('mouseup', function(d) {
-              // Mouse up on a link
-          })
-          .on('mouseover', function(d) {
-              // Mouse over on a link
-
-              //d3.select(this).style("stroke-width", 1.5);
-          })
-          .on('mouseout', function(d) {
-              // Mouse out on a link
-              //d3.select(this).style("stroke-width", 1);
           });
-
       /* append for each link a label to print relation property name */
       $('path').each(function (index, value) {
         vis.append("text")
@@ -405,48 +408,43 @@ var AskomicsForceLayoutManager = function () {
               .attr("id", function (d) { return "node_" + d.id; })
               .attr("uri", function (d) { return d.uri; })
               .attr("class", "nodeStrokeClass")
-              .style("fill", function (d) { return agv.getColorInstanciatedNode(d); })
+              .style("fill", function (d) { return forceLayoutManager.getColorInstanciatedNode(d); })
               .style("opacity", function(d) {
                   return (d.suggested === true ? 0.6 : 1);
               })
-              .on('mousedown', function(d) {
-                  // Mouse down on a link
-                  document.body.style.cursor = 'crosshair';
-                  // Colorize the selected node
-                  agv.manageSelectedNodes(d);
-              })
-              .on('mouseup', function(d) {
+              .on('click', function(d) {
                 console.log("mouse up NODE");
-                  // Mouse up on a link
-                  document.body.style.cursor = 'default';
-                  // nothing todo for intance
-                  if (! graphBuilder.isInstanciatedNode(d)) {
-                    // When selected a node is not considered suggested anymore.
-                    graphBuilder.instanciateNode(d);
-                    agv.updateInstanciatedNode(d);
-                    var ll = linksView.selectListLinksUser(links,d);
-                    graphBuilder.instanciateLink(ll);
-                    agv.updateInstanciateLinks(ll);
-                    nodeView.create(d);
-                    attributesView.create(d);
-                  }
+                forceLayoutManager.manageSelectedNodes(d);
+              // Mouse up on a link
+              //document.body.style.cursor = 'default';
+                // nothing todo for intance
+                if (! graphBuilder.isInstanciatedNode(d)) {
+                  // When selected a node is not considered suggested anymore.
+                  graphBuilder.instanciateNode(d);
+                  forceLayoutManager.updateInstanciatedNode(d);
+                  var ll = linksView.selectListLinksUser(links,d);
+                  graphBuilder.instanciateLink(ll);
+                  forceLayoutManager.updateInstanciateLinks(ll);
+                  nodeView.create(d);
+                  attributesView.create(d);
+                }
 
-                  linksView.hideAll();
-                  
-                  /* update node view  */
-                  nodeView.hideAll();
-                  nodeView.show(d);
+                linksView.hideAll();
 
-                  /* update right view with attribute view */
-                  attributesView.hideAll();
-                  attributesView.show(d);
+                /* update node view  */
+                nodeView.hideAll();
+                nodeView.show(d);
 
-                  /* remove old suggestion */
-                  agv.removeSuggestions();
-                  /* insert new suggestion */
-                  agv.insertSuggestions(d);
-                  /* update graph */
-                  forceLayoutManager.update();
+                /* update right view with attribute view */
+                attributesView.hideAll();
+                attributesView.show(d);
+
+                /* remove old suggestion */
+                forceLayoutManager.removeSuggestions();
+                /* insert new suggestion */
+                forceLayoutManager.insertSuggestions(d);
+                /* update graph */
+                forceLayoutManager.update();
               });
 
       nodeEnter.append("svg:text")//.append("tspan")
