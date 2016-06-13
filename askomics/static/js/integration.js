@@ -22,7 +22,14 @@ $(function () {
 
     $("#content_integration").on('click', '.preview_button', function(event) {
         var block = $(event.target).closest('.template-source_file');
-        previewTtl(block);
+        if (block.find('.preview_field').is(':visible')) {
+            console.log("xxx> visible, hide it!");
+            hidePreview(block);
+        }else{
+            console.log("xxx> NOT visible, show it!");
+            previewTtl(block);
+        }
+        
     });
 
     $("#content_integration").on('click', '.load_data', function(event) {
@@ -117,6 +124,11 @@ function previewTtl(file_elem) {
         file_elem.find(".preview_field").html(data);
         file_elem.find(".preview_field").show();
     });
+}
+
+function hidePreview(file_elem) {
+    var file_name = file_elem.find('.file_name').text();
+    file_elem.find(".preview_field").hide();
 }
 
 /**
