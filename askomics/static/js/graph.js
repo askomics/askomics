@@ -68,7 +68,7 @@ function insertSuggestions(prev_node, slt_node, expansionDict, nodeList, linkLis
 }
 
 function makeRemoveIcon(field) {
-    var removeIcon = $('<span class="glyphicon glyphicon-remove display"></span>');
+    var removeIcon = $('<span class="glyphicon glyphicon-erase display"></span>');
     removeIcon.click(function() { field.val(null).trigger("change"); });
     return removeIcon;
 }
