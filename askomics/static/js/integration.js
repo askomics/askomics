@@ -23,10 +23,8 @@ $(function () {
     $("#content_integration").on('click', '.preview_button', function(event) {
         var block = $(event.target).closest('.template-source_file');
         if (block.find('.preview_field').is(':visible')) {
-            console.log("xxx> visible, hide it!");
             hidePreview(block);
         }else{
-            console.log("xxx> NOT visible, show it!");
             previewTtl(block);
         }
         
