@@ -83,6 +83,13 @@ pre {
     margin-top: 40px;
 }
 
+.preview_table {
+    width: auto;
+    display: inline-block;
+    white-space: nowrap;
+    overflow-x: auto;
+}
+
 .preview_table td:first-child,
 .preview_table th:first-child {
     border-right: 2px solid #ddd;
