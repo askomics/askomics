@@ -9,7 +9,7 @@ var AskomicsNodeView = function () {
   {
     // Switch between close and open eye icon for unselected
     $("#showNode").click(function() {
-        var sparqlId = $("#nodeName").text();
+        var sparqlId = $("#objectName").text();
         var node = graphBuilder.getInstanciedNodeFromSparqlId(sparqlId);
         graphBuilder.switchActiveNode(node);
 
@@ -24,7 +24,7 @@ var AskomicsNodeView = function () {
 
     // Node deletion
     $("#deleteNode").click(function() {
-        var sparqlId = $("#nodeName").text();
+        var sparqlId = $("#objectName").text();
         var node = graphBuilder.getInstanciedNodeFromSparqlId(sparqlId);
         graphBuilder.removeInstanciedNode(node);
         forceLayoutManager.removeSuggestions();
@@ -48,7 +48,7 @@ var AskomicsNodeView = function () {
   };
 
   AskomicsNodeView.prototype.clean = function () {
-    $("#nodeName").text("");
+    $("#objectName").text("");
     $("#showNode").hide();
     $("#deleteNode").hide();
   };
@@ -60,7 +60,7 @@ var AskomicsNodeView = function () {
 
     this.clean();
 
-    $("#nodeName").html(this.formatLabelEntity(node));
+    $("#objectName").html(this.formatLabelEntity(node));
     $("#showNode").show();
     $("#deleteNode").show();
     if ( node.actif ) {

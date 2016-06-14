@@ -135,7 +135,7 @@ $(function () {
                 var contents = e.target.result;
                 $("#init").hide();
                 $("#svgdiv").hide();
-                $("#nodeDetails").hide();
+                $("#viewDetails").hide();
                 $("#queryBuilder").show();
                 $("#graph").attr("class", "col-md-12");
                 $("#uploadedQuery").show();

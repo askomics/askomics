@@ -13,9 +13,8 @@ var AskomicsLinksView = function () {
 
   AskomicsLinksView.prototype.showTitle = function (link) {
 
-    $("#nodeName").text(link.label);
-    $("#showNode").hide();
-    $("#deleteNode").hide();
+    nodeView.clean();
+    $("#objectName").text(link.label);
 
   };
 
@@ -43,10 +42,12 @@ var AskomicsLinksView = function () {
     console.log(JSON.stringify(link.target));
     var relation = $("<p></p>").append(nodeView.formatLabelEntity(link.source))
                                .append($('<span></span>').html(arrowCode))
+                               .append($('<em></em>').html(link.label))
+                               .append($('<span></span>').html(arrowCode))
                                .append(nodeView.formatLabelEntity(link.target));
     details.append(relation);
 
-    $("#nodeDetails").append(details);
+    $("#viewDetails").append(details);
   };
 
   // take a string and return an entity with a sub index

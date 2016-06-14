@@ -41,6 +41,10 @@ var AskomicsForceLayoutManager = function () {
       ctrlPressed = false ;
   });
 
+  AskomicsForceLayoutManager.prototype.colorSelectdObject = function (prefix,id) {
+    $(prefix+id).css("fill", "mediumvioletred");
+  };
+
   AskomicsForceLayoutManager.prototype.start = function () {
     /* Get information about start point to bgin query */
     var startPoint = $('#startpoints').find(":selected").data("value");
@@ -60,7 +64,7 @@ var AskomicsForceLayoutManager = function () {
     this.insertSuggestions(startPoint);
     /* build graph */
     this.update();
-    $("#node_"+startPoint.id).css("fill", "mediumvioletred");
+    this.colorSelectdObject("#node_",startPoint.id);
   };
 
     AskomicsForceLayoutManager.prototype.updateInstanciateLinks = function(links) {
@@ -118,7 +122,7 @@ var AskomicsForceLayoutManager = function () {
         if ( selectNodes.length > 1 || (selectNodes.length===0) || (selectNodes[0].id != node.id) ) {
           selectNodes = [] ;
           selectNodes.push(node);
-          $("#node_"+node.id).css("fill", "mediumvioletred");
+          forceLayoutManager.colorSelectdObject("#node_",node.id);
         } else { /* deselection of node */
           selectNodes = [] ;
           $("#node_"+node.id).css("fill", forceLayoutManager.getColorInstanciatedNode(node));
@@ -134,7 +138,7 @@ var AskomicsForceLayoutManager = function () {
           }
         }
         selectNodes.push(node);
-        $("#node_"+node.id).css("fill", "mediumvioletred");
+        forceLayoutManager.colorSelectdObject("#node_",node.id);
       }
     };
 

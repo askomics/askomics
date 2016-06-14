@@ -170,6 +170,6 @@ var AskomicsAttributesView = function () {
 
           //$('#waitModal').modal('hide');
       });
-      $("#nodeDetails").append(details);
+      $("#viewDetails").append(details);
   };
 };
