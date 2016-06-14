@@ -6,7 +6,7 @@
 
 var AskomicsAttributesView = function () {
 
-  var prefix = "view_";
+  var prefix = "rightview_"; /* TODO : This prefix have to be the same as Link view otherwise !!!!!!!!!!! */
 
   AskomicsAttributesView.prototype.remove = function (node) {
     $("#"+prefix+node.SPARQLid).remove();

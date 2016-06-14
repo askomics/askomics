@@ -4,7 +4,7 @@
   Manage Information Link View With a current selected link
 */
 var AskomicsLinksView = function () {
-  var prefix = "linkv_";
+  var prefix = "rightview_";
   var arrowCode = "&#8594;";
 
   AskomicsLinksView.prototype.remove = function (link) {
@@ -21,11 +21,11 @@ var AskomicsLinksView = function () {
 
   AskomicsLinksView.prototype.show = function (link) {
     this.showTitle(link);
-    $("#"+prefix+link.source.id+"-"+link.target.id).show();
+    $("#"+prefix+"Link-"+link.source.id+"-"+link.target.id).show();
   };
 
   AskomicsLinksView.prototype.hide = function (link) {
-    $("#"+prefix+link.source.id+"-"+link.target.id).hide();
+    $("#"+prefix+"Link-"+link.source.id+"-"+link.target.id).hide();
   };
 
   AskomicsLinksView.prototype.hideAll = function (link) {
@@ -35,8 +35,7 @@ var AskomicsLinksView = function () {
   AskomicsLinksView.prototype.create = function (link) {
 
     var elemUri = link.uri,
-         elemId  = link.source.id+"-"+link.target.id,
-         nameDiv = prefix+link.source.id+"-"+link.target.id ;
+         nameDiv = prefix+"Link-"+link.source.id+"-"+link.target.id ;
 
     this.showTitle(link);
 
@@ -45,8 +44,9 @@ var AskomicsLinksView = function () {
     var relation = $("<p></p>").append(nodeView.formatLabelEntity(link.source))
                                .append($('<span></span>').html(arrowCode))
                                .append(nodeView.formatLabelEntity(link.target));
-    //var nameLab = $("<label></label>").attr("for",elemId).text("Name");
-    $("#nodeDetails").append(details).append(relation);
+    details.append(relation);
+
+    $("#nodeDetails").append(details);
   };
 
   // take a string and return an entity with a sub index

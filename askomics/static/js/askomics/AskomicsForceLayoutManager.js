@@ -65,6 +65,7 @@ var AskomicsForceLayoutManager = function () {
 
     AskomicsForceLayoutManager.prototype.updateInstanciateLinks = function(links) {
       for (var l of links) {
+        console.log("updateInstanciateLinks->"+l.source.id + "-" + l.target.id + "-" + l.linkindex);
         var id = l.source.id + "-" + l.target.id + "-" + l.linkindex;
         $("#" + id).css("stroke-dasharray","");
         $("#" + id).css("opacity","1");
@@ -422,9 +423,12 @@ var AskomicsForceLayoutManager = function () {
                   // When selected a node is not considered suggested anymore.
                   graphBuilder.instanciateNode(d);
                   forceLayoutManager.updateInstanciatedNode(d);
-                  var ll = linksView.selectListLinksUser(links,d);
-                  graphBuilder.instanciateLink(ll);
-                  forceLayoutManager.updateInstanciateLinks(ll);
+                  var listOfLinksInstancied = linksView.selectListLinksUser(links,d);
+                  graphBuilder.instanciateLink(listOfLinksInstancied);
+                  forceLayoutManager.updateInstanciateLinks(listOfLinksInstancied);
+                  for (var ll of listOfLinksInstancied ) {
+                    linksView.create(ll);
+                  }
                   nodeView.create(d);
                   attributesView.create(d);
                 }
