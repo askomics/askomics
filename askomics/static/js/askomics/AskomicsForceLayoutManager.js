@@ -19,8 +19,8 @@ var AskomicsForceLayoutManager = function () {
 
   var force = d3.layout.force();
 
-  var nodes = force.nodes(),
-      links = force.links();
+  var nodes = force.nodes();
+  var links = force.links();
 
   var colorPalette = ["yellowgreen","teal","paleturquoise","peru","tomato","steelblue","lightskyblue","lightcoral"];
   var idxColorPalette = 0 ;
@@ -40,7 +40,17 @@ var AskomicsForceLayoutManager = function () {
   $(document).keyup(function (e) {
       ctrlPressed = false ;
   });
+/*
+  AskomicsForceLayoutManager.prototype.setNodes = function (_nodes) {
+    nodes=_nodes;
+    force.nodes(_nodes);
+  };
 
+  AskomicsForceLayoutManager.prototype.setLinks = function (_links) {
+    links=_links;
+    force.links(_links);
+  };
+*/
   AskomicsForceLayoutManager.prototype.colorSelectdObject = function (prefix,id) {
     $(prefix+id).css("fill", "mediumvioletred");
   };
@@ -67,9 +77,47 @@ var AskomicsForceLayoutManager = function () {
     this.colorSelectdObject("#node_",startPoint.id);
   };
 
+  AskomicsForceLayoutManager.prototype.startWithQuery = function (dump) {
+
+    userAbstraction.loadUserAbstraction();
+    t = graphBuilder.setNodesAndLinksFromState(dump);
+    lnodes = t[0];
+    llinks = t[1];
+
+    if ( lnodes.length <=0 ) return ; /* nothing to do */
+
+    for (var n of lnodes) {
+      console.log(n.id+" "+n.label);
+      nodes.push(n);
+      //graphBuilder.nodes().push(n);
+      nodeView.create(n);
+      attributesView.create(n);
+    }
+    attributesView.hideAll();
+
+    for (var l of llinks) {
+      console.log(JSON.stringify(l));
+      //graphBuilder.links().push(l);
+      links.push(l);
+      linksView.create(l);
+    }
+
+    linksView.hideAll();
+    /* select the last node */
+    var lastn = graphBuilder.nodes()[graphBuilder.nodes().length-1];
+    this.unSelectNodes();
+    this.manageSelectedNodes(lastn);
+    /* update right view with attribute view */
+    attributesView.show(lastn);
+    nodeView.show(lastn);
+    /* insert new suggestion with startpoints */
+    this.insertSuggestions(lastn);
+    this.update();
+    this.colorSelectdObject("#node_",lastn.id);
+  };
+
     AskomicsForceLayoutManager.prototype.updateInstanciateLinks = function(links) {
       for (var l of links) {
-        console.log("updateInstanciateLinks->"+l.source.id + "-" + l.target.id + "-" + l.linkindex);
         var id = l.source.id + "-" + l.target.id + "-" + l.linkindex;
         $("#" + id).css("stroke-dasharray","");
         $("#" + id).css("opacity","1");
@@ -142,6 +190,16 @@ var AskomicsForceLayoutManager = function () {
       }
     };
 
+    /* unselect all nodes */
+    AskomicsForceLayoutManager.prototype.unSelectNodes = function() {
+      selectNodes = [];
+      $("[id*='node_']").each(function (index, value) {
+        var n = {};
+        n.uri = $(this).attr('uri') ;
+        $(this).css("fill",forceLayoutManager.getColorInstanciatedNode(n));
+      });
+    };
+
     AskomicsForceLayoutManager.prototype.nodeIsSelected = function(node) {
       if (selectNodes.length > 1) {
         for (var i of selectNodes) {
@@ -163,7 +221,7 @@ var AskomicsForceLayoutManager = function () {
     };
 
     AskomicsForceLayoutManager.prototype.insertSuggestionsWithNewNode = function (slt_node) {
-        console.log("URI="+slt_node.uri);
+        console.log("********************************URI="+slt_node.uri);
         /* get All suggested node and relation associated to get orientation of arc */
         tab = userAbstraction.getRelationsObjectsAndSubjectsWithURI(slt_node.uri);
         console.log("SUGGESTION:"+JSON.stringify(tab));
@@ -230,14 +288,10 @@ var AskomicsForceLayoutManager = function () {
             links.push(link);
           }
         }
-        console.log("LINKS LENGTH="+links.length);
         // add neighbours of a node to the graph as propositions.
     } ;
 
     AskomicsForceLayoutManager.prototype.relationInstancied = function (subj, obj,relation,links) {
-      console.log(subj.name);
-      console.log(obj.name);
-      console.log("relation:"+relation);
       for ( var rel of links ) {
         if ( rel.source == subj && rel.target == obj && rel.uri == relation ) return true;
       }
@@ -331,6 +385,13 @@ var AskomicsForceLayoutManager = function () {
 
 
   AskomicsForceLayoutManager.prototype.update = function () {
+    //nodes = force.nodes();
+    //links = force.links();
+
+    for (var n of nodes){
+      console.log(n.id);
+    }
+
     var link = vis.selectAll(".link")
                   .data(links, function (d) {
                       return d.source.id + "-" + d.target.id + "-" + d.linkindex ;
@@ -355,8 +416,8 @@ var AskomicsForceLayoutManager = function () {
           .attr("label", function (d) { return d.label ; })
           .attr("class", "link")
           .attr("marker-end", "url(#marker)")
-          .style("stroke-dasharray","2")
-          .style("opacity", "0.3") /* default */
+          .style("stroke-dasharray",function(d) {console.log(JSON.stringify(d));return d.suggested?"2":"";})
+          .style("opacity", function(d) {return d.suggested?"0.3":"1";})
           .on('click', function(d) { // Mouse down on a link
               /* user want a new relation contraint betwwenn two node*/
               console.log("Link mouse down");

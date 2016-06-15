@@ -10,6 +10,52 @@
     var _instanciedNodeGraph = [] ;
     var _instanciedLinkGraph = [] ;
 
+    AskomicsGraphBuilder.prototype.nodes = function() {
+      return _instanciedNodeGraph;
+    };
+
+    AskomicsGraphBuilder.prototype.links = function() {
+      return _instanciedLinkGraph;
+    };
+    /* create a dump to store data structure and finally the query */
+    AskomicsGraphBuilder.prototype.getInternalState = function() {
+      return JSON.stringify([_instanciedNodeGraph,_instanciedLinkGraph,SPARQLIDgeneration,IGgeneration]);
+    };
+
+    /* create and return list of nodes and links to build a new grpah from a dump file */
+    AskomicsGraphBuilder.prototype.setNodesAndLinksFromState = function(dump) {
+      try {
+        var struct = JSON.parse(dump);
+        if (_instanciedNodeGraph.length >0)
+          this.removeInstanciedNode(_instanciedNodeGraph[0]);
+        _instanciedNodeGraph = struct[0];
+        _instanciedLinkGraph = struct[1];
+        SPARQLIDgeneration   = struct[2];
+        IGgeneration         = struct[3];
+
+        /* source and target don't have the good reference....we fix it*/
+        for (var link of _instanciedLinkGraph) {
+            t = this.findElt(_instanciedNodeGraph,link.source.id);
+            if ( ! t ) {
+              throw Error("Can not find node with ID:"+link.source.id);
+            }
+
+            link.source = t[1];
+            console.log("source==>"+JSON.stringify(link.source));
+            t = this.findElt(_instanciedNodeGraph,link.target.id);
+            if ( ! t ) {
+              throw Error("Can not find node with ID:"+link.target.id);
+            }
+            console.log("target==>"+JSON.stringify(t));
+            link.target = t[1];
+        }
+        return [_instanciedNodeGraph,_instanciedLinkGraph];
+      } catch (ex) {
+        console.error(ex);
+      }
+      return [[],[]];
+    };
+
     AskomicsGraphBuilder.prototype.addInstanciedElt = function(node) {
       _instanciedNodeGraph.push(node);
     };
@@ -19,7 +65,7 @@
     };
 
     AskomicsGraphBuilder.prototype.findElt = function(_array,id)  {
-      var elt  ;
+      var elt  = null ;
       var indexElt = -1;
       for (var i in _array ) {
         if (_array[i].id == id ) {
@@ -36,11 +82,12 @@
     AskomicsGraphBuilder.prototype.removeInstanciedNode = function(node) {
       console.log("---------- removeInstanciedNode ---------------- ID:"+node.id);
       if ( _instanciedNodeGraph[0].length <= 0 ) return ;
+      /*
       if ( _instanciedNodeGraph[0].id == node.id ) {
         console.log("Impossible to remove the first node !");
         return ;
       }
-
+      */
       /* search link associated with this node and a node with a id > (newest than idNode)*/
       var linkIndexToDelete = [];
       for (var i in _instanciedLinkGraph ) {
@@ -156,7 +203,8 @@
       node.nlink = {}; // number of relation with a node.
       node.attributes = {} ;
       node.categories = {} ;
-      node.filters = {} ;
+      node.filters = {} ;/* filters of attributes key:sparqlid*/
+      node.values = {} ; /* values of attributes key:sparqlid*/
       return node;
     };
 
@@ -228,6 +276,15 @@
       }else {
         return this.setAttributeOrCategoryForNode(node.attributes,attributeForUri,node);
       }
+    };
+
+    AskomicsGraphBuilder.prototype.getAttributeOrCategoryForNode = function(attributeForUri,node) {
+      if (attributeForUri.uri in node.categories ) {
+        return node.categories[attributeForUri.uri];
+      } else if (attributeForUri.uri in node.attributes) {
+        return node.attributes[attributeForUri.uri];
+      }
+      return null;
     };
 
     AskomicsGraphBuilder.prototype.switchActiveAttribute = function(uriId,nodeId) {
@@ -374,10 +431,18 @@
 
     AskomicsGraphBuilder.prototype.setFilterAttributes= function(nodeId,SPARQLid,value,filter) {
       var tab = this.findElt(_instanciedNodeGraph,nodeId);
-      if ($.trim(value) === "") {
-        delete tab[1].filters[SPARQLid];
+      var node = tab[1];
+      if (! node ) {
+        throw Error("AskomicsGraphBuilder.prototype.setFilterAttributes don't find node id:"+nodeId);
+      }
+      if ($.trim(value) === "") { // case if user don't wan anymore a filter
+        delete node.filters[SPARQLid];
+        delete node.values[SPARQLid];
       } else {
-        tab[1].filters[SPARQLid] = filter;
+        if (filter!=="") {
+          node.filters[SPARQLid] = filter;
+        }
+        node.values[SPARQLid] = value; /* save value to restore it when the views need it*/
       }
     };
   };

@@ -1,26 +1,28 @@
-var graph;
+
+function startRequestSessionAskomics() {
+  // Initialize the graph with the selected start point.
+  $("#init").hide();
+  $("#queryBuilder").show();
+  d3.select("svg").remove();
+
+  /* To manage construction of SPARQL Query */
+  graphBuilder = new AskomicsGraphBuilder();
+  /* To manage information about current node */
+  nodeView = new AskomicsNodeView();
+  /* To manage Attribute view on UI */
+  attributesView = new AskomicsAttributesView();
+  /* To manage Attribute view on UI */
+  linksView = new AskomicsLinksView();
+  /* To manage the D3.js Force Layout  */
+  forceLayoutManager = new AskomicsForceLayoutManager();
+  /* To manage information about User Datasrtucture  */
+  userAbstraction = new AskomicsUserAbstraction();
+}
 
 function startVisualisation() {
-    // Initialize the graph with the selected start point.
-    $("#init").hide();
-    $("#queryBuilder").show();
-    d3.select("svg").remove();
-
     //Following code is automatically executed at start or is triggered by the action of the user
-    /* To manage construction of SPARQL Query */
-    graphBuilder = new AskomicsGraphBuilder();
-    /* To manage information about current node */
-    nodeView = new AskomicsNodeView();
-    /* To manage Attribute view on UI */
-    attributesView = new AskomicsAttributesView();
-    /* To manage Attribute view on UI */
-    linksView = new AskomicsLinksView();
-    /* To manage the D3.js Force Layout  */
-    forceLayoutManager = new AskomicsForceLayoutManager();
+    startRequestSessionAskomics();
     forceLayoutManager.start();
-
-    // Save initial query in the download button
-    //launchQuery(0, 0, true);
 }
 
 function loadStartPoints() {
@@ -35,8 +37,6 @@ function loadStartPoints() {
         last_counter: startPointsDict.last_new_counter });
 
       $("#startpoints").empty();
-
-      console.log("STARTS:"+JSON.stringify(startPointsDict));
 
       $.each(startPointsDict.nodes, function(key, value) {
           $("#startpoints").append($("<option></option>").attr("data-value", JSON.stringify(value)).text(value.label));
@@ -118,11 +118,7 @@ function loadStatistics() {
   });
 }
 
-
 $(function () {
-    /* To manage information about User Datasrtucture  */
-    userAbstraction = new AskomicsUserAbstraction();
-
     // Startpoints definition
     loadStartPoints();
 
@@ -133,23 +129,18 @@ $(function () {
             var fr = new FileReader();
             fr.onload = function(e) {
                 var contents = e.target.result;
-                $("#init").hide();
-                $("#svgdiv").hide();
-                $("#viewDetails").hide();
-                $("#queryBuilder").show();
-                $("#graph").attr("class", "col-md-12");
-                $("#uploadedQuery").show();
-                $("#uploadedQuery").text(contents);
-                $("a#btn-qdown").attr("href", "data:text/plain;charset=UTF-8," + encodeURIComponent(contents));
+                startRequestSessionAskomics();
+                forceLayoutManager.startWithQuery(contents);
             };
             fr.readAsText(uploadedFile);
         }
     });
 
-    // Update of the query to download if an uploaded query is edited in AskOmics
-    $("#uploadedQuery").bind("DOMSubtreeModified", function() {
-        $("a#btn-qdown").attr("href", "data:text/plain;charset=UTF-8," + encodeURIComponent($("#uploadedQuery").text()));
+    //$("#uploadedQuery")
+    $("a#btn-qdown").on('click', function(d) {
+      $(this).attr("href", "data:text/plain;charset=UTF-8," + encodeURIComponent(graphBuilder.getInternalState()));
     });
+
 
     // Get the overview of files to integrate
     $("#integration").click(function() {

@@ -21,7 +21,7 @@
 
 
         <script src="static/js/askomics/query-handler.js"></script>
-        <script src="static/js/askomics/graph.js"></script>
+  <!--      <script src="static/js/askomics/graph.js"></script> -->
         <script src="static/js/askomics/askomics.js"></script>
         <script src="static/js/askomics/integration.js"></script>
 
@@ -64,7 +64,7 @@
                 <div class="col-md-offset-2"><p>Or upload a sparql query file</p>
                     <div class="uploadBtn btn btn-default">
                         <span>Upload query</span>
-                        <input id="uploadBtn" type="file" class="upload">
+                        <input id="uploadBtn" type="file" class="upload"/>
                     </div>
                 </div>
             </div>

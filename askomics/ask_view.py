@@ -295,27 +295,6 @@ class AskView(object):
         data["values"] = tse.build_sparql_query_from_json(body["variates"],body["constraintesRelations"],body["constraintesFilters"])
         return data
 
-#    @view_config(route_name='link_attribute', request_method='POST')
-#    def attributes(self):
-#        """ Get the attributes of a link described by a specified_by relation """
-#        self.log.debug("== Link ==")
-#        data = {}
-
-#        tse = TripleStoreExplorer(self.settings, self.request.session)
-
-#        body = self.request.json_body
-#        tse.set_counter(body["last_new_counter"])
-
-#        attributes = tse.get_attributes_of(body["uri"])
-#        specif = tse.has_setting(body["uri"], 'specify_relation')
-
-        # TODO : Need to be modified if multiple specify_relation
-#        data["relation"] = specif[0]
-
-#        data["attributes"] = [a.to_dict() for a in attributes]
-#        data["last_new_counter"] = tse.get_counter()
-#        return data
-
     @view_config(route_name='query', request_method='POST')
     def launch_query(self):
         """ Converts the constraints table created by the graph to a sparql query, send it to the database and compile the results"""

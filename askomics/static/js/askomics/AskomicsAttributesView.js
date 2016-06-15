@@ -50,8 +50,12 @@ var AskomicsAttributesView = function () {
 
       attributes = userAbstraction.getAttributesWithURI(node.uri);
       $.each(attributes, function(i) {
-
-          attribute = graphBuilder.buildAttributeOrCategoryForNode(attributes[i],node);
+          /* if attribute is loaded before the creation of attribute view, we don t need to create a new */
+          attribute = graphBuilder.getAttributeOrCategoryForNode(attributes[i],node);
+          /* creation of new one otherwise */
+          if ( ! attribute ) {
+            attribute = graphBuilder.buildAttributeOrCategoryForNode(attributes[i],node);
+          }
 
           var id = attribute.id;
 
@@ -59,12 +63,11 @@ var AskomicsAttributesView = function () {
           var inp = $("<select/>").addClass("form-control").attr("multiple","multiple");
 
           var labelSparqlVarId = attribute.SPARQLid;
+
           if (attribute.type.indexOf("http://www.w3.org/2001/XMLSchema#") < 0) {
               var tab = graphBuilder.buildConstraintsGraph();
-              //var tab = [ [] , [] ];
-
               $('#waitModal').modal('show');
-              inp.attr("list", "opt_" + attribute.SPARQLid)
+              inp.attr("list", "opt_" + labelSparqlVarId)
                  .attr("sparqlid",labelSparqlVarId);
               //console.log(JSON.stringify(nameDiv));
               var service = new RestServiceJs("sparqlquery");
@@ -77,7 +80,13 @@ var AskomicsAttributesView = function () {
             //  console.log(attribute.uri);
 
               service.post(model, function(d) {
-                  inp.append($("<option></option>").attr("value", "").attr("selected", "selected"));
+                  var selectedValue = "";
+                  if (labelSparqlVarId in node.values) {
+                    selectedValue = node.values[labelSparqlVarId];
+                  }
+                  if ( selectedValue==="" ) {
+                    inp.append($("<option></option>").attr("value", selectedValue).attr("selected", "selected"));
+                  }
                   var sizeSelect = 3 ;
                   if ( d.values.length<3 ) sizeSelect = d.values.length;
                   if ( d.values.length === 0 ) sizeSelect = 1;
@@ -85,7 +94,11 @@ var AskomicsAttributesView = function () {
 
                   if ( d.values.length > 1 ) {
                     for (var v of d.values) {
-                      inp.append($("<option></option>").attr("value", v[labelSparqlVarId]).append(v[labelSparqlVarId]));
+                      if ( selectedValue == v[labelSparqlVarId] ) {
+                        inp.append($("<option></option>").attr("value", v[labelSparqlVarId]).attr("selected", "selected").append(v[labelSparqlVarId]));
+                      } else {
+                        inp.append($("<option></option>").attr("value", v[labelSparqlVarId]).append(v[labelSparqlVarId]));
+                      }
                     }
                   } else if (d.values.length == 1) {
                     inp.append($("<option></option>").attr("value", d.values[0][labelSparqlVarId]).append(d.values[0][labelSparqlVarId]));
@@ -103,39 +116,64 @@ var AskomicsAttributesView = function () {
 
           } else {
               if (attribute.type.indexOf("decimal") >= 0) {
+                inputValue="";
+                selectedOpValue="";
                 inp = $("<table></table>").attr("sparqlid",labelSparqlVarId);
+                if ('op_'+labelSparqlVarId in node.values) {
+                  selectedOpValue = node.values['op_'+labelSparqlVarId];
+                }
+                if (labelSparqlVarId in node.values) {
+                  inputValue = node.values[labelSparqlVarId];
+                }
 
                 v = $("<select></select>").addClass("form-control");
-                v.append($("<option></option>").attr("value", '=').append('='));
-                v.append($("<option></option>").attr("value", '<').append('<'));
-                v.append($("<option></option>").attr("value", '<=').append('<='));
-                v.append($("<option></option>").attr("value", '>').append('>'));
-                v.append($("<option></option>").attr("value", '>=').append('>='));
-                v.append($("<option></option>").attr("value", '!=').append('!='));
+                var t;
+                t=$("<option></option>").attr("value", '=').append('=');
+                if ( selectedOpValue=='=') t.attr("selected", "selected");
+                v.append(t);
+                t=$("<option></option>").attr("value", '<').append('<');
+                if ( selectedOpValue=='<') t.attr("selected", "selected");
+                v.append(t);
+                t=$("<option></option>").attr("value", '<=').append('<=');
+                if ( selectedOpValue=='<=') t.attr("selected", "selected");
+                v.append(t);
+                t=$("<option></option>").attr("value", '>').append('>');
+                if ( selectedOpValue=='>') t.attr("selected", "selected");
+                v.append(t);
+                t=$("<option></option>").attr("value", '>=').append('>=');
+                if ( selectedOpValue=='>=') t.attr("selected", "selected");
+                v.append(t);
+                t=$("<option></option>").attr("value", '!=').append('!=');
+                if ( selectedOpValue=='!=') t.attr("selected", "selected");
+                v.append(t);
 
                 tr = $("<tr></tr>");
                 tr.append($("<td></td>").append(v));
-                v = $("<input/>").attr("type", "text").addClass("form-control");
+                v = $("<input/>").attr("type", "text").val(inputValue).addClass("form-control");
                 tr.append($("<td></td>").append(v));
                 inp.append(tr);
 
                 inp.change(function(d) {
-                  console.log($(this).html());
                   var op = $(this).find("option:selected").text();
                   var value = $(this).find('input').val();
                   nodeid = $(this).parent().attr('nodeid');
                   sparlid = $(this).attr('sparqlid');
 
                   graphBuilder.setFilterAttributes(nodeid,sparlid,value,'FILTER ( ?'+sparlid+' '+op+' '+value+')');
+                  graphBuilder.setFilterAttributes(nodeid,"op_"+sparlid,op,'');
                 });
 
               } else {
-                inp = $("<input/>").attr("sparqlid",labelSparqlVarId).attr("type", "text").addClass("form-control");
+                inputValue = "";
+                if (labelSparqlVarId in node.values) {
+                  inputValue = node.values[labelSparqlVarId];
+                }
+
+                inp = $("<input/>").attr("sparqlid",labelSparqlVarId).attr("type", "text").val(inputValue).addClass("form-control");
                 inp.change(function(d) {
                   var value = $(this).val();
                   nodeid = $(this).parent().attr('nodeid');
                   sparlid = $(this).attr('sparqlid');
-                  console.log(sparlid);
                   graphBuilder.setFilterAttributes(nodeid,sparlid,value,'FILTER ( regex(str(?'+sparlid+'), "'+$(this).val()+'", "i" ))');
                 });
               }

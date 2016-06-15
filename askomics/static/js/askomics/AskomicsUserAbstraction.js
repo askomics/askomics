@@ -155,7 +155,6 @@ var AskomicsUserAbstraction = function () {
       var subjectsTarget = {} ;
 
       for (var i in tripletSubjectRelationObject) {
-
         if ( tripletSubjectRelationObject[i].object == UriSelectedNode ) {
           if (! (tripletSubjectRelationObject[i].subject in subjectsTarget) ) {
             subjectsTarget[tripletSubjectRelationObject[i].subject] = [];

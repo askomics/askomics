@@ -29,14 +29,12 @@ function launchQuery(exp, lim, roq) {
     var jdata = {
       'variates': tab[0],
       'constraintesRelations': tab[1],
-      'constraintesFilters': tab[2]
+      'constraintesFilters': tab[2],
     };
     var service = new RestServiceJs("sparqlquery");
 
     service.post(jdata,function(data) {
-        if (roq) {
-            $("a#btn-qdown").attr("href", "data:text/plain;charset=UTF-8," + encodeURIComponent(data.query));
-        } else if (exp === 0) {
+      if (exp === 0) {
             displayResults(data);
             $('#waitModal').modal('hide');
         } else {
