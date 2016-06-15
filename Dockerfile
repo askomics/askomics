@@ -13,10 +13,10 @@ RUN apt-get update && apt-get install -y \
 
 # Python Install Dependencies
 #---------------------------------------------------------------------------------------
-ENV VENV=/usr/local/env
+ENV VENV=/usr/local/AskomicsWeb/venv
 RUN pip3 install virtualenv
-RUN virtualenv -p python3 /usr/local/AskomicsWeb/askomics-env
-RUN . /usr/local/AskomicsWeb/askomics-env/bin/activate
+RUN virtualenv -p python3 /usr/local/AskomicsWeb/venv
+RUN . /usr/local/AskomicsWeb/venv/bin/activate
 
 # Install Askomics
 #------------------------------------------------------------------------------------------
@@ -28,6 +28,5 @@ RUN pip3 install -e .
 # Launch Askomics
 #-------------------------------------------------------------------------------------------
 EXPOSE 6543
-CMD ["pserve","configs/production.ini"]
-#ENTRYPOINT ["/bin/bash"]
-#CMD ["cat","/etc/hosts"]
+ENTRYPOINT ["./startAskomics.sh"]
+CMD ["fuseki", "prod"]

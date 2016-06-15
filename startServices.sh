@@ -31,19 +31,14 @@ fi
 RDFTYPE=$1
 DEPMODE=$2
 
-PYTHON=${PYTHON:-"python3"}
-PYTHON_FLAGS+=( -s )
+PYTHON=${PYTHON:-$(which python3)}
 
 case "$DEPMODE" in
     prod|production|"")
-        DEPMODE="production"
-        PSERVE_FLAGS+=( -b -q )
-        PYTHON_FLAGS+=( -OO )
+        DEPMODE="prod"
         ;;
     dev|development)
-        DEPMODE="development"
-        PSERVE_FLAGS+=( --reload )
-        PYTHON_FLAGS+=( -bb -Wall )
+        DEPMODE="dev"
         ;;
     *)
         usage
@@ -103,16 +98,10 @@ case "$RDFTYPE" in
         echo " * login  : $AGRAPHUSER"
         echo " * paswwd : $AGRAPHPASS"
         echo " ********************************************************************** "
-
-        sudo docker run -d --net="host" -p 6543:6543 -t askomics/web $PYTHON ${PYTHON_FLAGS[@]} /usr/local/bin/pserve configs/$DEPMODE.agraph.ini ${PSERVE_FLAGS[@]}
-        ;;
-    fuseki)
-        sudo docker run -d --net="host" -p 6543:6543 -t askomics/web $PYTHON ${PYTHON_FLAGS[@]} /usr/local/bin/pserve configs/$DEPMODE.fuseki.ini ${PSERVE_FLAGS[@]}
-        ;;
-    virtuoso)
-        sudo docker run -d --net="host" -p 6543:6543 -t askomics/web $PYTHON ${PYTHON_FLAGS[@]} /usr/local/bin/pserve configs/$DEPMODE.virtuoso.ini ${PSERVE_FLAGS[@]}
         ;;
 esac
+
+sudo docker run -d --net="host" -p 6543:6543 -t askomics/web $RDFTYPE $DEPMODE
 
 
 echo "------------------------------------------------"
