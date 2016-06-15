@@ -8,8 +8,8 @@ DIR_CONFIG="${DIR_ASKOMICS}/configs"
 DIR_VENV=${DIR_VENV:-"${DIR_ASKOMICS}/venv"}
 
 PYTHON=${PYTHON:-"python3"}
-PYVENV=${PYVENV:-"pyvenv"}
-PIP=${PIP:-"pip3"}
+PYVENV=${PYVENV:-"$PYTHON -m venv"}
+PIP=${PIP:-"$PYTHON -m pip"}
 
 PYTHON_FLAGS+=( -s )
 
