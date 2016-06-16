@@ -13,7 +13,6 @@ var AskomicsAttributesView = function () {
   };
 
   AskomicsAttributesView.prototype.show = function (node) {
-    console.log("======> SHOW ATTRIBUTE VIEW");
     $("#"+prefix+node.SPARQLid).show();
   };
 

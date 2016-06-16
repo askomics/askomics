@@ -8,7 +8,7 @@ var AskomicsLinksView = function () {
   var arrowCode = "&#8594;";
 
   AskomicsLinksView.prototype.remove = function (link) {
-    $("#"+prefix+link.source.id+"-"+link.target.id).remove();
+    $("#"+prefix+"Link-"+link.source.id+"-"+link.target.id).remove();
   };
 
   AskomicsLinksView.prototype.showTitle = function (link) {

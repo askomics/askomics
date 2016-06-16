@@ -41,12 +41,10 @@
             }
 
             link.source = t[1];
-            console.log("source==>"+JSON.stringify(link.source));
             t = this.findElt(_instanciedNodeGraph,link.target.id);
             if ( ! t ) {
               throw Error("Can not find node with ID:"+link.target.id);
             }
-            console.log("target==>"+JSON.stringify(t));
             link.target = t[1];
         }
         return [_instanciedNodeGraph,_instanciedLinkGraph];
@@ -81,30 +79,38 @@
     */
     AskomicsGraphBuilder.prototype.removeInstanciedNode = function(node) {
       console.log("---------- removeInstanciedNode ---------------- ID:"+node.id);
-      if ( _instanciedNodeGraph[0].length <= 0 ) return ;
-      /*
-      if ( _instanciedNodeGraph[0].id == node.id ) {
-        console.log("Impossible to remove the first node !");
-        return ;
+      if ( _instanciedNodeGraph[0].length <= 0 || _instanciedNodeGraph[0].id == node.id ) {
+        return [];
       }
-      */
+
+      /* the method return list of links */
+      var listLinkRemoved = [];
+
       /* search link associated with this node and a node with a id > (newest than idNode)*/
       var linkIndexToDelete = [];
-      for (var i in _instanciedLinkGraph ) {
-        var t1 = _instanciedLinkGraph[i].source.id == node.id,
-            t2 = _instanciedLinkGraph[i].target.id == node.id;
+      var i=0;
+      while (i < _instanciedLinkGraph.length ) {
+        var link = _instanciedLinkGraph[i++];
+
+        var t1 = link.source.id == node.id,
+            t2 = link.target.id == node.id;
+
         if (t1 || t2 ) {
           // find a link associated with node.id
-          var currentNode = t1?_instanciedLinkGraph[i].source:_instanciedLinkGraph[i].target;
-          var targetNode = t1?_instanciedLinkGraph[i].target:_instanciedLinkGraph[i].source;
+          var currentNode = t1?link.source:link.target;
+          var targetNode = t1?link.target:link.source;
 
           /* the second node is newest than node.id, we have to remove it ! */
-          if ( targetNode.id > currentNode.id ) {
+          if ( targetNode.id > currentNode.id ) { // && targetNode in _instanciedNodeGraph ) {
             // removing node
-            this.removeInstanciedNode(targetNode);
+            listLinkRemoved = listLinkRemoved.concat(this.removeInstanciedNode(targetNode));
+            i=0;
+            continue; /* !!!!! reinit the loop because _instanciedLinkGraph have change !!!!!!!!!! */
+            //console.log("111:"+JSON.stringify(listLinkRemoved));
           }
+
           // removing link
-          linkIndexToDelete.push(i);
+          linkIndexToDelete.push(link.id);
           if ( currentNode.id in targetNode.nlink )
             delete targetNode.nlink[currentNode.id];
           if ( targetNode.id in currentNode.nlink )
@@ -114,17 +120,23 @@
 
       /* remove links */
       for (var l=linkIndexToDelete.length-1;l>=0;l--) {
-        _instanciedLinkGraph.splice(linkIndexToDelete[l], 1);
+        for (var j=0;j<_instanciedLinkGraph.length;j++) {
+          if ( _instanciedLinkGraph[j].id == linkIndexToDelete[l] ) {
+            listLinkRemoved.push(_instanciedLinkGraph[j]);
+            _instanciedLinkGraph.splice(j, 1);
+          }
+        }
       }
 
       /* remove the node */
       for (var n in _instanciedNodeGraph) {
-
         if ( _instanciedNodeGraph[n].id == node.id ) {
           _instanciedNodeGraph.splice(n, 1);
-          return;
+        //  console.log("222:"+JSON.stringify(listLinkRemoved));
+          return listLinkRemoved;
         }
       }
+      return listLinkRemoved;
     };
     AskomicsGraphBuilder.prototype.removeInstanciedLink = function(idLink) {
       // finding link
@@ -391,8 +403,6 @@
         }
 
         for (var f in node.filters) {
-          console.log(f);
-          console.log(node.filters[f]);
           filters.push(node.filters[f]);
         }
         /* remove the node from the buffer list */

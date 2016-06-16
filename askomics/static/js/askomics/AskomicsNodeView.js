@@ -26,10 +26,17 @@ var AskomicsNodeView = function () {
     $("#deleteNode").click(function() {
         var sparqlId = $("#objectName").text();
         var node = graphBuilder.getInstanciedNodeFromSparqlId(sparqlId);
-        graphBuilder.removeInstanciedNode(node);
-        forceLayoutManager.removeSuggestions();
-        forceLayoutManager.update();
-        //$(this).removeNode($("#nodeName").text());
+        if ( node ) {
+          listLinksRemoved = graphBuilder.removeInstanciedNode(node);
+          forceLayoutManager.removeSuggestions();
+          forceLayoutManager.update();
+          attributesView.remove(node);
+          nodeView.clean();
+          for (var l of listLinksRemoved) {
+            console.log("===>"+JSON.stringify(l));
+            linksView.remove(l);
+          }
+        }
     });
 
   }
