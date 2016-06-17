@@ -1,23 +1,29 @@
-var graph;
+/*jshint esversion: 6 */
+
+function startRequestSessionAskomics() {
+  // Initialize the graph with the selected start point.
+  $("#init").hide();
+  $("#queryBuilder").show();
+  d3.select("svg").remove();
+
+  /* To manage construction of SPARQL Query */
+  graphBuilder = new AskomicsGraphBuilder();
+  /* To manage information about current node */
+  nodeView = new AskomicsNodeView();
+  /* To manage Attribute view on UI */
+  attributesView = new AskomicsAttributesView();
+  /* To manage Attribute view on UI */
+  linksView = new AskomicsLinksView();
+  /* To manage the D3.js Force Layout  */
+  forceLayoutManager = new AskomicsForceLayoutManager();
+  /* To manage information about User Datasrtucture  */
+  userAbstraction = new AskomicsUserAbstraction();
+}
 
 function startVisualisation() {
-    // Initialize the graph with the selected start point.
-    $("#init").hide();
-    $("#queryBuilder").show();
-    d3.select("svg").remove();
-
-    var startPoint = $('#startpoints').find(":selected").data("value");
-    addConstraint('node',startPoint.id,startPoint.uri);
-
-    // Keep only the selected node
-    $("#svgdiv").data().last_new_counter = {};
-    $("#svgdiv").data().last_new_counter[startPoint.label] = 1 ;
-
-    console.log($("#svgdiv").data().last_new_counter);
-
-    graph = new myGraph("#svgdiv");
-    graph.addNode(startPoint);
-    addDisplay(startPoint.id);
+    //Following code is automatically executed at start or is triggered by the action of the user
+    startRequestSessionAskomics();
+    forceLayoutManager.start();
 }
 
 function loadStartPoints() {
@@ -173,8 +179,6 @@ function downloadTextAsFile(filename, text) {
 
 
 $(function () {
-    //Following code is automatically executed at start or is triggered by the action of the user
-
     // Startpoints definition
     loadStartPoints();
 
@@ -185,25 +189,18 @@ $(function () {
             var fr = new FileReader();
             fr.onload = function(e) {
                 var contents = e.target.result;
-                $("#init").hide();
-                $("#svgdiv").hide();
-                $("#nodeDetails").hide();
-                $("#queryBuilder").show();
-                $("#graph").attr("class", "col-md-12");
-                $("#uploadedQuery").text(contents).show();
+                startRequestSessionAskomics();
+                forceLayoutManager.startWithQuery(contents);
             };
             fr.readAsText(uploadedFile);
         }
     });
 
-    // Download query action
-    $("span#btn-qdown").click(function() {
-        var service = new RestServiceJs("results");
-        var jdata = prepareQuery(0, 0, true);
-        service.post(jdata,function(data) {
-            downloadTextAsFile("query.sparql", data.query);
-        });
+    //$("#uploadedQuery")
+    $("a#btn-qdown").on('click', function(d) {
+      $(this).attr("href", "data:text/plain;charset=UTF-8," + encodeURIComponent(graphBuilder.getInternalState()));
     });
+
 
     // Get the overview of files to integrate
     $("#integration").click(function() {
@@ -224,26 +221,6 @@ $(function () {
         $('.container#navbar_content').show();
         $('.container#content_' + $this.attr('id')).show();
         e.preventDefault();
-    });
-
-    // Switch between close and open eye icon for unselected / selected attributes
-    $("#showNode").click(function() {
-        var id = $("#nodeName").text();
-        if ($(this).hasClass('glyphicon-eye-close')) {
-            $(this).removeClass('glyphicon-eye-close');
-            $(this).addClass('glyphicon-eye-open');
-
-            addDisplay(id);
-        } else {
-            $(this).removeClass('glyphicon-eye-open');
-            $(this).addClass('glyphicon-eye-close');
-            removeDisplay(id);
-        }
-    });
-
-    // Node deletion
-    $("#deleteNode").click(function() {
-        graph.removeNode($("#nodeName").text());
     });
 
     // A helper for handlebars

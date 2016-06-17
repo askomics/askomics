@@ -1,22 +1,27 @@
 import os
+import unittest
 import json
 import tempfile, shutil
 
 from pyramid import testing
+from pyramid.paster import get_appsettings
 
-from askomics.test import AskoTestCase
 from askomics.libaskomics.source_file.SourceFile import SourceFile
 
 SIMPLE_SOURCE_FILE = os.path.join( os.path.dirname( __file__ ), "..", "test-data", "sourcefile.tsv.simple" )
 
-class SourceFileTests(AskoTestCase):
+class SourceFileTests(unittest.TestCase):
 
     def setUp( self ):
-        super().setUp()
+        self.temp_directory = tempfile.mkdtemp()
+        self.settings = get_appsettings('development.ini', name='main')
 
         request = testing.DummyRequest()
+
         self.srcfile = SourceFile(self.settings, request.session, SIMPLE_SOURCE_FILE, 10)
 
+    def tearDown( self ):
+        shutil.rmtree( self.temp_directory )
 
     def test_load_headers_from_file(self):
 

@@ -3,23 +3,35 @@
     <head>
         <meta charset="utf-8">
         <title>Visual SPARQL query builder for an RDF database</title>
+        <!--
         <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js" charset="utf-8"></script>
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
         <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>
+      -->
+        <script src="static/js/third-party/d3.min.js" charset="utf-8"></script>
+        <script src="static/js/third-party/jquery-1.12.4.min.js"></script>
+        <script src="static/js/third-party/jquery-ui-1.11.4/jquery-ui.min.js"></script>
+
         <!-- The Templates plugin is included to render the upload/download listings -->
         <script src="//blueimp.github.io/JavaScript-Templates/js/tmpl.min.js"></script>
 
-        <script src="static/js/bootstrap.js"></script>
-        <script src="static/js/handlebars-v4.0.5.js"></script>
-        <script src="static/js/rest.js"></script>
-        <script src="static/js/query-handler.js"></script>
-        <script src="static/js/graph.js"></script>
-        <script src="static/js/askomics.js"></script>
-        <script src="static/js/integration.js"></script>
+        <script src="static/js/third-party/bootstrap.js"></script>
+        <script src="static/js/third-party/handlebars-v4.0.5.js"></script>
 
-        <link href="static/css/bootstrap.css" rel="stylesheet" type="text/css">
-        <link href="static/css/style.css" rel="stylesheet" type="text/css">
-        <link href="static/css/pygment.css" rel="stylesheet" type="text/css">
+
+        <script src="static/js/MainAskomics.js"></script>
+        <script src="static/js/query-handler.js"></script>
+        <script src="static/js/integration.js"></script>
+        <script src="static/js/AskomicsRestManagement.js"></script>
+        <script src="static/js/AskomicsUserAbstraction.js"></script>
+        <script src="static/js/AskomicsGraphBuilder.js"></script>
+        <script src="static/js/AskomicsAttributesView.js"></script>
+        <script src="static/js/AskomicsNodeView.js"></script>
+        <script src="static/js/AskomicsLinksView.js"></script>
+        <script src="static/js/AskomicsForceLayoutManager.js"></script>
+
+        <link href="static/css/bootstrap.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="static/css/style.css">
     </head>
 
     <body>
@@ -71,7 +83,7 @@
                                 <span class="glyphicon glyphicon-save"></span>
                             </button>
                             <button id="btn-file" type="button" class="btn btn-default" onclick="generateResultFile(10000)">
-                                Generate a results file (max 10000 lines)
+                                Results file
                             </button>
                         </div>
                         <div class="btn-group btn-group-query">
@@ -80,8 +92,9 @@
                         </div>
                     </form>
                 </div>
-                <div id="nodeDetails" class="col-md-6">
-                    <h3 class="header-div">Filter <span id="nodeName" class="label label-default"></span> on
+
+                <div id="viewDetails" class="col-md-6">
+                    <h3 class="header-div">Filter <span id="objectName" class="label label-default"></span> on
                     <div class="btn-group btn-group-query">
                         <span id="showNode" class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
                         <span id="deleteNode" class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span>
@@ -89,7 +102,7 @@
 
                     <hr/>
                 </div>
-            </div>
+             </div>
             <div id="results" class="row"></div>
         </div>
 
@@ -223,6 +236,28 @@
                 </form>
                 <hr />
             {{/each}}
+        </script>
+
+        <!-- The template to display ttl preview -->
+        <script id="template-ttl-preview" type="text/x-handlebars-template">{{ header }}
+
+=============
+=  Content  =
+=============
+
+{{ content_ttl }}
+
+=================
+=  Abstraction  =
+=================
+
+{{ abstraction_ttl }}
+
+======================
+=  Domain knowledge  =
+======================
+
+{{ domain_knowledge_ttl }}
         </script>
     </body>
 </html>

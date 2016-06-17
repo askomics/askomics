@@ -1,0 +1,13 @@
+SELECT DISTINCT ?entity ?attribute ?labelAttribute ?typeAttribute
+FROM  $graph
+WHERE {
+  ?entity rdf:type owl:Class .
+	?attribute displaySetting:attribute "true"^^xsd:boolean .
+
+  ?attribute rdf:type owl:DatatypeProperty;
+						rdfs:label ?labelAttribute ;
+            rdfs:domain ?entity;
+            rdfs:range ?typeAttribute.
+
+	VALUES ?entity { $entities }
+}

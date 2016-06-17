@@ -17,10 +17,9 @@ def main(global_config, **settings):
     config.add_route('start_point', '/startpoints')
     config.add_route('statistics', '/statistics')
     config.add_route('empty_database', '/empty_database')
-    config.add_route('expand', '/neighbours')
-    config.add_route('link_attribute', '/link')
-    config.add_route('query', '/results')
-    config.add_route('attribute_value', '/category_value')
+    config.add_route('getUserAbstraction', '/userAbstraction')
+    config.add_route('query', '/results') #===========> Obsolete
+    config.add_route('sparqlquery', '/sparqlquery')
     config.add_route('source_files_overview', '/source_files_overview')
     config.add_route('load_data_into_graph', '/load_data_into_graph')
     config.add_route('preview_ttl', '/preview_ttl')

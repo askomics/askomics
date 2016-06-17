@@ -1,7 +1,18 @@
-from pyramid import testing
-from askomics.test import AskoTestCase
+import unittest
 
-class SparqlTests(AskoTestCase):
+from pyramid import testing
+from pyramid.paster import get_appsettings
+
+import json
+
+class SparqlTests(unittest.TestCase):
+    def setUp(self):
+        self.config = testing.setUp()
+        self.settings = get_appsettings('development.ini', name='main')
+
+    def tearDown(self):
+        testing.tearDown()
+
     def test_print_ids(self):
         from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
 

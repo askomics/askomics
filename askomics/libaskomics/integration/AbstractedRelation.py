@@ -25,23 +25,41 @@ class AbstractedRelation(object):
     """
 
     def __init__(self, relation_type, identifier, rdfs_domain, rdfs_range):
-        self.uri = ":has_" + identifier
-        self.label = "has_" + identifier
-        if relation_type == "entity" or relation_type == "category":
+        idx = identifier.find("@")
+        type_range = identifier
+
+        #Keep compatibility with old version
+        if idx  != -1:
+            type_range = identifier[idx+1:len(identifier)]
+            identifier = identifier[0:idx]
+        else:
+            identifier = identifier
+
+        self.uri = ":"+identifier
+        self.label = identifier
+        print(relation_type)
+        print(identifier)
+
+        print("RELATIONTYPE:"+relation_type)
+
+        if relation_type == "entity":
             self.relation_type = "owl:ObjectProperty"
-            self.rdfs_range = ":" + identifier
+            self.rdfs_range = ":" + type_range
+        elif relation_type.lower() == "category":
+            self.relation_type = "owl:ObjectProperty"
+            self.rdfs_range = ":" + type_range+"Category"
         else:
             self.relation_type = "owl:DatatypeProperty"
             self.rdfs_range = rdfs_range
-        self.rdfs_domain = ":" + rdfs_domain
 
+        self.rdfs_domain = ":" + rdfs_domain
         self.log = logging.getLogger(__name__)
 
     def set_uri(self, identifier):
-        self.uri = ":has_" + identifier
+        self.uri = ":" + identifier
 
     def set_label(self, identifier):
-        self.label = "has_" + identifier
+        self.label = identifier
 
     def set_relation_type(self, relation_type):
         if relation_type == "entity" or relation_type == "category":

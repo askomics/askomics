@@ -1,16 +1,23 @@
-from askomics.test import AskoTestCase
+import unittest
+
+from pyramid import testing
+from pyramid.paster import get_appsettings
 from askomics import main
 
 
-class ViewTests(AskoTestCase):
+class ViewTests(unittest.TestCase):
     def setUp(self):
         from askomics.ask_view import AskView
 
-        super().setUp()
+        self.config = testing.setUp()
+        self.settings = get_appsettings('development.ini', name='main')
         self.app = main(self.settings)
 
         from webtest import TestApp
         self.testapp = TestApp(self.app)
+
+    def tearDown(self):
+        testing.tearDown()
 
     def test_home(self):
 

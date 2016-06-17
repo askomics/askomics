@@ -97,6 +97,55 @@ class TripleStoreExplorer(ParamManager, CounterManager):
 
         return nodes
 
+    def getUserAbstraction(self):
+        """
+        Get the user abstraction (relation and entity as subject and object)
+
+        :return:
+        :rtype:
+        """
+        data = {}
+
+        self.log.debug(" =========== TripleStoreExplorer:getUserAbstraction ===========")
+        sqb = SparqlQueryBuilder(self.settings, self.session)
+        ql = QueryLauncher(self.settings, self.session)
+
+        sparql_template = self.get_template_sparql(self.ASKOMICS_abstractionRelationUser)
+        query = sqb.load_from_file(sparql_template, {}).query
+        results = ql.process_query(query)
+
+        data['relations'] = results
+
+        listEntities = {}
+
+        for elt in results:
+            if not elt['object'] in listEntities:
+                listEntities[elt['object']]=0
+            if not elt['subject'] in listEntities:
+                listEntities[elt['subject']]=0
+
+        filterEntities = ' '.join(["<"+s+">" for s in listEntities.keys()])
+        sparql_template = self.get_template_sparql(self.ASKOMICS_abstractionEntityUser)
+        query = sqb.load_from_file(sparql_template, {"entities" : filterEntities }).query
+        results = ql.process_query(query)
+
+        data['entities'] = results
+
+        sparql_template = self.get_template_sparql(self.ASKOMICS_abstractionAttributesEntityUser)
+        query = sqb.load_from_file(sparql_template, {"entities" : filterEntities }).query
+        results = ql.process_query(query)
+
+        data['attributes'] = results
+
+        sparql_template = self.get_template_sparql(self.ASKOMICS_abstractionCategoriesEntityUser)
+        query = sqb.load_from_file(sparql_template, {"entities" : filterEntities }).query
+        results = ql.process_query(query)
+
+        data['categories'] = results
+
+        return data
+
+
     def get_attributes_of(self, uri):
         """
         Get all attributes of a node class (identified by his uri). These
@@ -145,6 +194,47 @@ class TripleStoreExplorer(ParamManager, CounterManager):
                     )
 
         return attributes
+
+    def build_sparql_query_from_json(self,variates,constraintesRelations,constraintesFilters,limit):
+        print("variates")
+        print(variates)
+        print("constraintesRelations")
+        print(constraintesRelations)
+        print("constraintesFilters")
+        print(constraintesFilters)
+
+        req = ""
+        req += "SELECT DISTINCT "+' '.join(variates)+"\n"
+        req += "FROM "+ "<"+self.get_param("askomics.graph")+ ">"+"\n"
+        req += "WHERE {"+"\n"
+
+        for contraints in constraintesRelations:
+            if len(contraints)==4:
+                if contraints[3]:
+                    req += "OPTIONAL { "+contraints[0]+" "+contraints[1]+" "+contraints[2]+" } .\n"
+                    continue
+
+            req += contraints[0]+" "+contraints[1]+" "+contraints[2]+".\n"
+
+        for userFilter in constraintesFilters:
+            req += userFilter+".\n"
+
+        req += "}"
+        if limit != None and limit >0 :
+            req +=" LIMIT "+str(limit)
+        print ("================== REQUETE ===========================")
+        print (req)
+
+        sqb = SparqlQueryBuilder(self.settings, self.session)
+        ql = QueryLauncher(self.settings, self.session)
+
+        prefixes = sqb.header_sparql_config()
+        results = ql.process_query(prefixes+req)
+
+        print ("=================== RESULTS =========================")
+        print(results)
+        print ("===@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ =========================")
+        return results
 
     def get_neighbours_for_node(self, node, uri_new_instance):
         """
@@ -239,7 +329,6 @@ class TripleStoreExplorer(ParamManager, CounterManager):
                 rel_h = self.has_setting(result["relationUri"], 'attribute')
 
                 if att_h or rel_h or (result["propertyType"] == self.ASKOMICS_prefix["owl"] + "DatatypeProperty"): # FIXME doesn't detect categories
-                    self.log.debug("====>ATTRIB")
                     attribute_id = node.get_id() + '_' + neighbor_label + str(self.get_new_id(node.get_id() + '_' + neighbor_label))
                     attributes.append(
                         Attribute(attribute_id,
@@ -250,7 +339,6 @@ class TripleStoreExplorer(ParamManager, CounterManager):
                             )
                         )
                 else:
-                    self.log.debug("====>NODE")
                     self.log.debug(neighbor_label)
                     neighbor_id = neighbor_label + str(self.get_new_id(neighbor_label))
 

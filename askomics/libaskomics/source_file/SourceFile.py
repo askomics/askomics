@@ -222,8 +222,8 @@ class SourceFile(ParamManager, HaveCachedProperties):
         ttl = ''
 
         for header, categories in self.category_values.items():
-            indent = len(header) * " " + len("displaySetting:has_category") * " " + 3 * " "
-            ttl += ":" + header + " displaySetting:has_category :"
+            indent = len(header) * " " + len("displaySetting:category") * " " + 3 * " "
+            ttl += ":" + header+"Category" + " displaySetting:category :"
             ttl += (" , \n" + indent + ":").join(categories) + " .\n"
 
             for item in categories:
@@ -307,13 +307,23 @@ class SourceFile(ParamManager, HaveCachedProperties):
                         #if current_type == 'entity':
                             #relations.setdefault(header, {}).setdefault(entity_label, []).append(row[i]) # FIXME only useful if we want to check for duplicates
                         #else
+
+                        #OFI : manage new header with relation@type_entity
+                        #relationName = ":has_" + header # manage old way
+                        relationName = ":"+header # manage old way
+                        if current_type == 'entity':
+                            idx = header.find("@")
+                            if ( idx > 0 ):
+                                relationName = ":"+header[0:idx]
+
                         if current_type == 'category':
                             # This is a category, keep track of allowed values for this column
                             self.category_values[header].add(row[i])
 
                         # Create link to value
                         if row[i]: # Empty values are just ignored
-                            ttl += indent + " :has_" + header + " " + self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " ;\n"
+                            ttl += indent + " "+ relationName + " " + self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " ;\n"
+
                         # FIXME we will need to store undefined values one day if we want to be able to query on this
 
                 ttl = ttl[:-2] + "."

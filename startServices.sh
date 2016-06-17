@@ -54,7 +54,7 @@ fi
 # Build and run TripleStore RDF data
 case "$RDFTYPE" in
     fuseki)
-        echo " ================ FUSEKI =============="
+        echo " ================ FUSEKI (askomics/fuseki) =============="
         if [ -z `sudo docker images | grep "askomics/fuseki$" | awk '{print $1}'` ];then
             pushd $DIRROOT/docker/fuseki/
             sudo docker build -t askomics/fuseki .
@@ -74,11 +74,14 @@ case "$RDFTYPE" in
         ;;
 
       virtuoso)
-        echo "================= VIRTUOSO (docker tenforce/virtuoso) ================"
-        if [ -z `sudo docker images | grep "tenforce/virtuoso$" | awk '{print $1}'` ];then
-            sudo docker pull tenforce/virtuoso
-        fi
-        sudo docker run -d --name virtuoso -p 8890:8890 -p 1111:1111  -e DBA_PASSWORD=dba -e SPARQL_UPDATE=true -e DEFAULT_GRAPH=http://localhost:8890/DAV --net="host" -t tenforce/virtuoso
+        echo "================= VIRTUOSO (askomics/virtuoso - herited from tenforce/virtuoso) ================"
+        if [ -z `sudo docker images | grep "askomis/virtuoso$" | awk '{print $1}'` ];then
+            pushd $DIRROOT/docker/virtuoso/
+            sudo docker build -t askomics/virtuoso .
+            popd
+	fi
+
+        sudo docker run -d --name virtuoso -p 8890:8890 -p 1111:1111  -e DBA_PASSWORD=dba -e SPARQL_UPDATE=true -e DEFAULT_GRAPH=http://localhost:8890/DAV --net="host" -t askomics/virtuoso
         ;;
     *)
         usage

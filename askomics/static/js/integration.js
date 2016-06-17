@@ -1,3 +1,4 @@
+/*jshint esversion: 6 */
 /**
  * Register event handlers for integration
  */
@@ -39,7 +40,7 @@ function cols2rows(items) {
     for(var i=0, l=items.length; i<l; i++) {
         for(var j=0, m=items[i].length; j<m; j++) {
             if (!(j in out))  {
-                out[j] = []
+                out[j] = [];
             }
             out[j][i] = items[i][j];
         }
@@ -55,7 +56,7 @@ function displayTable(data) {
     // Transform columns to rows
     for(var i=0, l=data.files.length; i<l; i++) {
         if ('preview_data' in data.files[i]) {
-            data.files[i]['preview_data'] = cols2rows(data.files[i]['preview_data']);
+            data.files[i].preview_data = cols2rows(data.files[i].preview_data);
         }
     }
 

@@ -45,7 +45,8 @@ class AskView(object):
 
         nodes = tse.get_start_points()
 
-        data["nodes"] = {n.get_id(): n.to_dict() for n in nodes}
+        #data["nodes"] = {n.get_id(): n.to_dict() for n in nodes}
+        data["nodes"] = {n.get_uri(): n.to_dict() for n in nodes}
         data["last_new_counter"] = tse.get_counter()
 
         return data
@@ -247,98 +248,34 @@ class AskView(object):
 
         return data
 
-    @view_config(route_name='expand', request_method='POST')
-    def expansion(self):
-        """
-        Get the neighbours of a node
-        """
+    @view_config(route_name='getUserAbstraction', request_method='POST')
+    def getUserAbstraction(self):
+        """ Get the user asbtraction to manage relation inside javascript """
+        self.log.debug("== getUserAbstraction ==")
 
-        data = {}
+        #data = {}
         tse = TripleStoreExplorer(self.settings, self.request.session)
 
         body = self.request.json_body
-        self.log.debug("Received json query: "+str(body))
 
-        source_node = body["source_node"]
-        prev_node = body["source_previous_node"]
-        tse.set_counter(body["last_new_counter"])
+        data = tse.getUserAbstraction()
 
-        uri_new_instance = None
-        #if "typeNewInstance" in body:
-        #    uri_new_instance=body["uri_new_instance"] # FIXME what is it?
-
-        src = Node(source_node["id"],
-                source_node["uri"],
-                source_node["label"],
-                source_node["shortcuts"])
-
-        attributes, nodes, links = tse.get_neighbours_for_node(src, uri_new_instance)
-
-        data["nodes"] = [n.to_dict() for n in nodes]
-        data["links"] = [l.to_dict() for l in links]
-        data["attributes"] = [a.to_dict() for a in attributes]
-
-        if prev_node != None:
-            self.log.debug("----------PREV NODE ============================================")
-
-            # to replace the current node in a suggested mode
-
-            uri_new_instance = source_node["uri"]
-
-            src = Node(prev_node["id"],
-                prev_node["uri"],
-                prev_node["label"],
-                prev_node["shortcuts"])
-
-            attributes, nodes, links = tse.get_neighbours_for_node(src, uri_new_instance)
-
-            data["nodes"].append(nodes[0].to_dict())
-            data["links"].append(links[0].to_dict())
-            #data["attributes"].append([a.to_dict() for a in attributes])
-
-        data["last_new_counter"] = tse.get_counter()
-
-        if self.log.isEnabledFor(logging.DEBUG):
-            self.log.debug("Counters: "+str(data["last_new_counter"]))
-            self.log.debug("------LINKS-----\n%s", pformat(data["links"]))
-            self.log.debug("------NODES-----\n%s", pformat(data["nodes"]))
-            self.log.debug("---ATTRIBUTES---\n%s", pformat(data["attributes"]))
+        #data["nodes"] = [n.to_dict() for n in nodes]
+        #data["links"] = [l.to_dict() for l in links]
+        #data["attributes"] = [a.to_dict() for a in attributes]
 
         return data
 
-    @view_config(route_name='attribute_value', request_method='POST')
+    @view_config(route_name='sparqlquery', request_method='POST')
     def get_value(self):
-        """ Get different categories for a node class """
+        """ Build a request from a json whith the following contents :variates,constraintesRelations,constraintesFilters"""
         self.log.debug("== Attribute Value ==")
         data = {}
 
         tse = TripleStoreExplorer(self.settings, self.request.session)
 
         body = self.request.json_body
-
-        data["value"] = tse.has_category(body["entity"], body["category"], body["category_uri"])
-
-        return data
-
-    @view_config(route_name='link_attribute', request_method='POST')
-    def attributes(self):
-        """ Get the attributes of a link described by a specified_by relation """
-        self.log.debug("== Link ==")
-        data = {}
-
-        tse = TripleStoreExplorer(self.settings, self.request.session)
-
-        body = self.request.json_body
-        tse.set_counter(body["last_new_counter"])
-
-        attributes = tse.get_attributes_of(body["uri"])
-        specif = tse.has_setting(body["uri"], 'specify_relation')
-
-        # TODO : Need to be modified if multiple specify_relation
-        data["relation"] = specif[0]
-
-        data["attributes"] = [a.to_dict() for a in attributes]
-        data["last_new_counter"] = tse.get_counter()
+        data["values"] = tse.build_sparql_query_from_json(body["variates"],body["constraintesRelations"],body["constraintesFilters"],body["limit"])
         return data
 
     @view_config(route_name='query', request_method='POST')

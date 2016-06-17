@@ -21,7 +21,6 @@ class Node(GraphElement):
         self.uri = uri
         self.label = label
         self.shortcuts = shortcuts
-
         self.log = logging.getLogger(__name__)
 
     def get_id(self):
@@ -42,7 +41,7 @@ class Node(GraphElement):
         self.log.debug("shortcuts =" + str(self.shortcuts))
 
     def to_dict(self):
-        return {"id": self.node_id,
+        return {#"id": self.node_id,
                 "uri": self.uri,
                 "label": self.label,
                 "shortcuts": self.shortcuts}

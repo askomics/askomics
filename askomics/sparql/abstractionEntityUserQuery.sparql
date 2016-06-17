@@ -1,0 +1,6 @@
+SELECT DISTINCT ?entity ?property ?value
+FROM $graph
+WHERE {
+	?entity ?property ?value.
+  VALUES ?entity { $entities }
+}
