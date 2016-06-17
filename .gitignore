@@ -1,16 +1,19 @@
-__pycache__
-*.pyc
-*.csv
-*.egg-info
-*.egg
-
-*.cpython-33.pyc
-Askomics/askomics/files/*
-Askomics/askomics/results/*
-build/
-dist/
-eggs/
-.eggs/
-sdist/
+# pyramid
 pyramid.log
 pyramid.pid
+
+# Python tools
+.coverage
+venv
+
+# Python & distutils
+__pycache__
+*.egg-info
+.eggs
+askomics/ttl/*
+build/
+dist/
+
+# Editors & tooling
+*.orig
+*~

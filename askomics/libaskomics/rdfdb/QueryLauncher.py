@@ -3,9 +3,18 @@
 import os, time, tempfile
 from pprint import pformat
 from SPARQLWrapper import SPARQLWrapper, JSON
+import requests
 import logging
 
 from askomics.libaskomics.ParamManager import ParamManager
+
+class SPARQLError(RuntimeError):
+    """
+    The SPARQLError returns an error message when a query sends by requests module encounters an error.
+    """
+    def __init__(self, response):
+        self.status_code = response.status_code
+        super().__init__(response.text)
 
 class QueryLauncher(ParamManager):
     """
@@ -36,6 +45,7 @@ class QueryLauncher(ParamManager):
         urlupdate = None
         if self.is_defined("askomics.updatepoint"):
             urlupdate = self.get_param("askomics.updatepoint")
+        time0 = time.time()
         if self.is_defined("askomics.endpoint"):
             data_endpoint = SPARQLWrapper(self.get_param("askomics.endpoint"), urlupdate)
         else:
@@ -63,14 +73,19 @@ class QueryLauncher(ParamManager):
                 if hack_virtuoso.lower() == "ok" or hack_virtuoso.lower() == "true":
                     data_endpoint.queryType = 'SELECT'
             results = data_endpoint.query()
+            time1 = time.time()
         else:
             data_endpoint.setReturnFormat(JSON)
             results = data_endpoint.query().convert()
+            time1 = time.time()
 
-        if log_raw_results and self.log.isEnabledFor(logging.DEBUG):
-            self.log.debug("------- RAW RESULTS --------------\n%s", pformat(results))
+        queryTime = time1 - time0
 
-
+        if self.log.isEnabledFor(logging.DEBUG):
+            if log_raw_results:
+                self.log.debug("------- RAW RESULTS -------------- (t=%.3fs)\n%s", queryTime,  pformat(results))
+            else:
+                self.log.debug("------- QUERY DONE ------------ (t=%.3fs)", queryTime)
         return results
 
     def parse_results(self, json_res):
@@ -98,6 +113,7 @@ class QueryLauncher(ParamManager):
 
     def process_query(self, query):
         json_query = self.execute_query(query, log_raw_results=False)
+
         results = self.parse_results(json_query)
         return results
 
@@ -122,6 +138,36 @@ class QueryLauncher(ParamManager):
         res = self.execute_query(query_string)
 
         return res
+
+    def upload_data(self, filename):
+        """
+        Load a ttl file into the triple store using requests module and Fuseki
+        upload method which allows upload of big data into Fuseki (instead of LOAD method).
+
+        :param filename: name of the file, fp.name from Source.py
+        :return: response of the request and queryTime
+
+        Not working for Virtuoso because there is no upload files url.
+        """
+        self.log.debug("Loading into triple store (HTTP method) the content of: %s", filename)
+
+        data = {'graph': self.get_param("askomics.graph")}
+        files = [('file', (os.path.basename(filename), open(filename), 'text/turtle'))]
+
+        time0 = time.time()
+        response = requests.post(self.get_param("askomics.file_upload_url"), data=data, files=files)
+        if response.status_code != 200:
+            raise SPARQLError(response)
+
+        self.log.debug("---------- RESPONSE FROM HTTP : %s", response.raw.read())
+
+        time1 = time.time()
+        queryTime = time1 - time0
+
+        if self.log.isEnabledFor(logging.DEBUG):
+            self.log.debug("------- UPLOAD DONE --------- (t=%.3fs)\n%s", queryTime,  pformat(response))
+
+        return response
 
 
     # TODO see if we can make a rollback in case of malformed data

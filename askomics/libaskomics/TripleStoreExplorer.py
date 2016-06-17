@@ -91,8 +91,8 @@ class TripleStoreExplorer(ParamManager, CounterManager):
         for result in results:
             uri = result["nodeUri"]
             label = result["nodeLabel"]
-            node_id = label + str(self.get_new_id(label)) #FIXME ID have to be manage in Javascript View
-            shortcuts_list = self.has_setting(uri, 'shortcut') #FIXME Utility of this ?
+            node_id = label + str(self.get_new_id(label))
+            shortcuts_list = self.has_setting(uri, 'shortcut')
             nodes.append(Node(node_id, uri, label, shortcuts_list))
 
         return nodes

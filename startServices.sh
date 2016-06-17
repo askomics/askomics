@@ -31,12 +31,14 @@ fi
 RDFTYPE=$1
 DEPMODE=$2
 
+PYTHON=${PYTHON:-$(which python3)}
+
 case "$DEPMODE" in
     prod|production|"")
-        DEPMODE="production"
+        DEPMODE="prod"
         ;;
     dev|development)
-        DEPMODE="development"
+        DEPMODE="dev"
         ;;
     *)
         usage
@@ -99,16 +101,10 @@ case "$RDFTYPE" in
         echo " * login  : $AGRAPHUSER"
         echo " * paswwd : $AGRAPHPASS"
         echo " ********************************************************************** "
-
-        sudo docker run -d --net="host" -p 6543:6543 -t askomics/web pserve $DEPMODE.agraph.ini
-        ;;
-    fuseki)
-        sudo docker run -d --net="host" -p 6543:6543 -t askomics/web pserve $DEPMODE.fuseki.ini
-        ;;
-    virtuoso)
-        sudo docker run -d --net="host" -p 6543:6543 -t askomics/web pserve $DEPMODE.virtuoso.ini
         ;;
 esac
+
+sudo docker run -d --net="host" -p 6543:6543 -t askomics/web $RDFTYPE $DEPMODE
 
 
 echo "------------------------------------------------"

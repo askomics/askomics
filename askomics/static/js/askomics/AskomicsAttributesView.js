@@ -24,20 +24,30 @@ var AskomicsAttributesView = function () {
     $("div[id*='"+ prefix +"']" ).hide();
   };
 
+
+
   AskomicsAttributesView.prototype.create = function (node) {
       // Add attributes of the selected node on the right side of AskOmics
+    function makeRemoveIcon(field) {
+          var removeIcon = $('<span class="glyphicon glyphicon-remove display"></span>');
+          removeIcon.click(function() { field.val(null).trigger("change"); });
+          return removeIcon;
+    }
+
 
      var elemUri = node.uri,
           elemId  = node.SPARQLid,
           nameDiv = prefix+node.SPARQLid ;
 
-      $('#waitModal').modal('show');
+      displayModal('Please wait', 'Close');
       var details = $("<div></div>").attr("id",nameDiv).attr("nodeid", node.id).attr("sparqlid", node.SPARQLid).addClass('div-details');
 
       var nameLab = $("<label></label>").attr("for",elemId).text("ID");
       var nameInp = $("<input/>").addClass("form-control");
+      var removeIcon = $('<span class="glyphicon glyphicon-remove display"></span>');
+      removeIcon.click(function() { field.val(null).trigger("change"); });
 
-      details.append(nameLab).append(nameInp);
+      details.append(nameLab).append(makeRemoveIcon(nameInp)).append(nameInp);
 
       nameInp.change(function(d) {
         var value = $(this).val();
@@ -154,7 +164,10 @@ var AskomicsAttributesView = function () {
 
                 tr = $("<tr></tr>");
                 tr.append($("<td></td>").append(v));
-                v = $("<input/>").attr("type", "text").val(inputValue).addClass("form-control");
+                //v = $("<input/>").attr("type", "text").val(inputValue).addClass("form-control");
+                v = $('<input type="text" class="form-control"/>').attr("id",id); // ?????????????????
+                inp.val = v.val.bind(inputValue);// ?????????????????
+
                 tr.append($("<td></td>").append(v));
                 inp.append(tr);
 
@@ -209,11 +222,11 @@ var AskomicsAttributesView = function () {
               graphBuilder.switchActiveAttribute(atturi,nodeid);
           });
 
-          details.append(lab).append(icon).append(inp);
+          details.append(lab).append(makeRemoveIcon(inp)).append(icon).append(inp);
 
           //$('#waitModal').modal('hide');
       });
-      $('#waitModal').modal('hide');
+      hideModal();
       $("#viewDetails").append(details);
   };
 };

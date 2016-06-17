@@ -489,10 +489,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
                     try:
                         ql.insert_data(chunk, header_ttl)
                     except Exception as e:
-                        data['status'] = 'failed'
-                        data['error'] = 'Error while inserting data: '+str(e)
-
-                        return data
+                        return self._format_exception(e)
 
                     chunk = ""
                     total_triple_count += triple_count
@@ -506,10 +503,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
                 try:
                     ql.insert_data(chunk, header_ttl)
                 except Exception as e:
-                    data['status'] = 'failed'
-                    data['error'] = 'Error while inserting data: '+str(e)
-
-                    return data
+                    return self._format_exception(e)
 
             total_triple_count += triple_count
 
@@ -526,10 +520,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
             try:
                 ql.insert_data(chunk, header_ttl)
             except Exception as e:
-                data['status'] = 'failed'
-                data['error'] = 'Error while inserting data: '+str(e)
-
-                return data
+                return self._format_exception(e)
 
             data['status'] = 'ok'
             data['total_triple_count'] = total_triple_count
@@ -538,38 +529,56 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
     def load_data_from_file(self, fp, urlbase):
         """
-        Load a locally created ttl file in the triplestore using http
+        Load a locally created ttl file in the triplestore using http (with load_data(url)) or with the filename for Fuseki (with fuseki_load_data(fp.name)).
 
         :param fp: a file handle for the file to load
         :param urlbase:the base URL of current askomics instance. It is used to let triple stores access some askomics temporary ttl files using http.
         :return: a dictionnary with information on the success or failure of the operation
         """
-
-        data = {}
-
         if not fp.closed:
             fp.flush() # This is required as otherwise, data might not be really written to the file before being sent to triplestore
 
         ql = QueryLauncher(self.settings, self.session)
 
         url = urlbase+"/ttl/"+os.path.basename(fp.name)
+        data = {}
         try:
-            res = ql.load_data(url)
+            if self.is_defined("askomics.file_upload_url"):
+                res = ql.upload_data(fp.name)
+            else:
+                res = ql.load_data(url)
+            data['status'] = 'ok'
         except Exception as e:
-            data['status'] = 'failed'
-            data['error'] = 'Error while loading data: '+str(e)
+            self._format_exception(e, data=data)
+        finally:
             if self.settings["askomics.debug"]:
-                # There is an error, keep the temp file to investigate
                 data['url'] = url
             else:
                 os.remove(fp.name) # Everything ok, remove temp file
 
-            # There is an error, keep the temp file to investigate
+        return data
 
-            return data
+    def _format_exception(self, e, data=None, ctx='loading data'):
+        from traceback import format_tb, format_exception_only
+        from html import escape
 
-        if not self.settings["askomics.debug"]:
-            os.remove(fp.name) # Everything ok, remove temp file
+        fexception = format_exception_only(type(e), e)
+        ftb = format_tb(e.__traceback__)
 
-        data['status'] = 'ok'
+        self.log.error("Error in %s while %s: %s", __name__, ctx, '\n'.join(fexception + ftb))
+
+        fexception = escape('\n'.join(fexception))
+        error = '<strong>Error while %s:</strong><pre>%s</pre>' % (ctx, fexception)
+
+        if self.settings["askomics.debug"]:
+            error += """<p><strong>Traceback</strong> (most recent call last): <br />
+                    <ul>
+                        <li><pre>%s</pre></li>
+                    </ul>
+                    """ % '</pre></li><pre><li>'.join(map(escape, ftb))
+
+        if data is None:
+            data = {}
+        data['status'] = 'failed'
+        data['error'] = error
         return data

@@ -16,14 +16,6 @@ function launchQuery(exp, lim, roq) {
     //     :lim: LIMIT value in the SPARQL query
     //     :roq: bool, if true, don't launch the query, only return it
 
-    if (exp == 1) {
-        $("#export").remove();
-        $("#btn-file").text("Generating results file, please wait...");
-        $("#btn-file").disabled = true;
-    }
-
-    if (!roq)
-      $('#waitModal').modal('show');
 
     var tab = graphBuilder.buildConstraintsGraph();
     var jdata = {
@@ -42,6 +34,60 @@ function launchQuery(exp, lim, roq) {
             provideDownloadLink(data);
             $('#waitModal').modal('hide');
         }
+    });
+}
+
+function prepareQuery(exp, lim, roq) {
+    //     Get JSON to ask for a SPARQL query corresponding to the graph
+    //     and launch it according to given parameters.
+    //
+    //     :exp: 0 = results overview
+    //           1 = complete results file generation
+    //     :lim: LIMIT value in the SPARQL query
+    //     :roq: bool, if true, don't launch the query, only return it
+    var tab = graphBuilder.buildConstraintsGraph();
+    return {
+              'exp'                  : exp,
+              'variates'             : tab[0],
+              'constraintesRelations': tab[1],
+              'constraintesFilters'  : tab[2],
+              'limit'                : lim
+           };
+/*
+    { 'display':display,
+              'constraint':constraint,
+              'filter_cat':filter_cat,
+              'filter_num':filter_num,
+              'filter_str':filter_str,
+              'export':exp,
+              'limit':lim,
+              'return_only_query':roq,
+              'uploaded':$("#uploadedQuery").text()
+          };*/
+}
+
+function viewQueryResults() {
+    displayModal('Please wait', 'Close');
+
+    var service = new RestServiceJs("sparqlquery");
+    var jdata = prepareQuery(0, 30, false);
+    service.post(jdata,function(data) {
+        displayResults(data);
+        hideModal();
+    });
+}
+
+function generateResultFile(lim) {
+    displayModal('Please wait', 'Close');
+    $("#export").remove();
+    $("#btn-file").text("Generating results file, please wait...");
+    $("#btn-file").disabled = true;
+
+    var service = new RestServiceJs("sparqlquery");
+    var jdata = prepareQuery(1, lim, false);
+    service.post(jdata, function(data) {
+        provideDownloadLink(data);
+        hideModal();
     });
 }
 

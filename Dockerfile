@@ -8,27 +8,20 @@ RUN apt-get update && apt-get install -y \
   build-essential \
   python3 \
   python3-pip \
+  python3.4-venv \
   vim \
   ruby
 
-# Python Install Dependencies
-#---------------------------------------------------------------------------------------
-ENV VENV=/usr/local/env
-RUN pip3 install virtualenv
-RUN virtualenv -p python3 /usr/local/AskomicsWeb/askomics-env
-RUN . /usr/local/AskomicsWeb/askomics-env/bin/activate
-
 # Install Askomics
 #------------------------------------------------------------------------------------------
+ENV VENV=/usr/local/AskomicsWeb/venv
 RUN mkdir -p /usr/local/AskomicsWeb
 COPY . /usr/local/AskomicsWeb/
+RUN rm -rf $VENV
 WORKDIR /usr/local/AskomicsWeb/
-RUN pip3 install  -r /usr/local/AskomicsWeb/requirements.txt
-RUN python3 setup.py develop #install
 
 # Launch Askomics
 #-------------------------------------------------------------------------------------------
 EXPOSE 6543
-CMD ["pserve","production.ini"]
-#ENTRYPOINT ["/bin/bash"]
-#CMD ["cat","/etc/hosts"]
+ENTRYPOINT ["./startAskomics.sh"]
+CMD ["fuseki", "prod"]

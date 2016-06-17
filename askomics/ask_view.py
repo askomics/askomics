@@ -9,6 +9,11 @@ from pyramid.response import FileResponse
 
 import logging
 from pprint import pformat
+import textwrap
+
+from pygments import highlight
+from pygments.lexers import TurtleLexer
+from pygments.formatters import HtmlFormatter
 
 from askomics.libaskomics.ParamManager import ParamManager
 from askomics.libaskomics.TripleStoreExplorer import TripleStoreExplorer
@@ -90,7 +95,10 @@ class AskView(object):
 
                 shortcuts_list = tse.has_setting(uri, 'shortcut')
 
-                src = Node(class_name,uri,class_name,shortcuts_list)
+                src = Node(class_name, # We don't care about counter in stats
+                    uri,
+                    class_name,
+                    shortcuts_list)
 
                 attributes, nodes, links = tse.get_neighbours_for_node(src, None)
 
@@ -99,6 +107,21 @@ class AskView(object):
                 data["class"][class_name]["relations"] = [l.to_dict() for l in links]
 
         return data
+
+
+    @view_config(route_name='empty_database', request_method='GET')
+    def empty_database(self):
+        """
+        Delete all triples in the triplestore
+        """
+
+        self.log.debug("=== DELETE ALL TRIPLES ===")
+
+        sqb = SparqlQueryBuilder(self.settings, self.request.session)
+        ql = QueryLauncher(self.settings, self.request.session)
+
+        ql.execute_query(sqb.get_delete_query_string().query)
+
 
     @view_config(route_name='source_files_overview', request_method='GET')
     def source_files_overview(self):
@@ -144,16 +167,35 @@ class AskView(object):
         src_file.set_forced_column_types(col_types)
         src_file.set_disabled_columns(disabled_columns)
 
-        content_ttl = '\n'.join(src_file.get_turtle(preview_only=True))
-        abstraction_ttl = src_file.get_abstraction()
-        domain_knowledge_ttl = src_file.get_domain_knowledge()
+        data = textwrap.dedent(
+        """
+        {header}
 
-        data["header"] = sfc.get_turtle_template()
-        data["content_ttl"] = content_ttl
-        data["abstraction_ttl"] = abstraction_ttl
-        data["domain_knowledge_ttl"] = domain_knowledge_ttl
+        #############
+        #  Content  #
+        #############
 
-        return data
+        {content_ttl}
+
+        #################
+        #  Abstraction  #
+        #################
+
+        {abstraction_ttl}
+
+        ######################
+        #  Domain knowledge  #
+        ######################
+
+        {domain_knowledge_ttl}
+        """).format(header=sfc.get_turtle_template(),
+                    content_ttl = '\n'.join(src_file.get_turtle(preview_only=True)),
+                    abstraction_ttl = src_file.get_abstraction(),
+                    domain_knowledge_ttl = src_file.get_domain_knowledge()
+                    )
+
+        formatter = HtmlFormatter(cssclass='preview_field', nowrap=True, nobackground=True)
+        return highlight(data, TurtleLexer(), formatter) # Formated html
 
     @view_config(route_name='check_existing_data', request_method='POST')
     def check_existing_data(self):
@@ -224,65 +266,6 @@ class AskView(object):
 
         return data
 
-    @view_config(route_name='expand', request_method='POST')
-    def expansion(self):
-        """
-        Get the neighbours of a node
-        """
-
-        data = {}
-        tse = TripleStoreExplorer(self.settings, self.request.session)
-
-        body = self.request.json_body
-        self.log.debug("Received json query: "+str(body))
-
-        source_node = body["source_node"]
-        prev_node = body["source_previous_node"]
-        tse.set_counter(body["last_new_counter"])
-
-        uri_new_instance = None
-        #if "typeNewInstance" in body:
-        #    uri_new_instance=body["uri_new_instance"] # FIXME what is it?
-
-        src = Node(source_node["id"],
-                source_node["uri"],
-                source_node["label"],
-                source_node["shortcuts"])
-
-        attributes, nodes, links = tse.get_neighbours_for_node(src, uri_new_instance)
-
-        data["nodes"] = [n.to_dict() for n in nodes]
-        data["links"] = [l.to_dict() for l in links]
-        data["attributes"] = [a.to_dict() for a in attributes]
-
-        if prev_node != None:
-            self.log.debug("----------PREV NODE ============================================")
-
-            # to replace the current node in a suggested mode
-
-            uri_new_instance = source_node["uri"]
-
-            src = Node(prev_node["id"],
-                prev_node["uri"],
-                prev_node["label"],
-                prev_node["shortcuts"])
-
-            attributes, nodes, links = tse.get_neighbours_for_node(src, uri_new_instance)
-
-            data["nodes"].append(nodes[0].to_dict())
-            data["links"].append(links[0].to_dict())
-            #data["attributes"].append([a.to_dict() for a in attributes])
-
-        data["last_new_counter"] = tse.get_counter()
-
-        if self.log.isEnabledFor(logging.DEBUG):
-            self.log.debug("Counters: "+str(data["last_new_counter"]))
-            self.log.debug("------LINKS-----\n%s", pformat(data["links"]))
-            self.log.debug("------NODES-----\n%s", pformat(data["nodes"]))
-            self.log.debug("---ATTRIBUTES---\n%s", pformat(data["attributes"]))
-
-        return data
-
     @view_config(route_name='sparqlquery', request_method='POST')
     def get_value(self):
         """ Build a request from a json whith the following contents :variates,constraintesRelations,constraintesFilters"""
@@ -303,17 +286,10 @@ class AskView(object):
 
         export = bool(int(body['export']))
         sqb = SparqlQueryBuilder(self.settings, self.request.session)
-        return_only_query = bool(int(body['return_only_query']))
+        query = sqb.load_from_query_json(body).query
 
-        if body['uploaded'] != '':
-            if export:
-                query = body['uploaded'].replace('LIMIT 30', 'LIMIT 10000')
-            else:
-                query = body['uploaded']
-        else:
-            query = sqb.load_from_query_json(body).query
-
-        if return_only_query:
+        assert type(body['return_only_query']) is bool
+        if body['return_only_query']:
             data['query'] = query
             return data
 

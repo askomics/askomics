@@ -9,10 +9,12 @@ with open(os.path.join(here, 'CHANGES.txt')) as f:
     CHANGES = f.read()
 
 requires = [
-    'pyramid',
-    'pyramid_chameleon',
-    'pyramid_debugtoolbar',
-    'waitress',
+    'pyramid==1.7',
+    'pyramid-chameleon==0.3',
+    'pyramid-debugtoolbar==3.0.1',
+    'waitress==0.9.0',
+    'SPARQLWrapper==1.7.6',
+    'requests==2.10.0',
     ]
 
 setup(name='Askomics',
@@ -25,15 +27,16 @@ setup(name='Askomics',
         "Topic :: Internet :: WWW/HTTP",
         "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
         ],
-      author='',
-      author_email='',
+      maintainer='Olivier Filangi',
+      maintainer_email='olivier.filangi@rennes.inra.fr',
       url='http://bipaa.genouest.org/',
       keywords='web pyramid pylons',
       packages=find_packages(),
       include_package_data=True,
       zip_safe=False,
       install_requires=requires,
-      tests_require=requires,
+      setup_requires=['nose>=1.3'],
+      tests_require=['webtest', 'coverage'],
       test_suite="askomics",
       entry_points="""\
       [paste.app_factory]

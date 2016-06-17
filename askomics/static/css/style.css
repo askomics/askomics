@@ -1,3 +1,12 @@
+pre {
+    font-family:"Courier New", Courier, monospace;
+    text-align: left;
+    word-break: normal !important;
+    word-wrap: normal !important;
+    white-space: pre !important;
+    overflow: auto;
+}
+
 .link {
     stroke: #2E2E2E;
     stroke-width: 2px;
@@ -37,7 +46,7 @@
 
 .display {
     float: right;
-    right: 3%;
+    padding-right: 1%;
     font-size: 16px;
     padding-top: 5px;
 }
@@ -74,82 +83,23 @@
     margin-top: 40px;
 }
 
-.preview_table{
-    border-collapse: collapse;
-        border-spacing: 0;
-    width:auto;
-    height:100%;
-    margin:0px;padding:0px;
-    display: inline-block;
-    box-shadow: 10px 10px 5px #888888;
-    border:1px solid #000000;
+.preview_table td:first-child,
+.preview_table th:first-child {
+    border-right: 2px solid #ddd;
 }
 
-.preview_table tr:last-child td:last-child {
-    -moz-border-radius-bottomright:0px;
-    -webkit-border-bottom-right-radius:0px;
-    border-bottom-right-radius:0px;
+.preview_table th {
+    padding: 0px !important;
+    border-bottom: 0px !important;
+    border-top: 0px !important;
+    text-align: center;
 }
 
-.preview_table tr:first-child td:first-child {
-    -moz-border-radius-topleft:0px;
-    -webkit-border-top-left-radius:0px;
-    border-top-left-radius:0px;
-}
-
-.preview_table tr:first-child td:last-child {
-    -moz-border-radius-topright:0px;
-    -webkit-border-top-right-radius:0px;
-    border-top-right-radius:0px;
-}
-
-.preview_table tr:last-child td:first-child{
-    -moz-border-radius-bottomleft:0px;
-    -webkit-border-bottom-left-radius:0px;
-    border-bottom-left-radius:0px;
-}
-
-.preview_table tr:hover td{
-
-}
-
-.preview_table tr:nth-child(odd){ background-color:#e5e5e5; }
-
-.preview_table tr:nth-child(even)    { background-color:#ffffff; }
-
-.preview_table td{
-    vertical-align:middle;
-    border:1px solid #000000;
-    border-width:0px 1px 1px 0px;
+.preview_table td {
+    padding: 4px !important;
     text-align:left;
-    padding:7px;
-    font-size:12px;
-    font-family:Arial;
-    font-weight:normal;
-    color:#000000;
-}
-
-.preview_table tr:last-child td{
-    border-width:0px 1px 0px 0px;
-}
-
-.preview_table tr td:last-child{
-    border-width:0px 0px 1px 0px;
-}
-
-.preview_table tr:last-child td:last-child{
-    border-width:0px 0px 0px 0px;
-}
-
-.preview_table th{
-    border:0px solid #000000;
-    text-align:center;
-    border-width:0px 0px 1px 1px;
-    font-size:16px;
-    font-family:Arial;
-    font-weight:bold;
-    color:#000000;
-    vertical-align: middle;
+    font-size: 12px;
+    white-space: nowrap;
 }
 
 .fileTypeSelection label {
@@ -157,21 +107,6 @@
 }
 .fileTypeSelection input {
     display: inline-block;
-}
-
-
-pre {
-    font-family:"Courier New";
-    text-align: left;
-    height: auto;
-    width: auto;
-    max-width: 800px;
-    max-height: 200px;
-    overflow: auto;
-    background-color: #eeeeee;
-    word-break: normal !important;
-    word-wrap: normal !important;
-    white-space: pre !important;
 }
 
 div.uploadedQuery {
@@ -206,48 +141,10 @@ div.uploadedQuery {
 }
 
 .preview_field {
-    font-family:"Courier New", Courier, monospace;
-    border: 1px solid black;
-    margin: auto;
+    max-height: 400px;
     display: none;
 }
 
 .template-source_file {
     margin-bottom: 4em;
-}
-
-p.warning {
-    background-image: url("/static/images/icons/warning.png");
-    background-repeat: no-repeat;
-    display: inline;
-    font-size: 24px;
-    margin-left: auto;
-    margin-right: auto;
-    padding: 0 0 0 30px;
-    text-align: center;
-    vertical-align: middle;
-}
-
-p.error {
-    background-image: url('/static/images/icons/error.png');
-    background-repeat: no-repeat;
-    display: inline;
-    font-size: 24px;
-    margin-left: auto;
-    margin-right: auto;
-    padding: 0 0 0 30px;
-    text-align: center;
-    vertical-align: middle;
-}
-
-p.success {
-    background-image: url('/static/images/icons/ok.png');
-    background-repeat: no-repeat;
-    display: inline;
-    font-size: 24px;
-    margin-left: auto;
-    margin-right: auto;
-    padding: 0 0 0 30px;
-    text-align: center;
-    vertical-align: middle;
 }

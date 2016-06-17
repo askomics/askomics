@@ -70,12 +70,9 @@ class ParamManager(object):
         return obj
 
     def get_turtle_template(self):
-        header = ""
-
-        for key, value in self.ASKOMICS_prefix.items():
-            header += "@prefix "+key+":<"+value+"> .\n"
-
-        header += "@base" +"<"+self.get_param("askomics.prefix")+"> .\n"
-        header += "<" + self.get_param("askomics.prefix")+"> rdf:type owl:Ontology ."
-
-        return header
+        header = ["@prefix %s: <%s> ." % item
+                           for item in self.ASKOMICS_prefix.items()]
+        asko_prefix = self.get_param("askomics.prefix")
+        header.append("@base <%s> ." % asko_prefix)
+        header.append("<%s> rdf:type owl:Ontology ." % asko_prefix)
+        return '\n'.join(header)

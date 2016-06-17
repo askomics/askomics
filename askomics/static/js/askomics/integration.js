@@ -74,7 +74,7 @@ function displayTable(data) {
 
             var cols = data.files[i]['column_types'];
             for(var j=0, m=cols.length; j<m; j++) {
-                var selectbox = $('div#content_integration div.template-source_file:eq(' + i + ') select.column_type:eq(' + j + ')');
+                var selectbox = $('div#content_integration form.template-source_file:eq(' + i + ') select.column_type:eq(' + j + ')');
                 var values = selectbox.find("option").map(function() { return $(this).val(); });
 
                 if ($.inArray( cols[j], values) >= 0) {
@@ -82,7 +82,7 @@ function displayTable(data) {
                 }
 
                 // Check what is in the db
-                checkExistingData($('div#content_integration div.template-source_file:eq(' + i + ')'));
+                checkExistingData($('div#content_integration form.template-source_file:eq(' + i + ')'));
             }
         }
     }
@@ -114,14 +114,7 @@ function previewTtl(file_elem) {
                   'disabled_columns': disabled_columns };
 
     service.post(model, function(data) {
-
-        // display received data
-        var template = $('#template-ttl-preview').html();
-
-        var templateScript = Handlebars.compile(template);
-        var html = templateScript(data);
-
-        file_elem.find(".preview_field").html(html);
+        file_elem.find(".preview_field").html(data);
         file_elem.find(".preview_field").show();
     });
 }
@@ -163,13 +156,11 @@ function checkExistingData(file_elem) {
             }
         });
 
+        var insert_status_elem = file_elem.find(".insert_status").first();
         if (data.missing_headers.length > 0) {
-            file_elem.find(".message").first().html("The following columns are missing: " + data.missing_headers.join(', '));
-            file_elem.find(".message").first().show();
-        }
-        else {
-            file_elem.find(".message").first().html("");
-            file_elem.find(".message").first().hide();
+            insert_status_elem.html("<strong>The following columns are missing:</strong> " + data.missing_headers.join(', '))
+                              .removeClass("hidden alert-success")
+                              .addClass("show alert-danger");
         }
     });
 }
@@ -194,7 +185,7 @@ function loadSourceFile(file_elem) {
         }
     });
 
-    $('#waitModal').modal('show');
+    displayModal('Please wait', 'Close');
 
     var service = new RestServiceJs("load_data_into_graph");
     var model = { 'file_name': file_name,
@@ -202,22 +193,22 @@ function loadSourceFile(file_elem) {
                   'disabled_columns': disabled_columns  };
 
     service.post(model, function(data) {
-        $('#waitModal').modal('hide');
-
+        hideModal();
+        var insert_status_elem = file_elem.find(".insert_status").first();
         if (data.status != "ok") {
-            file_elem.find(".insert_status").first().html(data.error);
+            insert_status_elem.html('<span class="glyphicon glyphicon glyphicon-exclamation-sign"></span>')
+                              .append(data.error);
             if ('url' in data) {
-                file_elem.find(".insert_status").first().append("<br>You can view the ttl file here: <a href=\""+data.url+"\">"+data.url+"</a>");
+                insert_status_elem.append("<br>You can view the ttl file here: <a href=\""+data.url+"\">"+data.url+"</a>");
             }
-            file_elem.find(".insert_status").first().addClass('error');
-            file_elem.find(".insert_status").first().removeClass('success');
-            file_elem.find(".insert_status").first().show();
+            insert_status_elem.addClass('show alert-danger')
+                              .removeClass('hidden alert-success');
         }
         else {
-            file_elem.find(".insert_status").first().html("Inserted " + data.total_triple_count + " lines");
-            file_elem.find(".insert_status").first().addClass('success');
-            file_elem.find(".insert_status").first().removeClass('error');
-            file_elem.find(".insert_status").first().show();
+            insert_status_elem.html('<strong><span class="glyphicon glyphicon-ok"></span> Success:</strong> inserted '
+            + data.total_triple_count + " lines")
+                              .addClass('show alert-success')
+                              .removeClass('hidden alert-danger');
         }
 
         // Check what is in the db now
