@@ -68,7 +68,7 @@
                     </div>
                 </div>
             </div>
-            <div id="queryBuilder" class="row" hidden>
+        <div id="queryBuilder" class="row" hidden>
                 <div id="graph" class="col-md-6">
                     <div class="uploadBtn btn btn-default">
                         <span>Upload query</span>
@@ -94,6 +94,7 @@
                         </div>
                     </form>
                 </div>
+
                 <div id="viewDetails" class="col-md-6">
                     <h3 class="header-div">Filter <span id="objectName" class="label label-default"></span> on
                     <div class="btn-group btn-group-query">
@@ -103,7 +104,7 @@
 
                     <hr/>
                 </div>
-            </div>
+             </div>
             <div id="results" class="row"></div>
         </div>
 

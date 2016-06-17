@@ -195,7 +195,7 @@ class TripleStoreExplorer(ParamManager, CounterManager):
 
         return attributes
 
-    def build_sparql_query_from_json(self,variates,constraintesRelations,constraintesFilters):
+    def build_sparql_query_from_json(self,variates,constraintesRelations,constraintesFilters,limit):
         print("variates")
         print(variates)
         print("constraintesRelations")
@@ -208,13 +208,20 @@ class TripleStoreExplorer(ParamManager, CounterManager):
         req += "FROM "+ "<"+self.get_param("askomics.graph")+ ">"+"\n"
         req += "WHERE {"+"\n"
 
-        for triplet in constraintesRelations:
-            req += triplet[0]+" "+triplet[1]+" "+triplet[2]+".\n"
+        for contraints in constraintesRelations:
+            if len(contraints)==4:
+                if contraints[3]:
+                    req += "OPTIONAL { "+contraints[0]+" "+contraints[1]+" "+contraints[2]+" } .\n"
+                    continue
+
+            req += contraints[0]+" "+contraints[1]+" "+contraints[2]+".\n"
 
         for userFilter in constraintesFilters:
             req += userFilter+".\n"
 
         req += "}"
+        if limit != None and limit >0 :
+            req +=" LIMIT "+str(limit)
         print ("================== REQUETE ===========================")
         print (req)
 

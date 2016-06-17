@@ -31,6 +31,7 @@ var AskomicsAttributesView = function () {
           elemId  = node.SPARQLid,
           nameDiv = prefix+node.SPARQLid ;
 
+      $('#waitModal').modal('show');
       var details = $("<div></div>").attr("id",nameDiv).attr("nodeid", node.id).attr("sparqlid", node.SPARQLid).addClass('div-details');
 
       var nameLab = $("<label></label>").attr("for",elemId).text("ID");
@@ -64,8 +65,8 @@ var AskomicsAttributesView = function () {
           var labelSparqlVarId = attribute.SPARQLid;
 
           if (attribute.type.indexOf("http://www.w3.org/2001/XMLSchema#") < 0) {
-              var tab = graphBuilder.buildConstraintsGraph();
-              $('#waitModal').modal('show');
+              var tab = graphBuilder.buildConstraintsGraphForCategory(node,attribute.id);
+
               inp.attr("list", "opt_" + labelSparqlVarId)
                  .attr("sparqlid",labelSparqlVarId);
               //console.log(JSON.stringify(nameDiv));
@@ -73,7 +74,8 @@ var AskomicsAttributesView = function () {
               var model = {
                 'variates': [ "?"+labelSparqlVarId ],
                 'constraintesRelations': tab[1],
-                'constraintesFilters': []
+                'constraintesFilters': [],
+                'limit':100
               };
 
             //  console.log(attribute.uri);
@@ -102,7 +104,6 @@ var AskomicsAttributesView = function () {
                   } else if (d.values.length == 1) {
                     inp.append($("<option></option>").attr("value", d.values[0][labelSparqlVarId]).append(d.values[0][labelSparqlVarId]));
                   }
-                $('#waitModal').modal('hide');
               });
 
               inp.change(function(d) {
@@ -110,7 +111,12 @@ var AskomicsAttributesView = function () {
                 nodeid = $(this).parent().attr('nodeid');
                 sparlid = $(this).attr('sparqlid');
 
-                graphBuilder.setFilterAttributes(nodeid,sparlid,value,'FILTER ( ?'+sparlid+'="'+value[0]+'"^^xsd:string)');
+                //graphBuilder.setFilterAttributes(nodeid,sparlid,value,'FILTER ( ?'+sparlid+'="'+value[0]+'"^^xsd:string)');
+                var listValue = "";
+                for (var i=0;i<value.length;i++) {
+                  listValue+=":"+value[i]+" ";
+                }
+                graphBuilder.setFilterAttributes(nodeid,sparlid,value,'VALUES ?'+sparlid+' { '+listValue +'}');
               });
 
           } else {
@@ -207,6 +213,7 @@ var AskomicsAttributesView = function () {
 
           //$('#waitModal').modal('hide');
       });
+      $('#waitModal').modal('hide');
       $("#viewDetails").append(details);
   };
 };

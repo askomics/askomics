@@ -292,7 +292,7 @@ class AskView(object):
         tse = TripleStoreExplorer(self.settings, self.request.session)
 
         body = self.request.json_body
-        data["values"] = tse.build_sparql_query_from_json(body["variates"],body["constraintesRelations"],body["constraintesFilters"])
+        data["values"] = tse.build_sparql_query_from_json(body["variates"],body["constraintesRelations"],body["constraintesFilters"],body["limit"])
         return data
 
     @view_config(route_name='query', request_method='POST')

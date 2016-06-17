@@ -1,9 +1,9 @@
 /*jshint esversion: 6 */
 
 function formatQuery() {
-    $("input[type='checkbox']:checked").each(function() {
-        addDisplay($(this).attr('name'));
-    });
+  //  $("input[type='checkbox']:checked").each(function() {
+  //      addDisplay($(this).attr('name'));
+  //  });
     launchQuery(0, 30, false);
 }
 
@@ -30,6 +30,7 @@ function launchQuery(exp, lim, roq) {
       'variates': tab[0],
       'constraintesRelations': tab[1],
       'constraintesFilters': tab[2],
+      'limit':30
     };
     var service = new RestServiceJs("sparqlquery");
 

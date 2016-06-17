@@ -13,7 +13,7 @@ var AskomicsNodeView = function () {
         var node = graphBuilder.getInstanciedNodeFromSparqlId(sparqlId);
         graphBuilder.switchActiveNode(node);
 
-        if (! node.actif) {
+        if (node.actif) {
             $(this).removeClass('glyphicon-eye-close');
             $(this).addClass('glyphicon-eye-open');
         } else {
@@ -33,7 +33,6 @@ var AskomicsNodeView = function () {
           attributesView.remove(node);
           nodeView.clean();
           for (var l of listLinksRemoved) {
-            console.log("===>"+JSON.stringify(l));
             linksView.remove(l);
           }
         }

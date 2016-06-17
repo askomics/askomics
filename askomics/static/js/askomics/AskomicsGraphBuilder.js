@@ -358,17 +358,50 @@
       }
     };
 
+    AskomicsGraphBuilder.prototype.buildConstraintsGraphForCategory = function(nodeAttribute,attributeId) {
+      var variates = [] ;
+      var constraintRelations = [] ;
+      var filters = [];
+      var isOptional = false ; /* request too long with optional */
+
+      var ua = userAbstraction;
+
+      for (idx=_instanciedNodeGraph.length-1;idx>=0;idx--) {
+        var node = _instanciedNodeGraph[idx];
+        if (nodeAttribute.id != node.id ) continue ;
+        /* add node inside */
+        constraintRelations.push(["?"+'URI'+node.SPARQLid,'rdf:type',ua.URI(node.uri)]);
+        constraintRelations.push(["?"+'URI'+node.SPARQLid,'rdfs:label',"?"+node.SPARQLid]);
+
+        /* for instance we don't filter category with attributes node but could be (very long request)*/
+        if ( nodeAttribute.id != node.id ) continue;
+
+        for (var uri in node.categories) {
+            if ( node.categories[uri].id != attributeId ) continue;
+            constraintRelations.push(["?"+'URI'+node.SPARQLid,ua.URI(uri),"?EntCat"+node.categories[uri].SPARQLid,isOptional]);
+            constraintRelations.push(["?EntCat"+node.categories[uri].SPARQLid,'rdfs:label',"?"+node.categories[uri].SPARQLid,isOptional]);
+            variates.push("?"+node.categories[uri].SPARQLid);
+            return [variates,constraintRelations,filters] ;
+        }
+      }
+      return [variates,constraintRelations,filters] ;
+    };
+
+
     AskomicsGraphBuilder.prototype.buildConstraintsGraph = function() {
       var variates = [] ;
       var constraintRelations = [] ;
       var filters = [];
+      var isOptional = false ; /* request too long with optional */
 
+      /* copy arrays to avoid to removed nodes and links instancied */
       var dup_node_array = $.extend(true, [], _instanciedNodeGraph);
       var dup_link_array = $.extend(true, [], _instanciedLinkGraph);
       var ua = userAbstraction;
-
-      for (idx=dup_node_array.length-1;idx>=0;idx--) {
+      /* TODO: better if loop is inversed ?*/
+      for (idx=0;idx<_instanciedNodeGraph.length;idx++) {
         var node = dup_node_array[idx];
+
         /* add node inside */
         constraintRelations.push(["?"+'URI'+node.SPARQLid,'rdf:type',ua.URI(node.uri)]);
         constraintRelations.push(["?"+'URI'+node.SPARQLid,'rdfs:label',"?"+node.SPARQLid]);
@@ -376,37 +409,50 @@
         for (ilx=dup_link_array.length-1;ilx>=0;ilx--) {
           if ( (dup_link_array[ilx].source.id == node.id) ||  (dup_link_array[ilx].target.id == node.id) ) {
             constraintRelations.push(["?"+'URI'+dup_link_array[ilx].source.SPARQLid,ua.URI(dup_link_array[ilx].uri),"?"+'URI'+dup_link_array[ilx].target.SPARQLid]);
+            //remove link to avoid to add two same constraint
             dup_link_array.splice(ilx,1);
           }
         }
-        /* adding variable node name */
+
+        /* adding variable node name if asked by the user */
         if (node.actif) {
           variates.push("?"+node.SPARQLid);
         }
+        var SparqlId;
+        var isFiltered;
         /* adding constraints about attributs about the current node */
         for (var uri in node.attributes) {
-            constraintRelations.push(["?"+'URI'+node.SPARQLid,ua.URI(uri),"?"+node.attributes[uri].SPARQLid]);
-            constraintRelations.push([ua.URI(uri),'rdfs:domain',ua.URI(node.uri)]);
-            constraintRelations.push([ua.URI(uri),'rdfs:range',ua.URI(node.attributes[uri].type)]);
-            constraintRelations.push([ua.URI(uri),'rdf:type',ua.URI('owl:DatatypeProperty')]);
-          if ( node.actif && node.attributes[uri].actif) {
-            variates.push("?"+node.attributes[uri].SPARQLid);
-          }
+            SparqlId = node.attributes[uri].SPARQLid;
+            console.log(JSON.stringify(node.filters));
+            isFiltered =  SparqlId in node.filters;
+            if ( isFiltered || node.attributes[uri].actif ) {
+              constraintRelations.push(["?"+'URI'+node.SPARQLid,ua.URI(uri),"?"+node.attributes[uri].SPARQLid,isOptional]);
+              constraintRelations.push([ua.URI(uri),'rdfs:domain',ua.URI(node.uri),isOptional]);
+              constraintRelations.push([ua.URI(uri),'rdfs:range',ua.URI(node.attributes[uri].type),isOptional]);
+              constraintRelations.push([ua.URI(uri),'rdf:type',ua.URI('owl:DatatypeProperty'),isOptional]);
+              if ( node.actif && node.attributes[uri].actif) {
+                variates.push("?"+node.attributes[uri].SPARQLid);
+              }
+              if ( isFiltered ) {
+                filters.push(node.filters[SparqlId]);
+              }
+            }
         }
         for (uri in node.categories) {
-            constraintRelations.push(["?"+'URI'+node.SPARQLid,ua.URI(uri),"?EntCat"+node.categories[uri].SPARQLid]);
-            constraintRelations.push(["?EntCat"+node.categories[uri].SPARQLid,'rdfs:label',"?"+node.categories[uri].SPARQLid]);
+          SparqlId = node.categories[uri].SPARQLid;
+          isFiltered = SparqlId in node.filters;
+          if ( isFiltered || node.categories[uri].actif ) {
+            constraintRelations.push(["?"+'URI'+node.SPARQLid,ua.URI(uri),"?"+node.categories[uri].SPARQLid,isOptional]);
+
             //variates.push("?"+"EntCat"+node.categories[uri].SPARQLid);
-          if ( node.actif && node.categories[uri].actif) {
-            variates.push("?"+node.categories[uri].SPARQLid);
+            if ( node.actif && node.categories[uri].actif) {
+              variates.push("?"+node.categories[uri].SPARQLid);
+            }
+            if ( isFiltered ) {
+              filters.push(node.filters[SparqlId]);
+            }
           }
         }
-
-        for (var f in node.filters) {
-          filters.push(node.filters[f]);
-        }
-        /* remove the node from the buffer list */
-        dup_node_array.splice(idx,1);
       }
       return [variates,constraintRelations,filters] ;
     };

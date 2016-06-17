@@ -6,6 +6,10 @@ var AskomicsForceLayoutManager = function () {
 
   var w = $("#svgdiv").width();
   var h = 350 ;
+  var configDisplay = {
+    rNode        : 12,
+    opacityNode  : "0.5"
+  };
 
   var vis = d3.select("#svgdiv")
               .append("svg:svg")
@@ -16,7 +20,11 @@ var AskomicsForceLayoutManager = function () {
               .attr("viewBox", "0 0 " + w + " " + h)
               .attr("perserveAspectRatio", "xMinYMid")
               .append('svg:g');
-
+/*
+              .on("mouseover", function() { focus.style("display", null); })
+              .on("mouseout", function() { focus.style("display", "none"); })
+              .on("mousemove", mousemove);
+*/
   var force = d3.layout.force();
 
   var nodes = force.nodes();
@@ -375,7 +383,8 @@ var AskomicsForceLayoutManager = function () {
         idxn = removeN[n2];
         nodes.splice(idxn,1);
       }
-    } ;
+    } ;              /* user want a new relation contraint betwwenn two node*/
+
 
 
   AskomicsForceLayoutManager.prototype.update = function () {
@@ -406,6 +415,8 @@ var AskomicsForceLayoutManager = function () {
           .attr("marker-end", "url(#marker)")
           .style("stroke-dasharray",function(d) {return d.suggested?"2":"";})
           .style("opacity", function(d) {return d.suggested?"0.3":"1";})
+          .style("stroke-width", "2")
+          .on("mouseover", function(d) { this.style[2]="4";})//style("stroke", "#2A2A2A"); })
           .on('click', function(d) { // Mouse down on a link
               /* user want a new relation contraint betwwenn two node*/
               if ( d.suggested ) {
@@ -457,13 +468,13 @@ var AskomicsForceLayoutManager = function () {
 
       //setup_node(nodeEnter,slt_elt,slt_data,prev_elt,prev_data);
       nodeEnter.append("svg:circle")
-              .attr("r", 12)
+              .attr("r", configDisplay.rNode)
               .attr("id", function (d) { return "node_" + d.id; })
               .attr("uri", function (d) { return d.uri; })
               .attr("class", "nodeStrokeClass")
               .style("fill", function (d) { return forceLayoutManager.getColorInstanciatedNode(d); })
               .style("opacity", function(d) {
-                  return (d.suggested === true ? 0.6 : 1);
+                  return (d.suggested === true ? configDisplay.opacityNode : 1);
               })
               .on('click', function(d) {
                 forceLayoutManager.manageSelectedNodes(d);
@@ -478,7 +489,6 @@ var AskomicsForceLayoutManager = function () {
                   graphBuilder.instanciateLink(listOfLinksInstancied);
                   forceLayoutManager.updateInstanciateLinks(listOfLinksInstancied);
                   for (var ll of listOfLinksInstancied ) {
-                    console.log("CREATE LINK INTERFACE:"+d.id);
                     linksView.create(ll);
                   }
                   nodeView.create(d);
@@ -527,22 +537,54 @@ var AskomicsForceLayoutManager = function () {
 
           link.attr("d", function(d) {
             var nlinks = d.source.nlink[d.target.id]; // same as d.target.nlink[d.source.id]
+
+            /* diminution of arc to improve display of links */
+            var penteX = d.target.x-d.source.x;
+            var penteY = d.target.y-d.source.y;
+            var XT=0,YT=0,XS=0,YS=0;
+            var dim = configDisplay.rNode/3.0;
+            if ( penteX >0 && penteY>0) {
+              XT = -dim ;
+              YT = -dim ;
+              XS = dim  ;
+              YS = dim  ;
+            } else if
+            ( penteX >0 && penteY<0) {
+              XT = -dim ;
+              YT = dim ;
+              XS = dim  ;
+              YS = - dim  ;
+            } else if ( penteX <0 && penteY>0) {
+              XT = dim ;
+              YT = -dim ;
+              XS = -dim  ;
+              YS = dim  ;
+            } else if ( penteX <0 && penteY<0) {
+              XT = dim ;
+              YT = dim ;
+              XS = -dim  ;
+              YS = -dim  ;
+            }
+            Xsource = d.source.x + XS;
+            Ysource = d.source.y + YS;
+            Xtarget = d.target.x + XT;
+            Ytarget = d.target.y + YT;
             /* Manage a line if weigth = 1 */
             if ( nlinks <= 1 ) {
-              return "M" + d.source.x + "," + d.source.y + "L" +d.target.x + "," + d.target.y  ;
+              return "M" + Xsource + "," + Ysource + "L" + Xtarget + "," + Ytarget  ;
             } else {
               /* sinon calcul d une courbure */
-              var dx = d.target.x - d.source.x,
-                dy = d.target.y - d.source.y,
+              var dx = Xtarget - Xsource,
+                dy = Ytarget - Ysource,
                 dr = Math.sqrt(dx * dx + dy * dy);
 
               // if there are multiple links between these two nodes, we need generate different dr for each path
               dr = dr/(1 + (1/nlinks) * (d.linkindex - 1));
 
               // generate svg path
-              return "M" + d.source.x + "," + d.source.y +
-                     "A" + dr + "," + dr + " 0 0 1," + d.target.x + "," + d.target.y +
-                     "A" + dr + "," + dr + " 0 0 0," + d.source.x + "," + d.source.y;
+              return "M" + Xsource + "," + Ysource +
+                     "A" + dr + "," + dr + " 0 0 1," + Xtarget + "," + Ytarget +
+                     "A" + dr + "," + dr + " 0 0 0," + Xsource + "," + Ysource;
             }
           });
 
@@ -555,7 +597,7 @@ var AskomicsForceLayoutManager = function () {
       });
 
       // Restart the force layout.
-      force.charge(-700)
+      force.charge(-300)
           .linkDistance(175)
           .size([w, h])
           .start();
