@@ -15,22 +15,20 @@
         <!-- The Templates plugin is included to render the upload/download listings -->
         <script src="//blueimp.github.io/JavaScript-Templates/js/tmpl.min.js"></script>
 
-        <script src="static/js/bootstrap.js"></script>
-        <script src="static/js/handlebars-v4.0.5.js"></script>
-        <script src="static/js/rest.js"></script>
+        <script src="static/js/third-party/bootstrap.js"></script>
+        <script src="static/js/third-party/handlebars-v4.0.5.js"></script>
 
 
-        <script src="static/js/askomics/query-handler.js"></script>
-  <!--      <script src="static/js/askomics/graph.js"></script> -->
-        <script src="static/js/askomics/askomics.js"></script>
-        <script src="static/js/askomics/integration.js"></script>
-
-        <script src="static/js/askomics/AskomicsUserAbstraction.js"></script>
-        <script src="static/js/askomics/AskomicsGraphBuilder.js"></script>
-        <script src="static/js/askomics/AskomicsAttributesView.js"></script>
-        <script src="static/js/askomics/AskomicsNodeView.js"></script>
-        <script src="static/js/askomics/AskomicsLinksView.js"></script>
-        <script src="static/js/askomics/AskomicsForceLayoutManager.js"></script>
+        <script src="static/js/MainAskomics.js"></script>
+        <script src="static/js/query-handler.js"></script>
+        <script src="static/js/integration.js"></script>
+        <script src="static/js/AskomicsRestManagement.js"></script>
+        <script src="static/js/AskomicsUserAbstraction.js"></script>
+        <script src="static/js/AskomicsGraphBuilder.js"></script>
+        <script src="static/js/AskomicsAttributesView.js"></script>
+        <script src="static/js/AskomicsNodeView.js"></script>
+        <script src="static/js/AskomicsLinksView.js"></script>
+        <script src="static/js/AskomicsForceLayoutManager.js"></script>
 
         <link href="static/css/bootstrap.css" rel="stylesheet">
         <link rel="stylesheet" type="text/css" href="static/css/style.css">
