@@ -1,3 +1,4 @@
+/*jshint esversion: 6 */
 
 function startRequestSessionAskomics() {
   // Initialize the graph with the selected start point.

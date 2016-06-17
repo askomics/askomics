@@ -1,42 +1,5 @@
 /*jshint esversion: 6 */
 
-function formatQuery() {
-  //  $("input[type='checkbox']:checked").each(function() {
-  //      addDisplay($(this).attr('name'));
-  //  });
-    launchQuery(0, 30, false);
-}
-
-function launchQuery(exp, lim, roq) {
-    //     Get SPARQL query corresponding to the graph and launch it according
-    //     to given parameters.
-    //
-    //     :exp: 0 = results overview
-    //           1 = complete results file generation
-    //     :lim: LIMIT value in the SPARQL query
-    //     :roq: bool, if true, don't launch the query, only return it
-
-
-    var tab = graphBuilder.buildConstraintsGraph();
-    var jdata = {
-      'variates': tab[0],
-      'constraintesRelations': tab[1],
-      'constraintesFilters': tab[2],
-      'limit':30
-    };
-    var service = new RestServiceJs("sparqlquery");
-
-    service.post(jdata,function(data) {
-      if (exp === 0) {
-            displayResults(data);
-            $('#waitModal').modal('hide');
-        } else {
-            provideDownloadLink(data);
-            $('#waitModal').modal('hide');
-        }
-    });
-}
-
 function prepareQuery(exp, lim, roq) {
     //     Get JSON to ask for a SPARQL query corresponding to the graph
     //     and launch it according to given parameters.
@@ -53,17 +16,6 @@ function prepareQuery(exp, lim, roq) {
               'constraintesFilters'  : tab[2],
               'limit'                : lim
            };
-/*
-    { 'display':display,
-              'constraint':constraint,
-              'filter_cat':filter_cat,
-              'filter_num':filter_num,
-              'filter_str':filter_str,
-              'export':exp,
-              'limit':lim,
-              'return_only_query':roq,
-              'uploaded':$("#uploadedQuery").text()
-          };*/
 }
 
 function viewQueryResults() {
@@ -80,7 +32,7 @@ function viewQueryResults() {
 function generateResultFile(lim) {
     displayModal('Please wait', 'Close');
     $("#export").remove();
-    $("#btn-file").text("Generating results file, please wait...");
+    $("#btn-file").text("Generate...");
     $("#btn-file").disabled = true;
 
     var service = new RestServiceJs("sparqlquery");
@@ -93,7 +45,7 @@ function generateResultFile(lim) {
 
 function provideDownloadLink(data) {
     console.log("** provideDownloadLink **");
-    $("#btn-file").text("Generate a results file (max 10000 lines)");
+    $("#btn-file").text("Results file");
     $("#btn-down").prop("disabled", false);
     $("#form-down").attr("action", data.file).attr("method", "get");
 }
