@@ -77,20 +77,20 @@
                     </div>
                     <div id="svgdiv"></div>
                     <div id="uploadedQuery" class="uploadedQuery" hidden contenteditable></div>
-                    <form id="form-down" >
+
                         <div class="btn-group">
-                            <button id="btn-down" type="submit" class="btn btn-default">
-                                <span class="glyphicon glyphicon-save"></span>
+                            <button id="btn-down" type="submit" class="btn btn-default" onclick="downloadResultsFile(10000)">
+                                <span class="glyphicon glyphicon-save"></span> Download results
                             </button>
-                            <button id="btn-file" type="button" class="btn btn-default" onclick="generateResultFile(10000)">
+                            <!--<button id="btn-file" type="button" class="btn btn-default" onclick="generateResultFile(10000)">
                                 Results file
-                            </button>
+                            </button>-->
                         </div>
                         <div class="btn-group btn-group-query">
                             <button type="button" class="btn btn-default" onclick="viewQueryResults()">Launch query</button>
                             <button type="button" class="btn btn-default" onclick="window.location.reload()">Reset</button>
                         </div>
-                    </form>
+
                 </div>
 
                 <div id="viewDetails" class="col-md-6">

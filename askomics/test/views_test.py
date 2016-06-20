@@ -10,7 +10,7 @@ class ViewTests(unittest.TestCase):
         from askomics.ask_view import AskView
 
         self.config = testing.setUp()
-        self.settings = get_appsettings('development.ini', name='main')
+        self.settings = get_appsettings('configs/development.ini', name='main')
         self.app = main(self.settings)
 
         from webtest import TestApp

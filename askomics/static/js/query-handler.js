@@ -4,13 +4,13 @@ function prepareQuery(exp, lim, roq) {
     //     Get JSON to ask for a SPARQL query corresponding to the graph
     //     and launch it according to given parameters.
     //
-    //     :exp: 0 = results overview
-    //           1 = complete results file generation
+    //     :exp: false = results overview
+    //           true = complete results file generation
     //     :lim: LIMIT value in the SPARQL query
     //     :roq: bool, if true, don't launch the query, only return it
     var tab = graphBuilder.buildConstraintsGraph();
     return {
-              'exp'                  : exp,
+              'export'               : exp,
               'variates'             : tab[0],
               'constraintesRelations': tab[1],
               'constraintesFilters'  : tab[2],
@@ -19,35 +19,25 @@ function prepareQuery(exp, lim, roq) {
 }
 
 function viewQueryResults() {
+    $("#btn-down").prop("disabled", false);
     displayModal('Please wait', 'Close');
 
     var service = new RestServiceJs("sparqlquery");
-    var jdata = prepareQuery(0, 30, false);
+    var jdata = prepareQuery(false, 30, false);
     service.post(jdata,function(data) {
         displayResults(data);
         hideModal();
     });
 }
 
-function generateResultFile(lim) {
-    displayModal('Please wait', 'Close');
-    $("#export").remove();
-    $("#btn-file").text("Generate...");
-    $("#btn-file").disabled = true;
-
+function downloadResultsFile(lim) {
+    displayModal('Generating results file ...', 'Close');
     var service = new RestServiceJs("sparqlquery");
-    var jdata = prepareQuery(1, lim, false);
+    var jdata = prepareQuery(true, lim, false);
     service.post(jdata, function(data) {
-        provideDownloadLink(data);
         hideModal();
+        window.location.href = data.file;
     });
-}
-
-function provideDownloadLink(data) {
-    console.log("** provideDownloadLink **");
-    $("#btn-file").text("Results file");
-    $("#btn-down").prop("disabled", false);
-    $("#form-down").attr("action", data.file).attr("method", "get");
 }
 
 function displayResults(data) {
