@@ -30,14 +30,16 @@ var AskomicsUserAbstraction = function () {
       var service = new RestServiceJs("userAbstraction");
 
       service.postsync({}, function(resultListTripletSubjectRelationObject ) {
-
+      console.log("========================= ABSTRACTION =====================================================================");
+      for (var elt in resultListTripletSubjectRelationObject) {
+        console.log("*            "+ elt + "                      * ");
+        console.log("  == >  "+JSON.stringify(resultListTripletSubjectRelationObject[elt]));
+      }
         /* All relation are stored in tripletSubjectRelationObject */
         tripletSubjectRelationObject = resultListTripletSubjectRelationObject.relations;
         entityInformationList = {};
         /* All information about an entity available in TPS are stored in entityInformationList */
         for (var entry in resultListTripletSubjectRelationObject.entities){
-          console.log("========================= ABSTRACTION =====================================================================");
-          console.log("ENTITE:"+JSON.stringify(resultListTripletSubjectRelationObject.attributes[entry2]));
 
           var uri = resultListTripletSubjectRelationObject.entities[entry].entity;
           var rel = resultListTripletSubjectRelationObject.entities[entry].property;
@@ -49,7 +51,7 @@ var AskomicsUserAbstraction = function () {
           entityInformationList[uri][rel] = val;
         }
         var attribute = {};
-        console.log("-------------------------------------------------------------------");
+
         for (var entry2 in resultListTripletSubjectRelationObject.attributes){
           console.log("ATTRIBUTE:"+JSON.stringify(resultListTripletSubjectRelationObject.attributes[entry2]));
           var uri2 = resultListTripletSubjectRelationObject.attributes[entry2].entity;
@@ -66,7 +68,6 @@ var AskomicsUserAbstraction = function () {
           //TODO Force label in the first position to print the label at the first position
         }
 
-        console.log("-------------------------------------------------------------------");
         for (var entry3 in resultListTripletSubjectRelationObject.categories){
           console.log("CATEGORY:"+JSON.stringify(resultListTripletSubjectRelationObject.categories[entry3]));
           var uri3 = resultListTripletSubjectRelationObject.categories[entry3].entity;

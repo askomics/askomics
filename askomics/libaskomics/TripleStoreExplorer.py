@@ -102,29 +102,41 @@ class TripleStoreExplorer(ParamManager):
         :rtype:
         """
         data = {}
+        listEntities = {}
 
         self.log.debug(" =========== TripleStoreExplorer:getUserAbstraction ===========")
+
+        nodes_startpoint = self.get_start_points()
+        # add start node at first
+        for node in nodes_startpoint:
+            listEntities[node.get_uri()]=0
+
         sqb = SparqlQueryBuilder(self.settings, self.session)
         ql = QueryLauncher(self.settings, self.session)
 
         sparql_template = self.get_template_sparql(self.ASKOMICS_abstractionRelationUser)
-        query = sqb.load_from_file(sparql_template, {}).query
+        query = sqb.load_from_file(sparql_template, { 'OwlProperty' : 'owl:ObjectProperty'}).query
         results = ql.process_query(query)
 
         data['relations'] = results
-
-        listEntities = {}
-
-        nodes_startpoint = self.get_start_points()
-        # add start node at first 
-        for node in nodes_startpoint:
-            listEntities[node.get_uri()]=0
 
         for elt in results:
             if not elt['object'] in listEntities:
                 listEntities[elt['object']]=0
             if not elt['subject'] in listEntities:
                 listEntities[elt['subject']]=0
+
+        #sparql_template = self.get_template_sparql(self.ASKOMICS_abstractionRelationUser)
+        #query = sqb.load_from_file(sparql_template, { 'OwlProperty' : 'owl:SymmetricProperty'}).query
+        #results = ql.process_query(query)
+
+        #data['relationsSym'] = results
+
+        #for elt in results:
+        #    if not elt['object'] in listEntities:
+        #        listEntities[elt['object']]=0
+        #    if not elt['subject'] in listEntities:
+        #        listEntities[elt['subject']]=0
 
         filterEntities = ' '.join(["<"+s+">" for s in listEntities.keys()])
         sparql_template = self.get_template_sparql(self.ASKOMICS_abstractionEntityUser)

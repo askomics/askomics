@@ -42,7 +42,11 @@ class AbstractedRelation(object):
 
         print("RELATIONTYPE:"+relation_type)
 
-        if relation_type.startswith("entity"):
+        if relation_type == "entity":
+            self.relation_type = "owl:ObjectProperty"
+            self.rdfs_range = ":" + type_range
+        elif relation_type == "entitySym":
+            #self.relation_type = "owl:SymmetricProperty"
             self.relation_type = "owl:ObjectProperty"
             self.rdfs_range = ":" + type_range
         elif relation_type.lower() == "category":
@@ -61,17 +65,11 @@ class AbstractedRelation(object):
     def set_label(self, identifier):
         self.label = identifier
 
-    def set_relation_type(self, relation_type):
-        if relation_type == "entity" or relation_type == "category":
-            self.relation_type = "owl:ObjectProperty"
-        else:
-            self.relation_type = "owl:DatatypeProperty"
-
     def set_domain(self, rdfs_domain):
         self.rdfs_domain = rdfs_domain
 
     def set_range(self, rdfs_range):
-        if self.relation_type == "owl:ObjectProperty":
+        if self.relation_type == "owl:ObjectProperty" or self.relation_type == "owl:SymmetricProperty":
             self.rdfs_range = ":" + rdfs_range
         else:
             self.rdfs_range = rdfs_range
