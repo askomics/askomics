@@ -115,6 +115,11 @@ class TripleStoreExplorer(ParamManager):
 
         listEntities = {}
 
+        nodes_startpoint = self.get_start_points()
+        # add start node at first 
+        for node in nodes_startpoint:
+            listEntities[node.get_uri()]=0
+
         for elt in results:
             if not elt['object'] in listEntities:
                 listEntities[elt['object']]=0
