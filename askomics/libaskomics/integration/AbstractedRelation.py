@@ -42,7 +42,7 @@ class AbstractedRelation(object):
 
         print("RELATIONTYPE:"+relation_type)
 
-        if relation_type == "entity":
+        if relation_type.startswith("entity"):
             self.relation_type = "owl:ObjectProperty"
             self.rdfs_range = ":" + type_range
         elif relation_type.lower() == "category":

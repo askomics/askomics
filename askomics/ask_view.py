@@ -93,7 +93,7 @@ class AskView(object):
 
                 shortcuts_list = tse.has_setting(uri, 'shortcut')
 
-                src = Node(class_name, # We don't care about counter in stats
+                src = Node(
                     uri,
                     class_name,
                     shortcuts_list)
@@ -134,15 +134,20 @@ class AskView(object):
         data['files'] = []
 
         for src_file in source_files:
-            print("==========OUOUUOOOOOOOOOOOOOOOO")
-            print(src_file.headers)
 
             infos = {}
             infos['name'] = src_file.name
             try:
                 infos['headers'] = src_file.headers
                 infos['preview_data'] = src_file.get_preview_data()
-                infos['column_types'] = src_file.guess_column_types(infos['preview_data'])
+                infos['column_types'] = [];
+
+                for ih in range(0,len(infos['headers'])):
+                    if infos['headers'][ih].find("@")>0:
+                        infos['column_types'].append("entity")
+                    else:
+                        infos['column_types'].append(src_file.guess_values_type(infos['preview_data'][ih]))
+
             except Exception as e:
                 infos['error'] = 'Could not read input file, are you sure it is a valid tabular file?'
 

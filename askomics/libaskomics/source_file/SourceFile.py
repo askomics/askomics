@@ -43,6 +43,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
             'text'    : 'xsd:string',
             'category': ':',
             'entity'  : ':',
+            'entitySym'  : ':',
             'entity_start'  : ':'}
 
         self.delims = {
@@ -50,6 +51,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
             'text'    : ('"', '"'),
             'category': (':', ''),
             'entity'  : (':', ''),
+            'entitySym'  : (':', ''),
             'entity_start'  : (':', '')}
 
         self.log = logging.getLogger(__name__)
@@ -139,7 +141,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
         :param values: a List of values to evaluate
         :return: the guessed type ('numeric', 'text' or 'category'
         """
-
+        print(values)
         # First check if category
         if len(set(values)) < len(values) / 2:
             return 'category'
@@ -202,7 +204,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
             if key > 0 and key not in self.disabled_columns:
                 ttl += AbstractedRelation(key_type, self.headers[key], ref_entity, self.type_dict[key_type]).get_turtle()
 
-            if key > 0 and key_type != 'entity':
+            if key > 0 and not key_type.startswith('entity'):
                 ttl += ":" + self.headers[key] + ' displaySetting:attribute "true"^^xsd:boolean .\n'
 
         # Store the startpoint status
@@ -281,7 +283,8 @@ class SourceFile(ParamManager, HaveCachedProperties):
             # Loop on lines
             for row in tabreader:
 
-                ttl = ""
+                ttl    = ""
+                ttlSym = ""
 
                 # skip commented lines (# char at the begining)
                 if row[0].startswith('#'):
@@ -311,7 +314,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
                         #OFI : manage new header with relation@type_entity
                         #relationName = ":has_" + header # manage old way
                         relationName = ":"+header # manage old way
-                        if current_type == 'entity':
+                        if current_type.startswith('entity'):
                             idx = header.find("@")
                             if ( idx > 0 ):
                                 relationName = ":"+header[0:idx]
@@ -323,13 +326,17 @@ class SourceFile(ParamManager, HaveCachedProperties):
                         # Create link to value
                         if row[i]: # Empty values are just ignored
                             ttl += indent + " "+ relationName + " " + self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " ;\n"
-
+                        if current_type == 'entitySym':
+                            ttlSym += self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " "+ relationName + " :" + entity_label  + " .\n"
                         # FIXME we will need to store undefined values one day if we want to be able to query on this
 
                 ttl = ttl[:-2] + "."
+                #manage symmetric relation
+                if ttlSym != "":
+                    yield ttlSym
 
                 yield ttl
-
+                #print(ttl)
                 # Stop after x lines
                 count += 1
                 if preview_only and count > self.preview_limit:

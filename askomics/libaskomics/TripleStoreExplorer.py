@@ -292,8 +292,6 @@ class TripleStoreExplorer(ParamManager):
                 if r1['nodeUri'] == r2['nodeUri'] and r1['relationUri'] == r2['relationUri']:
                     results["reverse"].remove(r2)
 
-        self.print_stat()
-
         go_out_loop = False
         # Sort the results between attributes, nodes and links
         for direction in results:
@@ -326,22 +324,18 @@ class TripleStoreExplorer(ParamManager):
                 rel_h = self.has_setting(result["relationUri"], 'attribute')
 
                 if att_h or rel_h or (result["propertyType"] == self.ASKOMICS_prefix["owl"] + "DatatypeProperty"): # FIXME doesn't detect categories
-                    attribute_id = node.get_id() + '_' + neighbor_label + str(self.get_new_id(node.get_id() + '_' + neighbor_label))
                     attributes.append(
-                        Attribute(attribute_id,
+                        Attribute(
                             result["relationUri"],
                             result["nodeUri"],
-                            neighbor_label,
-                            node.get_id()
+                            neighbor_label
                             )
                         )
                 else:
                     self.log.debug(neighbor_label)
-                    neighbor_id = neighbor_label + str(self.get_new_id(neighbor_label))
-
                     # Add nodes and their links to node
                     nodes.append(
-                        Node(neighbor_id,
+                        Node(
                             neighbor_uri,
                             neighbor_label,
                             shortcuts_list))
@@ -349,9 +343,7 @@ class TripleStoreExplorer(ParamManager):
                     if direction == "direct":
                         links.append(
                             Link(node.get_uri(),
-                                node.get_id(),
                                 neighbor_uri,
-                                neighbor_id,
                                 result["relationUri"],
                                 result["relationLabel"],
                                 specified_by,
@@ -359,9 +351,7 @@ class TripleStoreExplorer(ParamManager):
                     else:
                         links.append(
                             Link(neighbor_uri,
-                                neighbor_id,
                                 node.get_uri(),
-                                node.get_id(),
                                 result["relationUri"],
                                 result["relationLabel"],
                                 specified_by,

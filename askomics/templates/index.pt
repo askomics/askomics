@@ -203,7 +203,8 @@
                                                     <option value='category'>Category</option>
                                                 </optgroup>
                                                 <optgroup label='Relationship'>
-                                                    <option value='entity'>Entity</option>
+                                                    <option value='entity'>Relation</option>
+                                                    <option value='entitySym'>Symmetric Relation</option>
                                                 </optgroup>
                                             {{/if}}
                                         </select>

@@ -24,8 +24,6 @@ var AskomicsAttributesView = function () {
     $("div[id*='"+ prefix +"']" ).hide();
   };
 
-
-
   AskomicsAttributesView.prototype.create = function (node) {
       // Add attributes of the selected node on the right side of AskOmics
     function makeRemoveIcon(field) {
@@ -33,7 +31,6 @@ var AskomicsAttributesView = function () {
           removeIcon.click(function() { field.val(null).trigger("change"); });
           return removeIcon;
     }
-
 
      var elemUri = node.uri,
           elemId  = node.SPARQLid,
@@ -43,7 +40,7 @@ var AskomicsAttributesView = function () {
       var details = $("<div></div>").attr("id",nameDiv).attr("nodeid", node.id).attr("sparqlid", node.SPARQLid).addClass('div-details');
 
       var nameLab = $("<label></label>").attr("for",elemId).text("ID");
-      var nameInp = $("<input/>").addClass("form-control");
+      var nameInp = $("<input/>").attr("id", "lab_" + elemId).addClass("form-control");
       var removeIcon = $('<span class="glyphicon glyphicon-remove display"></span>');
       removeIcon.click(function() { field.val(null).trigger("change"); });
 

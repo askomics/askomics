@@ -54,7 +54,8 @@ function cols2rows(items) {
  */
 function displayTable(data) {
     // Transform columns to rows
-    for(var i=0, l=data.files.length; i<l; i++) {
+    var i;
+    for(i=0, l=data.files.length; i<l; i++) {
         if ('preview_data' in data.files[i]) {
             data.files[i].preview_data = cols2rows(data.files[i].preview_data);
         }
@@ -69,11 +70,11 @@ function displayTable(data) {
     $("#content_integration").html(html);
 
     // Select the correct type for each column
-    for(var i=0, l=data.files.length; i<l; i++) {
+    for(i=0, l=data.files.length; i<l; i++) {
 
         if ('column_types' in data.files[i]) {
 
-            var cols = data.files[i]['column_types'];
+            var cols = data.files[i].column_types;
             for(var j=0, m=cols.length; j<m; j++) {
                 var selectbox = $('div#content_integration form.template-source_file:eq(' + i + ') select.column_type:eq(' + j + ')');
                 var values = selectbox.find("option").map(function() { return $(this).val(); });
