@@ -285,6 +285,13 @@ class AskView(object):
                 }
                 for res in results
             ]
+        if not body['export']:
+            return data
+
+        # Provide results file
+        ql = QueryLauncher(self.settings, self.request.session)
+        rb = ResultsBuilder(self.settings, self.request.session)
+        data['file'] = ql.format_results_csv(rb.build_csv_table(results))
 
         return data
 

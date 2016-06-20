@@ -85,7 +85,8 @@ var AskomicsAttributesView = function () {
                 'variates': [ "?"+labelSparqlVarId ],
                 'constraintesRelations': tab[1],
                 'constraintesFilters': [],
-                'limit':100
+                'limit':100,
+                'export':false,
               };
 
             //  console.log(attribute.uri);
