@@ -3,7 +3,6 @@
 import logging
 
 from askomics.libaskomics.ParamManager import ParamManager
-from askomics.libaskomics.CounterManager import CounterManager
 
 from askomics.libaskomics.graph.Node import Node
 from askomics.libaskomics.graph.Link import Link
@@ -13,7 +12,7 @@ from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
 from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
 
 
-class TripleStoreExplorer(ParamManager, CounterManager):
+class TripleStoreExplorer(ParamManager):
     """
     Use the different Sparql template queries in order to:
         - get special settings:
@@ -27,7 +26,6 @@ class TripleStoreExplorer(ParamManager, CounterManager):
 
     def __init__(self, settings, session, dico={}):
         ParamManager.__init__(self, settings, session)
-        CounterManager.__init__(self, dico)
 
         self.log = logging.getLogger(__name__)
 
@@ -91,9 +89,8 @@ class TripleStoreExplorer(ParamManager, CounterManager):
         for result in results:
             uri = result["nodeUri"]
             label = result["nodeLabel"]
-            node_id = label + str(self.get_new_id(label))
             shortcuts_list = self.has_setting(uri, 'shortcut')
-            nodes.append(Node(node_id, uri, label, shortcuts_list))
+            nodes.append(Node(uri, label, shortcuts_list))
 
         return nodes
 

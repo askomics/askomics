@@ -45,9 +45,7 @@ class AskView(object):
 
         nodes = tse.get_start_points()
 
-        #data["nodes"] = {n.get_id(): n.to_dict() for n in nodes}
         data["nodes"] = {n.get_uri(): n.to_dict() for n in nodes}
-        data["last_new_counter"] = tse.get_counter()
 
         return data
 
@@ -136,6 +134,9 @@ class AskView(object):
         data['files'] = []
 
         for src_file in source_files:
+            print("==========OUOUUOOOOOOOOOOOOOOOO")
+            print(src_file.headers)
+
             infos = {}
             infos['name'] = src_file.name
             try:
@@ -255,16 +256,11 @@ class AskView(object):
 
         #data = {}
         tse = TripleStoreExplorer(self.settings, self.request.session)
-
         body = self.request.json_body
-
         data = tse.getUserAbstraction()
 
-        #data["nodes"] = [n.to_dict() for n in nodes]
-        #data["links"] = [l.to_dict() for l in links]
-        #data["attributes"] = [a.to_dict() for a in attributes]
-
         return data
+
 
     @view_config(route_name='sparqlquery', request_method='POST')
     def get_value(self):
