@@ -14,7 +14,7 @@ class SourceFileTests(unittest.TestCase):
 
     def setUp( self ):
         self.temp_directory = tempfile.mkdtemp()
-        self.settings = get_appsettings('development.ini', name='main')
+        self.settings = get_appsettings('configs/development.ini', name='main')
 
         request = testing.DummyRequest()
 
