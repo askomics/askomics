@@ -8,7 +8,7 @@ import json
 class SparqlTests(unittest.TestCase):
     def setUp(self):
         self.config = testing.setUp()
-        self.settings = get_appsettings('development.ini', name='main')
+        self.settings = get_appsettings('configs/development.ini', name='main')
 
     def tearDown(self):
         testing.tearDown()
