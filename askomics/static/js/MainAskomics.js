@@ -205,8 +205,8 @@ $(function () {
     });
 
     //$("#uploadedQuery")
-    $("a#btn-qdown").on('click', function(d) {
-      $(this).attr("href", "data:text/plain;charset=UTF-8," + encodeURIComponent(graphBuilder.getInternalState()));
+    $("#btn-qdown").on('click', function(d) {
+      window.location.href = "data:text/plain;charset=UTF-8," + encodeURIComponent(graphBuilder.getInternalState());
     });
 
 
