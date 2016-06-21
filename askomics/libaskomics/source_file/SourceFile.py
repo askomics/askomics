@@ -427,8 +427,9 @@ class SourceFile(ParamManager, HaveCachedProperties):
             triple_count = 0
             for triple in content_ttl:
                 if not fp:
+                    pathttl = self.get_ttl_directory()
                     # Temp file must be accessed by http so we place it in askomics/ttl/ dir
-                    fp = tempfile.NamedTemporaryFile(dir="askomics/ttl/", suffix=".ttl", mode="w", delete=False)
+                    fp = tempfile.NamedTemporaryFile(dir=pathttl, suffix=".ttl", mode="w", delete=False)
                     fp.write(header_ttl + '\n')
 
                 fp.write(triple + '\n')

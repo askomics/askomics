@@ -1,3 +1,5 @@
+import os.path
+
 class ParamManager(object):
     """
         Manage static file and template sparql queries
@@ -28,8 +30,8 @@ class ParamManager(object):
                                 "owl": """http://www.w3.org/2002/07/owl#"""}
 
         self.ASKOMICS_sparql_queries_dir = 'askomics/sparql/'
-
-        self.ASKOMICS_html_template = 'askomics/templates/integration.pt'
+        self.ASKOMICS_html_template      = 'askomics/templates/integration.pt'
+        self.ASKOMICS_ttl_directory      = 'askomics/ttl/'
 
     def get_template_sparql(self, sparql_file):
         sparql_template = self.ASKOMICS_sparql_queries_dir + sparql_file
@@ -45,6 +47,11 @@ class ParamManager(object):
     def get_user_data_file(self, filename):
 
         return self.get_source_file_directory() + "/" + filename
+
+    def get_ttl_directory(self):
+        if not os.path.isdir(self.ASKOMICS_ttl_directory):
+            os.makedirs(self.ASKOMICS_ttl_directory)
+        return self.ASKOMICS_ttl_directory
 
     def get_param(self, key):
         return self.settings[key]
