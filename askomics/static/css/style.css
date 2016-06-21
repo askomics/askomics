@@ -155,3 +155,8 @@ div.uploadedQuery {
 .template-source_file {
     margin-bottom: 4em;
 }
+
+.results-div {
+    display: block;
+    overflow-x: auto;
+}
