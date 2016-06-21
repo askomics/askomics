@@ -360,7 +360,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
         query = sqb.load_from_file(sparql_template, {"nodeClass": self.headers[0]}).query
 
         results = ql.process_query(query)
-
+        
         for rel in results:
             existing_relations.append(rel["relation"].replace(self.get_param("askomics.prefix"), "").replace("has_", ""))
 
@@ -376,22 +376,30 @@ class SourceFile(ParamManager, HaveCachedProperties):
         headers_status = []
         missing_headers = []
 
+        header_tmp = []
+        # change header to avoid @ character
+        for header in self.headers[1:]:
+            idx = header.find("@")
+            if idx  != -1:
+                header = header[0:idx]
+            header_tmp.append(header)
+
         if self.existing_relations == []:
             # No results, everything is new
-            for k, h in enumerate(self.headers):
+            for k, h in enumerate(header_tmp):
                 headers_status.append('new')
 
             return headers_status, missing_headers
 
-
         for rel in self.existing_relations:
-            if rel not in self.headers:
-                self.log.warning('Expected relation "%s" but did not find corresponding source file: %s.', rel, repr(self.headers))
+            #print(rel)
+            if rel not in header_tmp:
+                self.log.warning('Expected relation "%s" but did not find corresponding source file: %s.', rel, repr(header_tmp))
                 missing_headers.append(rel)
 
         headers_status.append('present') # There are some existing relations, it means the entity is present
 
-        for header in self.headers[1:]:
+        for header in header_tmp[1:]:
             if header not in self.existing_relations:
                 self.log.debug('New class detected "%s".', header)
                 headers_status.append('new')
