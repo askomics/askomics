@@ -29,7 +29,7 @@ var AskomicsAttributesView = function () {
   AskomicsAttributesView.prototype.create = function (node) {
       // Add attributes of the selected node on the right side of AskOmics
     function makeRemoveIcon(field) {
-          var removeIcon = $('<span class="glyphicon glyphicon-remove display"></span>');
+          var removeIcon = $('<span class="glyphicon glyphicon-erase display"></span>');
           removeIcon.click(function() { field.val(null).trigger("change"); });
           return removeIcon;
     }
