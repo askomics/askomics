@@ -157,6 +157,9 @@ div.uploadedQuery {
 }
 
 .results-div {
-    display: block;
     overflow-x: auto;
+}
+
+.table-results {
+    margin-bottom: 0px;
 }
