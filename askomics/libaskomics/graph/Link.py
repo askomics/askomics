@@ -18,11 +18,9 @@ class Link(GraphElement):
     Some links can modify the WHERE clause with a spec_clause
     """
 
-    def __init__(self, source_uri, source_id, target_uri, target_id, relation_uri, relation_label, spec_uri="", spec_clause=""):
+    def __init__(self, source_uri, target_uri, relation_uri, relation_label, spec_uri="", spec_clause=""):
         self.source_uri = source_uri
-        self.source_id = source_id
         self.target_uri = target_uri
-        self.target_id = target_id
         self.relation_uri = relation_uri
         self.relation_label = relation_label
         self.spec_uri = spec_uri
@@ -33,14 +31,8 @@ class Link(GraphElement):
     def get_source_uri(self):
         return self.source_uri
 
-    def get_source_id(self):
-        return self.source_id
-
     def get_target_uri(self):
         return self.target_uri
-
-    def get_target_id(self):
-        return self.target_id
 
     def get_relation_uri(self):
         return self.relation_uri
@@ -59,13 +51,11 @@ class Link(GraphElement):
 
     def to_dict(self):
         return {"source_uri": self.source_uri,
-                "source_id": self.source_id,
                 "target_uri": self.target_uri,
-                "target_id": self.target_id,
                 "relation_uri": self.relation_uri,
                 "relation_label": self.relation_label,
                 "spec_uri": self.spec_uri,
                 "spec_clause": self.spec_clause}
 
     def __str__(self):
-        return "source_uri: {0}\tsource_id: {1}\ttarget_uri: {2}\ttarget_id: {3}\trelation_uri {4}".format(self.source_uri, self.source_id, self.target_uri, self.target_id, self.relation_uri)
+        return "source_uri: {0}\ttarget_uri: {1}\trelation_uri {2}".format(self.source_uri, self.target_uri, self.relation_uri)

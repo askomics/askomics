@@ -3,7 +3,6 @@
 import logging
 
 from askomics.libaskomics.ParamManager import ParamManager
-from askomics.libaskomics.CounterManager import CounterManager
 
 from askomics.libaskomics.graph.Node import Node
 from askomics.libaskomics.graph.Link import Link
@@ -13,7 +12,7 @@ from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
 from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
 
 
-class TripleStoreExplorer(ParamManager, CounterManager):
+class TripleStoreExplorer(ParamManager):
     """
     Use the different Sparql template queries in order to:
         - get special settings:
@@ -27,7 +26,6 @@ class TripleStoreExplorer(ParamManager, CounterManager):
 
     def __init__(self, settings, session, dico={}):
         ParamManager.__init__(self, settings, session)
-        CounterManager.__init__(self, dico)
 
         self.log = logging.getLogger(__name__)
 
@@ -91,9 +89,8 @@ class TripleStoreExplorer(ParamManager, CounterManager):
         for result in results:
             uri = result["nodeUri"]
             label = result["nodeLabel"]
-            node_id = label + str(self.get_new_id(label))
             shortcuts_list = self.has_setting(uri, 'shortcut')
-            nodes.append(Node(node_id, uri, label, shortcuts_list))
+            nodes.append(Node(uri, label, shortcuts_list))
 
         return nodes
 
@@ -105,24 +102,41 @@ class TripleStoreExplorer(ParamManager, CounterManager):
         :rtype:
         """
         data = {}
+        listEntities = {}
 
         self.log.debug(" =========== TripleStoreExplorer:getUserAbstraction ===========")
+
+        nodes_startpoint = self.get_start_points()
+        # add start node at first
+        for node in nodes_startpoint:
+            listEntities[node.get_uri()]=0
+
         sqb = SparqlQueryBuilder(self.settings, self.session)
         ql = QueryLauncher(self.settings, self.session)
 
         sparql_template = self.get_template_sparql(self.ASKOMICS_abstractionRelationUser)
-        query = sqb.load_from_file(sparql_template, {}).query
+        query = sqb.load_from_file(sparql_template, { 'OwlProperty' : 'owl:ObjectProperty'}).query
         results = ql.process_query(query)
 
         data['relations'] = results
-
-        listEntities = {}
 
         for elt in results:
             if not elt['object'] in listEntities:
                 listEntities[elt['object']]=0
             if not elt['subject'] in listEntities:
                 listEntities[elt['subject']]=0
+
+        #sparql_template = self.get_template_sparql(self.ASKOMICS_abstractionRelationUser)
+        #query = sqb.load_from_file(sparql_template, { 'OwlProperty' : 'owl:SymmetricProperty'}).query
+        #results = ql.process_query(query)
+
+        #data['relationsSym'] = results
+
+        #for elt in results:
+        #    if not elt['object'] in listEntities:
+        #        listEntities[elt['object']]=0
+        #    if not elt['subject'] in listEntities:
+        #        listEntities[elt['subject']]=0
 
         filterEntities = ' '.join(["<"+s+">" for s in listEntities.keys()])
         sparql_template = self.get_template_sparql(self.ASKOMICS_abstractionEntityUser)
@@ -295,8 +309,6 @@ class TripleStoreExplorer(ParamManager, CounterManager):
                 if r1['nodeUri'] == r2['nodeUri'] and r1['relationUri'] == r2['relationUri']:
                     results["reverse"].remove(r2)
 
-        self.print_stat()
-
         go_out_loop = False
         # Sort the results between attributes, nodes and links
         for direction in results:
@@ -329,22 +341,18 @@ class TripleStoreExplorer(ParamManager, CounterManager):
                 rel_h = self.has_setting(result["relationUri"], 'attribute')
 
                 if att_h or rel_h or (result["propertyType"] == self.ASKOMICS_prefix["owl"] + "DatatypeProperty"): # FIXME doesn't detect categories
-                    attribute_id = node.get_id() + '_' + neighbor_label + str(self.get_new_id(node.get_id() + '_' + neighbor_label))
                     attributes.append(
-                        Attribute(attribute_id,
+                        Attribute(
                             result["relationUri"],
                             result["nodeUri"],
-                            neighbor_label,
-                            node.get_id()
+                            neighbor_label
                             )
                         )
                 else:
                     self.log.debug(neighbor_label)
-                    neighbor_id = neighbor_label + str(self.get_new_id(neighbor_label))
-
                     # Add nodes and their links to node
                     nodes.append(
-                        Node(neighbor_id,
+                        Node(
                             neighbor_uri,
                             neighbor_label,
                             shortcuts_list))
@@ -352,9 +360,7 @@ class TripleStoreExplorer(ParamManager, CounterManager):
                     if direction == "direct":
                         links.append(
                             Link(node.get_uri(),
-                                node.get_id(),
                                 neighbor_uri,
-                                neighbor_id,
                                 result["relationUri"],
                                 result["relationLabel"],
                                 specified_by,
@@ -362,9 +368,7 @@ class TripleStoreExplorer(ParamManager, CounterManager):
                     else:
                         links.append(
                             Link(neighbor_uri,
-                                neighbor_id,
                                 node.get_uri(),
-                                node.get_id(),
                                 result["relationUri"],
                                 result["relationLabel"],
                                 specified_by,

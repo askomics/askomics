@@ -12,17 +12,12 @@ class Attribute(GraphElement):
     side of the AskOmics interrogation interface.
     """
 
-    def __init__(self, attr_id, uri, type_uri, label, parent):
-        self.attr_id = attr_id
+    def __init__(self, uri, type_uri, label):
         self.uri = uri
         self.type = type_uri
         self.label = label
-        self.parent = parent
 
         self.log = logging.getLogger(__name__)
-
-    def get_id(self):
-        return self.attr_id
 
     def get_uri(self):
         return self.uri
@@ -33,22 +28,17 @@ class Attribute(GraphElement):
     def get_label(self):
         return self.label
 
-    def get_parent(self):
-        return self.parent
-
     def to_dict(self):
-        return {'id': self.attr_id,
+        return {
                 'uri': self.uri,
                 'type_uri': self.type,
                 'label': self.label,
-                'parent': self.parent}
+        }
 
     def print_attr(self):
-        self.log.debug("id =" + self.attr_id)
         self.log.debug("uri =" + self.uri)
         self.log.debug("type_uri =" + str(self.type))
         self.log.debug("label =" + self.label)
-        self.log.debug("parent =" + str(self.parent))
 
     def __str__(self):
-        return "id: {0}\turi: {1}\type_uri: {2}\tlabel: {3}\tparent {4}".format(self.attr_id, self.uri, self.type, self.label, self.parent)
+        return "\turi: {0}\type_uri: {1}\tlabel: {2}\t".format(self.uri, self.type, self.label)

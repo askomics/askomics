@@ -52,9 +52,10 @@ function loadStartPoints() {
 }
 
 function loadStatistics(modal) {
+
   if (modal) {
     displayModal('Please Wait', 'Close');
-  };
+  }
 
   var service = new RestServiceJs("statistics");
   service.getAll(function(stats) {
@@ -120,7 +121,8 @@ function loadStatistics(modal) {
 
     if (modal) {
         hideModal();
-    };
+    }
+
     $('#content_statistics').append(table);
 
   });
@@ -139,7 +141,7 @@ function emptyDatabase(value) {
     if (value == 'no') {
         $("#deleteButtons").empty();
         $("#deleteButtons").append("<p><button id='btn-empty' onclick='emptyDatabase(\"confirm\")' class='btn btn-danger'>Clear database</button></p>");
-        return
+        return;
     }
 
     if (value == 'yes') {
@@ -152,14 +154,20 @@ function emptyDatabase(value) {
     }
 }
 
+var modalCount = 0;
+
 function displayModal(message, button) {
     $('#modalMessage').text(message);
     $('#modalButton').text(button);
     $('#modal').modal('show');
+    modalCount++;
 }
 
 function hideModal(){
-    $('#modal').modal('hide');
+    modalCount--;
+    if (modalCount<=0) {
+     $('#modal').modal('hide');
+    }
 }
 
 

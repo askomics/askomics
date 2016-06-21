@@ -77,8 +77,7 @@
                     </div>
                     <div id="svgdiv"></div>
                     <div id="uploadedQuery" class="uploadedQuery" hidden contenteditable></div>
-
-                        <div class="btn-group">
+			<div class="btn-group">
                             <button id="btn-down" type="submit" class="btn btn-default" onclick="downloadResultsFile(10000)">
                                 <span class="glyphicon glyphicon-save"></span> Download results
                             </button>
@@ -163,6 +162,22 @@
           </div><!-- /.modal-dialog -->
         </div><!-- /.modal -->
 
+        <!-- Modal  -->
+        <div class="modal fade" id="modalSuggestionLink"  role="dialog" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true" >
+          <div class="modal-dialog modal-md">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title" id="modalMessageSuggestionLink"></h4>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal" id="modalButtonSuggestionLink"></button>
+              </div>
+            </div><!-- /.modal-content -->
+          </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
+
+
         <!-- The template to display preview of source files -->
         <script id="template-source_file-preview" type="text/x-handlebars-template">
             {{#each files}}
@@ -203,7 +218,8 @@
                                                     <option value='category'>Category</option>
                                                 </optgroup>
                                                 <optgroup label='Relationship'>
-                                                    <option value='entity'>Entity</option>
+                                                    <option value='entity'>Relation</option>
+                                                    <option value='entitySym'>Symmetric Relation</option>
                                                 </optgroup>
                                             {{/if}}
                                         </select>

@@ -17,7 +17,6 @@ class FileUpload(object):
             request.session['upload_directory'] = tempfile.mkdtemp(suffix='_tmp', prefix='askomics')
 
         self.upload_dir = request.session['upload_directory']
-
         self.log = logging.getLogger(__name__)
 
         self.log.debug("upload_directory => "+self.upload_dir)

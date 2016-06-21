@@ -3,7 +3,7 @@ FROM  $graph
 WHERE {
   ?subject rdf:type owl:Class .
   ?object rdf:type owl:Class .
-  ?relation rdf:type owl:ObjectProperty;
+  ?relation rdf:type $OwlProperty;
             rdfs:domain ?subject;
             rdfs:range ?object.
 }

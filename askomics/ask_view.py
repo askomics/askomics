@@ -45,9 +45,7 @@ class AskView(object):
 
         nodes = tse.get_start_points()
 
-        #data["nodes"] = {n.get_id(): n.to_dict() for n in nodes}
         data["nodes"] = {n.get_uri(): n.to_dict() for n in nodes}
-        data["last_new_counter"] = tse.get_counter()
 
         return data
 
@@ -95,7 +93,7 @@ class AskView(object):
 
                 shortcuts_list = tse.has_setting(uri, 'shortcut')
 
-                src = Node(class_name, # We don't care about counter in stats
+                src = Node(
                     uri,
                     class_name,
                     shortcuts_list)
@@ -136,12 +134,20 @@ class AskView(object):
         data['files'] = []
 
         for src_file in source_files:
+
             infos = {}
             infos['name'] = src_file.name
             try:
                 infos['headers'] = src_file.headers
                 infos['preview_data'] = src_file.get_preview_data()
-                infos['column_types'] = src_file.guess_column_types(infos['preview_data'])
+                infos['column_types'] = [];
+
+                for ih in range(0,len(infos['headers'])):
+                    if infos['headers'][ih].find("@")>0:
+                        infos['column_types'].append("entity")
+                    else:
+                        infos['column_types'].append(src_file.guess_values_type(infos['preview_data'][ih]))
+
             except Exception as e:
                 infos['error'] = 'Could not read input file, are you sure it is a valid tabular file?'
 
@@ -255,16 +261,11 @@ class AskView(object):
 
         #data = {}
         tse = TripleStoreExplorer(self.settings, self.request.session)
-
         body = self.request.json_body
-
         data = tse.getUserAbstraction()
 
-        #data["nodes"] = [n.to_dict() for n in nodes]
-        #data["links"] = [l.to_dict() for l in links]
-        #data["attributes"] = [a.to_dict() for a in attributes]
-
         return data
+
 
     @view_config(route_name='sparqlquery', request_method='POST')
     def get_value(self):
