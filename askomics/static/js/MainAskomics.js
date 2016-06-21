@@ -52,9 +52,10 @@ function loadStartPoints() {
 }
 
 function loadStatistics(modal) {
+
   if (modal) {
     displayModal('Please Wait', 'Close');
-  };
+  }
 
   var service = new RestServiceJs("statistics");
   service.getAll(function(stats) {
@@ -120,7 +121,8 @@ function loadStatistics(modal) {
 
     if (modal) {
         hideModal();
-    };
+    }
+
     $('#content_statistics').append(table);
 
   });

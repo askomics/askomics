@@ -276,7 +276,24 @@ class AskView(object):
         tse = TripleStoreExplorer(self.settings, self.request.session)
 
         body = self.request.json_body
-        data["values"] = tse.build_sparql_query_from_json(body["variates"],body["constraintesRelations"],body["constraintesFilters"],body["limit"])
+        results = tse.build_sparql_query_from_json(body["variates"],body["constraintesRelations"],body["constraintesFilters"],body["limit"])
+
+        # Remove prefixes in the results table
+        data['values'] = [
+                {
+                    k: res[k].replace(self.settings["askomics.prefix"], '')
+                    for k in res.keys()
+                }
+                for res in results
+            ]
+        if not body['export']:
+            return data
+
+        # Provide results file
+        ql = QueryLauncher(self.settings, self.request.session)
+        rb = ResultsBuilder(self.settings, self.request.session)
+        data['file'] = ql.format_results_csv(rb.build_csv_table(results))
+
         return data
 
     @view_config(route_name='query', request_method='POST')
