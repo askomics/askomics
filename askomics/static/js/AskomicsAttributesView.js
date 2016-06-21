@@ -24,6 +24,8 @@ var AskomicsAttributesView = function () {
     $("div[id*='"+ prefix +"']" ).hide();
   };
 
+
+
   AskomicsAttributesView.prototype.create = function (node) {
       // Add attributes of the selected node on the right side of AskOmics
     function makeRemoveIcon(field) {
@@ -82,7 +84,8 @@ var AskomicsAttributesView = function () {
                 'variates': [ "?"+labelSparqlVarId ],
                 'constraintesRelations': tab[1],
                 'constraintesFilters': [],
-                'limit':100
+                'limit':100,
+                'export':false,
               };
 
             //  console.log(attribute.uri);
@@ -224,7 +227,6 @@ var AskomicsAttributesView = function () {
 
           //$('#waitModal').modal('hide');
       });
-
       $("#viewDetails").append(details);
   };
 };

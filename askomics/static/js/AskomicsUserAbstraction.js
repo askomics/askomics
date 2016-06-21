@@ -51,8 +51,8 @@ var AskomicsUserAbstraction = function () {
           entityInformationList[uri][rel] = val;
         }
         var attribute = {};
-
-        for (var entry2 in resultListTripletSubjectRelationObject.attributes){
+        
+	for (var entry2 in resultListTripletSubjectRelationObject.attributes){
           console.log("ATTRIBUTE:"+JSON.stringify(resultListTripletSubjectRelationObject.attributes[entry2]));
           var uri2 = resultListTripletSubjectRelationObject.attributes[entry2].entity;
           attribute = {};

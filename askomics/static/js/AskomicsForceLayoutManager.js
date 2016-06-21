@@ -19,20 +19,6 @@ var AskomicsForceLayoutManager = function () {
               .attr("pointer-events", "all")
               .attr("viewBox", "0 0 " + w + " " + h)
               .attr("perserveAspectRatio", "xMinYMid")
-              .on('click', function(d) {
-
-                var container = $('#modalMessageSuggestionLink');
-
-                $('#modalMessageSuggestionLink').text("hello");
-                $('#modalButtonSuggestionLink').text("ok");
-                $('#modalSuggestionLink').modal('show');
-
-                var id = 1;
-                var name = "hello";
-                $('<input />', { type: 'checkbox', id: 'cb'+id, value: name }).appendTo(container);
-                $('<label />', { 'for': 'cb'+id, text: name }).appendTo(container);
-
-              })
               .append('svg:g');
 /*
               .on("mouseover", function() { focus.style("display", null); })
@@ -432,7 +418,7 @@ var AskomicsForceLayoutManager = function () {
           .style("stroke-width", "2")
           .on("mouseover", function(d) { this.style[2]="4";})//style("stroke", "#2A2A2A"); })
           .on('click', function(d) { // Mouse down on a link
-              /* user want a new relation contraint between two nodes*/
+              /* user want a new relation contraint betwwenn two node*/
               if ( d.suggested ) {
                 ll = [d];
                 graphBuilder.instanciateLink(ll);

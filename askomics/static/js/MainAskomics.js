@@ -164,7 +164,7 @@ function displayModal(message, button) {
 function hideModal(){
     modalCount--;
     if (modalCount<=0) {
-      $('#modal').modal('hide');
+     $('#modal').modal('hide');
     }
 }
 
