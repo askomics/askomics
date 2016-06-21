@@ -36,7 +36,6 @@ var AskomicsAttributesView = function () {
           elemId  = node.SPARQLid,
           nameDiv = prefix+node.SPARQLid ;
 
-      displayModal('Please wait', 'Close');
       var details = $("<div></div>").attr("id",nameDiv).attr("nodeid", node.id).attr("sparqlid", node.SPARQLid).addClass('div-details');
 
       var nameLab = $("<label></label>").attr("for",elemId).text("ID");
@@ -72,6 +71,7 @@ var AskomicsAttributesView = function () {
           var labelSparqlVarId = attribute.SPARQLid;
 
           if (attribute.type.indexOf("http://www.w3.org/2001/XMLSchema#") < 0) {
+              displayModal('Please wait', 'Close');
               var tab = graphBuilder.buildConstraintsGraphForCategory(node,attribute.id);
 
               inp.attr("list", "opt_" + labelSparqlVarId)
@@ -111,6 +111,7 @@ var AskomicsAttributesView = function () {
                   } else if (d.values.length == 1) {
                     inp.append($("<option></option>").attr("value", d.values[0][labelSparqlVarId]).append(d.values[0][labelSparqlVarId]));
                   }
+                  hideModal();
               });
 
               inp.change(function(d) {
@@ -223,7 +224,7 @@ var AskomicsAttributesView = function () {
 
           //$('#waitModal').modal('hide');
       });
-      hideModal();
+
       $("#viewDetails").append(details);
   };
 };
