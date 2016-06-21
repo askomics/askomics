@@ -83,7 +83,7 @@ pre {
     margin-top: 40px;
 }
 
-preview_table {
+.preview_table {
     width: auto;
     display: inline-block;
     white-space: nowrap;
