@@ -46,7 +46,7 @@ function displayResults(data) {
     if (data.values.length > 0) {
        {
        /* new presentation by entity */
-       var table = $('<table></table>').addClass('table').addClass('table-bordered');
+       var table = $('<table></table>').addClass('table').addClass('table-bordered').addClass('table-results');
        var head = $('<thead></thead>');
        var body = $('<tbody></tbody');
 

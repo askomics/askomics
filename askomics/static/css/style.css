@@ -83,7 +83,7 @@ pre {
     margin-top: 40px;
 }
 
-preview_table {
+.preview_table {
     width: auto;
     display: inline-block;
     white-space: nowrap;
@@ -154,4 +154,12 @@ div.uploadedQuery {
 
 .template-source_file {
     margin-bottom: 4em;
+}
+
+.results-div {
+    overflow-x: auto;
+}
+
+.table-results {
+    margin-bottom: 0px;
 }
