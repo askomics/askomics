@@ -83,6 +83,12 @@ function displayTable(data) {
                 var selectbox = $('div#content_integration form.template-source_file:eq(' + i + ') select.column_type:eq(' + j + ')');
                 var values = selectbox.find("option").map(function() { return $(this).val(); });
 
+                if ($.inArray(cols[j], ['start', 'end', 'numeric']) == -1) {
+                    $.each(['start', 'end', 'numeric'], function( index, value ) {
+                        selectbox.find("option[value="+value+"]").hide();
+                    });
+                };
+
                 if ($.inArray( cols[j], values) >= 0) {
                     selectbox.val(cols[j]);
                 }
@@ -130,6 +136,28 @@ function hidePreview(file_elem) {
     file_elem.find(".preview_field").hide();
 }
 
+// Prototype to find if array contain all values of a list
+
+function containAll(Array1,Array2){
+    for(var i = 0 , len = Array2.length; i < len; i++){
+        if($.inArray(Array2[i], Array1) == -1) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// Prototype to find if array contain any values of a list
+
+ function containAny(Array1,Array2){
+    for(var i = 0 , len = Array2.length; i < len; i++){
+        if($.inArray(Array2[i], Array1) != -1) {
+            return true;
+        }
+    }
+    return false;
+}
+
 /**
  * Compare the user data and what is already in the triple store
  */
@@ -141,6 +169,21 @@ function checkExistingData(file_elem) {
     var col_types = file_elem.find('.column_type').map(function() {
         return $(this).val();
     }).get();
+
+    // check if all positionable attributes are set
+    var warning_elem = file_elem.find(".warning-message").first();
+
+    if (containAll(col_types,['start', 'end', 'ref', 'taxon'])) {//positionable entity with all attributes
+        warning_elem.html("").removeClass("show").addClass("hidden");
+    }else{
+        if (containAny(col_types,['start', 'end', 'ref', 'taxon'])) { //positionable entity with missing attributes
+            warning_elem.html('<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> Missing positionable attributes for '+file_name)
+                                .removeClass('hidden')
+                              .addClass("show alert alert-danger");
+        }else{ //not a positionable entity
+            warning_elem.html("").removeClass("show").addClass("hidden");
+        }
+    }
 
     // Find which column is disabled
     var disabled_columns = [];

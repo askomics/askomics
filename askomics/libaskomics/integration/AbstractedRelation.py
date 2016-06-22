@@ -49,7 +49,7 @@ class AbstractedRelation(object):
             #self.relation_type = "owl:SymmetricProperty"
             self.relation_type = "owl:ObjectProperty"
             self.rdfs_range = ":" + type_range
-        elif relation_type.lower() == "category":
+        elif relation_type.lower() in ('category', 'taxon', 'ref'):
             self.relation_type = "owl:ObjectProperty"
             self.rdfs_range = ":" + type_range+"Category"
         else:

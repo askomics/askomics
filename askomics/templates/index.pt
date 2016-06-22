@@ -136,14 +136,16 @@
           <hr/>
           <h3 class="header-div">Contributors</h3>
            <ul>
-            <li>Olivier Dameron</li>
+            <li>Arnaud Belcour</li>
             <li>Charles Bettembourg</li>
             <li>Anthony Bretaudeau</li>
             <li>Yvanne Chaussin</li>
+			<li>Olivier Dameron</li>
             <li>Aurélie Evrard</li>
             <li>Olivier Filangi</li>
-            <li>Fabrice Legeai</li>
+            <li>Xavier Garnier</li>
             <li>Maël Kerbiriou</li>
+			<li>Fabrice Legeai</li>
           </ul>
         </div>
 
@@ -217,6 +219,12 @@
                                                     <option value='text'>Text</option>
                                                     <option value='category'>Category</option>
                                                 </optgroup>
+                                                <optgroup label='Position attributes'>
+                                                    <option value='taxon'>Taxon</option>
+                                                    <option value='ref'>Reference</option>
+                                                    <option value='start'>Start</option>
+                                                    <option value='end'>End</option>
+                                                </optgroup>
                                                 <optgroup label='Relationship'>
                                                     <option value='entity'>Relation</option>
                                                     <option value='entitySym'>Symmetric Relation</option>
@@ -242,6 +250,7 @@
                         </table>
                         <pre class='preview_field'></pre>
                         <p class="insert_status text-left alert hidden"></p>
+                        <div class="warning-message hidden"></div>
                         <div class="form-group form-inline">
                             <div class="btn-group" role="group" aria-label="metadata">
                                 <input type="button" class="btn btn-success preview_button" value="Preview RDF" />

@@ -38,8 +38,8 @@ class QueryLauncher(ParamManager):
         """
         if self.log.isEnabledFor(logging.DEBUG):
             # Prefixes should always be the same, so drop them for logging
-            query_log = '\n'.join(line for line in query.split('\n')
-                                  if not line.startswith('PREFIX '))
+            query_log = query #'\n'.join(line for line in query.split('\n')
+            #                      if not line.startswith('PREFIX '))
             self.log.debug("----------- QUERY --------------\n%s", query_log)
 
         urlupdate = None

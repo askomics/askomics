@@ -157,6 +157,13 @@ class TripleStoreExplorer(ParamManager):
 
         data['categories'] = results
 
+        sparql_template = self.get_template_sparql(self.ASKOMICS_abstractionPositionableEntityUser)
+        query = sqb.load_from_file(sparql_template, {}).query
+        results = ql.process_query(query)
+
+        data['positionable'] = results
+
+
         return data
 
 

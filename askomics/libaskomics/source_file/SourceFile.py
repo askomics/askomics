@@ -42,6 +42,10 @@ class SourceFile(ParamManager, HaveCachedProperties):
             'numeric' : 'xsd:decimal',
             'text'    : 'xsd:string',
             'category': ':',
+            'taxon': ':',
+            'ref': ':',
+            'start': 'xsd:decimal',
+            'end': 'xsd:decimal',
             'entity'  : ':',
             'entitySym'  : ':',
             'entity_start'  : ':'}
@@ -50,6 +54,10 @@ class SourceFile(ParamManager, HaveCachedProperties):
             'numeric' : ('', ''),
             'text'    : ('"', '"'),
             'category': (':', ''),
+            'taxon': (':', ''),
+            'ref': (':', ''),
+            'start' : ('', ''),
+            'end' : ('', ''),
             'entity'  : (':', ''),
             'entitySym'  : (':', ''),
             'entity_start'  : (':', '')}
@@ -132,17 +140,44 @@ class SourceFile(ParamManager, HaveCachedProperties):
         :return: List of guessed column types
         """
 
-        return [self.guess_values_type(col) for col in columns]
+        data=[]
+        count=0
+        for col in columns:
+            print(str(col)+":"+str(count))
+            data.append(self.guess_values_type(col,count))
+            count+=1
+        return data
+        #return [self.guess_values_type(col) for col in columns]
 
-    def guess_values_type(self, values):
+    def guess_values_type(self, values, num):
         """
         From a list of values, guess the data type
 
         :param values: a List of values to evaluate
-        :return: the guessed type ('numeric', 'text' or 'category'
+        :param num: index of the header
+        :return: the guessed type ('taxon','ref', 'start', 'end', 'numeric', 'text' or 'category')
         """
-        print(values)
-        # First check if category
+
+        types = {'ref':('chrom', 'ref'), 'taxon':('taxon', 'species'), 'start':('start', 'begin'), 'end':('end', 'stop')}
+
+        # First check if it is specific type
+        self.log.debug('header: '+self.headers[num])
+        for typ, expressions in types.items():
+            for expression in expressions:
+                regexp = '.*' + expression + '.*'
+                if re.match(regexp, self.headers[num], re.IGNORECASE) is not None:
+                    # Test if start and end values are numerics
+                    if typ in ('start', 'end') and not all(self.is_decimal(val) for val in values):
+                        self.log.debug('ERROR! '+typ+' is not decimal!')
+                        break
+                    # test if taxon and ref are category
+                    # FIXME: taxon and ref may not be a category ?
+                    if typ in ('ref', 'taxon') and not len(set(values)) < len(values) / 2:
+                        self.log.debug('ERROR! '+typ+' is not category!')
+                        break
+                    return typ
+
+        # Then, check if category
         if len(set(values)) < len(values) / 2:
             return 'category'
         elif all(self.is_decimal(val) for val in values): # Then numeric
@@ -223,6 +258,21 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         ttl = ''
 
+        if all(types in self.forced_column_types for types in ('start', 'end', 'ref', 'taxon')):
+            ttl += ":" + self.headers[0] + ' displaySetting:is_positionable "true"^^xsd:boolean .\n'
+            ttl += ":is_positionable rdfs:label 'is_positionable' .\n"
+            ttl += ":is_positionable rdf:type owl:ObjectProperty .\n"
+            # Store the position attributes
+            for key, key_type in enumerate(self.forced_column_types):
+                if key > 0 and key_type == 'taxon':
+                    ttl += ":" + self.headers[0] + " displaySetting:position_taxon :" + self.headers[key] + " .\n"
+                if key > 0 and key_type == 'ref':
+                    ttl += ":" + self.headers[0] + " displaySetting:position_reference :" + self.headers[key] + " .\n"
+                if key > 0 and key_type == 'start':
+                    ttl += ":" + self.headers[0] + " displaySetting:position_start :" + self.headers[key] + " .\n"
+                if key > 0 and key_type == 'end':
+                    ttl += ":" + self.headers[0] + " displaySetting:position_end :" + self.headers[key] + " .\n"
+
         for header, categories in self.category_values.items():
             indent = len(header) * " " + len("displaySetting:category") * " " + 3 * " "
             ttl += ":" + header+"Category" + " displaySetting:category :"
@@ -261,7 +311,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
                     raise e #FIXME: Do we want to read the file anyway ?
 
                 for i, (header, current_type) in enumerate(zip(self.headers, self.forced_column_types)):
-                    if current_type == 'category':
+                    if current_type in ('category', 'taxon', 'ref'):
                         # This is a category, keep track of allowed values for this column
                         self.category_values.setdefault(header, set()).add(row[i])
 
@@ -319,7 +369,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
                             if ( idx > 0 ):
                                 relationName = ":"+header[0:idx]
 
-                        if current_type == 'category':
+                        if current_type in ('category', 'taxon', 'ref'):
                             # This is a category, keep track of allowed values for this column
                             self.category_values[header].add(row[i])
 
@@ -350,7 +400,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
         :return: a List of relation names
         :rtype: List
         """
-
+        self.log.debug("existing_relations")
         existing_relations = []
 
         sqb = SparqlQueryBuilder(self.settings, self.session)
@@ -360,6 +410,9 @@ class SourceFile(ParamManager, HaveCachedProperties):
         query = sqb.load_from_file(sparql_template, {"nodeClass": self.headers[0]}).query
 
         results = ql.process_query(query)
+
+        self.log.debug(results)
+        self.log.debug("==================")
 
         for rel in results:
             existing_relations.append(rel["relation"].replace(self.get_param("askomics.prefix"), "").replace("has_", ""))
@@ -376,22 +429,30 @@ class SourceFile(ParamManager, HaveCachedProperties):
         headers_status = []
         missing_headers = []
 
+        header_tmp = []
+        # change header to avoid @ character
+        for header in self.headers[1:]:
+            idx = header.find("@")
+            if idx  != -1:
+                header = header[0:idx]
+            header_tmp.append(header)
+
         if self.existing_relations == []:
             # No results, everything is new
-            for k, h in enumerate(self.headers):
+            for k, h in enumerate(header_tmp):
                 headers_status.append('new')
 
             return headers_status, missing_headers
 
-
         for rel in self.existing_relations:
-            if rel not in self.headers:
-                self.log.warning('Expected relation "%s" but did not find corresponding source file: %s.', rel, repr(self.headers))
+            #print(rel)
+            if rel not in header_tmp:
+                self.log.warning('Expected relation "%s" but did not find corresponding source file: %s.', rel, repr(header_tmp))
                 missing_headers.append(rel)
 
         headers_status.append('present') # There are some existing relations, it means the entity is present
 
-        for header in self.headers[1:]:
+        for header in header_tmp[1:]:
             if header not in self.existing_relations:
                 self.log.debug('New class detected "%s".', header)
                 headers_status.append('new')

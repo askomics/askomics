@@ -18,6 +18,8 @@ var AskomicsUserAbstraction = function () {
     var entityInformationList = {};
     var attributesEntityList = {};
     var categoriesEntityList = {};
+    /* uri ->W get information about ref, taxon, start, end */
+    var entityPositionableInformationList = {};
     /*
     load ontology
     see template SPARQL to know sparql variable
@@ -51,7 +53,7 @@ var AskomicsUserAbstraction = function () {
           entityInformationList[uri][rel] = val;
         }
         var attribute = {};
-        
+
 	for (var entry2 in resultListTripletSubjectRelationObject.attributes){
           console.log("ATTRIBUTE:"+JSON.stringify(resultListTripletSubjectRelationObject.attributes[entry2]));
           var uri2 = resultListTripletSubjectRelationObject.attributes[entry2].entity;
@@ -84,15 +86,32 @@ var AskomicsUserAbstraction = function () {
           //TODO Force label in the first position to print the label at the first position
         }
 
+        for (var entry4 in resultListTripletSubjectRelationObject.positionable){
+          var uri4 = resultListTripletSubjectRelationObject.positionable[entry4].entity;
+          if ( ! (uri4 in entityPositionableInformationList) ) {
+              console.log("=============>"+resultListTripletSubjectRelationObject.positionable[entry4].taxon);
+              entityPositionableInformationList[uri4] = {};
+              entityPositionableInformationList[uri4].taxon = resultListTripletSubjectRelationObject.positionable[entry4].taxon;
+              entityPositionableInformationList[uri4].ref = resultListTripletSubjectRelationObject.positionable[entry4].ref;
+              entityPositionableInformationList[uri4].start = resultListTripletSubjectRelationObject.positionable[entry4].start;
+              entityPositionableInformationList[uri4].end = resultListTripletSubjectRelationObject.positionable[entry4].end;
+          } else {
+            throw Exception("URI:"+uri4+" have several taxon,ref, start, end labels... "+JSON.stringify(entityPositionableInformationList[uri4]));
+          }
+        }
+
         console.log("==============================================================================================");
         console.log("<=== entityInformationList ===> ");
         console.log(JSON.stringify(entityInformationList));
+        console.log("<=== entityPositionableInformationList ===> ");
+        console.log(JSON.stringify(entityPositionableInformationList));
         //$('#waitModal').modal('hide');
       });
     };
 
     /* Get value of an attribut with RDF format like rdfs:label */
     AskomicsUserAbstraction.prototype.removePrefix = function(uriEntity) {
+
       var idx =  uriEntity.indexOf("#");
       if ( idx == -1 ) {
         idx =  uriEntity.indexOf(":");
@@ -179,5 +198,12 @@ var AskomicsUserAbstraction = function () {
       return attributesEntityList[UriSelectedNode];
     };
 
+    AskomicsUserAbstraction.prototype.isPositionable  = function(Uri) {
+      return (Uri in entityPositionableInformationList);
+    };
+
+    AskomicsUserAbstraction.prototype.getPositionableEntities = function() {
+      return JSON.parse(JSON.stringify(entityPositionableInformationList)) ;
+    };
 
   };
