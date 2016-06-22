@@ -148,6 +148,19 @@ var AskomicsForceLayoutManager = function () {
       return colorUriList[node.uri];
     };
 
+    AskomicsForceLayoutManager.prototype.getStrokeColorInstanciatedNode = function(node) {
+      if ( ! node  ) {
+        throw new Error("AskomicsForceLayoutManager.prototype.getStrokeColorInstanciatedNode node is not defined!");
+      }
+
+      if (node.positionable) {
+        return 'darkgreen';
+      } else {
+        return 'dimgrey';
+      }
+    };
+
+
     /* Update the label of cercle when a node is instanciated */
     AskomicsForceLayoutManager.prototype.updateInstanciatedNode = function(node) {
 
@@ -170,6 +183,7 @@ var AskomicsForceLayoutManager = function () {
           n.uri = $(this).attr('uri') ;
           $(this).css("fill",forceLayoutManager.getColorInstanciatedNode(n));
         });
+
         /* if several node were selected or a diffente node were selected so select only the current node */
         if ( selectNodes.length > 1 || (selectNodes.length===0) || (selectNodes[0].id != node.id) ) {
           selectNodes = [] ;
@@ -179,6 +193,7 @@ var AskomicsForceLayoutManager = function () {
           selectNodes = [] ;
           $("#node_"+node.id).css("fill", forceLayoutManager.getColorInstanciatedNode(node));
         }
+
       } else {
         // deselection case
         for ( var n in selectNodes ){
@@ -245,12 +260,14 @@ var AskomicsForceLayoutManager = function () {
           suggestedList[uri].nlink[slt_node.id] = 0;
 
           for (var rel in objectsTarget[uri]) {
+
             /* increment the number of link between the two nodes */
             slt_node.nlink[suggestedList[uri].id]++;
             suggestedList[uri].nlink[slt_node.id]++;
 
             link = {
               suggested : true,
+              positionable : false,
               uri   : objectsTarget[uri][rel],
               source: slt_node,
               target: suggestedList[uri],
@@ -280,6 +297,7 @@ var AskomicsForceLayoutManager = function () {
 
             link = {
               suggested : true,
+              positionable : false,
               uri   : subjectsTarget[uri][rel2],
               source: suggestedList[uri],
               target: slt_node,
@@ -292,6 +310,44 @@ var AskomicsForceLayoutManager = function () {
           }
         }
         // add neighbours of a node to the graph as propositions.
+
+        // Manage positionnable entities
+        positionableEntities = userAbstraction.getPositionableEntities();
+
+        for ( uri in positionableEntities ) {
+          if ( uri == slt_node.uri ) continue ;
+          console.log("add positionable suggestion:"+uri);
+          console.log(JSON.stringify(positionableEntities[uri]));
+          if ( ! (uri in suggestedList) ) {
+            /* creatin node */
+            suggestedNode = userAbstraction.buildBaseNode(uri);
+            /* specific attribute for suggested node */
+            graphBuilder.setSuggestedNode(suggestedNode,slt_node.x,slt_node.y);
+            /* adding in the node list to create D3.js graph */
+            nodes.push(suggestedNode);
+            suggestedList[uri] = suggestedNode ;
+
+            slt_node.nlink[suggestedList[uri].id]=0;
+            suggestedList[uri].nlink[slt_node.id]=0;
+          }
+
+          slt_node.nlink[suggestedList[uri].id]++;
+          suggestedList[uri].nlink[slt_node.id]++;
+
+          link = {
+            suggested : true,
+            positionable : true,
+            uri   : 'positionable:include',
+            source: slt_node,
+            target: suggestedList[uri],
+            label: '<include>',
+            linkindex: slt_node.nlink[suggestedList[uri].id],
+          };
+          graphBuilder.setId(link);
+          link.source.weight++;
+          links.push(link);
+        }
+
     } ;
 
     AskomicsForceLayoutManager.prototype.relationInstancied = function (subj, obj,relation,links) {
@@ -319,12 +375,14 @@ var AskomicsForceLayoutManager = function () {
 
         link = {
           suggested : true,
+          positionable : false,
           uri   : objectsTarget[node2.uri][rel],
           source: node1,
           target: node2,
           label: userAbstraction.removePrefix(objectsTarget[node2.uri][rel]),
           linkindex: node1.nlink[node2.id],
         };
+        graphBuilder.setId(link);
         link.source.weight++;
         links.push(link);
       }
@@ -342,12 +400,38 @@ var AskomicsForceLayoutManager = function () {
 
         link = {
           suggested : true,
+          positionable : false,
           uri   : subjectsTarget[node2.uri][rel2],
           source: node2,
           target: node1,
           label: userAbstraction.removePrefix(subjectsTarget[node2.uri][rel2]),
           linkindex: node1.nlink[node2.id],
         };
+        graphBuilder.setId(link);
+        link.source.weight++;
+        links.push(link);
+      }
+      // Manage positionnable entities
+      positionableEntities = userAbstraction.getPositionableEntities();
+
+      if ( (node1.uri in positionableEntities) && (node2.uri in positionableEntities)) {
+        console.log("add positionable suggestion between:"+node1.uri+" and "+node2.uri);
+        console.log(JSON.stringify(positionableEntities[node1.uri]));
+        console.log(JSON.stringify(positionableEntities[node2.uri]));
+
+        node1.nlink[node2.id]++;
+        node2.nlink[node1.id]++;
+
+        link = {
+          suggested : true,
+          positionable : true,
+          uri   : ':positionable:include',
+          source: node1,
+          target: node2,
+          label: '<include>',
+          linkindex: node1.nlink[node2.id],
+        };
+        graphBuilder.setId(link);
         link.source.weight++;
         links.push(link);
       }
@@ -413,6 +497,7 @@ var AskomicsForceLayoutManager = function () {
           .attr("label", function (d) { return d.label ; })
           .attr("class", "link")
           .attr("marker-end", "url(#marker)")
+          .style('stroke', function(d){return d.positionable?'darkgreen':'grey';})
           .style("stroke-dasharray",function(d) {return d.suggested?"2":"";})
           .style("opacity", function(d) {return d.suggested?"0.3":"1";})
           .style("stroke-width", "2")
@@ -472,6 +557,7 @@ var AskomicsForceLayoutManager = function () {
               .attr("id", function (d) { return "node_" + d.id; })
               .attr("uri", function (d) { return d.uri; })
               .attr("class", "nodeStrokeClass")
+              .style("stroke", function(d){ return forceLayoutManager.getStrokeColorInstanciatedNode(d); })
               .style("fill", function (d) { return forceLayoutManager.getColorInstanciatedNode(d); })
               .style("opacity", function(d) {
                   return (d.suggested === true ? configDisplay.opacityNode : 1);

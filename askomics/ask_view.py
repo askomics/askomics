@@ -126,6 +126,7 @@ class AskView(object):
         """
         Get preview data for all the available files
         """
+        self.log.debug(" ========= Askview:source_files_overview =============")
         sfc = SourceFileConvertor(self.settings, self.request.session)
 
         source_files = sfc.get_source_files()
@@ -146,10 +147,11 @@ class AskView(object):
                     if infos['headers'][ih].find("@")>0:
                         infos['column_types'].append("entity")
                     else:
-                        infos['column_types'].append(src_file.guess_values_type(infos['preview_data'][ih]))
+                        infos['column_types'].append(src_file.guess_values_type(infos['preview_data'][ih],ih))
 
             except Exception as e:
                 infos['error'] = 'Could not read input file, are you sure it is a valid tabular file?'
+                self.log.error(str(e))
 
             data['files'].append(infos)
 
@@ -160,6 +162,7 @@ class AskView(object):
         """
         Convert tabulated files to turtle according to the type of the columns set by the user
         """
+        self.log.debug("preview_ttl")
         data = {}
 
         body = self.request.json_body

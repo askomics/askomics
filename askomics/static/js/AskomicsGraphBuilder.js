@@ -205,7 +205,8 @@
     };
 
     AskomicsGraphBuilder.prototype.setSuggestedNode = function(node,x,y) {
-      node.suggested = true;
+      node.suggested    = true;
+      node.positionable = userAbstraction.isPositionable(node.uri);
       node.actif = false ;
       node.x = x;
       node.y = y;
@@ -218,6 +219,10 @@
       node.filters = {} ;/* filters of attributes key:sparqlid*/
       node.values = {} ; /* values of attributes key:sparqlid*/
       return node;
+    };
+
+    AskomicsGraphBuilder.prototype.setPositionable = function(node) {
+      node.positionable = true;
     };
 
     AskomicsGraphBuilder.prototype.instanciateNode = function(node) {
@@ -387,6 +392,67 @@
       return [variates,constraintRelations,filters] ;
     };
 
+    AskomicsGraphBuilder.prototype.buildPositionableConstraintsGraph = function(type,source,target,constraintRelations,filters) {
+
+      var node = source ;
+      var secondNode = target ;
+      var ua = userAbstraction;
+
+      var info = ua.getPositionableEntities();
+
+      taxonNodeId = node.categories[info[node.uri].taxon].SPARQLid;
+      refNodeId = node.categories[info[node.uri].ref].SPARQLid;
+      startNodeId = node.attributes[info[node.uri].start].SPARQLid;
+      endNodeId = node.attributes[info[node.uri].end].SPARQLid;
+
+      taxonSecNodeId = secondNode.categories[info[secondNode.uri].taxon].SPARQLid;
+      refSecNodeId = secondNode.categories[info[secondNode.uri].ref].SPARQLid;
+      startSecNodeId = secondNode.attributes[info[secondNode.uri].start].SPARQLid;
+      endSecNodeId = secondNode.attributes[info[secondNode.uri].end].SPARQLid;
+
+
+      constraintRelations.push([ua.URI(node.uri),'displaySetting:position_taxon',"?"+"id_taxon_"+node.SPARQLid]);
+      constraintRelations.push([ua.URI(node.uri),'displaySetting:position_reference',"?"+"id_ref_"+node.SPARQLid]);
+      constraintRelations.push([ua.URI(node.uri),'displaySetting:position_start',"?"+"id_start_"+node.SPARQLid]);
+      constraintRelations.push([ua.URI(node.uri),'displaySetting:position_end',"?"+"id_end_"+node.SPARQLid]);
+
+      constraintRelations.push([ua.URI(secondNode.uri),'displaySetting:position_taxon',"?"+"id_taxon_"+secondNode.SPARQLid]);
+      constraintRelations.push([ua.URI(secondNode.uri),'displaySetting:position_reference',"?"+"id_ref_"+secondNode.SPARQLid]);
+      constraintRelations.push([ua.URI(secondNode.uri),'displaySetting:position_start',"?"+"id_start_"+secondNode.SPARQLid]);
+      constraintRelations.push([ua.URI(secondNode.uri),'displaySetting:position_end',"?"+"id_end_"+secondNode.SPARQLid]);
+
+      /* constrainte to target the same ref/taxon */
+
+      constraintRelations.push(["?"+'URI'+node.SPARQLid,"?"+"id_taxon_"+node.SPARQLid,"?"+taxonNodeId]);
+      constraintRelations.push(["?"+'URI'+node.SPARQLid,"?"+"id_ref_"+node.SPARQLid,"?"+refNodeId]);
+
+      constraintRelations.push(["?"+'URI'+secondNode.SPARQLid,"?"+"id_taxon_"+secondNode.SPARQLid,"?"+taxonSecNodeId]);
+      constraintRelations.push(["?"+'URI'+secondNode.SPARQLid,"?"+"id_ref_"+secondNode.SPARQLid,"?"+refSecNodeId]);
+
+      /* manage start and end variates */
+      constraintRelations.push(["?"+'URI'+node.SPARQLid,"?"+"id_start_"+node.SPARQLid,"?"+startNodeId]);
+      constraintRelations.push(["?"+'URI'+node.SPARQLid,"?"+"id_end_"+node.SPARQLid,"?"+endNodeId]);
+
+      constraintRelations.push(["?"+'URI'+secondNode.SPARQLid,"?"+"id_start_"+secondNode.SPARQLid,"?"+startSecNodeId]);
+      constraintRelations.push(["?"+'URI'+secondNode.SPARQLid,"?"+"id_end_"+secondNode.SPARQLid,"?"+endSecNodeId]);
+
+      var opstart = "";
+      var opend = "";
+      switch(type) {
+        case 'positionable:include' :
+            opstart = '>=';
+            opend   = '<=';
+            break;
+        default:
+          throw Exception("AskomicsGraphBuilder.prototype.buildPositionableConstraintsGraph: unkown type :"+JSON.stringify(type));
+      }
+      /* TODO : attach these constraints with a checkbox on linkview */
+      filters.push('FILTER(' + "?"+taxonNodeId + "=" + "?"+taxonSecNodeId +')');
+      filters.push('FILTER(' + "?"+refNodeId + "=" + "?"+refSecNodeId +')');
+
+      filters.push('FILTER(' + "?"+ startNodeId + opstart + "?"+startSecNodeId +')');
+      filters.push('FILTER(' + "?"+ endNodeId + opend + "?"+endSecNodeId +')');
+    };
 
     AskomicsGraphBuilder.prototype.buildConstraintsGraph = function() {
       var variates = [] ;
@@ -405,14 +471,21 @@
         /* add node inside */
         constraintRelations.push(["?"+'URI'+node.SPARQLid,'rdf:type',ua.URI(node.uri)]);
         constraintRelations.push(["?"+'URI'+node.SPARQLid,'rdfs:label',"?"+node.SPARQLid]);
+
         /* find relation with this node and add it as a constraint  */
         for (ilx=dup_link_array.length-1;ilx>=0;ilx--) {
           if ( (dup_link_array[ilx].source.id == node.id) ||  (dup_link_array[ilx].target.id == node.id) ) {
-            constraintRelations.push(["?"+'URI'+dup_link_array[ilx].source.SPARQLid,ua.URI(dup_link_array[ilx].uri),"?"+'URI'+dup_link_array[ilx].target.SPARQLid]);
+            if ( dup_link_array[ilx].positionable ) {
+              var secondNode = dup_link_array[ilx].source.id == node.id?dup_link_array[ilx].target:dup_link_array[ilx].source;
+              this.buildPositionableConstraintsGraph(dup_link_array[ilx].uri,node,secondNode,constraintRelations,filters);
+            } else {
+              constraintRelations.push(["?"+'URI'+dup_link_array[ilx].source.SPARQLid,ua.URI(dup_link_array[ilx].uri),"?"+'URI'+dup_link_array[ilx].target.SPARQLid]);
+            }
             //remove link to avoid to add two same constraint
             dup_link_array.splice(ilx,1);
           }
         }
+
 
         /* adding variable node name if asked by the user */
         if (node.actif) {
@@ -423,7 +496,6 @@
         /* adding constraints about attributs about the current node */
         for (var uri in node.attributes) {
             SparqlId = node.attributes[uri].SPARQLid;
-            console.log(JSON.stringify(node.filters));
             isFiltered =  SparqlId in node.filters;
             if ( isFiltered || node.attributes[uri].actif ) {
               constraintRelations.push(["?"+'URI'+node.SPARQLid,ua.URI(uri),"?"+node.attributes[uri].SPARQLid,isOptional]);

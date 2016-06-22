@@ -191,17 +191,17 @@ $(function () {
     loadStartPoints();
 
     // Loading a sparql query file
-    $(".uploadBtn").change(function(event) {
-        var uploadedFile = event.target.files[0];
-        if (uploadedFile) {
-            var fr = new FileReader();
-            fr.onload = function(e) {
-                var contents = e.target.result;
-                startRequestSessionAskomics();
-                forceLayoutManager.startWithQuery(contents);
-            };
-            fr.readAsText(uploadedFile);
-        }
+    $(".uploadBtn").change( function(event) {
+      var uploadedFile = event.target.files[0];
+      if (uploadedFile) {
+          var fr = new FileReader();
+          fr.onload = function(e) {
+            var contents = e.target.result;
+            startRequestSessionAskomics();
+            forceLayoutManager.startWithQuery(contents);
+          };
+          fr.readAsText(uploadedFile);
+      }
     });
 
     //$("#uploadedQuery")
