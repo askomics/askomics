@@ -315,9 +315,9 @@ var AskomicsForceLayoutManager = function () {
         positionableEntities = userAbstraction.getPositionableEntities();
 
         for ( uri in positionableEntities ) {
-          if ( uri == slt_node.uri ) continue ;
-          console.log("add positionable suggestion:"+uri);
-          console.log(JSON.stringify(positionableEntities[uri]));
+          /* uncomment if we don't want a positionable relation between the same node  */
+          //if ( uri == slt_node.uri ) continue ;
+
           if ( ! (uri in suggestedList) ) {
             /* creatin node */
             suggestedNode = userAbstraction.buildBaseNode(uri);
@@ -683,7 +683,7 @@ var AskomicsForceLayoutManager = function () {
       });
 
       // Restart the force layout.
-      force.charge(-300)
+      force.charge(-700)
           .linkDistance(175)
           .size([w, h])
           .start();
