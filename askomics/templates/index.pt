@@ -68,13 +68,39 @@
             </div>
             <div id="queryBuilder" class="row" hidden>
                 <div id="graph" class="col-md-6">
-                    <div class="uploadBtn btn btn-default">
-                        <span>Upload query</span>
+                    <div class="btn-group">
+                      <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      Files<span class="caret"></span>
+                      </button>
+                      <ul class="dropdown-menu">
+                        <!--upload-->
+                        <li><a href="#">
+                        <div class="uploadBtn">
+                        <span><span class="glyphicon glyphicon-export" aria-hidden="true"> Upload query</span>
                         <input id="uploadBtn" type="file" class="upload">
+                        </div>
+                        </a></li>
+
+                        <!--download-->
+                        <li><a id="dwl-query">
+                        <span><span class="glyphicon glyphicon-save" aria-hidden="true"> Download query</span>
+                        </a></li>
+                      </ul>
                     </div>
+
+                    <!--
                     <div class="btn-group btn-group-query">
-                        <span id="btn-qdown" class="btn btn-default">Download query</span>
+                      <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      View<span class="caret"></span>
+                      </button>
+                      <ul class="dropdown-menu">
+                        <li><a href="#">bla</a></li>
+                        <li><a href="#">bli</a></li>
+                        <li><a href="#">blo</a></li>
+                      </ul>
                     </div>
+                    -->
+
                     <div id="svgdiv"></div>
                     <div id="uploadedQuery" class="uploadedQuery" hidden contenteditable></div>
 			<div class="btn-group">

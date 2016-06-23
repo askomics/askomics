@@ -205,8 +205,9 @@ $(function () {
     });
 
     //$("#uploadedQuery")
-    $("#btn-qdown").on('click', function(d) {
-      window.location.href = "data:text/plain;charset=UTF-8," + encodeURIComponent(graphBuilder.getInternalState());
+    $("#dwl-query").on('click', function(d) {
+      var d = new Date().getTime();
+      $(this).attr("href", "data:application/octet-stream," + encodeURIComponent(graphBuilder.getInternalState())).attr("download", "query-" + d + ".json");
     });
 
 
