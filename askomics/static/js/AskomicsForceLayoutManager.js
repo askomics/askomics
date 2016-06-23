@@ -316,7 +316,7 @@ var AskomicsForceLayoutManager = function () {
 
         for (uri in positionableEntities) {
           // if selected node is not a positionable node, donc create a positionable
-          // link wither other positionable node
+          // link with an other positionable node
           if (! (slt_node.uri in positionableEntities)) continue;
 
           /* uncomment if we don't want a positionable relation between the same node  */
