@@ -342,9 +342,11 @@ var AskomicsForceLayoutManager = function () {
             suggested : true,
             positionable : true,
             uri   : 'positionable:include',
-            source: slt_node,
-            target: suggestedList[uri],
-            label: '<include>',
+            //source: slt_node,
+            //target: suggestedList[uri],
+            source: suggestedList[uri],
+            target: slt_node,
+            label: 'included in',
             linkindex: slt_node.nlink[suggestedList[uri].id],
           };
           graphBuilder.setId(link);

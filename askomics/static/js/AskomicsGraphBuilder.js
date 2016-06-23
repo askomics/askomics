@@ -450,8 +450,10 @@
       filters.push('FILTER(' + "?"+taxonNodeId + "=" + "?"+taxonSecNodeId +')');
       filters.push('FILTER(' + "?"+refNodeId + "=" + "?"+refSecNodeId +')');
 
-      filters.push('FILTER(' + "?"+ startNodeId + opstart + "?"+startSecNodeId +')');
-      filters.push('FILTER(' + "?"+ endNodeId + opend + "?"+endSecNodeId +')');
+      //filters.push('FILTER(' + "?"+ startNodeId + opstart + "?"+startSecNodeId +')');
+      //filters.push('FILTER(' + "?"+ endNodeId + opend + "?"+endSecNodeId +')');
+      filters.push('FILTER(' + "?"+ startSecNodeId + opstart + "?"+startNodeId +')');
+      filters.push('FILTER(' + "?"+ endSecNodeId + opend + "?"+endNodeId +')');
     };
 
     AskomicsGraphBuilder.prototype.buildConstraintsGraph = function() {
