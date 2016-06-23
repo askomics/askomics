@@ -314,7 +314,11 @@ var AskomicsForceLayoutManager = function () {
         // Manage positionnable entities
         positionableEntities = userAbstraction.getPositionableEntities();
 
-        for ( uri in positionableEntities ) {
+        for (uri in positionableEntities) {
+          // if selected node is not a positionable node, donc create a positionable
+          // link wither other positionable node
+          if (! (slt_node.uri in positionableEntities)) continue;
+
           /* uncomment if we don't want a positionable relation between the same node  */
           //if ( uri == slt_node.uri ) continue ;
 
