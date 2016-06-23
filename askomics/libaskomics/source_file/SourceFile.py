@@ -434,19 +434,18 @@ class SourceFile(ParamManager, HaveCachedProperties):
         # change header to avoid @ character
         for header in self.headers[1:]:
             idx = header.find("@")
-            if idx  != -1:
-                header = header[0:idx]
+            if idx != -1:
+                header = header[idx+1:]
             header_tmp.append(header)
 
         if self.existing_relations == []:
             # No results, everything is new
-            for k, h in enumerate(header_tmp):
+            for elem in header_tmp:
                 headers_status.append('new')
 
             return headers_status, missing_headers
 
         for rel in self.existing_relations:
-            #print(rel)
             if rel not in header_tmp:
                 self.log.warning('Expected relation "%s" but did not find corresponding source file: %s.', rel, repr(header_tmp))
                 missing_headers.append(rel)
