@@ -486,8 +486,11 @@ var AskomicsForceLayoutManager = function () {
     /* nodes or links could be removed by other views */
     graphBuilder.synchronizeInstanciatedNodesAndLinks(nodes,links);
 
-    vis.append("svg:defs").append("svg:marker")
+    link.enter().append("svg:defs").append("svg:marker")
                      .attr("id", "marker")
+                     .attr("class", "arrow")
+                     .style('stroke', function(d){return d.positionable?'darkgreen':'grey';}) //FIXME: doesn't work
+                     .style('fill', function(d){return d.positionable?'darkgreen':'grey';}) //FIXME: doesn't work
                      .attr("viewBox", "0 -5 10 10")
                      .attr("refX", 15)
                      .attr("refY", -1.5)
