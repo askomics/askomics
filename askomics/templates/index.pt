@@ -76,14 +76,14 @@
                         <!--upload-->
                         <li><a href="#">
                         <div class="uploadBtn">
-                        <span><span class="glyphicon glyphicon-export" aria-hidden="true"> Upload query</span>
+                        <p><span class="glyphicon glyphicon-export" aria-hidden="true"></span> Upload query</p>
                         <input id="uploadBtn" type="file" class="upload">
                         </div>
                         </a></li>
 
                         <!--download-->
-                        <li><a id="dwl-query">
-                        <span><span class="glyphicon glyphicon-save" aria-hidden="true"> Download query</span>
+                        <li><a href="#" id="dwl-query">
+                        <p><span class="glyphicon glyphicon-save" aria-hidden="true"></span> Download query</p>
                         </a></li>
                       </ul>
                     </div>
