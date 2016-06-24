@@ -436,24 +436,43 @@
       constraintRelations.push(["?"+'URI'+secondNode.SPARQLid,"?"+"id_start_"+secondNode.SPARQLid,"?"+startSecNodeId]);
       constraintRelations.push(["?"+'URI'+secondNode.SPARQLid,"?"+"id_end_"+secondNode.SPARQLid,"?"+endSecNodeId]);
 
-      var opstart = "";
-      var opend = "";
+      var id_link = secondNode.id+'-'+node.id;
+
+      type = $('#direction-'+id_link).val();
+
       switch(type) {
-        case 'positionable:include' :
-            opstart = '>=';
-            opend   = '<=';
+        case 'included' :
+            filters.push('FILTER(' + "?"+ startSecNodeId + '>=' + "?"+startNodeId +')');
+            filters.push('FILTER(' + "?"+ endSecNodeId + '<=' + "?"+endNodeId +')');
             break;
+        case 'excluded':
+            filters.push('FILTER(?'+endNodeId+' < ?'+startSecNodeId+' || ?'+startNodeId+' > ?'+endSecNodeId+')');
+            break;
+
+        case 'overlap':
+            // I think its the same as included. to discuss next meeting
+            filters.push('FILTER(((?'+endSecNodeId+' > ?'+startNodeId+') && (?'+startSecNodeId+' < ?'+endNodeId+')) || ((?'+startSecNodeId+' < ?'+endNodeId+') && (?'+endSecNodeId+' > ?'+startNodeId+')))');
+            break;
+
+        case 'near':
+          alert('sorry, near query is not implemanted yet !');
+          hideModal();
+          exit();
+            break;
+
         default:
           throw Exception("AskomicsGraphBuilder.prototype.buildPositionableConstraintsGraph: unkown type :"+JSON.stringify(type));
       }
-      /* TODO : attach these constraints with a checkbox on linkview */
-      filters.push('FILTER(' + "?"+taxonNodeId + "=" + "?"+taxonSecNodeId +')');
-      filters.push('FILTER(' + "?"+refNodeId + "=" + "?"+refSecNodeId +')');
 
-      //filters.push('FILTER(' + "?"+ startNodeId + opstart + "?"+startSecNodeId +')');
-      //filters.push('FILTER(' + "?"+ endNodeId + opend + "?"+endSecNodeId +')');
-      filters.push('FILTER(' + "?"+ startSecNodeId + opstart + "?"+startNodeId +')');
-      filters.push('FILTER(' + "?"+ endSecNodeId + opend + "?"+endNodeId +')');
+      /* TODO : attach these constraints with a checkbox on linkview */
+      if ($('#ref-'+id_link).is(':checked')) {
+        filters.push('FILTER(' + "?"+refNodeId + "=" + "?"+refSecNodeId +')');
+      }
+
+      if ($('#tax-'+id_link).is(':checked')) {
+        filters.push('FILTER(' + "?"+taxonNodeId + "=" + "?"+taxonSecNodeId +')');
+      }
+
     };
 
     AskomicsGraphBuilder.prototype.buildConstraintsGraph = function() {

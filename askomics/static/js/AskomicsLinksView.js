@@ -33,8 +33,10 @@ var AskomicsLinksView = function () {
 
   AskomicsLinksView.prototype.create = function (link) {
 
+    var id_link = link.source.id+"-"+link.target.id;
+
     var elemUri = link.uri,
-         nameDiv = prefix+"Link-"+link.source.id+"-"+link.target.id ;
+         nameDiv = prefix+"Link-"+id_link ;
 
     this.showTitle(link);
 
@@ -44,7 +46,8 @@ var AskomicsLinksView = function () {
     var reverseArrow = $('<div></div>').append($('<span><span>').attr('class', 'glyphicon glyphicon-resize-horizontal').attr('aria-hidden', 'true'))
                                        .append('Reverse direction');
 
-    var select = $('<select></select>').append($('<option></option>').attr("value", 'included').attr("selected", "selected").append('included in'))
+    var select = $('<select></select>').attr('id', 'direction-'+id_link)
+                                       .append($('<option></option>').attr("value", 'included').attr("selected", "selected").append('included in'))
                                        .append($('<option></option>').attr("value", 'excluded').append('exluded of'))
                                        .append($('<option></option>').attr("value", 'overlap').append('overlaping with'))
                                        .append($('<option></option>').attr("value", 'near').append('near'));
@@ -53,9 +56,9 @@ var AskomicsLinksView = function () {
                                .append(select)
                                .append(nodeView.formatLabelEntity(link.target));
 
-    var checkbox = $('<div></div>').append($('<label></label>').append($('<input>').attr('type', 'checkbox').attr('checked', 'checked').attr('id', 'ref').attr('value', 'sameref')).append('Reference'))
+    var checkbox = $('<div></div>').append($('<label></label>').append($('<input>').attr('type', 'checkbox').attr('checked', 'checked').attr('id', 'ref-'+id_link).attr('value', 'sameref')).append('Reference'))
                                    .append($('<br>'))
-                                   .append($('<label></label>').append($('<input>').attr('type', 'checkbox').attr('checked', 'checked').attr('id', 'tax').attr('value', 'sametax')).append('Taxon'));
+                                   .append($('<label></label>').append($('<input>').attr('type', 'checkbox').attr('checked', 'checked').attr('id', 'tax-'+id_link).attr('value', 'sametax')).append('Taxon'));
 
     var onTheSame = $('<div></div>').append('On the same:')
                                     .append(checkbox);
@@ -72,41 +75,6 @@ var AskomicsLinksView = function () {
     //console.log('---> source: '+JSON.stringify(link.source));
 
     $("#viewDetails").append(details);
-
-    select.change(function() {
-      console.log('---> query: '+select.val());
-    })
-
-    $('#ref').change(function(){
-
-      if ($('#ref').is(':checked')) {
-        console.log('---> ref is checked!');
-      }else{
-        console.log('---> ref is not checked!');
-      }
-    });
-
-    $('#tax').change(function(){
-
-      if ($('#tax').is(':checked')) {
-        console.log('---> tax is checked!');
-
-      }else{
-        console.log('---> tax is not checked!');
-      }
-    });
-
-    $('#strict').change(function(){
-
-      if ($('#strict').is(':checked')) {
-        console.log('---> strict is checked!');
-      }else{
-        console.log('---> strict is not checked!');
-      }
-    });
-
-
-
   };
 
   // take a string and return an entity with a sub index
