@@ -46,7 +46,7 @@ var AskomicsLinksView = function () {
 
     var select = $('<select></select>').append($('<option></option>').attr("value", 'included').attr("selected", "selected").append('included in'))
                                        .append($('<option></option>').attr("value", 'excluded').append('exluded of'))
-                                       .append($('<option></option>').attr("value", 'overlap').append('overlap with'))
+                                       .append($('<option></option>').attr("value", 'overlap').append('overlaping with'))
                                        .append($('<option></option>').attr("value", 'near').append('near'));
 
     var relation = $("<div></div>").append(nodeView.formatLabelEntity(link.source))
@@ -69,9 +69,44 @@ var AskomicsLinksView = function () {
            .append($('<hr>'))
            .append(strict);
 
-    console.log('---> source: '+JSON.stringify(link.source));
+    //console.log('---> source: '+JSON.stringify(link.source));
 
     $("#viewDetails").append(details);
+
+    select.change(function() {
+      console.log('---> query: '+select.val());
+    })
+
+    $('#ref').change(function(){
+
+      if ($('#ref').is(':checked')) {
+        console.log('---> ref is checked!');
+      }else{
+        console.log('---> ref is not checked!');
+      }
+    });
+
+    $('#tax').change(function(){
+
+      if ($('#tax').is(':checked')) {
+        console.log('---> tax is checked!');
+
+      }else{
+        console.log('---> tax is not checked!');
+      }
+    });
+
+    $('#strict').change(function(){
+
+      if ($('#strict').is(':checked')) {
+        console.log('---> strict is checked!');
+      }else{
+        console.log('---> strict is not checked!');
+      }
+    });
+
+
+
   };
 
   // take a string and return an entity with a sub index
