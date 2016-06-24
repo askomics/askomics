@@ -40,12 +40,36 @@ var AskomicsLinksView = function () {
 
     var details = $("<div></div>").attr("id",nameDiv).addClass('div-details');
     console.log(JSON.stringify(link.target));
-    var relation = $("<p></p>").append(nodeView.formatLabelEntity(link.source))
-                               .append($('<span></span>').html(arrowCode))
-                               .append($('<em></em>').html(link.label))
-                               .append($('<span></span>').html(arrowCode))
+
+    var reverseArrow = $('<div></div>').append($('<span><span>').attr('class', 'glyphicon glyphicon-resize-horizontal').attr('aria-hidden', 'true'))
+                                       .append('Reverse direction');
+
+    var select = $('<select></select>').append($('<option></option>').attr("value", 'included').attr("selected", "selected").append('included in'))
+                                       .append($('<option></option>').attr("value", 'excluded').append('exluded of'))
+                                       .append($('<option></option>').attr("value", 'overlap').append('overlap with'))
+                                       .append($('<option></option>').attr("value", 'near').append('near'));
+
+    var relation = $("<div></div>").append(nodeView.formatLabelEntity(link.source))
+                               .append(select)
                                .append(nodeView.formatLabelEntity(link.target));
-    details.append(relation);
+
+    var checkbox = $('<div></div>').append($('<label></label>').append($('<input>').attr('type', 'checkbox').attr('checked', 'checked').attr('id', 'ref').attr('value', 'sameref')).append('Reference'))
+                                   .append($('<br>'))
+                                   .append($('<label></label>').append($('<input>').attr('type', 'checkbox').attr('checked', 'checked').attr('id', 'tax').attr('value', 'sametax')).append('Taxon'));
+
+    var onTheSame = $('<div></div>').append('On the same:')
+                                    .append(checkbox);
+
+    var strict = $('<div></div>').append($('<label></label>').append($('<input>').attr('type', 'checkbox').attr('checked', 'checked').attr('id', 'strict').attr('value', 'strict')).append('Strict'));
+
+    details.append(reverseArrow)
+           .append(relation)
+           .append($('<hr>'))
+           .append(onTheSame)
+           .append($('<hr>'))
+           .append(strict);
+
+    console.log('---> source: '+JSON.stringify(link.source));
 
     $("#viewDetails").append(details);
   };
