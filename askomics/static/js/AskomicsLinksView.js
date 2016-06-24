@@ -63,7 +63,7 @@ var AskomicsLinksView = function () {
     var onTheSame = $('<div></div>').append('On the same:')
                                     .append(checkbox);
 
-    var strict = $('<div></div>').append($('<label></label>').append($('<input>').attr('type', 'checkbox').attr('checked', 'checked').attr('id', 'strict').attr('value', 'strict')).append('Strict'));
+    var strict = $('<div></div>').append($('<label></label>').append($('<input>').attr('type', 'checkbox').attr('checked', 'checked').attr('id', 'strict-'+id_link).attr('value', 'strict')).append('Strict'));
 
     details.append(reverseArrow)
            .append(relation)
