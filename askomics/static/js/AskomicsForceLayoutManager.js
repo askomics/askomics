@@ -346,7 +346,7 @@ var AskomicsForceLayoutManager = function () {
             //target: suggestedList[uri],
             source: suggestedList[uri],
             target: slt_node,
-            label: 'included in',
+            label: 'positioned on',
             linkindex: slt_node.nlink[suggestedList[uri].id],
           };
           graphBuilder.setId(link);

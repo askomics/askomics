@@ -43,8 +43,8 @@ var AskomicsLinksView = function () {
     var details = $("<div></div>").attr("id",nameDiv).addClass('div-details');
     console.log(JSON.stringify(link.target));
 
-    var reverseArrow = $('<div></div>').append($('<span><span>').attr('class', 'glyphicon glyphicon-resize-horizontal').attr('aria-hidden', 'true'))
-                                       .append('Reverse direction');
+    /*var reverseArrow = $('<div></div>').append($('<span><span>').attr('class', 'glyphicon glyphicon-resize-horizontal').attr('aria-hidden', 'true'))
+                                       .append('Reverse direction');*/
 
     var select = $('<select></select>').attr('id', 'direction-'+id_link)
                                        .append($('<option></option>').attr("value", 'included').attr("selected", "selected").append('included in'))
@@ -65,7 +65,7 @@ var AskomicsLinksView = function () {
 
     var strict = $('<div></div>').append($('<label></label>').append($('<input>').attr('type', 'checkbox').attr('checked', 'checked').attr('id', 'strict-'+id_link).attr('value', 'strict')).append('Strict'));
 
-    details.append(reverseArrow)
+    details/*.append(reverseArrow)*/
            .append(relation)
            .append($('<hr>'))
            .append(onTheSame)
