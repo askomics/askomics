@@ -33,6 +33,11 @@ var AskomicsLinksView = function () {
 
   AskomicsLinksView.prototype.changeDir = function(link, direction) {
     link.uri = 'positionable:'+direction;
+    //FIXME: following don't work (write the new label on link)
+    var labels = {'included':'included in', 'excluded':'exluded of', 'overlap':'overlap with', 'near': 'near'};
+    link.label = labels[direction];
+    console.log('link (alv): '+JSON.stringify(link));
+    forceLayoutManager.update();
   };
 
   AskomicsLinksView.prototype.changeStrict = function(link, strict) {
