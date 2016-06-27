@@ -132,7 +132,8 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         return data
 
-    def guess_column_types(self, columns):
+    #Not used
+    def guess_column_types(self, columns, headers):
         """
         For each column given, return a guessed column type
 
@@ -143,13 +144,13 @@ class SourceFile(ParamManager, HaveCachedProperties):
         data=[]
         count=0
         for col in columns:
-            print(str(col)+":"+str(count))
-            data.append(self.guess_values_type(col,count))
+            header = headers[count]
+            data.append(self.guess_values_type(col,header))
             count+=1
         return data
         #return [self.guess_values_type(col) for col in columns]
 
-    def guess_values_type(self, values, num):
+    def guess_values_type(self, values, header):
         """
         From a list of values, guess the data type
 
@@ -161,11 +162,11 @@ class SourceFile(ParamManager, HaveCachedProperties):
         types = {'ref':('chrom', 'ref'), 'taxon':('taxon', 'species'), 'start':('start', 'begin'), 'end':('end', 'stop')}
 
         # First check if it is specific type
-        self.log.debug('header: '+self.headers[num])
+        self.log.debug('header: '+header)
         for typ, expressions in types.items():
             for expression in expressions:
                 regexp = '.*' + expression + '.*'
-                if re.match(regexp, self.headers[num], re.IGNORECASE) is not None:
+                if re.match(regexp, header, re.IGNORECASE) is not None:
                     # Test if start and end values are numerics
                     if typ in ('start', 'end') and not all(self.is_decimal(val) for val in values):
                         self.log.debug('ERROR! '+typ+' is not decimal!')
@@ -433,19 +434,18 @@ class SourceFile(ParamManager, HaveCachedProperties):
         # change header to avoid @ character
         for header in self.headers[1:]:
             idx = header.find("@")
-            if idx  != -1:
-                header = header[0:idx]
+            if idx != -1:
+                header = header[idx+1:]
             header_tmp.append(header)
 
         if self.existing_relations == []:
             # No results, everything is new
-            for k, h in enumerate(header_tmp):
+            for elem in header_tmp:
                 headers_status.append('new')
 
             return headers_status, missing_headers
 
         for rel in self.existing_relations:
-            #print(rel)
             if rel not in header_tmp:
                 self.log.warning('Expected relation "%s" but did not find corresponding source file: %s.', rel, repr(header_tmp))
                 missing_headers.append(rel)

@@ -95,9 +95,6 @@ var AskomicsAttributesView = function () {
                   if (labelSparqlVarId in node.values) {
                     selectedValue = node.values[labelSparqlVarId];
                   }
-                  if ( selectedValue==="" ) {
-                    inp.append($("<option></option>").attr("value", selectedValue).attr("selected", "selected"));
-                  }
                   var sizeSelect = 3 ;
                   if ( d.values.length<3 ) sizeSelect = d.values.length;
                   if ( d.values.length === 0 ) sizeSelect = 1;
@@ -119,6 +116,7 @@ var AskomicsAttributesView = function () {
 
               inp.change(function(d) {
                 var value = $(this).val();
+                if (value === null) {value = ''};
                 nodeid = $(this).parent().attr('nodeid');
                 sparlid = $(this).attr('sparqlid');
 
