@@ -71,9 +71,7 @@ var AskomicsLinksView = function () {
 
     var types = {'included': 'included in', 'excluded': 'excluded of', 'overlap': 'overlap with', 'near': 'near'};
 
-    //for (var i = types.length - 1; i >= 0; i--) {
     for (var key in types) {
-      console.log('---> type: '+types[key]);
       if(link.type == key) {
           select.append($('<option></option>').attr("value", key).attr("selected", "selected").append(types[key]));
       }else{

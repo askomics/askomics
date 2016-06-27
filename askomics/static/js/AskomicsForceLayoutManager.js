@@ -432,15 +432,18 @@ var AskomicsForceLayoutManager = function () {
 
 
         link = {
-          suggested : true,
-          positionable : true,
-          //uri   : ':positionable:include',
-          type : 'included',
-          source: node1,
-          target: node2,
-          label: '<include>',
-          linkindex: node1.nlink[node2.id],
-        };
+            suggested : true,
+            positionable : true,
+            uri   : 'positionable',
+            type : 'included',
+            sameTax: true,
+            sameRef: true,
+            strict: true,
+            source: suggestedList[uri],
+            target: slt_node,
+            label: 'included in',
+            linkindex: slt_node.nlink[suggestedList[uri].id],
+          };
         graphBuilder.setId(link);
         link.source.weight++;
         links.push(link);
