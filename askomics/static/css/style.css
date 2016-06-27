@@ -74,7 +74,7 @@ pre {
 }
 
 #svgdiv {
-    max-height: 380px;
+    /*max-height: 380px;*/
     background: Gainsboro;
     border: 1px solid;
 }
