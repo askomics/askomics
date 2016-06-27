@@ -439,10 +439,10 @@ var AskomicsForceLayoutManager = function () {
             sameTax: true,
             sameRef: true,
             strict: true,
-            source: suggestedList[uri],
-            target: slt_node,
+            source: node2,
+            target: node1,
             label: 'included in',
-            linkindex: slt_node.nlink[suggestedList[uri].id],
+            linkindex: node2.nlink[node1.id],
           };
         graphBuilder.setId(link);
         link.source.weight++;
