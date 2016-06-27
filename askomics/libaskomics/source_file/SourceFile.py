@@ -159,8 +159,6 @@ class SourceFile(ParamManager, HaveCachedProperties):
         :return: the guessed type ('taxon','ref', 'start', 'end', 'numeric', 'text' or 'category')
         """
 
-        if len(self.headers)<=num or num < 0:
-            raise IndexError("num ("+str(num)+") is too big  header:"+str(self.headers));
         types = {'ref':('chrom', 'ref'), 'taxon':('taxon', 'species'), 'start':('start', 'begin'), 'end':('end', 'stop')}
 
         # First check if it is specific type
@@ -469,7 +467,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         return headers_status, missing_headers
 
-    def persist(self, urlbase):
+    def persist(self, urlbase,method):
         """
         Store the current source file in the triple store
 
@@ -482,8 +480,6 @@ class SourceFile(ParamManager, HaveCachedProperties):
         content_ttl = self.get_turtle()
 
         ql = QueryLauncher(self.settings, self.session)
-
-        method = 'load' # FIXME how do we decide? We don't know the size of what we want to insert as we use a generator
 
         # use insert data instead of load sparql procedure when the dataset is small
         total_triple_count = 0
@@ -598,6 +594,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
             except Exception as e:
                 return self._format_exception(e)
 
+            data = {}
             data['status'] = 'ok'
             data['total_triple_count'] = total_triple_count
 

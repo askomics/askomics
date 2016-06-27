@@ -1,3 +1,4 @@
+sudo: required
 language: python
 python:
   - "3.3"
@@ -8,7 +9,9 @@ install:
   - pip install coveralls
   - python setup.py install
 before_script:
-  echo "Hello World"
+  - docker pull tenforce/virtuoso
+  - sudo docker run -d --name virtuoso -p 8890:8890 -p 1111:1111  -e DBA_PASSWORD=dba -e SPARQL_UPDATE=true -e DEFAULT_GRAPH=http://localhost:8890/DAV --net="host" -t tenforce/virtuoso
+  - docker ps -a
 script: python setup.py nosetests
 after_success:
   coveralls

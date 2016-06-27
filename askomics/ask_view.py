@@ -233,7 +233,8 @@ class AskView(object):
         urlbase = re.search(r'(http:\/\/.*)\/.*', self.request.current_route_url())
         urlbase = urlbase.group(1)
 
-        data = src_file.persist(urlbase)
+        method = 'load'
+        data = src_file.persist(urlbase,method)
 
         return data
 
