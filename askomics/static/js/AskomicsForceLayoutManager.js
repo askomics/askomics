@@ -341,7 +341,8 @@ var AskomicsForceLayoutManager = function () {
           link = {
             suggested : true,
             positionable : true,
-            uri   : 'positionable:included',
+            uri   : 'positionable',
+            type : 'included',
             sameTax: true,
             sameRef: true,
             strict: true,
@@ -433,7 +434,8 @@ var AskomicsForceLayoutManager = function () {
         link = {
           suggested : true,
           positionable : true,
-          uri   : ':positionable:include',
+          //uri   : ':positionable:include',
+          type : 'included',
           source: node1,
           target: node2,
           label: '<include>',
@@ -489,7 +491,7 @@ var AskomicsForceLayoutManager = function () {
     graphBuilder.synchronizeInstanciatedNodesAndLinks(nodes,links);
 
     link.append("svg:path")
-            .attr("label", function (d) { console.log('---> label for '+d.id+': '+d.label); return d.label ; })
+            .attr("label", function (d) { /*console.log('---> label for '+d.id+': '+d.label);*/ return d.label ; })
 
     link.enter().append("svg:defs").append("svg:marker")
                      .attr("id", "marker")
@@ -508,7 +510,7 @@ var AskomicsForceLayoutManager = function () {
 
       link.enter().append("svg:path")
           .attr("id", function (d) { return d.source.id + "-" + d.target.id + "-" + d.linkindex ; })
-          .attr("label", function (d) { console.log('---> enter, label for '+d.id+': '+d.label); return d.label ; })
+          .attr("label", function (d) { /*console.log('---> enter, label for '+d.id+': '+d.label);*/ return d.label ; })
           .attr("class", "link")
           .attr("marker-end", "url(#marker)")
           .style('stroke', function(d){return d.positionable?'darkgreen':'grey';})

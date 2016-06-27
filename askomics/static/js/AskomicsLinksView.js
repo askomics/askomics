@@ -31,11 +31,11 @@ var AskomicsLinksView = function () {
     $("div[id*='"+ prefix +"']" ).hide();
   };
 
-  AskomicsLinksView.prototype.changeDir = function(link, direction) {
-    link.uri = 'positionable:'+direction;
+  AskomicsLinksView.prototype.changeDir = function(link, type) {
+    link.type = type;
     //FIXME: following don't work (write the new label on link)
     var labels = {'included':'included in', 'excluded':'exluded of', 'overlap':'overlap with', 'near': 'near'};
-    link.label = labels[direction];
+    link.label = labels[type];
     console.log('link (alv): '+JSON.stringify(link));
     forceLayoutManager.update();
   };
@@ -67,19 +67,39 @@ var AskomicsLinksView = function () {
     /*var reverseArrow = $('<div></div>').append($('<span><span>').attr('class', 'glyphicon glyphicon-resize-horizontal').attr('aria-hidden', 'true'))
                                        .append('Reverse direction');*/
 
-    var select = $('<select></select>').attr('id', 'direction-'+id_link)
-                                       .append($('<option></option>').attr("value", 'included').attr("selected", "selected").append('included in'))
-                                       .append($('<option></option>').attr("value", 'excluded').append('exluded of'))
-                                       .append($('<option></option>').attr("value", 'overlap').append('overlaping with'))
-                                       .append($('<option></option>').attr("value", 'near').append('near'));
+    var select = $('<select></select>').attr('id', 'direction-'+id_link);
+
+    var types = {'included': 'included in', 'excluded': 'excluded of', 'overlap': 'overlap with', 'near': 'near'};
+
+    //for (var i = types.length - 1; i >= 0; i--) {
+    for (var key in types) {
+      console.log('---> type: '+types[key]);
+      if(link.type == key) {
+          select.append($('<option></option>').attr("value", key).attr("selected", "selected").append(types[key]));
+      }else{
+          select.append($('<option></option>').attr("value", key).append(types[key]));
+      }
+    }
 
     var relation = $("<div></div>").append(nodeView.formatLabelEntity(link.source))
                                .append(select)
                                .append(nodeView.formatLabelEntity(link.target));
 
-    var checkbox_sameref = $('<label></label>').append($('<input>').attr('type', 'checkbox').attr('checked', 'checked').attr('id', 'ref-'+id_link)).append('Reference');
+    var checkbox_sameref;
+    var checkbox_sametax;
 
-    var checkbox_sametax = $('<label></label>').append($('<input>').attr('type', 'checkbox').attr('checked', 'checked').attr('id', 'tax-'+id_link)).append('Taxon');
+    if (link.sameRef) {
+      checkbox_sameref = $('<label></label>').append($('<input>').attr('type', 'checkbox').attr('id', 'ref-'+id_link).attr('checked', 'checked')).append('Reference');
+    }else{
+      checkbox_sameref = $('<label></label>').append($('<input>').attr('type', 'checkbox').attr('id', 'ref-'+id_link)).append('Reference');
+    };
+
+    if (link.sameTax) {
+      checkbox_sametax = $('<label></label>').append($('<input>').attr('type', 'checkbox').attr('id', 'tax-'+id_link).attr('checked', 'checked')).append('Taxon');
+    }else{
+      checkbox_sametax = $('<label></label>').append($('<input>').attr('type', 'checkbox').attr('id', 'tax-'+id_link)).append('Taxon');
+    };
+
 
     var onTheSame = $('<div></div>').append('On the same:')
                                     .append($('<br>'))
@@ -87,7 +107,13 @@ var AskomicsLinksView = function () {
                                     .append($('<br>'))
                                     .append(checkbox_sametax);
 
-    var strict = $('<div></div>').append($('<label></label>').append($('<input>').attr('type', 'checkbox').attr('checked', 'checked').attr('id', 'strict-'+id_link).attr('value', 'strict')).append('Strict'));
+    var strict;
+
+    if (link.strict) {
+      strict = $('<div></div>').append($('<label></label>').append($('<input>').attr('type', 'checkbox').attr('checked', 'checked').attr('id', 'strict-'+id_link).attr('value', 'strict')).append('Strict'));
+    }else{
+      strict = $('<div></div>').append($('<label></label>').append($('<input>').attr('type', 'checkbox').attr('id', 'strict-'+id_link).attr('value', 'strict')).append('Strict'));
+    };
 
     details/*.append(reverseArrow)*/
            .append(relation)

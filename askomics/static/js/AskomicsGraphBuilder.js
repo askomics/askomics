@@ -442,22 +442,21 @@
         equalsign = '=';
       }
 
-
-      switch(infos.direction) {
-        case 'positionable:included' :
+      switch(infos.type) {
+        case 'included' :
             filters.push('FILTER(?'+startSecNodeId+' >'+equalsign+' ?'+startNodeId+')');
             filters.push('FILTER(?'+endSecNodeId+' <'+equalsign+' ?'+endNodeId+')');
             break;
-        case 'positionable:excluded':
+        case 'excluded':
             filters.push('FILTER(?'+endNodeId+' <'+equalsign+' ?'+startSecNodeId+' || ?'+startNodeId+' >'+equalsign+' ?'+endSecNodeId+')');
             break;
 
-        case 'positionable:overlap':
+        case 'overlap':
             // I think its the same as included. to discuss next meeting
             filters.push('FILTER(((?'+endSecNodeId+' >'+equalsign+' ?'+startNodeId+') && (?'+startSecNodeId+' <'+equalsign+' ?'+endNodeId+')) || ((?'+startSecNodeId+' <'+equalsign+' ?'+endNodeId+') && (?'+endSecNodeId+' >'+equalsign+' ?'+startNodeId+')))');
             break;
 
-        case 'positionable:near':
+        case 'near':
           alert('sorry, near query is not implemanted yet !');
           hideModal();
           exit();
@@ -501,7 +500,7 @@
             if ( dup_link_array[ilx].positionable ) {
               var secondNode = dup_link_array[ilx].source.id == node.id?dup_link_array[ilx].target:dup_link_array[ilx].source;
               var posInfos = {};
-              posInfos.direction = dup_link_array[ilx].uri;
+              posInfos.type = dup_link_array[ilx].type;
               posInfos.same_tax = dup_link_array[ilx].sameTax;
               posInfos.same_ref = dup_link_array[ilx].sameRef;
               posInfos.strict = dup_link_array[ilx].strict;
