@@ -11,6 +11,38 @@ var AskomicsForceLayoutManager = function () {
     opacityNode  : "0.5"
   };
 
+  $('#full-screen').click(function() {
+    if ($('#icon-resize').attr('value') == 'small') {
+      //hide all other things
+      $('#viewDetails').hide();
+      $('#graph').attr('class', 'col-md-12');
+
+      //resize svg
+      $("#svg").attr('height', 700);
+      $("#svg").attr('width', 1000);
+
+      //change icon
+      $('#icon-resize').attr('class', 'glyphicon glyphicon-resize-small');
+      $('#icon-resize').attr('value', 'full');
+      return;
+    }
+
+    if ($('#icon-resize').attr('value') == 'full') {
+      //reshow all other things
+      $('#viewDetails').show();
+      $('#graph').attr('class', 'col-md-6');
+
+      //resize svg
+      $("#svg").attr('height', 350);
+      $("#svg").attr('width', $("#svgdiv").width());
+
+      //change icon
+      $('#icon-resize').attr('class', 'glyphicon glyphicon-resize-full');
+      $('#icon-resize').attr('value', 'small');
+      return;
+    }
+  })
+
   var vis = d3.select("#svgdiv")
               .append("svg:svg")
               .attr("width", w)

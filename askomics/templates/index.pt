@@ -89,6 +89,12 @@
                       </ul>
                     </div>
 
+                    <!-- Resize graph -->
+                    <button type="button" id='full-screen' class="btn btn-default" aria-label="Right Align">
+                        <span id='icon-resize' value='small' class="glyphicon glyphicon-resize-full" aria-hidden="true"></span>
+                        Resize
+                    </button>
+
                     <!--
                     <div class="btn-group btn-group-query">
                       <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
