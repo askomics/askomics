@@ -31,6 +31,22 @@ var AskomicsLinksView = function () {
     $("div[id*='"+ prefix +"']" ).hide();
   };
 
+  AskomicsLinksView.prototype.changeDir = function(link, direction) {
+    link.uri = 'positionable:'+direction;
+  };
+
+  AskomicsLinksView.prototype.changeStrict = function(link, strict) {
+    link.strict = strict;
+  };
+
+  AskomicsLinksView.prototype.changeSameTax = function(link, same_tax) {
+    link.sameTax = same_tax;
+  };
+
+  AskomicsLinksView.prototype.changeSameRef = function(link, same_ref) {
+    link.sameRef = same_ref;
+  };
+
   AskomicsLinksView.prototype.create = function (link) {
 
     var id_link = link.source.id+"-"+link.target.id;
@@ -56,12 +72,15 @@ var AskomicsLinksView = function () {
                                .append(select)
                                .append(nodeView.formatLabelEntity(link.target));
 
-    var checkbox = $('<div></div>').append($('<label></label>').append($('<input>').attr('type', 'checkbox').attr('checked', 'checked').attr('id', 'ref-'+id_link).attr('value', 'sameref')).append('Reference'))
-                                   .append($('<br>'))
-                                   .append($('<label></label>').append($('<input>').attr('type', 'checkbox').attr('checked', 'checked').attr('id', 'tax-'+id_link).attr('value', 'sametax')).append('Taxon'));
+    var checkbox_sameref = $('<label></label>').append($('<input>').attr('type', 'checkbox').attr('checked', 'checked').attr('id', 'ref-'+id_link)).append('Reference');
+
+    var checkbox_sametax = $('<label></label>').append($('<input>').attr('type', 'checkbox').attr('checked', 'checked').attr('id', 'tax-'+id_link)).append('Taxon');
 
     var onTheSame = $('<div></div>').append('On the same:')
-                                    .append(checkbox);
+                                    .append($('<br>'))
+                                    .append(checkbox_sameref)
+                                    .append($('<br>'))
+                                    .append(checkbox_sametax);
 
     var strict = $('<div></div>').append($('<label></label>').append($('<input>').attr('type', 'checkbox').attr('checked', 'checked').attr('id', 'strict-'+id_link).attr('value', 'strict')).append('Strict'));
 
@@ -72,7 +91,36 @@ var AskomicsLinksView = function () {
            .append($('<hr>'))
            .append(strict);
 
-    //console.log('---> source: '+JSON.stringify(link.source));
+    alv = this;
+
+    select.change(function() {
+      value = select.val();
+      alv.changeDir(link, value);
+    });
+
+    checkbox_sameref.change(function() {
+      if ($('#ref-'+id_link).is(':checked')) {
+        alv.changeSameRef(link, true);
+      }else{
+        alv.changeSameRef(link, false);
+      }
+    });
+
+    checkbox_sametax.change(function() {
+      if($('#tax-'+id_link).is(':checked')) {
+        alv.changeSameTax(link, true);
+      }else{
+        alv.changeSameTax(link, false);
+      }
+    });
+
+    strict.change(function() {
+      if($('#strict-'+id_link).is(':checked')) {
+        alv.changeStrict(link, true);
+      }else{
+        alv.changeStrict(link, false);
+      }
+    });
 
     $("#viewDetails").append(details);
   };

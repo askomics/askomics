@@ -341,9 +341,10 @@ var AskomicsForceLayoutManager = function () {
           link = {
             suggested : true,
             positionable : true,
-            uri   : 'positionable:include',
-            //source: slt_node,
-            //target: suggestedList[uri],
+            uri   : 'positionable:included',
+            sameTax: true,
+            sameRef: true,
+            strict: true,
             source: suggestedList[uri],
             target: slt_node,
             label: 'positioned on',
