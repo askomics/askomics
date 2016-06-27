@@ -122,12 +122,13 @@ class AskView(object):
                 infos['preview_data'] = src_file.get_preview_data()
                 infos['column_types'] = [];
 
+                header_num = 0
                 for ih in range(0,len(infos['headers'])):
                     if infos['headers'][ih].find("@")>0:
                         infos['column_types'].append("entity")
                     else:
-                        infos['column_types'].append(src_file.guess_values_type(infos['preview_data'][ih],ih))
-
+                        infos['column_types'].append(src_file.guess_values_type(infos['preview_data'][ih], infos['headers'][header_num]))
+                    header_num += 1
             except Exception as e:
                 infos['error'] = 'Could not read input file, are you sure it is a valid tabular file?'
                 self.log.error(str(e))

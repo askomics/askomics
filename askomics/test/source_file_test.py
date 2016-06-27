@@ -53,15 +53,34 @@ class SourceFileTests(unittest.TestCase):
 
     def test_guess_column_type(self):
 
-        assert self.srcfile.guess_values_type(['453', '334254', '342', '335'],1) == 'numeric'
-        assert self.srcfile.guess_values_type(['45.3', '334.254', '342', '335'],1) == 'numeric'
-        assert self.srcfile.guess_values_type(['453', '33a4254', '342', '335'],1) == 'text'
-        assert self.srcfile.guess_values_type(['453', '453', '453', '453'],1) == 'category'
-        assert self.srcfile.guess_values_type(['453', 'ccc', 'bbb', 'aaa'],1) == 'text'
+        # category
+        assert self.srcfile.guess_values_type(['453', '453', '453', '453'], 'category') == 'category'
+
+        #text
+        assert self.srcfile.guess_values_type(['453', '33a4254', '342', '335'], 'text') == 'text'
+
+        #numeric
+        assert self.srcfile.guess_values_type(['453', '334254', '342', '335'], 'numeric') == 'numeric'
+        assert self.srcfile.guess_values_type(['45.3', '334.254', '342', '335'], 'numeric') == 'numeric'
+
+        #taxon
+        assert self.srcfile.guess_values_type(['taxon', 'taxon', 'taxon', 'taxon'], 'taxon') == 'taxon'
+        assert self.srcfile.guess_values_type(['taxon', 'taxon', 'taxon', 'taxon'], 'species') == 'taxon'
+        assert self.srcfile.guess_values_type(['taxon', 'taxon', 'taxon', 'taxon'], 'aaataxonaaa') == 'taxon'
+        assert self.srcfile.guess_values_type(['taxon', 'taxon', 'taxon', 'taxon'], 'aaaspeciesaaa') == 'taxon'
+
+        #ref
+        assert self.srcfile.guess_values_type(['reference', 'reference', 'reference', 'reference'], 'ref') == 'ref'
+        assert self.srcfile.guess_values_type(['chromosome', 'chromosome', 'chromosome', 'chromosome'], 'chrom') == 'ref'
+        assert self.srcfile.guess_values_type(['reference', 'reference', 'reference', 'reference'], 'aaarefaaa') == 'ref'
+        assert self.srcfile.guess_values_type(['chromosome', 'chromosome', 'chromosome', 'chromosome'], 'aaachromaaa') == 'ref'
+
+        #start and end
+        assert self.srcfile.guess_values_type(['453', '334254', '342', '335'], 'start') == 'start'
+        assert self.srcfile.guess_values_type(['45.3', '334.254', '342', '335'], 'begin') == 'start'
+        assert self.srcfile.guess_values_type(['453', '334254', '342', '335'], 'end') == 'end'
+        assert self.srcfile.guess_values_type(['45.3', '334.254', '342', '335'], 'stop') == 'end'
 
     def test_guess_column_types(self):
-
-        assert self.srcfile.guess_column_types([['453', '334254', '342', '335'], ['453', '453', '453', '453'], ['453', 'ccc', 'bbb', 'aaa'], ['453', '334254', '342', '335']]) == ['numeric', 'category', 'text', 'numeric']
-
-    def test_get_abstraction(self):
-        assert self.srcfile.get_abstraction()
+        # guess_column_types not used
+        assert self.srcfile.guess_column_types([['453', '334254', '342', '335'], ['453', '453', '453', '453'], ['453', 'ccc', 'bbb', 'aaa'], ['453', '334254', '342', '335']], ['hello', 'hello1', 'hello2', 'hello3']) == ['numeric', 'category', 'text', 'numeric']

@@ -314,7 +314,11 @@ var AskomicsForceLayoutManager = function () {
         // Manage positionnable entities
         positionableEntities = userAbstraction.getPositionableEntities();
 
-        for ( uri in positionableEntities ) {
+        for (uri in positionableEntities) {
+          // if selected node is not a positionable node, donc create a positionable
+          // link with an other positionable node
+          if (! (slt_node.uri in positionableEntities)) continue;
+
           /* uncomment if we don't want a positionable relation between the same node  */
           //if ( uri == slt_node.uri ) continue ;
 
@@ -337,10 +341,14 @@ var AskomicsForceLayoutManager = function () {
           link = {
             suggested : true,
             positionable : true,
-            uri   : 'positionable:include',
-            source: slt_node,
-            target: suggestedList[uri],
-            label: '<include>',
+            uri   : 'positionable',
+            type : 'included',
+            sameTax: true,
+            sameRef: true,
+            strict: true,
+            source: suggestedList[uri],
+            target: slt_node,
+            label: 'included in',
             linkindex: slt_node.nlink[suggestedList[uri].id],
           };
           graphBuilder.setId(link);
@@ -422,15 +430,20 @@ var AskomicsForceLayoutManager = function () {
         node1.nlink[node2.id]++;
         node2.nlink[node1.id]++;
 
+
         link = {
-          suggested : true,
-          positionable : true,
-          uri   : ':positionable:include',
-          source: node1,
-          target: node2,
-          label: '<include>',
-          linkindex: node1.nlink[node2.id],
-        };
+            suggested : true,
+            positionable : true,
+            uri   : 'positionable',
+            type : 'included',
+            sameTax: true,
+            sameRef: true,
+            strict: true,
+            source: suggestedList[uri],
+            target: slt_node,
+            label: 'included in',
+            linkindex: slt_node.nlink[suggestedList[uri].id],
+          };
         graphBuilder.setId(link);
         link.source.weight++;
         links.push(link);
@@ -470,8 +483,8 @@ var AskomicsForceLayoutManager = function () {
     } ;              /* user want a new relation contraint betwwenn two node*/
 
 
-
   AskomicsForceLayoutManager.prototype.update = function () {
+    console.log('---> update graph!');
 
     var link = vis.selectAll(".link")
                   .data(links, function (d) {
@@ -480,8 +493,14 @@ var AskomicsForceLayoutManager = function () {
     /* nodes or links could be removed by other views */
     graphBuilder.synchronizeInstanciatedNodesAndLinks(nodes,links);
 
-    vis.append("svg:defs").append("svg:marker")
+    link.append("svg:path")
+            .attr("label", function (d) { /*console.log('---> label for '+d.id+': '+d.label);*/ return d.label ; })
+
+    link.enter().append("svg:defs").append("svg:marker")
                      .attr("id", "marker")
+                     .attr("class", "arrow")
+                     .style('stroke', function(d){return d.positionable?'darkgreen':'grey';}) //FIXME: doesn't work
+                     .style('fill', function(d){return d.positionable?'darkgreen':'grey';}) //FIXME: doesn't work
                      .attr("viewBox", "0 -5 10 10")
                      .attr("refX", 15)
                      .attr("refY", -1.5)
@@ -494,7 +513,7 @@ var AskomicsForceLayoutManager = function () {
 
       link.enter().append("svg:path")
           .attr("id", function (d) { return d.source.id + "-" + d.target.id + "-" + d.linkindex ; })
-          .attr("label", function (d) { return d.label ; })
+          .attr("label", function (d) { /*console.log('---> enter, label for '+d.id+': '+d.label);*/ return d.label ; })
           .attr("class", "link")
           .attr("marker-end", "url(#marker)")
           .style('stroke', function(d){return d.positionable?'darkgreen':'grey';})

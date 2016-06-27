@@ -392,7 +392,7 @@
       return [variates,constraintRelations,filters] ;
     };
 
-    AskomicsGraphBuilder.prototype.buildPositionableConstraintsGraph = function(type,source,target,constraintRelations,filters) {
+    AskomicsGraphBuilder.prototype.buildPositionableConstraintsGraph = function(infos,source,target,constraintRelations,filters) {
 
       var node = source ;
       var secondNode = target ;
@@ -436,22 +436,44 @@
       constraintRelations.push(["?"+'URI'+secondNode.SPARQLid,"?"+"id_start_"+secondNode.SPARQLid,"?"+startSecNodeId]);
       constraintRelations.push(["?"+'URI'+secondNode.SPARQLid,"?"+"id_end_"+secondNode.SPARQLid,"?"+endSecNodeId]);
 
-      var opstart = "";
-      var opend = "";
-      switch(type) {
-        case 'positionable:include' :
-            opstart = '>=';
-            opend   = '<=';
+      if (infos.strict) {
+        equalsign = '';
+      }else{
+        equalsign = '=';
+      }
+
+      switch(infos.type) {
+        case 'included' :
+            filters.push('FILTER(?'+startSecNodeId+' >'+equalsign+' ?'+startNodeId+')');
+            filters.push('FILTER(?'+endSecNodeId+' <'+equalsign+' ?'+endNodeId+')');
             break;
+        case 'excluded':
+            filters.push('FILTER(?'+endNodeId+' <'+equalsign+' ?'+startSecNodeId+' || ?'+startNodeId+' >'+equalsign+' ?'+endSecNodeId+')');
+            break;
+
+        case 'overlap':
+            // I think its the same as included. to discuss next meeting
+            filters.push('FILTER(((?'+endSecNodeId+' >'+equalsign+' ?'+startNodeId+') && (?'+startSecNodeId+' <'+equalsign+' ?'+endNodeId+')) || ((?'+startSecNodeId+' <'+equalsign+' ?'+endNodeId+') && (?'+endSecNodeId+' >'+equalsign+' ?'+startNodeId+')))');
+            break;
+
+        case 'near':
+          alert('sorry, near query is not implemanted yet !');
+          hideModal();
+          exit();
+            break;
+
         default:
           throw Exception("AskomicsGraphBuilder.prototype.buildPositionableConstraintsGraph: unkown type :"+JSON.stringify(type));
       }
-      /* TODO : attach these constraints with a checkbox on linkview */
-      filters.push('FILTER(' + "?"+taxonNodeId + "=" + "?"+taxonSecNodeId +')');
-      filters.push('FILTER(' + "?"+refNodeId + "=" + "?"+refSecNodeId +')');
 
-      filters.push('FILTER(' + "?"+ startNodeId + opstart + "?"+startSecNodeId +')');
-      filters.push('FILTER(' + "?"+ endNodeId + opend + "?"+endSecNodeId +')');
+      if (infos.same_ref) {
+        filters.push('FILTER(' + "?"+refNodeId + "=" + "?"+refSecNodeId +')');
+      }
+
+      if (infos.same_tax) {
+        filters.push('FILTER(' + "?"+taxonNodeId + "=" + "?"+taxonSecNodeId +')');
+      }
+
     };
 
     AskomicsGraphBuilder.prototype.buildConstraintsGraph = function() {
@@ -477,7 +499,13 @@
           if ( (dup_link_array[ilx].source.id == node.id) ||  (dup_link_array[ilx].target.id == node.id) ) {
             if ( dup_link_array[ilx].positionable ) {
               var secondNode = dup_link_array[ilx].source.id == node.id?dup_link_array[ilx].target:dup_link_array[ilx].source;
-              this.buildPositionableConstraintsGraph(dup_link_array[ilx].uri,node,secondNode,constraintRelations,filters);
+              var posInfos = {};
+              posInfos.type = dup_link_array[ilx].type;
+              posInfos.same_tax = dup_link_array[ilx].sameTax;
+              posInfos.same_ref = dup_link_array[ilx].sameRef;
+              posInfos.strict = dup_link_array[ilx].strict;
+
+              this.buildPositionableConstraintsGraph(posInfos,node,secondNode,constraintRelations,filters);
             } else {
               constraintRelations.push(["?"+'URI'+dup_link_array[ilx].source.SPARQLid,ua.URI(dup_link_array[ilx].uri),"?"+'URI'+dup_link_array[ilx].target.SPARQLid]);
             }
