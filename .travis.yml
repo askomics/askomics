@@ -7,6 +7,8 @@ cache: pip
 install:
   - pip install coveralls
   - python setup.py install
+before_script:
+  echo "Hello World"
 script: python setup.py nosetests
 after_success:
   coveralls

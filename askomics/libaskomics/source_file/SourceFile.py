@@ -36,7 +36,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         self.preview_limit = preview_limit
 
-        self.forced_column_types = None # FIXME should it have a default value? (guessed headers?) otherwise we must call the setter before using this (or make it an arg to methods using this)
+        self.forced_column_types = ['entity']
 
         self.type_dict = {
             'numeric' : 'xsd:decimal',
@@ -158,6 +158,8 @@ class SourceFile(ParamManager, HaveCachedProperties):
         :return: the guessed type ('taxon','ref', 'start', 'end', 'numeric', 'text' or 'category')
         """
 
+        if len(self.headers)<=num or num < 0:
+            raise IndexError("num ("+str(num)+") is too big  header:"+str(self.headers));
         types = {'ref':('chrom', 'ref'), 'taxon':('taxon', 'species'), 'start':('start', 'begin'), 'end':('end', 'stop')}
 
         # First check if it is specific type
@@ -211,6 +213,9 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         self.forced_column_types = types
 
+        if len(self.forced_column_types) != len(self.headers):
+            raise ValueError("forced_column_types hve a different size that headers ! forced_column_types:"+str(self.forced_column_types)+" headers:"+str(self.headers))
+
     def set_disabled_columns(self, disabled_columns):
         """
         Set manually curated types for column
@@ -227,6 +232,8 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         :return: ttl content for the abstraction
         """
+        if len(self.forced_column_types)<=0:
+            raise ValueError("forced_column_types is not defined !")
 
         ttl = ''
         ref_entity = self.headers[0]

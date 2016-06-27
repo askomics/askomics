@@ -15,11 +15,23 @@ var AskomicsUserAbstraction = function () {
     /* Ontology is save locally to avoid request with TPS  */
     /* --------------------------------------------------- */
     var tripletSubjectRelationObject = [];
-    var entityInformationList = {};
-    var attributesEntityList = {};
-    var categoriesEntityList = {};
+    var entityInformationList = {}; /*   entityInformationList[uri1][rel] = uri2 ; */
+    var attributesEntityList = {};  /*   attributesEntityList[uri1] = [ att1, att2,... ] */
     /* uri ->W get information about ref, taxon, start, end */
-    var entityPositionableInformationList = {};
+    var entityPositionableInformationList = {}; /*   entityPositionableInformationList[uri1] = { taxon, ref, start, end } */
+
+
+    AskomicsUserAbstraction.prototype.getEntities = function() {
+      return JSON.parse(JSON.stringify(Object.keys(entityInformationList))) ;
+    };
+
+    AskomicsUserAbstraction.prototype.getAtributesEntity = function(uriEntity) {
+      return JSON.parse(JSON.stringify(attributesEntityList[uriEntity])) ;
+    };
+
+    AskomicsUserAbstraction.prototype.getPositionableEntities = function() {
+      return JSON.parse(JSON.stringify(entityPositionableInformationList)) ;
+    };
     /*
     load ontology
     see template SPARQL to know sparql variable
@@ -200,10 +212,6 @@ var AskomicsUserAbstraction = function () {
 
     AskomicsUserAbstraction.prototype.isPositionable  = function(Uri) {
       return (Uri in entityPositionableInformationList);
-    };
-
-    AskomicsUserAbstraction.prototype.getPositionableEntities = function() {
-      return JSON.parse(JSON.stringify(entityPositionableInformationList)) ;
     };
 
   };
