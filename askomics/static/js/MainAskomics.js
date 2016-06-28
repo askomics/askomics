@@ -34,12 +34,11 @@ function loadStartPoints() {
   $("#deleteNode").hide();
 
   service.getAll(function(startPointsDict) {
-      $("#svgdiv").data({
-        last_counter: startPointsDict.last_new_counter });
-
       $("#startpoints").empty();
-
+      console.log("-----------------------------------");
+      console.log(JSON.stringify(startPointsDict.nodes));
       $.each(startPointsDict.nodes, function(key, value) {
+
           $("#startpoints").append($("<option></option>").attr("data-value", JSON.stringify(value)).text(value.label));
       });
       $("#starter").prop("disabled", true);

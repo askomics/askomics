@@ -7,12 +7,18 @@ from pyramid.paster import get_appsettings
 from askomics.libaskomics.TripleStoreExplorer import TripleStoreExplorer
 
 import json
+from interface_tps import InterfaceTPS
 
 class tripleStoreExplorerTests(unittest.TestCase):
     def setUp( self ):
         self.settings = get_appsettings('configs/development.virtuoso.ini', name='main')
         self.request = testing.DummyRequest()
+        self.request.session['upload_directory'] = os.path.join( os.path.dirname( __file__ ), "..", "test-data")
         self.temp_directory = tempfile.mkdtemp()
+
+        it = InterfaceTPS(self.settings,self.request)
+        it.empty()
+        it.load_test1()
 
     def tearDown( self ):
         shutil.rmtree( self.temp_directory )
@@ -77,7 +83,11 @@ class tripleStoreExplorerTests(unittest.TestCase):
 
         constraintesFilters   = ['VALUES ?Sexe1 { :F }']
         results = tse.build_sparql_query_from_json(variates,constraintesRelations,constraintesFilters,limit)
-        assert results == [a,e]
+
+        for elt in results:
+            self.assertTrue(elt in [a,e])
+
+        assert len(results) == 2
 
         constraintesFilters   = ['FILTER ( ?Age1 < 25)']
         results = tse.build_sparql_query_from_json(variates,constraintesRelations,constraintesFilters,limit)

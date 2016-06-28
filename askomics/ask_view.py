@@ -21,7 +21,6 @@ from askomics.libaskomics.SourceFileConvertor import SourceFileConvertor
 from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
 from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
 from askomics.libaskomics.rdfdb.ResultsBuilder import ResultsBuilder
-from askomics.libaskomics.graph.Node import Node
 from askomics.libaskomics.source_file.SourceFile import SourceFile
 
 @view_defaults(renderer='json', route_name='start_point')
@@ -42,8 +41,7 @@ class AskView(object):
         tse = TripleStoreExplorer(self.settings, self.request.session)
 
         nodes = tse.get_start_points()
-
-        data["nodes"] = {n.get_uri(): n.to_dict() for n in nodes}
+        data["nodes"] = {n['uri']: n for n in nodes}
 
         return data
 
@@ -243,9 +241,7 @@ class AskView(object):
         """ Get the user asbtraction to manage relation inside javascript """
         self.log.debug("== getUserAbstraction ==")
 
-        #data = {}
         tse = TripleStoreExplorer(self.settings, self.request.session)
-        body = self.request.json_body
         data = tse.getUserAbstraction()
 
         return data
@@ -277,49 +273,6 @@ class AskView(object):
         ql = QueryLauncher(self.settings, self.request.session)
         rb = ResultsBuilder(self.settings, self.request.session)
         data['file'] = ql.format_results_csv(rb.build_csv_table(results))
-
-        return data
-
-    @view_config(route_name='query', request_method='POST')
-    def launch_query(self):
-        """ Converts the constraints table created by the graph to a sparql query, send it to the database and compile the results"""
-        data = {}
-        body = self.request.json_body
-
-        export = bool(int(body['export']))
-        sqb = SparqlQueryBuilder(self.settings, self.request.session)
-        query = sqb.load_from_query_json(body).query
-
-        assert type(body['return_only_query']) is bool
-        if body['return_only_query']:
-            data['query'] = query
-            return data
-
-        ql = QueryLauncher(self.settings, self.request.session)
-        rb = ResultsBuilder(self.settings, self.request.session)
-
-
-        results = ql.process_query(query)
-
-        if export:
-            data['file'] = ql.format_results_csv(rb.build_csv_table(results))
-        else:
-            entity_name_list, entity_list_attributes = rb.organize_attribute_and_entity(results, body['constraint'])
-
-            data['results_entity_name'] = entity_name_list
-            data['results_entity_attributes'] = entity_list_attributes
-
-            data['results'] = [
-                {
-                    k: res[k].replace(self.settings["askomics.prefix"], '')
-                    for k in res.keys()
-                }
-                for res in results
-            ]
-
-        self.log.debug("== results ==\n%s", pformat(results))
-
-    #    data['query'] = query
 
         return data
 
