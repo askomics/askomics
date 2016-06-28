@@ -1,3 +1,0 @@
-SELECT DISTINCT ?$setting
-FROM $graph
-WHERE { <$nodeClass> displaySetting:$setting ?$setting . }

@@ -48,6 +48,7 @@ class SourceFileConvertor(ParamManager):
         files = self.get_source_files()
 
         for f in files:
+            print(f.name)
             if f.name == name:
                 return f
 

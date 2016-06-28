@@ -1,9 +1,0 @@
-SELECT DISTINCT ?label
-FROM $graph
-WHERE {
-    ?elt rdf:type <$entity> .
-    ?elt <$category> ?o .
-    <$nodeClass> displaySetting:category ?o .
-		?o rdfs:label ?label .
-}
-ORDER BY asc(?label)

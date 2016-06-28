@@ -39,9 +39,7 @@ class AskView(object):
         """ Get the nodes being query starters """
         self.log.debug("== START POINT ==")
         data = {}
-        # l'increment des variables est reinitialisé
-        dico_counter = {}
-        tse = TripleStoreExplorer(self.settings, self.request.session, dico_counter)
+        tse = TripleStoreExplorer(self.settings, self.request.session)
 
         nodes = tse.get_start_points()
 
@@ -84,25 +82,6 @@ class AskView(object):
             if 'class' in obj:
                 class_name = pm.remove_prefix(obj['class'])
                 data["class"][class_name]["count"] = obj['count']
-
-        # Get details on relations for each classes
-        for obj in res_list_classes:
-            if 'class' in obj:
-                class_name = pm.remove_prefix(obj['class'])
-                uri = obj['class']
-
-                shortcuts_list = tse.has_setting(uri, 'shortcut')
-
-                src = Node(
-                    uri,
-                    class_name,
-                    shortcuts_list)
-
-                attributes, nodes, links = tse.get_neighbours_for_node(src, None)
-
-                data["class"][class_name]["attributes"] = [a.to_dict() for a in attributes]
-                data["class"][class_name]["neighbours"] = [n.to_dict() for n in nodes]
-                data["class"][class_name]["relations"] = [l.to_dict() for l in links]
 
         return data
 
@@ -254,7 +233,8 @@ class AskView(object):
         urlbase = re.search(r'(http:\/\/.*)\/.*', self.request.current_route_url())
         urlbase = urlbase.group(1)
 
-        data = src_file.persist(urlbase)
+        method = 'load'
+        data = src_file.persist(urlbase,method)
 
         return data
 

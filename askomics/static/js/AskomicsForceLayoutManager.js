@@ -498,10 +498,10 @@ var AskomicsForceLayoutManager = function () {
             sameTax: true,
             sameRef: true,
             strict: true,
-            source: suggestedList[uri],
-            target: slt_node,
+            source: node2,
+            target: node1,
             label: 'included in',
-            linkindex: slt_node.nlink[suggestedList[uri].id],
+            linkindex: node2.nlink[node1.id],
           };
         graphBuilder.setId(link);
         link.source.weight++;
@@ -612,7 +612,6 @@ var AskomicsForceLayoutManager = function () {
               linksView.show(d);
           });
 
-
         //build the arrow label
         //var displayed_link = [];
         $('path').each(function (index, value) {
@@ -629,7 +628,6 @@ var AskomicsForceLayoutManager = function () {
           //};
           //displayed_link.push(value.__data__.id)
         });
-
 
       var node = vis.selectAll("g.node")
                   .data(nodes, function (d) { return d.id; });
