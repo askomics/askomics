@@ -557,12 +557,13 @@ var AskomicsForceLayoutManager = function () {
     /* nodes or links could be removed by other views */
     graphBuilder.synchronizeInstanciatedNodesAndLinks(nodes,links);
 
-    //build the arrow
+    //build the arrows
     arrow.enter().append("svg:defs").append("svg:marker")
-                     .attr("id", "marker")
+                     .attr("id", function(d) {return 'marker-'+d.id;})
+                     .attr('link_id', function(d) {return d.id;})
                      .attr("class", "arrow")
-                     .style('stroke', function(d){return d.positionable?'darkgreen':'grey';}) //FIXME: doesn't work
-                     .style('fill', function(d){return d.positionable?'darkgreen':'grey';}) //FIXME: doesn't work
+                     .style('stroke', function(d){return d.positionable?'darkgreen':'grey';})
+                     .style('fill', function(d){return d.positionable?'darkgreen':'grey';})
                      .attr("viewBox", "0 -5 10 10")
                      .attr("refX", 15)
                      .attr("refY", -1.5)
@@ -574,9 +575,9 @@ var AskomicsForceLayoutManager = function () {
 
       link.enter().append("svg:path")
           .attr("id", function (d) { return d.source.id + "-" + d.target.id + "-" + d.linkindex ; })
-          .attr("label", function (d) { /*console.log('---> enter, label for '+d.id+': '+d.label);*/ return d.label ; })
+          .attr("label", function (d) { return d.label ; })
           .attr("class", "link")
-          .attr("marker-end", "url(#marker)")
+          .attr("marker-end", function(d) {return "url(#marker-"+d.id+")";})
           .style('stroke', function(d){return d.positionable?'darkgreen':'grey';})
           .style("stroke-dasharray",function(d) {return d.suggested?"2":"";})
           .style("opacity", function(d) {return d.suggested?"0.3":"1";})
