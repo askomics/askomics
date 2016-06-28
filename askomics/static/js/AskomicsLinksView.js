@@ -53,6 +53,18 @@ var AskomicsLinksView = function () {
   };
 
   AskomicsLinksView.prototype.create = function (link) {
+    if(link.positionable){
+      linksView.createPosistionableView(link);
+    }else{
+      linksView.createStandardView(link);
+    }
+  };
+
+  AskomicsLinksView.prototype.createStandardView = function (link) {
+    $("#viewDetails").append("No filter available yet");
+  };
+
+  AskomicsLinksView.prototype.createPosistionableView = function (link) {
 
     var id_link = link.source.id+"-"+link.target.id;
 
