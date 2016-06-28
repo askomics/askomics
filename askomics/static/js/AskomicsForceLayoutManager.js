@@ -185,6 +185,7 @@ var AskomicsForceLayoutManager = function () {
         var id = l.source.id + "-" + l.target.id + "-" + l.linkindex;
         $("#" + id).css("stroke-dasharray","");
         $("#" + id).css("opacity","1");
+        $('#label-'+id).css('opacity', "1");
       }
     };
 
@@ -554,10 +555,51 @@ var AskomicsForceLayoutManager = function () {
                    .data(links, function (d) {
                       return d.source.id + "-" + d.target.id + "-" + d.linkindex ;
                    })
+
+    // Link labels
+    link.enter().append("text")
+                .attr("style", "text-anchor:middle; font: 10px sans-serif; cursor: pointer;")
+                .attr("dy", "-5")
+                .attr('id', function(d) {return 'label-'+d.source.id+'-'+d.target.id+'-'+d.linkindex;})
+                .style("opacity", function(d) {return d.suggested?"0.3":"1";})
+                .append("textPath")
+                .attr("xlink:href",function(d) {return "#"+d.source.id+'-'+d.target.id+'-'+d.linkindex;})
+                .attr("startOffset", "35%")
+                .text(function(d){return d.label;})
+                .on('click', function(d) { // Mouse down on a link label
+                  /* user want a new relation contraint betwwenn two node*/
+                  if ( d.suggested ) {
+                    ll = [d];
+                    graphBuilder.instanciateLink(ll);
+                    forceLayoutManager.updateInstanciateLinks(ll);
+                    if ( d.source.suggested || d.target.suggested  ) {
+                      var node = d.source.suggested?d.source:d.target;
+                      graphBuilder.instanciateNode(node);
+                      forceLayoutManager.updateInstanciatedNode(node);
+                      nodeView.create(node);
+                      attributesView.create(node);
+                      /* remove old suggestion */
+                      forceLayoutManager.removeSuggestions();
+                      /* insert new suggestion */
+                      forceLayoutManager.insertSuggestions(node);
+                      /* update graph */
+                      forceLayoutManager.update();
+                    }
+                    linksView.create(d);
+                  }
+                  /* update node view  */
+                  nodeView.hideAll();
+                  /* update right view with link view */
+                  attributesView.hideAll();
+                  /* update link view */
+                  linksView.hideAll();
+                  linksView.show(d);
+              });
+
     /* nodes or links could be removed by other views */
     graphBuilder.synchronizeInstanciatedNodesAndLinks(nodes,links);
 
-    //build the arrows
+    // Arrows
     arrow.enter().append("svg:defs").append("svg:marker")
                      .attr("id", function(d) {return 'marker-'+d.id;})
                      .attr('link_id', function(d) {return d.id;})
@@ -573,6 +615,7 @@ var AskomicsForceLayoutManager = function () {
                      .append("path")
                      .attr("d", "M0,-5L10,0L0,5");
 
+      // Links
       link.enter().append("svg:path")
           .attr("id", function (d) { return d.source.id + "-" + d.target.id + "-" + d.linkindex ; })
           .attr("label", function (d) { return d.label ; })
@@ -582,53 +625,7 @@ var AskomicsForceLayoutManager = function () {
           .style("stroke-dasharray",function(d) {return d.suggested?"2":"";})
           .style("opacity", function(d) {return d.suggested?"0.3":"1";})
           .style("stroke-width", "2")
-          .on("mouseover", function(d) { this.style[2]="4";})//style("stroke", "#2A2A2A"); })
-          .on('click', function(d) { // Mouse down on a link
-              /* user want a new relation contraint betwwenn two node*/
-              if ( d.suggested ) {
-                ll = [d];
-                graphBuilder.instanciateLink(ll);
-                forceLayoutManager.updateInstanciateLinks(ll);
-                if ( d.source.suggested || d.target.suggested  ) {
-                  var node = d.source.suggested?d.source:d.target;
-                  graphBuilder.instanciateNode(node);
-                  forceLayoutManager.updateInstanciatedNode(node);
-                  nodeView.create(node);
-                  attributesView.create(node);
-                  /* remove old suggestion */
-                  forceLayoutManager.removeSuggestions();
-                  /* insert new suggestion */
-                  forceLayoutManager.insertSuggestions(node);
-                  /* update graph */
-                  forceLayoutManager.update();
-                }
-                linksView.create(d);
-              }
-              /* update node view  */
-              nodeView.hideAll();
-              /* update right view with link view */
-              attributesView.hideAll();
-              /* update link view */
-              linksView.hideAll();
-              linksView.show(d);
-          });
-
-        //build the arrow label
-        //var displayed_link = [];
-        $('path').each(function (index, value) {
-          $('#libelle_link_'+$(this).attr('id')).remove();
-          //if ($.inArray(value.__data__.id, displayed_link)) {
-            vis.append("text")
-                    .attr("id", "libelle_link_"+$(this).attr('id'))
-                    .attr("style", "text-anchor:middle; font: 10px sans-serif;")
-                    .attr("dy", "-5")
-                    .append("textPath")
-                    .attr("xlink:href","#"+$(this).attr('id'))
-                    .attr("startOffset", "35%")
-                    .text(value.__data__.label);
-          //};
-          //displayed_link.push(value.__data__.id)
-        });
+          .on("mouseover", function(d) { this.style[2]="4";});
 
       var node = vis.selectAll("g.node")
                   .data(nodes, function (d) { return d.id; });

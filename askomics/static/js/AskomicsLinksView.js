@@ -36,7 +36,13 @@ var AskomicsLinksView = function () {
     //FIXME: following don't work (write the new label on link)
     var labels = {'included':'included in', 'excluded':'exluded of', 'overlap':'overlap with', 'near': 'near'};
     link.label = labels[type];
-    console.log('link (alv): '+JSON.stringify(link));
+
+    //var id = link.source.id + "-" + link.target.id + "-" + link.linkindex;
+    //$('#label-'+id).text('ouhou!');
+
+    //console.log('link (alv): '+JSON.stringify(link));
+
+
     forceLayoutManager.update();
   };
 
@@ -85,7 +91,7 @@ var AskomicsLinksView = function () {
     this.showTitle(link);
 
     var details = $("<div></div>").attr("id",nameDiv).addClass('div-details');
-    console.log(JSON.stringify(link.target));
+    //console.log(JSON.stringify(link.target));
 
     /*var reverseArrow = $('<div></div>').append($('<span><span>').attr('class', 'glyphicon glyphicon-resize-horizontal').attr('aria-hidden', 'true'))
                                        .append('Reverse direction');*/
