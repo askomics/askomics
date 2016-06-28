@@ -1,6 +1,0 @@
-SELECT DISTINCT ?nodeUri ?nodeLabel
-FROM $graph
-WHERE {?currentNodeInstance a <$nodeClass> .
-       ?currentNodeInstance $shortcut ?neighborNodeInstance .
-       ?neighborNodeInstance a ?nodeUri .
-       ?nodeUri rdfs:label ?nodeLabel}

@@ -57,6 +57,10 @@ function loadStatistics(modal) {
     displayModal('Please Wait', 'Close');
   }
 
+  abstraction = new AskomicsUserAbstraction();
+  abstraction.loadUserAbstraction();
+
+
   var service = new RestServiceJs("statistics");
   service.getAll(function(stats) {
     $('#content_statistics').empty();
@@ -82,6 +86,7 @@ function loadStatistics(modal) {
     });
     $('#content_statistics').append(table);
 
+    var entities = abstraction.getEntities() ;
 
     table=$("<table></table>").addClass('table').addClass('table-bordered');
     th = $("<tr></tr>").addClass("table-bordered").attr("style", "text-align:center;");
@@ -89,16 +94,22 @@ function loadStatistics(modal) {
     th.append($("<th></th>").text("Relations"));
     table.append(th);
 
-    $.each(stats['class'], function(key, value) {
+    for (var ent1 in entities ) {
       tr = $("<tr></tr>")
-            .append($("<td></td>").text(key));
+            .append($("<td></td>").text(abstraction.removePrefix(entities[ent1])));
             rels = "";
-            $.each(value.relations, function(key_rel, value_rel) {
-                rels += value_rel.source_id + " ----" + value_rel.relation_label + "----> " + value_rel.target_id + " ";
-            });
-            tr.append($("<td></td>").text(rels));
+            var t = abstraction.getRelationsObjectsAndSubjectsWithURI(entities[ent1]);
+            var subjectTarget = t[0];
+            for ( var ent2 in subjectTarget) {
+              for (var rel of subjectTarget[ent2]) {
+                rels += abstraction.removePrefix(entities[ent1]) + " ----" + abstraction.removePrefix(rel) + "----> " + abstraction.removePrefix(ent2) + "</br>";
+              }
+            }
+
+            tr.append($("<td></td>").html(rels));
       table.append(tr);
-    });
+    }
+
     $('#content_statistics').append(table);
 
 
@@ -108,17 +119,20 @@ function loadStatistics(modal) {
     th.append($("<th></th>").text("Attributes"));
     table.append(th);
 
-    $.each(stats['class'], function(key, value) {
+    for (ent1 in entities ) {
+    //$.each(stats['class'], function(key, value) {
       tr = $("<tr></tr>")
-            .append($("<td></td>").text(key));
+            .append($("<td></td>").text(abstraction.removePrefix(entities[ent1])));
             attrs = "";
-            $.each(value.attributes, function(key_attr, value_attr) {
-                attrs += value_attr.label+", ";
-            });
-            tr.append($("<td></td>").text(attrs));
+            cats = "";
+            var listAtt = abstraction.getAtributesEntity(entities[ent1]);
+            for (var att of listAtt) {
+                attrs += '- '+att.label +' :'+abstraction.removePrefix(att.type)+ "</br>";
+            }
+            tr.append($("<td></td>").html(attrs));
       table.append(tr);
-    });
-
+    //});
+    }
     if (modal) {
         hideModal();
     }

@@ -36,7 +36,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         self.preview_limit = preview_limit
 
-        self.forced_column_types = None # FIXME should it have a default value? (guessed headers?) otherwise we must call the setter before using this (or make it an arg to methods using this)
+        self.forced_column_types = ['entity']
 
         self.type_dict = {
             'numeric' : 'xsd:decimal',
@@ -212,6 +212,9 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         self.forced_column_types = types
 
+        if len(self.forced_column_types) != len(self.headers):
+            raise ValueError("forced_column_types hve a different size that headers ! forced_column_types:"+str(self.forced_column_types)+" headers:"+str(self.headers))
+
     def set_disabled_columns(self, disabled_columns):
         """
         Set manually curated types for column
@@ -228,6 +231,8 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         :return: ttl content for the abstraction
         """
+        if len(self.forced_column_types)<=0:
+            raise ValueError("forced_column_types is not defined !")
 
         ttl = ''
         ref_entity = self.headers[0]
@@ -462,7 +467,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         return headers_status, missing_headers
 
-    def persist(self, urlbase):
+    def persist(self, urlbase,method):
         """
         Store the current source file in the triple store
 
@@ -475,8 +480,6 @@ class SourceFile(ParamManager, HaveCachedProperties):
         content_ttl = self.get_turtle()
 
         ql = QueryLauncher(self.settings, self.session)
-
-        method = 'load' # FIXME how do we decide? We don't know the size of what we want to insert as we use a generator
 
         # use insert data instead of load sparql procedure when the dataset is small
         total_triple_count = 0
@@ -591,6 +594,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
             except Exception as e:
                 return self._format_exception(e)
 
+            data = {}
             data['status'] = 'ok'
             data['total_triple_count'] = total_triple_count
 

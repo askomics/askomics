@@ -471,10 +471,10 @@ var AskomicsForceLayoutManager = function () {
             sameTax: true,
             sameRef: true,
             strict: true,
-            source: suggestedList[uri],
-            target: slt_node,
+            source: node2,
+            target: node1,
             label: 'included in',
-            linkindex: slt_node.nlink[suggestedList[uri].id],
+            linkindex: node2.nlink[node1.id],
           };
         graphBuilder.setId(link);
         link.source.weight++;
@@ -584,13 +584,16 @@ var AskomicsForceLayoutManager = function () {
           });
       /* append for each link a label to print relation property name */
       $('path').each(function (index, value) {
+        $('#libelle_link_'+$(this).attr('id')).remove();
+
         vis.append("text")
+                    .attr("id", "libelle_link_"+$(this).attr('id'))
                     .attr("style", "text-anchor:middle; font: 10px sans-serif;")
                     .attr("dy", "-5")
                     .append("textPath")
                     .attr("xlink:href","#"+$(this).attr('id'))
                     .attr("startOffset", "35%")
-                    .text($(this).attr('label'));
+                    .html($(this).attr('label'));
       });
 
 

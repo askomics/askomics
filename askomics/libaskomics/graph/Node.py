@@ -16,10 +16,9 @@ class Node(GraphElement):
           another node or a node attribute
     """
 
-    def __init__(self, uri, label, shortcuts):
+    def __init__(self, uri, label):
         self.uri = uri
         self.label = label
-        self.shortcuts = shortcuts
         self.log = logging.getLogger(__name__)
 
     def get_uri(self):
@@ -28,16 +27,12 @@ class Node(GraphElement):
     def get_label(self):
         return self.label
 
-    def get_shortcuts(self):
-        return self.shortcuts
-
     def print_attr(self):
         self.log.debug("uri =" + self.uri)
         self.log.debug("label =" + self.label)
-        self.log.debug("shortcuts =" + str(self.shortcuts))
 
     def to_dict(self):
-        return {#"id": self.node_id,
+        return {
                 "uri": self.uri,
-                "label": self.label,
-                "shortcuts": self.shortcuts}
+                "label": self.label
+                }

@@ -15,6 +15,7 @@ requires = [
     'waitress==0.9.0',
     'SPARQLWrapper==1.7.6',
     'requests==2.10.0',
+    'Pygments==2.1.3',
     'nose',
     'webtest',
     'coverage',
