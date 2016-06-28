@@ -4,6 +4,8 @@ python:
   - "3.3"
   - "3.4"
   - "3.5"
+services:
+  - docker
 cache: pip
 install:
   - pip install coveralls
