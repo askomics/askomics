@@ -10,7 +10,7 @@ from askomics.ask_view import AskView
 import json
 from interface_tps import InterfaceTPS
 
-class tripleStoreExplorerTests(unittest.TestCase):
+class AskViewTests(unittest.TestCase):
     def setUp( self ):
         self.settings = get_appsettings('configs/development.virtuoso.ini', name='main')
         self.request = testing.DummyRequest()
