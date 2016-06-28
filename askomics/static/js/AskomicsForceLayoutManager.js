@@ -522,13 +522,16 @@ var AskomicsForceLayoutManager = function () {
                   .data(links, function (d) {
                       return d.source.id + "-" + d.target.id + "-" + d.linkindex ;
                   });
+
+    var arrow = vis.selectAll(".arrow")
+                   .data(links, function (d) {
+                      return d.source.id + "-" + d.target.id + "-" + d.linkindex ;
+                   })
     /* nodes or links could be removed by other views */
     graphBuilder.synchronizeInstanciatedNodesAndLinks(nodes,links);
 
-    link.append("svg:path")
-            .attr("label", function (d) { /*console.log('---> label for '+d.id+': '+d.label);*/ return d.label ; })
-
-    link.enter().append("svg:defs").append("svg:marker")
+    //build the arrow
+    arrow.enter().append("svg:defs").append("svg:marker")
                      .attr("id", "marker")
                      .attr("class", "arrow")
                      .style('stroke', function(d){return d.positionable?'darkgreen':'grey';}) //FIXME: doesn't work
@@ -541,7 +544,6 @@ var AskomicsForceLayoutManager = function () {
                      .attr("orient", "auto")
                      .append("path")
                      .attr("d", "M0,-5L10,0L0,5");
-
 
       link.enter().append("svg:path")
           .attr("id", function (d) { return d.source.id + "-" + d.target.id + "-" + d.linkindex ; })
@@ -582,17 +584,24 @@ var AskomicsForceLayoutManager = function () {
               linksView.hideAll();
               linksView.show(d);
           });
-      /* append for each link a label to print relation property name */
-      $('path').each(function (index, value) {
-        vis.append("text")
+
+
+        //build the arrow label
+        //var displayed_link = [];
+        $('path').each(function (index, value) {
+          $('#libelle_link_'+$(this).attr('id')).remove();
+          //if ($.inArray(value.__data__.id, displayed_link)) {
+            vis.append("text")
+                    .attr("id", "libelle_link_"+$(this).attr('id'))
                     .attr("style", "text-anchor:middle; font: 10px sans-serif;")
                     .attr("dy", "-5")
                     .append("textPath")
                     .attr("xlink:href","#"+$(this).attr('id'))
                     .attr("startOffset", "35%")
-                    .text($(this).attr('label'));
-      });
-
+                    .text(value.__data__.label);
+          //};
+          //displayed_link.push(value.__data__.id)
+        });
 
 
       var node = vis.selectAll("g.node")
