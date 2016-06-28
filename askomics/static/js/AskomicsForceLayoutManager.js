@@ -231,6 +231,7 @@ var AskomicsForceLayoutManager = function () {
       $('#txt_'+node.id).html(graphBuilder.getLabelNode(node)+'<tspan font-size="7" baseline-shift="sub">'+graphBuilder.getLabelIndexNode(node)+"</tspan>");
       // canceled transparency
       $("#node_"+node.id).css("opacity", "1");
+      $('#txt_'+node.id).css("opacity","1");
       //$("#node_"+node.id).css("fill", this.getColorInstanciatedNode(node));
     };
 
@@ -685,6 +686,9 @@ var AskomicsForceLayoutManager = function () {
       nodeEnter.append("svg:text")//.append("tspan")
               .attr("class", "textClass")
               .attr("x", 14)
+              .style("opacity", function(d) {
+                  return (d.suggested === true ? configDisplay.opacityNode : 1);
+              })
               .attr("y", ".31em")
               .attr("id", function (d) {
                   return "txt_" + d.id;
