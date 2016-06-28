@@ -15,6 +15,7 @@ var AskomicsForceLayoutManager = function () {
     if ($('#icon-resize-graph').attr('value') == 'small') {
       //hide all other things
       $('#viewDetails').hide();
+      $('#results').hide();
       $('#graph').attr('class', 'col-md-12');
 
       //resize svg
@@ -31,6 +32,7 @@ var AskomicsForceLayoutManager = function () {
     if ($('#icon-resize-graph').attr('value') == 'full') {
       //reshow all other things
       $('#viewDetails').show();
+      $('#results').show();
       $('#graph').attr('class', 'col-md-6');
 
       //resize svg
@@ -48,6 +50,7 @@ var AskomicsForceLayoutManager = function () {
     if ($('#icon-resize-attr').attr('value') == 'small') {
       //hide all other things
       $('#graph').hide();
+      $('#results').hide();
       $('#viewDetails').attr('class', 'col-md-12');
       $('.div-details').attr('class', 'div-details-max');
 
@@ -60,6 +63,7 @@ var AskomicsForceLayoutManager = function () {
     if ($('#icon-resize-attr').attr('value') == 'full') {
       //reshow all other things
       $('#graph').show();
+      $('#results').show();
       $('#viewDetails').attr('class', 'col-md-6');
       $('.div-details-max').attr('class', 'div-details');
 
