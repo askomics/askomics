@@ -21,7 +21,6 @@ from askomics.libaskomics.SourceFileConvertor import SourceFileConvertor
 from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
 from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
 from askomics.libaskomics.rdfdb.ResultsBuilder import ResultsBuilder
-from askomics.libaskomics.graph.Node import Node
 from askomics.libaskomics.source_file.SourceFile import SourceFile
 
 @view_defaults(renderer='json', route_name='start_point')
@@ -42,8 +41,7 @@ class AskView(object):
         tse = TripleStoreExplorer(self.settings, self.request.session)
 
         nodes = tse.get_start_points()
-
-        data["nodes"] = {n.get_uri(): n.to_dict() for n in nodes}
+        data["nodes"] = {n['uri']: n for n in nodes}
 
         return data
 
