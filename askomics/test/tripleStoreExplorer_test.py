@@ -70,7 +70,10 @@ class tripleStoreExplorerTests(unittest.TestCase):
         'Sexe1': 'http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#M',
         'label1': 'Georges'}
 
-        assert results == [a,b,c,d,e,f,g]
+        for elt in results:
+            self.assertTrue(elt in [a,b,c,d,e,f,g])
+
+        assert len(results) == 7
 
         constraintesFilters   = ['VALUES ?Sexe1 { :F }']
         results = tse.build_sparql_query_from_json(variates,constraintesRelations,constraintesFilters,limit)
