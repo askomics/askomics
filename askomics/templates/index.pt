@@ -69,6 +69,11 @@
             </div>
             <div id="queryBuilder" class="row" hidden>
                 <div id="graph" class="col-md-6">
+                    <!-- Resize graph -->
+                    <button type="button" id='full-screen-graph' class="btn btn-default" aria-label="Right Align">
+                        <span id='icon-resize-graph' value='small' class="glyphicon glyphicon-resize-full" aria-hidden="true"></span>
+                    </button>
+
                     <div class="btn-group">
                       <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                       Files<span class="caret"></span>
@@ -81,19 +86,12 @@
                         <input id="uploadBtn" type="file" class="upload">
                         </div>
                         </a></li>
-
                         <!--download-->
                         <li><a href="#" id="dwl-query">
                         <p><span class="glyphicon glyphicon-save" aria-hidden="true"></span> Download query</p>
                         </a></li>
                       </ul>
                     </div>
-
-                    <!-- Resize graph -->
-                    <button type="button" id='full-screen' class="btn btn-default" aria-label="Right Align">
-                        <span id='icon-resize' value='small' class="glyphicon glyphicon-resize-full" aria-hidden="true"></span>
-                        Resize
-                    </button>
 
                     <!--
                     <div class="btn-group btn-group-query">
@@ -110,28 +108,30 @@
 
                     <div id="svgdiv"></div>
                     <div id="uploadedQuery" class="uploadedQuery" hidden contenteditable></div>
-			<div class="btn-group">
+                        <div class="btn-group">
                             <button id="btn-down" type="submit" class="btn btn-default" onclick="downloadResultsFile(10000)">
                                 <span class="glyphicon glyphicon-save"></span> Download results
                             </button>
-                            <!--<button id="btn-file" type="button" class="btn btn-default" onclick="generateResultFile(10000)">
-                                Results file
-                            </button>-->
                         </div>
                         <div class="btn-group btn-group-query">
                             <button type="button" class="btn btn-default" onclick="viewQueryResults()">Launch query</button>
                             <button type="button" class="btn btn-default" onclick="window.location.reload()">Reset</button>
                         </div>
-
                 </div>
 
                 <div id="viewDetails" class="col-md-6">
-                    <h3 class="header-div">Filter <span id="objectName" class="label label-default"></span> on
+                    <h3 class="header-div">
+                     <!-- Resize attributes view -->
+                    <button type="button" id='full-screen-attr' class="btn btn-default" aria-label="Right Align">
+                        <span id='icon-resize-attr' value='small' class="glyphicon glyphicon-resize-full" aria-hidden="true"></span>
+                    </button>
+                    Filter <span id="objectName" class="label label-default"></span> on
+
                     <div class="btn-group btn-group-query">
                         <span id="showNode" class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
                         <span id="deleteNode" class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span>
-                    </div></h3>
-
+                    </div>
+                    </h3>
                     <hr/>
                 </div>
              </div>

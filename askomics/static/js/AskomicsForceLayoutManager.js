@@ -11,23 +11,24 @@ var AskomicsForceLayoutManager = function () {
     opacityNode  : "0.5"
   };
 
-  $('#full-screen').click(function() {
-    if ($('#icon-resize').attr('value') == 'small') {
+  $('#full-screen-graph').click(function() {
+    if ($('#icon-resize-graph').attr('value') == 'small') {
       //hide all other things
       $('#viewDetails').hide();
       $('#graph').attr('class', 'col-md-12');
 
       //resize svg
       $("#svg").attr('height', 700);
-      $("#svg").attr('width', 1000);
+      //$("#svg").attr('width', 1000);
+      $("#svg").attr('width', $("#svgdiv").width());
 
       //change icon
-      $('#icon-resize').attr('class', 'glyphicon glyphicon-resize-small');
-      $('#icon-resize').attr('value', 'full');
+      $('#icon-resize-graph').attr('class', 'glyphicon glyphicon-resize-small');
+      $('#icon-resize-graph').attr('value', 'full');
       return;
     }
 
-    if ($('#icon-resize').attr('value') == 'full') {
+    if ($('#icon-resize-graph').attr('value') == 'full') {
       //reshow all other things
       $('#viewDetails').show();
       $('#graph').attr('class', 'col-md-6');
@@ -37,8 +38,34 @@ var AskomicsForceLayoutManager = function () {
       $("#svg").attr('width', $("#svgdiv").width());
 
       //change icon
-      $('#icon-resize').attr('class', 'glyphicon glyphicon-resize-full');
-      $('#icon-resize').attr('value', 'small');
+      $('#icon-resize-graph').attr('class', 'glyphicon glyphicon-resize-full');
+      $('#icon-resize-graph').attr('value', 'small');
+      return;
+    }
+  })
+
+  $('#full-screen-attr').click(function() {
+    if ($('#icon-resize-attr').attr('value') == 'small') {
+      //hide all other things
+      $('#graph').hide();
+      $('#viewDetails').attr('class', 'col-md-12');
+      $('.div-details').attr('class', 'div-details-max');
+
+      //change icon
+      $('#icon-resize-attr').attr('class', 'glyphicon glyphicon-resize-small');
+      $('#icon-resize-attr').attr('value', 'full');
+      return;
+    }
+
+    if ($('#icon-resize-attr').attr('value') == 'full') {
+      //reshow all other things
+      $('#graph').show();
+      $('#viewDetails').attr('class', 'col-md-6');
+      $('.div-details-max').attr('class', 'div-details');
+
+      //change icon
+      $('#icon-resize-attr').attr('class', 'glyphicon glyphicon-resize-full');
+      $('#icon-resize-attr').attr('value', 'small');
       return;
     }
   })
