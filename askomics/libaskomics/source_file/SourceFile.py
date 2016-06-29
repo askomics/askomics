@@ -38,7 +38,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         self.forced_column_types = ['entity']
 
-        self.category_values = defaultdict(set) 
+        self.category_values = defaultdict(set)
 
         self.type_dict = {
             'numeric' : 'xsd:decimal',
@@ -300,19 +300,20 @@ class SourceFile(ParamManager, HaveCachedProperties):
             tabreader = csv.reader(tabfile, dialect=self.dialect)
             next(tabreader) # Skip header
 
+            entity_label=""
             # Loop on lines
             for row_number, row in enumerate(tabreader):
-                # skip commented lines (# char at the begining)
-                if row[0].startswith('#'):
+                #blanck line
+                if len(row) == 0:
                     continue
-
                 if len(row) != len(self.headers):
-                    e = SourceFileSyntaxError('Invalid line found: %s columns expected, found %s' %s (str(self.headers), str(len(row))))
+                    e = SourceFileSyntaxError('Invalid line found: '+str(self.headers)+' columns expected, found '+str(len(row))+" - (last valid entity "+entity_label+")")
                     e.filename = self.path
                     e.lineno = row_number
                     log.error(repr(e))
-                    raise e #FIXME: Do we want to read the file anyway ?
+                    raise e
 
+                entity_label = row[0]
                 for i, (header, current_type) in enumerate(zip(self.headers, self.forced_column_types)):
                     if current_type in ('category', 'taxon', 'ref'):
                         # This is a category, keep track of allowed values for this column
@@ -329,26 +330,24 @@ class SourceFile(ParamManager, HaveCachedProperties):
             # Load the file with reader
             tabreader = csv.reader(tabfile, dialect=self.dialect)
 
-            count = 0
-
             next(tabreader) # Skip header
 
             # Loop on lines
-            for row in tabreader:
-
+            for row_number, row in enumerate(tabreader):
                 ttl    = ""
                 ttlSym = ""
-
-                # skip commented lines (# char at the begining)
-                if row[0].startswith('#'):
+                #if len(row)>0:
+                #    self.log.debug(row[0]+' '+str(row_number))
+                #blanck line
+                if len(row) == 0:
                     continue
 
                 if len(row) != len(self.headers):
-                    e = SourceFileSyntaxError('Invalid line found: %s columns expected, found %s' %s (str(self.headers), str(len(row))))
+                    e = SourceFileSyntaxError('Invalid line found: '+str(len(self.headers))+' columns expected, found '+str(len(row))+" - (last valid entity "+entity_label+")")
                     e.filename = self.path
                     e.lineno = row_number
                     self.log.error(repr(e))
-                    raise e #FIXME: Do we want to read the file anyway ?
+                    raise e
 
                 # Create the entity (first column)
                 entity_label = row[0]
@@ -389,10 +388,8 @@ class SourceFile(ParamManager, HaveCachedProperties):
                     yield ttlSym
 
                 yield ttl
-                #print(ttl)
                 # Stop after x lines
-                count += 1
-                if preview_only and count > self.preview_limit:
+                if preview_only and row_number > self.preview_limit:
                     return
 
     @cached_property

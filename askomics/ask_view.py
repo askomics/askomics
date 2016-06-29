@@ -221,18 +221,21 @@ class AskView(object):
         file_name = body["file_name"]
         col_types = body["col_types"]
         disabled_columns = body["disabled_columns"]
+        try:
+            sfc = SourceFileConvertor(self.settings, self.request.session)
 
-        sfc = SourceFileConvertor(self.settings, self.request.session)
+            src_file = sfc.get_source_file(file_name)
+            src_file.set_forced_column_types(col_types)
+            src_file.set_disabled_columns(disabled_columns)
 
-        src_file = sfc.get_source_file(file_name)
-        src_file.set_forced_column_types(col_types)
-        src_file.set_disabled_columns(disabled_columns)
+            urlbase = re.search(r'(http:\/\/.*)\/.*', self.request.current_route_url())
+            urlbase = urlbase.group(1)
 
-        urlbase = re.search(r'(http:\/\/.*)\/.*', self.request.current_route_url())
-        urlbase = urlbase.group(1)
-
-        method = 'load'
-        data = src_file.persist(urlbase,method)
+            method = 'load'
+            data = src_file.persist(urlbase,method)
+        except Exception as e:
+            data['error'] = 'Probleme with user data file ?</br>'+str(e)
+            self.log.error(str(e))
 
         return data
 
