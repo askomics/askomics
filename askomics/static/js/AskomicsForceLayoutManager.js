@@ -67,7 +67,7 @@ var AskomicsForceLayoutManager = function () {
       forceLayoutManager.normalsizeGraph();
       return;
     }
-  })
+  });
 
   $('#full-screen-attr').click(function() {
     if ($('#icon-resize-attr').attr('value') == 'small') {
@@ -566,7 +566,7 @@ var AskomicsForceLayoutManager = function () {
     var arrow = vis.selectAll(".arrow")
                    .data(links, function (d) {
                       return d.source.id + "-" + d.target.id + "-" + d.linkindex ;
-                   })
+                   });
 
     // Link labels
     link.enter().append("text")
@@ -630,6 +630,7 @@ var AskomicsForceLayoutManager = function () {
       // Links
       link.enter().append("svg:path")
           .attr("id", function (d) { return d.source.id + "-" + d.target.id + "-" + d.linkindex ; })
+          .attr('idlink', function(d) {return d.id;})
           .attr("label", function (d) { return d.label ; })
           .attr("class", "link")
           .attr("marker-end", function(d) {return "url(#marker-"+d.id+")";})

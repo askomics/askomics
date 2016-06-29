@@ -55,14 +55,16 @@ var AskomicsLinksView = function () {
 
     // remove link
     var id = link.source.id + "-" + link.target.id + "-" + link.linkindex;
+    var linkid = $('#'+id).attr("idlink");
+
     $('#'+id).remove(); // link
     $('#label-'+id).remove(); // link label
     $('#marker-'+id).remove(); // arrow
 
     // swap target and source
-    var old_source = link.source;
+    var buf = link.source ;
     link.source = link.target;
-    link.target = old_source;
+    link.target = buf;
 
     // new rightview for the reverse link
     linksView.create(link);
