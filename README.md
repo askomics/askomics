@@ -57,13 +57,13 @@ To be able to launch AskOmics, you will need to install it in your virtual envir
 If you want to develop AskOmics:
 ```
 $ cd rdf-visual-query-builder/
-$ python setup.py develop
+$ python3 setup.py develop
 ```
 
 If you don't want to develop AskOmics:
 ```
 $ cd rdf-visual-query-builder/
-$ python setup.py install
+$ python3 setup.py install
 ```
 
 ### Launch AskOmics server

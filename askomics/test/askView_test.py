@@ -14,6 +14,11 @@ class AskViewTests(unittest.TestCase):
     def setUp( self ):
         self.settings = get_appsettings('configs/development.virtuoso.ini', name='main')
         self.request = testing.DummyRequest()
+
+        self.config = testing.setUp(request=self.request)
+        self.config.add_route('load_data_into_graph', '/load_data_into_graph')
+        self.config.scan()
+
         self.request.session['upload_directory'] = os.path.join( os.path.dirname( __file__ ), "..", "test-data")
         self.temp_directory = tempfile.mkdtemp()
 
@@ -117,3 +122,12 @@ class AskViewTests(unittest.TestCase):
 
         self.request.json_body['export'] = True
         data = self.askview.get_value()
+
+    def test_load_data_into_graph(self):
+        self.request.json_body = {
+            'file_name':'personne.tsv',
+            'col_types': ['entity_start', 'text','category','numeric','text'],
+            'disabled_columns':[]
+        }
+
+        #data = self.askview.load_data_into_graph();

@@ -37,10 +37,6 @@ class AbstractedRelation(object):
 
         self.uri = ":"+identifier
         self.label = identifier
-        print(relation_type)
-        print(identifier)
-
-        print("RELATIONTYPE:"+relation_type)
 
         if relation_type == "entity":
             self.relation_type = "owl:ObjectProperty"
@@ -59,21 +55,6 @@ class AbstractedRelation(object):
         self.rdfs_domain = ":" + rdfs_domain
         self.log = logging.getLogger(__name__)
 
-    def set_uri(self, identifier):
-        self.uri = ":" + identifier
-
-    def set_label(self, identifier):
-        self.label = identifier
-
-    def set_domain(self, rdfs_domain):
-        self.rdfs_domain = rdfs_domain
-
-    def set_range(self, rdfs_range):
-        if self.relation_type == "owl:ObjectProperty" or self.relation_type == "owl:SymmetricProperty":
-            self.rdfs_range = ":" + rdfs_range
-        else:
-            self.rdfs_range = rdfs_range
-
     def get_uri(self):
         return self.uri
 
@@ -88,16 +69,6 @@ class AbstractedRelation(object):
 
     def get_range(self):
         return self.rdfs_range
-
-    def print_attr(self):
-        self.log.debug(pformat_generic_object(self))
-
-    def to_dict(self):
-        return {"uri": self.uri,
-                "label": self.label,
-                "relation_type": self.relation_type,
-                "domain": self.rdfs_domain,
-                "range": self.rdfs_range}
 
     def get_turtle(self):
         """

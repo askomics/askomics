@@ -24,3 +24,16 @@ class FileUploadTests(unittest.TestCase):
     def test_filepath(self):
         fu = FileUpload(self.request);
         fu.filepath('toto')
+
+    def test_validate(self):
+
+        fu = FileUpload(self.request);
+        nefi = {}
+        nefi['size']=0
+        fu.validate(nefi)
+        nefi['size']=99999999999
+        fu.validate(nefi)
+
+    def test_fileinfo(self):
+        fu = FileUpload(self.request);
+        fu.fileinfo("personne.tsv")
