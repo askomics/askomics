@@ -27,6 +27,10 @@ function viewQueryResults() {
     service.post(jdata,function(data) {
         displayResults(data);
         hideModal();
+        //resize graph if fullscreen
+        if ($('#icon-resize-graph').attr('value') == 'full') {
+          forceLayoutManager.normalsizeGraph();
+        }
     });
 }
 
