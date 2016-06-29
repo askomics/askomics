@@ -38,6 +38,8 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         self.forced_column_types = ['entity']
 
+        self.category_values = defaultdict(set) 
+
         self.type_dict = {
             'numeric' : 'xsd:decimal',
             'text'    : 'xsd:string',
@@ -93,8 +95,6 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
             # first line is header
             headers = next(tabreader)
-            if headers[0].startswith('#'):
-                headers[0] = re.sub('^#+', '', s) # Remove leading comment signs
 
         return headers
 
@@ -117,9 +117,6 @@ class SourceFile(ParamManager, HaveCachedProperties):
             # Loop on lines
             data = [[] for x in range(len(header))]
             for row in tabreader:
-                # skip commented lines (# char at the begining)
-                if row[0].startswith('#'):
-                    continue
 
                 # Fill data lists
                 for i, val in enumerate(row):

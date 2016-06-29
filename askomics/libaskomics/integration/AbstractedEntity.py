@@ -19,16 +19,6 @@ class AbstractedEntity(object):
     def get_uri(self):
         return self.uri
 
-    def get_label(self):
-        return self.label
-
-    def print_attr(self):
-        self.log.debug(pformat_generic_object(self))
-
-    def to_dict(self):
-        return {"uri": self.uri,
-                "label": self.label}
-
     def get_turtle(self):
         """
         return the turtle code describing an AbstractedEntity
