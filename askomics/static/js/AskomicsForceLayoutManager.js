@@ -11,25 +11,28 @@ var AskomicsForceLayoutManager = function () {
     opacityNode  : "0.5"
   };
 
-  $('#full-screen').click(function() {
-    if ($('#icon-resize').attr('value') == 'small') {
+  $('#full-screen-graph').click(function() {
+    if ($('#icon-resize-graph').attr('value') == 'small') {
       //hide all other things
       $('#viewDetails').hide();
+      $('#results').hide();
       $('#graph').attr('class', 'col-md-12');
 
       //resize svg
       $("#svg").attr('height', 700);
-      $("#svg").attr('width', 1000);
+      //$("#svg").attr('width', 1000);
+      $("#svg").attr('width', $("#svgdiv").width());
 
       //change icon
-      $('#icon-resize').attr('class', 'glyphicon glyphicon-resize-small');
-      $('#icon-resize').attr('value', 'full');
+      $('#icon-resize-graph').attr('class', 'glyphicon glyphicon-resize-small');
+      $('#icon-resize-graph').attr('value', 'full');
       return;
     }
 
-    if ($('#icon-resize').attr('value') == 'full') {
+    if ($('#icon-resize-graph').attr('value') == 'full') {
       //reshow all other things
       $('#viewDetails').show();
+      $('#results').show();
       $('#graph').attr('class', 'col-md-6');
 
       //resize svg
@@ -37,8 +40,36 @@ var AskomicsForceLayoutManager = function () {
       $("#svg").attr('width', $("#svgdiv").width());
 
       //change icon
-      $('#icon-resize').attr('class', 'glyphicon glyphicon-resize-full');
-      $('#icon-resize').attr('value', 'small');
+      $('#icon-resize-graph').attr('class', 'glyphicon glyphicon-resize-full');
+      $('#icon-resize-graph').attr('value', 'small');
+      return;
+    }
+  })
+
+  $('#full-screen-attr').click(function() {
+    if ($('#icon-resize-attr').attr('value') == 'small') {
+      //hide all other things
+      $('#graph').hide();
+      $('#results').hide();
+      $('#viewDetails').attr('class', 'col-md-12');
+      $('.div-details').attr('class', 'div-details-max');
+
+      //change icon
+      $('#icon-resize-attr').attr('class', 'glyphicon glyphicon-resize-small');
+      $('#icon-resize-attr').attr('value', 'full');
+      return;
+    }
+
+    if ($('#icon-resize-attr').attr('value') == 'full') {
+      //reshow all other things
+      $('#graph').show();
+      $('#results').show();
+      $('#viewDetails').attr('class', 'col-md-6');
+      $('.div-details-max').attr('class', 'div-details');
+
+      //change icon
+      $('#icon-resize-attr').attr('class', 'glyphicon glyphicon-resize-full');
+      $('#icon-resize-attr').attr('value', 'small');
       return;
     }
   });
@@ -158,6 +189,7 @@ var AskomicsForceLayoutManager = function () {
         var id = l.source.id + "-" + l.target.id + "-" + l.linkindex;
         $("#" + id).css("stroke-dasharray","");
         $("#" + id).css("opacity","1");
+        $('#label-'+id).css('opacity', "1");
       }
     };
 
@@ -203,6 +235,7 @@ var AskomicsForceLayoutManager = function () {
       $('#txt_'+node.id).html(graphBuilder.getLabelNode(node)+'<tspan font-size="7" baseline-shift="sub">'+graphBuilder.getLabelIndexNode(node)+"</tspan>");
       // canceled transparency
       $("#node_"+node.id).css("opacity", "1");
+      $('#txt_'+node.id).css("opacity","1");
       //$("#node_"+node.id).css("fill", this.getColorInstanciatedNode(node));
     };
 
@@ -522,17 +555,62 @@ var AskomicsForceLayoutManager = function () {
                   .data(links, function (d) {
                       return d.source.id + "-" + d.target.id + "-" + d.linkindex ;
                   });
+
+    var arrow = vis.selectAll(".arrow")
+                   .data(links, function (d) {
+                      return d.source.id + "-" + d.target.id + "-" + d.linkindex ;
+                   })
+
+    // Link labels
+    link.enter().append("text")
+                .attr("style", "text-anchor:middle; font: 10px sans-serif; cursor: pointer;")
+                .attr("dy", "-5")
+                .attr('id', function(d) {return 'label-'+d.source.id+'-'+d.target.id+'-'+d.linkindex;})
+                .style("opacity", function(d) {return d.suggested?"0.3":"1";})
+                .append("textPath")
+                .attr("xlink:href",function(d) {return "#"+d.source.id+'-'+d.target.id+'-'+d.linkindex;})
+                .attr("startOffset", "35%")
+                .text(function(d){return d.label;})
+                .on('click', function(d) { // Mouse down on a link label
+                  /* user want a new relation contraint betwwenn two node*/
+                  if ( d.suggested ) {
+                    ll = [d];
+                    graphBuilder.instanciateLink(ll);
+                    forceLayoutManager.updateInstanciateLinks(ll);
+                    if ( d.source.suggested || d.target.suggested  ) {
+                      var node = d.source.suggested?d.source:d.target;
+                      graphBuilder.instanciateNode(node);
+                      forceLayoutManager.updateInstanciatedNode(node);
+                      nodeView.create(node);
+                      attributesView.create(node);
+                      /* remove old suggestion */
+                      forceLayoutManager.removeSuggestions();
+                      /* insert new suggestion */
+                      forceLayoutManager.insertSuggestions(node);
+                      /* update graph */
+                      forceLayoutManager.update();
+                    }
+                    linksView.create(d);
+                  }
+                  /* update node view  */
+                  nodeView.hideAll();
+                  /* update right view with link view */
+                  attributesView.hideAll();
+                  /* update link view */
+                  linksView.hideAll();
+                  linksView.show(d);
+              });
+
     /* nodes or links could be removed by other views */
     graphBuilder.synchronizeInstanciatedNodesAndLinks(nodes,links);
 
-    link.append("svg:path")
-            .attr("label", function (d) { /*console.log('---> label for '+d.id+': '+d.label);*/ return d.label ; })
-
-    link.enter().append("svg:defs").append("svg:marker")
-                     .attr("id", "marker")
+    // Arrows
+    arrow.enter().append("svg:defs").append("svg:marker")
+                     .attr("id", function(d) {return 'marker-'+d.id;})
+                     .attr('link_id', function(d) {return d.id;})
                      .attr("class", "arrow")
-                     .style('stroke', function(d){return d.positionable?'darkgreen':'grey';}) //FIXME: doesn't work
-                     .style('fill', function(d){return d.positionable?'darkgreen':'grey';}) //FIXME: doesn't work
+                     .style('stroke', function(d){return d.positionable?'darkgreen':'grey';})
+                     .style('fill', function(d){return d.positionable?'darkgreen':'grey';})
                      .attr("viewBox", "0 -5 10 10")
                      .attr("refX", 15)
                      .attr("refY", -1.5)
@@ -542,61 +620,17 @@ var AskomicsForceLayoutManager = function () {
                      .append("path")
                      .attr("d", "M0,-5L10,0L0,5");
 
-
+      // Links
       link.enter().append("svg:path")
           .attr("id", function (d) { return d.source.id + "-" + d.target.id + "-" + d.linkindex ; })
-          .attr("label", function (d) { /*console.log('---> enter, label for '+d.id+': '+d.label);*/ return d.label ; })
+          .attr("label", function (d) { return d.label ; })
           .attr("class", "link")
-          .attr("marker-end", "url(#marker)")
+          .attr("marker-end", function(d) {return "url(#marker-"+d.id+")";})
           .style('stroke', function(d){return d.positionable?'darkgreen':'grey';})
           .style("stroke-dasharray",function(d) {return d.suggested?"2":"";})
           .style("opacity", function(d) {return d.suggested?"0.3":"1";})
           .style("stroke-width", "2")
-          .on("mouseover", function(d) { this.style[2]="4";})//style("stroke", "#2A2A2A"); })
-          .on('click', function(d) { // Mouse down on a link
-              /* user want a new relation contraint betwwenn two node*/
-              if ( d.suggested ) {
-                ll = [d];
-                graphBuilder.instanciateLink(ll);
-                forceLayoutManager.updateInstanciateLinks(ll);
-                if ( d.source.suggested || d.target.suggested  ) {
-                  var node = d.source.suggested?d.source:d.target;
-                  graphBuilder.instanciateNode(node);
-                  forceLayoutManager.updateInstanciatedNode(node);
-                  nodeView.create(node);
-                  attributesView.create(node);
-                  /* remove old suggestion */
-                  forceLayoutManager.removeSuggestions();
-                  /* insert new suggestion */
-                  forceLayoutManager.insertSuggestions(node);
-                  /* update graph */
-                  forceLayoutManager.update();
-                }
-                linksView.create(d);
-              }
-              /* update node view  */
-              nodeView.hideAll();
-              /* update right view with link view */
-              attributesView.hideAll();
-              /* update link view */
-              linksView.hideAll();
-              linksView.show(d);
-          });
-      /* append for each link a label to print relation property name */
-      $('path').each(function (index, value) {
-        $('#libelle_link_'+$(this).attr('id')).remove();
-
-        vis.append("text")
-                    .attr("id", "libelle_link_"+$(this).attr('id'))
-                    .attr("style", "text-anchor:middle; font: 10px sans-serif;")
-                    .attr("dy", "-5")
-                    .append("textPath")
-                    .attr("xlink:href","#"+$(this).attr('id'))
-                    .attr("startOffset", "35%")
-                    .html($(this).attr('label'));
-      });
-
-
+          .on("mouseover", function(d) { this.style[2]="4";});
 
       var node = vis.selectAll("g.node")
                   .data(nodes, function (d) { return d.id; });
@@ -656,6 +690,9 @@ var AskomicsForceLayoutManager = function () {
       nodeEnter.append("svg:text")//.append("tspan")
               .attr("class", "textClass")
               .attr("x", 14)
+              .style("opacity", function(d) {
+                  return (d.suggested === true ? configDisplay.opacityNode : 1);
+              })
               .attr("y", ".31em")
               .attr("id", function (d) {
                   return "txt_" + d.id;

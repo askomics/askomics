@@ -56,6 +56,10 @@ pre {
     overflow-y: auto;
 }
 
+.div-details-max {
+    overflow-y: auto;
+}
+
 .glyphicon:hover {
     cursor: pointer;
     color: chocolate;

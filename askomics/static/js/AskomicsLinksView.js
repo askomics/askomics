@@ -31,12 +31,43 @@ var AskomicsLinksView = function () {
     $("div[id*='"+ prefix +"']" ).hide();
   };
 
-  AskomicsLinksView.prototype.changeDir = function(link, type) {
+  AskomicsLinksView.prototype.changeType = function(link, type) {
+
+    // remove link
+    var id = link.source.id + "-" + link.target.id + "-" + link.linkindex;
+    $('#'+id).remove(); // link
+    $('#label-'+id).remove(); // link label
+    $('#marker-'+id).remove(); // arrow
+
+    // change link type and label
     link.type = type;
-    //FIXME: following don't work (write the new label on link)
     var labels = {'included':'included in', 'excluded':'exluded of', 'overlap':'overlap with', 'near': 'near'};
     link.label = labels[type];
-    console.log('link (alv): '+JSON.stringify(link));
+
+    // reload graph (it will recreate the link)
+    forceLayoutManager.update();
+  };
+
+  AskomicsLinksView.prototype.reverseDir = function(link) {
+
+    // remove rightview
+    linksView.remove(link);
+
+    // remove link
+    var id = link.source.id + "-" + link.target.id + "-" + link.linkindex;
+    $('#'+id).remove(); // link
+    $('#label-'+id).remove(); // link label
+    $('#marker-'+id).remove(); // arrow
+
+    // swap target and source
+    var old_source = link.source;
+    link.source = link.target;
+    link.target = old_source;
+
+    // new rightview for the reverse link
+    linksView.create(link);
+
+    // reload graph (it will recreate the link)
     forceLayoutManager.update();
   };
 
@@ -53,6 +84,29 @@ var AskomicsLinksView = function () {
   };
 
   AskomicsLinksView.prototype.create = function (link) {
+    if(link.positionable){
+      linksView.createPosistionableView(link);
+    }else{
+      linksView.createStandardView(link);
+    }
+  };
+
+  AskomicsLinksView.prototype.createStandardView = function (link) {
+
+    var id_link = link.source.id+"-"+link.target.id;
+
+    var elemUri = link.uri,
+         nameDiv = prefix+"Link-"+id_link ;
+
+    this.showTitle(link);
+    var details = $("<div></div>").attr("id",nameDiv)
+                                  .addClass('div-details')
+                                  .append("No filter available");
+
+    $("#viewDetails").append(details);
+  };
+
+  AskomicsLinksView.prototype.createPosistionableView = function (link) {
 
     var id_link = link.source.id+"-"+link.target.id;
 
@@ -62,12 +116,14 @@ var AskomicsLinksView = function () {
     this.showTitle(link);
 
     var details = $("<div></div>").attr("id",nameDiv).addClass('div-details');
-    console.log(JSON.stringify(link.target));
+    //console.log(JSON.stringify(link.target));
 
-    /*var reverseArrow = $('<div></div>').append($('<span><span>').attr('class', 'glyphicon glyphicon-resize-horizontal').attr('aria-hidden', 'true'))
-                                       .append('Reverse direction');*/
+    var reverseArrow = $('<div></div>').append($('<span><span>').attr('class', 'glyphicon glyphicon-resize-horizontal')
+                                                                .attr('aria-hidden', 'true')
+                                                                .attr('id', 'change_dir-'+id_link))
+                                       .append('Reverse direction');
 
-    var select = $('<select></select>').attr('id', 'direction-'+id_link);
+    var select = $('<select></select>').attr('id', 'type-'+id_link);
 
     var types = {'included': 'included in', 'excluded': 'excluded of', 'overlap': 'overlap with', 'near': 'near'};
 
@@ -113,42 +169,47 @@ var AskomicsLinksView = function () {
       strict = $('<div></div>').append($('<label></label>').append($('<input>').attr('type', 'checkbox').attr('id', 'strict-'+id_link).attr('value', 'strict')).append('Strict'));
     };
 
-    details/*.append(reverseArrow)*/
+    details.append(reverseArrow)
            .append(relation)
            .append($('<hr>'))
            .append(onTheSame)
            .append($('<hr>'))
            .append(strict);
 
-    alv = this;
+    lv = this;
 
     select.change(function() {
       value = select.val();
-      alv.changeDir(link, value);
+      lv.changeType(link, value);
     });
 
     checkbox_sameref.change(function() {
       if ($('#ref-'+id_link).is(':checked')) {
-        alv.changeSameRef(link, true);
+        lv.changeSameRef(link, true);
       }else{
-        alv.changeSameRef(link, false);
+        lv.changeSameRef(link, false);
       }
     });
 
     checkbox_sametax.change(function() {
       if($('#tax-'+id_link).is(':checked')) {
-        alv.changeSameTax(link, true);
+        lv.changeSameTax(link, true);
       }else{
-        alv.changeSameTax(link, false);
+        lv.changeSameTax(link, false);
       }
     });
 
     strict.change(function() {
       if($('#strict-'+id_link).is(':checked')) {
-        alv.changeStrict(link, true);
+        lv.changeStrict(link, true);
       }else{
-        alv.changeStrict(link, false);
+        lv.changeStrict(link, false);
       }
+    });
+
+    reverseArrow.click(function() {
+      console.log('---> ReverseDir');
+      lv.reverseDir(link);
     });
 
     $("#viewDetails").append(details);
