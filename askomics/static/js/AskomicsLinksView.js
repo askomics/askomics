@@ -125,7 +125,8 @@ var AskomicsLinksView = function () {
 
     var select = $('<select></select>').attr('id', 'type-'+id_link);
 
-    var types = {'included': 'included in', 'excluded': 'excluded of', 'overlap': 'overlap with', 'near': 'near'};
+    // Uncomment near when near query is OK
+    var types = {'included': 'included in', 'excluded': 'excluded of', 'overlap': 'overlap with'/*, 'near': 'near'*/};
 
     for (var key in types) {
       if(link.type == key) {
