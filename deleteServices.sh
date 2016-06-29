@@ -13,7 +13,7 @@ if [ -n "$dockerimg" ];then
     sudo docker rm -f $dockerimg
 fi
 
-dockerimg=`sudo docker ps -a | grep "tenforce/virtuoso" | awk '{print $1}'`
+dockerimg=`sudo docker ps -a | grep "askomics/virtuoso" | awk '{print $1}'`
 
 if [ -n "$dockerimg" ];then
     echo "===== Stopping virtuoso  ======== $dockerimg"

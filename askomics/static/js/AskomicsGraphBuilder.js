@@ -399,6 +399,8 @@
       var ua = userAbstraction;
 
       var info = ua.getPositionableEntities();
+      console.log("---- info positionable ----");
+      console.log(JSON.stringify(info));
 
       taxonNodeId = node.categories[info[node.uri].taxon].SPARQLid;
       refNodeId = node.categories[info[node.uri].ref].SPARQLid;
@@ -483,6 +485,7 @@
       /* copy arrays to avoid to removed nodes and links instancied */
       var dup_node_array = $.extend(true, [], _instanciedNodeGraph);
       var dup_link_array = $.extend(true, [], _instanciedLinkGraph);
+
       var ua = userAbstraction;
       /* TODO: better if loop is inversed ?*/
       for (idx=0;idx<_instanciedNodeGraph.length;idx++) {
@@ -497,16 +500,16 @@
           if ( (dup_link_array[ilx].source.id == node.id) ||  (dup_link_array[ilx].target.id == node.id) ) {
             if ( dup_link_array[ilx].positionable ) {
 
-              //node = dup_link_array[ilx].target;
-              //var secondNode = dup_link_array[ilx].source;
-              var secondNode = dup_link_array[ilx].source.id == node.id?dup_link_array[ilx].target:dup_link_array[ilx].source;
+              var nodeSource = dup_link_array[ilx].source;
+              var nodeTarget = dup_link_array[ilx].target ;
+              console.log("==================>"+nodeSource.id);
               var posInfos = {};
               posInfos.type = dup_link_array[ilx].type;
               posInfos.same_tax = dup_link_array[ilx].sameTax;
               posInfos.same_ref = dup_link_array[ilx].sameRef;
               posInfos.strict = dup_link_array[ilx].strict;
 
-              this.buildPositionableConstraintsGraph(posInfos,node,secondNode,constraintRelations,filters);
+              this.buildPositionableConstraintsGraph(posInfos,nodeSource,nodeTarget,constraintRelations,filters);
             } else {
               constraintRelations.push(["?"+'URI'+dup_link_array[ilx].source.SPARQLid,ua.URI(dup_link_array[ilx].uri),"?"+'URI'+dup_link_array[ilx].target.SPARQLid]);
             }
