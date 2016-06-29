@@ -498,6 +498,9 @@
         for (ilx=dup_link_array.length-1;ilx>=0;ilx--) {
           if ( (dup_link_array[ilx].source.id == node.id) ||  (dup_link_array[ilx].target.id == node.id) ) {
             if ( dup_link_array[ilx].positionable ) {
+
+              //node = dup_link_array[ilx].target;
+              //var secondNode = dup_link_array[ilx].source;
               var secondNode = dup_link_array[ilx].source.id == node.id?dup_link_array[ilx].target:dup_link_array[ilx].source;
               var posInfos = {};
               posInfos.type = dup_link_array[ilx].type;
