@@ -4,10 +4,6 @@ import logging
 
 from askomics.libaskomics.ParamManager import ParamManager
 
-from askomics.libaskomics.graph.Node import Node
-from askomics.libaskomics.graph.Link import Link
-from askomics.libaskomics.graph.Attribute import Attribute
-
 from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
 from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
 
@@ -48,7 +44,7 @@ class TripleStoreExplorer(ParamManager):
         for result in results:
             uri = result["nodeUri"]
             label = result["nodeLabel"]
-            nodes.append(Node(uri, label))
+            nodes.append({ 'uri': uri, 'label': label })
 
         return nodes
 
@@ -67,7 +63,7 @@ class TripleStoreExplorer(ParamManager):
         nodes_startpoint = self.get_start_points()
         # add start node at first
         for node in nodes_startpoint:
-            listEntities[node.get_uri()]=0
+            listEntities[node['uri']]=0
 
         sqb = SparqlQueryBuilder(self.settings, self.session)
         ql = QueryLauncher(self.settings, self.session)

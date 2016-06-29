@@ -72,7 +72,7 @@ var AskomicsForceLayoutManager = function () {
       $('#icon-resize-attr').attr('value', 'small');
       return;
     }
-  })
+  });
 
   var vis = d3.select("#svgdiv")
               .append("svg:svg")
