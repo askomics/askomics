@@ -149,7 +149,7 @@ var AskomicsForceLayoutManager = function () {
     attributesView.show(startPoint);
     nodeView.show(startPoint);
     /* insert new suggestion with startpoints */
-    this.insertSuggestions(startPoint);
+    this.insertSuggestions();
     /* build graph */
     this.update();
     this.colorSelectdObject("#node_",startPoint.id);
@@ -186,7 +186,7 @@ var AskomicsForceLayoutManager = function () {
     attributesView.show(lastn);
     nodeView.show(lastn);
     /* insert new suggestion with startpoints */
-    this.insertSuggestions(lastn);
+    this.insertSuggestions();
     this.update();
     this.colorSelectdObject("#node_",lastn.id);
   };
@@ -300,7 +300,7 @@ var AskomicsForceLayoutManager = function () {
       return false;
     };
 
-    AskomicsForceLayoutManager.prototype.insertSuggestions = function (node) {
+    AskomicsForceLayoutManager.prototype.insertSuggestions = function () {
       if (selectNodes.length === 0 ) {
         return ;
       } else if (selectNodes.length === 1 ) {
@@ -593,9 +593,12 @@ var AskomicsForceLayoutManager = function () {
                       /* remove old suggestion */
                       forceLayoutManager.removeSuggestions();
 
-                      forceLayoutManager.unSelectNodes();
-                      /* insert new suggestion */
-                      //forceLayoutManager.insertSuggestions(node);
+                      if (selectNodes.length <= 1) {
+                        forceLayoutManager.unSelectNodes();
+                      } else {
+                        /* insert new suggestion */
+                        forceLayoutManager.insertSuggestions();
+                      }
                       /* update graph */
                       forceLayoutManager.update();
                     }
@@ -692,7 +695,7 @@ var AskomicsForceLayoutManager = function () {
                 /* remove old suggestion */
                 forceLayoutManager.removeSuggestions();
                 /* insert new suggestion */
-                forceLayoutManager.insertSuggestions(d);
+                forceLayoutManager.insertSuggestions();
                 /* update graph */
                 forceLayoutManager.update();
               });

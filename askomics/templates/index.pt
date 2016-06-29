@@ -149,16 +149,6 @@
           <hr/>
           <h3 class="header-div">Project</h3>
           <p>
-          AskOmics is being developed by Charles Bettembourg and Fabrice Legeai as
-          a contribution to the <a href="http://www.agence-nationale-recherche.fr/?Project=ANR-11-BSV6-0017">MiRNAdapt project</a>,
-          but should be applicable to any RDF dataset.
-          </p>
-          <p>
-          It is based on an abstract representation of the MiRNAdapt data which
-          was created manually but should be replaced by the result of RDFmap in
-          the future.
-          </p>
-          <p>
           AskOmics uses <a href="http://d3js.org/">D3.js</a> to provide a visual
           representation of the abstraction as a graph.
           By starting from a node of interest and iteratively selecting its
@@ -167,19 +157,6 @@
           executed on the original dataset.
          </p>
           <hr/>
-          <h3 class="header-div">Contributors</h3>
-           <ul>
-            <li>Arnaud Belcour</li>
-            <li>Charles Bettembourg</li>
-            <li>Anthony Bretaudeau</li>
-            <li>Yvanne Chaussin</li>
-			<li>Olivier Dameron</li>
-            <li>Aurélie Evrard</li>
-            <li>Olivier Filangi</li>
-            <li>Xavier Garnier</li>
-            <li>Maël Kerbiriou</li>
-			<li>Fabrice Legeai</li>
-          </ul>
         </div>
 
         <!-- Modal  -->

@@ -20,11 +20,11 @@ var AskomicsLinksView = function () {
 
   AskomicsLinksView.prototype.show = function (link) {
     this.showTitle(link);
-    $("#"+prefix+"Link-"+link.source.id+"-"+link.target.id).show();
+    $("#"+prefix+"Link-"+link.source.id+"-"+link.target.id + "-" + link.linkindex).show();
   };
 
   AskomicsLinksView.prototype.hide = function (link) {
-    $("#"+prefix+"Link-"+link.source.id+"-"+link.target.id).hide();
+    $("#"+prefix+"Link-"+link.source.id+"-"+link.target.id + "-" + link.linkindex).hide();
   };
 
   AskomicsLinksView.prototype.hideAll = function (link) {
@@ -95,7 +95,7 @@ var AskomicsLinksView = function () {
 
   AskomicsLinksView.prototype.createStandardView = function (link) {
 
-    var id_link = link.source.id+"-"+link.target.id;
+    var id_link = link.source.id+"-"+link.target.id + "-" + link.linkindex;
 
     var elemUri = link.uri,
          nameDiv = prefix+"Link-"+id_link ;
@@ -110,7 +110,7 @@ var AskomicsLinksView = function () {
 
   AskomicsLinksView.prototype.createPosistionableView = function (link) {
 
-    var id_link = link.source.id+"-"+link.target.id;
+    var id_link = link.source.id+"-"+link.target.id + "-" + link.linkindex;
 
     var elemUri = link.uri,
          nameDiv = prefix+"Link-"+id_link ;
@@ -149,13 +149,13 @@ var AskomicsLinksView = function () {
       checkbox_sameref = $('<label></label>').append($('<input>').attr('type', 'checkbox').attr('id', 'ref-'+id_link).attr('checked', 'checked')).append('Reference');
     }else{
       checkbox_sameref = $('<label></label>').append($('<input>').attr('type', 'checkbox').attr('id', 'ref-'+id_link)).append('Reference');
-    };
+    }
 
     if (link.sameTax) {
       checkbox_sametax = $('<label></label>').append($('<input>').attr('type', 'checkbox').attr('id', 'tax-'+id_link).attr('checked', 'checked')).append('Taxon');
     }else{
       checkbox_sametax = $('<label></label>').append($('<input>').attr('type', 'checkbox').attr('id', 'tax-'+id_link)).append('Taxon');
-    };
+    }
 
 
     var onTheSame = $('<div></div>').append('On the same:')
@@ -170,7 +170,7 @@ var AskomicsLinksView = function () {
       strict = $('<div></div>').append($('<label></label>').append($('<input>').attr('type', 'checkbox').attr('checked', 'checked').attr('id', 'strict-'+id_link).attr('value', 'strict')).append('Strict'));
     }else{
       strict = $('<div></div>').append($('<label></label>').append($('<input>').attr('type', 'checkbox').attr('id', 'strict-'+id_link).attr('value', 'strict')).append('Strict'));
-    };
+    }
 
     details.append(reverseArrow)
            .append(relation)
@@ -221,24 +221,12 @@ var AskomicsLinksView = function () {
   // take a string and return an entity with a sub index
   AskomicsLinksView.prototype.selectListLinksUser = function(links,node) {
     /* fix the first link associted with the new instanciate node TODO: propose an interface to select the link */
-  for (var il in links) {
-    var l = links[il];
-    console.log("===>"+JSON.stringify(l));
-    if ( l.suggested && (l.source.id == node.id || l.target.id == node.id) ) {
+    for (var il in links) {
+      var l = links[il];
+      console.log("===>"+JSON.stringify(l));
+      if ( l.suggested && (l.source.id == node.id || l.target.id == node.id) ) {
         return [links[il]];
+      }
     }
-  }
-
-  //$('#linksModal').modal('hide');
-    /*
-    for (var l of links) {
-        if ( l.suggested ) {
-          if (l.source.id == d.id || l.target.id == d.id ) {
-            graphBuilder.instanciateLink(l);
-            graphView.solidifyLink(l);
-            break ; //only the link finded....
-          }
-        }
-    }*/
   };
 };
