@@ -592,8 +592,10 @@ var AskomicsForceLayoutManager = function () {
                       attributesView.create(node);
                       /* remove old suggestion */
                       forceLayoutManager.removeSuggestions();
+
+                      forceLayoutManager.unSelectNodes();
                       /* insert new suggestion */
-                      forceLayoutManager.insertSuggestions(node);
+                      //forceLayoutManager.insertSuggestions(node);
                       /* update graph */
                       forceLayoutManager.update();
                     }

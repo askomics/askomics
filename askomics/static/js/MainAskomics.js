@@ -219,8 +219,8 @@ $(function () {
 
     //$("#uploadedQuery")
     $("#dwl-query").on('click', function(d) {
-      var d = new Date().getTime();
-      $(this).attr("href", "data:application/octet-stream," + encodeURIComponent(graphBuilder.getInternalState())).attr("download", "query-" + d + ".json");
+      var date = new Date().getTime();
+      $(this).attr("href", "data:application/octet-stream," + encodeURIComponent(graphBuilder.getInternalState())).attr("download", "query-" + date + ".json");
     });
 
 
