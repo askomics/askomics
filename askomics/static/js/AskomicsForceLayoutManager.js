@@ -632,6 +632,22 @@ var AskomicsForceLayoutManager = function () {
                      .append("path")
                      .attr("d", "M0,-5L10,0L0,5");
 
+    // Second arrows
+    arrow.enter().append("svg:defs").append("svg:marker")
+                     .attr("id", function(d) {return 'start-marker-'+d.id;})
+                     .attr('link_id', function(d) {return d.id;})
+                     .attr("class", "arrow")
+                     .style('stroke', function(d){return d.positionable?'darkgreen':'grey';})
+                     .style('fill', function(d){return d.positionable?'darkgreen':'grey';})
+                     .attr("viewBox", "0 -5 10 10")
+                     .attr("refX", -5)
+                     .attr("refY", 0)
+                     .attr("markerWidth", 6)
+                     .attr("markerHeight", 6)
+                     .attr("orient", "auto")
+                     .append("path")
+                     .attr("d", "M0,0L10,-5L10,5Z");
+
       // Links
       link.enter().append("svg:path")
           .attr("id", function (d) { return d.source.id + "-" + d.target.id + "-" + d.linkindex ; })
@@ -639,6 +655,7 @@ var AskomicsForceLayoutManager = function () {
           .attr("label", function (d) { return d.label ; })
           .attr("class", "link")
           .attr("marker-end", function(d) {return "url(#marker-"+d.id+")";})
+          .attr("marker-start", function(d) {return d.type == 'overlap'?"url(#start-marker-"+d.id+")":"";})
           .style('stroke', function(d){return d.positionable?'darkgreen':'grey';})
           .style("stroke-dasharray",function(d) {return d.suggested?"2":"";})
           .style("opacity", function(d) {return d.suggested?"0.3":"1";})
