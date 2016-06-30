@@ -8,7 +8,7 @@ var AskomicsLinksView = function () {
   var arrowCode = "&#8594;";
 
   AskomicsLinksView.prototype.remove = function (link) {
-    $("#"+prefix+"Link-"+link.source.id+"-"+link.target.id).remove();
+    $("#"+prefix+"Link-"+link.source.id+"-"+link.target.id + "-" + link.linkindex).remove();
   };
 
   AskomicsLinksView.prototype.showTitle = function (link) {
@@ -43,6 +43,15 @@ var AskomicsLinksView = function () {
     link.type = type;
     var labels = {'included':'included in', 'excluded':'exluded of', 'overlap':'overlap with', 'near': 'near'};
     link.label = labels[type];
+
+    // If overlap, don't show reverse query (it is the same)
+    if (type == 'overlap') {
+      $('#change_dir-div-'+id).hide();
+    }else{
+      if ($('#change_dir-div-'+id).is(":hidden")) {
+        $('#change_dir-div-'+id).show();
+      }
+    }
 
     // reload graph (it will recreate the link)
     forceLayoutManager.update();
@@ -120,7 +129,7 @@ var AskomicsLinksView = function () {
     var details = $("<div></div>").attr("id",nameDiv).addClass('div-details');
     //console.log(JSON.stringify(link.target));
 
-    var reverseArrow = $('<div></div>').append($('<span><span>').attr('class', 'glyphicon glyphicon-resize-horizontal')
+    var reverseArrow = $('<div></div>').attr('id', 'change_dir-div-'+id_link).append($('<span><span>').attr('class', 'glyphicon glyphicon-resize-horizontal')
                                                                 .attr('aria-hidden', 'true')
                                                                 .attr('id', 'change_dir-'+id_link))
                                        .append('Reverse direction');
@@ -172,8 +181,8 @@ var AskomicsLinksView = function () {
       strict = $('<div></div>').append($('<label></label>').append($('<input>').attr('type', 'checkbox').attr('id', 'strict-'+id_link).attr('value', 'strict')).append('Strict'));
     }
 
-    details.append(reverseArrow)
-           .append(relation)
+    details//.append(reverseArrow)
+           .append(relation).append(reverseArrow)
            .append($('<hr>'))
            .append(onTheSame)
            .append($('<hr>'))

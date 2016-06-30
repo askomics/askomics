@@ -509,7 +509,7 @@
               posInfos.same_ref = dup_link_array[ilx].sameRef;
               posInfos.strict = dup_link_array[ilx].strict;
 
-              this.buildPositionableConstraintsGraph(posInfos,nodeSource,nodeTarget,constraintRelations,filters);
+              this.buildPositionableConstraintsGraph(posInfos,nodeTarget,nodeSource,constraintRelations,filters);
             } else {
               constraintRelations.push(["?"+'URI'+dup_link_array[ilx].source.SPARQLid,ua.URI(dup_link_array[ilx].uri),"?"+'URI'+dup_link_array[ilx].target.SPARQLid]);
             }
