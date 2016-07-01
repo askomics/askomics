@@ -95,6 +95,9 @@ var AskomicsMenuView = function () {
           var li = menuView.buildLiView(rel,true);
           li.attr("nodeuri",nodeuri)
             .on('click', function() {
+              /* when this li is unavailable, we can do nothing */
+              if ( $(this).attr("class") === "disabled" ) return ;
+              
               var span = $(this).find(".glyphicon");
               var cur_uri = $(this).attr("uri");
               if ( span.css("visibility") == "visible" ) {
