@@ -166,17 +166,7 @@ var AskomicsForceLayoutManager = function () {
   $(document).keyup(function (e) {
       ctrlPressed = false ;
   });
-/*
-  AskomicsForceLayoutManager.prototype.setNodes = function (_nodes) {
-    nodes=_nodes;
-    force.nodes(_nodes);
-  };
 
-  AskomicsForceLayoutManager.prototype.setLinks = function (_links) {
-    links=_links;
-    force.links(_links);
-  };
-*/
   AskomicsForceLayoutManager.prototype.colorSelectdObject = function (prefix,id) {
     $(prefix+id).css("fill", "mediumvioletred");
   };
@@ -186,8 +176,9 @@ var AskomicsForceLayoutManager = function () {
     var startPoint = $('#startpoints').find(":selected").data("value");
     /* load abstraction */
     userAbstraction.loadUserAbstraction();
-    /* initialize view menu */
+    /* initialize menus */
     menuView.start();
+    menuFile.start();
     /* Setting up an ID for the first variate */
     graphBuilder.setStartpoint(startPoint);
     /* first node */
@@ -208,6 +199,13 @@ var AskomicsForceLayoutManager = function () {
   AskomicsForceLayoutManager.prototype.startWithQuery = function (dump) {
 
     userAbstraction.loadUserAbstraction();
+    /* initialize menus */
+    menuView.start();
+    menuFile.start();
+
+    nodes.splice(0, nodes.length);
+    links.splice(0, links.length);
+
     t = graphBuilder.setNodesAndLinksFromState(dump);
     lnodes = t[0];
     llinks = t[1];

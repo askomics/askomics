@@ -1,6 +1,9 @@
 /*jshint esversion: 6 */
 
+askomicsInitialization = false;
+
 function startRequestSessionAskomics() {
+  if ( askomicsInitialization ) return ;
   // Initialize the graph with the selected start point.
   $("#init").hide();
   $("#queryBuilder").show();
@@ -20,6 +23,10 @@ function startRequestSessionAskomics() {
   userAbstraction = new AskomicsUserAbstraction();
   /* To manage information about menu propositional view */
   menuView = new AskomicsMenuView();
+  /* To manage information about File menu */
+  menuFile = new AskomicsMenuFile();
+
+  askomicsInitialization = true;
 }
 
 function startVisualisation() {
@@ -202,30 +209,26 @@ function downloadTextAsFile(filename, text) {
 
 
 $(function () {
+  // TODO: move inside AskomicsMenuFile
+  // Loading a sparql query file
+  $(".uploadBtn").change( function(event) {
+
+    var uploadedFile = event.target.files[0];
+    if (uploadedFile) {
+
+        var fr = new FileReader();
+        fr.onload = function(e) {
+          var contents = e.target.result;
+          startRequestSessionAskomics();
+          forceLayoutManager.startWithQuery(contents);
+        };
+        fr.readAsText(uploadedFile);
+    }
+    //event.stopPropagation();
+  });
 
     // Startpoints definition
     loadStartPoints();
-
-    // Loading a sparql query file
-    $(".uploadBtn").change( function(event) {
-      var uploadedFile = event.target.files[0];
-      if (uploadedFile) {
-          var fr = new FileReader();
-          fr.onload = function(e) {
-            var contents = e.target.result;
-            startRequestSessionAskomics();
-            forceLayoutManager.startWithQuery(contents);
-          };
-          fr.readAsText(uploadedFile);
-      }
-    });
-
-    //$("#uploadedQuery")
-    $("#dwl-query").on('click', function(d) {
-      var date = new Date().getTime();
-      $(this).attr("href", "data:application/octet-stream," + encodeURIComponent(graphBuilder.getInternalState())).attr("download", "query-" + date + ".json");
-    });
-
 
     // Get the overview of files to integrate
     $("#integration").click(function() {

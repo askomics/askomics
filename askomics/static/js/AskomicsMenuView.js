@@ -38,7 +38,7 @@ var AskomicsMenuView = function () {
     });
 
     $("#buttonViewListNodesAndLinks")
-    .on('click', function(event) {
+    .on('mousedown', function(event) {
       if ( $("#viewListNodesAndLinks").is(':visible') ) {
         $("#viewListNodesAndLinks").slideUp();
       }
@@ -97,7 +97,7 @@ var AskomicsMenuView = function () {
             .on('click', function() {
               /* when this li is unavailable, we can do nothing */
               if ( $(this).attr("class") === "disabled" ) return ;
-              
+
               var span = $(this).find(".glyphicon");
               var cur_uri = $(this).attr("uri");
               if ( span.css("visibility") == "visible" ) {

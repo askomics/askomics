@@ -467,7 +467,7 @@
             break;
 
         default:
-          throw Exception("AskomicsGraphBuilder.prototype.buildPositionableConstraintsGraph: unkown type :"+JSON.stringify(type));
+          throw new Error("AskomicsGraphBuilder.prototype.buildPositionableConstraintsGraph: unkown type :"+JSON.stringify(type));
       }
 
       if (infos.same_ref) {
@@ -609,4 +609,5 @@
         node.values[SPARQLid] = value; /* save value to restore it when the views need it*/
       }
     };
+
   };

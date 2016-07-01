@@ -259,7 +259,7 @@ class AskView(object):
         tse = TripleStoreExplorer(self.settings, self.request.session)
 
         body = self.request.json_body
-        results = tse.build_sparql_query_from_json(body["variates"],body["constraintesRelations"],body["constraintesFilters"],body["limit"])
+        results,query = tse.build_sparql_query_from_json(body["variates"],body["constraintesRelations"],body["constraintesFilters"],body["limit"],True)
 
         # Remove prefixes in the results table
         data['values'] = [
@@ -276,6 +276,21 @@ class AskView(object):
         ql = QueryLauncher(self.settings, self.request.session)
         rb = ResultsBuilder(self.settings, self.request.session)
         data['file'] = ql.format_results_csv(rb.build_csv_table(results))
+
+        return data
+
+    @view_config(route_name='getSparqlQueryInTextFormat', request_method='POST')
+    def getSparqlQueryInTextFormat(self):
+        """ Build a request from a json whith the following contents :variates,constraintesRelations,constraintesFilters"""
+        self.log.debug("== Attribute Value ==")
+        data = {}
+
+        tse = TripleStoreExplorer(self.settings, self.request.session)
+
+        body = self.request.json_body
+        results,query = tse.build_sparql_query_from_json(body["variates"],body["constraintesRelations"],body["constraintesFilters"],body["limit"],False)
+
+        data['query'] = query
 
         return data
 

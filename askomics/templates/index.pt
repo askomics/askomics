@@ -30,6 +30,7 @@
         <script src="static/js/AskomicsLinksView.js"></script>
         <script src="static/js/AskomicsForceLayoutManager.js"></script>
         <script src="static/js/AskomicsMenuView.js"></script>
+        <script src="static/js/AskomicsMenuFile.js"></script>
 
         <link href="static/css/bootstrap.css" rel="stylesheet" type="text/css">
         <link href="static/css/style.css" rel="stylesheet" type="text/css">
@@ -61,10 +62,10 @@
                 </div>
                 <button  id="starter" class="btn btn-default col-md-offset-2" onclick="startVisualisation()">Start</button>
                 <br><br><br>
-                <div class="col-md-offset-2"><p>Or upload a sparql query file</p>
+                <div class="col-md-offset-2"><p>Or upload a AskOmics file</p>
                     <div class="uploadBtn btn btn-default">
-                        <span>Upload query</span>
-                        <input id="uploadBtn" type="file" class="upload">
+                        <span>Load query</span>
+                        <input id="uploadBtn" type="file" class="upload" onclick="var m=new AskomicsMenuFile();m.uploadAskomicsFile();" >
                     </div>
                 </div>
             </div>
@@ -81,21 +82,25 @@
                       </button>
                       <ul class="dropdown-menu">
                         <!--upload-->
-                        <li><a href="#">
+                        <li><a href="#" class="small">
                         <div class="uploadBtn">
-                        <p><span class="glyphicon glyphicon-export" aria-hidden="true"></span> Upload query</p>
+                        <p><span class="glyphicon glyphicon-export" aria-hidden="true"></span> Load query</p>
                         <input id="uploadBtn" type="file" class="upload">
                         </div>
                         </a></li>
                         <!--download-->
-                        <li><a href="#" id="dwl-query">
-                        <p><span class="glyphicon glyphicon-save" aria-hidden="true"></span> Download query</p>
+                        <li><a href="#" id="dwl-query" class="small">
+                        <p><span class="glyphicon glyphicon-save small" aria-hidden="true"></span> Save query</p>
+                        </a></li>
+                        <!--download-->
+                        <li><a href="#" id="dwl-query-sparql" class="small">
+                        <p><span class="glyphicon glyphicon-download small" aria-hidden="true"></span> Save SPARQL query</p>
                         </a></li>
                       </ul>
                     </div>
 
                     <div class="btn-group">
-                      <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      <button id="buttonViewListNodesAndLinks" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                       View<span class="caret"></span>
                       </button>
                       <ul id="viewListNodesAndLinks" class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">

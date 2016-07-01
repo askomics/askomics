@@ -52,6 +52,7 @@ var AskomicsUserAbstraction = function () {
         /* All relation are stored in tripletSubjectRelationObject */
         tripletSubjectRelationObject = resultListTripletSubjectRelationObject.relations;
         entityInformationList = {};
+        entityPositionableInformationList = {};
         /* All information about an entity available in TPS are stored in entityInformationList */
         for (var entry in resultListTripletSubjectRelationObject.entities){
 
@@ -108,7 +109,7 @@ var AskomicsUserAbstraction = function () {
               entityPositionableInformationList[uri4].start = resultListTripletSubjectRelationObject.positionable[entry4].start;
               entityPositionableInformationList[uri4].end = resultListTripletSubjectRelationObject.positionable[entry4].end;
           } else {
-            throw Exception("URI:"+uri4+" have several taxon,ref, start, end labels... "+JSON.stringify(entityPositionableInformationList[uri4]));
+            throw new Error("URI:"+uri4+" have several taxon,ref, start, end labels... "+JSON.stringify(entityPositionableInformationList[uri4]));
           }
         }
 
