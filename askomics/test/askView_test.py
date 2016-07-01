@@ -123,6 +123,22 @@ class AskViewTests(unittest.TestCase):
         self.request.json_body['export'] = True
         data = self.askview.get_value()
 
+    def test_get_valuetxtquery(self):
+        #load files
+        self.it.empty()
+        self.it.load_test1()
+
+        self.request.json_body = {
+            'variates':['?Personne1'],
+            'constraintesRelations': [['?URIPersonne1', 'rdf:type', '<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Personne>'], ['?URIPersonne1', 'rdfs:label', '?Personne1']],
+            'constraintesFilters': [],
+            'limit': 30,
+            'export': False,
+        }
+
+
+        data = self.askview.getSparqlQueryInTextFormat()
+
     def test_load_data_into_graph(self):
         self.request.json_body = {
             'file_name':'personne.tsv',
