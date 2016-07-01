@@ -208,8 +208,12 @@
       node.suggested    = true;
       node.positionable = userAbstraction.isPositionable(node.uri);
       node.actif = false ;
-      node.x = x;
-      node.y = y;
+      /* if this future node have the same coordinate with the previous node , the graphe move too much ! */
+      var sc = 30;
+      var scaleX = Math.random()<0.5?-1:1;
+      var scaleY = Math.random()<0.5?-1:1;
+      node.x = x+scaleX*sc;
+      node.y = y+scaleY*sc;
       this.setId(node);
       node.name = node.label;
       node.weight = 0;

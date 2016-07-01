@@ -18,6 +18,8 @@ function startRequestSessionAskomics() {
   forceLayoutManager = new AskomicsForceLayoutManager();
   /* To manage information about User Datasrtucture  */
   userAbstraction = new AskomicsUserAbstraction();
+  /* To manage information about menu propositional view */
+  menuView = new AskomicsMenuView();
 }
 
 function startVisualisation() {
@@ -124,7 +126,7 @@ function loadStatistics(modal) {
             .append($("<td></td>").text(abstraction.removePrefix(entities[ent1])));
             attrs = "";
             cats = "";
-            var listAtt = abstraction.getAtributesEntity(entities[ent1]);
+            var listAtt = abstraction.getAttributesEntity(entities[ent1]);
             for (var att of listAtt) {
                 attrs += '- '+att.label +' :'+abstraction.removePrefix(att.type)+ "</br>";
             }
@@ -200,6 +202,7 @@ function downloadTextAsFile(filename, text) {
 
 
 $(function () {
+
     // Startpoints definition
     loadStartPoints();
 

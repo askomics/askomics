@@ -29,6 +29,7 @@
         <script src="static/js/AskomicsNodeView.js"></script>
         <script src="static/js/AskomicsLinksView.js"></script>
         <script src="static/js/AskomicsForceLayoutManager.js"></script>
+        <script src="static/js/AskomicsMenuView.js"></script>
 
         <link href="static/css/bootstrap.css" rel="stylesheet" type="text/css">
         <link href="static/css/style.css" rel="stylesheet" type="text/css">
@@ -93,18 +94,13 @@
                       </ul>
                     </div>
 
-                    <!--
-                    <div class="btn-group btn-group-query">
+                    <div class="btn-group">
                       <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                       View<span class="caret"></span>
                       </button>
-                      <ul class="dropdown-menu">
-                        <li><a href="#">bla</a></li>
-                        <li><a href="#">bli</a></li>
-                        <li><a href="#">blo</a></li>
+                      <ul id="viewListNodesAndLinks" class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
                       </ul>
                     </div>
-                    -->
 
                     <div id="svgdiv"></div>
                     <div id="uploadedQuery" class="uploadedQuery" hidden contenteditable></div>
@@ -125,7 +121,7 @@
                     <button type="button" id='full-screen-attr' class="btn btn-default" aria-label="Right Align">
                         <span id='icon-resize-attr' value='small' class="glyphicon glyphicon-resize-full" aria-hidden="true"></span>
                     </button>
-                    Filter <span id="objectName" class="label label-default"></span> on
+                    <span id="objectName" class="label label-default"></span>
 
                     <div class="btn-group btn-group-query">
                         <span id="showNode" class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
@@ -149,10 +145,10 @@
           <hr/>
           <h3 class="header-div">Project</h3>
           <p>
-          AskOmics uses <a href="http://d3js.org/">D3.js</a> to provide a visual
-          representation of the abstraction as a graph.
+          AskOmics provide a visual
+          representation of the user abstraction as a graph.
           By starting from a node of interest and iteratively selecting its
-          neighbors, the user creates a path on the abstraction graph.
+          neighbors, the user creates a path on an abstraction graph.
           This path can then be transformed into a SPARQL query that can be
           executed on the original dataset.
          </p>
