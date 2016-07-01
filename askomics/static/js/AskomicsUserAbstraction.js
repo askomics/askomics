@@ -25,7 +25,7 @@ var AskomicsUserAbstraction = function () {
       return JSON.parse(JSON.stringify(Object.keys(entityInformationList))) ;
     };
 
-    AskomicsUserAbstraction.prototype.getAtributesEntity = function(uriEntity) {
+    AskomicsUserAbstraction.prototype.getAttributesEntity = function(uriEntity) {
       return JSON.parse(JSON.stringify(attributesEntityList[uriEntity])) ;
     };
 
@@ -38,7 +38,7 @@ var AskomicsUserAbstraction = function () {
     */
     /* Request information in the model layer */
     //this.updateOntology();
-    AskomicsUserAbstraction.prototype.loadUserAbstraction = function(uriEntity) {
+    AskomicsUserAbstraction.prototype.loadUserAbstraction = function() {
     //  $('#waitModal').modal('show');
     //AskomicsUserAbstraction.prototype.updateOntology = function() {
       var service = new RestServiceJs("userAbstraction");
@@ -52,6 +52,7 @@ var AskomicsUserAbstraction = function () {
         /* All relation are stored in tripletSubjectRelationObject */
         tripletSubjectRelationObject = resultListTripletSubjectRelationObject.relations;
         entityInformationList = {};
+        entityPositionableInformationList = {};
         /* All information about an entity available in TPS are stored in entityInformationList */
         for (var entry in resultListTripletSubjectRelationObject.entities){
 
@@ -108,7 +109,7 @@ var AskomicsUserAbstraction = function () {
               entityPositionableInformationList[uri4].start = resultListTripletSubjectRelationObject.positionable[entry4].start;
               entityPositionableInformationList[uri4].end = resultListTripletSubjectRelationObject.positionable[entry4].end;
           } else {
-            throw Exception("URI:"+uri4+" have several taxon,ref, start, end labels... "+JSON.stringify(entityPositionableInformationList[uri4]));
+            throw new Error("URI:"+uri4+" have several taxon,ref, start, end labels... "+JSON.stringify(entityPositionableInformationList[uri4]));
           }
         }
 
@@ -123,14 +124,16 @@ var AskomicsUserAbstraction = function () {
 
     /* Get value of an attribut with RDF format like rdfs:label */
     AskomicsUserAbstraction.prototype.removePrefix = function(uriEntity) {
+      if (typeof(uriEntity) !== 'string')
+        throw new Error("AskomicsUserAbstraction.prototype.removePrefix: uriEntity is not a string uriEntity :"+JSON.stringify(uriEntity));
 
       var idx =  uriEntity.indexOf("#");
       if ( idx == -1 ) {
         idx =  uriEntity.indexOf(":");
-        if ( idx == -1 ) return;
+        if ( idx == -1 ) return uriEntity;
       }
-      uriEntity = uriEntity.substr(idx+1,uriEntity.length);
-      return uriEntity;
+      var res = uriEntity.substr(idx+1,uriEntity.length);
+      return res;
     };
 
     AskomicsUserAbstraction.prototype.URI = function(uriEntity) {

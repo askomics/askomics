@@ -29,6 +29,8 @@
         <script src="static/js/AskomicsNodeView.js"></script>
         <script src="static/js/AskomicsLinksView.js"></script>
         <script src="static/js/AskomicsForceLayoutManager.js"></script>
+        <script src="static/js/AskomicsMenuView.js"></script>
+        <script src="static/js/AskomicsMenuFile.js"></script>
 
         <link href="static/css/bootstrap.css" rel="stylesheet" type="text/css">
         <link href="static/css/style.css" rel="stylesheet" type="text/css">
@@ -60,9 +62,9 @@
                 </div>
                 <button  id="starter" class="btn btn-default col-md-offset-2" onclick="startVisualisation()">Start</button>
                 <br><br><br>
-                <div class="col-md-offset-2"><p>Or upload a sparql query file</p>
+                <div class="col-md-offset-2"><p>Or upload a AskOmics file</p>
                     <div class="uploadBtn btn btn-default">
-                        <span>Upload query</span>
+                        <span>Load query</span>
                         <input id="uploadBtn" type="file" class="upload">
                     </div>
                 </div>
@@ -80,31 +82,30 @@
                       </button>
                       <ul class="dropdown-menu">
                         <!--upload-->
-                        <li><a href="#">
+                        <li><a href="#" class="small">
                         <div class="uploadBtn">
-                        <p><span class="glyphicon glyphicon-export" aria-hidden="true"></span> Upload query</p>
+                        <p><span class="glyphicon glyphicon-export" aria-hidden="true"></span> Load query</p>
                         <input id="uploadBtn" type="file" class="upload">
                         </div>
                         </a></li>
                         <!--download-->
-                        <li><a href="#" id="dwl-query">
-                        <p><span class="glyphicon glyphicon-save" aria-hidden="true"></span> Download query</p>
+                        <li><a href="#" id="dwl-query" class="small">
+                        <p><span class="glyphicon glyphicon-save small" aria-hidden="true"></span> Save query</p>
+                        </a></li>
+                        <!--download-->
+                        <li><a href="#" id="dwl-query-sparql" class="small">
+                        <p><span class="glyphicon glyphicon-download small" aria-hidden="true"></span> Save SPARQL query</p>
                         </a></li>
                       </ul>
                     </div>
 
-                    <!--
-                    <div class="btn-group btn-group-query">
-                      <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <div class="btn-group">
+                      <button id="buttonViewListNodesAndLinks" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                       View<span class="caret"></span>
                       </button>
-                      <ul class="dropdown-menu">
-                        <li><a href="#">bla</a></li>
-                        <li><a href="#">bli</a></li>
-                        <li><a href="#">blo</a></li>
+                      <ul id="viewListNodesAndLinks" class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
                       </ul>
                     </div>
-                    -->
 
                     <div id="svgdiv"></div>
                     <div id="uploadedQuery" class="uploadedQuery" hidden contenteditable></div>
@@ -125,7 +126,7 @@
                     <button type="button" id='full-screen-attr' class="btn btn-default" aria-label="Right Align">
                         <span id='icon-resize-attr' value='small' class="glyphicon glyphicon-resize-full" aria-hidden="true"></span>
                     </button>
-                    Filter <span id="objectName" class="label label-default"></span> on
+                    <span id="objectName" class="label label-default"></span>
 
                     <div class="btn-group btn-group-query">
                         <span id="showNode" class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
@@ -149,10 +150,10 @@
           <hr/>
           <h3 class="header-div">Project</h3>
           <p>
-          AskOmics uses <a href="http://d3js.org/">D3.js</a> to provide a visual
-          representation of the abstraction as a graph.
+          AskOmics provide a visual
+          representation of the user abstraction as a graph.
           By starting from a node of interest and iteratively selecting its
-          neighbors, the user creates a path on the abstraction graph.
+          neighbors, the user creates a path on an abstraction graph.
           This path can then be transformed into a SPARQL query that can be
           executed on the original dataset.
          </p>
@@ -167,28 +168,15 @@
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                 <h4 class="modal-title" id="modalMessage"></h4>
               </div>
+              <div class="modal-body">
+                <!--<p>One fine body…</p> -->
+              </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal" id="modalButton"></button>
               </div>
             </div><!-- /.modal-content -->
           </div><!-- /.modal-dialog -->
         </div><!-- /.modal -->
-
-        <!-- Modal  -->
-        <div class="modal fade" id="modalSuggestionLink"  role="dialog" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true" >
-          <div class="modal-dialog modal-md">
-            <div class="modal-content">
-              <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                <h4 class="modal-title" id="modalMessageSuggestionLink"></h4>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal" id="modalButtonSuggestionLink"></button>
-              </div>
-            </div><!-- /.modal-content -->
-          </div><!-- /.modal-dialog -->
-        </div><!-- /.modal -->
-
 
         <!-- The template to display preview of source files -->
         <script id="template-source_file-preview" type="text/x-handlebars-template">

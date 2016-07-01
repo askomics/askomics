@@ -120,7 +120,7 @@ class TripleStoreExplorer(ParamManager):
 
         return data
 
-    def build_sparql_query_from_json(self,variates,constraintesRelations,constraintesFilters,limit):
+    def build_sparql_query_from_json(self,variates,constraintesRelations,constraintesFilters,limit,sendRequestToTPS):
         self.log.debug("variates")
         self.log.debug(variates)
         self.log.debug("constraintesRelations")
@@ -145,13 +145,21 @@ class TripleStoreExplorer(ParamManager):
             req += userFilter+".\n"
 
         req += "}"
-        if limit != None and limit >0 :
+        if limit >0 :
             req +=" LIMIT "+str(limit)
 
+
         sqb = SparqlQueryBuilder(self.settings, self.session)
-        ql = QueryLauncher(self.settings, self.session)
-
         prefixes = sqb.header_sparql_config()
-        results = ql.process_query(prefixes+req)
+        query = prefixes+req
 
-        return results
+        results = {}
+
+        if sendRequestToTPS:
+            ql = QueryLauncher(self.settings, self.session)
+            results = ql.process_query(query)
+        else:
+            #add comment inside query to inform user
+            query = "# endpoint = "+self.get_param("askomics.endpoint") + "\n" + query
+
+        return results,query

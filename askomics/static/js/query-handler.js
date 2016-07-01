@@ -25,12 +25,16 @@ function viewQueryResults() {
     var service = new RestServiceJs("sparqlquery");
     var jdata = prepareQuery(false, 30, false);
     service.post(jdata,function(data) {
-        displayResults(data);
-        hideModal();
-        //resize graph if fullscreen
-        if ($('#icon-resize-graph').attr('value') == 'full') {
-          forceLayoutManager.normalsizeGraph();
-        }
+      hideModal();
+      if ('error' in data) {
+        alert(data.error);
+        return;
+      }
+      displayResults(data);
+      //resize graph if fullscreen
+      if ($('#icon-resize-graph').attr('value') == 'full') {
+        forceLayoutManager.normalsizeGraph();
+      }
     });
 }
 

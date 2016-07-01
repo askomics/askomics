@@ -1,6 +1,9 @@
 /*jshint esversion: 6 */
 
+askomicsInitialization = false;
+
 function startRequestSessionAskomics() {
+  if ( askomicsInitialization ) return ;
   // Initialize the graph with the selected start point.
   $("#init").hide();
   $("#queryBuilder").show();
@@ -18,6 +21,12 @@ function startRequestSessionAskomics() {
   forceLayoutManager = new AskomicsForceLayoutManager();
   /* To manage information about User Datasrtucture  */
   userAbstraction = new AskomicsUserAbstraction();
+  /* To manage information about menu propositional view */
+  menuView = new AskomicsMenuView();
+  /* To manage information about File menu */
+  menuFile = new AskomicsMenuFile();
+
+  askomicsInitialization = true;
 }
 
 function startVisualisation() {
@@ -35,8 +44,7 @@ function loadStartPoints() {
 
   service.getAll(function(startPointsDict) {
       $("#startpoints").empty();
-      console.log("-----------------------------------");
-      console.log(JSON.stringify(startPointsDict.nodes));
+
       $.each(startPointsDict.nodes, function(key, value) {
 
           $("#startpoints").append($("<option></option>").attr("data-value", JSON.stringify(value)).text(value.label));
@@ -124,7 +132,7 @@ function loadStatistics(modal) {
             .append($("<td></td>").text(abstraction.removePrefix(entities[ent1])));
             attrs = "";
             cats = "";
-            var listAtt = abstraction.getAtributesEntity(entities[ent1]);
+            var listAtt = abstraction.getAttributesEntity(entities[ent1]);
             for (var att of listAtt) {
                 attrs += '- '+att.label +' :'+abstraction.removePrefix(att.type)+ "</br>";
             }
@@ -161,7 +169,10 @@ function emptyDatabase(value) {
         displayModal('Please wait during deletion', 'Close');
         var service = new RestServiceJs("empty_database");
             service.getAll(function(empty_db){
-            hideModal();
+              hideModal();
+              if ('error' in empty_db ) {
+                alert(empty_db.error);
+              }
             loadStatistics(false);
         });
     }
@@ -200,29 +211,9 @@ function downloadTextAsFile(filename, text) {
 
 
 $(function () {
+  // TODO: move inside AskomicsMenuFile
     // Startpoints definition
     loadStartPoints();
-
-    // Loading a sparql query file
-    $(".uploadBtn").change( function(event) {
-      var uploadedFile = event.target.files[0];
-      if (uploadedFile) {
-          var fr = new FileReader();
-          fr.onload = function(e) {
-            var contents = e.target.result;
-            startRequestSessionAskomics();
-            forceLayoutManager.startWithQuery(contents);
-          };
-          fr.readAsText(uploadedFile);
-      }
-    });
-
-    //$("#uploadedQuery")
-    $("#dwl-query").on('click', function(d) {
-      var date = new Date().getTime();
-      $(this).attr("href", "data:application/octet-stream," + encodeURIComponent(graphBuilder.getInternalState())).attr("download", "query-" + date + ".json");
-    });
-
 
     // Get the overview of files to integrate
     $("#integration").click(function() {
