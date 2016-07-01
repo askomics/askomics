@@ -90,7 +90,7 @@ class AskView(object):
         Delete all triples in the triplestore
         """
         data = {}
-        
+
         self.log.debug("=== DELETE ALL TRIPLES ===")
         try:
             sqb = SparqlQueryBuilder(self.settings, self.request.session)
@@ -203,15 +203,20 @@ class AskView(object):
         disabled_columns = body["disabled_columns"]
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
+        try:
+            src_file = sfc.get_source_file(file_name)
+            src_file.set_forced_column_types(col_types)
+            src_file.set_disabled_columns(disabled_columns)
 
-        src_file = sfc.get_source_file(file_name)
-        src_file.set_forced_column_types(col_types)
-        src_file.set_disabled_columns(disabled_columns)
+            headers_status, missing_headers = src_file.compare_to_database()
 
-        headers_status, missing_headers = src_file.compare_to_database()
-
-        data["headers_status"] = headers_status
-        data["missing_headers"] = missing_headers
+            data["headers_status"] = headers_status
+            data["missing_headers"] = missing_headers
+        except Exception as e:
+            data["headers_status"] = ""
+            data["missing_headers"] = ""
+            data['error'] = str(e)
+            self.log.error(str(e))
 
         return data
 
