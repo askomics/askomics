@@ -89,14 +89,19 @@ class AskView(object):
         """
         Delete all triples in the triplestore
         """
-
+        data = {}
+        
         self.log.debug("=== DELETE ALL TRIPLES ===")
+        try:
+            sqb = SparqlQueryBuilder(self.settings, self.request.session)
+            ql = QueryLauncher(self.settings, self.request.session)
 
-        sqb = SparqlQueryBuilder(self.settings, self.request.session)
-        ql = QueryLauncher(self.settings, self.request.session)
+            ql.execute_query(sqb.get_delete_query_string().query)
+        except Exception as e:
+            data['error'] = str(e)
+            self.log.error(str(e))
 
-        ql.execute_query(sqb.get_delete_query_string().query)
-
+        return data
 
     @view_config(route_name='source_files_overview', request_method='GET')
     def source_files_overview(self):
@@ -259,23 +264,30 @@ class AskView(object):
         tse = TripleStoreExplorer(self.settings, self.request.session)
 
         body = self.request.json_body
-        results,query = tse.build_sparql_query_from_json(body["variates"],body["constraintesRelations"],body["constraintesFilters"],body["limit"],True)
+        try:
+            results,query = tse.build_sparql_query_from_json(body["variates"],body["constraintesRelations"],body["constraintesFilters"],body["limit"],True)
 
-        # Remove prefixes in the results table
-        data['values'] = [
+            # Remove prefixes in the results table
+            data['values'] = [
                 {
                     k: res[k].replace(self.settings["askomics.prefix"], '')
                     for k in res.keys()
                 }
                 for res in results
             ]
-        if not body['export']:
-            return data
+            if not body['export']:
+                return data
 
-        # Provide results file
-        ql = QueryLauncher(self.settings, self.request.session)
-        rb = ResultsBuilder(self.settings, self.request.session)
-        data['file'] = ql.format_results_csv(rb.build_csv_table(results))
+
+            # Provide results file
+            ql = QueryLauncher(self.settings, self.request.session)
+            rb = ResultsBuilder(self.settings, self.request.session)
+            data['file'] = ql.format_results_csv(rb.build_csv_table(results))
+        except Exception as e:
+            data['values'] = []
+            data['file'] = ""
+            data['error'] = str(e)
+            self.log.error(str(e))
 
         return data
 
@@ -284,13 +296,16 @@ class AskView(object):
         """ Build a request from a json whith the following contents :variates,constraintesRelations,constraintesFilters"""
         self.log.debug("== Attribute Value ==")
         data = {}
+        try:
+            tse = TripleStoreExplorer(self.settings, self.request.session)
 
-        tse = TripleStoreExplorer(self.settings, self.request.session)
+            body = self.request.json_body
+            results,query = tse.build_sparql_query_from_json(body["variates"],body["constraintesRelations"],body["constraintesFilters"],body["limit"],False)
 
-        body = self.request.json_body
-        results,query = tse.build_sparql_query_from_json(body["variates"],body["constraintesRelations"],body["constraintesFilters"],body["limit"],False)
-
-        data['query'] = query
+            data['query'] = query
+        except Exception as e:
+            data['error'] = str(e)
+            self.log.error(str(e))
 
         return data
 

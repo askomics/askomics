@@ -168,28 +168,15 @@
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                 <h4 class="modal-title" id="modalMessage"></h4>
               </div>
+              <div class="modal-body">
+                <!--<p>One fine body…</p> -->
+              </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal" id="modalButton"></button>
               </div>
             </div><!-- /.modal-content -->
           </div><!-- /.modal-dialog -->
         </div><!-- /.modal -->
-
-        <!-- Modal  -->
-        <div class="modal fade" id="modalSuggestionLink"  role="dialog" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true" >
-          <div class="modal-dialog modal-md">
-            <div class="modal-content">
-              <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                <h4 class="modal-title" id="modalMessageSuggestionLink"></h4>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal" id="modalButtonSuggestionLink"></button>
-              </div>
-            </div><!-- /.modal-content -->
-          </div><!-- /.modal-dialog -->
-        </div><!-- /.modal -->
-
 
         <!-- The template to display preview of source files -->
         <script id="template-source_file-preview" type="text/x-handlebars-template">

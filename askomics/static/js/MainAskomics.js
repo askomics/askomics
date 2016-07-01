@@ -44,8 +44,7 @@ function loadStartPoints() {
 
   service.getAll(function(startPointsDict) {
       $("#startpoints").empty();
-      console.log("-----------------------------------");
-      console.log(JSON.stringify(startPointsDict.nodes));
+
       $.each(startPointsDict.nodes, function(key, value) {
 
           $("#startpoints").append($("<option></option>").attr("data-value", JSON.stringify(value)).text(value.label));
@@ -170,7 +169,10 @@ function emptyDatabase(value) {
         displayModal('Please wait during deletion', 'Close');
         var service = new RestServiceJs("empty_database");
             service.getAll(function(empty_db){
-            hideModal();
+              hideModal();
+              if ('error' in empty_db ) {
+                alert(empty_db.error);
+              }
             loadStatistics(false);
         });
     }
@@ -210,23 +212,6 @@ function downloadTextAsFile(filename, text) {
 
 $(function () {
   // TODO: move inside AskomicsMenuFile
-  // Loading a sparql query file
-  $(".uploadBtn").change( function(event) {
-
-    var uploadedFile = event.target.files[0];
-    if (uploadedFile) {
-
-        var fr = new FileReader();
-        fr.onload = function(e) {
-          var contents = e.target.result;
-          startRequestSessionAskomics();
-          forceLayoutManager.startWithQuery(contents);
-        };
-        fr.readAsText(uploadedFile);
-    }
-    //event.stopPropagation();
-  });
-
     // Startpoints definition
     loadStartPoints();
 
