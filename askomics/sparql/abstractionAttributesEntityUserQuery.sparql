@@ -8,6 +8,6 @@ WHERE {
 						rdfs:label ?labelAttribute ;
             rdfs:domain ?entity;
             rdfs:range ?typeAttribute.
-
 	VALUES ?entity { $entities }
+  VALUES ?typeAttribute { xsd:decimal xsd:string }
 }
