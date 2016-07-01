@@ -32,7 +32,28 @@ var AskomicsMenuView = function () {
   AskomicsMenuView.prototype.start = function(node) {
     menuView = this;
 
-    $("#viewListNodesAndLinks").css("display","table-row");
+    /* to close the menu when a click event outside */
+    $(window).click(function() {
+      $("#viewListNodesAndLinks").slideUp();
+    });
+
+    $("#buttonViewListNodesAndLinks")
+    .on('click', function(event) {
+      if ( $("#viewListNodesAndLinks").is(':visible') ) {
+        $("#viewListNodesAndLinks").slideUp();
+      }
+      else {
+        $("#viewListNodesAndLinks").slideDown();
+      }
+    });
+
+    $("#viewListNodesAndLinks")
+      .css("display","table-row")
+      /* let the menu open when something is clicked inside !! */
+      .on('click', function(event) {
+        event.stopPropagation();
+      });
+
 
     // <li><a href="#" class="small" data-value="option1" tabIndex="-1"><input type="checkbox"/>&nbsp;Option 1</a></li>
     lentities = userAbstraction.getEntities();
@@ -124,16 +145,7 @@ var AskomicsMenuView = function () {
         //$("#viewListNodesAndLinks").append($("<li></li>").attr("class","divider"));
       }
 
-      var r= $('<input type="button" value="close"/>');
-      r.on('click', function() {
-        $("#viewListNodesAndLinks").hide();
-      });
-
-      var liClose = $("<li></li>");
-      liClose.css("display","table-cell");
-      //liClose.css("vertical-align","right");
-      liClose.append(r);
-      $("#viewListNodesAndLinks").append(liClose);
-
+      //hide by default
+      $("#viewListNodesAndLinks").hide();
   } ;
 };
