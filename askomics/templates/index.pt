@@ -65,7 +65,7 @@
                 <div class="col-md-offset-2"><p>Or upload a AskOmics file</p>
                     <div class="uploadBtn btn btn-default">
                         <span>Load query</span>
-                        <input id="uploadBtn" type="file" class="upload" onclick="var m=new AskomicsMenuFile();m.uploadAskomicsFile();" >
+                        <input id="uploadBtn" type="file" class="upload">
                     </div>
                 </div>
             </div>

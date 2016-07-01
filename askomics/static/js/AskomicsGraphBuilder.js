@@ -2,6 +2,7 @@
 
 /* constructeur de AskomicsGraphBuilder */
   var AskomicsGraphBuilder = function () {
+    var AskomicsGraphBuilderVersion = 1.0           ;
     /* ========================================= ATTRIBUTES ============================================= */
     var SPARQLIDgeneration = {} ; /* { <ENT1> : 5, ... }  last index used to named variable */
     var IGgeneration = 0;
@@ -19,7 +20,7 @@
     };
     /* create a dump to store data structure and finally the query */
     AskomicsGraphBuilder.prototype.getInternalState = function() {
-      return JSON.stringify([_instanciedNodeGraph,_instanciedLinkGraph,SPARQLIDgeneration,IGgeneration]);
+      return JSON.stringify([AskomicsGraphBuilderVersion,_instanciedNodeGraph,_instanciedLinkGraph,SPARQLIDgeneration,IGgeneration]);
     };
 
     /* create and return list of nodes and links to build a new grpah from a dump file */
@@ -28,11 +29,16 @@
         var struct = JSON.parse(dump);
         if (_instanciedNodeGraph.length >0)
           this.removeInstanciedNode(_instanciedNodeGraph[0]);
-        _instanciedNodeGraph = struct[0];
-        _instanciedLinkGraph = struct[1];
-        SPARQLIDgeneration   = struct[2];
-        IGgeneration         = struct[3];
+        var versionOfFile    = struct[0];
+        _instanciedNodeGraph = struct[1];
+        _instanciedLinkGraph = struct[2];
+        SPARQLIDgeneration   = struct[3];
+        IGgeneration         = struct[4];
 
+        /* manage version */
+        if ( versionOfFile !== AskomicsGraphBuilderVersion ) {
+          alert("Dump file are builded with the Askomics Graph Builder Version:"+versionOfFile+"\n"+". Current version is "+ AskomicsGraphBuilderVersion +".\nReload of dump are not guaranteed !");
+        }
         /* source and target don't have the good reference....we fix it*/
         for (var link of _instanciedLinkGraph) {
             t = this.findElt(_instanciedNodeGraph,link.source.id);
