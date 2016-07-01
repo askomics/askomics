@@ -434,8 +434,10 @@ class SourceFile(ParamManager, HaveCachedProperties):
         for header in self.headers[1:]:
             idx = header.find("@")
             if idx != -1:
+                header_tmp.append(header[0:idx])
                 header = header[idx+1:]
-            header_tmp.append(header)
+            else:
+                header_tmp.append(header)
 
         if self.existing_relations == []:
             # No results, everything is new
