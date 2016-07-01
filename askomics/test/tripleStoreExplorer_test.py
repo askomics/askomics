@@ -34,7 +34,7 @@ class tripleStoreExplorerTests(unittest.TestCase):
         constraintesFilters   = []
         limit = 10
         tse = TripleStoreExplorer(self.settings, self.request.session)
-        results = tse.build_sparql_query_from_json(variates,constraintesRelations,constraintesFilters,limit)
+        results,query = tse.build_sparql_query_from_json(variates,constraintesRelations,constraintesFilters,limit,True)
 
         a = {'Age1': '23',
         'ID1': 'AZERTY',
@@ -83,7 +83,7 @@ class tripleStoreExplorerTests(unittest.TestCase):
         assert len(results) == 7
 
         constraintesFilters   = ['VALUES ?Sexe1 { :F }']
-        results = tse.build_sparql_query_from_json(variates,constraintesRelations,constraintesFilters,limit)
+        results,query = tse.build_sparql_query_from_json(variates,constraintesRelations,constraintesFilters,limit,True)
 
         for elt in results:
             self.assertTrue(elt in [a,e])
@@ -91,5 +91,5 @@ class tripleStoreExplorerTests(unittest.TestCase):
         assert len(results) == 2
 
         constraintesFilters   = ['FILTER ( ?Age1 < 25)']
-        results = tse.build_sparql_query_from_json(variates,constraintesRelations,constraintesFilters,limit)
+        results,query = tse.build_sparql_query_from_json(variates,constraintesRelations,constraintesFilters,limit,True)
         assert results == [a]

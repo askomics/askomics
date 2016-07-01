@@ -30,8 +30,10 @@ class ResultsBuilderTests(unittest.TestCase):
         constraintesFilters   = []
         limit = 10
         tse = TripleStoreExplorer(self.settings, self.request.session)
-        self.results = tse.build_sparql_query_from_json(variates,constraintesRelations,constraintesFilters,limit)
-
+        self.results, self.query = tse.build_sparql_query_from_json(variates,constraintesRelations,constraintesFilters,limit, True)
+        results, query = tse.build_sparql_query_from_json(variates,constraintesRelations,constraintesFilters,limit, False)
+        assert len(results) == 0
+        
     def tearDown( self ):
         shutil.rmtree( self.temp_directory )
         self.it.empty()
