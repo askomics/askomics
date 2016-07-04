@@ -45,10 +45,6 @@ var AskomicsUserAbstraction = function () {
 
       service.postsync({}, function(resultListTripletSubjectRelationObject ) {
       console.log("========================= ABSTRACTION =====================================================================");
-      for (var elt in resultListTripletSubjectRelationObject) {
-        console.log("*            "+ elt + "                      * ");
-        console.log("  == >  "+JSON.stringify(resultListTripletSubjectRelationObject[elt]));
-      }
         /* All relation are stored in tripletSubjectRelationObject */
         tripletSubjectRelationObject = resultListTripletSubjectRelationObject.relations;
         entityInformationList = {};
@@ -102,7 +98,6 @@ var AskomicsUserAbstraction = function () {
         for (var entry4 in resultListTripletSubjectRelationObject.positionable){
           var uri4 = resultListTripletSubjectRelationObject.positionable[entry4].entity;
           if ( ! (uri4 in entityPositionableInformationList) ) {
-              console.log("=============>"+resultListTripletSubjectRelationObject.positionable[entry4].taxon);
               entityPositionableInformationList[uri4] = {};
               entityPositionableInformationList[uri4].taxon = resultListTripletSubjectRelationObject.positionable[entry4].taxon;
               entityPositionableInformationList[uri4].ref = resultListTripletSubjectRelationObject.positionable[entry4].ref;
@@ -112,13 +107,6 @@ var AskomicsUserAbstraction = function () {
             throw new Error("URI:"+uri4+" have several taxon,ref, start, end labels... "+JSON.stringify(entityPositionableInformationList[uri4]));
           }
         }
-
-        console.log("==============================================================================================");
-        console.log("<=== entityInformationList ===> ");
-        console.log(JSON.stringify(entityInformationList));
-        console.log("<=== entityPositionableInformationList ===> ");
-        console.log(JSON.stringify(entityPositionableInformationList));
-        //$('#waitModal').modal('hide');
       });
     };
 
@@ -183,8 +171,6 @@ var AskomicsUserAbstraction = function () {
      */
 
     AskomicsUserAbstraction.prototype.getRelationsObjectsAndSubjectsWithURI = function(UriSelectedNode) {
-      console.log('getRelationsFromSubject '+UriSelectedNode);
-      console.log('tripletSubjectRelationObject '+JSON.stringify(tripletSubjectRelationObject));
 
       var objectsTarget = {} ;
       var subjectsTarget = {} ;

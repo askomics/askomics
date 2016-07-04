@@ -178,20 +178,14 @@ function emptyDatabase(value) {
     }
 }
 
-var modalCount = 0;
-
 function displayModal(message, button) {
     $('#modalMessage').text(message);
     $('#modalButton').text(button);
     $('#modal').modal('show');
-    modalCount++;
 }
 
 function hideModal(){
-    modalCount--;
-    if (modalCount<=0) {
-     $('#modal').modal('hide');
-    }
+    $('#modal').modal('hide');
 }
 
 
