@@ -5,7 +5,7 @@
 */
 var AskomicsMenuView = function () {
 
-  AskomicsMenuView.prototype.buildLiView = function(uri,submenu) {
+  AskomicsMenuView.prototype.buildLiView = function(uri,label,submenu) {
 
     var icheck = $("<span/>")
         .attr("class","glyphicon glyphicon-check");
@@ -16,9 +16,9 @@ var AskomicsMenuView = function () {
             .attr("data-value","option1")
             .attr("tabIndex","-1") ;
     if (submenu) {
-      a.html($("<i></i>").append(" "+userAbstraction.removePrefix(uri)+" ")).append(icheck);
+      a.html($("<i></i>").append(label+"\t")).append(icheck);
     } else {
-      a.html($("<b></b>").append(userAbstraction.removePrefix(uri)+" ")).append(icheck);
+      a.html($("<b></b>").append(label+"\t")).append(icheck);
     }
     var li = $("<li></li>");
     li.attr("uri",uri);
@@ -60,7 +60,7 @@ var AskomicsMenuView = function () {
 
     $.each(lentities, function(i) {
       nodeuri = lentities[i];
-      var li = menuView.buildLiView(nodeuri,false);
+      var li = menuView.buildLiView(nodeuri,userAbstraction.removePrefix(nodeuri),false);
       li.on('click', function() {
         var span = $(this).find(".glyphicon");
         var cur_uri = $(this).attr("uri");
@@ -92,7 +92,7 @@ var AskomicsMenuView = function () {
       $.each(listRelObj, function(objecturi) {
         $.each(listRelObj[objecturi], function(idxrel) {
           var rel = listRelObj[objecturi][idxrel];
-          var li = menuView.buildLiView(rel,true);
+          var li = menuView.buildLiView(rel,userAbstraction.removePrefix(rel)+"&#8594;"+userAbstraction.removePrefix(objecturi),true);
           li.attr("nodeuri",nodeuri)
             .on('click', function() {
               /* when this li is unavailable, we can do nothing */
@@ -125,7 +125,7 @@ var AskomicsMenuView = function () {
     if (Object.keys(positionableEntities).length>0) {
       /* positionable object */
       posuri = "positionable";
-      var li = menuView.buildLiView(posuri,true);
+      var li = menuView.buildLiView(posuri,userAbstraction.removePrefix(posuri),false);
       li.attr("nodeuri",posuri)
         .on('click', function() {
           var span = $(this).find(".glyphicon");

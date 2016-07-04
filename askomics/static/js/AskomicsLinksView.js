@@ -8,7 +8,7 @@ var AskomicsLinksView = function () {
   var arrowCode = "&#8594;";
 
   AskomicsLinksView.prototype.remove = function (link) {
-    $("#"+prefix+"Link-"+link.source.id+"-"+link.target.id + "-" + link.linkindex).remove();
+    $("#"+prefix+"Link-"+link.id).remove();
   };
 
   AskomicsLinksView.prototype.showTitle = function (link) {
@@ -20,11 +20,11 @@ var AskomicsLinksView = function () {
 
   AskomicsLinksView.prototype.show = function (link) {
     this.showTitle(link);
-    $("#"+prefix+"Link-"+link.source.id+"-"+link.target.id + "-" + link.linkindex).show();
+    $("#"+prefix+"Link-"+link.id).show();
   };
 
   AskomicsLinksView.prototype.hide = function (link) {
-    $("#"+prefix+"Link-"+link.source.id+"-"+link.target.id + "-" + link.linkindex).hide();
+    $("#"+prefix+"Link-"+link.id).hide();
   };
 
   AskomicsLinksView.prototype.hideAll = function (link) {
@@ -34,7 +34,7 @@ var AskomicsLinksView = function () {
   AskomicsLinksView.prototype.changeType = function(link, type) {
 
     // remove link
-    var id = link.source.id + "-" + link.target.id + "-" + link.linkindex;
+    var id = link.id;
     $('#'+id).remove(); // link
     $('#label-'+id).remove(); // link label
     $('#marker-'+id).remove(); // arrow
@@ -63,7 +63,7 @@ var AskomicsLinksView = function () {
     linksView.remove(link);
 
     // remove link
-    var id = link.source.id + "-" + link.target.id + "-" + link.linkindex;
+    var id = link.id;
     var linkid = $('#'+id).attr("idlink");
 
     $('#'+id).remove(); // link
@@ -104,7 +104,7 @@ var AskomicsLinksView = function () {
 
   AskomicsLinksView.prototype.createStandardView = function (link) {
 
-    var id_link = link.source.id+"-"+link.target.id + "-" + link.linkindex;
+    var id_link = link.id;
 
     var elemUri = link.uri,
          nameDiv = prefix+"Link-"+id_link ;
@@ -119,7 +119,7 @@ var AskomicsLinksView = function () {
 
   AskomicsLinksView.prototype.createPosistionableView = function (link) {
 
-    var id_link = link.source.id+"-"+link.target.id + "-" + link.linkindex;
+    var id_link = link.id;
 
     var elemUri = link.uri,
          nameDiv = prefix+"Link-"+id_link ;

@@ -240,8 +240,10 @@ var AskomicsForceLayoutManager = function () {
   };
 
     AskomicsForceLayoutManager.prototype.updateInstanciateLinks = function(links) {
+      console.log('updateInstanciateLinks size:'+links.length);
       for (var l of links) {
-        var id = l.source.id + "-" + l.target.id + "-" + l.linkindex;
+        var id = l.id;
+        console.log(JSON.stringify(l));
         $("#" + id).css("stroke-dasharray","");
         $("#" + id).css("opacity","1");
         $('#label-'+id).css('opacity', "1");
@@ -375,22 +377,22 @@ var AskomicsForceLayoutManager = function () {
           /* specific attribute for suggested node */
           graphBuilder.setSuggestedNode(suggestedNode,slt_node.x,slt_node.y);
 
-          /* We create a unique instance and add all possible relation between selected node and this suggested node */
-          suggestedList[uri] = suggestedNode ;
-          slt_node.nlink[suggestedList[uri].id] = 0;
-          suggestedList[uri].nlink[slt_node.id] = 0;
-
           for (var rel in objectsTarget[uri]) {
             /* Filter if link are not desired by the user */
             if (! forceLayoutManager.isProposedUri("link",objectsTarget[uri][rel])) continue ;
+
             /* adding in the node list to create D3.js graph */
-            if ( slt_node.nlink[suggestedList[uri].id] === 0 ) {
+            if ( ! (suggestedNode.id in slt_node.nlink) ) {
+              /* We create a unique instance and add all possible relation between selected node and this suggested node */
+              suggestedList[uri] = suggestedNode ;
+              slt_node.nlink[suggestedList[uri].id] = 0;
+              suggestedList[uri].nlink[slt_node.id] = 0;
               nodes.push(suggestedNode);
             }
             /* increment the number of link between the two nodes */
             slt_node.nlink[suggestedList[uri].id]++;
             suggestedList[uri].nlink[slt_node.id]++;
-
+            
             link = {
               suggested : true,
               positionable : false,
@@ -414,17 +416,17 @@ var AskomicsForceLayoutManager = function () {
           if ( ! (uri in suggestedList) ) {
             suggestedNode = userAbstraction.buildBaseNode(uri);
             graphBuilder.setSuggestedNode(suggestedNode,slt_node.x,slt_node.y);
-
-            suggestedList[uri] = suggestedNode ;
-            slt_node.nlink[suggestedList[uri].id] = 0;
-            suggestedList[uri].nlink[slt_node.id] = 0;
           }
 
           for (var rel2 in subjectsTarget[uri]) {
             /* Filter if link are not desired by the user */
             if (! forceLayoutManager.isProposedUri("link",subjectsTarget[uri][rel2])) continue ;
+
             /* adding in the node list to create D3.js graph */
-            if ( slt_node.nlink[suggestedList[uri].id] === 0 ) {
+            if ( ! (suggestedNode.id in slt_node.nlink) ) {
+              suggestedList[uri] = suggestedNode ;
+              slt_node.nlink[suggestedList[uri].id] = 0;
+              suggestedList[uri].nlink[slt_node.id] = 0;
               nodes.push(suggestedNode);
             }
 
@@ -434,6 +436,10 @@ var AskomicsForceLayoutManager = function () {
             link = {
               suggested : true,
               positionable : false,
+              type : '',       // using with positionable object
+              sameTax: false,  // using with positionable object
+              sameRef: false,  // using with positionable object
+              strict: false,   // using with positionable object
               uri   : subjectsTarget[uri][rel2],
               source: suggestedList[uri],
               target: slt_node,
@@ -506,6 +512,7 @@ var AskomicsForceLayoutManager = function () {
     };
 
     AskomicsForceLayoutManager.prototype.insertSuggestionsWithTwoNodesInstancied = function (node1, node2) {
+
       /* get All suggested node and relation associated to get orientation of arc */
       tab = userAbstraction.getRelationsObjectsAndSubjectsWithURI(node1.uri);
       objectsTarget = tab[0];  /* All triplets which slt_node URI are the subject */
@@ -574,7 +581,6 @@ var AskomicsForceLayoutManager = function () {
         node1.nlink[node2.id]++;
         node2.nlink[node1.id]++;
 
-
         link = {
             suggested : true,
             positionable : true,
@@ -632,22 +638,22 @@ var AskomicsForceLayoutManager = function () {
 
     var link = vis.selectAll(".link")
                   .data(links, function (d) {
-                      return d.source.id + "-" + d.target.id + "-" + d.linkindex ;
+                      return d.id ;
                   });
 
     var arrow = vis.selectAll(".arrow")
                    .data(links, function (d) {
-                      return d.source.id + "-" + d.target.id + "-" + d.linkindex ;
+                      return d.id ;
                    });
 
     // Link labels
     link.enter().append("text")
                 .attr("style", "text-anchor:middle; font: 10px sans-serif; cursor: pointer;")
                 .attr("dy", "-5")
-                .attr('id', function(d) {return 'label-'+d.source.id+'-'+d.target.id+'-'+d.linkindex;})
+                .attr('id', function(d) {return 'label-'+d.id;})
                 .style("opacity", function(d) {return d.suggested?"0.3":"1";})
                 .append("textPath")
-                .attr("xlink:href",function(d) {return "#"+d.source.id+'-'+d.target.id+'-'+d.linkindex;})
+                .attr("xlink:href",function(d) {return "#"+d.id;})
                 .attr("startOffset", "35%")
                 .text(function(d){return d.label;})
                 .on('click', function(d) { // Mouse down on a link label
@@ -722,7 +728,7 @@ var AskomicsForceLayoutManager = function () {
 
       // Links
       link.enter().append("svg:path")
-          .attr("id", function (d) { return d.source.id + "-" + d.target.id + "-" + d.linkindex ; })
+          .attr("id", function (d) { return d.id ; })
           .attr('idlink', function(d) {return d.id;})
           .attr("label", function (d) { return d.label ; })
           .attr("class", "link")
@@ -820,6 +826,10 @@ var AskomicsForceLayoutManager = function () {
             /* diminution of arc to improve display of links */
             var penteX = d.target.x-d.source.x;
             var penteY = d.target.y-d.source.y;
+            /* arrondi a une decimale */
+            penteX = Math.round(penteX*10)/10;
+            penteY = Math.round(penteY*10)/10;
+
             var XT=0,YT=0,XS=0,YS=0;
             var dim = configDisplay.rNode/3.0;
             if ( penteX >0 && penteY>0) {
@@ -879,6 +889,8 @@ var AskomicsForceLayoutManager = function () {
       // Restart the force layout.
       force.charge(-700)
           .linkDistance(175)
+          .friction(0.7)
+          //.alpha(1)
           .size([w, h])
           .start();
   };

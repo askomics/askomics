@@ -57,14 +57,17 @@ var AskomicsAttributesView = function () {
 
 
       attributes = userAbstraction.getAttributesWithURI(node.uri);
+
       $.each(attributes, function(i) {
           /* if attribute is loaded before the creation of attribute view, we don t need to create a new */
           attribute = graphBuilder.getAttributeOrCategoryForNode(attributes[i],node);
+
           /* creation of new one otherwise */
           if ( ! attribute ) {
             attribute = graphBuilder.buildAttributeOrCategoryForNode(attributes[i],node);
-          }
 
+          }
+          
           var id = attribute.id;
 
           var lab = $("<label></label>").attr("for",attribute.label).text(attribute.label);
@@ -116,7 +119,7 @@ var AskomicsAttributesView = function () {
 
               inp.change(function(d) {
                 var value = $(this).val();
-                if (value === null) {value = ''};
+                if (value === null) value = '';
                 nodeid = $(this).parent().attr('nodeid');
                 sparlid = $(this).attr('sparqlid');
 
