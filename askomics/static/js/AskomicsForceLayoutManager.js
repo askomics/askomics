@@ -168,7 +168,7 @@ var AskomicsForceLayoutManager = function () {
   });
 
   AskomicsForceLayoutManager.prototype.colorSelectdObject = function (prefix,id) {
-    $(prefix+id).css("fill", "mediumvioletred");
+    $(prefix+id).css("stroke", "firebrick");
   };
 
   AskomicsForceLayoutManager.prototype.start = function () {
@@ -293,7 +293,6 @@ var AskomicsForceLayoutManager = function () {
       // canceled transparency
       $("#node_"+node.id).css("opacity", "1");
       $('#txt_'+node.id).css("opacity","1");
-      //$("#node_"+node.id).css("fill", this.getColorInstanciatedNode(node));
     };
 
     /* Update the label of cercle when a node is instanciated */
@@ -301,9 +300,7 @@ var AskomicsForceLayoutManager = function () {
 
       if (! ctrlPressed) {
         $("[id*='node_']").each(function (index, value) {
-          var n = {};
-          n.uri = $(this).attr('uri') ;
-          $(this).css("fill",forceLayoutManager.getColorInstanciatedNode(n));
+          $(this).css("stroke", "grey");
         });
 
         /* if several node were selected or a diffente node were selected so select only the current node */
@@ -313,7 +310,8 @@ var AskomicsForceLayoutManager = function () {
           forceLayoutManager.colorSelectdObject("#node_",node.id);
         } else { /* deselection of node */
           selectNodes = [] ;
-          $("#node_"+node.id).css("fill", forceLayoutManager.getColorInstanciatedNode(node));
+          console.log('---> deselection');
+          $("#node_"+node.id).css("stroke", "grey");
         }
 
       } else {
@@ -322,7 +320,7 @@ var AskomicsForceLayoutManager = function () {
           if (selectNodes[n].id == node.id) {
             // remove the current node from the selected node list !
              selectNodes.splice(n,1);
-             $("#node_"+node.id).css("fill", forceLayoutManager.getColorInstanciatedNode(node));
+             $("#node_"+node.id).css("stroke", "grey");
              return;
           }
         }
@@ -335,9 +333,17 @@ var AskomicsForceLayoutManager = function () {
     AskomicsForceLayoutManager.prototype.unSelectNodes = function() {
       selectNodes = [];
       $("[id*='node_']").each(function (index, value) {
-        var n = {};
-        n.uri = $(this).attr('uri') ;
-        $(this).css("fill",forceLayoutManager.getColorInstanciatedNode(n));
+        $(this).css("stroke", "grey");
+      });
+    };
+
+    AskomicsForceLayoutManager.prototype.selectLink = function(link) {
+      $("#"+link.id).css("stroke", "firebrick");
+    };
+
+    AskomicsForceLayoutManager.prototype.unSelectLinks = function() {
+      $(".link").each(function (index) {
+        $(this).css("stroke", "grey");
       });
     };
 
@@ -655,40 +661,58 @@ var AskomicsForceLayoutManager = function () {
                 .append("textPath")
                 .attr("xlink:href",function(d) {return "#"+d.id;})
                 .attr("startOffset", "35%")
+                .attr('fill', function(d){ return d.positionable?'darkgreen':'grey'})
                 .text(function(d){return d.label;})
                 .on('click', function(d) { // Mouse down on a link label
-                  /* user want a new relation contraint betwwenn two node*/
-                  if ( d.suggested ) {
-                    ll = [d];
-                    graphBuilder.instanciateLink(ll);
-                    forceLayoutManager.updateInstanciateLinks(ll);
-                    if ( d.source.suggested || d.target.suggested  ) {
-                      var node = d.source.suggested?d.source:d.target;
-                      graphBuilder.instanciateNode(node);
-                      forceLayoutManager.updateInstanciatedNode(node);
-                      nodeView.create(node);
-                      attributesView.create(node);
-                      /* remove old suggestion */
-                      forceLayoutManager.removeSuggestions();
 
-                      if (selectNodes.length <= 1) {
-                        forceLayoutManager.unSelectNodes();
-                      } else {
-                        /* insert new suggestion */
-                        forceLayoutManager.insertSuggestions();
+                  if (true) { //if node is selected
+                    /* user want a new relation contraint betwwenn two node*/
+
+                    //deselect all nodes and links
+                    forceLayoutManager.unSelectNodes();
+                    forceLayoutManager.unSelectLinks();
+
+                    //select link
+                    forceLayoutManager.selectLink(d);
+
+                    if ( d.suggested ) {
+                      ll = [d];
+                      graphBuilder.instanciateLink(ll);
+                      forceLayoutManager.updateInstanciateLinks(ll);
+                      if ( d.source.suggested || d.target.suggested  ) {
+                        var node = d.source.suggested?d.source:d.target;
+                        graphBuilder.instanciateNode(node);
+                        forceLayoutManager.updateInstanciatedNode(node);
+                        nodeView.create(node);
+                        attributesView.create(node);
+                        // remove old suggestion
+                        forceLayoutManager.removeSuggestions();
+                        if (selectNodes.length <= 1) {
+                          forceLayoutManager.unSelectNodes();
+                        } else {
+                          // insert new suggestion
+                          forceLayoutManager.insertSuggestions();
+                        }
                       }
-                      /* update graph */
-                      forceLayoutManager.update();
+                      linksView.create(d);
+                    }else{
+                      forceLayoutManager.removeSuggestions();
                     }
-                    linksView.create(d);
+                    /* update node view  */
+                    nodeView.hideAll();
+                    /* update right view with link view */
+                    attributesView.hideAll();
+                    /* update link view */
+                    linksView.hideAll();
+                    linksView.show(d);
+                    forceLayoutManager.update();
+                  }else{
+                    forceLayoutManager.unSelectNodes();
+                    forceLayoutManager.unSelectLinks();
+                    forceLayoutManager.update();
+                    nodeView.hideAll();
+                    linksView.hideAll();
                   }
-                  /* update node view  */
-                  nodeView.hideAll();
-                  /* update right view with link view */
-                  attributesView.hideAll();
-                  /* update link view */
-                  linksView.hideAll();
-                  linksView.show(d);
               });
 
     /* nodes or links could be removed by other views */
@@ -699,8 +723,8 @@ var AskomicsForceLayoutManager = function () {
                      .attr("id", function(d) {return 'end-marker-'+d.id;})
                      .attr('link_id', function(d) {return d.id;})
                      .attr("class", "arrow")
-                     .style('stroke', function(d){return d.positionable?'darkgreen':'grey';})
-                     .style('fill', function(d){return d.positionable?'darkgreen':'grey';})
+                     .style('stroke', 'grey')
+                     .style('fill', 'grey')
                      .attr("viewBox", "0 -5 10 10")
                      .attr("refX", 15)
                      .attr("refY", 0)
@@ -715,8 +739,8 @@ var AskomicsForceLayoutManager = function () {
                      .attr("id", function(d) {return 'start-marker-'+d.id;})
                      .attr('link_id', function(d) {return d.id;})
                      .attr("class", "arrow")
-                     .style('stroke', function(d){return d.positionable?'darkgreen':'grey';})
-                     .style('fill', function(d){return d.positionable?'darkgreen':'grey';})
+                     .style('stroke', 'grey')
+                     .style('fill', 'grey')
                      .attr("viewBox", "0 -5 10 10")
                      .attr("refX", -5)
                      .attr("refY", 0)
@@ -734,7 +758,7 @@ var AskomicsForceLayoutManager = function () {
           .attr("class", "link")
           .attr("marker-end", function(d) {return "url(#end-marker-"+d.id+")";})
           .attr("marker-start", function(d) {return d.type == 'overlap'?"url(#start-marker-"+d.id+")":"";})
-          .style('stroke', function(d){return d.positionable?'darkgreen':'grey';})
+          .style('stroke', 'grey')
           .style("stroke-dasharray",function(d) {return d.suggested?"2":"";})
           .style("opacity", function(d) {return d.suggested?"0.3":"1";})
           .style("stroke-width", "2")
@@ -753,13 +777,14 @@ var AskomicsForceLayoutManager = function () {
               .attr("id", function (d) { return "node_" + d.id; })
               .attr("uri", function (d) { return d.uri; })
               .attr("class", "nodeStrokeClass")
-              .style("stroke", function(d){ return forceLayoutManager.getStrokeColorInstanciatedNode(d); })
+              .style('stroke', 'grey')
               .style("fill", function (d) { return forceLayoutManager.getColorInstanciatedNode(d); })
               .style("opacity", function(d) {
                   return (d.suggested === true ? configDisplay.opacityNode : 1);
               })
               .on('click', function(d) {
                 forceLayoutManager.manageSelectedNodes(d);
+                forceLayoutManager.unSelectLinks();
               // Mouse up on a link
               //document.body.style.cursor = 'default';
                 // nothing todo for intance
@@ -798,6 +823,8 @@ var AskomicsForceLayoutManager = function () {
       nodeEnter.append("svg:text")//.append("tspan")
               .attr("class", "textClass")
               .attr("x", 14)
+              .attr('fill', function(d){return d.positionable?'darkgreen':'black'})
+              //.attr('stroke', function(d){return d.positionable?'darkgreen':'black'})
               .style("opacity", function(d) {
                   return (d.suggested === true ? configDisplay.opacityNode : 1);
               })
