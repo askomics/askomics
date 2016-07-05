@@ -39,16 +39,15 @@ var AskomicsUserAbstraction = function () {
     /* Request information in the model layer */
     //this.updateOntology();
     AskomicsUserAbstraction.prototype.loadUserAbstraction = function() {
-    //  $('#waitModal').modal('show');
-    //AskomicsUserAbstraction.prototype.updateOntology = function() {
       var service = new RestServiceJs("userAbstraction");
 
       service.postsync({}, function(resultListTripletSubjectRelationObject ) {
       console.log("========================= ABSTRACTION =====================================================================");
-        /* All relation are stored in tripletSubjectRelationObject */
-        tripletSubjectRelationObject = resultListTripletSubjectRelationObject.relations;
-        entityInformationList = {};
-        entityPositionableInformationList = {};
+      /* All relation are stored in tripletSubjectRelationObject */
+      tripletSubjectRelationObject = resultListTripletSubjectRelationObject.relations;
+      entityInformationList = {};
+      entityPositionableInformationList = {};
+      attributesEntityList = {};
         /* All information about an entity available in TPS are stored in entityInformationList */
         for (var entry in resultListTripletSubjectRelationObject.entities){
 
