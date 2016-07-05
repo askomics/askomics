@@ -27,8 +27,7 @@
     AskomicsGraphBuilder.prototype.setNodesAndLinksFromState = function(dump) {
       try {
         var struct = JSON.parse(dump);
-        if (_instanciedNodeGraph.length >0)
-          this.removeInstanciedNode(_instanciedNodeGraph[0]);
+        
         var versionOfFile    = struct[0];
         _instanciedNodeGraph = struct[1];
         _instanciedLinkGraph = struct[2];
@@ -84,7 +83,6 @@
       remove a node and all node newest (and link) associated
     */
     AskomicsGraphBuilder.prototype.removeInstanciedNode = function(node) {
-      console.log("---------- removeInstanciedNode ---------------- ID:"+node.id);
       if ( _instanciedNodeGraph[0].length <= 0 || _instanciedNodeGraph[0].id == node.id ) {
         return [];
       }
@@ -454,6 +452,14 @@
         equalsign = '=';
       }
 
+      if (infos.same_ref) {
+        filters.push('FILTER(' + "?"+refNodeId + "=" + "?"+refSecNodeId +')');
+      }
+
+      if (infos.same_tax) {
+        filters.push('FILTER(' + "?"+taxonNodeId + "=" + "?"+taxonSecNodeId +')');
+      }
+
       switch(infos.type) {
         case 'included' :
             filters.push('FILTER((?'+startSecNodeId+' >'+equalsign+' ?'+startNodeId+') && (?'+endSecNodeId+' <'+equalsign+' ?'+endNodeId+'))');
@@ -475,21 +481,16 @@
         default:
           throw new Error("AskomicsGraphBuilder.prototype.buildPositionableConstraintsGraph: unkown type :"+JSON.stringify(type));
       }
-
-      if (infos.same_ref) {
-        filters.push('FILTER(' + "?"+refNodeId + "=" + "?"+refSecNodeId +')');
-      }
-
-      if (infos.same_tax) {
-        filters.push('FILTER(' + "?"+taxonNodeId + "=" + "?"+taxonSecNodeId +')');
-      }
-
     };
 
     AskomicsGraphBuilder.prototype.buildConstraintsGraph = function() {
       var variates = [] ;
       var constraintRelations = [] ;
       var filters = [];
+
+      var constraintRelationsPositionable = [];
+      var filtersPositionable = [];
+
       var isOptional = false ; /* request too long with optional */
 
       /* copy arrays to avoid to removed nodes and links instancied */
@@ -512,14 +513,13 @@
 
               var nodeSource = dup_link_array[ilx].source;
               var nodeTarget = dup_link_array[ilx].target ;
-              console.log("==================>"+nodeSource.id);
               var posInfos = {};
               posInfos.type = dup_link_array[ilx].type;
               posInfos.same_tax = dup_link_array[ilx].sameTax;
               posInfos.same_ref = dup_link_array[ilx].sameRef;
               posInfos.strict = dup_link_array[ilx].strict;
 
-              this.buildPositionableConstraintsGraph(posInfos,nodeTarget,nodeSource,constraintRelations,filters);
+              this.buildPositionableConstraintsGraph(posInfos,nodeTarget,nodeSource,constraintRelationsPositionable,filtersPositionable);
             } else {
               constraintRelations.push(["?"+'URI'+dup_link_array[ilx].source.SPARQLid,ua.URI(dup_link_array[ilx].uri),"?"+'URI'+dup_link_array[ilx].target.SPARQLid]);
             }
@@ -568,6 +568,16 @@
           }
         }
       }
+      /* Add positionalme constraint and filter in last */
+      for (i=0;i<constraintRelationsPositionable.length;i++) {
+        constraintRelations.push(constraintRelationsPositionable[i]);
+      }
+      console.log("------------");
+      for (i=0;i<filtersPositionable.length;i++) {
+        console.log(filtersPositionable[i]);
+        filters.push(filtersPositionable[i]);
+      }
+      console.log("------------");
       return [variates,constraintRelations,filters] ;
     };
 
