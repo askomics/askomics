@@ -61,10 +61,8 @@ var AskomicsAttributesView = function () {
           attribute = graphBuilder.getAttributeOrCategoryForNode(attributes[i],node);
           /* creation of new one otherwise */
           if ( ! attribute ) {
-            console.log("ATTRIBUT HELLO1:"+JSON.stringify(attributes[i]));
             attribute = graphBuilder.buildAttributeOrCategoryForNode(attributes[i],node);
           }
-          console.log("ATTRIBUT "+attribute.label);
           var id = attribute.id;
 
           var lab = $("<label></label>").attr("for",attribute.label).text(attribute.label);
