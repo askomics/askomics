@@ -849,7 +849,7 @@ var AskomicsForceLayoutManager = function () {
               .attr("class", "textClass")
               .attr("x", 14)
               .attr('fill', function(d){return d.positionable?'darkgreen':'black'})
-              //.attr('stroke', function(d){return d.positionable?'darkgreen':'black'})
+              .style('stroke', function(d){return d.positionable?'darkgreen':'black'})
               .style("opacity", function(d) {
                   return (d.suggested === true ? configDisplay.opacityNode : 1);
               })
