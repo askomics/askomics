@@ -209,6 +209,20 @@ $(function () {
     // Startpoints definition
     loadStartPoints();
 
+    // Loading a sparql query file
+    $(".uploadBtn").change( function(event) {
+      var uploadedFile = event.target.files[0];
+      if (uploadedFile) {
+          var fr = new FileReader();
+          fr.onload = function(e) {
+            var contents = e.target.result;
+            startRequestSessionAskomics();
+            forceLayoutManager.startWithQuery(contents);
+          };
+          fr.readAsText(uploadedFile);
+      }
+    });
+
     // Get the overview of files to integrate
     $("#integration").click(function() {
         var service = new RestServiceJs("up/");

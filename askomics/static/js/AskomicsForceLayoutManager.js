@@ -138,6 +138,7 @@ var AskomicsForceLayoutManager = function () {
               .attr("viewBox", "0 0 " + w + " " + h)
               .attr("perserveAspectRatio", "xMinYMid")
               .append('svg:g');
+            //  .call(d3.behavior.zoom().on("zoom", console.log("redraw")));
 /*
               .on("mouseover", function() { focus.style("display", null); })
               .on("mouseout", function() { focus.style("display", "none"); })
@@ -198,6 +199,7 @@ var AskomicsForceLayoutManager = function () {
 
   AskomicsForceLayoutManager.prototype.startWithQuery = function (dump) {
 
+    d3.select("g").selectAll("*").remove();
     userAbstraction.loadUserAbstraction();
     /* initialize menus */
     menuView.start();
@@ -398,7 +400,7 @@ var AskomicsForceLayoutManager = function () {
             /* increment the number of link between the two nodes */
             slt_node.nlink[suggestedList[uri].id]++;
             suggestedList[uri].nlink[slt_node.id]++;
-            
+
             link = {
               suggested : true,
               positionable : false,
