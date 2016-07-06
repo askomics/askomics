@@ -330,6 +330,12 @@ var AskomicsForceLayoutManager = function () {
         selectNodes.push(node);
         forceLayoutManager.colorSelectdObject("#node_",node.id);
       }
+
+      if (selectNodes.length == 0) {
+        //no node selected: hide rightview
+        attributesView.hideAll();
+        //linksView.hideAll();
+      };
     };
 
     /* unselect all nodes */
@@ -715,7 +721,7 @@ var AskomicsForceLayoutManager = function () {
                     forceLayoutManager.unSelectNodes();
                     forceLayoutManager.unSelectLinks();
                     forceLayoutManager.update();
-                    nodeView.hideAll();
+                    attributesView.hideAll();
                     linksView.hideAll();
                   }
               });
@@ -815,7 +821,11 @@ var AskomicsForceLayoutManager = function () {
 
                 /* update right view with attribute view */
                 attributesView.hideAll();
-                attributesView.show(d);
+
+                // show attribute view only if node is not selected
+                if (!$.inArray(d, selectNodes)) {
+                  attributesView.show(d);
+                };
 
                 /* remove old suggestion */
                 forceLayoutManager.removeSuggestions();

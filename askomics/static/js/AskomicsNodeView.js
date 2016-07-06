@@ -89,8 +89,8 @@ var AskomicsNodeView = function () {
   };
 
   AskomicsNodeView.prototype.hideAll = function (node) {
-  //  $("div[id*='"+ prefix +"']" ).hide();
-  this.clean();
+    //$("div[id*='"+ prefix +"']" ).hide();
+    this.clean();
   };
 
   AskomicsNodeView.prototype.create = function (node) {
