@@ -348,12 +348,21 @@ var AskomicsForceLayoutManager = function () {
 
     AskomicsForceLayoutManager.prototype.selectLink = function(link) {
       $("#"+link.id).css("stroke", "firebrick");
+      $('#end-marker-'+link.id).css("stroke", "firebrick");
+      $('#end-marker-'+link.id).css("fill", "firebrick");
+      $('#start-marker-'+link.id).css("stroke", "firebrick");
+      $('#start-marker-'+link.id).css("fill", "firebrick");
       selectLink = link;
     };
 
     AskomicsForceLayoutManager.prototype.unSelectLinks = function() {
       $(".link").each(function (index) {
         $(this).css("stroke", "grey");
+        selectLink = '';
+      });
+      $(".arrow").each(function (index) {
+        $(this).css("stroke", "grey");
+        $(this).css("fill", "grey");
         selectLink = '';
       });
     };
