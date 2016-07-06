@@ -156,6 +156,7 @@ var AskomicsForceLayoutManager = function () {
 
   var ctrlPressed = false ;
   var selectNodes = []    ;
+  var selectLink  = ''    ;
 
   /* Definition of an event when CTRL key is actif to select several node */
   $(document).keydown(function (e) {
@@ -270,7 +271,7 @@ var AskomicsForceLayoutManager = function () {
       if (idxColorPalette >= colorPalette.length) idxColorPalette = 0;
       return colorUriList[node.uri];
     };
-
+    /* //not used anymore
     AskomicsForceLayoutManager.prototype.getStrokeColorInstanciatedNode = function(node) {
       if ( ! node  ) {
         throw new Error("AskomicsForceLayoutManager.prototype.getStrokeColorInstanciatedNode node is not defined!");
@@ -282,7 +283,7 @@ var AskomicsForceLayoutManager = function () {
         return 'dimgrey';
       }
     };
-
+    */
 
     /* Update the label of cercle when a node is instanciated */
     AskomicsForceLayoutManager.prototype.updateInstanciatedNode = function(node) {
@@ -341,11 +342,13 @@ var AskomicsForceLayoutManager = function () {
 
     AskomicsForceLayoutManager.prototype.selectLink = function(link) {
       $("#"+link.id).css("stroke", "firebrick");
+      selectLink = link;
     };
 
     AskomicsForceLayoutManager.prototype.unSelectLinks = function() {
       $(".link").each(function (index) {
         $(this).css("stroke", "grey");
+        selectLink = '';
       });
     };
 
@@ -667,7 +670,7 @@ var AskomicsForceLayoutManager = function () {
                 .text(function(d){return d.label;})
                 .on('click', function(d) { // Mouse down on a link label
 
-                  if (true) { //if node is selected
+                  if (d != selectLink) { //if link is not selected
                     /* user want a new relation contraint betwwenn two node*/
 
                     //deselect all nodes and links
