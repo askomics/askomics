@@ -793,6 +793,7 @@ var AskomicsForceLayoutManager = function () {
 
       //setup_node(nodeEnter,slt_elt,slt_data,prev_elt,prev_data);
       nodeEnter.append("svg:circle")
+              .attr("style", "cursor: pointer;")
               .attr("r", configDisplay.rNode)
               .attr("id", function (d) { return "node_" + d.id; })
               .attr("uri", function (d) { return d.uri; })
