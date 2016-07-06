@@ -128,9 +128,19 @@ class TripleStoreExplorer(ParamManager):
         self.log.debug("constraintesFilters")
         self.log.debug(constraintesFilters)
 
+        sqb = SparqlQueryBuilder(self.settings, self.session)
+        ql = QueryLauncher(self.settings, self.session)
+        res = ql.execute_query(sqb.get_list_named_graphs().query)
+
+        namedGraphs = []
+
+        for indexResult in range(len(res['results']['bindings'])):
+            namedGraphs.append(res['results']['bindings'][indexResult]['g']['value'])
+
         req = ""
         req += "SELECT DISTINCT "+' '.join(variates)+"\n"
-        req += "FROM "+ "<"+self.get_param("askomics.graph")+ ">"+"\n"
+        for graph in namedGraphs:
+            req += "FROM "+ "<"+graph+ ">"+"\n"
         req += "WHERE {"+"\n"
 
         for contraints in constraintesRelations:
@@ -139,13 +149,13 @@ class TripleStoreExplorer(ParamManager):
                     req += "OPTIONAL { "+contraints[0]+" "+contraints[1]+" "+contraints[2]+" } .\n"
                     continue
 
-            req += contraints[0]+" "+contraints[1]+" "+contraints[2]+".\n"
+            req += "\t"+"\t"+contraints[0]+" "+contraints[1]+" "+contraints[2]+".\n"
 
         for userFilter in constraintesFilters:
-            req += userFilter+".\n"
+            req += "\t"+"\t"+userFilter+".\n"
 
         req += "}"
-        if limit >0 :
+        if limit != None and limit >0 :
             req +=" LIMIT "+str(limit)
 
 

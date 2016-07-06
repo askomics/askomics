@@ -17,6 +17,8 @@ def main(global_config, **settings):
     config.add_route('start_point', '/startpoints')
     config.add_route('statistics', '/statistics')
     config.add_route('empty_database', '/empty_database')
+    config.add_route('list_named_graphs', '/list_named_graphs')
+    config.add_route('delete_graph', '/delete_graph')
     config.add_route('getUserAbstraction', '/userAbstraction')
     config.add_route('sparqlquery', '/sparqlquery')
     config.add_route('getSparqlQueryInTextFormat', '/getSparqlQueryInTextFormat')

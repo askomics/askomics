@@ -1,4 +1,9 @@
 SELECT DISTINCT ?nodeUri ?nodeLabel
-FROM $graph
-WHERE {?nodeUri displaySetting:startPoint "true"^^xsd:boolean .
-       ?nodeUri rdfs:label ?nodeLabel }
+WHERE {
+    GRAPH <urn:sparql:tests-askomics:insert:informative1> {
+    ?g rdfg:subGraphOf <urn:sparql:tests-askomics:insert:informative1> }
+    GRAPH ?g {
+        ?nodeUri displaySetting:startPoint "true"^^xsd:boolean .
+        ?nodeUri rdfs:label ?nodeLabel
+    }
+}

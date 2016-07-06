@@ -57,13 +57,44 @@ class AskView(object):
         tse = TripleStoreExplorer(self.settings, self.request.session)
 
         results = ql.process_query(sqb.get_statistics_number_of_triples().query)
-        data["ntriples"] = results[0]["no"]
+        resultsGraphs = ql.process_query(sqb.get_statistics_number_of_triples_AskOmics_graphs().query)
+        data["ntriples"] = int(results[0]["no"]) + int(resultsGraphs[0]["no"])
 
         results = ql.process_query(sqb.get_statistics_number_of_entities().query)
         data["nentities"] = results[0]["no"]
 
         results = ql.process_query(sqb.get_statistics_distinct_classes().query)
         data["nclasses"] = results[0]["no"]
+
+        # Get the number of graphs
+        results = ql.process_query(sqb.get_statistics_number_of_graphs().query)
+        data["ngraphs"] = results[0]["no"]
+
+        self.log.debug("=== LIST OF METADATAS ")
+
+        # Get the list of named graphs
+        namedGraphsResults = ql.execute_query(sqb.get_list_named_graphs().query)
+
+        namedGraphsMetadatas = {}
+
+        # Get a dictionnary containing the metadatas for each graph
+        for indexResult in range(len(namedGraphsResults['results']['bindings'])):
+            metadatasResults = ql.execute_query(sqb.get_metadatas(namedGraphsResults['results']['bindings'][indexResult]['g']['value']).query)
+            metadatas = {}
+            for indexMetadatasResults in range(len(metadatasResults['results']['bindings'])):
+                if metadatasResults['results']['bindings'][indexMetadatasResults]['p']['value'] == "http://www.w3.org/ns/prov#generatedAtTime":
+                    metadatas['loadDate'] = metadatasResults['results']['bindings'][indexMetadatasResults]['o']['value']
+                if metadatasResults['results']['bindings'][indexMetadatasResults]['p']['value'] == "http://purl.org/dc/elements/1.1/creator":
+                    metadatas['username'] = metadatasResults['results']['bindings'][indexMetadatasResults]['o']['value']
+                if metadatasResults['results']['bindings'][indexMetadatasResults]['p']['value'] == "http://purl.org/dc/elements/1.1/hasVersion":
+                    metadatas['version'] = metadatasResults['results']['bindings'][indexMetadatasResults]['o']['value']
+                if metadatasResults['results']['bindings'][indexMetadatasResults]['p']['value'] == "http://www.w3.org/ns/prov#describesService":
+                    metadatas['server'] = metadatasResults['results']['bindings'][indexMetadatasResults]['o']['value']
+                if metadatasResults['results']['bindings'][indexMetadatasResults]['p']['value'] == "http://www.w3.org/ns/prov#wasDerivedFrom":
+                    metadatas['filename'] = metadatasResults['results']['bindings'][indexMetadatasResults]['o']['value']
+            namedGraphsMetadatas[namedGraphsResults['results']['bindings'][indexResult]['g']['value']] = metadatas
+
+        data['metadata'] = namedGraphsMetadatas
 
         # Get the list of classes
         res_list_classes = ql.process_query(sqb.get_statistics_list_classes().query)
@@ -96,12 +127,52 @@ class AskView(object):
             sqb = SparqlQueryBuilder(self.settings, self.request.session)
             ql = QueryLauncher(self.settings, self.request.session)
 
-            ql.execute_query(sqb.get_delete_query_string().query)
+            namedGraphs = self.get_list_named_graphs()
+            namedGraphs.append(ql.get_param("askomics.graph"))
+            for graph in namedGraphs:
+                ql.execute_query(sqb.get_delete_query_string(graph).query)
+
         except Exception as e:
             data['error'] = str(e)
             self.log.error(str(e))
 
         return data
+
+    @view_config(route_name='delete_graph', request_method='POST')
+    def delete_graph(self):
+        """
+        Delete triples from a list of graph
+        """
+        self.log.debug("=== DELETE SELECTED GRAPHS ===")
+
+        sqb = SparqlQueryBuilder(self.settings, self.request.session)
+        ql = QueryLauncher(self.settings, self.request.session)
+
+        graphs = self.request.json_body['namedGraphs']
+
+        for graph in graphs:
+            self.log.debug("--- DELETE GRAPH : %s", graph)
+            ql.execute_query(sqb.get_drop_named_graph(graph).query)
+
+    @view_config(route_name='list_named_graphs', request_method='GET')
+    def get_list_named_graphs(self):
+        """
+        Return a list with all the named graphs.
+        """
+
+        self.log.debug("=== LIST OF NAMED GRAPHS ===")
+
+        sqb = SparqlQueryBuilder(self.settings, self.request.session)
+        ql = QueryLauncher(self.settings, self.request.session)
+
+        res = ql.execute_query(sqb.get_list_named_graphs().query)
+
+        namedGraphs = []
+
+        for indexResult in range(len(res['results']['bindings'])):
+            namedGraphs.append(res['results']['bindings'][indexResult]['g']['value'])
+
+        return namedGraphs
 
     @view_config(route_name='source_files_overview', request_method='GET')
     def source_files_overview(self):

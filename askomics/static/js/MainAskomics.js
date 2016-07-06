@@ -75,9 +75,43 @@ function loadStatistics(modal) {
     .append($("<p></p>").text("Number of triples  : "+stats.ntriples))
     .append($("<p></p>").text("Number of entities : "+stats.nentities))
     .append($("<p></p>").text("Number of classes : "+stats.nclasses))
+    .append($("<p></p>").text("Number of graphs: "+stats.ngraphs))
     .append($("<div id='deleteButtons'></div>"));
 
     $("#deleteButtons").append("<p><button id='btn-empty' onclick='emptyDatabase(\"confirm\")' class='btn btn-danger'>Empty database</button></p>");
+
+    table=$("<table></table>").addClass('table').addClass('table-bordered');
+    th = $("<tr></tr>").addClass("table-bordered").attr("style", "text-align:center;");
+    th.append($("<th></th>").text("Graph"));
+    th.append($("<th></th>").text("Load Date"));
+    th.append($("<th></th>").text("Username"));
+    th.append($("<th></th>").text("Server"));
+    th.append($("<th></th>").text("AskOmics Version"));
+    table.append(th);
+
+    $.each(stats['metadata'], function(key) {
+        tr = $("<tr></tr>")
+            .append($("<td></td>").text(stats['metadata'][key]['filename']))
+            .append($("<td></td>").text(stats['metadata'][key]['loadDate']))
+            .append($("<td></td>").text(stats['metadata'][key]['username']))
+            .append($("<td></td>").text(stats['metadata'][key]['server']))
+            .append($("<td></td>").text(stats['metadata'][key]['version']))
+        table.append(tr);
+    });
+
+    $('#content_statistics').append(table);
+
+    var form = $("<form class='form-horizontal'><fieldset class='form-group'><label>Choose what graph you want to delete</label><select class='form-control' id='dropNamedGraphSelected' multiple='multiple' ></select></fieldset><button id='dropNamedGraphButton' type='button' onclick='deleteNamedGraph($(\"#dropNamedGraphSelected\").val())' class='btn btn-primary'>Delete</button></form>");
+    var select = form.find('select')
+
+    var serviceNamedGraphs = new RestServiceJs('list_named_graphs');
+    serviceNamedGraphs.getAll(function(namedGraphs) {
+        for (graphName in namedGraphs){
+            select.append($("<option></option>").attr("value", namedGraphs[graphName]).append(namedGraphs[graphName]));
+        };
+    });
+
+    $('#content_statistics').append(form)
 
     table=$("<table></table>").addClass('table').addClass('table-bordered');
     th = $("<tr></tr>").addClass("table-bordered").attr("style", "text-align:center;");
@@ -177,6 +211,17 @@ function emptyDatabase(value) {
         });
     }
 }
+
+function deleteNamedGraph(graphs) {
+    displayModal('Please wait during deletion', 'Close');
+    var service = new RestServiceJs("delete_graph");
+    var graphs = {'namedGraphs':graphs}
+        service.post(graphs, function(){
+        hideModal();
+        loadStatistics(false);
+    });
+}
+
 
 function displayModal(message, button) {
     $('#modalMessage').text(message);

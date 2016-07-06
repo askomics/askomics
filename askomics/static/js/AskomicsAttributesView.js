@@ -24,8 +24,6 @@ var AskomicsAttributesView = function () {
     $("div[id*='"+ prefix +"']" ).hide();
   };
 
-
-
   AskomicsAttributesView.prototype.create = function (node) {
       // Add attributes of the selected node on the right side of AskOmics
     function makeRemoveIcon(field) {
@@ -61,13 +59,12 @@ var AskomicsAttributesView = function () {
       $.each(attributes, function(i) {
           /* if attribute is loaded before the creation of attribute view, we don t need to create a new */
           attribute = graphBuilder.getAttributeOrCategoryForNode(attributes[i],node);
-
           /* creation of new one otherwise */
           if ( ! attribute ) {
+            console.log("ATTRIBUT HELLO1:"+JSON.stringify(attributes[i]));
             attribute = graphBuilder.buildAttributeOrCategoryForNode(attributes[i],node);
-
           }
-          
+          console.log("ATTRIBUT "+attribute.label);
           var id = attribute.id;
 
           var lab = $("<label></label>").attr("for",attribute.label).text(attribute.label);
