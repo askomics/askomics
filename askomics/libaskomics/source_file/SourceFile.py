@@ -463,6 +463,19 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         return headers_status, missing_headers
 
+    def get_number_of_lines(self):
+        """
+        Get the number of line of a tabulated file
+
+        :return: number of ligne (int)
+        """
+
+        with open(self.path) as f:
+            for number, l in enumerate(f):
+                pass
+
+        return number
+
     def persist(self, urlbase,method):
         """
         Store the current source file in the triple store
@@ -593,6 +606,8 @@ class SourceFile(ParamManager, HaveCachedProperties):
             data = {}
             data['status'] = 'ok'
             data['total_triple_count'] = total_triple_count
+
+        data['expected_lines_number'] = self.get_number_of_lines()
 
         return data
 

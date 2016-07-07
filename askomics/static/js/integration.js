@@ -260,10 +260,20 @@ function loadSourceFile(file_elem) {
                               .removeClass('hidden alert-success');
         }
         else {
-            insert_status_elem.html('<strong><span class="glyphicon glyphicon-ok"></span> Success:</strong> inserted '
-            + data.total_triple_count + " lines")
-                              .addClass('show alert-success')
-                              .removeClass('hidden alert-danger');
+            if (data.expected_lines_number == data.total_triple_count) {
+
+
+                insert_status_elem.html('<strong><span class="glyphicon glyphicon-ok"></span> Success:</strong> inserted '
+                + data.total_triple_count + " lines of "+data.expected_lines_number)
+                                  .addClass('show alert-success')
+                                  .removeClass('hidden alert-danger');
+
+            }else{
+                insert_status_elem.html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> Warning:</strong> inserted '
+                + data.total_triple_count + " lines of "+data.expected_lines_number)
+                                  .addClass('show alert-warning')
+                                  .removeClass('hidden alert-danger');
+            }
         }
 
         // Check what is in the db now
