@@ -57,6 +57,9 @@ var AskomicsNodeView = function () {
               help_title = 'Positionable link '+elem.label;
               help_str = 'There is a relation of position between '+elem.source.label+' and '+elem.target.label+'.';
               help_str += ' You can choose different kind of positionable relation.';
+              help_str += 'This relation are explained on the following figure:';
+              $('#help_figure').attr('src', '/static/images/positionable.png').attr('alt', 'bliblibli').css('width', '650px');
+              $('#help_figure').removeClass( "hidden" );
             }else{
               help_title = 'Link '+elem.label;
               help_str = 'There is a relation between '+elem.source.label+' and '+elem.target.label+'.';

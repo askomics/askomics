@@ -171,6 +171,7 @@
               </div>
               <div class="modal-body">
                 <p id='modalMessage'></p>
+                <img id='help_figure' class='hidden'>
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal" id="modalButton"></button>
