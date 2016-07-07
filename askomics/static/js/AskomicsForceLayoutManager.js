@@ -547,7 +547,7 @@ var AskomicsForceLayoutManager = function () {
         links.push(link);
       }
 
-      for (var rel2 in subjectsTarget[node2.uri]) {
+      for (let rel2 in subjectsTarget[node2.uri]) {
         /* Filter if link are not desired by the user */
         if (! forceLayoutManager.isProposedUri("link",subjectsTarget[node2.uri][rel2])) continue ;
 
