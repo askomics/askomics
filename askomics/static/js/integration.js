@@ -136,7 +136,7 @@ function hidePreview(file_elem) {
     file_elem.find(".preview_field").hide();
 }
 
-// Prototype to find if array contain all values of a list
+// Function to find if array contain all values of a list
 
 function containAll(Array1,Array2){
     for(var i = 0 , len = Array2.length; i < len; i++){
@@ -147,7 +147,7 @@ function containAll(Array1,Array2){
     return true;
 }
 
-// Prototype to find if array contain any values of a list
+// Function to find if array contain any values of a list
 
  function containAny(Array1,Array2){
     for(var i = 0 , len = Array2.length; i < len; i++){
@@ -210,9 +210,9 @@ function checkExistingData(file_elem) {
             }
         });
 
-        var insert_status_elem = file_elem.find(".insert_status").first();
+        var insert_warning_elem = file_elem.find(".insert_warning").first();
         if (data.missing_headers.length > 0) {
-            insert_status_elem.html("<strong>The following columns are missing:</strong> " + data.missing_headers.join(', '))
+            insert_warning_elem.html("<strong>The following columns are missing:</strong> " + data.missing_headers.join(', '))
                               .removeClass("hidden alert-success")
                               .addClass("show alert-danger");
         }
@@ -249,11 +249,12 @@ function loadSourceFile(file_elem) {
     service.post(model, function(data) {
         hideModal();
         var insert_status_elem = file_elem.find(".insert_status").first();
+        var insert_warning_elem = file_elem.find(".insert_warning").first();
         if (data.status != "ok") {
-            insert_status_elem.html('<span class="glyphicon glyphicon glyphicon-exclamation-sign"></span>')
+            insert_warning_elem.html('<span class="glyphicon glyphicon glyphicon-exclamation-sign"></span>')
                               .append(data.error);
             if ('url' in data) {
-                insert_status_elem.append("<br>You can view the ttl file here: <a href=\""+data.url+"\">"+data.url+"</a>");
+                insert_warning_elem.append("<br>You can view the ttl file here: <a href=\""+data.url+"\">"+data.url+"</a>");
             }
             insert_status_elem.addClass('show alert-danger')
                               .removeClass('hidden alert-success');

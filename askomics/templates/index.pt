@@ -248,6 +248,7 @@
                         </table>
                         <pre class='preview_field'></pre>
                         <p class="insert_status text-left alert hidden"></p>
+                        <p class="insert_warning text-left alert hidden"></p>
                         <div class="warning-message hidden"></div>
                         <div class="form-group form-inline">
                             <div class="btn-group" role="group" aria-label="metadata">
