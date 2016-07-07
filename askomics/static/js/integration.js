@@ -239,7 +239,7 @@ function loadSourceFile(file_elem) {
         }
     });
 
-    displayModal('Please wait', 'Close');
+    displayModal('Please wait', '', 'Close');
 
     var service = new RestServiceJs("load_data_into_graph");
     var model = { 'file_name': file_name,

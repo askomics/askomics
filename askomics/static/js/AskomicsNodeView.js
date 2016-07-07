@@ -38,6 +38,32 @@ var AskomicsNodeView = function () {
         }
     });
 
+    $('#help').click(function() {
+      var sparqlId = $("#objectName").text();
+        console.log('---> sparqlId: '+sparqlId);
+        try{
+          var node = graphBuilder.getInstanciedNodeFromSparqlId(sparqlId);
+        }catch(err){
+          return;
+        }
+
+
+        if ( node ) {
+          if (node.positionable) {
+            help_title = 'positionable node '+node.label;
+            help_str = node.label+' is a positionable node. You can click on the positionable link to change the query.';
+            help_str += ' Choose which attributes you want to see on the right panel.';
+            help_str += ' Filter this attributes by choosing values';
+          }else{
+            help_title = 'Node '+node.label;
+            help_str = ' Choose which attributes you want to see on the right panel.';
+            help_str += ' Filter this attributes by choosing values';
+          }
+
+          displayModal(help_title, help_str, 'ok');
+        }
+    })
+
   }
 
   // take a string and return an entity with a sub index

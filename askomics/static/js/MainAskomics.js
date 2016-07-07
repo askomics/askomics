@@ -61,7 +61,7 @@ function loadStartPoints() {
 function loadStatistics(modal) {
 
   if (modal) {
-    displayModal('Please Wait', 'Close');
+    displayModal('Please Wait', '', 'Close');
   }
 
   abstraction = new AskomicsUserAbstraction();
@@ -166,7 +166,7 @@ function emptyDatabase(value) {
     }
 
     if (value == 'yes') {
-        displayModal('Please wait during deletion', 'Close');
+        displayModal('Please wait', 'database deletion ...', 'Close');
         var service = new RestServiceJs("empty_database");
             service.getAll(function(empty_db){
               hideModal();
@@ -178,8 +178,16 @@ function emptyDatabase(value) {
     }
 }
 
-function displayModal(message, button) {
-    $('#modalMessage').text(message);
+function displayModal(title, message, button) {
+    $('#modalTitle').text(title);
+    if (message == '') {
+      $('.modal-body').hide();
+      $('.modal-sm').css('width', '300px');
+    }else{
+      $('.modal-sm').css('width', '700px');
+      $('.modal-body').show();
+      $('#modalMessage').text(message);
+    }
     $('#modalButton').text(button);
     $('#modal').modal('show');
 }
