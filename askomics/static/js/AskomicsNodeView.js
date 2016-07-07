@@ -42,28 +42,41 @@ var AskomicsNodeView = function () {
       var sparqlId = $("#objectName").text();
         console.log('---> sparqlId: '+sparqlId);
         try{
-          var node = graphBuilder.getInstanciedNodeFromSparqlId(sparqlId);
+          var elem = graphBuilder.getInstanciedNodeFromSparqlId(sparqlId);
         }catch(err){
-          return;
-        }
-
-
-        if ( node ) {
-          if (node.positionable) {
-            help_title = 'positionable node '+node.label;
-            help_str = node.label+' is a positionable node. You can click on the positionable link to change the query.';
-            help_str += ' Choose which attributes you want to see on the right panel.';
-            help_str += ' Filter this attributes by choosing values';
-          }else{
-            help_title = 'Node '+node.label;
-            help_str = ' Choose which attributes you want to see on the right panel.';
-            help_str += ' Filter this attributes by choosing values';
+          try{
+            var elem = graphBuilder.getInstanciedLinkFromSparqlId(sparqlId);
+          }catch(err){
+            console.log('there is no node or link with id '+sparqlId);
+            return;
           }
-
+        }
+        if (elem) {
+          if (elem.hasOwnProperty('strict')) { // if link (only link have a key strict)
+            if (elem.positionable) {
+              help_title = 'Positionable link '+elem.label;
+              help_str = 'There is a relation of position between '+elem.source.label+' and '+elem.target.label+'.';
+              help_str += ' You can choose different kind of positionable relation.';
+            }else{
+              help_title = 'Link '+elem.label;
+              help_str = 'There is a relation between '+elem.source.label+' and '+elem.target.label+'.';
+              help_str += ' This mean that blablabla';
+            }
+          }else{ // else, it is a node
+            if (elem.positionable) { // a positionable node
+              help_title = 'positionable node '+elem.label;
+              help_str = elem.label+' is a positionable node. You can click on the positionable link to change the query.';
+              help_str += ' Choose which attributes you want to see on the right panel.';
+              help_str += ' Filter this attributes by choosing values';
+            }else{ // a normal node
+              help_title = 'Node '+elem.label;
+              help_str = ' Choose which attributes you want to see on the right panel.';
+              help_str += ' Filter this attributes by choosing values';
+            }
+          }
           displayModal(help_title, help_str, 'ok');
         }
     })
-
   }
 
   // take a string and return an entity with a sub index
