@@ -194,11 +194,11 @@
                                     <th class='column_header'>
                                         {{#unless @first}}
                                             <input type='checkbox' class='toggle_column' checked />
-                                        {{/unless}}
-                                        {{ this }}
 
                                         <img src='/static/images/icons/ok.png' class='relation_present' title='Data with this name is already present in the database' width='24' height='24' />
                                         <img src='/static/images/icons/new.png' class='relation_new' title='No data with this name was found in the database' width='24' height='24' />
+                                        {{/unless}}
+                                        {{ this }}
                                     </th>
                                 {{/each}}
 
