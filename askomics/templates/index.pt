@@ -224,8 +224,8 @@
                                                     <option value='start'>Start</option>
                                                     <option value='end'>End</option>
                                                 </optgroup>
-                                                <optgroup label='Relationship'>
-                                                    <option value='entity'>Relation</option>
+                                                <optgroup label='Relationship to entity'>
+                                                    <option value='entity'>General Relation</option>
                                                     <option value='entitySym'>Symmetric Relation</option>
                                                 </optgroup>
                                             {{/if}}
