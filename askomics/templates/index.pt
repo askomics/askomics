@@ -210,7 +210,7 @@
                                     <th>
                                         <select class='column_type form-control'>
                                             {{#if @first}}
-                                                <optgroup label='Relationship'>
+                                                <optgroup label='Reference Entity'>
                                                     <option value='entity_start'>Entity (Start)</option>
                                                     <option value='entity'>Entity</option>
                                             {{else}}
@@ -219,7 +219,7 @@
                                                     <option value='text'>Text</option>
                                                     <option value='category'>Category</option>
                                                 </optgroup>
-                                                <optgroup label='Position attributes'>
+                                                <optgroup label='Positionable attributes'>
                                                     <option value='taxon'>Taxon</option>
                                                     <option value='ref'>Reference</option>
                                                     <option value='start'>Start</option>
