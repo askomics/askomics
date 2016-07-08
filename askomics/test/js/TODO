@@ -1,0 +1,43 @@
+grunt
+qunit
+
+sudo apt-get install npm
+sudo apt-get install nodejs-legacy
+sudo npm install -g grunt-cli
+sudo npm install grunt --save-dev
+sudo npm install grunt-contrib-jshint --save-dev
+sudo npm install grunt-contrib-concat --save-dev
+sudo npm install grunt-contrib-uglify --save-dev
+sudo npm install grunt-contrib-jshint --save-dev
+sudo npm install grunt-contrib-watch --save-dev
+
+sudo npm install grunt-contrib-qunit --save-dev
+sudo npm install -g phantomjs
+
+sudo npm install grunt-contrib-connect --save-dev
+sudo npm install connect-livereload --save-dev
+
+
+module.exports = function(grunt) {
+
+  grunt.initConfig({
+    jshint: {
+      files: ['Gruntfile.js', 'src/**/*.js', 'test/**/*.js'],
+      options: {
+        globals: {
+          jQuery: true
+        }
+      }
+    },
+    watch: {
+      files: ['<%= jshint.files %>'],
+      tasks: ['jshint']
+    }
+  });
+
+  grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-contrib-watch');
+
+  grunt.registerTask('default', ['jshint']);
+
+};

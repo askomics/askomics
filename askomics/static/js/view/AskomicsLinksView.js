@@ -13,7 +13,7 @@ var AskomicsLinksView = function () {
 
   AskomicsLinksView.prototype.showTitle = function (link) {
 
-    nodeView.clean();
+    manageObjectView.clean();
     $("#objectName").text(link.label);
 
   };
@@ -147,9 +147,9 @@ var AskomicsLinksView = function () {
       }
     }
 
-    var relation = $("<div></div>").append(nodeView.formatLabelEntity(link.source))
+    var relation = $("<div></div>").append(manageObjectView.formatLabelEntity(link.source))
                                .append(select)
-                               .append(nodeView.formatLabelEntity(link.target));
+                               .append(manageObjectView.formatLabelEntity(link.target));
 
     var checkbox_sameref;
     var checkbox_sametax;

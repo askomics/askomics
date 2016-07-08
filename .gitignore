@@ -14,6 +14,9 @@ askomics/ttl/*
 build/
 dist/
 
+# Javascript & utils
+node_modules
+
 # Editors & tooling
 *.orig
 *~

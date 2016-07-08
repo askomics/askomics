@@ -189,7 +189,7 @@ var AskomicsForceLayoutManager = function () {
     attributesView.create(startPoint);
     /* update right view with attribute view */
     attributesView.show(startPoint);
-    nodeView.show(startPoint);
+    manageObjectView.show(startPoint);
     /* insert new suggestion with startpoints */
     this.insertSuggestions();
     /* build graph */
@@ -217,7 +217,7 @@ var AskomicsForceLayoutManager = function () {
     for (var n of lnodes) {
       nodes.push(n);
       //graphBuilder.nodes().push(n);
-      nodeView.create(n);
+      manageObjectView.create(n);
       attributesView.create(n);
     }
     attributesView.hideAll();
@@ -234,7 +234,7 @@ var AskomicsForceLayoutManager = function () {
     this.manageSelectedNodes(lastn);
     /* update right view with attribute view */
     attributesView.show(lastn);
-    nodeView.show(lastn);
+    manageObjectView.show(lastn);
     /* insert new suggestion with startpoints */
     this.insertSuggestions();
     this.update();
@@ -668,7 +668,7 @@ var AskomicsForceLayoutManager = function () {
                       var node = d.source.suggested?d.source:d.target;
                       graphBuilder.instanciateNode(node);
                       forceLayoutManager.updateInstanciatedNode(node);
-                      nodeView.create(node);
+                      manageObjectView.create(node);
                       attributesView.create(node);
                       /* remove old suggestion */
                       forceLayoutManager.removeSuggestions();
@@ -685,7 +685,7 @@ var AskomicsForceLayoutManager = function () {
                     linksView.create(d);
                   }
                   /* update node view  */
-                  nodeView.hideAll();
+                  manageObjectView.hideAll();
                   /* update right view with link view */
                   attributesView.hideAll();
                   /* update link view */
@@ -775,15 +775,15 @@ var AskomicsForceLayoutManager = function () {
                   for (var ll of listOfLinksInstancied ) {
                     linksView.create(ll);
                   }
-                  nodeView.create(d);
+                  manageObjectView.create(d);
                   attributesView.create(d);
                 }
 
                 linksView.hideAll();
 
                 /* update node view  */
-                nodeView.hideAll();
-                nodeView.show(d);
+                manageObjectView.hideAll();
+                manageObjectView.show(d);
 
                 /* update right view with attribute view */
                 attributesView.hideAll();

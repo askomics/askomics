@@ -3,8 +3,7 @@
 /*
   Manage Information Node View With a current selected node
 */
-var AskomicsNodeView = function () {
-  //var prefix = "nodeview_";
+var AskomicsManageObjectView = function () {
 
   {
     // Switch between close and open eye icon for unselected
@@ -31,7 +30,7 @@ var AskomicsNodeView = function () {
           forceLayoutManager.removeSuggestions();
           forceLayoutManager.update();
           attributesView.remove(node);
-          nodeView.clean();
+          manageObjectView.clean();
           for (var l of listLinksRemoved) {
             linksView.remove(l);
           }
@@ -41,9 +40,9 @@ var AskomicsNodeView = function () {
   }
 
   // take a string and return an entity with a sub index
-  AskomicsNodeView.prototype.formatLabelEntity = function(node) {
+  AskomicsManageObjectView.prototype.formatLabelEntity = function(node) {
     if ( node === undefined )
-      throw new Error("AskomicsNodeView.prototype.formatLabelEntity : node is not defined !");
+      throw new Error("AskomicsManageObjectView.prototype.formatLabelEntity : node is not defined !");
 
     var re = new RegExp(/(\d+)$/);
     var indiceEntity = node.name.match(re);
@@ -53,15 +52,15 @@ var AskomicsNodeView = function () {
     return $('<em></em>').text(labelEntity).append($('<sub></sub>').text(indiceEntity[0]));
   };
 
-  AskomicsNodeView.prototype.clean = function () {
+  AskomicsManageObjectView.prototype.clean = function () {
     $("#objectName").text("");
     $("#showNode").hide();
     $("#deleteNode").hide();
   };
 
-  AskomicsNodeView.prototype.show = function (node) {
+  AskomicsManageObjectView.prototype.show = function (node) {
     if ( node === undefined ) {
-      throw new Error("AskomicsNodeView.prototype.set : node is undefined !");
+      throw new Error("AskomicsManageObjectView.prototype.show : node is undefined !");
     }
 
     this.clean();
@@ -78,22 +77,21 @@ var AskomicsNodeView = function () {
     }
   };
 
-  AskomicsNodeView.prototype.remove = function (node) {
+  AskomicsManageObjectView.prototype.remove = function (node) {
     //$("#"+prefix+node.SPARQLid).remove();
     this.clean();
   };
 
-  AskomicsNodeView.prototype.hide = function (node) {
+  AskomicsManageObjectView.prototype.hide = function (node) {
     //$("#"+prefix+node.SPARQLid).hide();
     this.clean();
   };
 
-  AskomicsNodeView.prototype.hideAll = function (node) {
+  AskomicsManageObjectView.prototype.hideAll = function (node) {
   //  $("div[id*='"+ prefix +"']" ).hide();
   this.clean();
   };
 
-  AskomicsNodeView.prototype.create = function (node) {
-  //  var nodeView = $("<div></div>").attr("id",prefix+node.SPARQLid);
+  AskomicsManageObjectView.prototype.create = function (node) {
   };
 };

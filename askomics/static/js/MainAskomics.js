@@ -12,7 +12,7 @@ function startRequestSessionAskomics() {
   /* To manage construction of SPARQL Query */
   graphBuilder = new AskomicsGraphBuilder();
   /* To manage information about current node */
-  nodeView = new AskomicsNodeView();
+  manageObjectView = new AskomicsManageObjectView();
   /* To manage Attribute view on UI */
   attributesView = new AskomicsAttributesView();
   /* To manage Attribute view on UI */

@@ -21,9 +21,12 @@
         <script src="static/js/AskomicsRestManagement.js"></script>
         <script src="static/js/AskomicsUserAbstraction.js"></script>
         <script src="static/js/AskomicsGraphBuilder.js"></script>
-        <script src="static/js/AskomicsAttributesView.js"></script>
-        <script src="static/js/AskomicsNodeView.js"></script>
-        <script src="static/js/AskomicsLinksView.js"></script>
+        <script src="static/js/AskomicsManageObjectView.js"></script>
+
+        <script src="static/js/view/AskomicsObjectView.js"></script>
+        <script src="static/js/view/AskomicsAttributesView.js"></script>
+        <script src="static/js/view/AskomicsLinksView.js"></script>
+
         <script src="static/js/AskomicsForceLayoutManager.js"></script>
         <script src="static/js/AskomicsMenuView.js"></script>
         <script src="static/js/AskomicsMenuFile.js"></script>
