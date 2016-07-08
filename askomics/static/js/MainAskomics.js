@@ -61,7 +61,7 @@ function loadStartPoints() {
 function loadStatistics(modal) {
 
   if (modal) {
-    displayModal('Please Wait', 'Close');
+    displayModal('Please Wait', '', 'Close');
   }
 
   abstraction = new AskomicsUserAbstraction();
@@ -200,7 +200,7 @@ function emptyDatabase(value) {
     }
 
     if (value == 'yes') {
-        displayModal('Please wait during deletion', 'Close');
+        displayModal('Please wait ...', '', 'Close');
         var service = new RestServiceJs("empty_database");
             service.getAll(function(empty_db){
               hideModal();
@@ -232,7 +232,6 @@ function displayModal(message, button) {
 function hideModal(){
     $('#modal').modal('hide');
 }
-
 
 function downloadTextAsFile(filename, text) {
     // Download text as file

@@ -53,7 +53,7 @@ class AskomicsAttributesView extends AskomicsObjectView {
           var labelSparqlVarId = attribute.SPARQLid;
 
           if (attribute.type.indexOf("http://www.w3.org/2001/XMLSchema#") < 0) {
-              displayModal('Please wait', 'Close');
+              displayModal('Please wait', '', 'Close');
               var tab = graphBuilder.buildConstraintsGraphForCategory(node,attribute.id);
 
               inp.attr("list", "opt_" + labelSparqlVarId)

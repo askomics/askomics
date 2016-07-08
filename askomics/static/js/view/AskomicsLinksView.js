@@ -55,6 +55,8 @@ var AskomicsLinksView = function () {
 
     // reload graph (it will recreate the link)
     forceLayoutManager.update();
+    //select the link
+    forceLayoutManager.selectLink(link);
   };
 
   AskomicsLinksView.prototype.reverseDir = function(link) {
@@ -80,6 +82,8 @@ var AskomicsLinksView = function () {
 
     // reload graph (it will recreate the link)
     forceLayoutManager.update();
+    //select the link
+    forceLayoutManager.selectLink(link);
   };
 
   AskomicsLinksView.prototype.changeStrict = function(link, strict) {

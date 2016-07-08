@@ -156,6 +156,7 @@ var AskomicsForceLayoutManager = function () {
 
   var ctrlPressed = false ;
   var selectNodes = []    ;
+  var selectLink  = ''    ;
 
   /* Definition of an event when CTRL key is actif to select several node */
   $(document).keydown(function (e) {
@@ -169,7 +170,7 @@ var AskomicsForceLayoutManager = function () {
   });
 
   AskomicsForceLayoutManager.prototype.colorSelectdObject = function (prefix,id) {
-    $(prefix+id).css("fill", "mediumvioletred");
+    $(prefix+id).css("stroke", "firebrick");
   };
 
   AskomicsForceLayoutManager.prototype.start = function () {
@@ -270,7 +271,7 @@ var AskomicsForceLayoutManager = function () {
       if (idxColorPalette >= colorPalette.length) idxColorPalette = 0;
       return colorUriList[node.uri];
     };
-
+    /* //not used anymore
     AskomicsForceLayoutManager.prototype.getStrokeColorInstanciatedNode = function(node) {
       if ( ! node  ) {
         throw new Error("AskomicsForceLayoutManager.prototype.getStrokeColorInstanciatedNode node is not defined!");
@@ -282,7 +283,7 @@ var AskomicsForceLayoutManager = function () {
         return 'dimgrey';
       }
     };
-
+    */
 
     /* Update the label of cercle when a node is instanciated */
     AskomicsForceLayoutManager.prototype.updateInstanciatedNode = function(node) {
@@ -295,7 +296,6 @@ var AskomicsForceLayoutManager = function () {
       // canceled transparency
       $("#node_"+node.id).css("opacity", "1");
       $('#txt_'+node.id).css("opacity","1");
-      //$("#node_"+node.id).css("fill", this.getColorInstanciatedNode(node));
     };
 
     /* Update the label of cercle when a node is instanciated */
@@ -303,9 +303,7 @@ var AskomicsForceLayoutManager = function () {
 
       if (! ctrlPressed) {
         $("[id*='node_']").each(function (index, value) {
-          var n = {};
-          n.uri = $(this).attr('uri') ;
-          $(this).css("fill",forceLayoutManager.getColorInstanciatedNode(n));
+          $(this).css("stroke", "grey");
         });
 
         /* if several node were selected or a diffente node were selected so select only the current node */
@@ -315,7 +313,8 @@ var AskomicsForceLayoutManager = function () {
           forceLayoutManager.colorSelectdObject("#node_",node.id);
         } else { /* deselection of node */
           selectNodes = [] ;
-          $("#node_"+node.id).css("fill", forceLayoutManager.getColorInstanciatedNode(node));
+          console.log('---> deselection');
+          $("#node_"+node.id).css("stroke", "grey");
         }
 
       } else {
@@ -324,12 +323,18 @@ var AskomicsForceLayoutManager = function () {
           if (selectNodes[n].id == node.id) {
             // remove the current node from the selected node list !
              selectNodes.splice(n,1);
-             $("#node_"+node.id).css("fill", forceLayoutManager.getColorInstanciatedNode(node));
+             $("#node_"+node.id).css("stroke", "grey");
              return;
           }
         }
         selectNodes.push(node);
         forceLayoutManager.colorSelectdObject("#node_",node.id);
+      }
+
+      if (selectNodes.length === 0) {
+        //no node selected: hide rightview
+        attributesView.hideAll();
+        //linksView.hideAll();
       }
     };
 
@@ -337,9 +342,28 @@ var AskomicsForceLayoutManager = function () {
     AskomicsForceLayoutManager.prototype.unSelectNodes = function() {
       selectNodes = [];
       $("[id*='node_']").each(function (index, value) {
-        var n = {};
-        n.uri = $(this).attr('uri') ;
-        $(this).css("fill",forceLayoutManager.getColorInstanciatedNode(n));
+        $(this).css("stroke", "grey");
+      });
+    };
+
+    AskomicsForceLayoutManager.prototype.selectLink = function(link) {
+      $("#"+link.id).css("stroke", "firebrick");
+      $('#end-marker-'+link.id).css("stroke", "firebrick");
+      $('#end-marker-'+link.id).css("fill", "firebrick");
+      $('#start-marker-'+link.id).css("stroke", "firebrick");
+      $('#start-marker-'+link.id).css("fill", "firebrick");
+      selectLink = link;
+    };
+
+    AskomicsForceLayoutManager.prototype.unSelectLinks = function() {
+      $(".link").each(function (index) {
+        $(this).css("stroke", "grey");
+        selectLink = '';
+      });
+      $(".arrow").each(function (index) {
+        $(this).css("stroke", "grey");
+        $(this).css("fill", "grey");
+        selectLink = '';
       });
     };
 
@@ -657,40 +681,58 @@ var AskomicsForceLayoutManager = function () {
                 .append("textPath")
                 .attr("xlink:href",function(d) {return "#"+d.id;})
                 .attr("startOffset", "35%")
+                .attr('fill', function(d){ return d.positionable?'darkgreen':'grey';})
                 .text(function(d){return d.label;})
                 .on('click', function(d) { // Mouse down on a link label
-                  /* user want a new relation contraint betwwenn two node*/
-                  if ( d.suggested ) {
-                    ll = [d];
-                    graphBuilder.instanciateLink(ll);
-                    forceLayoutManager.updateInstanciateLinks(ll);
-                    if ( d.source.suggested || d.target.suggested  ) {
-                      var node = d.source.suggested?d.source:d.target;
-                      graphBuilder.instanciateNode(node);
-                      forceLayoutManager.updateInstanciatedNode(node);
-                      manageObjectView.create(node);
-                      attributesView.create(node);
-                      /* remove old suggestion */
-                      forceLayoutManager.removeSuggestions();
 
-                      if (selectNodes.length <= 1) {
-                        forceLayoutManager.unSelectNodes();
-                      } else {
-                        /* insert new suggestion */
-                        forceLayoutManager.insertSuggestions();
+                  if (d != selectLink) { //if link is not selected
+                    /* user want a new relation contraint betwwenn two node*/
+
+                    //deselect all nodes and links
+                    forceLayoutManager.unSelectNodes();
+                    forceLayoutManager.unSelectLinks();
+
+                    //select link
+                    forceLayoutManager.selectLink(d);
+
+                    if ( d.suggested ) {
+                      ll = [d];
+                      graphBuilder.instanciateLink(ll);
+                      forceLayoutManager.updateInstanciateLinks(ll);
+                      if ( d.source.suggested || d.target.suggested  ) {
+                        var node = d.source.suggested?d.source:d.target;
+                        graphBuilder.instanciateNode(node);
+                        forceLayoutManager.updateInstanciatedNode(node);
+                        manageObjectView.create(node);
+                        attributesView.create(node);
+                        // remove old suggestion
+                        forceLayoutManager.removeSuggestions();
+                        if (selectNodes.length <= 1) {
+                          forceLayoutManager.unSelectNodes();
+                        } else {
+                          // insert new suggestion
+                          forceLayoutManager.insertSuggestions();
+                        }
                       }
-                      /* update graph */
-                      forceLayoutManager.update();
+                      linksView.create(d);
+                    }else{
+                      forceLayoutManager.removeSuggestions();
                     }
-                    linksView.create(d);
+                    /* update node view  */
+                    manageObjectView.hideAll();
+                    /* update right view with link view */
+                    attributesView.hideAll();
+                    /* update link view */
+                    linksView.hideAll();
+                    linksView.show(d);
+                    forceLayoutManager.update();
+                  }else{
+                    forceLayoutManager.unSelectNodes();
+                    forceLayoutManager.unSelectLinks();
+                    forceLayoutManager.update();
+                    attributesView.hideAll();
+                    linksView.hideAll();
                   }
-                  /* update node view  */
-                  manageObjectView.hideAll();
-                  /* update right view with link view */
-                  attributesView.hideAll();
-                  /* update link view */
-                  linksView.hideAll();
-                  linksView.show(d);
               });
 
     /* nodes or links could be removed by other views */
@@ -698,14 +740,14 @@ var AskomicsForceLayoutManager = function () {
 
     // Arrows
     arrow.enter().append("svg:defs").append("svg:marker")
-                     .attr("id", function(d) {return 'marker-'+d.id;})
+                     .attr("id", function(d) {return 'end-marker-'+d.id;})
                      .attr('link_id', function(d) {return d.id;})
                      .attr("class", "arrow")
-                     .style('stroke', function(d){return d.positionable?'darkgreen':'grey';})
-                     .style('fill', function(d){return d.positionable?'darkgreen':'grey';})
+                     .style('stroke', 'grey')
+                     .style('fill', 'grey')
                      .attr("viewBox", "0 -5 10 10")
                      .attr("refX", 15)
-                     .attr("refY", -1.5)
+                     .attr("refY", 0)
                      .attr("markerWidth", 6)
                      .attr("markerHeight", 6)
                      .attr("orient", "auto")
@@ -717,8 +759,8 @@ var AskomicsForceLayoutManager = function () {
                      .attr("id", function(d) {return 'start-marker-'+d.id;})
                      .attr('link_id', function(d) {return d.id;})
                      .attr("class", "arrow")
-                     .style('stroke', function(d){return d.positionable?'darkgreen':'grey';})
-                     .style('fill', function(d){return d.positionable?'darkgreen':'grey';})
+                     .style('stroke', 'grey')
+                     .style('fill', 'grey')
                      .attr("viewBox", "0 -5 10 10")
                      .attr("refX", -5)
                      .attr("refY", 0)
@@ -734,9 +776,9 @@ var AskomicsForceLayoutManager = function () {
           .attr('idlink', function(d) {return d.id;})
           .attr("label", function (d) { return d.label ; })
           .attr("class", "link")
-          .attr("marker-end", function(d) {return "url(#marker-"+d.id+")";})
+          .attr("marker-end", function(d) {return "url(#end-marker-"+d.id+")";})
           .attr("marker-start", function(d) {return d.type == 'overlap'?"url(#start-marker-"+d.id+")":"";})
-          .style('stroke', function(d){return d.positionable?'darkgreen':'grey';})
+          .style('stroke', 'grey')
           .style("stroke-dasharray",function(d) {return d.suggested?"2":"";})
           .style("opacity", function(d) {return d.suggested?"0.3":"1";})
           .style("stroke-width", "2")
@@ -751,17 +793,19 @@ var AskomicsForceLayoutManager = function () {
 
       //setup_node(nodeEnter,slt_elt,slt_data,prev_elt,prev_data);
       nodeEnter.append("svg:circle")
+              .attr("style", "cursor: pointer;")
               .attr("r", configDisplay.rNode)
               .attr("id", function (d) { return "node_" + d.id; })
               .attr("uri", function (d) { return d.uri; })
               .attr("class", "nodeStrokeClass")
-              .style("stroke", function(d){ return forceLayoutManager.getStrokeColorInstanciatedNode(d); })
+              .style('stroke', 'grey')
               .style("fill", function (d) { return forceLayoutManager.getColorInstanciatedNode(d); })
               .style("opacity", function(d) {
                   return (d.suggested === true ? configDisplay.opacityNode : 1);
               })
               .on('click', function(d) {
                 forceLayoutManager.manageSelectedNodes(d);
+                forceLayoutManager.unSelectLinks();
               // Mouse up on a link
               //document.body.style.cursor = 'default';
                 // nothing todo for intance
@@ -787,7 +831,11 @@ var AskomicsForceLayoutManager = function () {
 
                 /* update right view with attribute view */
                 attributesView.hideAll();
-                attributesView.show(d);
+
+                // show attribute view only if node is not selected
+                if (!$.inArray(d, selectNodes)) {
+                  attributesView.show(d);
+                }
 
                 /* remove old suggestion */
                 forceLayoutManager.removeSuggestions();
@@ -800,6 +848,8 @@ var AskomicsForceLayoutManager = function () {
       nodeEnter.append("svg:text")//.append("tspan")
               .attr("class", "textClass")
               .attr("x", 14)
+              .attr('fill', function(d){return d.positionable?'darkgreen':'black';})
+              .style('stroke', function(d){return d.positionable?'darkgreen':'black';})
               .style("opacity", function(d) {
                   return (d.suggested === true ? configDisplay.opacityNode : 1);
               })

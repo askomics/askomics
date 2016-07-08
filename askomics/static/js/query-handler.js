@@ -20,7 +20,7 @@ function prepareQuery(exp, lim, roq) {
 
 function viewQueryResults() {
     $("#btn-down").prop("disabled", false);
-    displayModal('Please wait', 'Close');
+    displayModal('Please wait', '', 'Close');
 
     var service = new RestServiceJs("sparqlquery");
     var jdata = prepareQuery(false, 30, false);
@@ -39,7 +39,7 @@ function viewQueryResults() {
 }
 
 function downloadResultsFile(lim) {
-    displayModal('Generating results file ...', 'Close');
+    displayModal('Generating results file ...', '', 'Close');
     var service = new RestServiceJs("sparqlquery");
     var jdata = prepareQuery(true, lim, false);
     service.post(jdata, function(data) {

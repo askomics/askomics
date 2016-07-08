@@ -202,6 +202,13 @@
       throw new Error("AskomicsGraphBuilder.prototype.getInstanciedNodeFromSparqlId : could not find Instanciate Node with SparqlId:"+sparlId);
     };
 
+    AskomicsGraphBuilder.prototype.getInstanciedLinkFromSparqlId = function(sparqlId) {
+      for (var n of _instanciedLinkGraph) {
+        if (n.label === sparqlId) return n;
+      }
+      throw new Error("AskomicsGraphBuilder.prototype.getInstanciedLinkFromSparqlId : could not find Instanciate Link with SparqlId:"+sparlId);
+    };
+
 
     /* TODO : find a best solution to unactive a node without matching on sparql variable ID */
     AskomicsGraphBuilder.prototype.switchActiveNode = function(node) {

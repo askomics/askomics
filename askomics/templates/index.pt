@@ -128,6 +128,7 @@
                     <span id="objectName" class="label label-default"></span>
 
                     <div class="btn-group btn-group-query">
+                        <span id="help" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
                         <span id="showNode" class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
                         <span id="deleteNode" class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span>
                     </div>
@@ -165,10 +166,11 @@
             <div class="modal-content">
               <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                <h4 class="modal-title" id="modalMessage"></h4>
+                <h4 class="modal-title" id="modalTitle"></h4>
               </div>
               <div class="modal-body">
-                <!--<p>One fine body…</p> -->
+                <p id='modalMessage'></p>
+                <img id='help_figure' class='hidden'>
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal" id="modalButton"></button>
@@ -193,11 +195,11 @@
                                     <th class='column_header'>
                                         {{#unless @first}}
                                             <input type='checkbox' class='toggle_column' checked />
-                                        {{/unless}}
-                                        {{ this }}
 
                                         <img src='/static/images/icons/ok.png' class='relation_present' title='Data with this name is already present in the database' width='24' height='24' />
                                         <img src='/static/images/icons/new.png' class='relation_new' title='No data with this name was found in the database' width='24' height='24' />
+                                        {{/unless}}
+                                        {{ this }}
                                     </th>
                                 {{/each}}
 
@@ -207,7 +209,7 @@
                                     <th>
                                         <select class='column_type form-control'>
                                             {{#if @first}}
-                                                <optgroup label='Relationship'>
+                                                <optgroup label='Reference entity'>
                                                     <option value='entity_start'>Entity (Start)</option>
                                                     <option value='entity'>Entity</option>
                                             {{else}}
@@ -216,15 +218,15 @@
                                                     <option value='text'>Text</option>
                                                     <option value='category'>Category</option>
                                                 </optgroup>
-                                                <optgroup label='Position attributes'>
+                                                <optgroup label='Positionables attributes'>
                                                     <option value='taxon'>Taxon</option>
                                                     <option value='ref'>Reference</option>
                                                     <option value='start'>Start</option>
                                                     <option value='end'>End</option>
                                                 </optgroup>
-                                                <optgroup label='Relationship'>
-                                                    <option value='entity'>Relation</option>
-                                                    <option value='entitySym'>Symmetric Relation</option>
+                                                <optgroup label='Relationship to entity'>
+                                                    <option value='entity'>General relation</option>
+                                                    <option value='entitySym'>Symmetric relation</option>
                                                 </optgroup>
                                             {{/if}}
                                         </select>
@@ -247,6 +249,7 @@
                         </table>
                         <pre class='preview_field'></pre>
                         <p class="insert_status text-left alert hidden"></p>
+                        <p class="insert_warning text-left alert hidden"></p>
                         <div class="warning-message hidden"></div>
                         <div class="form-group form-inline">
                             <div class="btn-group" role="group" aria-label="metadata">
