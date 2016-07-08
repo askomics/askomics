@@ -210,7 +210,7 @@
                                     <th>
                                         <select class='column_type form-control'>
                                             {{#if @first}}
-                                                <optgroup label='Reference Entity'>
+                                                <optgroup label='Reference entity'>
                                                     <option value='entity_start'>Entity (Start)</option>
                                                     <option value='entity'>Entity</option>
                                             {{else}}
@@ -219,15 +219,15 @@
                                                     <option value='text'>Text</option>
                                                     <option value='category'>Category</option>
                                                 </optgroup>
-                                                <optgroup label='Positionable attributes'>
+                                                <optgroup label='Positionables attributes'>
                                                     <option value='taxon'>Taxon</option>
                                                     <option value='ref'>Reference</option>
                                                     <option value='start'>Start</option>
                                                     <option value='end'>End</option>
                                                 </optgroup>
                                                 <optgroup label='Relationship to entity'>
-                                                    <option value='entity'>General Relation</option>
-                                                    <option value='entitySym'>Symmetric Relation</option>
+                                                    <option value='entity'>General relation</option>
+                                                    <option value='entitySym'>Symmetric relation</option>
                                                 </optgroup>
                                             {{/if}}
                                         </select>
