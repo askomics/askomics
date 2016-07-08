@@ -31,7 +31,7 @@ module.exports = function(grunt) {
      files: ['askomics/test/js/*.html']
     },
     jshint: {
-      files: ['Gruntfile.js', 'askomics/static/js/*.js','askomics/static/js/**/*.js', 'askomics/test/js/*.js'],
+      files: ['Gruntfile.js', 'askomics/static/js/*.js','askomics/static/js/view/*.js', 'askomics/test/js/*.js'],
       options: {
         globals: {
           jQuery: true

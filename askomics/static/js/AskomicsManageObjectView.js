@@ -40,11 +40,12 @@ var AskomicsManageObjectView = function () {
     $('#help').click(function() {
       var sparqlId = $("#objectName").text();
         console.log('---> sparqlId: '+sparqlId);
+        var elem;
         try{
-          var elem = graphBuilder.getInstanciedNodeFromSparqlId(sparqlId);
+          elem = graphBuilder.getInstanciedNodeFromSparqlId(sparqlId);
         }catch(err){
           try{
-            var elem = graphBuilder.getInstanciedLinkFromSparqlId(sparqlId);
+            elem = graphBuilder.getInstanciedLinkFromSparqlId(sparqlId);
           }catch(err){
             console.log('there is no node or link with id '+sparqlId);
             return;
@@ -82,7 +83,7 @@ var AskomicsManageObjectView = function () {
           }
           displayModal(help_title, help_str, 'ok');
         }
-    })
+    });
   }
 
   // take a string and return an entity with a sub index
