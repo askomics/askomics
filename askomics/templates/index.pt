@@ -221,13 +221,13 @@
                                                 </optgroup>
                                                 <optgroup label='Positionables attributes'>
                                                     <option value='taxon'>Taxon</option>
-                                                    <option value='ref'>Reference</option>
+                                                    <option value='ref'>Chromosome</option>
                                                     <option value='start'>Start</option>
                                                     <option value='end'>End</option>
                                                 </optgroup>
-                                                <optgroup label='Relationship to entity'>
-                                                    <option value='entity'>General relation</option>
-                                                    <option value='entitySym'>Symmetric relation</option>
+                                                <optgroup label='Relation type'>
+                                                    <option value='entity'>General relation to entity</option>
+                                                    <option value='entitySym'>Symmetric relation to entity</option>
                                                 </optgroup>
                                             {{/if}}
                                         </select>
