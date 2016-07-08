@@ -38,6 +38,52 @@ var AskomicsNodeView = function () {
         }
     });
 
+    $('#help').click(function() {
+      var sparqlId = $("#objectName").text();
+        console.log('---> sparqlId: '+sparqlId);
+        try{
+          var elem = graphBuilder.getInstanciedNodeFromSparqlId(sparqlId);
+        }catch(err){
+          try{
+            var elem = graphBuilder.getInstanciedLinkFromSparqlId(sparqlId);
+          }catch(err){
+            console.log('there is no node or link with id '+sparqlId);
+            return;
+          }
+        }
+        if (elem) {
+          console.log('---> elem: '+JSON.stringify(elem));
+          if (elem.hasOwnProperty('linkindex')) { // if link (only link have a key strict)
+            if (elem.positionable) {
+              help_title = 'Positionable link '+elem.label;
+              help_str = 'There is a relation of position between '+elem.source.label+' and '+elem.target.label+'.';
+              help_str += ' You can choose different kind of positionable relation.';
+              help_str += 'This relations are explained on the following figure:';
+              $('#help_figure').attr('src', '/static/images/positionable.png').attr('alt', 'positionable').css('width', '650px');
+              $('#help_figure').removeClass( "hidden" );
+            }else{
+              help_title = 'Link '+elem.label;
+              help_str = 'There is a relation between '+elem.source.label+' and '+elem.target.label+'.';
+              help_str += ' This mean that attribute '+elem.target.label+' of '+elem.source.label+' is an entity.';
+              $('#help_figure').addClass( "hidden" );
+            }
+          }else{ // else, it is a node
+            if (elem.positionable) { // a positionable node
+              help_title = 'positionable node '+elem.label;
+              help_str = elem.label+' is a positionable node. You can click on the positionable link to change the query.';
+              help_str += ' Choose which attributes you want to see on the right panel.';
+              help_str += ' Filter this attributes by choosing values';
+              $('#help_figure').addClass( "hidden" );
+            }else{ // a normal node
+              help_title = 'Node '+elem.label;
+              help_str = ' Choose which attributes you want to see on the right panel.';
+              help_str += ' Filter this attributes by choosing values';
+              $('#help_figure').addClass( "hidden" );
+            }
+          }
+          displayModal(help_title, help_str, 'ok');
+        }
+    })
   }
 
   // take a string and return an entity with a sub index
@@ -89,8 +135,8 @@ var AskomicsNodeView = function () {
   };
 
   AskomicsNodeView.prototype.hideAll = function (node) {
-  //  $("div[id*='"+ prefix +"']" ).hide();
-  this.clean();
+    //$("div[id*='"+ prefix +"']" ).hide();
+    this.clean();
   };
 
   AskomicsNodeView.prototype.create = function (node) {
