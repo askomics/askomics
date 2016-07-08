@@ -166,7 +166,7 @@ function emptyDatabase(value) {
     }
 
     if (value == 'yes') {
-        displayModal('Please wait', 'database deletion ...', 'Close');
+        displayModal('Please wait ...', '', 'Close');
         var service = new RestServiceJs("empty_database");
             service.getAll(function(empty_db){
               hideModal();

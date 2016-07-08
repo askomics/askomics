@@ -214,7 +214,8 @@ function checkExistingData(file_elem) {
         if (data.missing_headers.length > 0) {
             insert_warning_elem.html("<strong>The following columns are missing:</strong> " + data.missing_headers.join(', '))
                               .removeClass("hidden alert-success")
-                              .addClass("show alert-danger");
+                              .removeClass("hidden alert-danger")
+                              .addClass("show alert-warning");
         }
     });
 }
@@ -246,6 +247,8 @@ function loadSourceFile(file_elem) {
                   'col_types': col_types,
                   'disabled_columns': disabled_columns  };
 
+    console.log('---> col_types: '+col_types);
+
     service.post(model, function(data) {
         hideModal();
         var insert_status_elem = file_elem.find(".insert_status").first();
@@ -256,23 +259,41 @@ function loadSourceFile(file_elem) {
             if ('url' in data) {
                 insert_warning_elem.append("<br>You can view the ttl file here: <a href=\""+data.url+"\">"+data.url+"</a>");
             }
-            insert_status_elem.addClass('show alert-danger')
-                              .removeClass('hidden alert-success');
+            insert_status_elem.removeClass('hidden alert-success')
+                              .addClass('show alert-danger');
         }
         else {
-            if (data.expected_lines_number == data.total_triple_count) {
+            if($.inArray('entitySym', col_types) != -1) {
+                console.log('--->yes, in array');
+                if (data.expected_lines_number*2 == data.total_triple_count) {
+                    insert_status_elem.html('<strong><span class="glyphicon glyphicon-ok"></span> Success:</strong> inserted '
+                    + data.total_triple_count + " lines of "+(data.expected_lines_number*2))
+                                      .removeClass('hidden alert-danger')
+                                      .removeClass('hidden alert-warning')
+                                      .addClass('show alert-success');
 
-
-                insert_status_elem.html('<strong><span class="glyphicon glyphicon-ok"></span> Success:</strong> inserted '
-                + data.total_triple_count + " lines of "+data.expected_lines_number)
-                                  .addClass('show alert-success')
-                                  .removeClass('hidden alert-danger');
-
+                }else{
+                    insert_status_elem.html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> Warning:</strong> inserted '
+                    + data.total_triple_count*2 + " lines of "+data.expected_lines_number)
+                                      .removeClass('hidden alert-success')
+                                      .removeClass('hidden alert-warning')
+                                      .addClass('show alert-danger');
+                }
             }else{
-                insert_status_elem.html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> Warning:</strong> inserted '
-                + data.total_triple_count + " lines of "+data.expected_lines_number)
-                                  .addClass('show alert-warning')
-                                  .removeClass('hidden alert-danger');
+                if (data.expected_lines_number == data.total_triple_count) {
+                    insert_status_elem.html('<strong><span class="glyphicon glyphicon-ok"></span> Success:</strong> inserted '
+                    + data.total_triple_count + " lines of "+data.expected_lines_number)
+                                      .removeClass('hidden alert-danger')
+                                      .removeClass('hidden alert-warning')
+                                      .addClass('show alert-success');
+                }else{
+                    insert_status_elem.html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> Warning:</strong> inserted '
+                    + data.total_triple_count + " lines of "+data.expected_lines_number)
+                                      .removeClass('hidden alert-success')
+                                      .removeClass('hidden alert-warning')
+                                      .addClass('show alert-danger');
+                }
+
             }
         }
 
