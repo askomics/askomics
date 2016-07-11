@@ -116,7 +116,7 @@
                         </div>
                         <div class="btn-group btn-group-query">
                             <button type="button" class="btn btn-default" onclick="viewQueryResults()">Launch query</button>
-                            <button type="button" class="btn btn-default" onclick="window.location.reload()">Reset</button>
+                            <button type="button" class="btn btn-default" onclick="resetGraph()">Reset</button>
                         </div>
                 </div>
 

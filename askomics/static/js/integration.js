@@ -302,4 +302,7 @@ function loadSourceFile(file_elem) {
             checkExistingData($(this));
         });
     });
+    if (!$('#results').is(':empty')){
+        $("#results").empty();
+    }
 }

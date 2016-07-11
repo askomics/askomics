@@ -11,6 +11,10 @@ var AskomicsLinksView = function () {
     $("#"+prefix+"Link-"+link.id).remove();
   };
 
+  AskomicsLinksView.prototype.removeAll = function (link) {
+    $("div[id*='"+ prefix +"']" ).remove();
+  };
+
   AskomicsLinksView.prototype.showTitle = function (link) {
 
     nodeView.clean();

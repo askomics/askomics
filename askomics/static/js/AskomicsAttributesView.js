@@ -12,6 +12,9 @@ var AskomicsAttributesView = function () {
     $("#"+prefix+node.SPARQLid).remove();
   };
 
+  AskomicsAttributesView.prototype.removeAll = function (node) {
+    $("div[id*='"+ prefix +"']" ).remove();  };
+
   AskomicsAttributesView.prototype.show = function (node) {
     $("#"+prefix+node.SPARQLid).show();
   };

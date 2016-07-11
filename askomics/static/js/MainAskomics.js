@@ -35,6 +35,30 @@ function startVisualisation() {
     forceLayoutManager.start();
 }
 
+function resetGraph() {
+  if ( ! askomicsInitialization ) return ;
+
+  // hide graph
+  $("#queryBuilder").hide();
+
+  // hide results table
+  $("#results").empty();
+
+  //remove all rightviews
+  attributesView.removeAll();
+  linksView.removeAll();
+  nodeView.remove();
+
+  // delete the svg
+  d3.select("svg").remove();
+
+  // show the start point selector
+  $("#init").show();
+
+  loadStartPoints();
+  askomicsInitialization = false;
+}
+
 function loadStartPoints() {
 
   var service = new RestServiceJs("startpoints");
@@ -174,6 +198,7 @@ function emptyDatabase(value) {
                 alert(empty_db.error);
               }
             loadStatistics(false);
+            resetGraph();
         });
     }
 }
