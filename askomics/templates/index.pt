@@ -148,7 +148,7 @@
                 <button id='btn-empty' onclick='emptyDatabase("confirm")' class='btn btn-danger'>Clear database</button>
             <p>
             <p id='btn-st'>
-                <button id='btn-stats' onclick='loadStatistics(true)' class='btn btn-default'>Get stats</button>
+                <button id='btn-stats' onclick='loadStatistics()' class='btn btn-default'>Get stats</button>
             </p>
             <hr/>
             <div id="statistics_div" class="row"></div>

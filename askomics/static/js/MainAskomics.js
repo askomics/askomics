@@ -82,11 +82,11 @@ function loadStartPoints() {
   });
 }
 
-function loadStatistics(modal) {
+function loadStatistics() {
 
-  if (modal) {
-    displayModal('Please Wait', '', 'Close');
-  }
+
+  displayModal('Please Wait', '', 'Close');
+
 
   abstraction = new AskomicsUserAbstraction();
   abstraction.loadUserAbstraction();
@@ -161,9 +161,9 @@ function loadStatistics(modal) {
       table.append(tr);
     //});
     }
-    if (modal) {
-        hideModal();
-    }
+
+    hideModal();
+
 
     $('#statistics_div').append(table);
 
