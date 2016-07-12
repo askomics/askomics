@@ -29,6 +29,28 @@ function startVisualisation() {
     forceLayoutManager.start();
 }
 
+function resetGraph() {
+  if ( ! askomicsInitialization ) return ;
+
+  // hide graph
+  $("#queryBuilder").hide();
+
+  // hide results table
+  $("#results").empty();
+
+  //remove all rightviews
+  AskomicsObjectView.removeAll();
+
+  // delete the svg
+  d3.select("svg").remove();
+
+  // show the start point selector
+  $("#init").show();
+
+  loadStartPoints();
+  askomicsInitialization = false;
+}
+
 function loadStartPoints() {
 
   var service = new RestServiceJs("startpoints");
@@ -52,11 +74,11 @@ function loadStartPoints() {
   });
 }
 
-function loadStatistics(modal) {
+function loadStatistics() {
 
-  if (modal) {
-    displayModal('Please Wait', '', 'Close');
-  }
+
+  displayModal('Please Wait', '', 'Close');
+
 
   abstraction = new AskomicsUserAbstraction();
   abstraction.loadUserAbstraction();
@@ -64,15 +86,12 @@ function loadStatistics(modal) {
 
   var service = new RestServiceJs("statistics");
   service.getAll(function(stats) {
-    $('#content_statistics').empty();
-    $('#content_statistics')
+    $('#statistics_div').empty();
+    $('#statistics_div')
     .append($("<p></p>").text("Number of triples  : "+stats.ntriples))
     .append($("<p></p>").text("Number of entities : "+stats.nentities))
     .append($("<p></p>").text("Number of classes : "+stats.nclasses))
-    .append($("<p></p>").text("Number of graphs: "+stats.ngraphs))
-    .append($("<div id='deleteButtons'></div>"));
-
-    $("#deleteButtons").append("<p><button id='btn-empty' onclick='emptyDatabase(\"confirm\")' class='btn btn-danger'>Empty database</button></p>");
+    .append($("<p></p>").text("Number of graphs: "+stats.ngraphs));
 
     table=$("<table></table>").addClass('table').addClass('table-bordered');
     th = $("<tr></tr>").addClass("table-bordered").attr("style", "text-align:center;");
@@ -119,7 +138,7 @@ function loadStatistics(modal) {
             .append($("<td></td>").text(value.count));
       table.append(tr);
     });
-    $('#content_statistics').append(table);
+    $('#statistics_div').append(table);
 
     var entities = abstraction.getEntities() ;
 
@@ -145,7 +164,7 @@ function loadStatistics(modal) {
       table.append(tr);
     }
 
-    $('#content_statistics').append(table);
+    $('#statistics_div').append(table);
 
 
     table = $("<table></table>").addClass('table').addClass('table-bordered');
@@ -168,28 +187,41 @@ function loadStatistics(modal) {
       table.append(tr);
     //});
     }
-    if (modal) {
-        hideModal();
-    }
 
-    $('#content_statistics').append(table);
+    hideModal();
+
+
+    $('#statistics_div').append(table);
 
   });
 }
 
 function emptyDatabase(value) {
     if (value == 'confirm') {
-        $("#deleteButtons").empty();
-        $("#deleteButtons")
-        .append('<p>Delete all data ? ')
-        .append("<button id='btn-empty' onclick='emptyDatabase(\"yes\")' class='btn btn-danger'>Yes</button> ")
-        .append("<button id='btn-empty' onclick='emptyDatabase(\"no\")' class='btn btn-default'>No</button></p>");
+        $("#btn-del").empty();
+        $("#btn-del").append('Are you sure ? ')
+                    .append($('<div></div>')
+                                .attr('class', 'btn-group')
+                                .attr('role', 'group')
+                                .attr('aria-label', '...')
+                                .append($('<button></button>')
+                                      .attr('type', 'button')
+                                      .attr('class', 'btn btn-danger')
+                                      .attr('onclick', 'emptyDatabase(\"yes\")')
+                                      .append('Yes')
+                                ).append($('<button></button>')
+                                      .attr('type', 'button')
+                                      .attr('class', 'btn btn-default')
+                                      .attr('onclick', 'emptyDatabase(\"no\")')
+                                      .append('No')
+                                )
+                          );
         return;
     }
 
     if (value == 'no') {
-        $("#deleteButtons").empty();
-        $("#deleteButtons").append("<p><button id='btn-empty' onclick='emptyDatabase(\"confirm\")' class='btn btn-danger'>Clear database</button></p>");
+        $("#btn-del").empty();
+        $("#btn-del").append("<button id='btn-empty' onclick='emptyDatabase(\"confirm\")' class='btn btn-danger'>Clear database</button>");
         return;
     }
 
@@ -201,10 +233,15 @@ function emptyDatabase(value) {
               if ('error' in empty_db ) {
                 alert(empty_db.error);
               }
-            loadStatistics(false);
+            $('#statistics_div').empty();
+            $('#btn-del').empty();
+            $("#btn-del").append("<button id='btn-empty' onclick='emptyDatabase(\"confirm\")' class='btn btn-danger'>Clear database</button>");
+            $('#btn-del').append(' All triples deleted!');
+            resetGraph();
         });
     }
 }
+
 
 function deleteNamedGraph(graphs) {
     displayModal('Please wait during deletion', 'Close');
@@ -216,9 +253,22 @@ function deleteNamedGraph(graphs) {
     });
 }
 
+function resetStats() {
+  $('#btn-del').empty();
+  $("#btn-del").append("<button id='btn-empty' onclick='emptyDatabase(\"confirm\")' class='btn btn-danger'>Clear database</button>");
+  $('#statistics_div').empty();
+}
 
-function displayModal(message, button) {
-    $('#modalMessage').text(message);
+function displayModal(title, message, button) {
+    $('#modalTitle').text(title);
+    if (message === '') {
+      $('.modal-body').hide();
+      $('.modal-sm').css('width', '300px');
+    }else{
+      $('.modal-sm').css('width', '700px');
+      $('.modal-body').show();
+      $('#modalMessage').text(message);
+    }
     $('#modalButton').text(button);
     $('#modal').modal('show');
 }

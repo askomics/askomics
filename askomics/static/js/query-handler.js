@@ -22,10 +22,14 @@ function viewQueryResults() {
     $("#btn-down").prop("disabled", false);
     displayModal('Please wait', '', 'Close');
 
+    var time = $.now();
     var service = new RestServiceJs("sparqlquery");
     var jdata = prepareQuery(false, 30, false);
     service.post(jdata,function(data) {
       hideModal();
+      new_time = $.now();
+      exec_time = new_time - time;
+      console.log('===> query executed in '+exec_time+' ms');
       if ('error' in data) {
         alert(data.error);
         return;

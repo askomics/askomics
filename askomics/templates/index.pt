@@ -55,7 +55,7 @@
                     <ul class="nav navbar-nav navbar-right">
                         <li id="interrogation" class="active"><a href="#" onclick="loadStartPoints();">Ask!</a></li>
                         <li id="integration"><a href="#">Upload</a></li>
-                        <li id="statistics"><a href="#" onclick="loadStatistics(true);" >Stats</a></li>
+                        <li id="statistics"><a href="#">Database</a></li>
                         <li id="about"><a href="#">About</a></li>
                     </ul>
                 </div>
@@ -123,7 +123,7 @@
                         </div>
                         <div class="btn-group btn-group-query">
                             <button type="button" class="btn btn-default" onclick="viewQueryResults()">Launch query</button>
-                            <button type="button" class="btn btn-default" onclick="window.location.reload()">Reset</button>
+                            <button type="button" class="btn btn-default" onclick="resetGraph()">Reset</button>
                         </div>
                 </div>
 
@@ -151,7 +151,14 @@
             <div id="overview" class="row"></div>
         </div>
         <div id="content_statistics" class="container" hidden>
-            <div id="statistics" class="row"></div>
+            <p id='btn-del'>
+                <button id='btn-empty' onclick='emptyDatabase("confirm")' class='btn btn-danger'>Clear database</button>
+            <p>
+            <p id='btn-st'>
+                <button id='btn-stats' onclick='loadStatistics()' class='btn btn-default'>Get stats</button>
+            </p>
+            <hr/>
+            <div id="statistics_div" class="row"></div>
         </div>
 
         <div id="content_about" class="container" hidden>

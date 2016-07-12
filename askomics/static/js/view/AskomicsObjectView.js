@@ -49,6 +49,10 @@ class AskomicsObjectView {
     $("#"+AskomicsObjectView_prefix+this.objet.id).remove();
   }
 
+  static removeAll() {
+    $("div[id*='"+ AskomicsObjectView_prefix +"']" ).remove();
+  }
+
   show() {
     console.log(" %%%%%%%%%%%%%%%%%%%%%%% === show ==="+ this.objet.uri);
     AskomicsObjectView.hideAll();

@@ -11,7 +11,6 @@ class AskomicsPositionableLinkView extends AskomicsObjectView {
   }
 
   changeType(type) {
-
     // remove link
     var id = this.link.id;
     $('#'+id).remove(); // link

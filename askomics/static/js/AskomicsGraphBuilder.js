@@ -531,6 +531,12 @@
         var SparqlId;
         var isFiltered;
         /* adding constraints about attributs about the current node */
+
+        // add the filters on entity name
+        if (node.SPARQLid in node.filters) {
+          filters.push(node.filters[node.SPARQLid]);
+        };
+
         for (var uri in node.attributes) {
             SparqlId = node.attributes[uri].SPARQLid;
             isFiltered =  SparqlId in node.filters;

@@ -49,7 +49,7 @@ class SourceFileTests(unittest.TestCase):
         assert self.srcfile.is_decimal('23.3095')
         assert not self.srcfile.is_decimal('23,3095')
         assert self.srcfile.is_decimal('.0495')
-        assert not self.srcfile.is_decimal('')
+        assert self.srcfile.is_decimal('')
 
     def test_guess_column_type(self):
 
