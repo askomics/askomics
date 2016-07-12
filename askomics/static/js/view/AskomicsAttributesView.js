@@ -6,7 +6,13 @@
 
 class AskomicsAttributesView extends AskomicsObjectView {
 
-  create(node) {
+  constructor(node) {
+    super(node);
+    this.node = node;
+  }
+
+  create() {
+    var node = this.node;
       // Add attributes of the selected node on the right side of AskOmics
     function makeRemoveIcon(field) {
           var removeIcon = $('<span class="glyphicon glyphicon-erase display"></span>');
@@ -18,7 +24,8 @@ class AskomicsAttributesView extends AskomicsObjectView {
           elemId  = node.SPARQLid,
           nameDiv = this.prefix+node.SPARQLid ;
 
-      var details = $("<div></div>").attr("id",nameDiv).attr("nodeid", node.id).attr("sparqlid", node.SPARQLid).addClass('div-details');
+      var details = this.divPanel() ;
+      details.attr("nodeid", node.id).attr("sparqlid", node.SPARQLid).addClass('div-details');
 
       var nameLab = $("<label></label>").attr("for",elemId).text("ID");
       var nameInp = $("<input/>").attr("id", "lab_" + elemId).addClass("form-control");
@@ -35,10 +42,10 @@ class AskomicsAttributesView extends AskomicsObjectView {
         graphBuilder.setFilterAttributes(nodeid,sparlid,value,'FILTER ( regex(str(?'+sparlid+'), "'+$(this).val()+'", "i" ))');
       });
 
-
       var attributes = userAbstraction.getAttributesWithURI(node.uri);
 
       $.each(attributes, function(i) {
+        console.log(attributes[i]);
           /* if attribute is loaded before the creation of attribute view, we don t need to create a new */
           let attribute = graphBuilder.getAttributeOrCategoryForNode(attributes[i],node);
           /* creation of new one otherwise */
@@ -109,7 +116,6 @@ class AskomicsAttributesView extends AskomicsObjectView {
               });
 
           } else {
-               console.log("TEST...:"+JSON.stringify(attribute));
               if (attribute.type.indexOf("decimal") >= 0) {
 
                 let inputValue="";

@@ -27,7 +27,7 @@
     AskomicsGraphBuilder.prototype.setNodesAndLinksFromState = function(dump) {
       try {
         var struct = JSON.parse(dump);
-        
+
         var versionOfFile    = struct[0];
         _instanciedNodeGraph = struct[1];
         _instanciedLinkGraph = struct[2];
@@ -189,8 +189,8 @@
     };
 
     AskomicsGraphBuilder.prototype.setStartpoint = function(node) {
-      this.setSuggestedNode(node,0,0);
-      this.instanciateNode(node);
+      node = this.setSuggestedNode(node,0,0);
+      node = this.instanciateNode(node);
       return node;
     };
 
@@ -216,36 +216,23 @@
     };
 
     AskomicsGraphBuilder.prototype.setSuggestedNode = function(node,x,y) {
-      node.suggested    = true;
-      node.positionable = userAbstraction.isPositionable(node.uri);
-      node.actif = false ;
-      /* if this future node have the same coordinate with the previous node , the graphe move too much ! */
-      var sc = 30;
-      var scaleX = Math.random()<0.5?-1:1;
-      var scaleY = Math.random()<0.5?-1:1;
-      node.x = x+scaleX*sc;
-      node.y = y+scaleY*sc;
-      this.setId(node);
-      node.name = node.label;
-      node.weight = 0;
-      node.nlink = {}; // number of relation with a node.
-      node.attributes = {} ;
-      node.categories = {} ;
-      node.filters = {} ;/* filters of attributes key:sparqlid*/
-      node.values = {} ; /* values of attributes key:sparqlid*/
+      // TODO: Create a builder node inside userAbstraction
+      if ( userAbstraction.isPositionable(node.uri) ) {
+        node = new AskomicsPositionableNode(node,x,y);
+      } else {
+        node = new AskomicsNode(node,x,y);
+      }
+      node = this.setId(node);
       return node;
-    };
-
-    AskomicsGraphBuilder.prototype.setPositionable = function(node) {
-      node.positionable = true;
     };
 
     AskomicsGraphBuilder.prototype.instanciateNode = function(node) {
       node.suggested = false;
       node.actif = true ;
       this.setSPARQLVariateId(node);
-      node.name = node.SPARQLid;
+      node.label = node.SPARQLid;
       _instanciedNodeGraph.push(node);
+      return node;
     };
 
     AskomicsGraphBuilder.prototype.isInstanciatedNode = function(node) {
@@ -270,7 +257,7 @@
     */
     AskomicsGraphBuilder.prototype.getLabelNode = function(node) {
         var re = new RegExp(/(\d+)$/);
-        var labelEntity = node.name.replace(re,"");
+        var labelEntity = node.label.replace(re,"");
 
         return labelEntity;
       };
@@ -280,7 +267,7 @@
     */
     AskomicsGraphBuilder.prototype.getLabelIndexNode = function(node) {
           var re = new RegExp(/(\d+)$/);
-          var indiceEntity = node.name.match(re);
+          var indiceEntity = node.label.match(re);
 
           if ( indiceEntity && indiceEntity.length>0 )
             return indiceEntity[0];
@@ -311,6 +298,7 @@
     };
 
     AskomicsGraphBuilder.prototype.getAttributeOrCategoryForNode = function(attributeForUri,node) {
+      console.log(node.categories);
       if (attributeForUri.uri in node.categories ) {
         return node.categories[attributeForUri.uri];
       } else if (attributeForUri.uri in node.attributes) {

@@ -11,12 +11,6 @@ function startRequestSessionAskomics() {
 
   /* To manage construction of SPARQL Query */
   graphBuilder = new AskomicsGraphBuilder();
-  /* To manage information about current node */
-  manageObjectView = new AskomicsManageObjectView();
-  /* To manage Attribute view on UI */
-  attributesView = new AskomicsAttributesView();
-  /* To manage Attribute view on UI */
-  linksView = new AskomicsLinksView();
   /* To manage the D3.js Force Layout  */
   forceLayoutManager = new AskomicsForceLayoutManager();
   /* To manage information about User Datasrtucture  */
