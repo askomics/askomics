@@ -120,6 +120,13 @@ class AskomicsObjectView {
         let node = graphBuilder.getInstanciedNode(id);
 
         if ( node ) {
+          if (node.id == graphBuilder.nodes()[0].id) {
+            let help_title = "Information";
+            let help_str   = "Askomics can not delete the start node. Use the reset button to begin a new query!";
+            displayModal(help_title, help_str, 'ok');
+            return;
+          }
+
           let listLinksRemoved = graphBuilder.removeInstanciedNode(node);
           forceLayoutManager.removeSuggestions();
           forceLayoutManager.update();
