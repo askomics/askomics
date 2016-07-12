@@ -7,7 +7,7 @@ class AskomicsPositionableNode extends AskomicsNode {
   }
 
   getPanelView() {
-    return new AskomicsAttributesView(this);
+    return new AskomicsPositionableNodeView(this);
   }
 
   getTextFillColor() { return 'darkgreen'; }

@@ -20,6 +20,8 @@ function startRequestSessionAskomics() {
   /* To manage information about File menu */
   menuFile = new AskomicsMenuFile();
 
+  AskomicsObjectView.defineClickMenu();
+
   askomicsInitialization = true;
 }
 

@@ -31,7 +31,8 @@
         <script src="static/js/link/AskomicsPositionableLink.js"></script>
 
         <script src="static/js/view/AskomicsObjectView.js"></script>
-        <script src="static/js/view/AskomicsAttributesView.js"></script>
+        <script src="static/js/view/AskomicsNodeView.js"></script>
+        <script src="static/js/view/AskomicsPositionableNodeView.js"></script>
         <script src="static/js/view/AskomicsLinkView.js"></script>
         <script src="static/js/view/AskomicsPositionableLinkView.js"></script>
 

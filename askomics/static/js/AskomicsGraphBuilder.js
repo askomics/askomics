@@ -142,32 +142,38 @@
       }
       return listLinkRemoved;
     };
-    AskomicsGraphBuilder.prototype.removeInstanciedLink = function(idLink) {
+    AskomicsGraphBuilder.prototype.removeInstanciedLink = function(link) {
       // finding link
-      var t = findElt(_instanciedLinkGraph,idLink);
+      var t = this.findElt(_instanciedLinkGraph,link.id);
+      var removeNode = null;
+      console.log(JSON.stringify(_instanciedLinkGraph));
 
       var indexLinkNode = t[0];
       var linkNode = t[1] ;
 
-      if ( indexLinkNode === -1 ) {
-        throw new Error("AskomicsGraphBuilder.prototype.removeInstanciedLink id link unknown:"+idLink);
+      if ( indexLinkNode == -1 ) {
+        throw new Error("AskomicsGraphBuilder.prototype.removeInstanciedLink id link unknown:"+link.id);
       }
 
-      linkNode.source.id.nlink[linkNode.target.id]--;
-      linkNode.target.id.nlink[linkNode.source.id]--;
+      linkNode.source.nlink[linkNode.target.id]--;
+      linkNode.target.nlink[linkNode.source.id]--;
       /* if no link between node then remove the newest node */
-      if ( linkNode.source.id.nlink[linkNode.target.id] <= 0 ) {
+      if ( linkNode.source.nlink[linkNode.target.id] <= 0 ) {
         // keep the oldest node !
         if ( linkNode.source.id > linkNode.target.id ) {
           this.removeInstanciedNode(linkNode.source);
+          removeNode = linkNode.source;
         } else {
           this.removeInstanciedNode(linkNode.target);
+          removeNode = linkNode.target;
         }
       }
       //removing the link
-      t = findElt(_instanciedLinkGraph,idLink);
+      t = this.findElt(_instanciedLinkGraph,link.id);
       if (t[0]>-1)
         _instanciedLinkGraph.splice(t[0], 1);
+
+        return removeNode;
     };
 
     /* create and return a new ID to instanciate a new SPARQL variate */
@@ -195,18 +201,18 @@
     };
 
 
-    AskomicsGraphBuilder.prototype.getInstanciedNodeFromSparqlId = function(sparlId) {
+    AskomicsGraphBuilder.prototype.getInstanciedNode = function(id) {
       for (var n of _instanciedNodeGraph) {
-        if (n.SPARQLid === sparlId ) return n;
+        if (n.id == id ) return n;
       }
-      throw new Error("AskomicsGraphBuilder.prototype.getInstanciedNodeFromSparqlId : could not find Instanciate Node with SparqlId:"+sparlId);
+      return null;
     };
 
-    AskomicsGraphBuilder.prototype.getInstanciedLinkFromSparqlId = function(sparqlId) {
+    AskomicsGraphBuilder.prototype.getInstanciedLink = function(id) {
       for (var n of _instanciedLinkGraph) {
-        if (n.label === sparqlId) return n;
+        if (n.id == id) return n;
       }
-      throw new Error("AskomicsGraphBuilder.prototype.getInstanciedLinkFromSparqlId : could not find Instanciate Link with SparqlId:"+sparlId);
+      return null;
     };
 
 

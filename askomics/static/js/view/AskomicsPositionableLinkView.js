@@ -10,6 +10,16 @@ class AskomicsPositionableLinkView extends AskomicsObjectView {
     this.link = link ;
   }
 
+  display_help() {
+    let help_title = 'Positionable link '+this.link.label;
+    let help_str = 'There is a relation of position between '+this.link.source.label+' and '+this.link.target.label+'.';
+    help_str += ' You can choose different kind of positionable relation.';
+    help_str += 'This relations are explained on the following figure:';
+    $('#help_figure').attr('src', '/static/images/positionable.png').attr('alt', 'positionable').css('width', '650px');
+    $('#help_figure').removeClass( "hidden" );
+    displayModal(help_title, help_str, 'ok');
+  }
+
   changeType(type) {
     // remove link
     var id = this.link.id;

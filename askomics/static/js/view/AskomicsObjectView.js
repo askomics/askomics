@@ -12,6 +12,7 @@ class AskomicsObjectView {
     $("#objectName").text("");
     $("#showNode").hide();
     $("#deleteNode").hide();
+    $("#objectName").removeAttr("objid");
   }
 
   // take a string and return an entity with a sub index
@@ -30,6 +31,7 @@ class AskomicsObjectView {
   showTitleObjectView() {
 
     $("#objectName").html(this.formatLabelEntity(this.objet));
+    $("#objectName").attr("objid",this.objet.id);
     $("#showNode").show();
     $("#deleteNode").show();
 
@@ -41,11 +43,13 @@ class AskomicsObjectView {
         $("#showNode").removeClass('glyphicon-eye-open');
         $("#showNode").addClass('glyphicon-eye-close');
       }
+    } else {
+        $("#showNode").removeClass('glyphicon-eye-close');
+        $("#showNode").removeClass('glyphicon-eye-open');
     }
   }
 
   remove() {
-    console.log(" %%%%%%%%%%%%%%%%%%%%%%% === remove ==="+ this.objet.uri);
     $("#"+AskomicsObjectView_prefix+this.objet.id).remove();
   }
 
@@ -54,7 +58,6 @@ class AskomicsObjectView {
   }
 
   show() {
-    console.log(" %%%%%%%%%%%%%%%%%%%%%%% === show ==="+ this.objet.uri);
     AskomicsObjectView.hideAll();
     AskomicsObjectView.cleanTitleObjectView();
     this.showTitleObjectView();
@@ -62,7 +65,6 @@ class AskomicsObjectView {
   }
 
   hide() {
-    console.log(" %%%%%%%%%%%%%%%%%%%%%%% === hide ==="+ this.objet.uri);
     AskomicsObjectView.cleanTitleObjectView();
     $("#"+AskomicsObjectView_prefix+this.objet.id).hide();
   }
@@ -73,89 +75,78 @@ class AskomicsObjectView {
   }
 
   static hideAll () {
-    console.log(" %%%%%%%%%%%%%%%%%%%%%%% === hideAll ===");
     AskomicsObjectView.cleanTitleObjectView();
     $("div[id*='"+ AskomicsObjectView_prefix +"']" ).hide();
   }
-
-}
-
-{
-  // Switch between close and open eye icon for unselected
-  $("#showNode").click(function() {
-      var sparqlId = $("#objectName").text();
-      var node = graphBuilder.getInstanciedNodeFromSparqlId(sparqlId);
-      graphBuilder.switchActiveNode(node);
-
-      if (node.actif) {
-          $(this).removeClass('glyphicon-eye-close');
-          $(this).addClass('glyphicon-eye-open');
-      } else {
-          $(this).removeClass('glyphicon-eye-open');
-          $(this).addClass('glyphicon-eye-close');
-      }
-  });
-
-  // Node deletion
-  $("#deleteNode").click(function() {
-      var sparqlId = $("#objectName").text();
-      var node = graphBuilder.getInstanciedNodeFromSparqlId(sparqlId);
-      if ( node ) {
-        listLinksRemoved = graphBuilder.removeInstanciedNode(node);
-        forceLayoutManager.removeSuggestions();
-        forceLayoutManager.update();
-        node.getPanelView().remove(node);
-        for (var l of listLinksRemoved) {
-          linksView.remove(l);
-        }
-      }
-  });
-
-  $('#help').click(function() {
-    var sparqlId = $("#objectName").text();
-      console.log('---> sparqlId: '+sparqlId);
-      var elem;
-      try{
-        elem = graphBuilder.getInstanciedNodeFromSparqlId(sparqlId);
-      }catch(err){
-        try{
-          elem = graphBuilder.getInstanciedLinkFromSparqlId(sparqlId);
-        }catch(err){
-          console.log('there is no node or link with id '+sparqlId);
+  static defineClickMenu() {
+    // Switch between close and open eye icon for unselected
+    $("#showNode").click(function() {
+        var id = $("#objectName").attr("objid");
+        if (graphBuilder.nodes().length <= 1) {
+          let help_title = "Information";
+          let help_str   = "Askomics can not disable a single node.";
+          displayModal(help_title, help_str, 'ok');
           return;
         }
-      }
-      if (elem) {
-        console.log('---> elem: '+JSON.stringify(elem));
-        if (elem.hasOwnProperty('linkindex')) { // if link (only link have a key strict)
-          if (elem.positionable) {
-            help_title = 'Positionable link '+elem.label;
-            help_str = 'There is a relation of position between '+elem.source.label+' and '+elem.target.label+'.';
-            help_str += ' You can choose different kind of positionable relation.';
-            help_str += 'This relations are explained on the following figure:';
-            $('#help_figure').attr('src', '/static/images/positionable.png').attr('alt', 'positionable').css('width', '650px');
-            $('#help_figure').removeClass( "hidden" );
-          }else{
-            help_title = 'Link '+elem.label;
-            help_str = 'There is a relation between '+elem.source.label+' and '+elem.target.label+'.';
-            help_str += ' This mean that attribute '+elem.target.label+' of '+elem.source.label+' is an entity.';
-            $('#help_figure').addClass( "hidden" );
-          }
-        }else{ // else, it is a node
-          if (elem.positionable) { // a positionable node
-            help_title = 'positionable node '+elem.label;
-            help_str = elem.label+' is a positionable node. You can click on the positionable link to change the query.';
-            help_str += ' Choose which attributes you want to see on the right panel.';
-            help_str += ' Filter this attributes by choosing values';
-            $('#help_figure').addClass( "hidden" );
-          }else{ // a normal node
-            help_title = 'Node '+elem.label;
-            help_str = ' Choose which attributes you want to see on the right panel.';
-            help_str += ' Filter this attributes by choosing values';
-            $('#help_figure').addClass( "hidden" );
+        let countActif = 0;
+        for(let i=0;i<graphBuilder.nodes().length;i++) {
+          if ( graphBuilder.nodes()[i].actif) countActif++ ;
+        }
+        if (countActif <= 1) {
+          let help_title = "Information";
+          let help_str   = "Askomics can not disable all nodes.";
+          displayModal(help_title, help_str, 'ok');
+          return;
+        }
+
+        var node = graphBuilder.getInstanciedNode(id);
+        if ( node ) {
+          graphBuilder.switchActiveNode(node);
+
+          if (node.actif) {
+            $(this).removeClass('glyphicon-eye-close');
+            $(this).addClass('glyphicon-eye-open');
+          } else {
+            $(this).removeClass('glyphicon-eye-open');
+            $(this).addClass('glyphicon-eye-close');
           }
         }
-        displayModal(help_title, help_str, 'ok');
-      }
-  });
+        // link are not manage
+    });
+
+    // Node deletion
+    $("#deleteNode").click(function() {
+        let id = $("#objectName").attr("objid");
+        let node = graphBuilder.getInstanciedNode(id);
+
+        if ( node ) {
+          let listLinksRemoved = graphBuilder.removeInstanciedNode(node);
+          forceLayoutManager.removeSuggestions();
+          forceLayoutManager.update();
+          node.getPanelView().remove();
+          for (let l of listLinksRemoved) {
+            l.getPanelView().remove();
+          }
+        } else {
+          let link =graphBuilder.getInstanciedLink(id);
+          let removenode = graphBuilder.removeInstanciedLink(link);
+          forceLayoutManager.removeSuggestions();
+          forceLayoutManager.update();
+          link.getPanelView().remove();
+          if ( removenode ) {
+            removenode.getPanelView().remove();
+          }
+        }
+    });
+
+    $('#help').click(function() {
+      var id = $("#objectName").attr("objid");
+      let elem = graphBuilder.getInstanciedNode(id);
+      if (! elem)
+        elem = graphBuilder.getInstanciedLink(id);
+      if (elem)
+        elem.getPanelView().display_help();
+    });
+  }
+
 }

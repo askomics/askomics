@@ -12,7 +12,7 @@ class AskomicsNode extends GraphNode {
   }
 
   getPanelView() {
-    return new AskomicsAttributesView(this);
+    return new AskomicsNodeView(this);
   }
 
   set attributes (attributes) { this._attributes = attributes; }
