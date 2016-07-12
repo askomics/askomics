@@ -49,13 +49,24 @@ function resetGraph() {
   linksView.removeAll();
   nodeView.remove();
 
+  //reset view menu
+  menuView.reset();
+
+  //unbind files menu
+  $('#dwl-query').unbind();
+  $('#dwl-query-sparql').unbind();
+
+  //reset fullscreen buttons
+  $('#full-screen-graph').unbind();
+  $('#full-screen-attr').unbind();
+
   // delete the svg
   d3.select("svg").remove();
 
   // show the start point selector
   $("#init").show();
-
   loadStartPoints();
+
   askomicsInitialization = false;
 }
 

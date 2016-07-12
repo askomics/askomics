@@ -28,6 +28,12 @@ var AskomicsMenuView = function () {
     return li;
   };
 
+  AskomicsMenuView.prototype.reset = function() {
+    // Remove onclick
+    $("#buttonViewListNodesAndLinks").unbind();
+    $("#viewListNodesAndLinks").empty();
+  };
+
   /* initialize the view. The abstraction have to be done */
   AskomicsMenuView.prototype.start = function(node) {
     menuView = this;
