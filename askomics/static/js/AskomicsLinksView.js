@@ -228,7 +228,6 @@ var AskomicsLinksView = function () {
     });
 
     reverseArrow.click(function() {
-      console.log('---> ReverseDir');
       lv.reverseDir(link);
     });
 

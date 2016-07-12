@@ -247,8 +247,6 @@ function loadSourceFile(file_elem) {
                   'col_types': col_types,
                   'disabled_columns': disabled_columns  };
 
-    console.log('---> col_types: '+col_types);
-
     service.post(model, function(data) {
         hideModal();
         var insert_status_elem = file_elem.find(".insert_status").first();
@@ -264,7 +262,6 @@ function loadSourceFile(file_elem) {
         }
         else {
             if($.inArray('entitySym', col_types) != -1) {
-                console.log('--->yes, in array');
                 if (data.expected_lines_number*2 == data.total_triple_count) {
                     insert_status_elem.html('<strong><span class="glyphicon glyphicon-ok"></span> Success:</strong> inserted '
                     + data.total_triple_count + " lines of "+(data.expected_lines_number*2))

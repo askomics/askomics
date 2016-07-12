@@ -40,19 +40,17 @@ var AskomicsNodeView = function () {
 
     $('#help').click(function() {
       var sparqlId = $("#objectName").text();
-        console.log('---> sparqlId: '+sparqlId);
         try{
           var elem = graphBuilder.getInstanciedNodeFromSparqlId(sparqlId);
         }catch(err){
           try{
             var elem = graphBuilder.getInstanciedLinkFromSparqlId(sparqlId);
           }catch(err){
-            console.log('there is no node or link with id '+sparqlId);
+            console.log('AskomicsNodeView - help: there is no node or link with id '+sparqlId);
             return;
           }
         }
         if (elem) {
-          console.log('---> elem: '+JSON.stringify(elem));
           if (elem.hasOwnProperty('linkindex')) { // if link (only link have a key strict)
             if (elem.positionable) {
               help_title = 'Positionable link '+elem.label;
