@@ -302,4 +302,11 @@ function loadSourceFile(file_elem) {
             checkExistingData($(this));
         });
     });
+
+    // when user upload a file, reset the stats and clear the results table
+    // (it no longer reflects reality)
+    if (!$('#results').is(':empty')){
+        $("#results").empty();
+    }
+    resetStats();
 }

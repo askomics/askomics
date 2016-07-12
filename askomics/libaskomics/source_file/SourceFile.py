@@ -191,6 +191,9 @@ class SourceFile(ParamManager, HaveCachedProperties):
         :param value: the value to evaluate
         :return: True if the value is decimal
         """
+
+        if value == "":
+            return True
         if value.isdigit():
             return True
         else:
