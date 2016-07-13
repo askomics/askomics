@@ -53,7 +53,6 @@ class AskomicsNodeView extends AskomicsObjectView {
       var attributes = userAbstraction.getAttributesWithURI(node.uri);
 
       $.each(attributes, function(i) {
-        console.log(attributes[i]);
           /* if attribute is loaded before the creation of attribute view, we don t need to create a new */
           let attribute = graphBuilder.getAttributeOrCategoryForNode(attributes[i],node);
           /* creation of new one otherwise */
@@ -95,11 +94,8 @@ class AskomicsNodeView extends AskomicsObjectView {
                   if ( d.values.length<3 ) sizeSelect = d.values.length;
                   if ( d.values.length === 0 ) sizeSelect = 1;
                   inp.attr("size",sizeSelect);
-                  console.log("CATEEEEEEEEEEEEEEEE:"+JSON.stringify(d.values));
                   if ( d.values.length > 1 ) {
                     for (let v of d.values) {
-                      console.log(URISparqlVarId);
-                      console.log(v);
                       if ( selectedValue == v[labelSparqlVarId] ) {
                         inp.append($("<option></option>").attr("value", v[URISparqlVarId]).attr("selected", "selected").append(v[labelSparqlVarId]));
                       } else {
@@ -113,8 +109,7 @@ class AskomicsNodeView extends AskomicsObjectView {
               });
 
               inp.change(function(d) {
-                var value = $(this).val(); 
-                console.log(value);
+                var value = $(this).val();
                 if (!value) value = '';
                 let nodeid = $(this).parent().attr('nodeid');
                 let sparlid = $(this).attr('sparqlid');
