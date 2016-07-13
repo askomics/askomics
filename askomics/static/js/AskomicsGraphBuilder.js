@@ -61,6 +61,10 @@ const classesMapping = {
         if ( versionOfFile != this.AskomicsGraphBuilderVersion ) {
           alert("Dump file are builded with the Askomics Graph Builder Version:"+versionOfFile+"\n"+". Current version is "+ AskomicsGraphBuilderVersion +".\nReload of dump are not guaranteed !");
         }
+
+        this.nodes().splice(0, this.nodes().length);
+        this.links().splice(0, this.links().length);
+
         //setup nodes
         for (let i=0;i<nodes.length;i++) {
           let className = nodes[i][0];

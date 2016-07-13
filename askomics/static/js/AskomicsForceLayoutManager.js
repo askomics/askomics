@@ -203,7 +203,6 @@ var AskomicsForceLayoutManager = function () {
 
     nodes.splice(0, nodes.length);
     links.splice(0, links.length);
-
     t = graphBuilder.setNodesAndLinksFromState(dump);
     lnodes = t[0];
     llinks = t[1];
