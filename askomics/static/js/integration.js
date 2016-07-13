@@ -253,8 +253,6 @@ function loadSourceFile(file_elem) {
                   'col_types': col_types,
                   'disabled_columns': disabled_columns  };
 
-    console.log('---> col_types: '+col_types);
-
     service.post(model, function(data) {
         hideModal();
         var insert_status_elem = file_elem.find(".insert_status").first();
@@ -269,9 +267,37 @@ function loadSourceFile(file_elem) {
                               .addClass('show alert-danger');
         }
         else {
-            insert_status_elem.html('<strong><span class="glyphicon glyphicon-ok"></span> Success:</strong> inserted '+ data.total_triple_count + " lines")
-                              .addClass('show alert-success')
-                              .removeClass('hidden alert-danger');
+            if($.inArray('entitySym', col_types) != -1) {
+                if (data.expected_lines_number*2 == data.total_triple_count) {
+                    insert_status_elem.html('<strong><span class="glyphicon glyphicon-ok"></span> Success:</strong> inserted '
+                    + data.total_triple_count + " lines of "+(data.expected_lines_number*2))
+                                      .removeClass('hidden alert-danger')
+                                      .removeClass('hidden alert-warning')
+                                      .addClass('show alert-success');
+
+                }else{
+                    insert_status_elem.html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> Warning:</strong> inserted '
+                    + data.total_triple_count*2 + " lines of "+data.expected_lines_number)
+                                      .removeClass('hidden alert-success')
+                                      .removeClass('hidden alert-warning')
+                                      .addClass('show alert-danger');
+                }
+            }else{
+                if (data.expected_lines_number == data.total_triple_count) {
+                    insert_status_elem.html('<strong><span class="glyphicon glyphicon-ok"></span> Success:</strong> inserted '
+                    + data.total_triple_count + " lines of "+data.expected_lines_number)
+                                      .removeClass('hidden alert-danger')
+                                      .removeClass('hidden alert-warning')
+                                      .addClass('show alert-success');
+                }else{
+                    insert_status_elem.html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> Warning:</strong> inserted '
+                    + data.total_triple_count + " lines of "+data.expected_lines_number)
+                                      .removeClass('hidden alert-success')
+                                      .removeClass('hidden alert-warning')
+                                      .addClass('show alert-danger');
+                }
+
+            }
         }
 
         // Check what is in the db now
