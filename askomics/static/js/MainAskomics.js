@@ -43,13 +43,22 @@ function resetGraph() {
   //remove all rightviews
   AskomicsObjectView.removeAll();
 
+  //reset view menu
+  menuView.reset();
+
+  //unbind files menu
+  menuFile.unbindDownloadButtons();
+
+  //unbind fullscreen buttons
+  forceLayoutManager.unbindFullscreenButtons();
+
   // delete the svg
   d3.select("svg").remove();
 
   // show the start point selector
   $("#init").show();
-
   loadStartPoints();
+
   askomicsInitialization = false;
 }
 
@@ -241,6 +250,7 @@ function emptyDatabase(value) {
             $("#btn-del").append("<button id='btn-empty' onclick='emptyDatabase(\"confirm\")' class='btn btn-danger'>Clear database</button>");
             $('#btn-del').append(' All triples deleted!');
             resetGraph();
+            resetStats();
         });
     }
 }
@@ -251,8 +261,9 @@ function deleteNamedGraph(graphs) {
     var service = new RestServiceJs("delete_graph");
     let data = {'namedGraphs':graphs };
         service.post(data, function(){
+        resetGraph();
+        resetStats();
         hideModal();
-        loadStatistics(false);
     });
 }
 

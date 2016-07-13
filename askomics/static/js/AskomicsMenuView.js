@@ -32,6 +32,12 @@ class AskomicsMenuView {
     return li;
   }
 
+  reset() {
+    // Remove onclick
+    $("#buttonViewListNodesAndLinks").unbind();
+    $("#viewListNodesAndLinks").empty();
+  }
+
   /* initialize the view. The abstraction have to be done */
   start(node) {
     let menuView = this;

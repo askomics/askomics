@@ -101,6 +101,11 @@ var AskomicsForceLayoutManager = function () {
     $('#icon-resize-attr').attr('value', 'small');
   };
 
+  AskomicsForceLayoutManager.prototype.unbindFullscreenButtons = function() {
+    $('#full-screen-graph').unbind();
+    $('#full-screen-attr').unbind();
+  };
+
   $('#full-screen-graph').click(function() {
     if ($('#icon-resize-graph').attr('value') == 'small') {
       forceLayoutManager.fullsizeGraph();
