@@ -72,7 +72,7 @@ function displayResults(data) {
        for (i=0;i<nodeToDisplay.length;i++ ) {
          varEntity = nodeToDisplay[i];
          var nodeBuf = {name:varEntity};
-         var label = nodeView.formatLabelEntity(nodeBuf);
+         var label = varEntity;
          activesAttributes[varEntity] = graphBuilder.attributesDisplaying(varEntity);
          var nAttributes = activesAttributes[varEntity].length+1;
          /* Fomattage en indice du numero de l'entité */

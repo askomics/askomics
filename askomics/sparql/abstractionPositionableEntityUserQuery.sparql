@@ -1,10 +1,13 @@
 SELECT DISTINCT ?entity ?ref ?taxon ?start ?end
-FROM $graph
 WHERE {
-	?entity rdf:type owl:Class .
-	?entity displaySetting:is_positionable "true"^^xsd:boolean .
-	?entity displaySetting:position_reference ?ref .
-  ?entity displaySetting:position_taxon     ?taxon .
-  ?entity displaySetting:position_start     ?start .
-  ?entity displaySetting:position_end       ?end .
+    GRAPH <urn:sparql:tests-askomics:insert:informative1> {
+    ?g rdfg:subGraphOf <urn:sparql:tests-askomics:insert:informative1> }
+    GRAPH ?g {
+	    ?entity rdf:type owl:Class .
+	    ?entity displaySetting:is_positionable "true"^^xsd:boolean .
+	    ?entity displaySetting:position_reference ?ref .
+    ?entity displaySetting:position_taxon     ?taxon .
+    ?entity displaySetting:position_start     ?start .
+    ?entity displaySetting:position_end       ?end .
+    }
 }

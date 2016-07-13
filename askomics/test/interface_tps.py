@@ -13,7 +13,26 @@ class InterfaceTPS(object):
         #empty database
         sqb = SparqlQueryBuilder(self.settings, self.request.session)
         ql = QueryLauncher(self.settings, self.request.session)
-        ql.execute_query(sqb.get_delete_query_string().query)
+        namedGraphs = self.list_named_graphs()
+        for graph in namedGraphs:
+            ql.execute_query(sqb.get_delete_query_string(graph).query)
+
+    def list_named_graphs(self):
+        sqb = SparqlQueryBuilder(self.settings, self.request.session)
+        ql = QueryLauncher(self.settings, self.request.session)
+
+        res = ql.execute_query(sqb.get_list_named_graphs().query)
+
+        namedGraphs = []
+
+        for indexResult in range(len(res['results']['bindings'])):
+            namedGraphs.append(res['results']['bindings'][indexResult]['g']['value'])
+
+        return namedGraphs
+    def drop_graph(self, graph):
+        sqb = SparqlQueryBuilder(self.settings, self.request.session)
+        ql = QueryLauncher(self.settings, self.request.session)
+        ql.execute_query(sqb.get_drop_named_graph(graph).query)
 
     def load_file(self,f,col_types):
         disabled_columns = []

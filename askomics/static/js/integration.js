@@ -73,6 +73,14 @@ function displayTable(data) {
 
     $("#content_integration").html(html);
 
+    function mapCallback() {
+      return $(this).val();
+    }
+
+    function getSelectCallback(index, value) {
+      selectbox.find("option[value="+value+"]").hide();
+    }
+
     // Select the correct type for each column
     for(i=0, l=data.files.length; i<l; i++) {
 
@@ -81,13 +89,11 @@ function displayTable(data) {
             var cols = data.files[i].column_types;
             for(var j=0, m=cols.length; j<m; j++) {
                 var selectbox = $('div#content_integration form.template-source_file:eq(' + i + ') select.column_type:eq(' + j + ')');
-                var values = selectbox.find("option").map(function() { return $(this).val(); });
+                var values = selectbox.find("option").map(mapCallback);
 
                 if ($.inArray(cols[j], ['start', 'end', 'numeric']) == -1) {
-                    $.each(['start', 'end', 'numeric'], function( index, value ) {
-                        selectbox.find("option[value="+value+"]").hide();
-                    });
-                };
+                    $.each(['start', 'end', 'numeric'],getSelectCallback);
+                }
 
                 if ($.inArray( cols[j], values) >= 0) {
                     selectbox.val(cols[j]);
@@ -263,38 +269,9 @@ function loadSourceFile(file_elem) {
                               .addClass('show alert-danger');
         }
         else {
-            if($.inArray('entitySym', col_types) != -1) {
-                console.log('--->yes, in array');
-                if (data.expected_lines_number*2 == data.total_triple_count) {
-                    insert_status_elem.html('<strong><span class="glyphicon glyphicon-ok"></span> Success:</strong> inserted '
-                    + data.total_triple_count + " lines of "+(data.expected_lines_number*2))
-                                      .removeClass('hidden alert-danger')
-                                      .removeClass('hidden alert-warning')
-                                      .addClass('show alert-success');
-
-                }else{
-                    insert_status_elem.html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> Warning:</strong> inserted '
-                    + data.total_triple_count*2 + " lines of "+data.expected_lines_number)
-                                      .removeClass('hidden alert-success')
-                                      .removeClass('hidden alert-warning')
-                                      .addClass('show alert-danger');
-                }
-            }else{
-                if (data.expected_lines_number == data.total_triple_count) {
-                    insert_status_elem.html('<strong><span class="glyphicon glyphicon-ok"></span> Success:</strong> inserted '
-                    + data.total_triple_count + " lines of "+data.expected_lines_number)
-                                      .removeClass('hidden alert-danger')
-                                      .removeClass('hidden alert-warning')
-                                      .addClass('show alert-success');
-                }else{
-                    insert_status_elem.html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> Warning:</strong> inserted '
-                    + data.total_triple_count + " lines of "+data.expected_lines_number)
-                                      .removeClass('hidden alert-success')
-                                      .removeClass('hidden alert-warning')
-                                      .addClass('show alert-danger');
-                }
-
-            }
+            insert_status_elem.html('<strong><span class="glyphicon glyphicon-ok"></span> Success:</strong> inserted '+ data.total_triple_count + " lines")
+                              .addClass('show alert-success')
+                              .removeClass('hidden alert-danger');
         }
 
         // Check what is in the db now

@@ -11,12 +11,6 @@ function startRequestSessionAskomics() {
 
   /* To manage construction of SPARQL Query */
   graphBuilder = new AskomicsGraphBuilder();
-  /* To manage information about current node */
-  nodeView = new AskomicsNodeView();
-  /* To manage Attribute view on UI */
-  attributesView = new AskomicsAttributesView();
-  /* To manage Attribute view on UI */
-  linksView = new AskomicsLinksView();
   /* To manage the D3.js Force Layout  */
   forceLayoutManager = new AskomicsForceLayoutManager();
   /* To manage information about User Datasrtucture  */
@@ -25,6 +19,8 @@ function startRequestSessionAskomics() {
   menuView = new AskomicsMenuView();
   /* To manage information about File menu */
   menuFile = new AskomicsMenuFile();
+
+  AskomicsObjectView.defineClickMenu();
 
   askomicsInitialization = true;
 }
@@ -45,9 +41,7 @@ function resetGraph() {
   $("#results").empty();
 
   //remove all rightviews
-  attributesView.removeAll();
-  linksView.removeAll();
-  nodeView.remove();
+  AskomicsObjectView.removeAll();
 
   // delete the svg
   d3.select("svg").remove();
@@ -99,6 +93,40 @@ function loadStatistics() {
     .append($("<p></p>").text("Number of triples  : "+stats.ntriples))
     .append($("<p></p>").text("Number of entities : "+stats.nentities))
     .append($("<p></p>").text("Number of classes : "+stats.nclasses))
+    .append($("<p></p>").text("Number of graphs: "+stats.ngraphs));
+
+    table=$("<table></table>").addClass('table').addClass('table-bordered');
+    th = $("<tr></tr>").addClass("table-bordered").attr("style", "text-align:center;");
+    th.append($("<th></th>").text("Graph"));
+    th.append($("<th></th>").text("Load Date"));
+    th.append($("<th></th>").text("Username"));
+    th.append($("<th></th>").text("Server"));
+    th.append($("<th></th>").text("AskOmics Version"));
+    table.append(th);
+
+    $.each(stats.metadata, function(key) {
+        tr = $("<tr></tr>")
+            .append($("<td></td>").text(stats.metadata[key].filename))
+            .append($("<td></td>").text(stats.metadata[key].loadDate))
+            .append($("<td></td>").text(stats.metadata[key].username))
+            .append($("<td></td>").text(stats.metadata[key].server))
+            .append($("<td></td>").text(stats.metadata[key].version));
+        table.append(tr);
+    });
+
+    $('#content_statistics').append(table);
+
+    var form = $("<form class='form-horizontal'><fieldset class='form-group'><label>Choose what graph you want to delete</label><select class='form-control' id='dropNamedGraphSelected' multiple='multiple' ></select></fieldset><button id='dropNamedGraphButton' type='button' onclick='deleteNamedGraph($(\"#dropNamedGraphSelected\").val())' class='btn btn-primary'>Delete</button></form>");
+    var select = form.find('select');
+
+    var serviceNamedGraphs = new RestServiceJs('list_named_graphs');
+    serviceNamedGraphs.getAll(function(namedGraphs) {
+        for (let graphName in namedGraphs){
+            select.append($("<option></option>").attr("value", namedGraphs[graphName]).append(namedGraphs[graphName]));
+        }
+    });
+
+    $('#content_statistics').append(form);
 
     table=$("<table></table>").addClass('table').addClass('table-bordered');
     th = $("<tr></tr>").addClass("table-bordered").attr("style", "text-align:center;");
@@ -216,6 +244,17 @@ function emptyDatabase(value) {
     }
 }
 
+
+function deleteNamedGraph(graphs) {
+    displayModal('Please wait during deletion', 'Close');
+    var service = new RestServiceJs("delete_graph");
+    let data = {'namedGraphs':graphs };
+        service.post(data, function(){
+        hideModal();
+        loadStatistics(false);
+    });
+}
+
 function resetStats() {
   $('#btn-del').empty();
   $("#btn-del").append("<button id='btn-empty' onclick='emptyDatabase(\"confirm\")' class='btn btn-danger'>Clear database</button>");
@@ -224,7 +263,7 @@ function resetStats() {
 
 function displayModal(title, message, button) {
     $('#modalTitle').text(title);
-    if (message == '') {
+    if (message === '') {
       $('.modal-body').hide();
       $('.modal-sm').css('width', '300px');
     }else{
@@ -239,7 +278,6 @@ function displayModal(title, message, button) {
 function hideModal(){
     $('#modal').modal('hide');
 }
-
 
 function downloadTextAsFile(filename, text) {
     // Download text as file

@@ -125,7 +125,7 @@ class QueryLauncher(ParamManager):
         return "/static/results/"+os.path.basename(fp.name)
 
     # TODO see if we can make a rollback in case of malformed data
-    def load_data(self, url):
+    def load_data(self, url, graphName):
         """
         Load a ttl file accessible from http into the triple store using LOAD method
 
@@ -134,12 +134,12 @@ class QueryLauncher(ParamManager):
         """
         self.log.debug("Loading into triple store (LOAD method) the content of: %s", url)
 
-        query_string = "LOAD <"+url+"> INTO GRAPH"+ " <" + self.get_param("askomics.graph")+ ">"
+        query_string = "LOAD <"+url+"> INTO GRAPH"+ " <" + graphName + ">"
         res = self.execute_query(query_string)
 
         return res
 
-    def upload_data(self, filename):
+    def upload_data(self, filename, graphName):
         """
         Load a ttl file into the triple store using requests module and Fuseki
         upload method which allows upload of big data into Fuseki (instead of LOAD method).
@@ -151,7 +151,7 @@ class QueryLauncher(ParamManager):
         """
         self.log.debug("Loading into triple store (HTTP method) the content of: %s", filename)
 
-        data = {'graph': self.get_param("askomics.graph")}
+        data = {'graph': graphName}
         files = [('file', (os.path.basename(filename), open(filename), 'text/turtle'))]
 
         time0 = time.time()
@@ -171,7 +171,7 @@ class QueryLauncher(ParamManager):
 
 
     # TODO see if we can make a rollback in case of malformed data
-    def insert_data(self, ttl_string, ttl_header=""):
+    def insert_data(self, ttl_string, graph, ttl_header=""):
         """
         Load a ttl string into the triple store using INSERT DATA method
 
@@ -185,11 +185,11 @@ class QueryLauncher(ParamManager):
         query_string = ttl_header
         query_string += "\n"
         query_string += "INSERT DATA {\n"
-        query_string += "GRAPH "+ "<" + self.get_param("askomics.graph")+ ">" +"\n"
-        query_string += "{\n"
+        query_string += "\tGRAPH "+ "<" + graph + ">" +"\n"
+        query_string += "\t\t{\n"
         query_string += ttl_string + "\n"
-        query_string += "}\n"
-        query_string += "}\n"
+        query_string += "\t\t}\n"
+        query_string += "\t}\n"
 
         res = self.execute_query(query_string)
 
