@@ -372,31 +372,16 @@ var AskomicsForceLayoutManager = function () {
             if ( ! (suggestedNode.id in slt_node.nlink) ) {
               /* We create a unique instance and add all possible relation between selected node and this suggested node */
               suggestedList[uri] = suggestedNode ;
-          //    slt_node.nlink[suggestedList[uri].id] = 0;
-          //    suggestedList[uri].nlink[slt_node.id] = 0;
               nodes.push(suggestedNode);
             }
             /* increment the number of link between the two nodes */
-          //  slt_node.nlink[suggestedList[uri].id]++;
-          //  suggestedList[uri].nlink[slt_node.id]++;
 
             let uriLink  = objectsTarget[uri][rel] ;
             let source   = slt_node ;
             let target   = suggestedList[uri];
 
             link = new AskomicsLink(uriLink,source,target);
-      /*      link = {
-              suggested : true,
-              positionable : false,
-              uri   : objectsTarget[uri][rel],
-              source: slt_node,
-              target: suggestedList[uri],
-              label: userAbstraction.removePrefix(objectsTarget[uri][rel]),
-              linkindex: slt_node.nlink[suggestedList[uri].id],
-            };*/
-
-            //link.source.weight++;
-            link = graphBuilder.setId(link);
+            link.id = graphBuilder.getId();
             links.push(link);
           }
         }
@@ -417,8 +402,6 @@ var AskomicsForceLayoutManager = function () {
             /* adding in the node list to create D3.js graph */
             if ( ! (suggestedNode.id in slt_node.nlink) ) {
               suggestedList[uri] = suggestedNode ;
-              //slt_node.nlink[suggestedList[uri].id] = 0;
-              //suggestedList[uri].nlink[slt_node.id] = 0;
               nodes.push(suggestedNode);
             }
 
@@ -428,23 +411,7 @@ var AskomicsForceLayoutManager = function () {
             let source   = suggestedList[uri] ;
             let target   = slt_node;
             link = new AskomicsLink(uriLink,source,target);
-/*
-            link = {
-              suggested : true,
-              positionable : false,
-              type : '',       // using with positionable object
-              sameTax: false,  // using with positionable object
-              sameRef: false,  // using with positionable object
-              strict: false,   // using with positionable object
-              uri   : subjectsTarget[uri][rel2],
-              source: suggestedList[uri],
-              target: slt_node,
-              label: userAbstraction.removePrefix(subjectsTarget[uri][rel2]),
-              linkindex: slt_node.nlink[suggestedList[uri].id],
-            };
-            */
-            link = graphBuilder.setId(link);
-            //link.source.weight++;
+            link.id = graphBuilder.getId();
             links.push(link);
           }
         }
@@ -474,34 +441,13 @@ var AskomicsForceLayoutManager = function () {
             nodes.push(suggestedNode);
             suggestedList[uri] = suggestedNode ;
 
-            //slt_node.nlink[suggestedList[uri].id]=0;
-            //suggestedList[uri].nlink[slt_node.id]=0;
           }
-
-          //slt_node.nlink[suggestedList[uri].id]++;
-          //suggestedList[uri].nlink[slt_node.id]++;
 
           let uriLink  = 'positionable' ;
           let source   = suggestedList[uri] ;
           let target   = slt_node;
           link = new AskomicsPositionableLink(uriLink,source,target);
-/*
-          link = {
-            suggested : true,
-            positionable : true,
-            uri   : 'positionable',
-            type : 'included',
-            sameTax: true,
-            sameRef: true,
-            strict: true,
-            source: suggestedList[uri],
-            target: slt_node,
-            label: 'included in',
-            linkindex: slt_node.nlink[suggestedList[uri].id],
-          };
-          */
-          link = graphBuilder.setId(link);
-          //link.source.weight++;
+          link.id = graphBuilder.getId();
           links.push(link);
         }
 
@@ -526,30 +472,11 @@ var AskomicsForceLayoutManager = function () {
         if (! forceLayoutManager.isProposedUri("link",objectsTarget[node2.uri][rel])) continue ;
 
         if ( this.relationInstancied(node1,node2,objectsTarget[node2.uri][rel],links) ) continue ;
-        /* increment the number of link between the two nodes */
-        //if ( ! (node2.id in node1.nlink) ) {
-        //  node1.nlink[node2.id] = 0;
-        //  node2.nlink[node1.id] = 0;
-        //}
-        //node1.nlink[node2.id]++;
-        //node2.nlink[node1.id]++;
         let uriLink  = objectsTarget[node2.uri][rel];
         let source   = node1;
         let target   = node2;
         link = new AskomicsLink(uriLink,source,target);
-/*
-        link = {
-          suggested : true,
-          positionable : false,
-          uri   : objectsTarget[node2.uri][rel],
-          source: node1,
-          target: node2,
-          label: userAbstraction.removePrefix(objectsTarget[node2.uri][rel]),
-          linkindex: node1.nlink[node2.id],
-        };
-*/
-        link = graphBuilder.setId(link);
-        //link.source.weight++;
+        link.id = graphBuilder.getId();
         links.push(link);
       }
 
@@ -559,30 +486,11 @@ var AskomicsForceLayoutManager = function () {
 
         if ( this.relationInstancied(node2,node1,subjectsTarget[node2.uri][rel2],links) ) continue ;
 
-        //if ( ! (node2.id in node1.nlink) ) {
-        //  node1.nlink[node2.id] = 0;
-        //  node2.nlink[node1.id] = 0;
-        //}
-
-        //node1.nlink[node2.id]++;
-        //node2.nlink[node1.id]++;
         let uriLink  = subjectsTarget[node2.uri][rel2];
         let source   = node2;
         let target   = node1;
         link = new AskomicsLink(uriLink,source,target);
-/*
-        link = {
-          suggested : true,
-          positionable : false,
-          uri   : subjectsTarget[node2.uri][rel2],
-          source: node2,
-          target: node1,
-          label: userAbstraction.removePrefix(subjectsTarget[node2.uri][rel2]),
-          linkindex: node1.nlink[node2.id],
-        };
-        */
-        link = graphBuilder.setId(link);
-        //link.source.weight++;
+        link.id = graphBuilder.getId();
         links.push(link);
       }
       // Manage positionnable entities
@@ -591,30 +499,11 @@ var AskomicsForceLayoutManager = function () {
       if ( forceLayoutManager.isProposedUri("link","positionable") &&
            (node1.uri in positionableEntities) && (node2.uri in positionableEntities)) {
 
-        //node1.nlink[node2.id]++;
-        //node2.nlink[node1.id]++;
-
         let uriLink  = 'positionable' ;
         let source   = node2 ;
         let target   = node1;
         link = new AskomicsPositionableLink(uriLink,source,target);
-/*
-        link = {
-            suggested : true,
-            positionable : true,
-            uri   : 'positionable',
-            type : 'included',
-            sameTax: true,
-            sameRef: true,
-            strict: true,
-            source: node2,
-            target: node1,
-            label: 'included in',
-            linkindex: node2.nlink[node1.id],
-          };
-          */
-        link = graphBuilder.setId(link);
-        //link.source.weight++;
+        link.id = graphBuilder.getId();
         links.push(link);
       }
     };

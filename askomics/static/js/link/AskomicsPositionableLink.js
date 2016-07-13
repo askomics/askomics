@@ -11,7 +11,14 @@ class AskomicsPositionableLink extends AskomicsLink {
     this.sameRef  =  true ;
     this.strict   =  true ;
   }
-
+  setjson(obj) {
+    super.setjson(obj);
+    this.type     = obj.type ;
+    this.label    = obj.label;
+    this.sameTax  =  obj.sameTax ;
+    this.sameRef  =  obj.sameRef ;
+    this.strict   =  obj.strict ;
+  }
   getPanelView() {
     return new AskomicsPositionableLinkView(this);
   }

@@ -4,8 +4,11 @@ class AskomicsLink extends GraphLink {
 
   constructor(uriL,sourceN,targetN) {
     super(sourceN,targetN);
-
-    this.uri = uriL ;
+    if ( uriL ) {
+      this.uri = uriL ;
+    } else {
+      this.uri = "undef";
+    }
     this.label = userAbstraction.removePrefix(this.uri);
   }
 
@@ -23,6 +26,12 @@ class AskomicsLink extends GraphLink {
 
   instanciateVariateSPARQL(variates) {
 
+  }
+
+  setjson(obj) {
+    super.setjson(obj);
+    this.uri = obj.uri;
+    this.label = obj.label;
   }
 
 

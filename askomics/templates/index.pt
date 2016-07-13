@@ -20,7 +20,6 @@
         <script src="static/js/integration.js"></script>
         <script src="static/js/AskomicsRestManagement.js"></script>
         <script src="static/js/AskomicsUserAbstraction.js"></script>
-        <script src="static/js/AskomicsGraphBuilder.js"></script>
 
         <script src="static/js/node/GraphNode.js"></script>
         <script src="static/js/node/AskomicsNode.js"></script>
@@ -30,6 +29,8 @@
         <script src="static/js/link/AskomicsLink.js"></script>
         <script src="static/js/link/AskomicsPositionableLink.js"></script>
 
+        <script src="static/js/AskomicsGraphBuilder.js"></script>
+        
         <script src="static/js/view/AskomicsObjectView.js"></script>
         <script src="static/js/view/AskomicsNodeView.js"></script>
         <script src="static/js/view/AskomicsPositionableNodeView.js"></script>

@@ -1,9 +1,18 @@
-/*jshint esversion: 6 */
+  /*jshint esversion: 6 */
+
+const classesMapping = {
+  'GraphNode': GraphNode,
+  'AskomicsPositionableNode': AskomicsPositionableNode,
+  'AskomicsNode': AskomicsNode,
+  'GraphLink': GraphLink,
+  'AskomicsLink': AskomicsLink,
+  'AskomicsPositionableLink': AskomicsPositionableLink
+};
 
 /* constructeur de AskomicsGraphBuilder */
   class AskomicsGraphBuilder {
     constructor() {
-      this.AskomicsGraphBuilderVersion = 1.0           ;
+      this.AskomicsGraphBuilderVersion = 1.1 ;
       /* ========================================= ATTRIBUTES ============================================= */
       this.SPARQLIDgeneration = {} ; /* { <ENT1> : 5, ... }  last index used to named variable */
       this.IDgeneration = 0;
@@ -22,7 +31,17 @@
     }
     /* create a dump to store data structure and finally the query */
     getInternalState() {
-      return JSON.stringify([this.AskomicsGraphBuilderVersion,this._instanciedNodeGraph,this._instanciedLinkGraph,this.SPARQLIDgeneration,this.IDgeneration]);
+      let nodes = [];
+      let links = [];
+
+      /* Save class name to rebuild the object when loading */
+      for (let i=0;i<this.nodes().length;i++) {
+        nodes.push([this.nodes()[i].constructor.name,this.nodes()[i]]);
+      }
+      for (let i=0;i<this.links().length;i++) {
+        links.push([this.links()[i].constructor.name,this.links()[i]]);
+      }
+      return JSON.stringify([this.AskomicsGraphBuilderVersion,nodes,links,this.SPARQLIDgeneration,this.IDgeneration]);
     }
 
     /* create and return list of nodes and links to build a new grpah from a dump file */
@@ -31,30 +50,34 @@
         let struct = JSON.parse(dump);
 
         let versionOfFile    = struct[0];
-        this._instanciedNodeGraph = struct[1];
-        this._instanciedLinkGraph = struct[2];
+        //this._instanciedNodeGraph = struct[1];
+        //this._instanciedLinkGraph = struct[2];
+        let nodes = struct[1];
+        let links = struct[2];
         this.SPARQLIDgeneration   = struct[3];
         this.IDgeneration         = struct[4];
 
         /* manage version */
-        if ( versionOfFile !== AskomicsGraphBuilderVersion ) {
+        if ( versionOfFile != this.AskomicsGraphBuilderVersion ) {
           alert("Dump file are builded with the Askomics Graph Builder Version:"+versionOfFile+"\n"+". Current version is "+ AskomicsGraphBuilderVersion +".\nReload of dump are not guaranteed !");
         }
-        /* source and target don't have the good reference....we fix it*/
-        for (var link of this._instanciedLinkGraph) {
-            t = AskomicsGraphBuilder.findElt(this._instanciedNodeGraph,link.source.id);
-            if ( ! t ) {
-              throw Error("Can not find node with ID:"+link.source.id);
-            }
-
-            link.source = t[1];
-            t = AskomicsGraphBuilder.findElt(this._instanciedNodeGraph,link.target.id);
-            if ( ! t ) {
-              throw Error("Can not find node with ID:"+link.target.id);
-            }
-            link.target = t[1];
+        //setup nodes
+        for (let i=0;i<nodes.length;i++) {
+          let className = nodes[i][0];
+          let jsonObj = nodes[i][1];
+          let n = new classesMapping[className](jsonObj);
+          n.setjson(jsonObj);
+          this.nodes().push(n);
         }
-        return [this._instanciedNodeGraph,this._instanciedLinkGraph];
+        //setup links
+        for (let i=0;i<links.length;i++) {
+          let className = links[i][0];
+          let jsonObj = links[i][1];
+          let l = new classesMapping[className]();
+          l.setjson(jsonObj);
+          this.links().push(l);
+        }
+        return [this.nodes(),this.links()];
       } catch (ex) {
         console.error(ex);
       }
@@ -191,10 +214,10 @@
       return nodeOrLinkOrAttribute;
     }
 
-    setId(node) {
-      node.id = this.IDgeneration;
+    getId(node) {
+      let id = this.IDgeneration;
       this.IDgeneration++;
-      return node;
+      return id;
     }
 
     setStartpoint(node) {
@@ -231,14 +254,15 @@
       } else {
         node = new AskomicsNode(node,x,y);
       }
-      node = this.setId(node);
+      node.id = this.getId();
       return node;
     }
 
     instanciateNode(node) {
+
       node.suggested = false;
       node.actif = true ;
-      this.setSPARQLVariateId(node);
+      node = this.setSPARQLVariateId(node);
       node.label = node.SPARQLid;
       this._instanciedNodeGraph.push(node);
       return node;
@@ -256,7 +280,7 @@
     instanciateLink(links) {
       for (var l of links ) {
         l.suggested = false;
-        this.setSPARQLVariateId(l);
+        l = this.setSPARQLVariateId(l);
         this._instanciedLinkGraph.push(l);
       }
     }
@@ -290,8 +314,8 @@
       AttOrCatArray[attributeForUri.uri].type = attributeForUri.type ;
       AttOrCatArray[attributeForUri.uri].label = attributeForUri.label ;
 
-      this.setSPARQLVariateId(AttOrCatArray[attributeForUri.uri]);
-      this.setId(AttOrCatArray[attributeForUri.uri]);
+      AttOrCatArray[attributeForUri.uri] = this.setSPARQLVariateId(AttOrCatArray[attributeForUri.uri]);
+      AttOrCatArray[attributeForUri.uri].id=this.getId();
 
       /* by default all attributes is ask */
       AttOrCatArray[attributeForUri.uri].actif = false ;

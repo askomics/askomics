@@ -8,7 +8,18 @@ class AskomicsNode extends GraphNode {
     this._categories = {} ;
     this._filters    = {} ; /* filters of attributes key:sparqlid*/
     this._values     = {} ; /* values of attributes key:sparqlid*/
+    this.label       = userAbstraction.removePrefix(node.uri);
+    this.uri         = node.uri;
     return this;
+  }
+
+  setjson(obj) {
+    super.setjson(obj);
+    this._attributes = obj._attributes ;
+    this._categories = obj._categories ;
+    this._filters    = obj._filters ; /* filters of attributes key:sparqlid*/
+    this._values     = obj._values ;
+    this.label       = obj.label ;
   }
 
   getPanelView() {

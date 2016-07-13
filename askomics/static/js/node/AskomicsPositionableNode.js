@@ -6,6 +6,10 @@ class AskomicsPositionableNode extends AskomicsNode {
     super(node,x,y);
   }
 
+  setjson(obj) {
+    super.setjson(obj);
+  }
+
   getPanelView() {
     return new AskomicsPositionableNodeView(this);
   }
