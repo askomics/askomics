@@ -35,17 +35,17 @@ class AskomicsNodeView extends AskomicsObjectView {
       var details = this.divPanel() ;
       details.attr("nodeid", node.id).attr("sparqlid", node.SPARQLid).addClass('div-details');
 
-      var nameLab = $("<label></label>").attr("for",elemId).text("ID");
-      var nameInp = $("<input/>").attr("id", "lab_" + elemId).addClass("form-control");
-      var removeIcon = $('<span class="glyphicon glyphicon-remove display"></span>');
+      let nameLab = $("<label></label>").attr("for",elemId).text("ID");
+      let nameInp = $("<input/>").attr("id", "lab_" + elemId).addClass("form-control");
+      let removeIcon = $('<span class="glyphicon glyphicon-remove display"></span>');
       removeIcon.click(function() { field.val(null).trigger("change"); });
 
       details.append(nameLab).append(makeRemoveIcon(nameInp)).append(nameInp);
 
       nameInp.change(function(d) {
-        var value = $(this).val();
-        nodeid = $(this).parent().attr('nodeid');
-        sparlid = $(this).parent().attr('sparqlid');
+        let value = $(this).val();
+        let nodeid = $(this).parent().attr('nodeid');
+        let sparlid = $(this).parent().attr('sparqlid');
 
         graphBuilder.setFilterAttributes(nodeid,sparlid,value,'FILTER ( regex(str(?'+sparlid+'), "'+$(this).val()+'", "i" ))');
       });
@@ -60,7 +60,7 @@ class AskomicsNodeView extends AskomicsObjectView {
           if ( ! attribute ) {
             attribute = graphBuilder.buildAttributeOrCategoryForNode(attributes[i],node);
           }
-          var id = attribute.id;
+          let id = attribute.id;
 
           var lab = $("<label></label>").attr("for",attribute.label).text(attribute.label);
           var inp = $("<select/>").addClass("form-control").attr("multiple","multiple");
