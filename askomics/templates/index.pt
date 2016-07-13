@@ -57,7 +57,7 @@
                     <ul class="nav navbar-nav navbar-right">
                         <li id="interrogation" class="active"><a href="#" onclick="loadStartPoints();">Ask!</a></li>
                         <li id="integration"><a href="#">Upload</a></li>
-                        <li id="statistics"><a href="#">Database</a></li>
+                        <li id="statistics" onclick="loadNamedGraphs()"><a href="#">Datasets</a></li>
                         <li id="about"><a href="#">About</a></li>
                     </ul>
                 </div>
@@ -153,13 +153,24 @@
             <div id="overview" class="row"></div>
         </div>
         <div id="content_statistics" class="container" hidden>
-            <p id='btn-del'>
-                <button id='btn-empty' onclick='emptyDatabase("confirm")' class='btn btn-danger'>Clear database</button>
-            <p>
+            <h3>Manage datasets</h3>
+            <hr/>
+
+            <form class="form-horizontal">
+                <fieldset>
+                    <label>Choose which datasets you want to delete</label>
+                    <select multiple="multiple" id="dropNamedGraphSelected" class="form-control"></select>
+                </fieldset>
+                <div id="btn-del-graph" class="btn-group"><button id="btn-empty-graph" class="btn btn-primary" onclick="deleteNamedGraph($('#dropNamedGraphSelected').val())" type="button" id="dropNamedGraphButton">Delete</button></div>
+                <div id="btn-del" class="btn-group"><button id="btn-empty" onclick="emptyDatabase('confirm')" class="btn btn-danger">Delete all</button></div>
+            </form>
+
+            <h3>Statistics</h3>
+            <hr/>
             <p id='btn-st'>
                 <button id='btn-stats' onclick='loadStatistics()' class='btn btn-default'>Get stats</button>
             </p>
-            <hr/>
+
             <div id="statistics_div" class="row"></div>
         </div>
 

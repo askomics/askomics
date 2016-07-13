@@ -31,6 +31,8 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         ParamManager.__init__(self, settings, session)
 
+        self.timestamp = str(time.time())
+
         self.path = path
 
         # The name should not contain extension as dots are not allowed in rdf names
@@ -588,7 +590,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
             sqb = SparqlQueryBuilder(self.settings, self.session)
             header_ttl = sqb.header_sparql_config()
 
-            graphName = "urn:sparql:" + self.name + ':' + time.strftime('%Y-%m-%d',time.localtime())
+            graphName = "urn:sparql:" + self.name + '_' + self.timestamp
 
             triple_count = 0
             chunk = ""
@@ -668,7 +670,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         sqb = SparqlQueryBuilder(self.settings, self.session)
         ql = QueryLauncher(self.settings, self.session)
-        graphName = "urn:sparql:" + self.name + ':' + time.strftime('%Y-%m-%d',time.localtime())
+        graphName = "urn:sparql:" + self.name + '_' + self.timestamp
         self.metadatas['graphName'] = graphName
         ttlNamedGraph = "<" + graphName + "> " + "rdfg:subGraphOf" + " <" + self.get_param("askomics.graph") + "> ."
         sparqlHeader = sqb.header_sparql_config()
