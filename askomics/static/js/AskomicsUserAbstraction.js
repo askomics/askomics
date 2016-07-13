@@ -135,6 +135,7 @@ var AskomicsUserAbstraction = function () {
     AskomicsUserAbstraction.prototype.getAttrib = function(uriEntity,attrib) {
         if (!(uriEntity in entityInformationList)) {
           console.error(JSON.stringify(uriEntity) + " is not referenced in the user abstraction !");
+
           return;
         }
         var attrib_longterm = attrib ;
