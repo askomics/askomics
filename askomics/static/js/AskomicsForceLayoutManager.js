@@ -181,10 +181,8 @@ var AskomicsForceLayoutManager = function () {
     menuFile.start();
 
     startPoint = userAbstraction.buildBaseNode(startPoint.uri);
-    console.log(startPoint.label);
     /* Setting up an ID for the first variate */
     startPoint = graphBuilder.setStartpoint(startPoint);
-    console.log(startPoint.label);
 
     /* first node */
     nodes.push(startPoint);
@@ -203,7 +201,6 @@ var AskomicsForceLayoutManager = function () {
   };
 
   AskomicsForceLayoutManager.prototype.startWithQuery = function (dump) {
-
     d3.select("g").selectAll("*").remove();
     userAbstraction.loadUserAbstraction();
     /* initialize menus */
