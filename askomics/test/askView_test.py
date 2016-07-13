@@ -164,6 +164,25 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.check_existing_data();
 
+        # catch error
+        self.request.json_body = {
+            'file_name':'personneeee.tsv',
+            'col_types': {},
+            'disabled_columns':1
+        }
+
+        data = self.askview.check_existing_data();
+
+    def test_load_data_into_graph(self):
+
+        self.request.json_body = {
+            'file_name':'personne.tsv',
+            'col_types': ['entity_start', 'text','category','numeric','text'],
+            'disabled_columns':[]
+        }
+
+        data = self.askview.load_data_into_graph();
+
     def test_getUserAbstraction(self):
         #load files
         self.it.empty()
@@ -190,6 +209,11 @@ class AskViewTests(unittest.TestCase):
         self.request.json_body['export'] = True
         data = self.askview.get_value()
 
+        # manage an error
+        self.request.json_body = {
+        }
+        data = self.askview.get_value()
+
     def test_get_valuetxtquery(self):
         #load files
         self.it.empty()
@@ -206,11 +230,7 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.getSparqlQueryInTextFormat()
 
-    def test_load_data_into_graph(self):
+        # manage an error
         self.request.json_body = {
-            'file_name':'personne.tsv',
-            'col_types': ['entity_start', 'text','category','numeric','text'],
-            'disabled_columns':[]
         }
-
-        #data = self.askview.load_data_into_graph();
+        data = self.askview.getSparqlQueryInTextFormat()

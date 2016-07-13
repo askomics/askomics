@@ -33,7 +33,7 @@ class ResultsBuilderTests(unittest.TestCase):
         self.results, self.query = tse.build_sparql_query_from_json(variates,constraintesRelations,constraintesFilters,limit, True)
         results, query = tse.build_sparql_query_from_json(variates,constraintesRelations,constraintesFilters,limit, False)
         assert len(results) == 0
-        
+
     def tearDown( self ):
         shutil.rmtree( self.temp_directory )
         self.it.empty()
@@ -41,6 +41,8 @@ class ResultsBuilderTests(unittest.TestCase):
     def test_build_csv_table(self):
         rb = ResultsBuilder(self.settings, self.request.session)
         res = rb.build_csv_table(self.results)
+        r = []
+        res = rb.build_csv_table(r)
 
     def test_gen_csv_table(self):
         rb = ResultsBuilder(self.settings, self.request.session)

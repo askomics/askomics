@@ -52,7 +52,7 @@ class AbstractedRelation(object):
             self.rdfs_range = ":" + urllib.parse.quote(type_range+"Category")
         else:
             self.relation_type = "owl:DatatypeProperty"
-            self.rdfs_range = urllib.parse.quote(rdfs_range)
+            self.rdfs_range = rdfs_range
 
         self.rdfs_domain = ":" + urllib.parse.quote(rdfs_domain)
         self.log = logging.getLogger(__name__)
