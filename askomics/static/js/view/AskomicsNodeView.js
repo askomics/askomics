@@ -66,6 +66,7 @@ class AskomicsNodeView extends AskomicsObjectView {
           var inp = $("<select/>").addClass("form-control").attr("multiple","multiple");
 
           var labelSparqlVarId = attribute.SPARQLid;
+          var URISparqlVarId   = "URICat"+attribute.SPARQLid;
 
           if (attribute.type.indexOf("http://www.w3.org/2001/XMLSchema#") < 0) {
               displayModal('Please wait', '', 'Close');
@@ -76,10 +77,10 @@ class AskomicsNodeView extends AskomicsObjectView {
               //console.log(JSON.stringify(nameDiv));
               var service = new RestServiceJs("sparqlquery");
               var model = {
-                'variates': [ "?"+labelSparqlVarId ],
+                'variates': tab[0],
                 'constraintesRelations': tab[1],
-                'constraintesFilters': [],
-                'limit':100,
+                'constraintesFilters': tab[2],
+                'limit' :-1,
                 'export':false,
               };
 
@@ -94,31 +95,34 @@ class AskomicsNodeView extends AskomicsObjectView {
                   if ( d.values.length<3 ) sizeSelect = d.values.length;
                   if ( d.values.length === 0 ) sizeSelect = 1;
                   inp.attr("size",sizeSelect);
-
+                  console.log("CATEEEEEEEEEEEEEEEE:"+JSON.stringify(d.values));
                   if ( d.values.length > 1 ) {
                     for (let v of d.values) {
+                      console.log(URISparqlVarId);
+                      console.log(v);
                       if ( selectedValue == v[labelSparqlVarId] ) {
-                        inp.append($("<option></option>").attr("value", v[labelSparqlVarId]).attr("selected", "selected").append(v[labelSparqlVarId]));
+                        inp.append($("<option></option>").attr("value", v[URISparqlVarId]).attr("selected", "selected").append(v[labelSparqlVarId]));
                       } else {
-                        inp.append($("<option></option>").attr("value", v[labelSparqlVarId]).append(v[labelSparqlVarId]));
+                        inp.append($("<option></option>").attr("value", v[URISparqlVarId]).append(v[labelSparqlVarId]));
                       }
                     }
                   } else if (d.values.length == 1) {
-                    inp.append($("<option></option>").attr("value", d.values[0][labelSparqlVarId]).append(d.values[0][labelSparqlVarId]));
+                    inp.append($("<option></option>").attr("value", d.values[0][URISparqlVarId]).append(d.values[0][labelSparqlVarId]));
                   }
                   hideModal();
               });
 
               inp.change(function(d) {
-                var value = $(this).val();
-                if (value === null) value = '';
+                var value = $(this).val(); 
+                console.log(value);
+                if (!value) value = '';
                 let nodeid = $(this).parent().attr('nodeid');
                 let sparlid = $(this).attr('sparqlid');
 
                 //graphBuilder.setFilterAttributes(nodeid,sparlid,value,'FILTER ( ?'+sparlid+'="'+value[0]+'"^^xsd:string)');
                 var listValue = "";
                 for (let i=0;i<value.length;i++) {
-                  listValue+=":"+value[i]+" ";
+                  listValue+="<"+value[i]+"> ";
                 }
                 graphBuilder.setFilterAttributes(nodeid,sparlid,value,'VALUES ?'+sparlid+' { '+listValue +'}');
               });

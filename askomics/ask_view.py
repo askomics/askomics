@@ -101,7 +101,9 @@ class AskView(object):
 
         data["class"] = {}
         for obj in res_list_classes:
+            print(obj['class'])
             class_name = pm.remove_prefix(obj['class'])
+            print(class_name)
             data["class"][class_name] = {}
 
         # Get the number of instances by class
@@ -109,6 +111,7 @@ class AskView(object):
 
         for obj in res_nb_instances:
             if 'class' in obj:
+                print(data['class'])
                 class_name = pm.remove_prefix(obj['class'])
                 data["class"][class_name]["count"] = obj['count']
 
@@ -344,13 +347,8 @@ class AskView(object):
             results,query = tse.build_sparql_query_from_json(body["variates"],body["constraintesRelations"],body["constraintesFilters"],body["limit"],True)
 
             # Remove prefixes in the results table
-            data['values'] = [
-                {
-                    k: res[k].replace(self.settings["askomics.prefix"], '')
-                    for k in res.keys()
-                }
-                for res in results
-            ]
+            data['values'] = results
+
             if not body['export']:
                 return data
 

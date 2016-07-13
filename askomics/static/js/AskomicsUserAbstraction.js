@@ -48,27 +48,28 @@ var AskomicsUserAbstraction = function () {
       entityInformationList = {};
       entityPositionableInformationList = {};
       attributesEntityList = {};
-        /* All information about an entity available in TPS are stored in entityInformationList */
-        for (var entry in resultListTripletSubjectRelationObject.entities){
+      /* All information about an entity available in TPS are stored in entityInformationList */
+      for (let entry in resultListTripletSubjectRelationObject.entities){
+        console.log("ENTITY:"+JSON.stringify(resultListTripletSubjectRelationObject.entities[entry]));
+        var uri = resultListTripletSubjectRelationObject.entities[entry].entity;
+        var rel = resultListTripletSubjectRelationObject.entities[entry].property;
+        var val = resultListTripletSubjectRelationObject.entities[entry].value;
 
-          var uri = resultListTripletSubjectRelationObject.entities[entry].entity;
-          var rel = resultListTripletSubjectRelationObject.entities[entry].property;
-          var val = resultListTripletSubjectRelationObject.entities[entry].value;
-
-          if ( ! (uri in entityInformationList) ) {
-              entityInformationList[uri] = {};
-          }
-          entityInformationList[uri][rel] = val;
+        if ( ! (uri in entityInformationList) ) {
+            entityInformationList[uri] = {};
         }
-        var attribute = {};
+        entityInformationList[uri][rel] = val;
+      }
 
-	for (var entry2 in resultListTripletSubjectRelationObject.attributes){
-          console.log("ATTRIBUTE:"+JSON.stringify(resultListTripletSubjectRelationObject.attributes[entry2]));
-          var uri2 = resultListTripletSubjectRelationObject.attributes[entry2].entity;
-          attribute = {};
-          attribute.uri  = resultListTripletSubjectRelationObject.attributes[entry2].attribute;
-          attribute.label = resultListTripletSubjectRelationObject.attributes[entry2].labelAttribute;
-          attribute.type  = resultListTripletSubjectRelationObject.attributes[entry2].typeAttribute;
+      var attribute = {};
+
+	    for (let entry2 in resultListTripletSubjectRelationObject.attributes){
+        console.log("ATTRIBUTE:"+JSON.stringify(resultListTripletSubjectRelationObject.attributes[entry2]));
+        var uri2 = resultListTripletSubjectRelationObject.attributes[entry2].entity;
+        attribute = {};
+        attribute.uri  = resultListTripletSubjectRelationObject.attributes[entry2].attribute;
+        attribute.label = resultListTripletSubjectRelationObject.attributes[entry2].labelAttribute;
+        attribute.type  = resultListTripletSubjectRelationObject.attributes[entry2].typeAttribute;
 
           if ( ! (uri2 in attributesEntityList) ) {
               attributesEntityList[uri2] = [];
@@ -149,6 +150,7 @@ var AskomicsUserAbstraction = function () {
           console.error(JSON.stringify(uriEntity) + '['+JSON.stringify(attrib)+']' + " is not referenced in the user abstraction !");
           return;
         }
+
         return entityInformationList[uriEntity][attrib_longterm];
     };
 

@@ -10,6 +10,7 @@ import os.path
 import tempfile
 import time
 import getpass
+import urllib.parse
 from pkg_resources import get_distribution
 
 from askomics.libaskomics.ParamManager import ParamManager
@@ -257,11 +258,11 @@ class SourceFile(ParamManager, HaveCachedProperties):
                 ttl += AbstractedRelation(key_type, self.headers[key], ref_entity, self.type_dict[key_type]).get_turtle()
 
             if key > 0 and not key_type.startswith('entity'):
-                ttl += ":" + self.headers[key] + ' displaySetting:attribute "true"^^xsd:boolean .\n'
+                ttl += ":" + urllib.parse.quote(self.headers[key]) + ' displaySetting:attribute "true"^^xsd:boolean .\n'
 
         # Store the startpoint status
         if self.forced_column_types[0] == 'entity_start':
-            ttl += ":" + ref_entity + ' displaySetting:startPoint "true"^^xsd:boolean .\n'
+            ttl += ":" + urllib.parse.quote(ref_entity) + ' displaySetting:startPoint "true"^^xsd:boolean .\n'
 
         return ttl
 
@@ -276,27 +277,27 @@ class SourceFile(ParamManager, HaveCachedProperties):
         ttl = ''
 
         if all(types in self.forced_column_types for types in ('start', 'end', 'ref', 'taxon')):
-            ttl += ":" + self.headers[0] + ' displaySetting:is_positionable "true"^^xsd:boolean .\n'
+            ttl += ":" + urllib.parse.quote(self.headers[0]) + ' displaySetting:is_positionable "true"^^xsd:boolean .\n'
             ttl += ":is_positionable rdfs:label 'is_positionable' .\n"
             ttl += ":is_positionable rdf:type owl:ObjectProperty .\n"
             # Store the position attributes
             for key, key_type in enumerate(self.forced_column_types):
                 if key > 0 and key_type == 'taxon':
-                    ttl += ":" + self.headers[0] + " displaySetting:position_taxon :" + self.headers[key] + " .\n"
+                    ttl += ":" + urllib.parse.quote(self.headers[0]) + " displaySetting:position_taxon :" + urllib.parse.quote(self.headers[key]) + " .\n"
                 if key > 0 and key_type == 'ref':
-                    ttl += ":" + self.headers[0] + " displaySetting:position_reference :" + self.headers[key] + " .\n"
+                    ttl += ":" + urllib.parse.quote(self.headers[0]) + " displaySetting:position_reference :" + urllib.parse.quote(self.headers[key]) + " .\n"
                 if key > 0 and key_type == 'start':
-                    ttl += ":" + self.headers[0] + " displaySetting:position_start :" + self.headers[key] + " .\n"
+                    ttl += ":" + urllib.parse.quote(self.headers[0]) + " displaySetting:position_start :" + urllib.parse.quote(self.headers[key]) + " .\n"
                 if key > 0 and key_type == 'end':
-                    ttl += ":" + self.headers[0] + " displaySetting:position_end :" + self.headers[key] + " .\n"
+                    ttl += ":" + urllib.parse.quote(self.headers[0]) + " displaySetting:position_end :" + urllib.parse.quote(self.headers[key]) + " .\n"
 
         for header, categories in self.category_values.items():
             indent = len(header) * " " + len("displaySetting:category") * " " + 3 * " "
-            ttl += ":" + header+"Category" + " displaySetting:category :"
-            ttl += (" , \n" + indent + ":").join(categories) + " .\n"
+            ttl += ":" + urllib.parse.quote(header+"Category") + " displaySetting:category :"
+            ttl += (" , \n" + indent + ":").join(map(urllib.parse.quote,categories)) + " .\n"
 
             for item in categories:
-                ttl += ":" + item + " rdf:type :" + header + " ;\n" + len(item) * " " + "  rdfs:label \"" + item + "\" .\n"
+                ttl += ":" + urllib.parse.quote(item) + " rdf:type :" + urllib.parse.quote(header) + " ;\n" + len(item) * " " + "  rdfs:label \"" + item + "\" .\n"
 
         return ttl
 
@@ -366,7 +367,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
                 # Create the entity (first column)
                 entity_label = row[0]
                 indent = (len(entity_label) + 1) * " "
-                ttl += ":" + entity_label + " rdf:type :" + self.headers[0] + " ;\n"
+                ttl += ":" + urllib.parse.quote(entity_label) + " rdf:type :" + urllib.parse.quote(self.headers[0]) + " ;\n"
                 ttl += indent + " rdfs:label \"" + entity_label + "\" ;\n"
 
                 # Add data from other columns
@@ -379,21 +380,22 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
                         #OFI : manage new header with relation@type_entity
                         #relationName = ":has_" + header # manage old way
-                        relationName = ":"+header # manage old way
+                        relationName = ":"+urllib.parse.quote(header) # manage old way
                         if current_type.startswith('entity'):
                             idx = header.find("@")
                             if ( idx > 0 ):
-                                relationName = ":"+header[0:idx]
+                                relationName = ":"+urllib.parse.quote(header[0:idx])
 
                         if current_type in ('category', 'taxon', 'ref'):
                             # This is a category, keep track of allowed values for this column
                             self.category_values[header].add(row[i])
+                            row[i] = urllib.parse.quote(row[i])
 
                         # Create link to value
                         if row[i]: # Empty values are just ignored
                             ttl += indent + " "+ relationName + " " + self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " ;\n"
                         if current_type == 'entitySym':
-                            ttlSym += self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " "+ relationName + " :" + entity_label  + " .\n"
+                            ttlSym += self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " "+ relationName + " :" + urllib.parse.quote(entity_label)  + " .\n"
                         # FIXME we will need to store undefined values one day if we want to be able to query on this
 
                 ttl = ttl[:-2] + "."
@@ -442,9 +444,6 @@ class SourceFile(ParamManager, HaveCachedProperties):
         query = sqb.load_from_file(sparql_template, {"nodeClass": self.headers[0]}).query
 
         results = ql.process_query(query)
-
-        self.log.debug(results)
-        self.log.debug("==================")
 
         for rel in results:
             existing_relations.append(rel["relation"].replace(self.get_param("askomics.prefix"), "").replace("has_", ""))
