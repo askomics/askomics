@@ -208,7 +208,8 @@ const classesMapping = {
 
     /* create and return a new ID to instanciate a new SPARQL variate */
     setSPARQLVariateId(nodeOrLinkOrAttribute) {
-      let lab = nodeOrLinkOrAttribute.label;
+      let lab = userAbstraction.removePrefix(nodeOrLinkOrAttribute.uri);
+      lab = lab.replace(/[%!\"#$%&'\(\)\*\+,\.\/:;<=>\?\@\[\\\]\^`\{\|\}~]/g, '');
       if ( ! this.SPARQLIDgeneration[lab] ) {
         this.SPARQLIDgeneration[lab] = 0 ;
       }
@@ -265,9 +266,10 @@ const classesMapping = {
     instanciateNode(node) {
 
       node.suggested = false;
-      node.actif = true ;
-      node = this.setSPARQLVariateId(node);
-      node.label = node.SPARQLid;
+      node.actif     = true ;
+      node           = this.setSPARQLVariateId(node);
+      node.label     += this.getLabelIndexNode(node) ;
+
       this._instanciedNodeGraph.push(node);
       return node;
     }
@@ -290,21 +292,11 @@ const classesMapping = {
     }
 
     /*
-      return the name of the node without index  to set up and update the graph
-    */
-    getLabelNode(node) {
-        var re = new RegExp(/(\d+)$/);
-        var labelEntity = node.label.replace(re,"");
-
-        return labelEntity;
-      }
-
-    /*
       return the index name of the node to set up and update the graph
     */
     getLabelIndexNode(node) {
           var re = new RegExp(/(\d+)$/);
-          var indiceEntity = node.label.match(re);
+          var indiceEntity = node.SPARQLid.match(re);
 
           if ( indiceEntity && indiceEntity.length>0 )
             return indiceEntity[0];
@@ -315,6 +307,7 @@ const classesMapping = {
     /* Build attribute with id, sparId inside a node from a generic uri attribute */
     setAttributeOrCategoryForNode(AttOrCatArray,attributeForUri,node) {
       AttOrCatArray[attributeForUri.uri] = {} ;
+      AttOrCatArray[attributeForUri.uri].uri = attributeForUri.uri ;
       AttOrCatArray[attributeForUri.uri].type = attributeForUri.type ;
       AttOrCatArray[attributeForUri.uri].label = attributeForUri.label ;
 

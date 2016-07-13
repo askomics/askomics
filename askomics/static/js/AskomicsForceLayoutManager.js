@@ -179,6 +179,8 @@ var AskomicsForceLayoutManager = function () {
     /* initialize menus */
     menuView.start();
     menuFile.start();
+
+    startPoint = userAbstraction.buildBaseNode(startPoint.uri);
     /* Setting up an ID for the first variate */
     startPoint = graphBuilder.setStartpoint(startPoint);
 
@@ -199,7 +201,6 @@ var AskomicsForceLayoutManager = function () {
   };
 
   AskomicsForceLayoutManager.prototype.startWithQuery = function (dump) {
-
     d3.select("g").selectAll("*").remove();
     userAbstraction.loadUserAbstraction();
     /* initialize menus */
@@ -257,7 +258,7 @@ var AskomicsForceLayoutManager = function () {
         throw new Error("AskomicsForceLayoutManager.prototype.updateInstanciateNode : node is not defined !");
 
       // change label node with the SPARQL Variate Id
-      $('#txt_'+node.id).html(graphBuilder.getLabelNode(node)+'<tspan font-size="7" baseline-shift="sub">'+graphBuilder.getLabelIndexNode(node)+"</tspan>");
+      $('#txt_'+node.id).html(node.label+'<tspan font-size="7" baseline-shift="sub">'+graphBuilder.getLabelIndexNode(node)+"</tspan>");
       // canceled transparency
       $("#node_"+node.id).css("opacity", "1");
       $('#txt_'+node.id).css("opacity","1");
@@ -734,14 +735,13 @@ var AskomicsForceLayoutManager = function () {
               .attr("id", function (d) {
                   return "txt_" + d.id;
               })
-              .text(function (d) {
-                  return graphBuilder.getLabelNode(d);
-                }).append("tspan")
-                  .attr("font-size","7")
-                  .attr("baseline-shift","sub")
-                .text(function (d) {
-                    return graphBuilder.getLabelIndexNode(d);
-                  });
+              .text(function (d) { return d.label; })
+                  .append("tspan")
+                   .attr("font-size","7")
+                   .attr("baseline-shift","sub")
+                   .text(function (d) {
+                     return graphBuilder.getLabelIndexNode(d);
+                    });
 
       link.exit().remove();
       node.exit().remove();

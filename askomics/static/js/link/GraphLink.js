@@ -3,7 +3,7 @@
 class GraphLink {
   constructor(sourceN,targetN) {
     this.id        = -1;
-    this.SPARQLid  = -1;
+    this.SPARQLid  = "";
     this.suggested = true ;
 
     if ( sourceN ) {

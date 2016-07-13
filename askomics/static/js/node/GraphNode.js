@@ -25,7 +25,7 @@ class GraphNode {
 
   init() {
     this.id           = -1;
-    this.SPARQLid     = -1;
+    this.SPARQLid     = "";
     this.suggested    = true;
     this.actif        = false ;
     this.weight       = 0;

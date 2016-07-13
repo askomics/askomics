@@ -74,13 +74,13 @@ class SparqlQueryBuilder(ParamManager):
         return self.prepare_query(
             """SELECT DISTINCT ?class WHERE {
             GRAPH <"""+self.get_param("askomics.graph")+"""> { ?g rdfg:subGraphOf <"""+self.get_param("askomics.graph")+""">}
-            GRAPH ?g { ?s a ?class }}""")
+            GRAPH ?g { ?s a ?classVar. ?classVar rdfs:label ?class. }}""")
 
     def get_statistics_nb_instances_by_classe(self):
         return self.prepare_query(
             """SELECT ?class (COUNT(distinct ?s) AS ?count ) WHERE {
             GRAPH <"""+self.get_param("askomics.graph")+"""> { ?g rdfg:subGraphOf <"""+self.get_param("askomics.graph")+""">}
-            GRAPH ?g { ?s a ?class }} GROUP BY ?class ORDER BY ?count""")
+            GRAPH ?g { ?s a ?classVar. ?classVar rdfs:label ?class. }} GROUP BY ?class ORDER BY ?count""")
 
     def get_statistics_by_startpoint(self):
         return self.prepare_query(
@@ -94,7 +94,7 @@ class SparqlQueryBuilder(ParamManager):
 
     def get_list_named_graphs(self):
         return self.prepare_query(
-            """SELECT DISTINCT ?g WHERE { 
+            """SELECT DISTINCT ?g WHERE {
             GRAPH <"""+self.get_param("askomics.graph")+"""> { ?g rdfg:subGraphOf <"""+self.get_param("askomics.graph")+""">}
             GRAPH ?g { ?s ?p ?o } }""")
 

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import urllib.parse
 from askomics.libaskomics.utils import pformat_generic_object
 
 class AbstractedEntity(object):
@@ -11,7 +12,7 @@ class AbstractedEntity(object):
     """
 
     def __init__(self, identifier):
-        self.uri = ":" + identifier
+        self.uri = ":" + urllib.parse.quote(identifier)
         self.label = identifier
 
         self.log = logging.getLogger(__name__)
