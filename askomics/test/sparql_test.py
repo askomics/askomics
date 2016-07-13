@@ -4,6 +4,7 @@ import os
 from pyramid import testing
 from pyramid.paster import get_appsettings
 from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
+from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
 
 import json
 
@@ -43,6 +44,7 @@ class SparqlTests(unittest.TestCase):
     def test_statistics(self):
         request = testing.DummyRequest()
         sqb = SparqlQueryBuilder(self.settings, request.session)
+        ql = QueryLauncher(self.settings, request.session)
 
         sqb.get_statistics_number_of_triples()
         sqb.get_statistics_number_of_entities()
@@ -50,4 +52,9 @@ class SparqlTests(unittest.TestCase):
         sqb.get_statistics_list_classes()
         sqb.get_statistics_nb_instances_by_classe()
         sqb.get_statistics_by_startpoint()
-        sqb.get_delete_query_string()
+        sqb.get_list_named_graphs()
+        res = ql.execute_query(sqb.get_list_named_graphs().query)
+
+        for indexResult in range(len(res['results']['bindings'])):
+                    sqb.get_delete_query_string(res['results']['bindings'][indexResult]['g']['value'])
+                    sqb.get_metadatas(res['results']['bindings'][indexResult]['g']['value'])

@@ -24,7 +24,10 @@ class ParamManager(object):
                                 "xsd": """http://www.w3.org/2001/XMLSchema#""",
                                 "rdfs": """http://www.w3.org/2000/01/rdf-schema#""",
                                 "rdf": """http://www.w3.org/1999/02/22-rdf-syntax-ns#""",
-                                "owl": """http://www.w3.org/2002/07/owl#"""}
+                                "rdfg": """http://www.w3.org/2004/03/trix/rdfg-1/""",
+                                "owl": """http://www.w3.org/2002/07/owl#""",
+                                "prov": """http://www.w3.org/ns/prov#""",
+                                "dc": """http://purl.org/dc/elements/1.1/"""}
 
         self.ASKOMICS_sparql_queries_dir = 'askomics/sparql/'
         self.ASKOMICS_html_template      = 'askomics/templates/integration.pt'

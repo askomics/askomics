@@ -6,10 +6,6 @@ var AskomicsForceLayoutManager = function () {
 
   var w = $("#svgdiv").width();
   var h = 350 ;
-  var configDisplay = {
-    rNode        : 12,
-    opacityNode  : "0.5"
-  };
 
   /* filter to hide and show proposition node and links */
   var _hideProposedUriNode    = [] ;
@@ -149,11 +145,6 @@ var AskomicsForceLayoutManager = function () {
   var nodes = force.nodes();
   var links = force.links();
 
-  var colorPalette = ["yellowgreen","teal","paleturquoise","peru","tomato","steelblue","lightskyblue","lightcoral"];
-  var idxColorPalette = 0 ;
-      /* Color associate with Uri */
-  var colorUriList = {} ;
-
   var ctrlPressed = false ;
   var selectNodes = []    ;
   var selectLink  = ''    ;
@@ -176,26 +167,30 @@ var AskomicsForceLayoutManager = function () {
   AskomicsForceLayoutManager.prototype.start = function () {
     /* Get information about start point to bgin query */
     var startPoint = $('#startpoints').find(":selected").data("value");
+
+    //startPoint = userAbstraction.buildBaseNode(startPoint.uri);
     /* load abstraction */
     userAbstraction.loadUserAbstraction();
     /* initialize menus */
     menuView.start();
     menuFile.start();
     /* Setting up an ID for the first variate */
-    graphBuilder.setStartpoint(startPoint);
+    startPoint = graphBuilder.setStartpoint(startPoint);
+
     /* first node */
     nodes.push(startPoint);
     this.manageSelectedNodes(startPoint);
 
-    attributesView.create(startPoint);
+
+    startPoint.getPanelView().create();
     /* update right view with attribute view */
-    attributesView.show(startPoint);
-    nodeView.show(startPoint);
+    startPoint.getPanelView().show();
     /* insert new suggestion with startpoints */
     this.insertSuggestions();
     /* build graph */
     this.update();
     this.colorSelectdObject("#node_",startPoint.id);
+
   };
 
   AskomicsForceLayoutManager.prototype.startWithQuery = function (dump) {
@@ -208,7 +203,6 @@ var AskomicsForceLayoutManager = function () {
 
     nodes.splice(0, nodes.length);
     links.splice(0, links.length);
-
     t = graphBuilder.setNodesAndLinksFromState(dump);
     lnodes = t[0];
     llinks = t[1];
@@ -217,25 +211,23 @@ var AskomicsForceLayoutManager = function () {
 
     for (var n of lnodes) {
       nodes.push(n);
-      //graphBuilder.nodes().push(n);
-      nodeView.create(n);
-      attributesView.create(n);
+      n.getPanelView().create();
     }
-    attributesView.hideAll();
+    AskomicsObjectView.hideAll();
 
     for (var l of llinks) {
       links.push(l);
-      linksView.create(l);
+      l.getPanelView().create(l);
     }
 
-    linksView.hideAll();
+    AskomicsObjectView.hideAll();
+
     /* select the last node */
     var lastn = graphBuilder.nodes()[graphBuilder.nodes().length-1];
     this.unSelectNodes();
     this.manageSelectedNodes(lastn);
     /* update right view with attribute view */
-    attributesView.show(lastn);
-    nodeView.show(lastn);
+    lastn.getPanelView().show();
     /* insert new suggestion with startpoints */
     this.insertSuggestions();
     this.update();
@@ -252,38 +244,6 @@ var AskomicsForceLayoutManager = function () {
         $('#label-'+id).css('opacity', "1");
       }
     };
-
-    AskomicsForceLayoutManager.prototype.getColorInstanciatedNode = function(node) {
-      if ( ! node  ) {
-        throw new Error("AskomicsForceLayoutManager.prototype.getColorInstanciatedNode node is not defined!");
-      }
-
-      if (! ('uri' in node)) {
-        throw new Error("AskomicsForceLayoutManager.prototype.getColorInstanciatedNode node has not uri !:"+JSON.stringify(node));
-      }
-
-      if ( node.uri in colorUriList ) {
-        return colorUriList[node.uri];
-      }
-
-
-      colorUriList[node.uri] = colorPalette[idxColorPalette++];
-      if (idxColorPalette >= colorPalette.length) idxColorPalette = 0;
-      return colorUriList[node.uri];
-    };
-    /* //not used anymore
-    AskomicsForceLayoutManager.prototype.getStrokeColorInstanciatedNode = function(node) {
-      if ( ! node  ) {
-        throw new Error("AskomicsForceLayoutManager.prototype.getStrokeColorInstanciatedNode node is not defined!");
-      }
-
-      if (node.positionable) {
-        return 'darkgreen';
-      } else {
-        return 'dimgrey';
-      }
-    };
-    */
 
     /* Update the label of cercle when a node is instanciated */
     AskomicsForceLayoutManager.prototype.updateInstanciatedNode = function(node) {
@@ -331,11 +291,11 @@ var AskomicsForceLayoutManager = function () {
         forceLayoutManager.colorSelectdObject("#node_",node.id);
       }
 
-      if (selectNodes.length == 0) {
+      if (selectNodes.length === 0) {
         //no node selected: hide rightview
-        attributesView.hideAll();
+        AskomicsObjectView.hideAll();
         //linksView.hideAll();
-      };
+      }
     };
 
     /* unselect all nodes */
@@ -401,7 +361,7 @@ var AskomicsForceLayoutManager = function () {
           /* creatin node */
           suggestedNode = userAbstraction.buildBaseNode(uri);
           /* specific attribute for suggested node */
-          graphBuilder.setSuggestedNode(suggestedNode,slt_node.x,slt_node.y);
+          suggestedNode = graphBuilder.setSuggestedNode(suggestedNode,slt_node.x,slt_node.y);
 
           for (var rel in objectsTarget[uri]) {
             /* Filter if link are not desired by the user */
@@ -411,26 +371,16 @@ var AskomicsForceLayoutManager = function () {
             if ( ! (suggestedNode.id in slt_node.nlink) ) {
               /* We create a unique instance and add all possible relation between selected node and this suggested node */
               suggestedList[uri] = suggestedNode ;
-              slt_node.nlink[suggestedList[uri].id] = 0;
-              suggestedList[uri].nlink[slt_node.id] = 0;
               nodes.push(suggestedNode);
             }
             /* increment the number of link between the two nodes */
-            slt_node.nlink[suggestedList[uri].id]++;
-            suggestedList[uri].nlink[slt_node.id]++;
 
-            link = {
-              suggested : true,
-              positionable : false,
-              uri   : objectsTarget[uri][rel],
-              source: slt_node,
-              target: suggestedList[uri],
-              label: userAbstraction.removePrefix(objectsTarget[uri][rel]),
-              linkindex: slt_node.nlink[suggestedList[uri].id],
-            };
+            let uriLink  = objectsTarget[uri][rel] ;
+            let source   = slt_node ;
+            let target   = suggestedList[uri];
 
-            link.source.weight++;
-            graphBuilder.setId(link);
+            link = new AskomicsLink(uriLink,source,target);
+            link.id = graphBuilder.getId();
             links.push(link);
           }
         }
@@ -441,7 +391,7 @@ var AskomicsForceLayoutManager = function () {
 
           if ( ! (uri in suggestedList) ) {
             suggestedNode = userAbstraction.buildBaseNode(uri);
-            graphBuilder.setSuggestedNode(suggestedNode,slt_node.x,slt_node.y);
+            suggestedNode = graphBuilder.setSuggestedNode(suggestedNode,slt_node.x,slt_node.y);
           }
 
           for (var rel2 in subjectsTarget[uri]) {
@@ -451,29 +401,16 @@ var AskomicsForceLayoutManager = function () {
             /* adding in the node list to create D3.js graph */
             if ( ! (suggestedNode.id in slt_node.nlink) ) {
               suggestedList[uri] = suggestedNode ;
-              slt_node.nlink[suggestedList[uri].id] = 0;
-              suggestedList[uri].nlink[slt_node.id] = 0;
               nodes.push(suggestedNode);
             }
 
-            slt_node.nlink[suggestedList[uri].id]++;
-            suggestedList[uri].nlink[slt_node.id]++;
-
-            link = {
-              suggested : true,
-              positionable : false,
-              type : '',       // using with positionable object
-              sameTax: false,  // using with positionable object
-              sameRef: false,  // using with positionable object
-              strict: false,   // using with positionable object
-              uri   : subjectsTarget[uri][rel2],
-              source: suggestedList[uri],
-              target: slt_node,
-              label: userAbstraction.removePrefix(subjectsTarget[uri][rel2]),
-              linkindex: slt_node.nlink[suggestedList[uri].id],
-            };
-            graphBuilder.setId(link);
-            link.source.weight++;
+            //slt_node.nlink[suggestedList[uri].id]++;
+            //suggestedList[uri].nlink[slt_node.id]++;
+            let uriLink  = subjectsTarget[uri][rel2] ;
+            let source   = suggestedList[uri] ;
+            let target   = slt_node;
+            link = new AskomicsLink(uriLink,source,target);
+            link.id = graphBuilder.getId();
             links.push(link);
           }
         }
@@ -498,33 +435,18 @@ var AskomicsForceLayoutManager = function () {
             /* creatin node */
             suggestedNode = userAbstraction.buildBaseNode(uri);
             /* specific attribute for suggested node */
-            graphBuilder.setSuggestedNode(suggestedNode,slt_node.x,slt_node.y);
+            suggestedNode = graphBuilder.setSuggestedNode(suggestedNode,slt_node.x,slt_node.y);
             /* adding in the node list to create D3.js graph */
             nodes.push(suggestedNode);
             suggestedList[uri] = suggestedNode ;
 
-            slt_node.nlink[suggestedList[uri].id]=0;
-            suggestedList[uri].nlink[slt_node.id]=0;
           }
 
-          slt_node.nlink[suggestedList[uri].id]++;
-          suggestedList[uri].nlink[slt_node.id]++;
-
-          link = {
-            suggested : true,
-            positionable : true,
-            uri   : 'positionable',
-            type : 'included',
-            sameTax: true,
-            sameRef: true,
-            strict: true,
-            source: suggestedList[uri],
-            target: slt_node,
-            label: 'included in',
-            linkindex: slt_node.nlink[suggestedList[uri].id],
-          };
-          graphBuilder.setId(link);
-          link.source.weight++;
+          let uriLink  = 'positionable' ;
+          let source   = suggestedList[uri] ;
+          let target   = slt_node;
+          link = new AskomicsPositionableLink(uriLink,source,target);
+          link.id = graphBuilder.getId();
           links.push(link);
         }
 
@@ -549,53 +471,25 @@ var AskomicsForceLayoutManager = function () {
         if (! forceLayoutManager.isProposedUri("link",objectsTarget[node2.uri][rel])) continue ;
 
         if ( this.relationInstancied(node1,node2,objectsTarget[node2.uri][rel],links) ) continue ;
-        /* increment the number of link between the two nodes */
-        if ( ! (node2.id in node1.nlink) ) {
-          node1.nlink[node2.id] = 0;
-          node2.nlink[node1.id] = 0;
-        }
-        node1.nlink[node2.id]++;
-        node2.nlink[node1.id]++;
-
-        link = {
-          suggested : true,
-          positionable : false,
-          uri   : objectsTarget[node2.uri][rel],
-          source: node1,
-          target: node2,
-          label: userAbstraction.removePrefix(objectsTarget[node2.uri][rel]),
-          linkindex: node1.nlink[node2.id],
-        };
-        graphBuilder.setId(link);
-        link.source.weight++;
+        let uriLink  = objectsTarget[node2.uri][rel];
+        let source   = node1;
+        let target   = node2;
+        link = new AskomicsLink(uriLink,source,target);
+        link.id = graphBuilder.getId();
         links.push(link);
       }
 
-      for (var rel2 in subjectsTarget[node2.uri]) {
+      for (let rel2 in subjectsTarget[node2.uri]) {
         /* Filter if link are not desired by the user */
         if (! forceLayoutManager.isProposedUri("link",subjectsTarget[node2.uri][rel2])) continue ;
 
         if ( this.relationInstancied(node2,node1,subjectsTarget[node2.uri][rel2],links) ) continue ;
 
-        if ( ! (node2.id in node1.nlink) ) {
-          node1.nlink[node2.id] = 0;
-          node2.nlink[node1.id] = 0;
-        }
-
-        node1.nlink[node2.id]++;
-        node2.nlink[node1.id]++;
-
-        link = {
-          suggested : true,
-          positionable : false,
-          uri   : subjectsTarget[node2.uri][rel2],
-          source: node2,
-          target: node1,
-          label: userAbstraction.removePrefix(subjectsTarget[node2.uri][rel2]),
-          linkindex: node1.nlink[node2.id],
-        };
-        graphBuilder.setId(link);
-        link.source.weight++;
+        let uriLink  = subjectsTarget[node2.uri][rel2];
+        let source   = node2;
+        let target   = node1;
+        link = new AskomicsLink(uriLink,source,target);
+        link.id = graphBuilder.getId();
         links.push(link);
       }
       // Manage positionnable entities
@@ -604,24 +498,11 @@ var AskomicsForceLayoutManager = function () {
       if ( forceLayoutManager.isProposedUri("link","positionable") &&
            (node1.uri in positionableEntities) && (node2.uri in positionableEntities)) {
 
-        node1.nlink[node2.id]++;
-        node2.nlink[node1.id]++;
-
-        link = {
-            suggested : true,
-            positionable : true,
-            uri   : 'positionable',
-            type : 'included',
-            sameTax: true,
-            sameRef: true,
-            strict: true,
-            source: node2,
-            target: node1,
-            label: 'included in',
-            linkindex: node2.nlink[node1.id],
-          };
-        graphBuilder.setId(link);
-        link.source.weight++;
+        let uriLink  = 'positionable' ;
+        let source   = node2 ;
+        let target   = node1;
+        link = new AskomicsPositionableLink(uriLink,source,target);
+        link.id = graphBuilder.getId();
         links.push(link);
       }
     };
@@ -658,6 +539,16 @@ var AskomicsForceLayoutManager = function () {
       }
     } ;              /* user want a new relation contraint betwwenn two node*/
 
+    // take a string and return an entity with a sub index
+    AskomicsForceLayoutManager.prototype.selectListLinksUser= function (links,node) {
+      /* fix the first link associted with the new instanciate node TODO: propose an interface to select the link */
+      for (var il in links) {
+        var l = links[il];
+        if ( l.suggested && (l.source.id == node.id || l.target.id == node.id) ) {
+          return [links[il]];
+        }
+      }
+    };
 
   AskomicsForceLayoutManager.prototype.update = function () {
     console.log('---> update graph!');
@@ -677,11 +568,11 @@ var AskomicsForceLayoutManager = function () {
                 .attr("style", "text-anchor:middle; font: 10px sans-serif; cursor: pointer;")
                 .attr("dy", "-5")
                 .attr('id', function(d) {return 'label-'+d.id;})
-                .style("opacity", function(d) {return d.suggested?"0.3":"1";})
+                .style("opacity", function(d) {return d.getTextOpacity();})
                 .append("textPath")
                 .attr("xlink:href",function(d) {return "#"+d.id;})
                 .attr("startOffset", "35%")
-                .attr('fill', function(d){ return d.positionable?'darkgreen':'grey'})
+                .attr('fill', function(d){ return d.getTextFillColor();})
                 .text(function(d){return d.label;})
                 .on('click', function(d) { // Mouse down on a link label
 
@@ -703,8 +594,7 @@ var AskomicsForceLayoutManager = function () {
                         var node = d.source.suggested?d.source:d.target;
                         graphBuilder.instanciateNode(node);
                         forceLayoutManager.updateInstanciatedNode(node);
-                        nodeView.create(node);
-                        attributesView.create(node);
+                        node.getPanelView().create();
                         // remove old suggestion
                         forceLayoutManager.removeSuggestions();
                         if (selectNodes.length <= 1) {
@@ -714,24 +604,20 @@ var AskomicsForceLayoutManager = function () {
                           forceLayoutManager.insertSuggestions();
                         }
                       }
-                      linksView.create(d);
+                      //linksView.create(d);
+                      d.getPanelView().create();
                     }else{
                       forceLayoutManager.removeSuggestions();
                     }
-                    /* update node view  */
-                    nodeView.hideAll();
-                    /* update right view with link view */
-                    attributesView.hideAll();
                     /* update link view */
-                    linksView.hideAll();
-                    linksView.show(d);
+                    d.getPanelView().show();
+
                     forceLayoutManager.update();
                   }else{
                     forceLayoutManager.unSelectNodes();
                     forceLayoutManager.unSelectLinks();
                     forceLayoutManager.update();
-                    attributesView.hideAll();
-                    linksView.hideAll();
+                    AskomicsObjectView.hideAll();
                   }
               });
 
@@ -794,15 +680,13 @@ var AskomicsForceLayoutManager = function () {
       //setup_node(nodeEnter,slt_elt,slt_data,prev_elt,prev_data);
       nodeEnter.append("svg:circle")
               .attr("style", "cursor: pointer;")
-              .attr("r", configDisplay.rNode)
-              .attr("id", function (d) { return "node_" + d.id; })
-              .attr("uri", function (d) { return d.uri; })
+              .attr("r", function (d)       { return d.getRNode(); })
+              .attr("id", function (d)      { return "node_" + d.id; })
+              .attr("uri", function (d)     { return d.uri; })
               .attr("class", "nodeStrokeClass")
-              .style('stroke', 'grey')
-              .style("fill", function (d) { return forceLayoutManager.getColorInstanciatedNode(d); })
-              .style("opacity", function(d) {
-                  return (d.suggested === true ? configDisplay.opacityNode : 1);
-              })
+              .style('stroke', function (d) { return d.getNodeStrokeColor(); })
+              .style("fill", function (d)   { return d.getColorInstanciatedNode(); })
+              .style("opacity", function(d) { return d.getOpacity();})
               .on('click', function(d) {
                 forceLayoutManager.manageSelectedNodes(d);
                 forceLayoutManager.unSelectLinks();
@@ -813,29 +697,19 @@ var AskomicsForceLayoutManager = function () {
                   // When selected a node is not considered suggested anymore.
                   graphBuilder.instanciateNode(d);
                   forceLayoutManager.updateInstanciatedNode(d);
-                  var listOfLinksInstancied = linksView.selectListLinksUser(links,d);
+                  var listOfLinksInstancied = forceLayoutManager.selectListLinksUser(links,d);
                   graphBuilder.instanciateLink(listOfLinksInstancied);
                   forceLayoutManager.updateInstanciateLinks(listOfLinksInstancied);
                   for (var ll of listOfLinksInstancied ) {
-                    linksView.create(ll);
+                    ll.getPanelView().create();
                   }
-                  nodeView.create(d);
-                  attributesView.create(d);
+                  d.getPanelView().create();
                 }
-
-                linksView.hideAll();
-
-                /* update node view  */
-                nodeView.hideAll();
-                nodeView.show(d);
-
-                /* update right view with attribute view */
-                attributesView.hideAll();
 
                 // show attribute view only if node is not selected
                 if (!$.inArray(d, selectNodes)) {
-                  attributesView.show(d);
-                };
+                  d.getPanelView().show();
+                }
 
                 /* remove old suggestion */
                 forceLayoutManager.removeSuggestions();
@@ -848,11 +722,9 @@ var AskomicsForceLayoutManager = function () {
       nodeEnter.append("svg:text")//.append("tspan")
               .attr("class", "textClass")
               .attr("x", 14)
-              .attr('fill', function(d){return d.positionable?'darkgreen':'black'})
-              .style('stroke', function(d){return d.positionable?'darkgreen':'black'})
-              .style("opacity", function(d) {
-                  return (d.suggested === true ? configDisplay.opacityNode : 1);
-              })
+              .attr('fill', function(d){return d.getTextFillColor();})
+              .style('stroke', function(d){return d.getTextStrokeColor();})
+              .style("opacity", function(d) { return d.getOpacity();})
               .attr("y", ".31em")
               .attr("id", function (d) {
                   return "txt_" + d.id;
@@ -883,7 +755,7 @@ var AskomicsForceLayoutManager = function () {
             penteY = Math.round(penteY*10)/10;
 
             var XT=0,YT=0,XS=0,YS=0;
-            var dim = configDisplay.rNode/3.0;
+            var dim = d.source.getRNode()/3.0;
             if ( penteX >0 && penteY>0) {
               XT = -dim ;
               YT = -dim ;

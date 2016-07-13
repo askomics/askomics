@@ -133,9 +133,9 @@
 <!-- The jQuery UI widget factory, can be omitted if jQuery UI is already included -->
 <!-- <script src="/static/js/upload/vendor/jquery.ui.widget.js"></script> -->
 <!-- Bootstrap JS is not required, but included for the responsive demo navigation -->
-<script src="//netdna.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<!-- <script src="//netdna.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script> -->
 <!-- blueimp Gallery script -->
-<script src="//blueimp.github.io/Gallery/js/jquery.blueimp-gallery.min.js"></script>
+<script src="/static/js/third-party/jquery.blueimp-gallery.min.js"></script>
 <!-- The Iframe Transport is required for browsers without support for XHR file uploads -->
 <script src="/static/js/third-party/upload/jquery.iframe-transport.js"></script>
 <!-- The basic File Upload plugin -->

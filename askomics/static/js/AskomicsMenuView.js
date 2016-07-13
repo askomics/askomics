@@ -3,9 +3,13 @@
 /*
   Manage Menu View to select and unselect proposition of element/link
 */
-var AskomicsMenuView = function () {
+class AskomicsMenuView {
 
-  AskomicsMenuView.prototype.buildLiView = function(uri,label,submenu) {
+  constructor() {
+
+  }
+
+  buildLiView(uri,label,submenu) {
 
     var icheck = $("<span/>")
         .attr("class","glyphicon glyphicon-check");
@@ -26,7 +30,7 @@ var AskomicsMenuView = function () {
     li.css("vertical-align","middle");
     li.append(a);
     return li;
-  };
+  }
 
   AskomicsMenuView.prototype.reset = function() {
     // Remove onclick
@@ -35,8 +39,8 @@ var AskomicsMenuView = function () {
   };
 
   /* initialize the view. The abstraction have to be done */
-  AskomicsMenuView.prototype.start = function(node) {
-    menuView = this;
+  start(node) {
+    let menuView = this;
 
     /* to close the menu when a click event outside */
     $(window).click(function() {
@@ -62,10 +66,10 @@ var AskomicsMenuView = function () {
 
 
     // <li><a href="#" class="small" data-value="option1" tabIndex="-1"><input type="checkbox"/>&nbsp;Option 1</a></li>
-    lentities = userAbstraction.getEntities();
+    let lentities = userAbstraction.getEntities();
 
     $.each(lentities, function(i) {
-      nodeuri = lentities[i];
+      let nodeuri = lentities[i];
       var li = menuView.buildLiView(nodeuri,userAbstraction.removePrefix(nodeuri),false);
       li.on('click', function() {
         var span = $(this).find(".glyphicon");
@@ -92,8 +96,8 @@ var AskomicsMenuView = function () {
       /* --------------------------- */
       /* Adding filter on relations  */
       /* --------------------------- */
-      var tab = userAbstraction.getRelationsObjectsAndSubjectsWithURI(nodeuri);
-      var listRelObj = tab[0];
+      let tab = userAbstraction.getRelationsObjectsAndSubjectsWithURI(nodeuri);
+      let listRelObj = tab[0];
 
       $.each(listRelObj, function(objecturi) {
         $.each(listRelObj[objecturi], function(idxrel) {
@@ -127,11 +131,11 @@ var AskomicsMenuView = function () {
       /* next entity */
     });
 
-    positionableEntities = userAbstraction.getPositionableEntities();
+    let positionableEntities = userAbstraction.getPositionableEntities();
     if (Object.keys(positionableEntities).length>0) {
       /* positionable object */
-      posuri = "positionable";
-      var li = menuView.buildLiView(posuri,userAbstraction.removePrefix(posuri),false);
+      let posuri = "positionable";
+      let li = menuView.buildLiView(posuri,userAbstraction.removePrefix(posuri),false);
       li.attr("nodeuri",posuri)
         .on('click', function() {
           var span = $(this).find(".glyphicon");
@@ -156,5 +160,5 @@ var AskomicsMenuView = function () {
 
       //hide by default
       $("#viewListNodesAndLinks").hide();
-  } ;
-};
+  }
+}

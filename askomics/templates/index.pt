@@ -2,18 +2,14 @@
 <html lang="${request.locale_name}">
     <head>
         <meta charset="utf-8">
-        <title>Visual SPARQL query builder for an RDF database</title>
-        <!--
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js" charset="utf-8"></script>
-        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-        <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>
-      -->
+        <title>Visual SPARQL query builder for an Biological RDF database</title>
+
         <script src="static/js/third-party/d3.min.js" charset="utf-8"></script>
         <script src="static/js/third-party/jquery-1.12.4.min.js"></script>
         <script src="static/js/third-party/jquery-ui-1.11.4/jquery-ui.min.js"></script>
 
         <!-- The Templates plugin is included to render the upload/download listings -->
-        <script src="//blueimp.github.io/JavaScript-Templates/js/tmpl.min.js"></script>
+        <script src="static/js/third-party/tmpl.min.js"></script>
 
         <script src="static/js/third-party/bootstrap.js"></script>
         <script src="static/js/third-party/handlebars-v4.0.5.js"></script>
@@ -24,10 +20,23 @@
         <script src="static/js/integration.js"></script>
         <script src="static/js/AskomicsRestManagement.js"></script>
         <script src="static/js/AskomicsUserAbstraction.js"></script>
+
+        <script src="static/js/node/GraphNode.js"></script>
+        <script src="static/js/node/AskomicsNode.js"></script>
+        <script src="static/js/node/AskomicsPositionableNode.js"></script>
+
+        <script src="static/js/link/GraphLink.js"></script>
+        <script src="static/js/link/AskomicsLink.js"></script>
+        <script src="static/js/link/AskomicsPositionableLink.js"></script>
+
         <script src="static/js/AskomicsGraphBuilder.js"></script>
-        <script src="static/js/AskomicsAttributesView.js"></script>
-        <script src="static/js/AskomicsNodeView.js"></script>
-        <script src="static/js/AskomicsLinksView.js"></script>
+        
+        <script src="static/js/view/AskomicsObjectView.js"></script>
+        <script src="static/js/view/AskomicsNodeView.js"></script>
+        <script src="static/js/view/AskomicsPositionableNodeView.js"></script>
+        <script src="static/js/view/AskomicsLinkView.js"></script>
+        <script src="static/js/view/AskomicsPositionableLinkView.js"></script>
+
         <script src="static/js/AskomicsForceLayoutManager.js"></script>
         <script src="static/js/AskomicsMenuView.js"></script>
         <script src="static/js/AskomicsMenuFile.js"></script>

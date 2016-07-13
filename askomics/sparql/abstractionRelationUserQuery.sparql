@@ -1,9 +1,13 @@
 SELECT DISTINCT ?subject ?relation ?object
-FROM  $graph
 WHERE {
-  ?subject rdf:type owl:Class .
-  ?object rdf:type owl:Class .
-  ?relation rdf:type $OwlProperty;
-            rdfs:domain ?subject;
-            rdfs:range ?object.
+    GRAPH <urn:sparql:tests-askomics:insert:informative1> {
+    ?g rdfg:subGraphOf <urn:sparql:tests-askomics:insert:informative1> .
+    ?g1 rdfg:subGraphOf <urn:sparql:tests-askomics:insert:informative1> }
+    GRAPH ?g { ?object rdf:type owl:Class . }
+    GRAPH ?g1 {
+    ?subject rdf:type owl:Class .
+    ?relation rdf:type $OwlProperty;
+                rdfs:domain ?subject;
+                rdfs:range ?object.
+    }
 }

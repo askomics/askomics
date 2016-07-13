@@ -4,32 +4,23 @@
   Manage The creation, update and deletaion inside the Attributes Graph view
 */
 
-var AskomicsAttributesView = function () {
+class AskomicsNodeView extends AskomicsObjectView {
 
-  var prefix = "rightview_"; /* TODO : This prefix have to be the same as Link view otherwise !!!!!!!!!!! */
+  constructor(node) {
+    super(node);
+    this.node = node;
+  }
 
-  AskomicsAttributesView.prototype.remove = function (node) {
-    $("#"+prefix+node.SPARQLid).remove();
-  };
+  display_help() {
+    let help_title = 'Node '+this.node.label;
+    let help_str = ' Choose which attributes you want to see on the right panel.';
+    help_str += ' Filter this attributes by choosing values';
+    $('#help_figure').addClass( "hidden" );
+    displayModal(help_title, help_str, 'ok');
+  }
 
-  AskomicsAttributesView.prototype.removeAll = function (node) {
-    $("div[id*='"+ prefix +"']" ).remove();  };
-
-  AskomicsAttributesView.prototype.show = function (node) {
-    $("#"+prefix+node.SPARQLid).show();
-  };
-
-  AskomicsAttributesView.prototype.hide = function (node) {
-    $("#"+prefix+node.SPARQLid).hide();
-  };
-
-  AskomicsAttributesView.prototype.hideAll = function (node) {
-    $("div[id*='"+ prefix +"']" ).hide();
-  };
-
-
-
-  AskomicsAttributesView.prototype.create = function (node) {
+  create() {
+    var node = this.node;
       // Add attributes of the selected node on the right side of AskOmics
     function makeRemoveIcon(field) {
           var removeIcon = $('<span class="glyphicon glyphicon-erase display"></span>');
@@ -39,39 +30,37 @@ var AskomicsAttributesView = function () {
 
      var elemUri = node.uri,
           elemId  = node.SPARQLid,
-          nameDiv = prefix+node.SPARQLid ;
+          nameDiv = this.prefix+node.SPARQLid ;
 
-      var details = $("<div></div>").attr("id",nameDiv).attr("nodeid", node.id).attr("sparqlid", node.SPARQLid).addClass('div-details');
+      var details = this.divPanel() ;
+      details.attr("nodeid", node.id).attr("sparqlid", node.SPARQLid).addClass('div-details');
 
-      var nameLab = $("<label></label>").attr("for",elemId).text("ID");
-      var nameInp = $("<input/>").attr("id", "lab_" + elemId).addClass("form-control");
-      var removeIcon = $('<span class="glyphicon glyphicon-remove display"></span>');
+      let nameLab = $("<label></label>").attr("for",elemId).text("ID");
+      let nameInp = $("<input/>").attr("id", "lab_" + elemId).addClass("form-control");
+      let removeIcon = $('<span class="glyphicon glyphicon-remove display"></span>');
       removeIcon.click(function() { field.val(null).trigger("change"); });
 
       details.append(nameLab).append(makeRemoveIcon(nameInp)).append(nameInp);
 
       nameInp.change(function(d) {
-        var value = $(this).val();
-        nodeid = $(this).parent().attr('nodeid');
-        sparlid = $(this).parent().attr('sparqlid');
+        let value = $(this).val();
+        let nodeid = $(this).parent().attr('nodeid');
+        let sparlid = $(this).parent().attr('sparqlid');
 
         graphBuilder.setFilterAttributes(nodeid,sparlid,value,'FILTER ( regex(str(?'+sparlid+'), "'+$(this).val()+'", "i" ))');
       });
 
-
-      attributes = userAbstraction.getAttributesWithURI(node.uri);
+      var attributes = userAbstraction.getAttributesWithURI(node.uri);
 
       $.each(attributes, function(i) {
+        console.log(attributes[i]);
           /* if attribute is loaded before the creation of attribute view, we don t need to create a new */
-          attribute = graphBuilder.getAttributeOrCategoryForNode(attributes[i],node);
-
+          let attribute = graphBuilder.getAttributeOrCategoryForNode(attributes[i],node);
           /* creation of new one otherwise */
           if ( ! attribute ) {
             attribute = graphBuilder.buildAttributeOrCategoryForNode(attributes[i],node);
-
           }
-          
-          var id = attribute.id;
+          let id = attribute.id;
 
           var lab = $("<label></label>").attr("for",attribute.label).text(attribute.label);
           var inp = $("<select/>").addClass("form-control").attr("multiple","multiple");
@@ -80,7 +69,7 @@ var AskomicsAttributesView = function () {
 
           if (attribute.type.indexOf("http://www.w3.org/2001/XMLSchema#") < 0) {
               displayModal('Please wait', '', 'Close');
-              var tab = graphBuilder.buildConstraintsGraphForCategory(node,attribute.id);
+              var tab = node.buildConstraintsGraphForCategory(attribute.id);
 
               inp.attr("list", "opt_" + labelSparqlVarId)
                  .attr("sparqlid",labelSparqlVarId);
@@ -97,7 +86,7 @@ var AskomicsAttributesView = function () {
             //  console.log(attribute.uri);
 
               service.post(model, function(d) {
-                  var selectedValue = "";
+                  let selectedValue = "";
                   if (labelSparqlVarId in node.values) {
                     selectedValue = node.values[labelSparqlVarId];
                   }
@@ -107,7 +96,7 @@ var AskomicsAttributesView = function () {
                   inp.attr("size",sizeSelect);
 
                   if ( d.values.length > 1 ) {
-                    for (var v of d.values) {
+                    for (let v of d.values) {
                       if ( selectedValue == v[labelSparqlVarId] ) {
                         inp.append($("<option></option>").attr("value", v[labelSparqlVarId]).attr("selected", "selected").append(v[labelSparqlVarId]));
                       } else {
@@ -123,12 +112,12 @@ var AskomicsAttributesView = function () {
               inp.change(function(d) {
                 var value = $(this).val();
                 if (value === null) value = '';
-                nodeid = $(this).parent().attr('nodeid');
-                sparlid = $(this).attr('sparqlid');
+                let nodeid = $(this).parent().attr('nodeid');
+                let sparlid = $(this).attr('sparqlid');
 
                 //graphBuilder.setFilterAttributes(nodeid,sparlid,value,'FILTER ( ?'+sparlid+'="'+value[0]+'"^^xsd:string)');
                 var listValue = "";
-                for (var i=0;i<value.length;i++) {
+                for (let i=0;i<value.length;i++) {
                   listValue+=":"+value[i]+" ";
                 }
                 graphBuilder.setFilterAttributes(nodeid,sparlid,value,'VALUES ?'+sparlid+' { '+listValue +'}');
@@ -136,8 +125,9 @@ var AskomicsAttributesView = function () {
 
           } else {
               if (attribute.type.indexOf("decimal") >= 0) {
-                inputValue="";
-                selectedOpValue="";
+
+                let inputValue="";
+                let selectedOpValue="";
                 inp = $("<table></table>").attr("sparqlid",labelSparqlVarId);
                 if ('op_'+labelSparqlVarId in node.values) {
                   selectedOpValue = node.values['op_'+labelSparqlVarId];
@@ -146,8 +136,8 @@ var AskomicsAttributesView = function () {
                   inputValue = node.values[labelSparqlVarId];
                 }
 
-                v = $("<select></select>").addClass("form-control");
-                var t;
+                let v = $("<select></select>").addClass("form-control");
+                let t;
                 t=$("<option></option>").attr("value", '=').append('=');
                 if ( selectedOpValue=='=') t.attr("selected", "selected");
                 v.append(t);
@@ -167,7 +157,7 @@ var AskomicsAttributesView = function () {
                 if ( selectedOpValue=='!=') t.attr("selected", "selected");
                 v.append(t);
 
-                tr = $("<tr></tr>");
+                let tr = $("<tr></tr>");
                 tr.append($("<td></td>").append(v));
                 //v = $("<input/>").attr("type", "text").val(inputValue).addClass("form-control");
                 v = $('<input type="text" class="form-control"/>').attr("id",id); // ?????????????????
@@ -179,15 +169,15 @@ var AskomicsAttributesView = function () {
                 inp.change(function(d) {
                   var op = $(this).find("option:selected").text();
                   var value = $(this).find('input').val();
-                  nodeid = $(this).parent().attr('nodeid');
-                  sparlid = $(this).attr('sparqlid');
+                  let nodeid = $(this).parent().attr('nodeid');
+                  let sparlid = $(this).attr('sparqlid');
 
                   graphBuilder.setFilterAttributes(nodeid,sparlid,value,'FILTER ( ?'+sparlid+' '+op+' '+value+')');
                   graphBuilder.setFilterAttributes(nodeid,"op_"+sparlid,op,'');
                 });
 
               } else {
-                inputValue = "";
+                let inputValue = "";
                 if (labelSparqlVarId in node.values) {
                   inputValue = node.values[labelSparqlVarId];
                 }
@@ -232,5 +222,5 @@ var AskomicsAttributesView = function () {
           //$('#waitModal').modal('hide');
       });
       $("#viewDetails").append(details);
-  };
-};
+  }
+}

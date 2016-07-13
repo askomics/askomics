@@ -43,30 +43,68 @@ class SparqlQueryBuilder(ParamManager):
     # The following utilities use prepare_query to fill a template.
     def get_statistics_number_of_triples(self):
         return self.prepare_query(
-            'SELECT (COUNT(*) AS ?no)  FROM $graph { ?s ?p ?o  }')
+            """SELECT (COUNT(?s) AS ?no) WHERE {
+            GRAPH <"""+self.get_param("askomics.graph")+"""> { ?g rdfg:subGraphOf <"""+self.get_param("askomics.graph")+""">}
+            GRAPH ?g { ?s ?p ?o }}""")
+
+    def get_statistics_number_of_triples_AskOmics_graphs(self):
+        return self.prepare_query(
+            """SELECT (COUNT(?s) AS ?no) WHERE {
+            GRAPH <"""+self.get_param("askomics.graph")+"""> { ?s ?p ?o}}""")
 
     def get_statistics_number_of_entities(self):
         return self.prepare_query(
-            'SELECT (COUNT(distinct ?s) AS ?no) FROM $graph { ?s a []  }')
+            """SELECT (COUNT(distinct ?s) AS ?no) WHERE {
+            GRAPH <"""+self.get_param("askomics.graph")+"""> { ?g rdfg:subGraphOf <"""+self.get_param("askomics.graph")+""">}
+            GRAPH ?g { ?s a [] }}""")
+
+    def get_statistics_number_of_graphs(self):
+        return self.prepare_query(
+            """SELECT (COUNT(distinct ?g) AS ?no) WHERE {
+            GRAPH <"""+self.get_param("askomics.graph")+"""> { ?g rdfg:subGraphOf <"""+self.get_param("askomics.graph")+""">}
+            GRAPH ?g { ?s ?p ?o } }""")
 
     def get_statistics_distinct_classes(self):
         return self.prepare_query(
-            'SELECT (COUNT(distinct ?o) AS ?no) FROM $graph { ?s rdf:type ?o }')
+            """SELECT (COUNT(distinct ?o) AS ?no) WHERE {
+            GRAPH <"""+self.get_param("askomics.graph")+"""> { ?g rdfg:subGraphOf <"""+self.get_param("askomics.graph")+""">}
+            GRAPH ?g { ?s rdf:type ?o }}""")
 
     def get_statistics_list_classes(self):
         return self.prepare_query(
-            'SELECT DISTINCT ?class FROM $graph { ?s a ?class }')
+            """SELECT DISTINCT ?class WHERE {
+            GRAPH <"""+self.get_param("askomics.graph")+"""> { ?g rdfg:subGraphOf <"""+self.get_param("askomics.graph")+""">}
+            GRAPH ?g { ?s a ?class }}""")
 
     def get_statistics_nb_instances_by_classe(self):
         return self.prepare_query(
-            'SELECT  ?class (COUNT(?s) AS ?count ) FROM $graph'
-            ' { ?s a ?class } GROUP BY ?class ORDER BY ?count')
+            """SELECT ?class (COUNT(distinct ?s) AS ?count ) WHERE {
+            GRAPH <"""+self.get_param("askomics.graph")+"""> { ?g rdfg:subGraphOf <"""+self.get_param("askomics.graph")+""">}
+            GRAPH ?g { ?s a ?class }} GROUP BY ?class ORDER BY ?count""")
 
     def get_statistics_by_startpoint(self):
         return self.prepare_query(
-            'SELECT ?p (COUNT(?p) AS ?pTotal)\n FROM $graph'
-            ' { ?node displaySetting:startPoint "true"^^xsd:boolean . }')
+            """SELECT ?p (COUNT(?p) AS ?pTotal) WHERE {
+            GRAPH <"""+self.get_param("askomics.graph")+"""> { ?g rdfg:subGraphOf <"""+self.get_param("askomics.graph")+""">}
+            GRAPH ?g { ?node displaySetting:startPoint "true"^^xsd:boolean . }}""")
 
-    def get_delete_query_string(self):
+    def get_delete_query_string(self, graph):
         return self.prepare_query(
-            'CLEAR GRAPH $graph')
+            'CLEAR GRAPH <'+graph+">")
+
+    def get_list_named_graphs(self):
+        return self.prepare_query(
+            """SELECT DISTINCT ?g WHERE { 
+            GRAPH <"""+self.get_param("askomics.graph")+"""> { ?g rdfg:subGraphOf <"""+self.get_param("askomics.graph")+""">}
+            GRAPH ?g { ?s ?p ?o } }""")
+
+    def get_drop_named_graph(self, graph):
+        return self.prepare_query(
+            'DROP SILENT GRAPH <' + graph + '>')
+
+    def get_metadatas(self, graph):
+        return self.prepare_query(
+        """SELECT DISTINCT ?p ?o
+            WHERE {	GRAPH <"""+self.get_param("askomics.graph")+""">
+		        { <""" + graph + """> ?p ?o
+                VALUES ?p {prov:generatedAtTime dc:creator dc:hasVersion prov:describesService prov:wasDerivedFrom} } }""")
