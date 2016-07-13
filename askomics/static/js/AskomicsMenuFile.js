@@ -27,4 +27,9 @@ var AskomicsMenuFile = function () {
     });
   };
 
+  AskomicsMenuFile.prototype.unbindDownloadButtons = function() {
+    $('#dwl-query').unbind();
+    $('#dwl-query-sparql').unbind();
+  };
+
 };

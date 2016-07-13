@@ -32,11 +32,11 @@ class AskomicsMenuView {
     return li;
   }
 
-  AskomicsMenuView.prototype.reset = function() {
+  reset() {
     // Remove onclick
     $("#buttonViewListNodesAndLinks").unbind();
     $("#viewListNodesAndLinks").empty();
-  };
+  }
 
   /* initialize the view. The abstraction have to be done */
   start(node) {
