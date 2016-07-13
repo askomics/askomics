@@ -84,12 +84,25 @@ class AskomicsNodeView extends AskomicsObjectView {
               };
 
             //  console.log(attribute.uri);
-
               service.post(model, function(d) {
                   let selectedValue = "";
                   if (labelSparqlVarId in node.values) {
                     selectedValue = node.values[labelSparqlVarId];
                   }
+                  /* bubble sort */
+                  let isNotSort = true;
+                  while ( isNotSort) {
+                    isNotSort = false;
+                    for (let i=0;i<d.values.length-1;i++) {
+                      if ( d.values[i][URISparqlVarId] > d.values[i+1][URISparqlVarId] ) {
+                        let a = d.values[i];
+                        d.values[i] = d.values[i+1];
+                        d.values[i+1] = a ;
+                        isNotSort = true;
+                      }
+                    }
+                  }
+
                   var sizeSelect = 3 ;
                   if ( d.values.length<3 ) sizeSelect = d.values.length;
                   if ( d.values.length === 0 ) sizeSelect = 1;
