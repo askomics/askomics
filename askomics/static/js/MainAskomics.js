@@ -115,8 +115,15 @@ function enableDelButtons() {
 }
 
 function formatGraphName(name) {
-  // user don't have to see the urn:sparql:
-  return name.replace(/urn:sparql:/, "");
+  /*
+  Transform the name of the graph into a readable string
+  */
+  var timestamp = name.substr(name.lastIndexOf("_") + 1);
+  var d = new Date(timestamp*1000);
+  var new_name = name.substr(0,name.lastIndexOf('_'));
+  new_name = new_name.replace(/urn:sparql:/, "");
+
+  return new_name+" ("+d.toLocaleString()+")";
 }
 
 function loadStatistics() {
