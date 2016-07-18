@@ -118,7 +118,7 @@ function formatGraphName(name) {
   /*
   Transform the name of the graph into a readable string
   */
-  var timestamp = name.substr(name.lastIndexOf("_") + 1);
+  var timestamp = name.substr(name.lastIndexOf('_') + 1);
   var d = new Date(timestamp*1000);
   var new_name = name.substr(0,name.lastIndexOf('_'));
   new_name = new_name.replace(/urn:sparql:/, "");

@@ -103,8 +103,10 @@ class SparqlQueryBuilder(ParamManager):
             'DROP SILENT GRAPH <' + graph + '>')
 
     def get_delete_metadatas_of_graph(self, graph):
-        #TODO: write the query to delete metadatas of a graph
-        return
+        return self.prepare_query(
+            """
+            DELETE WHERE { GRAPH <"""+self.get_param("askomics.graph")+"""> { <"""+graph+"""> ?p ?o }}
+            """)
 
     def get_metadatas(self, graph):
         return self.prepare_query(
