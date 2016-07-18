@@ -53,7 +53,6 @@ class AskomicsNodeView extends AskomicsObjectView {
       var attributes = userAbstraction.getAttributesWithURI(node.uri);
 
       $.each(attributes, function(i) {
-        console.log(attributes[i]);
           /* if attribute is loaded before the creation of attribute view, we don t need to create a new */
           let attribute = graphBuilder.getAttributeOrCategoryForNode(attributes[i],node);
           /* creation of new one otherwise */
@@ -66,6 +65,7 @@ class AskomicsNodeView extends AskomicsObjectView {
           var inp = $("<select/>").addClass("form-control").attr("multiple","multiple");
 
           var labelSparqlVarId = attribute.SPARQLid;
+          var URISparqlVarId   = "URICat"+attribute.SPARQLid;
 
           if (attribute.type.indexOf("http://www.w3.org/2001/XMLSchema#") < 0) {
               displayModal('Please wait', '', 'Close');
@@ -76,49 +76,61 @@ class AskomicsNodeView extends AskomicsObjectView {
               //console.log(JSON.stringify(nameDiv));
               var service = new RestServiceJs("sparqlquery");
               var model = {
-                'variates': [ "?"+labelSparqlVarId ],
+                'variates': tab[0],
                 'constraintesRelations': tab[1],
-                'constraintesFilters': [],
-                'limit':100,
+                'constraintesFilters': tab[2],
+                'limit' :-1,
                 'export':false,
               };
 
             //  console.log(attribute.uri);
-
               service.post(model, function(d) {
                   let selectedValue = "";
                   if (labelSparqlVarId in node.values) {
                     selectedValue = node.values[labelSparqlVarId];
                   }
+                  /* bubble sort */
+                  let isNotSort = true;
+                  while ( isNotSort) {
+                    isNotSort = false;
+                    for (let i=0;i<d.values.length-1;i++) {
+                      if ( d.values[i][URISparqlVarId] > d.values[i+1][URISparqlVarId] ) {
+                        let a = d.values[i];
+                        d.values[i] = d.values[i+1];
+                        d.values[i+1] = a ;
+                        isNotSort = true;
+                      }
+                    }
+                  }
+
                   var sizeSelect = 3 ;
                   if ( d.values.length<3 ) sizeSelect = d.values.length;
                   if ( d.values.length === 0 ) sizeSelect = 1;
                   inp.attr("size",sizeSelect);
-
                   if ( d.values.length > 1 ) {
                     for (let v of d.values) {
                       if ( selectedValue == v[labelSparqlVarId] ) {
-                        inp.append($("<option></option>").attr("value", v[labelSparqlVarId]).attr("selected", "selected").append(v[labelSparqlVarId]));
+                        inp.append($("<option></option>").attr("value", v[URISparqlVarId]).attr("selected", "selected").append(v[labelSparqlVarId]));
                       } else {
-                        inp.append($("<option></option>").attr("value", v[labelSparqlVarId]).append(v[labelSparqlVarId]));
+                        inp.append($("<option></option>").attr("value", v[URISparqlVarId]).append(v[labelSparqlVarId]));
                       }
                     }
                   } else if (d.values.length == 1) {
-                    inp.append($("<option></option>").attr("value", d.values[0][labelSparqlVarId]).append(d.values[0][labelSparqlVarId]));
+                    inp.append($("<option></option>").attr("value", d.values[0][URISparqlVarId]).append(d.values[0][labelSparqlVarId]));
                   }
                   hideModal();
               });
 
               inp.change(function(d) {
                 var value = $(this).val();
-                if (value === null) value = '';
+                if (!value) value = '';
                 let nodeid = $(this).parent().attr('nodeid');
                 let sparlid = $(this).attr('sparqlid');
 
                 //graphBuilder.setFilterAttributes(nodeid,sparlid,value,'FILTER ( ?'+sparlid+'="'+value[0]+'"^^xsd:string)');
                 var listValue = "";
                 for (let i=0;i<value.length;i++) {
-                  listValue+=":"+value[i]+" ";
+                  listValue+="<"+value[i]+"> ";
                 }
                 graphBuilder.setFilterAttributes(nodeid,sparlid,value,'VALUES ?'+sparlid+' { '+listValue +'}');
               });

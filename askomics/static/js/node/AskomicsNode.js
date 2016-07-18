@@ -8,7 +8,7 @@ class AskomicsNode extends GraphNode {
     this._categories = {} ;
     this._filters    = {} ; /* filters of attributes key:sparqlid*/
     this._values     = {} ; /* values of attributes key:sparqlid*/
-    this.label       = userAbstraction.removePrefix(node.uri);
+    this.label       = node.label;
     this.uri         = node.uri;
     return this;
   }
@@ -47,7 +47,9 @@ class AskomicsNode extends GraphNode {
       let SparqlId = this.categories[uri].SPARQLid;
       let isFiltered = SparqlId in this.filters;
       if ( isFiltered || this.categories[uri].actif ) {
-        constraintRelations.push(["?"+'URI'+this.SPARQLid,ua.URI(uri),"?"+this.categories[uri].SPARQLid,isOptional]);
+        //constraintRelations.push(["?"+'URI'+this.SPARQLid,ua.URI(uri),"?"+this.categories[uri].SPARQLid,isOptional]);
+        constraintRelations.push(["?"+'URI'+this.SPARQLid,ua.URI(uri),"?URICat"+this.categories[uri].SPARQLid,isOptional]);
+        constraintRelations.push(["?URICat"+this.categories[uri].SPARQLid,'rdfs:label',"?"+this.categories[uri].SPARQLid,isOptional]);
       }
     }
   }
@@ -117,9 +119,11 @@ class AskomicsNode extends GraphNode {
 
       for (let uri in node.categories) {
           if ( node.categories[uri].id != attributeId ) continue;
-          constraintRelations.push(["?"+'URI'+node.SPARQLid,ua.URI(uri),"?EntCat"+node.categories[uri].SPARQLid,isOptional]);
-          constraintRelations.push(["?EntCat"+node.categories[uri].SPARQLid,'rdfs:label',"?"+node.categories[uri].SPARQLid,isOptional]);
+          constraintRelations.push(["?"+'URI'+node.SPARQLid,ua.URI(uri),"?URICat"+node.categories[uri].SPARQLid,isOptional]);
+          constraintRelations.push(["?URICat"+node.categories[uri].SPARQLid,'rdfs:label',"?"+node.categories[uri].SPARQLid,isOptional]);
           variates.push("?"+node.categories[uri].SPARQLid);
+          variates.push("?URICat"+node.categories[uri].SPARQLid);
+          console.log(variates.length);
           return [variates,constraintRelations,filters] ;
       }
     }

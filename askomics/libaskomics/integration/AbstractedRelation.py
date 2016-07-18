@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import urllib.parse
 from askomics.libaskomics.utils import pformat_generic_object
 
 class AbstractedRelation(object):
@@ -26,33 +27,34 @@ class AbstractedRelation(object):
 
     def __init__(self, relation_type, identifier, rdfs_domain, rdfs_range):
         idx = identifier.find("@")
-        type_range = identifier
+        type_range =  identifier
 
         #Keep compatibility with old version
         if idx  != -1:
-            type_range = identifier[idx+1:len(identifier)]
-            identifier = identifier[0:idx]
-        else:
-            identifier = identifier
+            type_range =  urllib.parse.quote(identifier[idx+1:len(identifier)])
+            self.label = identifier[0:idx]
 
+        else:
+            self.label = identifier
+
+        identifier =  urllib.parse.quote(self.label)
         self.uri = ":"+identifier
-        self.label = identifier
 
         if relation_type == "entity":
             self.relation_type = "owl:ObjectProperty"
-            self.rdfs_range = ":" + type_range
+            self.rdfs_range = ":" + urllib.parse.quote(type_range)
         elif relation_type == "entitySym":
             #self.relation_type = "owl:SymmetricProperty"
             self.relation_type = "owl:ObjectProperty"
-            self.rdfs_range = ":" + type_range
+            self.rdfs_range = ":" + urllib.parse.quote(type_range)
         elif relation_type.lower() in ('category', 'taxon', 'ref'):
             self.relation_type = "owl:ObjectProperty"
-            self.rdfs_range = ":" + type_range+"Category"
+            self.rdfs_range = ":" + urllib.parse.quote(type_range+"Category")
         else:
             self.relation_type = "owl:DatatypeProperty"
             self.rdfs_range = rdfs_range
 
-        self.rdfs_domain = ":" + rdfs_domain
+        self.rdfs_domain = ":" + urllib.parse.quote(rdfs_domain)
         self.log = logging.getLogger(__name__)
 
     def get_uri(self):

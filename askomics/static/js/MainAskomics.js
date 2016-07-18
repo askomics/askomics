@@ -182,8 +182,9 @@ function loadStatistics() {
     table.append(th);
 
     for (var ent1 in entities ) {
+      console.log(abstraction.getAttrib(entities[ent1],'rdfs:label'));
       tr = $("<tr></tr>")
-            .append($("<td></td>").text(abstraction.removePrefix(entities[ent1])));
+            .append($("<td></td>").text(abstraction.getAttrib(entities[ent1],'rdfs:label')));
             rels = "";
             var t = abstraction.getRelationsObjectsAndSubjectsWithURI(entities[ent1]);
             var subjectTarget = t[0];
@@ -209,12 +210,12 @@ function loadStatistics() {
     for (ent1 in entities ) {
     //$.each(stats['class'], function(key, value) {
       tr = $("<tr></tr>")
-            .append($("<td></td>").text(abstraction.removePrefix(entities[ent1])));
+            .append($("<td></td>").text(abstraction.getAttrib(entities[ent1],'rdfs:label')));
             attrs = "";
             cats = "";
             var listAtt = abstraction.getAttributesEntity(entities[ent1]);
             for (var att of listAtt) {
-                attrs += '- '+att.label +' :'+abstraction.removePrefix(att.type)+ "</br>";
+                attrs += '- '+att.label +"</br>";
             }
             tr.append($("<td></td>").html(attrs));
       table.append(tr);
