@@ -44,12 +44,11 @@ class AskomicsNode extends GraphNode {
         }
     }
     for (let uri in this.categories) {
-      let SparqlId = this.categories[uri].SPARQLid;
+      let SparqlId = "URICat"+this.categories[uri].SPARQLid;
       let isFiltered = SparqlId in this.filters;
       if ( isFiltered || this.categories[uri].actif ) {
-        //constraintRelations.push(["?"+'URI'+this.SPARQLid,ua.URI(uri),"?"+this.categories[uri].SPARQLid,isOptional]);
-        constraintRelations.push(["?"+'URI'+this.SPARQLid,ua.URI(uri),"?URICat"+this.categories[uri].SPARQLid,isOptional]);
-        constraintRelations.push(["?URICat"+this.categories[uri].SPARQLid,'rdfs:label',"?"+this.categories[uri].SPARQLid,isOptional]);
+        constraintRelations.push(["?"+'URI'+this.SPARQLid,ua.URI(uri),"?"+SparqlId,isOptional]);
+        constraintRelations.push(["?"+SparqlId,'rdfs:label',"?"+this.categories[uri].SPARQLid,isOptional]);
       }
     }
   }
@@ -67,7 +66,7 @@ class AskomicsNode extends GraphNode {
       }
     }
     for (let uri in this.categories) {
-      let SparqlId = this.categories[uri].SPARQLid;
+      let SparqlId = "URICat"+this.categories[uri].SPARQLid;
       if ( SparqlId in this.filters ) {
           filters.push(this.filters[SparqlId]);
       }

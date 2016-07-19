@@ -72,7 +72,7 @@ class AskomicsNodeView extends AskomicsObjectView {
               var tab = node.buildConstraintsGraphForCategory(attribute.id);
 
               inp.attr("list", "opt_" + labelSparqlVarId)
-                 .attr("sparqlid",labelSparqlVarId);
+                 .attr("sparqlid",URISparqlVarId);
               //console.log(JSON.stringify(nameDiv));
               var service = new RestServiceJs("sparqlquery");
               var model = {
@@ -125,14 +125,18 @@ class AskomicsNodeView extends AskomicsObjectView {
                 var value = $(this).val();
                 if (!value) value = '';
                 let nodeid = $(this).parent().attr('nodeid');
-                let sparlid = $(this).attr('sparqlid');
+                let sparqlid = $(this).attr('sparqlid');
+
+                if ( sparqlid === undefined ) {
+                  throw new Error("can not reach sparqlid attribute!");
+                }
 
                 //graphBuilder.setFilterAttributes(nodeid,sparlid,value,'FILTER ( ?'+sparlid+'="'+value[0]+'"^^xsd:string)');
                 var listValue = "";
                 for (let i=0;i<value.length;i++) {
                   listValue+="<"+value[i]+"> ";
                 }
-                graphBuilder.setFilterAttributes(nodeid,sparlid,value,'VALUES ?'+sparlid+' { '+listValue +'}');
+                graphBuilder.setFilterAttributes(nodeid,sparqlid,value,'VALUES ?'+sparqlid+' { '+listValue +'}');
               });
 
           } else {
