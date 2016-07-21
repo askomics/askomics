@@ -258,7 +258,11 @@ class SourceFile(ParamManager, HaveCachedProperties):
                 ttl += AbstractedRelation(key_type, self.headers[key], key_type, ref_entity, self.type_dict[key_type]).get_turtle()
 
             if key > 0 and not key_type.startswith('entity'):
-                ttl += ":" + urllib.parse.quote(self.headers[key]) + ' displaySetting:attribute "true"^^xsd:boolean .\n'
+                if key_type in ('taxon', 'ref', 'start', 'end'):
+                    uri = 'position_'+key_type
+                else:
+                    uri = urllib.parse.quote(self.headers[key])
+                ttl += ":" + uri + ' displaySetting:attribute "true"^^xsd:boolean .\n'
 
         # Store the startpoint status
         if self.forced_column_types[0] == 'entity_start':
