@@ -96,6 +96,7 @@ var AskomicsUserAbstraction = function () {
         }
 
         for (var entry4 in resultListTripletSubjectRelationObject.positionable){
+          console.log('POSITIONABLE:'+JSON.stringify(resultListTripletSubjectRelationObject.positionable[entry4]));
           var uri4 = resultListTripletSubjectRelationObject.positionable[entry4].entity;
           if ( ! (uri4 in entityPositionableInformationList) ) {
               entityPositionableInformationList[uri4] = {};
