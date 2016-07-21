@@ -254,15 +254,15 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         # Store all the relations
         for key, key_type in enumerate(self.forced_column_types):
-            if key > 0 and key not in self.disabled_columns:
-                ttl += AbstractedRelation(key_type, self.headers[key], key_type, ref_entity, self.type_dict[key_type]).get_turtle()
-
             if key > 0 and not key_type.startswith('entity'):
                 if key_type in ('taxon', 'ref', 'start', 'end'):
                     uri = 'position_'+key_type
                 else:
                     uri = urllib.parse.quote(self.headers[key])
                 ttl += ":" + uri + ' displaySetting:attribute "true"^^xsd:boolean .\n'
+
+            if key > 0 and key not in self.disabled_columns:
+                ttl += AbstractedRelation(key_type, self.headers[key], ref_entity, self.type_dict[key_type]).get_turtle()
 
         # Store the startpoint status
         if self.forced_column_types[0] == 'entity_start':

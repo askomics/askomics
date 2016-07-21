@@ -25,7 +25,7 @@ class AbstractedRelation(object):
     specified class (xsd:string or xsd:numeric) in case of DatatypeProperty.
     """
 
-    def __init__(self, relation_type, identifier, col_type, rdfs_domain, rdfs_range):
+    def __init__(self, relation_type, identifier , rdfs_domain, rdfs_range):
         idx = identifier.find("@")
         type_range =  identifier
 
@@ -40,7 +40,7 @@ class AbstractedRelation(object):
         identifier =  urllib.parse.quote(self.label)
         self.uri = ":"+identifier
 
-        self.col_type = col_type
+        self.col_type = relation_type
 
         if relation_type == "entity":
             self.relation_type = "owl:ObjectProperty"
