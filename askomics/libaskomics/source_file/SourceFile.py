@@ -255,7 +255,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
         # Store all the relations
         for key, key_type in enumerate(self.forced_column_types):
             if key > 0 and key not in self.disabled_columns:
-                ttl += AbstractedRelation(key_type, self.headers[key], ref_entity, self.type_dict[key_type]).get_turtle()
+                ttl += AbstractedRelation(key_type, self.headers[key], key_type, ref_entity, self.type_dict[key_type]).get_turtle()
 
             if key > 0 and not key_type.startswith('entity'):
                 ttl += ":" + urllib.parse.quote(self.headers[key]) + ' displaySetting:attribute "true"^^xsd:boolean .\n'

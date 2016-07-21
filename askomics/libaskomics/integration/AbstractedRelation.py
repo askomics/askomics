@@ -25,7 +25,7 @@ class AbstractedRelation(object):
     specified class (xsd:string or xsd:numeric) in case of DatatypeProperty.
     """
 
-    def __init__(self, relation_type, identifier, rdfs_domain, rdfs_range):
+    def __init__(self, relation_type, identifier, col_type, rdfs_domain, rdfs_range):
         idx = identifier.find("@")
         type_range =  identifier
 
@@ -39,6 +39,8 @@ class AbstractedRelation(object):
 
         identifier =  urllib.parse.quote(self.label)
         self.uri = ":"+identifier
+
+        self.col_type = col_type
 
         if relation_type == "entity":
             self.relation_type = "owl:ObjectProperty"
@@ -72,13 +74,23 @@ class AbstractedRelation(object):
     def get_range(self):
         return self.rdfs_range
 
+    def get_col_type(self):
+        return self.col_type
+
     def get_turtle(self):
         """
         return the turtle code describing an AbstractedRelation
         for the abstraction file generation.
         """
-        indent = (len(self.get_uri())) * " "
-        turtle = self.get_uri() + " rdf:type " + self.get_relation_type() + " ;\n"
+
+        if self.get_col_type() in ('start', 'end', 'taxon', 'ref'):
+            self.log.debug('---> POSITIONABLE ATTRIBUTE <---')
+            uri = ':position_'+self.get_col_type()
+        else:
+            uri = self.get_uri()
+
+        indent = (len(uri)) * " "
+        turtle = uri + " rdf:type " + self.get_relation_type() + " ;\n"
         turtle += indent + ' rdfs:label "' + self.get_label() + '" ;\n'
         turtle += indent + " rdfs:domain " + self.get_domain() + " ;\n"
         turtle += indent + " rdfs:range " + self.get_range() + " .\n\n"
