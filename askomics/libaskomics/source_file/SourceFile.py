@@ -280,7 +280,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
             ttl += ":" + urllib.parse.quote(self.headers[0]) + ' displaySetting:is_positionable "true"^^xsd:boolean .\n'
             ttl += ":is_positionable rdfs:label 'is_positionable' .\n"
             ttl += ":is_positionable rdf:type owl:ObjectProperty .\n"
-            # Store the position attributes
+            # Store the columns names of position attributes
             for key, key_type in enumerate(self.forced_column_types):
                 if key > 0 and key_type == 'taxon':
                     ttl += ":" + urllib.parse.quote(self.headers[0]) + " displaySetting:position_taxon :" + urllib.parse.quote(self.headers[key]) + " .\n"
@@ -315,7 +315,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
             tabreader = csv.reader(tabfile, dialect=self.dialect)
             next(tabreader) # Skip header
 
-            entity_label=""
+            entity_label = ""
             # Loop on lines
             for row_number, row in enumerate(tabreader):
                 #blanck line
@@ -393,7 +393,18 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
                         # Create link to value
                         if row[i]: # Empty values are just ignored
-                            ttl += indent + " "+ relationName + " " + self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " ;\n"
+                            # positionable attributes
+                            if current_type == 'start':
+                                ttl += indent + " " + ':position_start' + " " + self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " ;\n"
+                            elif current_type == 'end':
+                                ttl += indent + " " + ':position_end' + " " + self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " ;\n"
+                            elif current_type == 'taxon':
+                                ttl += indent + " " + ':position_taxon' + " " + self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " ;\n"
+                            elif current_type == 'ref':
+                                ttl += indent + " " + ':position_ref' + " " + self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " ;\n"
+                            else:
+                                ttl += indent + " "+ relationName + " " + self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " ;\n"
+
                         if current_type == 'entitySym':
                             ttlSym += self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " "+ relationName + " :" + urllib.parse.quote(entity_label)  + " .\n"
                         # FIXME we will need to store undefined values one day if we want to be able to query on this
