@@ -35,18 +35,18 @@ class AskomicsPositionableLink extends AskomicsLink {
 
     /* constrainte to target the same ref/taxon */
 
-    constraintRelations.push(["?"+'URI'+node.SPARQLid+" :position_taxon ?taxon_"+node.SPARQLid]);
-    constraintRelations.push(["?"+'URI'+node.SPARQLid+" :position_ref ?ref_"+node.SPARQLid]);
+    constraintRelations.push(["?"+'URI'+node.SPARQLid, ":position_taxon", "?taxon_"+node.SPARQLid]);
+    constraintRelations.push(["?"+'URI'+node.SPARQLid, ":position_ref", "?ref_"+node.SPARQLid]);
 
-    constraintRelations.push(["?"+'URI'+secondNode.SPARQLid+" :position_taxon ?taxon_"+secondNode.SPARQLid]);
-    constraintRelations.push(["?"+'URI'+secondNode.SPARQLid+" :position_ref ?ref_"+secondNode.SPARQLid]);
+    constraintRelations.push(["?"+'URI'+secondNode.SPARQLid, ":position_taxon", "?taxon_"+secondNode.SPARQLid]);
+    constraintRelations.push(["?"+'URI'+secondNode.SPARQLid, ":position_ref", "?ref_"+secondNode.SPARQLid]);
 
     /* manage start and end variates */
-    constraintRelations.push(["?"+'URI'+node.SPARQLid+" :position_start ?start_"+node.SPARQLid]);
-    constraintRelations.push(["?"+'URI'+node.SPARQLid+" :position_end ?end_"+node.SPARQLid]);
+    constraintRelations.push(["?"+'URI'+node.SPARQLid, ":position_start", "?start_"+node.SPARQLid]);
+    constraintRelations.push(["?"+'URI'+node.SPARQLid, ":position_end", "?end_"+node.SPARQLid]);
 
-    constraintRelations.push(["?"+'URI'+secondNode.SPARQLid+" :position_start ?start_"+secondNode.SPARQLid]);
-    constraintRelations.push(["?"+'URI'+secondNode.SPARQLid+" :position_end ?end_"+secondNode.SPARQLid]);
+    constraintRelations.push(["?"+'URI'+secondNode.SPARQLid, ":position_start", "?start_"+secondNode.SPARQLid]);
+    constraintRelations.push(["?"+'URI'+secondNode.SPARQLid, ":position_end", "?end_"+secondNode.SPARQLid]);
   }
 
   buildFiltersSPARQL(filters) {
@@ -73,9 +73,10 @@ class AskomicsPositionableLink extends AskomicsLink {
       //filters.push('FILTER(SAMETERM(?taxon_'+node.SPARQLid+', ?taxon_'+secondNode.SPARQLid+'))');
     }
 
+
     switch(this.type) {
       case 'included' :
-          filters.push('FILTER((?start_'+secondNode.SPARQLid+' >'+equalsign+' start_'+node.SPARQLid+' ) && (?end_'+secondNode.SPARQLid+' <'+equalsign+' ?end_'+node.SPARQLid+'))');
+          filters.push('FILTER((?start_'+secondNode.SPARQLid+' >'+equalsign+' ?start_'+node.SPARQLid+' ) && (?end_'+secondNode.SPARQLid+' <'+equalsign+' ?end_'+node.SPARQLid+'))');
           //filters.push('FILTER((?'+startSecNodeId+' >'+equalsign+' ?'+startNodeId+') && (?'+endSecNodeId+' <'+equalsign+' ?'+endNodeId+'))');
           break;
       case 'excluded':
