@@ -62,11 +62,15 @@ class AskomicsPositionableLink extends AskomicsLink {
     let info = ua.getPositionableEntities();
 
     if (this.same_ref) {
+      //TODO: test which of the following line is the fastest
       filters.push('FILTER(?ref_'+node.SPARQLid+' = ?ref_'+secondNode.SPARQLid+')');
+      //filters.push('FILTER(SAMETERM(?ref_'+node.SPARQLid+', ?ref_'+secondNode.SPARQLid+'))');
     }
 
     if (this.same_tax) {
+      //TODO: test which of the following line is the fastest
       filters.push('FILTER(?taxon_'+node.SPARQLid+' = ?taxon_'+secondNode.SPARQLid+')');
+      //filters.push('FILTER(SAMETERM(?taxon_'+node.SPARQLid+', ?taxon_'+secondNode.SPARQLid+'))');
     }
 
     switch(this.type) {
