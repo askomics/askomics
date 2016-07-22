@@ -439,20 +439,25 @@ const classesMapping = {
     }
 
     attributesDisplaying(SPARQLid) {
-      var list = [];
+      var list_id = [];
+      var list_label = [];
       for (var v of this._instanciedNodeGraph) {
         if (v.SPARQLid == SPARQLid ) {
           for (var uriAtt in v.attributes) {
             if (v.attributes[uriAtt].actif) {
-              list.push(v.attributes[uriAtt].SPARQLid);
+              list_id.push(v.attributes[uriAtt].SPARQLid);
+              list_label.push(v.attributes[uriAtt].label);
+              console.log('---> attr: '+JSON.stringify(v.attributes));
             }
           }
           for (var uriCat in v.categories) {
             if (v.categories[uriCat].actif) {
-              list.push(v.categories[uriCat].SPARQLid);
+              list_id.push(v.categories[uriCat].SPARQLid);
+              list_label.push(v.categories[uriCat].label);
+              console.log('---> cat: '+JSON.stringify(v.categories));
             }
           }
-          return list;
+          return {'id' : list_id, 'label': list_label};
         }
       }
     }

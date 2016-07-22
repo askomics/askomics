@@ -64,6 +64,7 @@ function displayResults(data) {
 
        let row = $('<tr></tr>');
        let activesAttributes = {} ;
+       let activesAttributesLabel = {};
 
        let nodeToDisplay = graphBuilder.nodesDisplaying();
        let i,j,k;
@@ -73,7 +74,9 @@ function displayResults(data) {
          varEntity = nodeToDisplay[i];
          var nodeBuf = {name:varEntity};
          var label = varEntity;
-         activesAttributes[varEntity] = graphBuilder.attributesDisplaying(varEntity);
+         let attr_disp = graphBuilder.attributesDisplaying(varEntity);
+         activesAttributes[varEntity] = attr_disp.id;
+         activesAttributesLabel[varEntity] = attr_disp.label;
          var nAttributes = activesAttributes[varEntity].length+1;
          /* Fomattage en indice du numero de l'entité */
          row.append($('<th></th>')
@@ -91,7 +94,7 @@ function displayResults(data) {
          row.append($('<th></th>').addClass("success").addClass("table-bordered").text("ID"));
 
          for (var att in activesAttributes[varEntity]) {
-            row.append($('<th></th>').addClass("success").addClass("table-bordered").text(activesAttributes[varEntity][att]));
+            row.append($('<th></th>').addClass("success").addClass("table-bordered").text(activesAttributesLabel[varEntity][att]));
 
          }
        }
