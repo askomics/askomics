@@ -7,16 +7,16 @@ class AskomicsPositionableLink extends AskomicsLink {
 
     this.type     = 'included' ;
     this.label    = 'included in';
-    this.sameTax  =  true ;
-    this.sameRef  =  true ;
+    this.same_tax  =  true ;
+    this.same_ref  =  true ;
     this.strict   =  true ;
   }
   setjson(obj) {
     super.setjson(obj);
     this.type     = obj.type ;
     this.label    = obj.label;
-    this.sameTax  =  obj.sameTax ;
-    this.sameRef  =  obj.sameRef ;
+    this.same_tax  =  obj.same_tax ;
+    this.same_ref  =  obj.same_ref ;
     this.strict   =  obj.strict ;
   }
   getPanelView() {
