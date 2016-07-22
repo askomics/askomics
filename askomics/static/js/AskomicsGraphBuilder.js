@@ -173,6 +173,9 @@ const classesMapping = {
 
     removeInstanciedLink(link) {
       // finding link
+      if (!link) {
+        throw new Error("Link is undefined.");
+      }
       var t = AskomicsGraphBuilder.findElt(this._instanciedLinkGraph,link.id);
       var removeNode = null;
       console.log(JSON.stringify(this._instanciedLinkGraph));
