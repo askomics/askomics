@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+  <head>
+      <meta charset='UTF-8' />
+      <meta http-equiv='content-type' content='text/html; charset=utf-8' />
+
+      <title>GraphNode Test Runner</title>
+      <link rel="stylesheet" href="../../../node_modules/mocha/mocha.css" />
+  </head>
+  <body>
+    <!-- add any external libraries your code needs -->
+    <script src="../../static/js/third-party/d3.min.js" charset="utf-8"></script>
+    <script src="../../static/js/third-party/jquery-1.12.4.min.js"></script>
+    <script src="../../static/js/third-party/jquery-ui-1.11.4/jquery-ui.min.js"></script>
+    <script src="../../static/js/third-party/handlebars-v4.0.5.js"></script>
+
+    <script src="../../static/dist/askomics.js"></script>
+
+    <script src="../../../node_modules/mocha/mocha.js"></script>
+    <script src="../../../node_modules/chai/chai.js"></script>
+
+    <script>mocha.setup('bdd')</script>
+
+    <!-- http://chaijs.com/api/assert/ : assertion -->
+  <script src="js/GraphNode.js"></script>
+
+    <script>
+          mocha.checkLeaks();
+          mocha.run();
+    </script>
+    <div id="mocha.."></div> <!-- QUnit fills this with results, etc -->
+    <div id='mocha'>
+
+      <!-- any HTML you want to be present in each test (will be reset for each test) -->
+
+    </div>
+
+  </body>
