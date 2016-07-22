@@ -26,6 +26,6 @@ before_script:
   - sleep 45
 script: 
   - python setup.py nosetests
-  
+  - gulp test 
 after_success:
   coveralls
