@@ -284,16 +284,6 @@ class SourceFile(ParamManager, HaveCachedProperties):
             ttl += ":" + urllib.parse.quote(self.headers[0]) + ' displaySetting:is_positionable "true"^^xsd:boolean .\n'
             ttl += ":is_positionable rdfs:label 'is_positionable' .\n"
             ttl += ":is_positionable rdf:type owl:ObjectProperty .\n"
-            # Store the columns names of position attributes
-            for key, key_type in enumerate(self.forced_column_types):
-                if key > 0 and key_type == 'taxon':
-                    ttl += ":" + urllib.parse.quote(self.headers[0]) + " displaySetting:position_taxon :" + urllib.parse.quote(self.headers[key]) + " .\n"
-                if key > 0 and key_type == 'ref':
-                    ttl += ":" + urllib.parse.quote(self.headers[0]) + " displaySetting:position_reference :" + urllib.parse.quote(self.headers[key]) + " .\n"
-                if key > 0 and key_type == 'start':
-                    ttl += ":" + urllib.parse.quote(self.headers[0]) + " displaySetting:position_start :" + urllib.parse.quote(self.headers[key]) + " .\n"
-                if key > 0 and key_type == 'end':
-                    ttl += ":" + urllib.parse.quote(self.headers[0]) + " displaySetting:position_end :" + urllib.parse.quote(self.headers[key]) + " .\n"
 
         for header, categories in self.category_values.items():
             indent = len(header) * " " + len("displaySetting:category") * " " + 3 * " "
