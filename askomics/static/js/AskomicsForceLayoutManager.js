@@ -1,7 +1,5 @@
 /*jshint esversion: 6 */
 
-/*
-*/
 var AskomicsForceLayoutManager = function () {
 
   var w = $("#svgdiv").width();
@@ -23,7 +21,7 @@ var AskomicsForceLayoutManager = function () {
 
   AskomicsForceLayoutManager.prototype.offProposedUri = function(type,uri) {
 
-    tab = this.getArrayForProposedUri(type);
+    let tab = this.getArrayForProposedUri(type);
 
     for (var uriI of tab) {
       if (uriI == uri) return;
@@ -33,7 +31,7 @@ var AskomicsForceLayoutManager = function () {
 
   AskomicsForceLayoutManager.prototype.onProposedUri = function(type,uri) {
 
-    tab = this.getArrayForProposedUri(type);
+    let tab = this.getArrayForProposedUri(type);
 
     for (var i in tab) {
       if (tab[i] == uri ) {
@@ -45,7 +43,7 @@ var AskomicsForceLayoutManager = function () {
 
   AskomicsForceLayoutManager.prototype.isProposedUri = function(type,uri) {
 
-    tab = this.getArrayForProposedUri(type);
+    let tab = this.getArrayForProposedUri(type);
 
     for (var i in tab) {
       if (tab[i] == uri ) {
@@ -171,7 +169,7 @@ var AskomicsForceLayoutManager = function () {
 
   AskomicsForceLayoutManager.prototype.start = function () {
     /* Get information about start point to bgin query */
-    var startPoint = $('#startpoints').find(":selected").data("value");
+    let startPoint = $('#startpoints').find(":selected").data("value");
 
     //startPoint = userAbstraction.buildBaseNode(startPoint.uri);
     /* load abstraction */
@@ -209,9 +207,9 @@ var AskomicsForceLayoutManager = function () {
 
     nodes.splice(0, nodes.length);
     links.splice(0, links.length);
-    t = graphBuilder.setNodesAndLinksFromState(dump);
-    lnodes = t[0];
-    llinks = t[1];
+    let t = graphBuilder.setNodesAndLinksFromState(dump);
+    let lnodes = t[0];
+    let llinks = t[1];
 
     if ( lnodes.length <=0 ) return ; /* nothing to do */
 
@@ -243,7 +241,7 @@ var AskomicsForceLayoutManager = function () {
     AskomicsForceLayoutManager.prototype.updateInstanciateLinks = function(links) {
       console.log('updateInstanciateLinks size:'+links.length);
       for (var l of links) {
-        var id = l.id;
+        let id = l.id;
         console.log(JSON.stringify(l));
         $("#" + id).css("stroke-dasharray","");
         $("#" + id).css("opacity","1");
@@ -285,7 +283,7 @@ var AskomicsForceLayoutManager = function () {
 
       } else {
         // deselection case
-        for ( var n in selectNodes ){
+        for ( let n in selectNodes ){
           if (selectNodes[n].id == node.id) {
             // remove the current node from the selected node list !
              selectNodes.splice(n,1);
@@ -354,18 +352,18 @@ var AskomicsForceLayoutManager = function () {
 
     AskomicsForceLayoutManager.prototype.insertSuggestionsWithNewNode = function (slt_node) {
         /* get All suggested node and relation associated to get orientation of arc */
-        tab = userAbstraction.getRelationsObjectsAndSubjectsWithURI(slt_node.uri);
-        objectsTarget = tab[0];  /* All triplets which slt_node URI are the subject */
-        subjectsTarget = tab[1]; /* All triplets which slt_node URI are the object */
-        var link = {} ;
+        let tab = userAbstraction.getRelationsObjectsAndSubjectsWithURI(slt_node.uri);
+        let objectsTarget = tab[0];  /* All triplets which slt_node URI are the subject */
+        let subjectsTarget = tab[1]; /* All triplets which slt_node URI are the object */
 
         var suggestedList = {} ;
+        let link;
 
         for (var uri in objectsTarget ) {
           /* Filter if node are not desired by the user */
           if (! forceLayoutManager.isProposedUri("node",uri)) continue ;
           /* creatin node */
-          suggestedNode = userAbstraction.buildBaseNode(uri);
+          let suggestedNode = userAbstraction.buildBaseNode(uri);
           /* specific attribute for suggested node */
           suggestedNode = graphBuilder.setSuggestedNode(suggestedNode,slt_node.x,slt_node.y);
 
@@ -394,7 +392,7 @@ var AskomicsForceLayoutManager = function () {
         for (uri in subjectsTarget ) {
           /* Filter if node are not desired by the user */
           if (! forceLayoutManager.isProposedUri("node",uri)) continue ;
-
+          let suggestedNode;
           if ( ! (uri in suggestedList) ) {
             suggestedNode = userAbstraction.buildBaseNode(uri);
             suggestedNode = graphBuilder.setSuggestedNode(suggestedNode,slt_node.x,slt_node.y);
@@ -423,7 +421,7 @@ var AskomicsForceLayoutManager = function () {
         // add neighbours of a node to the graph as propositions.
 
         // Manage positionnable entities
-        positionableEntities = userAbstraction.getPositionableEntities();
+        let positionableEntities = userAbstraction.getPositionableEntities();
 
         for (uri in positionableEntities) {
           // if selected node is not a positionable node, donc create a positionable
@@ -436,7 +434,7 @@ var AskomicsForceLayoutManager = function () {
 
           /* uncomment if we don't want a positionable relation between the same node  */
           //if ( uri == slt_node.uri ) continue ;
-
+          let suggestedNode;
           if ( ! (uri in suggestedList) ) {
             /* creatin node */
             suggestedNode = userAbstraction.buildBaseNode(uri);
@@ -468,9 +466,9 @@ var AskomicsForceLayoutManager = function () {
     AskomicsForceLayoutManager.prototype.insertSuggestionsWithTwoNodesInstancied = function (node1, node2) {
 
       /* get All suggested node and relation associated to get orientation of arc */
-      tab = userAbstraction.getRelationsObjectsAndSubjectsWithURI(node1.uri);
-      objectsTarget = tab[0];  /* All triplets which slt_node URI are the subject */
-      subjectsTarget = tab[1]; /* All triplets which slt_node URI are the object */
+      let tab = userAbstraction.getRelationsObjectsAndSubjectsWithURI(node1.uri);
+      let objectsTarget = tab[0];  /* All triplets which slt_node URI are the subject */
+      let subjectsTarget = tab[1]; /* All triplets which slt_node URI are the object */
 
       for (var rel in objectsTarget[node2.uri]) {
         /* Filter if link are not desired by the user */
@@ -480,26 +478,26 @@ var AskomicsForceLayoutManager = function () {
         let uriLink  = objectsTarget[node2.uri][rel];
         let source   = node1;
         let target   = node2;
-        link = new AskomicsLink(uriLink,source,target);
+        let link = new AskomicsLink(uriLink,source,target);
         link.id = graphBuilder.getId();
         links.push(link);
       }
 
-      for (let rel2 in subjectsTarget[node2.uri]) {
+      for (let rel in subjectsTarget[node2.uri]) {
         /* Filter if link are not desired by the user */
-        if (! forceLayoutManager.isProposedUri("link",subjectsTarget[node2.uri][rel2])) continue ;
+        if (! forceLayoutManager.isProposedUri("link",subjectsTarget[node2.uri][rel])) continue ;
 
-        if ( this.relationInstancied(node2,node1,subjectsTarget[node2.uri][rel2],links) ) continue ;
+        if ( this.relationInstancied(node2,node1,subjectsTarget[node2.uri][rel],links) ) continue ;
 
-        let uriLink  = subjectsTarget[node2.uri][rel2];
+        let uriLink  = subjectsTarget[node2.uri][rel];
         let source   = node2;
         let target   = node1;
-        link = new AskomicsLink(uriLink,source,target);
+        let link = new AskomicsLink(uriLink,source,target);
         link.id = graphBuilder.getId();
         links.push(link);
       }
       // Manage positionnable entities
-      positionableEntities = userAbstraction.getPositionableEntities();
+      let positionableEntities = userAbstraction.getPositionableEntities();
 
       if ( forceLayoutManager.isProposedUri("link","positionable") &&
            (node1.uri in positionableEntities) && (node2.uri in positionableEntities)) {
@@ -507,7 +505,7 @@ var AskomicsForceLayoutManager = function () {
         let uriLink  = 'positionable' ;
         let source   = node2 ;
         let target   = node1;
-        link = new AskomicsPositionableLink(uriLink,source,target);
+        let link = new AskomicsPositionableLink(uriLink,source,target);
         link.id = graphBuilder.getId();
         links.push(link);
       }
@@ -516,9 +514,9 @@ var AskomicsForceLayoutManager = function () {
     /* Remove all nodes and links suggestion */
     AskomicsForceLayoutManager.prototype.removeSuggestions = function() {
 
-      var removeL = [];
+      let removeL = [];
       for (var idx in links) {
-        l = links[idx];
+        let l = links[idx];
         if ( l.suggested ) {
           removeL.push(idx);
           l.source.nlink[l.target.id]--; // decrease the number of link
@@ -540,7 +538,7 @@ var AskomicsForceLayoutManager = function () {
         }
       }
       for (var n2=removeN.length-1;n2>=0;n2--){
-        idxn = removeN[n2];
+        let idxn = removeN[n2];
         nodes.splice(idxn,1);
       }
     } ;              /* user want a new relation contraint betwwenn two node*/
@@ -548,8 +546,8 @@ var AskomicsForceLayoutManager = function () {
     // take a string and return an entity with a sub index
     AskomicsForceLayoutManager.prototype.selectListLinksUser= function (links,node) {
       /* fix the first link associted with the new instanciate node TODO: propose an interface to select the link */
-      for (var il in links) {
-        var l = links[il];
+      for (let il in links) {
+        let l = links[il];
         if ( l.suggested && (l.source.id == node.id || l.target.id == node.id) ) {
           return [links[il]];
         }
@@ -593,7 +591,7 @@ var AskomicsForceLayoutManager = function () {
                     forceLayoutManager.selectLink(d);
 
                     if ( d.suggested ) {
-                      ll = [d];
+                      let ll = [d];
                       graphBuilder.instanciateLink(ll);
                       forceLayoutManager.updateInstanciateLinks(ll);
                       if ( d.source.suggested || d.target.suggested  ) {
@@ -673,8 +671,8 @@ var AskomicsForceLayoutManager = function () {
           .style('stroke', 'grey')
           .style("stroke-dasharray",function(d) {return d.suggested?"2":"";})
           .style("opacity", function(d) {return d.suggested?"0.3":"1";})
-          .style("stroke-width", "2")
-          .on("mouseover", function(d) { this.style[2]="4";});
+          .style("stroke-width", "2");
+        //  .on("mouseover", function(d) { this.style[2]="4";}); /* "TypeError: 2 is read-only" occurs in browser */
 
       var node = vis.selectAll("g.node")
                   .data(nodes, function (d) { return d.id; });
@@ -750,17 +748,17 @@ var AskomicsForceLayoutManager = function () {
           node.attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
 
           link.attr("d", function(d) {
-            var nlinks = d.source.nlink[d.target.id]; // same as d.target.nlink[d.source.id]
+            let nlinks = d.source.nlink[d.target.id]; // same as d.target.nlink[d.source.id]
 
             /* diminution of arc to improve display of links */
-            var penteX = d.target.x-d.source.x;
-            var penteY = d.target.y-d.source.y;
+            let penteX = d.target.x-d.source.x;
+            let penteY = d.target.y-d.source.y;
             /* arrondi a une decimale */
             penteX = Math.round(penteX*10)/10;
             penteY = Math.round(penteY*10)/10;
 
-            var XT=0,YT=0,XS=0,YS=0;
-            var dim = d.source.getRNode()/3.0;
+            let XT=0,YT=0,XS=0,YS=0;
+            let dim = d.source.getRNode()/3.0;
             if ( penteX >0 && penteY>0) {
               XT = -dim ;
               YT = -dim ;
@@ -783,16 +781,16 @@ var AskomicsForceLayoutManager = function () {
               XS = -dim  ;
               YS = -dim  ;
             }
-            Xsource = d.source.x + XS;
-            Ysource = d.source.y + YS;
-            Xtarget = d.target.x + XT;
-            Ytarget = d.target.y + YT;
+            let Xsource = d.source.x + XS;
+            let Ysource = d.source.y + YS;
+            let Xtarget = d.target.x + XT;
+            let Ytarget = d.target.y + YT;
             /* Manage a line if weigth = 1 */
             if ( nlinks <= 1 ) {
               return "M" + Xsource + "," + Ysource + "L" + Xtarget + "," + Ytarget  ;
             } else {
               /* sinon calcul d une courbure */
-              var dx = Xtarget - Xsource,
+              let dx = Xtarget - Xsource,
                 dy = Ytarget - Ysource,
                 dr = Math.sqrt(dx * dx + dy * dy);
 
