@@ -396,6 +396,8 @@ var AskomicsForceLayoutManager = function () {
           if ( ! (uri in suggestedList) ) {
             suggestedNode = userAbstraction.buildBaseNode(uri);
             suggestedNode = graphBuilder.setSuggestedNode(suggestedNode,slt_node.x,slt_node.y);
+          } else {
+            suggestedNode = suggestedList[uri];
           }
 
           for (var rel2 in subjectsTarget[uri]) {

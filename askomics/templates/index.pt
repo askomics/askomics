@@ -14,32 +14,7 @@
         <script src="static/js/third-party/bootstrap.js"></script>
         <script src="static/js/third-party/handlebars-v4.0.5.js"></script>
 
-
-        <script src="static/js/MainAskomics.js"></script>
-        <script src="static/js/query-handler.js"></script>
-        <script src="static/js/integration.js"></script>
-        <script src="static/js/AskomicsRestManagement.js"></script>
-        <script src="static/js/AskomicsUserAbstraction.js"></script>
-
-        <script src="static/js/node/GraphNode.js"></script>
-        <script src="static/js/node/AskomicsNode.js"></script>
-        <script src="static/js/node/AskomicsPositionableNode.js"></script>
-
-        <script src="static/js/link/GraphLink.js"></script>
-        <script src="static/js/link/AskomicsLink.js"></script>
-        <script src="static/js/link/AskomicsPositionableLink.js"></script>
-
-        <script src="static/js/AskomicsGraphBuilder.js"></script>
-        
-        <script src="static/js/view/AskomicsObjectView.js"></script>
-        <script src="static/js/view/AskomicsNodeView.js"></script>
-        <script src="static/js/view/AskomicsPositionableNodeView.js"></script>
-        <script src="static/js/view/AskomicsLinkView.js"></script>
-        <script src="static/js/view/AskomicsPositionableLinkView.js"></script>
-
-        <script src="static/js/AskomicsForceLayoutManager.js"></script>
-        <script src="static/js/AskomicsMenuView.js"></script>
-        <script src="static/js/AskomicsMenuFile.js"></script>
+        <script src="static/dist/askomics.js"></script>
 
         <link href="static/css/bootstrap.css" rel="stylesheet" type="text/css">
         <link href="static/css/style.css" rel="stylesheet" type="text/css">

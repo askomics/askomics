@@ -8,6 +8,7 @@ class AskomicsNode extends GraphNode {
     this._categories = {} ;
     this._filters    = {} ; /* filters of attributes key:sparqlid*/
     this._values     = {} ; /* values of attributes key:sparqlid*/
+    this._isregexp   = {} ;
     this.label       = node.label;
     this.uri         = node.uri;
     return this;
@@ -58,9 +59,10 @@ class AskomicsNode extends GraphNode {
     if (this.SPARQLid in this.filters) {
       filters.push(this.filters[this.SPARQLid]);
     }
-
+    console.log(JSON.stringify(this.filters));
     for (let uri in this.attributes) {
       let SparqlId = this.attributes[uri].SPARQLid;
+      console.log(SparqlId);
       if ( SparqlId in this.filters ) {
         filters.push(this.filters[SparqlId]);
       }
@@ -127,6 +129,23 @@ class AskomicsNode extends GraphNode {
       }
     }
     return [variates,constraintRelations,filters] ;
+  }
+
+  switchRegexpMode(idatt) {
+    if (! (idatt in this._isregexp)) {
+      /* default value */
+      this._isregexp[idatt] = true;
+      return;
+    }
+    this._isregexp[idatt] = !this._isregexp[idatt] ;
+  }
+
+  isregexp(idatt) {
+    if (! (idatt in this._isregexp)) {
+      /* default value */
+      this._isregexp[idatt] = true;
+    }
+    return this._isregexp[idatt];
   }
 
   set attributes (attributes) { this._attributes = attributes; }

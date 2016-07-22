@@ -91,12 +91,13 @@ class AskomicsPositionableLink extends AskomicsLink {
     let startSecNodeId = secondNode.attributes[info[secondNode.uri].start].SPARQLid;
     let endSecNodeId = secondNode.attributes[info[secondNode.uri].end].SPARQLid;
 
-    if (this.same_ref) {
-      filters.push('FILTER(' + "?"+refNodeId + "=" + "?"+refSecNodeId +')');
+    alert(this.sameRef);
+    if (this.sameRef) {
+      filters.push('FILTER(' + "SAMETERM(?"+refNodeId + "," + "?"+refSecNodeId +'))');
     }
 
-    if (this.same_tax) {
-      filters.push('FILTER(' + "?"+taxonNodeId + "=" + "?"+taxonSecNodeId +')');
+    if (this.sameTax) {
+      filters.push('FILTER(' + "SAMETERM(?"+taxonNodeId + "," + "?"+taxonSecNodeId +'))');
     }
 
     switch(this.type) {

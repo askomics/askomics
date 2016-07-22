@@ -79,17 +79,16 @@ class AskomicsPositionableLinkView extends AskomicsObjectView {
   }
 
   changeSameTax(same_tax) {
-    this.sameTax = same_tax;
+    this.link.sameTax = same_tax;
   }
 
   changeSameRef(same_ref) {
-    this.sameRef = same_ref;
+    this.link.sameRef = same_ref;
   }
 
   create() {
-    var link = this.link;
-    var id_link = link.id;
-    var elemUri = link.uri;
+    var id_link = this.link.id;
+    var elemUri = this.link.uri;
 
     var details = this.divPanel() ;
     details.addClass('div-details');
@@ -112,20 +111,20 @@ class AskomicsPositionableLinkView extends AskomicsObjectView {
       }
     }
 
-    var relation = $("<div></div>").append(this.formatLabelEntity(link.source))
+    var relation = $("<div></div>").append(this.formatLabelEntity(this.link.source))
                                .append(select)
-                               .append(this.formatLabelEntity(link.target));
+                               .append(this.formatLabelEntity(this.link.target));
 
     var checkbox_sameref;
     var checkbox_sametax;
 
-    if (link.sameRef) {
+    if (this.link.sameRef) {
       checkbox_sameref = $('<label></label>').append($('<input>').attr('type', 'checkbox').attr('id', 'ref-'+id_link).attr('checked', 'checked')).append('Reference');
     }else{
       checkbox_sameref = $('<label></label>').append($('<input>').attr('type', 'checkbox').attr('id', 'ref-'+id_link)).append('Reference');
     }
 
-    if (link.sameTax) {
+    if (this.link.sameTax) {
       checkbox_sametax = $('<label></label>').append($('<input>').attr('type', 'checkbox').attr('id', 'tax-'+id_link).attr('checked', 'checked')).append('Taxon');
     }else{
       checkbox_sametax = $('<label></label>').append($('<input>').attr('type', 'checkbox').attr('id', 'tax-'+id_link)).append('Taxon');
@@ -140,7 +139,7 @@ class AskomicsPositionableLinkView extends AskomicsObjectView {
 
     var strict;
 
-    if (link.strict) {
+    if (this.link.strict) {
       strict = $('<div></div>').append($('<label></label>').append($('<input>').attr('type', 'checkbox').attr('checked', 'checked').attr('id', 'strict-'+id_link).attr('value', 'strict')).append('Strict'));
     }else{
       strict = $('<div></div>').append($('<label></label>').append($('<input>').attr('type', 'checkbox').attr('id', 'strict-'+id_link).attr('value', 'strict')).append('Strict'));
