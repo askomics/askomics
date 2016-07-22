@@ -270,8 +270,6 @@ const classesMapping = {
       node.suggested = false;
       node.actif     = true ;
       node           = this.setSPARQLVariateId(node);
-      node.label     += this.getLabelIndexNode(node) ;
-
       this._instanciedNodeGraph.push(node);
       return node;
     }
@@ -292,19 +290,6 @@ const classesMapping = {
         this._instanciedLinkGraph.push(l);
       }
     }
-
-    /*
-      return the index name of the node to set up and update the graph
-    */
-    getLabelIndexNode(node) {
-          var re = new RegExp(/(\d+)$/);
-          var indiceEntity = node.SPARQLid.match(re);
-
-          if ( indiceEntity && indiceEntity.length>0 )
-            return indiceEntity[0];
-          else
-            return "";
-      }
 
     /* Build attribute with id, sparId inside a node from a generic uri attribute */
     setAttributeOrCategoryForNode(AttOrCatArray,attributeForUri,node) {

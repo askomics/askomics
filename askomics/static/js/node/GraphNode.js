@@ -37,6 +37,25 @@ class GraphNode {
   set nlink (nlink) { this._nlink = nlink; }
   get nlink () { return this._nlink; }
 
+  /*
+    return the index name of the node to set up and update the graph
+  */
+  getLabelIndexNode() {
+    if ( this.SPARQLid === "" ) return "";
+
+    let re = new RegExp(/(\d+)$/);
+    let indiceEntity = this.SPARQLid.match(re);
+
+    if ( indiceEntity && indiceEntity.length>0 )
+        return indiceEntity[0];
+    else
+        return "";
+  }
+
+  getLabelIndexNodeHtml() {
+    return '<tspan font-size="7" baseline-shift="sub">'+this.getLabelIndexNode()+"</tspan>";
+  }
+
   setjson(obj) {
     this.id        = obj.id ;
     this.SPARQLid  = obj.SPARQLid ;

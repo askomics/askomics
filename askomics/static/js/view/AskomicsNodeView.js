@@ -263,7 +263,7 @@ class AskomicsNodeView extends AskomicsObjectView {
       details.attr("nodeid", node.id).attr("sparqlid", node.SPARQLid).addClass('div-details');
 
       /* Label Entity as ID attribute */
-      let lab = $("<label></label>").attr("for",elemId).text(node.label);
+      let lab = $("<label></label>").attr("for",elemId).html(node.label);
       let inp = this.buildString(node,node.label,node.SPARQLid);
 
       node.switchRegexpMode(node.id);
