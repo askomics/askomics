@@ -77,7 +77,6 @@ class AskomicsPositionableLink extends AskomicsLink {
     switch(this.type) {
       case 'included' :
           filters.push('FILTER((?start_'+secondNode.SPARQLid+' >'+equalsign+' ?start_'+node.SPARQLid+' ) && (?end_'+secondNode.SPARQLid+' <'+equalsign+' ?end_'+node.SPARQLid+'))');
-          //filters.push('FILTER((?'+startSecNodeId+' >'+equalsign+' ?'+startNodeId+') && (?'+endSecNodeId+' <'+equalsign+' ?'+endNodeId+'))');
           break;
       case 'excluded':
           filters.push('FILTER(?end_'+node.SPARQLid+' <'+equalsign+' ?start_'+secondNode.SPARQLid+' || ?start_'+node.SPARQLid+' >'+equalsign+' ?end_'+secondNode.SPARQLid+')');
