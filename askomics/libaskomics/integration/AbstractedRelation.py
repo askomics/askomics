@@ -25,7 +25,7 @@ class AbstractedRelation(object):
     specified class (xsd:string or xsd:numeric) in case of DatatypeProperty.
     """
 
-    def __init__(self, relation_type, identifier , rdfs_domain, rdfs_range):
+    def __init__(self, relation_type, identifier, rdfs_domain, rdfs_range):
         idx = identifier.find("@")
         type_range =  identifier
 
