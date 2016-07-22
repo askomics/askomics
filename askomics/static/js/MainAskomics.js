@@ -155,9 +155,13 @@ function loadStatistics() {
     table.append(th);
 
     $.each(stats.metadata, function(key) {
+
+      var d = new Date(stats.metadata[key].loadDate*1000);
+      date = d.toLocaleString();
+
         tr = $("<tr></tr>")
             .append($("<td></td>").text(stats.metadata[key].filename))
-            .append($("<td></td>").text(stats.metadata[key].loadDate))
+            .append($("<td></td>").text(date))
             .append($("<td></td>").text(stats.metadata[key].username))
             .append($("<td></td>").text(stats.metadata[key].server))
             .append($("<td></td>").text(stats.metadata[key].version));

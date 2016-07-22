@@ -646,7 +646,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
             data = {}
 
             self.metadatas['server'] = queryResults.info()['server']
-            self.metadatas['loadDate'] = time.strftime('%Y-%m-%d',time.localtime())
+            self.metadatas['loadDate'] = self.timestamp
 
             data['status'] = 'ok'
             data['total_triple_count'] = total_triple_count
@@ -681,11 +681,11 @@ class SourceFile(ParamManager, HaveCachedProperties):
             if self.is_defined("askomics.file_upload_url"):
                 queryResults = ql.upload_data(fp.name, graphName)
                 self.metadatas['server'] = queryResults.headers['Server']
-                self.metadatas['loadDate'] = time.strftime('%Y-%m-%d',time.localtime())
+                self.metadatas['loadDate'] = self.timestamp
             else:
                 queryResults = ql.load_data(url, graphName)
                 self.metadatas['server'] = queryResults.info()['server']
-                self.metadatas['loadDate'] = time.strftime('%Y-%m-%d',time.localtime())
+                self.metadatas['loadDate'] = self.timestamp
             data['status'] = 'ok'
         except Exception as e:
             self._format_exception(e, data=data)
