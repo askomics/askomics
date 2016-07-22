@@ -13,6 +13,7 @@ install:
   - npm install --save-dev gulp
   - npm install --save-dev gulp-util
   - npm install --save-dev gulp-concat
+  - npm install --save-dev gulp-sourcemaps
   - npm install --save-dev gulp-babel babel-preset-es2015
   - npm install --save-dev gulp-mocha
   - npm install gulp-mocha-phantomjs --save-dev
@@ -24,8 +25,8 @@ before_script:
   - sudo docker run -d --name virtuoso -p 127.0.0.1:8890:8890 -p 127.0.0.1:1111:1111  -e DBA_PASSWORD=dba -e SPARQL_UPDATE=true -e DEFAULT_GRAPH=http://localhost:8890/DAV --net="host" -t tenforce/virtuoso
   - docker ps -a
   - sleep 45
-script: 
+script:
   - python setup.py nosetests
-  - gulp test 
+  - gulp test
 after_success:
   coveralls
