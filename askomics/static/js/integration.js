@@ -58,8 +58,7 @@ function cols2rows(items) {
  */
 function displayTable(data) {
     // Transform columns to rows
-    var i;
-    for(i=0, l=data.files.length; i<l; i++) {
+    for(let i=0;i<data.files.length;i++) {
         if ('preview_data' in data.files[i]) {
             data.files[i].preview_data = cols2rows(data.files[i].preview_data);
         }
@@ -82,12 +81,12 @@ function displayTable(data) {
     }
 
     // Select the correct type for each column
-    for(i=0, l=data.files.length; i<l; i++) {
+    for(let i=0, l=data.files.length; i<l; i++) {
 
         if ('column_types' in data.files[i]) {
 
             var cols = data.files[i].column_types;
-            for(var j=0, m=cols.length; j<m; j++) {
+            for(let j=0; j<cols.length; j++) {
                 var selectbox = $('div#content_integration form.template-source_file:eq(' + i + ') select.column_type:eq(' + j + ')');
                 var values = selectbox.find("option").map(mapCallback);
 
@@ -145,7 +144,7 @@ function hidePreview(file_elem) {
 // Function to find if array contain all values of a list
 
 function containAll(Array1,Array2){
-    for(var i = 0 , len = Array2.length; i < len; i++){
+    for(let i = 0 ; i<Array2.length ; i++){
         if($.inArray(Array2[i], Array1) == -1) {
             return false;
         }
@@ -156,7 +155,7 @@ function containAll(Array1,Array2){
 // Function to find if array contain any values of a list
 
  function containAny(Array1,Array2){
-    for(var i = 0 , len = Array2.length; i < len; i++){
+    for(let i = 0;i< Array2.length; i++){
         if($.inArray(Array2[i], Array1) != -1) {
             return true;
         }
@@ -269,29 +268,25 @@ function loadSourceFile(file_elem) {
         else {
             if($.inArray('entitySym', col_types) != -1) {
                 if (data.expected_lines_number*2 == data.total_triple_count) {
-                    insert_status_elem.html('<strong><span class="glyphicon glyphicon-ok"></span> Success:</strong> inserted '
-                    + data.total_triple_count + " lines of "+(data.expected_lines_number*2))
+                    insert_status_elem.html('<strong><span class="glyphicon glyphicon-ok"></span> Success:</strong> inserted '+ data.total_triple_count + " lines of "+(data.expected_lines_number*2))
                                       .removeClass('hidden alert-danger')
                                       .removeClass('hidden alert-warning')
                                       .addClass('show alert-success');
 
                 }else{
-                    insert_status_elem.html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> Warning:</strong> inserted '
-                    + data.total_triple_count*2 + " lines of "+data.expected_lines_number)
+                    insert_status_elem.html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> Warning:</strong> inserted '+ data.total_triple_count*2 + " lines of "+data.expected_lines_number)
                                       .removeClass('hidden alert-success')
                                       .removeClass('hidden alert-warning')
                                       .addClass('show alert-danger');
                 }
             }else{
                 if (data.expected_lines_number == data.total_triple_count) {
-                    insert_status_elem.html('<strong><span class="glyphicon glyphicon-ok"></span> Success:</strong> inserted '
-                    + data.total_triple_count + " lines of "+data.expected_lines_number)
+                    insert_status_elem.html('<strong><span class="glyphicon glyphicon-ok"></span> Success:</strong> inserted '+ data.total_triple_count + " lines of "+data.expected_lines_number)
                                       .removeClass('hidden alert-danger')
                                       .removeClass('hidden alert-warning')
                                       .addClass('show alert-success');
                 }else{
-                    insert_status_elem.html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> Warning:</strong> inserted '
-                    + data.total_triple_count + " lines of "+data.expected_lines_number)
+                    insert_status_elem.html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> Warning:</strong> inserted '+ data.total_triple_count + " lines of "+data.expected_lines_number)
                                       .removeClass('hidden alert-success')
                                       .removeClass('hidden alert-warning')
                                       .addClass('show alert-danger');

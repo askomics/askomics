@@ -1,6 +1,13 @@
 /*jshint esversion: 6 */
 
-askomicsInitialization = false;
+/* Manage theses variables with a Singleton Classes */
+var askomicsInitialization = false;
+var abstraction;
+var graphBuilder ;
+var forceLayoutManager ;
+var userAbstraction ;
+var menuView ;
+var menuFile ;
 
 function startRequestSessionAskomics() {
   if ( askomicsInitialization ) return ;
@@ -104,8 +111,8 @@ function loadStatistics() {
     .append($("<p></p>").text("Number of classes : "+stats.nclasses))
     .append($("<p></p>").text("Number of graphs: "+stats.ngraphs));
 
-    table=$("<table></table>").addClass('table').addClass('table-bordered');
-    th = $("<tr></tr>").addClass("table-bordered").attr("style", "text-align:center;");
+    let table=$("<table></table>").addClass('table').addClass('table-bordered');
+    let th = $("<tr></tr>").addClass("table-bordered").attr("style", "text-align:center;");
     th.append($("<th></th>").text("Graph"));
     th.append($("<th></th>").text("Load Date"));
     th.append($("<th></th>").text("Username"));
@@ -114,7 +121,7 @@ function loadStatistics() {
     table.append(th);
 
     $.each(stats.metadata, function(key) {
-        tr = $("<tr></tr>")
+        let tr = $("<tr></tr>")
             .append($("<td></td>").text(stats.metadata[key].filename))
             .append($("<td></td>").text(stats.metadata[key].loadDate))
             .append($("<td></td>").text(stats.metadata[key].username))
@@ -144,7 +151,7 @@ function loadStatistics() {
     table.append(th);
 
     $.each(stats['class'], function(key, value) {
-      tr = $("<tr></tr>")
+      let tr = $("<tr></tr>")
             .append($("<td></td>").text(key))
             .append($("<td></td>").text(value.count));
       table.append(tr);
@@ -159,11 +166,11 @@ function loadStatistics() {
     th.append($("<th></th>").text("Relations"));
     table.append(th);
 
-    for (var ent1 in entities ) {
+    for (let ent1 in entities ) {
       console.log(abstraction.getAttrib(entities[ent1],'rdfs:label'));
-      tr = $("<tr></tr>")
+      let tr = $("<tr></tr>")
             .append($("<td></td>").text(abstraction.getAttrib(entities[ent1],'rdfs:label')));
-            rels = "";
+            let rels = "";
             var t = abstraction.getRelationsObjectsAndSubjectsWithURI(entities[ent1]);
             var subjectTarget = t[0];
             for ( var ent2 in subjectTarget) {
@@ -185,12 +192,12 @@ function loadStatistics() {
     th.append($("<th></th>").text("Attributes"));
     table.append(th);
 
-    for (ent1 in entities ) {
+    for (let ent1 in entities ) {
     //$.each(stats['class'], function(key, value) {
-      tr = $("<tr></tr>")
+      let tr = $("<tr></tr>")
             .append($("<td></td>").text(abstraction.getAttrib(entities[ent1],'rdfs:label')));
-            attrs = "";
-            cats = "";
+            let attrs = "";
+            let cats = "";
             var listAtt = abstraction.getAttributesEntity(entities[ent1]);
             for (var att of listAtt) {
                 attrs += '- '+att.label +"</br>";

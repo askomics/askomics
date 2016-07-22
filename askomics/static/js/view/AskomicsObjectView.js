@@ -21,10 +21,10 @@ class AskomicsObjectView {
       throw new Error("AskomicsObjectView.formatLabelEntity : node is not defined !");
 
     var re = new RegExp(/(\d+)$/);
-    var indiceEntity = this.objet.label.match(re);
+    var indiceEntity = this.objet.SPARQLid.match(re);
     if ( indiceEntity === null || indiceEntity.length <= 0 )
       indiceEntity = [""];
-    var labelEntity = this.objet.label.replace(re,"");
+    var labelEntity = this.objet.SPARQLid.replace(re,"");
     return $('<em></em>').text(labelEntity).append($('<sub></sub>').text(indiceEntity[0]));
   }
 

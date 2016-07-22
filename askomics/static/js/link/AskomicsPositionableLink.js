@@ -61,6 +61,7 @@ class AskomicsPositionableLink extends AskomicsLink {
     let secondNode = this.source ;
     let info = ua.getPositionableEntities();
 
+
     if (this.same_ref) {
       //TODO: test which of the following line is the fastest
       filters.push('FILTER(?ref_'+node.SPARQLid+' = ?ref_'+secondNode.SPARQLid+')');

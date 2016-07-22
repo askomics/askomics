@@ -41,6 +41,7 @@ ADD clean-logs.sh /clean-logs.sh
 ADD virtuoso.sh /virtuoso.sh
 
 VOLUME /data
+RUN mkdir dumps
 WORKDIR /data
 EXPOSE 8890
 EXPOSE 1111

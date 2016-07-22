@@ -1,5 +1,4 @@
-  /*jshint esversion: 6 */
-
+/*jshint esversion: 6 */
 const classesMapping = {
   'GraphNode': GraphNode,
   'AskomicsPositionableNode': AskomicsPositionableNode,
@@ -174,6 +173,9 @@ const classesMapping = {
 
     removeInstanciedLink(link) {
       // finding link
+      if (!link) {
+        throw new Error("Link is undefined.");
+      }
       var t = AskomicsGraphBuilder.findElt(this._instanciedLinkGraph,link.id);
       var removeNode = null;
       console.log(JSON.stringify(this._instanciedLinkGraph));
@@ -236,14 +238,14 @@ const classesMapping = {
       for (var n of this._instanciedNodeGraph) {
         if (n.id == id ) return n;
       }
-      return null;
+      throw new Exception ("GraphBuilder :: Can not find instancied node:"+JSON.stringify(id));
     }
 
     getInstanciedLink(id) {
       for (var n of this._instanciedLinkGraph) {
         if (n.id == id) return n;
       }
-      return null;
+      throw new Exception ("GraphBuilder :: Can not find instancied link:"+JSON.stringify(id));
     }
 
 
@@ -268,8 +270,6 @@ const classesMapping = {
       node.suggested = false;
       node.actif     = true ;
       node           = this.setSPARQLVariateId(node);
-      node.label     += this.getLabelIndexNode(node) ;
-
       this._instanciedNodeGraph.push(node);
       return node;
     }
@@ -290,19 +290,6 @@ const classesMapping = {
         this._instanciedLinkGraph.push(l);
       }
     }
-
-    /*
-      return the index name of the node to set up and update the graph
-    */
-    getLabelIndexNode(node) {
-          var re = new RegExp(/(\d+)$/);
-          var indiceEntity = node.SPARQLid.match(re);
-
-          if ( indiceEntity && indiceEntity.length>0 )
-            return indiceEntity[0];
-          else
-            return "";
-      }
 
     /* Build attribute with id, sparId inside a node from a generic uri attribute */
     setAttributeOrCategoryForNode(AttOrCatArray,attributeForUri,node) {
@@ -462,22 +449,4 @@ const classesMapping = {
         }
       }
     }
-
-    setFilterAttributes(nodeId,SPARQLid,value,filter) {
-      var tab = AskomicsGraphBuilder.findElt(this._instanciedNodeGraph,nodeId);
-      var node = tab[1];
-      if (! node ) {
-        throw Error("AskomicsGraphBuilder.prototype.setFilterAttributes don't find node id:"+nodeId);
-      }
-      if ($.trim(value) === "") { // case if user don't wan anymore a filter
-        delete node.filters[SPARQLid];
-        delete node.values[SPARQLid];
-      } else {
-        if (filter!=="") {
-          node.filters[SPARQLid] = filter;
-        }
-        node.values[SPARQLid] = value; /* save value to restore it when the views need it*/
-      }
-    }
-
   }
