@@ -10,11 +10,22 @@ cache: pip
 install:
   - pip install coveralls
   - python setup.py install
+  - npm install --save-dev gulp
+  - npm install --save-dev gulp-util
+  - npm install --save-dev gulp-concat
+  - npm install --save-dev gulp-babel babel-preset-es2015
+  - npm install --save-dev gulp-mocha
+  - npm install gulp-mocha-phantomjs --save-dev
+  - npm install should --save-dev
+  - npm install --save-dev chai
+  - npm install jshint gulp-jshint --save-dev
 before_script:
   - docker pull tenforce/virtuoso
   - sudo docker run -d --name virtuoso -p 127.0.0.1:8890:8890 -p 127.0.0.1:1111:1111  -e DBA_PASSWORD=dba -e SPARQL_UPDATE=true -e DEFAULT_GRAPH=http://localhost:8890/DAV --net="host" -t tenforce/virtuoso
   - docker ps -a
   - sleep 45
-script: python setup.py nosetests
+script: 
+  - python setup.py nosetests
+  
 after_success:
   coveralls
