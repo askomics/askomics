@@ -238,14 +238,14 @@ const classesMapping = {
       for (var n of this._instanciedNodeGraph) {
         if (n.id == id ) return n;
       }
-      return null;
+      throw new Exception ("GraphBuilder :: Can not find instancied node:"+JSON.stringify(id));
     }
 
     getInstanciedLink(id) {
       for (var n of this._instanciedLinkGraph) {
         if (n.id == id) return n;
       }
-      return null;
+      throw new Exception ("GraphBuilder :: Can not find instancied link:"+JSON.stringify(id));
     }
 
 
@@ -449,22 +449,4 @@ const classesMapping = {
         }
       }
     }
-
-    setFilterAttributes(nodeId,SPARQLid,value,filter) {
-      var tab = AskomicsGraphBuilder.findElt(this._instanciedNodeGraph,nodeId);
-      var node = tab[1];
-      if (! node ) {
-        throw Error("AskomicsGraphBuilder.prototype.setFilterAttributes don't find node id:"+nodeId);
-      }
-      if ($.trim(value) === "") { // case if user don't wan anymore a filter
-        delete node.filters[SPARQLid];
-        delete node.values[SPARQLid];
-      } else {
-        if (filter!=="") {
-          node.filters[SPARQLid] = filter;
-        }
-        node.values[SPARQLid] = value; /* save value to restore it when the views need it*/
-      }
-    }
-
   }

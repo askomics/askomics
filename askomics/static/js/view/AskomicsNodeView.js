@@ -90,12 +90,12 @@ class AskomicsNodeView extends AskomicsObjectView {
         throw new Error("AskomicsNodeView: can not reach sparqlid attribute!");
       }
 
-      //graphBuilder.setFilterAttributes(nodeid,sparlid,value,'FILTER ( ?'+sparlid+'="'+value[0]+'"^^xsd:string)');
       var listValue = "";
       for (let i=0;i<value.length;i++) {
         listValue+="<"+value[i]+"> ";
       }
-      graphBuilder.setFilterAttributes(nodeid,sparqlid,value,'VALUES ?'+sparqlid+' { '+listValue +'}');
+      let node = graphBuilder.getInstanciedNode(nodeid);
+      node.setFilterAttributes(sparqlid,value,'VALUES ?'+sparqlid+' { '+listValue +'}');
     });
 
     return inp;
@@ -151,54 +151,62 @@ class AskomicsNodeView extends AskomicsObjectView {
       var value = $(this).find('input').val();
       let nodeid = $(this).parent().attr('nodeid');
       let sparlid = $(this).attr('sparqlid');
-
-      graphBuilder.setFilterAttributes(nodeid,sparlid,value,'FILTER ( ?'+sparlid+' '+op+' '+value+')');
-      graphBuilder.setFilterAttributes(nodeid,"op_"+sparlid,op,'');
+      let node = graphBuilder.getInstanciedNode(nodeid);
+      node.setFilterAttributes(sparlid,value,'FILTER ( ?'+sparlid+' '+op+' '+value+')');
+      node.setFilterAttributes("op_"+sparlid,op,'');
     });
     return inp ;
   }
+
+  changeFilter(node,sparqlid,value) {
+    if ( ! node.isRegexpMode(sparqlid) ) {
+      node.setFilterAttributes(sparqlid,value,'FILTER ( ?'+sparqlid+' = "'+value+'" )');
+    } else {
+      node.setFilterAttributes(sparqlid,value,'FILTER ( regex(str(?'+sparqlid+'), "'+value+'", "i" ))');
+    }
+  }
+
   /* ===============================================================================================*/
-    buildString(node,labelSparqlVarId,id) {
-      let inputValue       = "";
+  buildString(node,labelSparqlVarId) {
+    let inputValue       = "";
 
-      if (labelSparqlVarId in node.values) {
-        inputValue = node.values[labelSparqlVarId];
-      }
-      let inp =$("<div></div>");
+    if (labelSparqlVarId in node.values) {
+      inputValue = node.values[labelSparqlVarId];
+    }
 
-      //let tab = $("<table></table>", { padding: "20px" }).attr("sparqlid",labelSparqlVarId).appendTo(inp);
-      //let tr  = $("<tr></tr>").appendTo(tab);
-      //$("<td></td>").append($("<small/>").append($("<label></label>").addClass("text-muted").text("Exact match"))).appendTo(tr);
-      //let typ  = $("<td></td>").append($('<input/>', { type: 'checkbox', checked: true })).appendTo(tr);
-      let st = $("<input/>").attr("sparqlid",labelSparqlVarId).attr("type", "text").val(inputValue).addClass("form-control").appendTo(inp);
+    let inp = $("<input/>")
+            .attr("nodeid",node.id)
+            .attr("sparqlid",labelSparqlVarId)
+            .attr("type", "text")
+            .val(inputValue)
+            .addClass("form-control");
+    let obj = this;
 
-      inp.change(function(d) {
-        let value = $(this).find(":input[type='text']").val();
-        let sparqlid = $(this).find(":input[type='text']").attr('sparqlid');
+    inp.change(function(d) {
+      let value = $(this).val();
+      let sparqlid = $(this).attr('sparqlid');
+      let nodeid = $(this).attr('nodeid');
 
-        let nodeid = $(this).parent().attr('nodeid');
-
-        if ( graphBuilder.isregexp(sparqlid) ) {
-          graphBuilder.setFilterAttributes(nodeid,sparqlid,value,'FILTER ( ?'+sparqlid+' = "'+value+'" )');
-        } else {
-          graphBuilder.setFilterAttributes(nodeid,sparqlid,value,'FILTER ( regex(str(?'+sparqlid+'), "'+value+'", "i" ))');
-        }
-      });
+      let node = graphBuilder.getInstanciedNode(nodeid);
+      console.log(value);
+      console.log(sparqlid);
+      console.log(nodeid);
+      obj.changeFilter(node,sparqlid,value);
+    });
       return inp ;
     }
-/* ===============================================================================================*/
-  create() {
-    var node = this.node;
 
     // dedicated to String entry
-    function makeRegExpIcon(nodeid,attributeid) {
+    makeRegExpIcon(nodeid,sparqlid) {
       var icon = $('<span></span>')
-              .attr('attid', attributeid)
+              .attr('sparqlid', sparqlid)
               .attr('nodeid', nodeid)
               .attr('aria-hidden','true')
               .addClass('glyphicon')
               .addClass('glyphicon-filter')
               .addClass('display');
+
+      let obj = this;
 
       icon.click(function(d) {
           if (icon.hasClass('glyphicon-filter')) {
@@ -209,24 +217,24 @@ class AskomicsNodeView extends AskomicsObjectView {
                 icon.addClass('glyphicon-filter');
           }
 
-          var attid  = $(this).attr('atturi');
+          var sparqlid  = $(this).attr('sparqlid');
           var nodeid = $(this).attr('nodeid');
-          let n = graphBuilder.getInstanciedNode(nodeid);
-          if (! n ) {
-            throw new Exception("AskomicsNodeView: Can not find instancied node:"+nodeid);
+          let node = graphBuilder.getInstanciedNode(nodeid);
+          node.switchRegexpMode(sparqlid);
+          if (sparqlid in node.values) {
+            obj.changeFilter(node,sparqlid,node.values[sparqlid]);
           }
-          n.switchRegexpMode(attid);
       });
       return icon;
     }
       // Add attributes of the selected node on the right side of AskOmics
-    function makeRemoveIcon(field) {
+    makeRemoveIcon(field) {
           var removeIcon = $('<span class="glyphicon glyphicon-erase display"></span>');
           removeIcon.click(function() { field.val(null).trigger("change"); });
           return removeIcon;
     }
 
-    function makeEyeIcon(node,attribute) {
+    makeEyeIcon(node,attribute) {
       // =============================================================================================
       //    Manage Attribute variate when eye is selected or deselected
       //
@@ -255,6 +263,11 @@ class AskomicsNodeView extends AskomicsObjectView {
       return icon;
     }
 
+/* ===============================================================================================*/
+  create() {
+    var mythis = this;
+    var node = this.node;
+
      var elemUri = node.uri,
           elemId  = node.SPARQLid,
           nameDiv = this.prefix+node.SPARQLid ;
@@ -264,13 +277,13 @@ class AskomicsNodeView extends AskomicsObjectView {
 
       /* Label Entity as ID attribute */
       let lab = $("<label></label>").attr("for",elemId).html(node.label);
-      let inp = this.buildString(node,node.label,node.SPARQLid);
+      let inp = this.buildString(node,node.SPARQLid);
 
-      node.switchRegexpMode(node.id);
+      node.switchRegexpMode(node.SPARQLid);
 
       details.append(lab)
-             .append(makeRemoveIcon(inp))
-             .append(makeRegExpIcon(node.id,node.id))
+             .append(mythis.makeRemoveIcon(inp))
+             .append(mythis.makeRegExpIcon(node.id,node.SPARQLid))
              .append(inp);
 
       var attributes = userAbstraction.getAttributesWithURI(node.uri);
@@ -292,17 +305,17 @@ class AskomicsNodeView extends AskomicsObjectView {
             inp = currentObj.buildDecimal(node,attribute);
             /* RemoveIcon, EyeIcon, Attribute IHM */
             details.append(lab)
-                   .append(makeRemoveIcon(inp))
-                   .append(makeEyeIcon(node,attribute))
+                   .append(mythis.makeRemoveIcon(inp))
+                   .append(mythis.makeEyeIcon(node,attribute))
                    .append(inp);
           } else {
-            inp = currentObj.buildString(node,attribute.SPARQLid,attribute.id);
-            node.switchRegexpMode(attribute.id);
+            inp = currentObj.buildString(node,attribute.SPARQLid);
+            node.switchRegexpMode(attribute.SPARQLid);
             /* RemoveIcon, EyeIcon, Attribute IHM */
             details.append(lab)
-                   .append(makeRemoveIcon(inp))
-                   .append(makeEyeIcon(node,attribute))
-                   .append(makeRegExpIcon(node.id,attribute.id))
+                   .append(mythis.makeRemoveIcon(inp))
+                   .append(mythis.makeEyeIcon(node,attribute))
+                   .append(mythis.makeRegExpIcon(node.id,attribute.SPARQLid))
                    .append(inp);
           }
 

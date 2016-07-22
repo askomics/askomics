@@ -132,21 +132,38 @@ class AskomicsNode extends GraphNode {
   }
 
   switchRegexpMode(idatt) {
+    if ( idatt === undefined ) throw new Error("switchRegexpMode : undefined attribute !");
     if (! (idatt in this._isregexp)) {
       /* default value */
       this._isregexp[idatt] = true;
       return;
     }
+
     this._isregexp[idatt] = !this._isregexp[idatt] ;
   }
 
-  isregexp(idatt) {
+  isRegexpMode(idatt) {
+    if ( idatt === undefined ) throw new Error("isRegexpMode : undefined attribute !");
     if (! (idatt in this._isregexp)) {
       /* default value */
       this._isregexp[idatt] = true;
     }
     return this._isregexp[idatt];
   }
+
+  setFilterAttributes(SPARQLid,value,filter) {
+    var node = this;
+    if ($.trim(value) === "") { // case if user don't wan anymore a filter
+      delete node.filters[SPARQLid];
+      delete node.values[SPARQLid];
+    } else {
+      if (filter!=="") {
+        node.filters[SPARQLid] = filter;
+      }
+      node.values[SPARQLid] = value; /* save value to restore it when the views need it*/
+    }
+  }
+
 
   set attributes (attributes) { this._attributes = attributes; }
   get attributes () { return this._attributes; }
