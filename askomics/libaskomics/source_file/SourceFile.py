@@ -460,9 +460,6 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         results = ql.process_query(query)
 
-        for rel in results:
-            existing_relations.append(rel["relation"].replace(self.get_param("askomics.prefix"), "").replace("has_", ""))
-
         return existing_relations
 
     def compare_to_database(self):
