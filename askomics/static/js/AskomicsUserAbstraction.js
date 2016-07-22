@@ -100,10 +100,10 @@ var AskomicsUserAbstraction = function () {
           var uri4 = resultListTripletSubjectRelationObject.positionable[entry4].entity;
           if ( ! (uri4 in entityPositionableInformationList) ) {
               entityPositionableInformationList[uri4] = {};
-              entityPositionableInformationList[uri4].taxon = resultListTripletSubjectRelationObject.positionable[entry4].taxon;
-              entityPositionableInformationList[uri4].ref = resultListTripletSubjectRelationObject.positionable[entry4].ref;
-              entityPositionableInformationList[uri4].start = resultListTripletSubjectRelationObject.positionable[entry4].start;
-              entityPositionableInformationList[uri4].end = resultListTripletSubjectRelationObject.positionable[entry4].end;
+              entityPositionableInformationList[uri4].taxon = ":position_taxon";
+              entityPositionableInformationList[uri4].ref = ":position_ref";
+              entityPositionableInformationList[uri4].start = ":position_start";
+              entityPositionableInformationList[uri4].end = ":position_end";
           } else {
             throw new Error("URI:"+uri4+" have several taxon,ref, start, end labels... "+JSON.stringify(entityPositionableInformationList[uri4]));
           }
