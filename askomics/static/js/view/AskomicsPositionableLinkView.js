@@ -79,11 +79,11 @@ class AskomicsPositionableLinkView extends AskomicsObjectView {
   }
 
   changeSameTax(same_tax) {
-    this.link.sameTax = same_tax;
+    this.link.same_tax = same_tax;
   }
 
   changeSameRef(same_ref) {
-    this.link.sameRef = same_ref;
+    this.link.same_ref = same_ref;
   }
 
   create() {
@@ -118,13 +118,13 @@ class AskomicsPositionableLinkView extends AskomicsObjectView {
     var checkbox_sameref;
     var checkbox_sametax;
 
-    if (this.link.sameRef) {
+    if (this.link.same_ref) {
       checkbox_sameref = $('<label></label>').append($('<input>').attr('type', 'checkbox').attr('id', 'ref-'+id_link).attr('checked', 'checked')).append('Reference');
     }else{
       checkbox_sameref = $('<label></label>').append($('<input>').attr('type', 'checkbox').attr('id', 'ref-'+id_link)).append('Reference');
     }
 
-    if (this.link.sameTax) {
+    if (this.link.same_tax) {
       checkbox_sametax = $('<label></label>').append($('<input>').attr('type', 'checkbox').attr('id', 'tax-'+id_link).attr('checked', 'checked')).append('Taxon');
     }else{
       checkbox_sametax = $('<label></label>').append($('<input>').attr('type', 'checkbox').attr('id', 'tax-'+id_link)).append('Taxon');
