@@ -18,6 +18,7 @@ install:
   - npm install --save-dev gulp-mocha
   - npm install gulp-mocha-phantomjs --save-dev
   - npm install should --save-dev
+  - npm install --save-dev mocha
   - npm install --save-dev chai
   - npm install jshint gulp-jshint --save-dev
 before_script:
