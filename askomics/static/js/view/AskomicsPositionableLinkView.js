@@ -111,9 +111,9 @@ class AskomicsPositionableLinkView extends AskomicsObjectView {
       }
     }
 
-    var relation = $("<div></div>").append(this.formatLabelEntity(this.link.source))
+    var relation = $("<div></div>").append(this.link.source.formatInHtmlLabelEntity())
                                .append(select)
-                               .append(this.formatLabelEntity(this.link.target));
+                               .append(this.link.target.formatInHtmlLabelEntity());
 
     var checkbox_sameref;
     var checkbox_sametax;

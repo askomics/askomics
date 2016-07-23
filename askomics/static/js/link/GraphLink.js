@@ -33,6 +33,17 @@ class GraphLink {
     }
   }
 
+  //TODO: Create a super class for Node/Link to agregate SPARQLid management
+  // take a string and return an entity with a sub index
+  formatInHtmlLabelEntity() {
+    let re = new RegExp(/(\d+)$/);
+    let indiceEntity = this.SPARQLid.match(re);
+    if ( indiceEntity === null || indiceEntity.length <= 0 )
+      indiceEntity = [""];
+    let labelEntity = this.SPARQLid.replace(re,"");
+    return $('<em></em>').text(labelEntity).append($('<sub></sub>').text(indiceEntity[0]));
+  }
+
   setjson(obj) {
     this.id        = obj.id ;
     this.SPARQLid  = obj.SPARQLid ;

@@ -301,6 +301,11 @@ class AskomicsNodeView extends AskomicsObjectView {
 
           if (attribute.type.indexOf("http://www.w3.org/2001/XMLSchema#") < 0) {
             inp = currentObj.buildCategory(node,attribute,inp);
+            /* RemoveIcon, EyeIcon, Attribute IHM */
+            details.append(lab)
+                   .append(mythis.makeRemoveIcon(inp))
+                   .append(mythis.makeEyeIcon(node,attribute))
+                   .append(inp);
           } else if (attribute.type.indexOf("decimal") >= 0) {
             inp = currentObj.buildDecimal(node,attribute);
             /* RemoveIcon, EyeIcon, Attribute IHM */
