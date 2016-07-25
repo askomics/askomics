@@ -22,13 +22,13 @@ function viewQueryResults() {
     $("#btn-down").prop("disabled", false);
     displayModal('Please wait', '', 'Close');
 
-    var time = $.now();
-    var service = new RestServiceJs("sparqlquery");
-    var jdata = prepareQuery(false, 30, false);
+    let time = $.now();
+    let service = new RestServiceJs("sparqlquery");
+    let jdata = prepareQuery(false, 30, false);
     service.post(jdata,function(data) {
       hideModal();
-      new_time = $.now();
-      exec_time = new_time - time;
+      let new_time = $.now();
+      let exec_time = new_time - time;
       console.log('===> query executed in '+exec_time+' ms');
       if ('error' in data) {
         alert(data.error);
@@ -58,22 +58,25 @@ function displayResults(data) {
     if (data.values.length > 0) {
        {
        /* new presentation by entity */
-       var table = $('<table></table>').addClass('table').addClass('table-bordered').addClass('table-results');
-       var head = $('<thead></thead>');
-       var body = $('<tbody></tbody');
+       let table = $('<table></table>').addClass('table').addClass('table-bordered').addClass('table-results');
+       let head = $('<thead></thead>');
+       let body = $('<tbody></tbody');
 
-       var row = $('<tr></tr>');
-       var activesAttributes = {} ;
+       let row = $('<tr></tr>');
+       let activesAttributes = {} ;
+       let activesAttributesLabel = {};
 
-       var nodeToDisplay = graphBuilder.nodesDisplaying();
-       var i,k;
-       var varEntity;
+       let nodeToDisplay = graphBuilder.nodesDisplaying();
+       let i,j,k;
+       let varEntity;
 
        for (i=0;i<nodeToDisplay.length;i++ ) {
          varEntity = nodeToDisplay[i];
          var nodeBuf = {name:varEntity};
          var label = varEntity;
-         activesAttributes[varEntity] = graphBuilder.attributesDisplaying(varEntity);
+         let attr_disp = graphBuilder.attributesDisplaying(varEntity);
+         activesAttributes[varEntity] = attr_disp.id;
+         activesAttributesLabel[varEntity] = attr_disp.label;
          var nAttributes = activesAttributes[varEntity].length+1;
          /* Fomattage en indice du numero de l'entité */
          row.append($('<th></th>')
@@ -91,7 +94,7 @@ function displayResults(data) {
          row.append($('<th></th>').addClass("success").addClass("table-bordered").text("ID"));
 
          for (var att in activesAttributes[varEntity]) {
-            row.append($('<th></th>').addClass("success").addClass("table-bordered").text(activesAttributes[varEntity][att]));
+            row.append($('<th></th>').addClass("success").addClass("table-bordered").text(activesAttributesLabel[varEntity][att]));
 
          }
        }

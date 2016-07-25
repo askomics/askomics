@@ -15,22 +15,9 @@ class AskomicsObjectView {
     $("#objectName").removeAttr("objid");
   }
 
-  // take a string and return an entity with a sub index
-  formatLabelEntity() {
-    if ( this.objet === undefined )
-      throw new Error("AskomicsObjectView.formatLabelEntity : node is not defined !");
-
-    var re = new RegExp(/(\d+)$/);
-    var indiceEntity = this.objet.label.match(re);
-    if ( indiceEntity === null || indiceEntity.length <= 0 )
-      indiceEntity = [""];
-    var labelEntity = this.objet.label.replace(re,"");
-    return $('<em></em>').text(labelEntity).append($('<sub></sub>').text(indiceEntity[0]));
-  }
-
   showTitleObjectView() {
 
-    $("#objectName").html(this.formatLabelEntity(this.objet));
+    $("#objectName").html(this.objet.formatInHtmlLabelEntity());
     $("#objectName").attr("objid",this.objet.id);
     $("#showNode").show();
     $("#deleteNode").show();

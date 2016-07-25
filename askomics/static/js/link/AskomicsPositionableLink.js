@@ -7,16 +7,16 @@ class AskomicsPositionableLink extends AskomicsLink {
 
     this.type     = 'included' ;
     this.label    = 'included in';
-    this.sameTax  =  true ;
-    this.sameRef  =  true ;
+    this.same_tax  =  true ;
+    this.same_ref  =  true ;
     this.strict   =  true ;
   }
   setjson(obj) {
     super.setjson(obj);
     this.type     = obj.type ;
     this.label    = obj.label;
-    this.sameTax  =  obj.sameTax ;
-    this.sameRef  =  obj.sameRef ;
+    this.same_tax  =  obj.same_tax ;
+    this.same_ref  =  obj.same_ref ;
     this.strict   =  obj.strict ;
   }
   getPanelView() {
@@ -32,41 +32,21 @@ class AskomicsPositionableLink extends AskomicsLink {
     let ua = userAbstraction;
 
     let info = ua.getPositionableEntities();
-    let taxonNodeId = node.categories[info[node.uri].taxon].SPARQLid;
-    let refNodeId = node.categories[info[node.uri].ref].SPARQLid;
-    let startNodeId = node.attributes[info[node.uri].start].SPARQLid;
-    let endNodeId = node.attributes[info[node.uri].end].SPARQLid;
-
-    let taxonSecNodeId = secondNode.categories[info[secondNode.uri].taxon].SPARQLid;
-    let refSecNodeId = secondNode.categories[info[secondNode.uri].ref].SPARQLid;
-    let startSecNodeId = secondNode.attributes[info[secondNode.uri].start].SPARQLid;
-    let endSecNodeId = secondNode.attributes[info[secondNode.uri].end].SPARQLid;
-
-
-    constraintRelations.push([ua.URI(node.uri),'displaySetting:position_taxon',"?"+"id_taxon_"+node.SPARQLid]);
-    constraintRelations.push([ua.URI(node.uri),'displaySetting:position_reference',"?"+"id_ref_"+node.SPARQLid]);
-    constraintRelations.push([ua.URI(node.uri),'displaySetting:position_start',"?"+"id_start_"+node.SPARQLid]);
-    constraintRelations.push([ua.URI(node.uri),'displaySetting:position_end',"?"+"id_end_"+node.SPARQLid]);
-
-    constraintRelations.push([ua.URI(secondNode.uri),'displaySetting:position_taxon',"?"+"id_taxon_"+secondNode.SPARQLid]);
-    constraintRelations.push([ua.URI(secondNode.uri),'displaySetting:position_reference',"?"+"id_ref_"+secondNode.SPARQLid]);
-    constraintRelations.push([ua.URI(secondNode.uri),'displaySetting:position_start',"?"+"id_start_"+secondNode.SPARQLid]);
-    constraintRelations.push([ua.URI(secondNode.uri),'displaySetting:position_end',"?"+"id_end_"+secondNode.SPARQLid]);
 
     /* constrainte to target the same ref/taxon */
 
-    constraintRelations.push(["?"+'URI'+node.SPARQLid,"?"+"id_taxon_"+node.SPARQLid,"?"+taxonNodeId]);
-    constraintRelations.push(["?"+'URI'+node.SPARQLid,"?"+"id_ref_"+node.SPARQLid,"?"+refNodeId]);
+    constraintRelations.push(["?"+'URI'+node.SPARQLid, ":position_taxon", "?taxon_"+node.SPARQLid]);
+    constraintRelations.push(["?"+'URI'+node.SPARQLid, ":position_ref", "?ref_"+node.SPARQLid]);
 
-    constraintRelations.push(["?"+'URI'+secondNode.SPARQLid,"?"+"id_taxon_"+secondNode.SPARQLid,"?"+taxonSecNodeId]);
-    constraintRelations.push(["?"+'URI'+secondNode.SPARQLid,"?"+"id_ref_"+secondNode.SPARQLid,"?"+refSecNodeId]);
+    constraintRelations.push(["?"+'URI'+secondNode.SPARQLid, ":position_taxon", "?taxon_"+secondNode.SPARQLid]);
+    constraintRelations.push(["?"+'URI'+secondNode.SPARQLid, ":position_ref", "?ref_"+secondNode.SPARQLid]);
 
     /* manage start and end variates */
-    constraintRelations.push(["?"+'URI'+node.SPARQLid,"?"+"id_start_"+node.SPARQLid,"?"+startNodeId]);
-    constraintRelations.push(["?"+'URI'+node.SPARQLid,"?"+"id_end_"+node.SPARQLid,"?"+endNodeId]);
+    constraintRelations.push(["?"+'URI'+node.SPARQLid, ":position_start", "?start_"+node.SPARQLid]);
+    constraintRelations.push(["?"+'URI'+node.SPARQLid, ":position_end", "?end_"+node.SPARQLid]);
 
-    constraintRelations.push(["?"+'URI'+secondNode.SPARQLid,"?"+"id_start_"+secondNode.SPARQLid,"?"+startSecNodeId]);
-    constraintRelations.push(["?"+'URI'+secondNode.SPARQLid,"?"+"id_end_"+secondNode.SPARQLid,"?"+endSecNodeId]);
+    constraintRelations.push(["?"+'URI'+secondNode.SPARQLid, ":position_start", "?start_"+secondNode.SPARQLid]);
+    constraintRelations.push(["?"+'URI'+secondNode.SPARQLid, ":position_end", "?end_"+secondNode.SPARQLid]);
   }
 
   buildFiltersSPARQL(filters) {
@@ -81,34 +61,30 @@ class AskomicsPositionableLink extends AskomicsLink {
     let secondNode = this.source ;
     let info = ua.getPositionableEntities();
 
-    let taxonNodeId = node.categories[info[node.uri].taxon].SPARQLid;
-    let refNodeId = node.categories[info[node.uri].ref].SPARQLid;
-    let startNodeId = node.attributes[info[node.uri].start].SPARQLid;
-    let endNodeId = node.attributes[info[node.uri].end].SPARQLid;
-
-    let taxonSecNodeId = secondNode.categories[info[secondNode.uri].taxon].SPARQLid;
-    let refSecNodeId = secondNode.categories[info[secondNode.uri].ref].SPARQLid;
-    let startSecNodeId = secondNode.attributes[info[secondNode.uri].start].SPARQLid;
-    let endSecNodeId = secondNode.attributes[info[secondNode.uri].end].SPARQLid;
 
     if (this.same_ref) {
-      filters.push('FILTER(' + "?"+refNodeId + "=" + "?"+refSecNodeId +')');
+      //TODO: test which of the following line is the fastest
+      filters.push('FILTER(?ref_'+node.SPARQLid+' = ?ref_'+secondNode.SPARQLid+')');
+      //filters.push('FILTER(SAMETERM(?ref_'+node.SPARQLid+', ?ref_'+secondNode.SPARQLid+'))');
     }
 
     if (this.same_tax) {
-      filters.push('FILTER(' + "?"+taxonNodeId + "=" + "?"+taxonSecNodeId +')');
+      //TODO: test which of the following line is the fastest
+      filters.push('FILTER(?taxon_'+node.SPARQLid+' = ?taxon_'+secondNode.SPARQLid+')');
+      //filters.push('FILTER(SAMETERM(?taxon_'+node.SPARQLid+', ?taxon_'+secondNode.SPARQLid+'))');
     }
+
 
     switch(this.type) {
       case 'included' :
-          filters.push('FILTER((?'+startSecNodeId+' >'+equalsign+' ?'+startNodeId+') && (?'+endSecNodeId+' <'+equalsign+' ?'+endNodeId+'))');
+          filters.push('FILTER((?start_'+secondNode.SPARQLid+' >'+equalsign+' ?start_'+node.SPARQLid+' ) && (?end_'+secondNode.SPARQLid+' <'+equalsign+' ?end_'+node.SPARQLid+'))');
           break;
       case 'excluded':
-          filters.push('FILTER(?'+endNodeId+' <'+equalsign+' ?'+startSecNodeId+' || ?'+startNodeId+' >'+equalsign+' ?'+endSecNodeId+')');
+          filters.push('FILTER(?end_'+node.SPARQLid+' <'+equalsign+' ?start_'+secondNode.SPARQLid+' || ?start_'+node.SPARQLid+' >'+equalsign+' ?end_'+secondNode.SPARQLid+')');
           break;
 
       case 'overlap':
-          filters.push('FILTER(((?'+endSecNodeId+' >'+equalsign+' ?'+startNodeId+') && (?'+startSecNodeId+' <'+equalsign+' ?'+endNodeId+')) || ((?'+startSecNodeId+' <'+equalsign+' ?'+endNodeId+') && (?'+endSecNodeId+' >'+equalsign+' ?'+startNodeId+')))');
+          filters.push('FILTER(((?end_'+secondNode.SPARQLid+' >'+equalsign+' ?start_'+node.SPARQLid+') && (?start_'+secondNode.SPARQLid+' <'+equalsign+' ?end_'+node.SPARQLid+')) || ((?start_'+secondNode.SPARQLid+' <'+equalsign+' ?end_'+node.SPARQLid+') && (?end_'+secondNode.SPARQLid+' >'+equalsign+' ?start_'+node.SPARQLid+')))');
           break;
 
       case 'near':

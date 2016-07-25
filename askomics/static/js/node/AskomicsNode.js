@@ -8,6 +8,7 @@ class AskomicsNode extends GraphNode {
     this._categories = {} ;
     this._filters    = {} ; /* filters of attributes key:sparqlid*/
     this._values     = {} ; /* values of attributes key:sparqlid*/
+    this._isregexp   = {} ;
     this.label       = node.label;
     this.uri         = node.uri;
     return this;
@@ -44,12 +45,11 @@ class AskomicsNode extends GraphNode {
         }
     }
     for (let uri in this.categories) {
-      let SparqlId = this.categories[uri].SPARQLid;
+      let SparqlId = "URICat"+this.categories[uri].SPARQLid;
       let isFiltered = SparqlId in this.filters;
       if ( isFiltered || this.categories[uri].actif ) {
-        //constraintRelations.push(["?"+'URI'+this.SPARQLid,ua.URI(uri),"?"+this.categories[uri].SPARQLid,isOptional]);
-        constraintRelations.push(["?"+'URI'+this.SPARQLid,ua.URI(uri),"?URICat"+this.categories[uri].SPARQLid,isOptional]);
-        constraintRelations.push(["?URICat"+this.categories[uri].SPARQLid,'rdfs:label',"?"+this.categories[uri].SPARQLid,isOptional]);
+        constraintRelations.push(["?"+'URI'+this.SPARQLid,ua.URI(uri),"?"+SparqlId,isOptional]);
+        constraintRelations.push(["?"+SparqlId,'rdfs:label',"?"+this.categories[uri].SPARQLid,isOptional]);
       }
     }
   }
@@ -59,15 +59,16 @@ class AskomicsNode extends GraphNode {
     if (this.SPARQLid in this.filters) {
       filters.push(this.filters[this.SPARQLid]);
     }
-
+    console.log(JSON.stringify(this.filters));
     for (let uri in this.attributes) {
       let SparqlId = this.attributes[uri].SPARQLid;
+      console.log(SparqlId);
       if ( SparqlId in this.filters ) {
         filters.push(this.filters[SparqlId]);
       }
     }
     for (let uri in this.categories) {
-      let SparqlId = this.categories[uri].SPARQLid;
+      let SparqlId = "URICat"+this.categories[uri].SPARQLid;
       if ( SparqlId in this.filters ) {
           filters.push(this.filters[SparqlId]);
       }
@@ -129,6 +130,40 @@ class AskomicsNode extends GraphNode {
     }
     return [variates,constraintRelations,filters] ;
   }
+
+  switchRegexpMode(idatt) {
+    if ( idatt === undefined ) throw new Error("switchRegexpMode : undefined attribute !");
+    if (! (idatt in this._isregexp)) {
+      /* default value */
+      this._isregexp[idatt] = true;
+      return;
+    }
+
+    this._isregexp[idatt] = !this._isregexp[idatt] ;
+  }
+
+  isRegexpMode(idatt) {
+    if ( idatt === undefined ) throw new Error("isRegexpMode : undefined attribute !");
+    if (! (idatt in this._isregexp)) {
+      /* default value */
+      this._isregexp[idatt] = true;
+    }
+    return this._isregexp[idatt];
+  }
+
+  setFilterAttributes(SPARQLid,value,filter) {
+    var node = this;
+    if ($.trim(value) === "") { // case if user don't wan anymore a filter
+      delete node.filters[SPARQLid];
+      delete node.values[SPARQLid];
+    } else {
+      if (filter!=="") {
+        node.filters[SPARQLid] = filter;
+      }
+      node.values[SPARQLid] = value; /* save value to restore it when the views need it*/
+    }
+  }
+
 
   set attributes (attributes) { this._attributes = attributes; }
   get attributes () { return this._attributes; }
