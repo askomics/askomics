@@ -157,7 +157,9 @@ class AskView(object):
             self.log.debug("--- DELETE GRAPH : %s", graph)
             ql.execute_query(sqb.get_drop_named_graph(graph).query)
             #delete metadatas
-            ql.execute_query(sqb.get_delete_metadatas_of_graph(graph).query)
+            #FIXME: delete metadatas not working with virtuoso
+            if not self.settings['askomics.hack_virtuoso']:
+                ql.execute_query(sqb.get_delete_metadatas_of_graph(graph).query)
 
     @view_config(route_name='list_named_graphs', request_method='GET')
     def get_list_named_graphs(self):
