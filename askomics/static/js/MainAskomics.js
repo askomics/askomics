@@ -101,10 +101,10 @@ function loadNamedGraphs() {
     var serviceNamedGraphs = new RestServiceJs('list_named_graphs');
     serviceNamedGraphs.getAll(function(namedGraphs) {
         if (namedGraphs.length === 0) {
-          disableDelButtons();
+          disableDelButton();
           return;
         }else{
-          enableDelButtons();
+          enableDelButton();
         }
         for (let graphName in namedGraphs){
             select.append($("<option></option>").attr("value", namedGraphs[graphName])
@@ -113,14 +113,16 @@ function loadNamedGraphs() {
     });
 }
 
+function unselectGraphs() {
+  $('#dropNamedGraphSelected option:selected').removeAttr("selected");
+  manageDelGraphButton();
+}
+
 function manageDelGraphButton() {
   let graphs = $('#dropNamedGraphSelected').val();
-  console.log('---> graphs: '+graphs);
   if (graphs === null) {
-    console.log('---> disable it');
     $('#btn-empty-graph').prop('disabled', true);
   }else{
-    console.log('---> enable it');
     $('#btn-empty-graph').prop('disabled', false);
   }
 }
