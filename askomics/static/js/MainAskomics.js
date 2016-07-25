@@ -96,6 +96,7 @@ function loadNamedGraphs() {
 
     var select = $('#dropNamedGraphSelected');
     select.empty();
+    manageDelGraphButton();
 
     var serviceNamedGraphs = new RestServiceJs('list_named_graphs');
     serviceNamedGraphs.getAll(function(namedGraphs) {
@@ -106,28 +107,39 @@ function loadNamedGraphs() {
           enableDelButtons();
         }
         for (let graphName in namedGraphs){
-            select.append($("<option></option>").attr("value", namedGraphs[graphName]).append(formatGraphName(namedGraphs[graphName])));
+            select.append($("<option></option>").attr("value", namedGraphs[graphName])
+                                                .append(formatGraphName(namedGraphs[graphName])));
         }
     });
 }
 
-function disableDelButtons() {
-  $('#btn-empty').prop('disabled', true);
-  $('#btn-empty-graph').prop('disabled', true);
+function manageDelGraphButton() {
+  let graphs = $('#dropNamedGraphSelected').val();
+  console.log('---> graphs: '+graphs);
+  if (graphs === null) {
+    console.log('---> disable it');
+    $('#btn-empty-graph').prop('disabled', true);
+  }else{
+    console.log('---> enable it');
+    $('#btn-empty-graph').prop('disabled', false);
+  }
 }
 
-function enableDelButtons() {
+function disableDelButton() {
+  $('#btn-empty').prop('disabled', true);
+}
+
+function enableDelButton() {
   $('#btn-empty').prop('disabled', false);
-  $('#btn-empty-graph').prop('disabled', false);
 }
 
 function formatGraphName(name) {
   /*
   Transform the name of the graph into a readable string
   */
-  var timestamp = name.substr(name.lastIndexOf('_') + 1);
-  var d = new Date(timestamp*1000);
-  var new_name = name.substr(0,name.lastIndexOf('_'));
+  let timestamp = name.substr(name.lastIndexOf('_') + 1);
+  let d = new Date(timestamp*1000);
+  let new_name = name.substr(0,name.lastIndexOf('_'));
   new_name = new_name.replace(/urn:sparql:/, "");
 
   return new_name+" ("+d.toLocaleString()+")";
