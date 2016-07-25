@@ -182,11 +182,6 @@ class SourceFile(ParamManager, HaveCachedProperties):
                     if typ in ('start', 'end') and not all(self.is_decimal(val) for val in values):
                         self.log.debug('ERROR! '+typ+' is not decimal!')
                         break
-                    # test if taxon and ref are category
-                    # FIXME: taxon and ref may not be a category ?
-                    if typ in ('ref', 'taxon') and not len(set(values)) < len(values) / 2:
-                        self.log.debug('ERROR! '+typ+' is not category!')
-                        break
                     return typ
 
         # Then, check if category
