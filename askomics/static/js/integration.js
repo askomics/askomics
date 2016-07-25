@@ -178,7 +178,7 @@ function checkExistingData(file_elem) {
     // check if all positionable attributes are set
     var warning_elem = file_elem.find(".warning-message").first();
 
-    if (containAll(col_types,['start', 'end', 'ref', 'taxon'])) {//positionable entity with all attributes
+    if (containAll(col_types,['start', 'end'])) {//positionable entity with all attributes
         warning_elem.html("").removeClass("show").addClass("hidden");
     }else{
         if (containAny(col_types,['start', 'end', 'ref', 'taxon'])) { //positionable entity with missing attributes

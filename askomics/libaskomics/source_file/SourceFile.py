@@ -282,7 +282,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         ttl = ''
 
-        if all(types in self.forced_column_types for types in ('start', 'end', 'ref', 'taxon')):
+        if all(types in self.forced_column_types for types in ('start', 'end')): # a positionable entity have to have a start and a end
             ttl += ":" + urllib.parse.quote(self.headers[0]) + ' displaySetting:is_positionable "true"^^xsd:boolean .\n'
             ttl += ":is_positionable rdfs:label 'is_positionable' .\n"
             ttl += ":is_positionable rdf:type owl:ObjectProperty .\n"
