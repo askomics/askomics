@@ -21,6 +21,9 @@ install:
   - npm install --save-dev mocha
   - npm install --save-dev chai
   - npm install jshint gulp-jshint --save-dev
+  - npm install mocha-phantomjs-istanbul --save-dev
+  - npm install gulp-istanbul-report --save-dev
+  - npm install gulp-inject --save-dev
 before_script:
   - docker pull tenforce/virtuoso
   - sudo docker run -d --name virtuoso -p 127.0.0.1:8890:8890 -p 127.0.0.1:1111:1111  -e DBA_PASSWORD=dba -e SPARQL_UPDATE=true -e DEFAULT_GRAPH=http://localhost:8890/DAV --net="host" -t tenforce/virtuoso
