@@ -86,6 +86,7 @@ class AskViewTests(unittest.TestCase):
         for key in data['metadata'].keys():
             self.assertRegexpMatches(key, r'^urn:sparql:(instrument|enseigne|connait|joue|personne)\.tsv_[0-9]+\.[0-9]+$')
             for key2 in data['metadata'][key]:
+                self.assertRegexpMatches(key2, r'^(version|username|filename|loadDate|server)$')
                 if key2 == 'version':
                     assert data['metadata'][key][key2] == '1.3'
                 elif key2 == 'username':
