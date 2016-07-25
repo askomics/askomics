@@ -5,7 +5,7 @@ var sourcemaps = require('gulp-sourcemaps');
 var babel = require('gulp-babel');
 var mocha = require('gulp-mocha');
 var inject = require('gulp-inject');
-var rename = require('gulp-rename');
+//var rename = require('gulp-rename');
 var istanbul = require('gulp-istanbul');
 var mochaPhantomJS = require('gulp-mocha-phantomjs');
 var istanbulReport = require('gulp-istanbul-report');
@@ -66,7 +66,7 @@ gulp.task('pre-test', function () {
      }))
     .pipe(sourcemaps.init())
     // Covering files
-    .pipe(istanbul())
+    .pipe(istanbul({coverageVariable: '__coverage__'}))
     .pipe(sourcemaps.write('.'))
     // Write the covered files to a temporary directory
     .pipe(gulp.dest('askomics/test/client/js/istanbul/'));
