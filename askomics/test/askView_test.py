@@ -88,7 +88,7 @@ class AskViewTests(unittest.TestCase):
             for key2 in data['metadata'][key]:
                 self.assertRegexpMatches(key2, r'^(version|username|filename|loadDate|server)$')
                 if key2 == 'version':
-                    assert data['metadata'][key][key2] == '1.3'
+                    assert data['metadata'][key][key2] == '2.0'
                 elif key2 == 'username':
                     assert data['metadata'][key][key2] == getpass.getuser() 
                 elif key2 == 'filename':
