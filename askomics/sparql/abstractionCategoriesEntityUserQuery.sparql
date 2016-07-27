@@ -1,0 +1,16 @@
+SELECT DISTINCT ?entity ?category ?labelCategory ?typeCategory
+WHERE {
+    GRAPH <urn:sparql:tests-askomics:insert:informative1> {
+    ?g rdfg:subGraphOf <urn:sparql:tests-askomics:insert:informative1> }
+    GRAPH ?g {
+        ?entity rdf:type owl:Class .
+	        ?typeCategory displaySetting:category [] .
+
+        ?category rdf:type owl:ObjectProperty;
+                    rdfs:label ?labelCategory ;
+                    rdfs:domain ?entity;
+                    rdfs:range ?typeCategory.
+
+	    VALUES ?entity { $entities }
+    }
+}

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import urllib.parse
 from askomics.libaskomics.utils import pformat_generic_object
 
 class AbstractedEntity(object):
@@ -11,23 +12,13 @@ class AbstractedEntity(object):
     """
 
     def __init__(self, identifier):
-        self.uri = ":" + identifier
+        self.uri = ":" + urllib.parse.quote(identifier)
         self.label = identifier
 
         self.log = logging.getLogger(__name__)
 
     def get_uri(self):
         return self.uri
-
-    def get_label(self):
-        return self.label
-
-    def print_attr(self):
-        self.log.debug(pformat_generic_object(self))
-
-    def to_dict(self):
-        return {"uri": self.uri,
-                "label": self.label}
 
     def get_turtle(self):
         """

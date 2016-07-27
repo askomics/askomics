@@ -1,5 +1,9 @@
 # AskOmics
 
+[![Build Status](https://travis-ci.org/askomics/askomics.svg?branch=v2.0)](https://travis-ci.org/askomics/askomics)
+[![Coverage Status](https://coveralls.io/repos/github/askomics/askomics/badge.svg?branch=v2.0)](https://coveralls.io/github/askomics/askomics?branch=v2.0)
+
+
 AskOmics is a visual SPARQL query builder for RDF database. One of its advantages
 is that you don't need to know how to use SPARQL or the structure of your database.
 
@@ -57,13 +61,13 @@ To be able to launch AskOmics, you will need to install it in your virtual envir
 If you want to develop AskOmics:
 ```
 $ cd rdf-visual-query-builder/
-$ python setup.py develop
+$ python3 setup.py develop
 ```
 
 If you don't want to develop AskOmics:
 ```
 $ cd rdf-visual-query-builder/
-$ python setup.py install
+$ python3 setup.py install
 ```
 
 ### Launch AskOmics server

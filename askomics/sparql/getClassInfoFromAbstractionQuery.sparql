@@ -1,7 +1,12 @@
-SELECT DISTINCT ?relation
-FROM $graph
-WHERE {?class rdf:type owl:Class .
-       OPTIONAL { ?relation rdfs:domain ?class } .
-       OPTIONAL { ?relation rdfs:range ?range } .
-       VALUES ?class { :$nodeClass }
-      }
+SELECT DISTINCT ?relation_label
+WHERE {
+    GRAPH <urn:sparql:tests-askomics:insert:informative1> {
+    ?g rdfg:subGraphOf <urn:sparql:tests-askomics:insert:informative1> }
+    GRAPH ?g {
+        ?class rdf:type owl:Class .
+        OPTIONAL { ?relation rdfs:domain ?class } .
+        OPTIONAL { ?relation rdfs:range ?range } .
+        OPTIONAL { ?relation rdfs:label ?relation_label } .
+        VALUES ?class { :$nodeClass }
+    }
+}

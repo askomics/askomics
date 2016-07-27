@@ -1,0 +1,43 @@
+{
+  "name": "askomics",
+  "version": "2.0.0",
+  "devDependencies": {
+    "babel-preset-es2015": "^6.9.0",
+    "chai": "^3.5.0",
+    "gulp": "^3.9.1",
+    "gulp-babel": "^6.1.2",
+    "gulp-concat": "^2.6.0",
+    "gulp-depend": "^1.0.0",
+    "gulp-inject": "^4.1.0",
+    "gulp-istanbul-report": "0.0.1",
+    "gulp-jshint": "^2.0.1",
+    "gulp-mocha": "^2.2.0",
+    "gulp-mocha-phantomjs": "^0.11.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-util": "^3.0.7",
+    "istanbul": "^0.4.4",
+    "jshint": "^2.9.2",
+    "mocha": "^2.5.3",
+    "mocha-phantomjs-istanbul": "0.0.2",
+    "remap-istanbul": "^0.6.4",
+    "should": "^10.0.0"
+  },
+  "main": "gulpfile.js",
+  "directories": {
+    "doc": "doc"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/askomics/askomics/"
+  },
+  "keywords": [
+    "semantic",
+    "web",
+    "ontology"
+  ],
+  "author": "",
+  "license": "GPL-3.0"
+}

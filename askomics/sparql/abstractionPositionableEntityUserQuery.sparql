@@ -1,0 +1,9 @@
+SELECT DISTINCT ?entity
+WHERE {
+    GRAPH <urn:sparql:tests-askomics:insert:informative1> {
+    ?g rdfg:subGraphOf <urn:sparql:tests-askomics:insert:informative1> }
+    GRAPH ?g {
+        ?entity rdf:type owl:Class .
+        ?entity displaySetting:is_positionable "true"^^xsd:boolean .
+    }
+}

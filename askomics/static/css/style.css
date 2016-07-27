@@ -56,6 +56,10 @@ pre {
     overflow-y: auto;
 }
 
+.div-details-max {
+    overflow-y: auto;
+}
+
 .glyphicon:hover {
     cursor: pointer;
     color: chocolate;
@@ -74,7 +78,7 @@ pre {
 }
 
 #svgdiv {
-    max-height: 380px;
+    /*max-height: 380px;*/
     background: Gainsboro;
     border: 1px solid;
 }
@@ -154,4 +158,12 @@ div.uploadedQuery {
 
 .template-source_file {
     margin-bottom: 4em;
+}
+
+.results-div {
+    overflow-x: auto;
+}
+
+.table-results {
+    margin-bottom: 0px;
 }

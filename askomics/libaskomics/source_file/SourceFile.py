@@ -8,6 +8,10 @@ from collections import defaultdict
 from itertools import count
 import os.path
 import tempfile
+import time
+import getpass
+import urllib.parse
+from pkg_resources import get_distribution
 
 from askomics.libaskomics.ParamManager import ParamManager
 from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
@@ -28,6 +32,8 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         ParamManager.__init__(self, settings, session)
 
+        self.timestamp = str(time.time())
+
         self.path = path
 
         # The name should not contain extension as dots are not allowed in rdf names
@@ -36,21 +42,41 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         self.preview_limit = preview_limit
 
-        self.forced_column_types = None # FIXME should it have a default value? (guessed headers?) otherwise we must call the setter before using this (or make it an arg to methods using this)
+        self.forced_column_types = ['entity']
+
+        self.category_values = defaultdict(set)
 
         self.type_dict = {
             'numeric' : 'xsd:decimal',
             'text'    : 'xsd:string',
             'category': ':',
+            'taxon': ':',
+            'ref': ':',
+            'start': 'xsd:decimal',
+            'end': 'xsd:decimal',
             'entity'  : ':',
+            'entitySym'  : ':',
             'entity_start'  : ':'}
 
         self.delims = {
             'numeric' : ('', ''),
             'text'    : ('"', '"'),
             'category': (':', ''),
+            'taxon': (':', ''),
+            'ref': (':', ''),
+            'start' : ('', ''),
+            'end' : ('', ''),
             'entity'  : (':', ''),
+            'entitySym'  : (':', ''),
             'entity_start'  : (':', '')}
+
+        self.metadatas = {
+            'loadDate': '',
+            'username': getpass.getuser(),
+            'fileName': self.name,
+            'version': get_distribution('Askomics').version,
+            'server': '',
+            'graphName':''}
 
         self.log = logging.getLogger(__name__)
 
@@ -83,8 +109,6 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
             # first line is header
             headers = next(tabreader)
-            if headers[0].startswith('#'):
-                headers[0] = re.sub('^#+', '', s) # Remove leading comment signs
 
         return headers
 
@@ -107,9 +131,6 @@ class SourceFile(ParamManager, HaveCachedProperties):
             # Loop on lines
             data = [[] for x in range(len(header))]
             for row in tabreader:
-                # skip commented lines (# char at the begining)
-                if row[0].startswith('#'):
-                    continue
 
                 # Fill data lists
                 for i, val in enumerate(row):
@@ -122,7 +143,8 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         return data
 
-    def guess_column_types(self, columns):
+    #Not used
+    def guess_column_types(self, columns, headers):
         """
         For each column given, return a guessed column type
 
@@ -130,17 +152,44 @@ class SourceFile(ParamManager, HaveCachedProperties):
         :return: List of guessed column types
         """
 
-        return [self.guess_values_type(col) for col in columns]
+        data=[]
+        count=0
+        for col in columns:
+            header = headers[count]
+            data.append(self.guess_values_type(col,header))
+            count+=1
+        return data
+        #return [self.guess_values_type(col) for col in columns]
 
-    def guess_values_type(self, values):
+    def guess_values_type(self, values, header):
         """
         From a list of values, guess the data type
 
         :param values: a List of values to evaluate
-        :return: the guessed type ('numeric', 'text' or 'category'
+        :param num: index of the header
+        :return: the guessed type ('taxon','ref', 'start', 'end', 'numeric', 'text' or 'category')
         """
 
-        # First check if category
+        types = {'ref':('chrom', 'ref'), 'taxon':('taxon', 'species'), 'start':('start', 'begin'), 'end':('end', 'stop')}
+
+        # First check if it is specific type
+        self.log.debug('header: '+header)
+        for typ, expressions in types.items():
+            for expression in expressions:
+                regexp = '.*' + expression + '.*'
+                if re.match(regexp, header, re.IGNORECASE) is not None:
+                    # Test if start and end values are numerics
+                    if typ in ('start', 'end') and not all(self.is_decimal(val) for val in values):
+                        self.log.debug('ERROR! '+typ+' is not decimal!')
+                        break
+                    # test if taxon and ref are category
+                    # FIXME: taxon and ref may not be a category ?
+                    if typ in ('ref', 'taxon') and not len(set(values)) < len(values) / 2:
+                        self.log.debug('ERROR! '+typ+' is not category!')
+                        break
+                    return typ
+
+        # Then, check if category
         if len(set(values)) < len(values) / 2:
             return 'category'
         elif all(self.is_decimal(val) for val in values): # Then numeric
@@ -156,6 +205,9 @@ class SourceFile(ParamManager, HaveCachedProperties):
         :param value: the value to evaluate
         :return: True if the value is decimal
         """
+
+        if value == "":
+            return True
         if value.isdigit():
             return True
         else:
@@ -174,6 +226,9 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         self.forced_column_types = types
 
+        if len(self.forced_column_types) != len(self.headers):
+            raise ValueError("forced_column_types hve a different size that headers ! forced_column_types:"+str(self.forced_column_types)+" headers:"+str(self.headers))
+
     def set_disabled_columns(self, disabled_columns):
         """
         Set manually curated types for column
@@ -190,6 +245,8 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         :return: ttl content for the abstraction
         """
+        if len(self.forced_column_types)<=0:
+            raise ValueError("forced_column_types is not defined !")
 
         ttl = ''
         ref_entity = self.headers[0]
@@ -199,15 +256,19 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         # Store all the relations
         for key, key_type in enumerate(self.forced_column_types):
+            if key > 0 and not key_type.startswith('entity'):
+                if key_type in ('taxon', 'ref', 'start', 'end'):
+                    uri = 'position_'+key_type
+                else:
+                    uri = urllib.parse.quote(self.headers[key])
+                ttl += ":" + uri + ' displaySetting:attribute "true"^^xsd:boolean .\n'
+
             if key > 0 and key not in self.disabled_columns:
                 ttl += AbstractedRelation(key_type, self.headers[key], ref_entity, self.type_dict[key_type]).get_turtle()
 
-            if key > 0 and key_type != 'entity':
-                ttl += ":" + self.headers[key] + ' displaySetting:attribute "true"^^xsd:boolean .\n'
-
         # Store the startpoint status
         if self.forced_column_types[0] == 'entity_start':
-            ttl += ":" + ref_entity + ' displaySetting:startPoint "true"^^xsd:boolean .\n'
+            ttl += ":" + urllib.parse.quote(ref_entity) + ' displaySetting:startPoint "true"^^xsd:boolean .\n'
 
         return ttl
 
@@ -221,13 +282,18 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         ttl = ''
 
+        if all(types in self.forced_column_types for types in ('start', 'end', 'ref', 'taxon')):
+            ttl += ":" + urllib.parse.quote(self.headers[0]) + ' displaySetting:is_positionable "true"^^xsd:boolean .\n'
+            ttl += ":is_positionable rdfs:label 'is_positionable' .\n"
+            ttl += ":is_positionable rdf:type owl:ObjectProperty .\n"
+
         for header, categories in self.category_values.items():
-            indent = len(header) * " " + len("displaySetting:has_category") * " " + 3 * " "
-            ttl += ":" + header + " displaySetting:has_category :"
-            ttl += (" , \n" + indent + ":").join(categories) + " .\n"
+            indent = len(header) * " " + len("displaySetting:category") * " " + 3 * " "
+            ttl += ":" + urllib.parse.quote(header+"Category") + " displaySetting:category :"
+            ttl += (" , \n" + indent + ":").join(map(urllib.parse.quote,categories)) + " .\n"
 
             for item in categories:
-                ttl += ":" + item + " rdf:type :" + header + " ;\n" + len(item) * " " + "  rdfs:label \"" + item + "\" .\n"
+                ttl += ":" + urllib.parse.quote(item) + " rdf:type :" + urllib.parse.quote(header) + " ;\n" + len(item) * " " + "  rdfs:label \"" + item + "\" .\n"
 
         return ttl
 
@@ -245,21 +311,22 @@ class SourceFile(ParamManager, HaveCachedProperties):
             tabreader = csv.reader(tabfile, dialect=self.dialect)
             next(tabreader) # Skip header
 
+            entity_label = ""
             # Loop on lines
             for row_number, row in enumerate(tabreader):
-                # skip commented lines (# char at the begining)
-                if row[0].startswith('#'):
+                #blanck line
+                if len(row) == 0:
                     continue
-
                 if len(row) != len(self.headers):
-                    e = SourceFileSyntaxError('Invalid line found: %s columns expected, found %s' %s (str(self.headers), str(len(row))))
+                    e = SourceFileSyntaxError('Invalid line found: '+str(self.headers)+' columns expected, found '+str(len(row))+" - (last valid entity "+entity_label+")")
                     e.filename = self.path
                     e.lineno = row_number
                     log.error(repr(e))
-                    raise e #FIXME: Do we want to read the file anyway ?
+                    raise e
 
+                entity_label = row[0]
                 for i, (header, current_type) in enumerate(zip(self.headers, self.forced_column_types)):
-                    if current_type == 'category':
+                    if current_type in ('category', 'taxon', 'ref'):
                         # This is a category, keep track of allowed values for this column
                         self.category_values.setdefault(header, set()).add(row[i])
 
@@ -274,30 +341,29 @@ class SourceFile(ParamManager, HaveCachedProperties):
             # Load the file with reader
             tabreader = csv.reader(tabfile, dialect=self.dialect)
 
-            count = 0
-
             next(tabreader) # Skip header
 
             # Loop on lines
-            for row in tabreader:
-
-                ttl = ""
-
-                # skip commented lines (# char at the begining)
-                if row[0].startswith('#'):
+            for row_number, row in enumerate(tabreader):
+                ttl    = ""
+                ttlSym = ""
+                #if len(row)>0:
+                #    self.log.debug(row[0]+' '+str(row_number))
+                #blanck line
+                if len(row) == 0:
                     continue
 
                 if len(row) != len(self.headers):
-                    e = SourceFileSyntaxError('Invalid line found: %s columns expected, found %s' %s (str(self.headers), str(len(row))))
+                    e = SourceFileSyntaxError('Invalid line found: '+str(len(self.headers))+' columns expected, found '+str(len(row))+" - (last valid entity "+entity_label+")")
                     e.filename = self.path
                     e.lineno = row_number
                     self.log.error(repr(e))
-                    raise e #FIXME: Do we want to read the file anyway ?
+                    raise e
 
                 # Create the entity (first column)
                 entity_label = row[0]
                 indent = (len(entity_label) + 1) * " "
-                ttl += ":" + entity_label + " rdf:type :" + self.headers[0] + " ;\n"
+                ttl += ":" + urllib.parse.quote(entity_label) + " rdf:type :" + urllib.parse.quote(self.headers[0]) + " ;\n"
                 ttl += indent + " rdfs:label \"" + entity_label + "\" ;\n"
 
                 # Add data from other columns
@@ -307,23 +373,65 @@ class SourceFile(ParamManager, HaveCachedProperties):
                         #if current_type == 'entity':
                             #relations.setdefault(header, {}).setdefault(entity_label, []).append(row[i]) # FIXME only useful if we want to check for duplicates
                         #else
-                        if current_type == 'category':
+
+                        #OFI : manage new header with relation@type_entity
+                        #relationName = ":has_" + header # manage old way
+                        relationName = ":"+urllib.parse.quote(header) # manage old way
+                        if current_type.startswith('entity'):
+                            idx = header.find("@")
+                            if ( idx > 0 ):
+                                relationName = ":"+urllib.parse.quote(header[0:idx])
+
+                        if current_type in ('category', 'taxon', 'ref'):
                             # This is a category, keep track of allowed values for this column
                             self.category_values[header].add(row[i])
+                            row[i] = urllib.parse.quote(row[i])
 
                         # Create link to value
                         if row[i]: # Empty values are just ignored
-                            ttl += indent + " :has_" + header + " " + self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " ;\n"
+                            # positionable attributes
+                            if current_type == 'start':
+                                ttl += indent + " " + ':position_start' + " " + self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " ;\n"
+                            elif current_type == 'end':
+                                ttl += indent + " " + ':position_end' + " " + self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " ;\n"
+                            elif current_type == 'taxon':
+                                ttl += indent + " " + ':position_taxon' + " " + self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " ;\n"
+                            elif current_type == 'ref':
+                                ttl += indent + " " + ':position_ref' + " " + self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " ;\n"
+                            else:
+                                ttl += indent + " "+ relationName + " " + self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " ;\n"
+
+                        if current_type == 'entitySym':
+                            ttlSym += self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " "+ relationName + " :" + urllib.parse.quote(entity_label)  + " .\n"
                         # FIXME we will need to store undefined values one day if we want to be able to query on this
 
                 ttl = ttl[:-2] + "."
+                #manage symmetric relation
+                if ttlSym != "":
+                    yield ttlSym
 
                 yield ttl
-
                 # Stop after x lines
-                count += 1
-                if preview_only and count > self.preview_limit:
+                if preview_only and row_number > self.preview_limit:
                     return
+
+    def get_metadatas(self):
+        """
+        Create metadatas and insert them into AskOmics main graph.
+        """
+        self.log.debug("====== INSERT METADATAS ======")
+        sqb = SparqlQueryBuilder(self.settings, self.session)
+        ql = QueryLauncher(self.settings, self.session)
+
+        ttlMetadatas = "<" + self.metadatas['graphName'] + "> " + "prov:generatedAtTime " + '"' + self.metadatas['loadDate'] + '"^^xsd:dateTime .\n'
+        ttlMetadatas += "<" + self.metadatas['graphName'] + "> " + "dc:creator " + '"' + self.metadatas['username'] + '"^^xsd:string  .\n'
+        ttlMetadatas += "<" + self.metadatas['graphName'] + "> " + "prov:wasDerivedFrom " + '"' + self.metadatas['fileName'] + '"^^xsd:string .\n'
+        ttlMetadatas += "<" + self.metadatas['graphName'] + "> " + "dc:hasVersion " + '"' + self.metadatas['version'] + '"^^xsd:string .\n'
+        ttlMetadatas += "<" + self.metadatas['graphName'] + "> " + "prov:describesService " + '"' + self.metadatas['server'] + '"^^xsd:string .'
+
+        sparqlHeader = sqb.header_sparql_config()
+
+        ql.insert_data(ttlMetadatas, self.get_param("askomics.graph"), sparqlHeader)
 
     @cached_property
     def existing_relations(self):
@@ -333,7 +441,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
         :return: a List of relation names
         :rtype: List
         """
-
+        self.log.debug("existing_relations")
         existing_relations = []
 
         sqb = SparqlQueryBuilder(self.settings, self.session)
@@ -343,9 +451,6 @@ class SourceFile(ParamManager, HaveCachedProperties):
         query = sqb.load_from_file(sparql_template, {"nodeClass": self.headers[0]}).query
 
         results = ql.process_query(query)
-
-        for rel in results:
-            existing_relations.append(rel["relation"].replace(self.get_param("askomics.prefix"), "").replace("has_", ""))
 
         return existing_relations
 
@@ -359,22 +464,31 @@ class SourceFile(ParamManager, HaveCachedProperties):
         headers_status = []
         missing_headers = []
 
+        header_tmp = []
+        # change header to avoid @ character
+        for header in self.headers[1:]:
+            idx = header.find("@")
+            if idx != -1:
+                header_tmp.append(header[0:idx])
+                header = header[idx+1:]
+            else:
+                header_tmp.append(header)
+
         if self.existing_relations == []:
             # No results, everything is new
-            for k, h in enumerate(self.headers):
+            for elem in header_tmp:
                 headers_status.append('new')
 
             return headers_status, missing_headers
 
-
         for rel in self.existing_relations:
-            if rel not in self.headers:
-                self.log.warning('Expected relation "%s" but did not find corresponding source file: %s.', rel, repr(self.headers))
+            if rel not in header_tmp:
+                self.log.warning('Expected relation "%s" but did not find corresponding source file: %s.', rel, repr(header_tmp))
                 missing_headers.append(rel)
 
         headers_status.append('present') # There are some existing relations, it means the entity is present
 
-        for header in self.headers[1:]:
+        for header in header_tmp[1:]:
             if header not in self.existing_relations:
                 self.log.debug('New class detected "%s".', header)
                 headers_status.append('new')
@@ -384,7 +498,20 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         return headers_status, missing_headers
 
-    def persist(self, urlbase):
+    def get_number_of_lines(self):
+        """
+        Get the number of line of a tabulated file
+
+        :return: number of ligne (int)
+        """
+
+        with open(self.path) as f:
+            for number, l in enumerate(f):
+                pass
+
+        return number
+
+    def persist(self, urlbase,method):
         """
         Store the current source file in the triple store
 
@@ -398,8 +525,6 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         ql = QueryLauncher(self.settings, self.session)
 
-        method = 'load' # FIXME how do we decide? We don't know the size of what we want to insert as we use a generator
-
         # use insert data instead of load sparql procedure when the dataset is small
         total_triple_count = 0
         chunk_count = 1
@@ -410,8 +535,9 @@ class SourceFile(ParamManager, HaveCachedProperties):
             triple_count = 0
             for triple in content_ttl:
                 if not fp:
+                    pathttl = self.get_ttl_directory()
                     # Temp file must be accessed by http so we place it in askomics/ttl/ dir
-                    fp = tempfile.NamedTemporaryFile(dir="askomics/ttl/", suffix=".ttl", mode="w", delete=False)
+                    fp = tempfile.NamedTemporaryFile(dir=pathttl, prefix="tmp_"+self.metadatas['fileName'], suffix=".ttl", mode="w", delete=False)
                     fp.write(header_ttl + '\n')
 
                 fp.write(triple + '\n')
@@ -448,7 +574,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
             domain_knowledge_ttl = self.get_domain_knowledge()
 
             os.remove(fp.name) # Everything ok, remove previous temp file
-            fp = tempfile.NamedTemporaryFile(dir="askomics/ttl/", suffix=".ttl", mode="w", delete=False)
+            fp = tempfile.NamedTemporaryFile(dir=pathttl, prefix="tmp_"+self.metadatas['fileName'], suffix=".ttl", mode="w", delete=False)
             fp.write(header_ttl + '\n')
             fp.write(abstraction_ttl + '\n')
             fp.write(domain_knowledge_ttl + '\n')
@@ -465,6 +591,8 @@ class SourceFile(ParamManager, HaveCachedProperties):
             sqb = SparqlQueryBuilder(self.settings, self.session)
             header_ttl = sqb.header_sparql_config()
 
+            graphName = "urn:sparql:" + self.name + '_' + self.timestamp
+
             triple_count = 0
             chunk = ""
             for triple in content_ttl:
@@ -477,7 +605,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
                     # We have reached the maximum chunk size, load it and then we will start a new chunk
                     self.log.debug("Inserting ttl chunk %s" % (chunk_count))
                     try:
-                        ql.insert_data(chunk, header_ttl)
+                        queryResults = ql.insert_data(chunk, graphName, header_ttl)
                     except Exception as e:
                         return self._format_exception(e)
 
@@ -491,7 +619,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
                 self.log.debug("Inserting ttl chunk %s (last)" % (chunk_count))
 
                 try:
-                    ql.insert_data(chunk, header_ttl)
+                    queryResults = ql.insert_data(chunk, graphName, header_ttl)
                 except Exception as e:
                     return self._format_exception(e)
 
@@ -508,12 +636,25 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
             self.log.debug("Inserting ttl abstraction")
             try:
-                ql.insert_data(chunk, header_ttl)
+                ql.insert_data(chunk, graphName, header_ttl)
             except Exception as e:
                 return self._format_exception(e)
 
+            ttlNamedGraph = "<" + graphName + "> " + "rdfg:subGraphOf" + " <" + self.get_param("askomics.graph") + "> ."
+            self.metadatas['graphName'] = graphName
+            sparqlHeader = sqb.header_sparql_config()
+            ql.insert_data(ttlNamedGraph, self.get_param("askomics.graph"), sparqlHeader)
+
+            data = {}
+
+            self.metadatas['server'] = queryResults.info()['server']
+            self.metadatas['loadDate'] = self.timestamp
+
             data['status'] = 'ok'
             data['total_triple_count'] = total_triple_count
+            self.get_metadatas()
+
+        data['expected_lines_number'] = self.get_number_of_lines()
 
         return data
 
@@ -528,15 +669,25 @@ class SourceFile(ParamManager, HaveCachedProperties):
         if not fp.closed:
             fp.flush() # This is required as otherwise, data might not be really written to the file before being sent to triplestore
 
+        sqb = SparqlQueryBuilder(self.settings, self.session)
         ql = QueryLauncher(self.settings, self.session)
+        graphName = "urn:sparql:" + self.name + '_' + self.timestamp
+        self.metadatas['graphName'] = graphName
+        ttlNamedGraph = "<" + graphName + "> " + "rdfg:subGraphOf" + " <" + self.get_param("askomics.graph") + "> ."
+        sparqlHeader = sqb.header_sparql_config()
+        ql.insert_data(ttlNamedGraph, self.get_param("askomics.graph"), sparqlHeader)
 
         url = urlbase+"/ttl/"+os.path.basename(fp.name)
         data = {}
         try:
             if self.is_defined("askomics.file_upload_url"):
-                res = ql.upload_data(fp.name)
+                queryResults = ql.upload_data(fp.name, graphName)
+                self.metadatas['server'] = queryResults.headers['Server']
+                self.metadatas['loadDate'] = self.timestamp
             else:
-                res = ql.load_data(url)
+                queryResults = ql.load_data(url, graphName)
+                self.metadatas['server'] = queryResults.info()['server']
+                self.metadatas['loadDate'] = self.timestamp
             data['status'] = 'ok'
         except Exception as e:
             self._format_exception(e, data=data)
@@ -545,6 +696,8 @@ class SourceFile(ParamManager, HaveCachedProperties):
                 data['url'] = url
             else:
                 os.remove(fp.name) # Everything ok, remove temp file
+
+        self.get_metadatas()
 
         return data
 

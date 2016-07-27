@@ -15,10 +15,14 @@ requires = [
     'waitress==0.9.0',
     'SPARQLWrapper==1.7.6',
     'requests==2.10.0',
+    'Pygments==2.1.3',
+    'nose',
+    'webtest',
+    'coverage',
     ]
 
 setup(name='Askomics',
-      version='1.3',
+      version='2.0',
       description='Askomics',
       long_description=README + '\n\n' + CHANGES,
       classifiers=[
