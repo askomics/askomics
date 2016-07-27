@@ -1,7 +1,10 @@
+//require('./istanbul/askomics.js');
+
 // tests.js
 describe('GraphNode', function(){
   describe('#Constructeur empty', function(){
     it('* test all methods *', function(){
+
       var node = new GraphNode();
       chai.assert.typeOf(node.SPARQLid,'string');
       chai.assert.isNotOk(node.actif);
@@ -15,4 +18,5 @@ describe('GraphNode', function(){
       */
     });
   });
+//});
 });
