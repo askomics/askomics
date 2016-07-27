@@ -10,6 +10,7 @@ var istanbul = require('gulp-istanbul');
 var mochaPhantomJS = require('gulp-mocha-phantomjs');
 var istanbulReport = require('gulp-istanbul-report');
 
+console.log(require('istanbul').Report.getReportList());
 
 var askomicsSourceFiles = [
         'askomics/static/js/AskomicsRestManagement.js',
@@ -55,15 +56,13 @@ var mochaPhantomOpts = {
     useColors: true,
     hooks: 'mocha-phantomjs-istanbul',
     coverageFile: coverageFile
-  },
+  }
 };
 
 //https://github.com/willembult/gulp-istanbul-report
 gulp.task('pre-test', function () {
   return gulp.src(askomicsSourceFiles, {base: "askomics/static/js"})
-     .pipe(babel({
-       presets: ['es2015']
-     }))
+    .pipe(babel({presets: ['es2015']}))
     .pipe(sourcemaps.init())
     // Covering files
     .pipe(istanbul({coverageVariable: '__coverage__'}))
@@ -99,6 +98,19 @@ gulp.task('test', ['default','pre-test'],function () {
     .pipe(mochaPhantomJS(mochaPhantomOpts))
     .on('finish', function() {
       gulp.src(coverageFile)
-        .pipe(istanbulReport());
+        .pipe(istanbulReport({
+          reporterOpts: {
+            dir: './coverage'
+          },
+          includeAllSources: true,
+          includeUntested : true,
+          reporters: [
+            'text',
+            'text-summary',
+            {'name': 'text', file: 'frontend.txt'}, // -> ./coverage/report.txt
+            {'name': 'lcovonly', file: 'frontend.lcov'},
+            {'name': 'json', file: 'frontend.json'} // -> ./jsonCov/cov.json
+          ]
+        }));
     });
 });
