@@ -179,6 +179,47 @@ class AskView(object):
 
         return namedGraphs
 
+    @view_config(route_name='positionable_attr', request_method='POST')
+    def positionable_attr(self):
+        """
+        Return the positionable attributes in common between two positionable entity
+        """
+
+        body = self.request.json_body
+        data = {}
+
+        sqb = SparqlQueryBuilder(self.settings, self.request.session)
+        ql = QueryLauncher(self.settings, self.request.session)
+
+        self.log.debug('first entity: '+body['node'])
+        self.log.debug('second entity: '+body['second_node'])
+
+        # Check if the two entity are positionable
+        positionable1 = ql.process_query(sqb.get_if_positionable(body['node']).query)
+        positionable2 = ql.process_query(sqb.get_if_positionable(body['node']).query)
+
+        if positionable1 == 0 or positionable2 == 0:
+            data['error'] = 'not positionable nodes'
+            return data
+
+        results = ql.process_query(sqb.get_common_positionable_attributes(body['node'], body['second_node']).query)
+        self.log.debug(results)
+
+        data['results'] = {}
+
+        list_pos_attr = []
+
+        for elem in results:
+            if elem['pos_attr'] not in list_pos_attr:
+                list_pos_attr.append(elem['pos_attr'])
+
+        for elem in list_pos_attr:
+            data['results'][elem] = False not in [bool(int(p['status'])) for p in results if p['pos_attr'] == elem]
+
+        self.log.debug('---> '+str(data['results']))
+
+        return data
+
     @view_config(route_name='source_files_overview', request_method='GET')
     def source_files_overview(self):
         """
