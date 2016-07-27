@@ -12,9 +12,11 @@ class AskomicsPositionableLink extends AskomicsLink {
     this.strict   =  false ;
     this.position_taxon = 'undef' ;
     this.position_ref = 'undef' ;
+  }
 
-    /* get list of common positionable attributes
-       (taxon and ref) */
+  setCommonPosAttr() {
+    /*  get list of common positionable attributes
+        (taxon and ref) */
     let service = new RestServiceJs("positionable_attr");
     let model = { 'node': this.source.uri,
                   'second_node': this.target.uri,

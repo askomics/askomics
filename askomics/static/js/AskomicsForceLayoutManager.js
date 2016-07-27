@@ -459,6 +459,7 @@ var AskomicsForceLayoutManager = function () {
           let source   = suggestedList[uri] ;
           let target   = slt_node;
           link = new AskomicsPositionableLink(uriLink,source,target);
+          link.setCommonPosAttr();
           link.id = graphBuilder.getId();
           links.push(link);
         }
@@ -515,6 +516,7 @@ var AskomicsForceLayoutManager = function () {
         let source   = node2 ;
         let target   = node1;
         let link = new AskomicsPositionableLink(uriLink,source,target);
+        link.setCommonPosAttr();
         link.id = graphBuilder.getId();
         links.push(link);
       }
