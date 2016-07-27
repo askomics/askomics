@@ -163,6 +163,13 @@ var AskomicsForceLayoutManager = function () {
       ctrlPressed = false ;
   });
 
+  // Trigger query with enter key
+  $(document).keydown(function (e) {
+    if (e.keyCode == 13 && $('#content_interrogation').is(':visible')) {
+          viewQueryResults();
+      }
+  });
+
   AskomicsForceLayoutManager.prototype.colorSelectdObject = function (prefix,id) {
     $(prefix+id).css("stroke", "firebrick");
   };
