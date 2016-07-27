@@ -32,6 +32,8 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         ParamManager.__init__(self, settings, session)
 
+        self.timestamp = str(time.time())
+
         self.path = path
 
         # The name should not contain extension as dots are not allowed in rdf names
@@ -589,7 +591,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
             sqb = SparqlQueryBuilder(self.settings, self.session)
             header_ttl = sqb.header_sparql_config()
 
-            graphName = "urn:sparql:" + self.name + ':' + time.strftime('%Y-%m-%d',time.localtime())
+            graphName = "urn:sparql:" + self.name + '_' + self.timestamp
 
             triple_count = 0
             chunk = ""
@@ -646,7 +648,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
             data = {}
 
             self.metadatas['server'] = queryResults.info()['server']
-            self.metadatas['loadDate'] = time.strftime('%Y-%m-%d',time.localtime())
+            self.metadatas['loadDate'] = self.timestamp
 
             data['status'] = 'ok'
             data['total_triple_count'] = total_triple_count
@@ -669,7 +671,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         sqb = SparqlQueryBuilder(self.settings, self.session)
         ql = QueryLauncher(self.settings, self.session)
-        graphName = "urn:sparql:" + self.name + ':' + time.strftime('%Y-%m-%d',time.localtime())
+        graphName = "urn:sparql:" + self.name + '_' + self.timestamp
         self.metadatas['graphName'] = graphName
         ttlNamedGraph = "<" + graphName + "> " + "rdfg:subGraphOf" + " <" + self.get_param("askomics.graph") + "> ."
         sparqlHeader = sqb.header_sparql_config()
@@ -681,11 +683,11 @@ class SourceFile(ParamManager, HaveCachedProperties):
             if self.is_defined("askomics.file_upload_url"):
                 queryResults = ql.upload_data(fp.name, graphName)
                 self.metadatas['server'] = queryResults.headers['Server']
-                self.metadatas['loadDate'] = time.strftime('%Y-%m-%d',time.localtime())
+                self.metadatas['loadDate'] = self.timestamp
             else:
                 queryResults = ql.load_data(url, graphName)
                 self.metadatas['server'] = queryResults.info()['server']
-                self.metadatas['loadDate'] = time.strftime('%Y-%m-%d',time.localtime())
+                self.metadatas['loadDate'] = self.timestamp
             data['status'] = 'ok'
         except Exception as e:
             self._format_exception(e, data=data)
