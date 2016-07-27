@@ -184,6 +184,7 @@ class AskView(object):
         """
         Return the positionable attributes in common between two positionable entity
         """
+        #FIXEME: Rewrite this ugly method
 
         body = self.request.json_body
         data = {}
@@ -211,10 +212,10 @@ class AskView(object):
 
         for elem in results:
             if elem['pos_attr'] not in list_pos_attr:
-                list_pos_attr.append(elem['pos_attr'])
+                list_pos_attr.append(elem['pos_attr'].replace("http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#", ""))
 
         for elem in list_pos_attr:
-            data['results'][elem] = False not in [bool(int(p['status'])) for p in results if p['pos_attr'] == elem]
+            data['results'][elem] = False not in [bool(int(p['status'])) for p in results if p['pos_attr'] == "http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#"+elem]
 
         self.log.debug('---> '+str(data['results']))
 
