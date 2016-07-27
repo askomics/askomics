@@ -22,6 +22,7 @@ install:
   - npm install --save-dev chai
   - npm install jshint gulp-jshint --save-dev
   - npm install mocha-phantomjs-istanbul --save-dev
+  - npm install gulp-istanbul --save-dev
   - npm install gulp-istanbul-report --save-dev
   - npm install gulp-inject --save-dev
 before_script:

@@ -10,7 +10,7 @@ var istanbul = require('gulp-istanbul');
 var mochaPhantomJS = require('gulp-mocha-phantomjs');
 var istanbulReport = require('gulp-istanbul-report');
 
-console.log(require('istanbul').Report.getReportList());
+//console.log(require('istanbul').Report.getReportList());
 
 var askomicsSourceFiles = [
         'askomics/static/js/AskomicsRestManagement.js',
