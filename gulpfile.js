@@ -9,6 +9,7 @@ var inject = require('gulp-inject');
 var istanbul = require('gulp-istanbul');
 var mochaPhantomJS = require('gulp-mocha-phantomjs');
 var istanbulReport = require('gulp-istanbul-report');
+//var remapIstanbul = require('remap-istanbul/lib/gulpRemapIstanbul');
 
 //console.log(require('istanbul').Report.getReportList());
 
@@ -19,6 +20,7 @@ var askomicsSourceFiles = [
         'askomics/static/js/query-handler.js',
         'askomics/static/js/AskomicsMenuFile.js',
         'askomics/static/js/AskomicsMenuView.js',
+        'askomics/static/js/GraphObject.js',
         'askomics/static/js/node/GraphNode.js',
         'askomics/static/js/node/AskomicsNode.js',
         'askomics/static/js/node/AskomicsPositionableNode.js',
@@ -40,10 +42,10 @@ gulp.task('default', function() {
     return gulp.src(askomicsSourceFiles)
         .pipe(jshint())
         .pipe(jshint.reporter('default'))
+        .pipe(sourcemaps.init())
         .pipe(babel({
             presets: ['es2015']
         }))
-        .pipe(sourcemaps.init())
         .pipe(concat('askomics.js'))
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest('askomics/static/dist'));
@@ -56,14 +58,15 @@ var mochaPhantomOpts = {
     useColors: true,
     hooks: 'mocha-phantomjs-istanbul',
     coverageFile: coverageFile
-  }
+  },
+  globals: ['script*', 'jQuery*']
 };
 
 //https://github.com/willembult/gulp-istanbul-report
 gulp.task('pre-test', function () {
   return gulp.src(askomicsSourceFiles, {base: "askomics/static/js"})
-    .pipe(babel({presets: ['es2015']}))
     .pipe(sourcemaps.init())
+    .pipe(babel({presets: ['es2015']}))
     // Covering files
     .pipe(istanbul({coverageVariable: '__coverage__'}))
     .pipe(sourcemaps.write('.'))
@@ -76,7 +79,8 @@ var testFrameworkFiles=[
   'node_modules/mocha/mocha.js',
   'node_modules/mocha/mocha.css',
   'node_modules/should/should.js',
-  'node_modules/chai/chai.js'
+  'node_modules/chai/chai.js',
+  'node_modules/jquery/dist/jquery.js'
 ];
 // New Askomics files instrumented for coverage
 var askomicsInstrumentedSourceFiles = askomicsSourceFiles.slice();
@@ -107,10 +111,21 @@ gulp.task('test', ['default','pre-test'],function () {
           reporters: [
             'text',
             'text-summary',
-            {'name': 'text', file: 'frontend.txt'}, // -> ./coverage/report.txt
             {'name': 'lcovonly', file: 'frontend.lcov'},
             {'name': 'json', file: 'frontend.json'} // -> ./jsonCov/cov.json
           ]
         }));
     });
 });
+/*
+gulp.task('remap-istanbul', function () {
+    return gulp.src('coverage/frontend.json')
+        .pipe(remapIstanbul({
+            fail: true,
+            reports: {
+                'json': 'coverage.json',
+                'html': 'html-report'
+            }
+        }));
+});
+*/

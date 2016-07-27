@@ -5,8 +5,9 @@ const colorPalette  = ["yellowgreen","teal","paleturquoise","peru","tomato","ste
 var idxColorPalette = 0  ;
 var colorUriList    = {} ;
 
-class GraphNode {
+class GraphNode extends GraphObject {
   constructor(node,x,y) {
+    super();
     this.init();
     for (var prop in node) {
       if (node.hasOwnProperty(prop)) {
@@ -24,65 +25,37 @@ class GraphNode {
   }
 
   init() {
-    this.id           = -1;
-    this.SPARQLid     = "";
-    this.suggested    = true;
     this.actif        = false ;
     this.weight       = 0;
     this.x            = 0;
     this.y            = 0;
-    this._nlink     = {}; // number of relation with a node.
+    this.nlink     = {}; // number of relation with a node.
   }
+
+  set actif  (__actif) { this._actif = __actif; }
+  get actif () { return this._actif; }
+
+  set weight  (__weight) { this._weight = __weight; }
+  get weight () { return this._weight; }
+
+  set x  (__x) { this._x = __x; }
+  get x () { return this._x; }
+
+  set y  (__y) { this._y = __y; }
+  get y () { return this._y; }
 
   set nlink (nlink) { this._nlink = nlink; }
   get nlink () { return this._nlink; }
 
-  /*
-    return the index name of the node to set up and update the graph
-  */
-  getLabelIndexNode() {
-    if ( this.SPARQLid === "" ) return "";
-
-    let re = new RegExp(/(\d+)$/);
-    let indiceEntity = this.SPARQLid.match(re);
-
-    if ( indiceEntity && indiceEntity.length>0 )
-        return indiceEntity[0];
-    else
-        return "";
-  }
-
-  getLabelIndexNodeHtml() {
-    return '<tspan font-size="7" baseline-shift="sub">'+this.getLabelIndexNode()+"</tspan>";
-  }
-
-  //TODO: Create a super class for Node/Link to agregate SPARQLid management
-  // take a string and return an entity with a sub index
-  formatInHtmlLabelEntity() {
-    let re = new RegExp(/(\d+)$/);
-    let indiceEntity = this.SPARQLid.match(re);
-    if ( indiceEntity === null || indiceEntity.length <= 0 )
-      indiceEntity = [""];
-    let labelEntity = this.SPARQLid.replace(re,"");
-    return $('<em></em>').text(labelEntity).append($('<sub></sub>').text(indiceEntity[0]));
-  }
-
   setjson(obj) {
-    this.id        = obj.id ;
-    this.SPARQLid  = obj.SPARQLid ;
-    this.suggested = obj.suggested ;
-    this.actif = obj.actif;
-    this.x = obj.x;
-    this.y = obj.y;
-    this.weight=obj.weight;
+    super.setjson(obj);
+    this._actif = obj._actif;
+    this._x = obj._x;
+    this._y = obj._y;
+    this._weight=obj._weight;
     this._nlink=obj._nlink;
   }
 
-  toString() {
-    return " GraphNode ";
-  }
-
-  getOpacity() { return this.suggested? "0.5" : "1"; }
   getNodeStrokeColor() { return 'grey'; }
 
   getColorInstanciatedNode() {
@@ -94,6 +67,11 @@ class GraphNode {
     colorUriList[this.uri] = colorPalette[idxColorPalette++];
     if (idxColorPalette >= colorPalette.length) idxColorPalette = 0;
     return colorUriList[this.uri];
+  }
+
+  toString() {
+    let s = super.toString();
+    return " GraphNode ("+ s + ")";
   }
 
 }

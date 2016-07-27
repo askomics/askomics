@@ -1,24 +1,24 @@
 /*jshint esversion: 6 */
 
-class GraphLink {
+class GraphLink extends GraphObject {
   constructor(sourceN,targetN) {
-    this.id        = -1;
-    this.SPARQLid  = "";
-    this.suggested = true ;
+    super();
 
-    if ( sourceN ) {
+    this.linkindex = -1;
+
+    if ( sourceN && sourceN !== null ) {
       this.source    = sourceN ;
       this.source.weight++;
     } else {
       this.source = null ;
     }
-    if (targetN) {
+    if ( targetN && targetN !== null) {
       this.target    = targetN ;
     } else {
       this.target = null ;
     }
 
-    if ( sourceN && targetN ) {
+    if ( this.source !== null && this.target !== null ) {
       if ( ! (this.target.id in this.source.nlink) ) {
         this.source.nlink[this.target.id] = 0;
         this.target.nlink[this.source.id] = 0;
@@ -28,42 +28,42 @@ class GraphLink {
       this.target.nlink[this.source.id]++;
 
       this.linkindex = this.source.nlink[this.target.id];
-    } else {
-      this.linkindex = -1;
     }
   }
 
-  //TODO: Create a super class for Node/Link to agregate SPARQLid management
-  // take a string and return an entity with a sub index
-  formatInHtmlLabelEntity() {
-    let re = new RegExp(/(\d+)$/);
-    let indiceEntity = this.SPARQLid.match(re);
-    if ( indiceEntity === null || indiceEntity.length <= 0 )
-      indiceEntity = [""];
-    let labelEntity = this.SPARQLid.replace(re,"");
-    return $('<em></em>').text(labelEntity).append($('<sub></sub>').text(indiceEntity[0]));
-  }
+  set source  (__source) { this._source = __source; }
+  get source () { return this._source; }
+
+  set target  (__target) { this._target = __target; }
+  get target () { return this._target; }
+
+  set linkindex  (__linkindex) { this._linkindex = __linkindex; }
+  get linkindex () { return this._linkindex; }
 
   setjson(obj) {
-    this.id        = obj.id ;
-    this.SPARQLid  = obj.SPARQLid ;
-    this.suggested = obj.suggested;
+    super.setjson(obj);
     this.linkindex = obj.linkindex;
+    if (! graphBuilder)
+      throw "Devel error: setjson : graphBuilder is not instancied!";
 
     let t = AskomicsGraphBuilder.findElt(graphBuilder.nodes(),obj.source.id);
     if (t[0]<0) {
-      throw new Exception("Devel error: setjson : nodes have to be iniialized to define links.");
+      throw "Devel error: setjson : nodes have to be iniialized to define links.";
     }
     this.source    = t[1];
     t = AskomicsGraphBuilder.findElt(graphBuilder.nodes(),obj.target.id);
     if (t[0]<0) {
-      throw new Exception("Devel error: setjson : nodes have to be iniialized to define links.");
+      throw "Devel error: setjson : nodes have to be iniialized to define links.";
     }
     this.target = t[1];
   }
 
-  getTextOpacity() { return this.suggested? "0.3" : "1"; }
   getLinkStrokeColor() { return 'grey'; }
   getTextFillColor() { return 'grey'; }
+
+  toString() {
+    let s = super.toString();
+    return " GraphLink ("+ s + ")";
+  }
 
 }
