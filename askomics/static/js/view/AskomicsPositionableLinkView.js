@@ -118,18 +118,41 @@ class AskomicsPositionableLinkView extends AskomicsObjectView {
     var checkbox_sameref;
     var checkbox_sametax;
 
-    if (this.link.same_ref) {
-      checkbox_sameref = $('<label></label>').append($('<input>').attr('type', 'checkbox').attr('id', 'ref-'+id_link).attr('checked', 'checked')).append('Reference');
+    if (this.link.position_ref) {
+        if (this.link.same_ref) {
+          checkbox_sameref = $('<label></label>').attr('id', 'reflab-'+id_link).append($('<input>').attr('type', 'checkbox').attr('id', 'ref-'+id_link).attr('checked', 'checked')).append('Reference');
+        }else{
+          checkbox_sameref = $('<label></label>').attr('id', 'reflab-'+id_link).append($('<input>').attr('type', 'checkbox').attr('id', 'ref-'+id_link)).append('Reference');
+        }
+
+        checkbox_sameref.change(function() {
+          if ($('#ref-'+id_link).is(':checked')) {
+            view.changeSameRef(true);
+          }else{
+            view.changeSameRef(false);
+          }
+        });
     }else{
-      checkbox_sameref = $('<label></label>').append($('<input>').attr('type', 'checkbox').attr('id', 'ref-'+id_link)).append('Reference');
+      checkbox_sameref = '';
     }
 
-    if (this.link.same_tax) {
-      checkbox_sametax = $('<label></label>').append($('<input>').attr('type', 'checkbox').attr('id', 'tax-'+id_link).attr('checked', 'checked')).append('Taxon');
-    }else{
-      checkbox_sametax = $('<label></label>').append($('<input>').attr('type', 'checkbox').attr('id', 'tax-'+id_link)).append('Taxon');
-    }
+    if (this.link.position_taxon) {
+        if (this.link.same_tax) {
+          checkbox_sametax = $('<label></label>').attr('id', 'taxlab-'+id_link).append($('<input>').attr('type', 'checkbox').attr('id', 'tax-'+id_link).attr('checked', 'checked')).append('Taxon');
+        }else{
+          checkbox_sametax = $('<label></label>').attr('id', 'taxlab-'+id_link).append($('<input>').attr('type', 'checkbox').attr('id', 'tax-'+id_link)).append('Taxon');
+        }
 
+        checkbox_sametax.change(function() {
+          if($('#tax-'+id_link).is(':checked')) {
+            view.changeSameTax(true);
+          }else{
+            view.changeSameTax(false);
+          }
+        });
+    }else{
+      checkbox_sametax = '';
+    }
 
     var onTheSame = $('<div></div>').append('On the same:')
                                     .append($('<br>'))
@@ -157,22 +180,6 @@ class AskomicsPositionableLinkView extends AskomicsObjectView {
     select.change(function() {
       let value = select.val();
       view.changeType(value);
-    });
-
-    checkbox_sameref.change(function() {
-      if ($('#ref-'+id_link).is(':checked')) {
-        view.changeSameRef(true);
-      }else{
-        view.changeSameRef(false);
-      }
-    });
-
-    checkbox_sametax.change(function() {
-      if($('#tax-'+id_link).is(':checked')) {
-        view.changeSameTax(true);
-      }else{
-        view.changeSameTax(false);
-      }
     });
 
     strict.change(function() {

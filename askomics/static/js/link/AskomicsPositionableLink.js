@@ -7,10 +7,30 @@ class AskomicsPositionableLink extends AskomicsLink {
 
     this.type     = 'included' ;
     this.label    = 'included in';
-    this.same_tax  =  true ;
-    this.same_ref  =  true ;
-    this.strict   =  true ;
+    this.same_tax  =  false ;
+    this.same_ref  =  false ;
+    this.strict   =  false ;
+    this.position_taxon = 'undef' ;
+    this.position_ref = 'undef' ;
+
+    /* get list of common positionable attributes
+       (taxon and ref) */
+    let service = new RestServiceJs("positionable_attr");
+    let model = { 'node': this.source.uri,
+                  'second_node': this.target.uri,
+                  'link': this };
+
+    displayModal('Please wait', '', 'Close');
+    service.post(model, function(data) {
+        if (data.error) {
+          throw new Error(data.error);
+        }
+        model.link.position_taxon = data.results.position_taxon;
+        model.link.position_ref = data.results.position_ref;
+        hideModal();
+    });
   }
+
   setjson(obj) {
     super.setjson(obj);
     this.type     = obj.type ;
@@ -18,12 +38,14 @@ class AskomicsPositionableLink extends AskomicsLink {
     this.same_tax  =  obj.same_tax ;
     this.same_ref  =  obj.same_ref ;
     this.strict   =  obj.strict ;
+    this.position_taxon = obj.position_taxon ;
+    this.position_ref = obj.position_ref ;
   }
   getPanelView() {
     return new AskomicsPositionableLinkView(this);
   }
 
-  getFillColor() { return 'darkgreen'; }
+  getTextFillColor() { return 'darkgreen'; }
 
   buildConstraintsSPARQL(constraintRelations) {
 
@@ -33,13 +55,17 @@ class AskomicsPositionableLink extends AskomicsLink {
 
     let info = ua.getPositionableEntities();
 
-    /* constrainte to target the same ref/taxon */
+    /* constrainte to target the same ref */
+    if (this.position_ref) {
+      constraintRelations.push(["?"+'URI'+node.SPARQLid, ":position_ref", "?ref_"+node.SPARQLid]);
+      constraintRelations.push(["?"+'URI'+secondNode.SPARQLid, ":position_ref", "?ref_"+secondNode.SPARQLid]);
+    }
 
-    constraintRelations.push(["?"+'URI'+node.SPARQLid, ":position_taxon", "?taxon_"+node.SPARQLid]);
-    constraintRelations.push(["?"+'URI'+node.SPARQLid, ":position_ref", "?ref_"+node.SPARQLid]);
-
-    constraintRelations.push(["?"+'URI'+secondNode.SPARQLid, ":position_taxon", "?taxon_"+secondNode.SPARQLid]);
-    constraintRelations.push(["?"+'URI'+secondNode.SPARQLid, ":position_ref", "?ref_"+secondNode.SPARQLid]);
+    /* constrainte to target the same taxon */
+    if (this.position_taxon) {
+      constraintRelations.push(["?"+'URI'+node.SPARQLid, ":position_taxon", "?taxon_"+node.SPARQLid]);
+      constraintRelations.push(["?"+'URI'+secondNode.SPARQLid, ":position_taxon", "?taxon_"+secondNode.SPARQLid]);
+    }
 
     /* manage start and end variates */
     constraintRelations.push(["?"+'URI'+node.SPARQLid, ":position_start", "?start_"+node.SPARQLid]);
