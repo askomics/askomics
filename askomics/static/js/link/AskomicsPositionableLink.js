@@ -9,14 +9,16 @@ class AskomicsPositionableLink extends AskomicsLink {
     this.label    = 'included in';
     this.same_tax  =  false ;
     this.same_ref  =  false ;
+    this.which_strand = 'both' ; // 'both', 'same' or 'opposite'
     this.strict   =  false ;
     this.position_taxon = 'undef' ;
     this.position_ref = 'undef' ;
+    this.position_strand = 'undef' ;
   }
 
   setCommonPosAttr() {
     /*  get list of common positionable attributes
-        (taxon and ref) */
+        (taxon, ref and strand) */
     let service = new RestServiceJs("positionable_attr");
     let model = { 'node': this.source.uri,
                   'second_node': this.target.uri,
@@ -27,8 +29,10 @@ class AskomicsPositionableLink extends AskomicsLink {
         if (data.error) {
           throw new Error(data.error);
         }
+
         model.link.position_taxon = data.results.position_taxon;
         model.link.position_ref = data.results.position_ref;
+        model.link.position_strand = data.results.position_strand;
         hideModal();
     });
   }
@@ -39,9 +43,11 @@ class AskomicsPositionableLink extends AskomicsLink {
     this.label    = obj.label;
     this.same_tax  =  obj.same_tax ;
     this.same_ref  =  obj.same_ref ;
+    this.which_strand = obj.which_strand ;
     this.strict   =  obj.strict ;
     this.position_taxon = obj.position_taxon ;
     this.position_ref = obj.position_ref ;
+    this.position_strand = obj.position_strand ;
   }
   getPanelView() {
     return new AskomicsPositionableLinkView(this);
@@ -67,6 +73,12 @@ class AskomicsPositionableLink extends AskomicsLink {
     if (this.position_taxon) {
       constraintRelations.push(["?"+'URI'+node.SPARQLid, ":position_taxon", "?taxon_"+node.SPARQLid]);
       constraintRelations.push(["?"+'URI'+secondNode.SPARQLid, ":position_taxon", "?taxon_"+secondNode.SPARQLid]);
+    }
+
+    /* constraint to target the same/opposite strand */
+    if (this.position_strand) {
+      constraintRelations.push(["?"+'URI'+node.SPARQLid, ":position_strand", "?strand_"+node.SPARQLid]);
+      constraintRelations.push(["?"+'URI'+secondNode.SPARQLid, ":position_strand", "?strand_"+secondNode.SPARQLid]);
     }
 
     /* manage start and end variates */
@@ -100,6 +112,12 @@ class AskomicsPositionableLink extends AskomicsLink {
       //TODO: test which of the following line is the fastest
       filters.push('FILTER(?taxon_'+node.SPARQLid+' = ?taxon_'+secondNode.SPARQLid+')');
       //filters.push('FILTER(SAMETERM(?taxon_'+node.SPARQLid+', ?taxon_'+secondNode.SPARQLid+'))');
+    }
+
+    if (this.same_strand == 'same') {
+      filters.push('FILTER(?strand_'+node.SPARQLid+' = ?strand_'+secondNode.SPARQLid+')');
+    }else if (this.same_strand == 'opp') {
+      filters.push('FILTER(?strand_'+node.SPARQLid+' != ?strand_'+secondNode.SPARQLid+')');
     }
 
 

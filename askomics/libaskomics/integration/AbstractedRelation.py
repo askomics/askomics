@@ -49,7 +49,7 @@ class AbstractedRelation(object):
             #self.relation_type = "owl:SymmetricProperty"
             self.relation_type = "owl:ObjectProperty"
             self.rdfs_range = ":" + urllib.parse.quote(type_range)
-        elif relation_type.lower() in ('category', 'taxon', 'ref'):
+        elif relation_type.lower() in ('category', 'taxon', 'ref', 'strand'):
             self.relation_type = "owl:ObjectProperty"
             self.rdfs_range = ":" + urllib.parse.quote(type_range+"Category")
         else:
@@ -83,7 +83,7 @@ class AbstractedRelation(object):
         for the abstraction file generation.
         """
 
-        if self.get_col_type() in ('start', 'end', 'taxon', 'ref'):
+        if self.get_col_type() in ('start', 'end', 'taxon', 'ref', 'strand'):
             self.log.debug('---> POSITIONABLE ATTRIBUTE <---')
             uri = ':position_'+self.get_col_type()
         else:

@@ -128,7 +128,7 @@ class SparqlQueryBuilder(ParamManager):
         """SELECT DISTINCT ?uri ?pos_attr ?status
         WHERE {
             GRAPH <"""+self.get_param("askomics.graph")+"""> { ?g rdfg:subGraphOf <"""+self.get_param("askomics.graph")+""">}
-            VALUES ?pos_attr {:position_taxon :position_ref }
+            VALUES ?pos_attr {:position_taxon :position_ref :position_strand }
             VALUES ?uri {<"""+uri1+"""> <"""+uri2+"""> }
             BIND(EXISTS {?pos_attr rdfs:domain ?uri} AS ?status)
         }""")
