@@ -87,7 +87,7 @@ class AskomicsPositionableLinkView extends AskomicsObjectView {
   }
 
   changeStrand(strand) {
-    this.link.same_strand = strand;
+    this.link.which_strand = strand;
   }
 
   create() {
@@ -164,7 +164,7 @@ class AskomicsPositionableLinkView extends AskomicsObjectView {
     }
 
     if (this.link.position_strand) {
-       if (this.link.same_strand == 'same') {
+       if (this.link.which_strand == 'same') {
         radio_samestrand = $('<div></div>').attr('id', 'div_strand-'+id_link)
                                               .append('Strand:')
                                               .append('<br>')
@@ -184,7 +184,7 @@ class AskomicsPositionableLinkView extends AskomicsObjectView {
                                                                   .attr('name', 'strand-'+id_link)
                                                                   .attr('value', 'opp'))
                                               .append('opposite').append('<br>');
-       }else if (this.link.same_strand == 'opposite') {
+       }else if (this.link.which_strand == 'opp') {
         radio_samestrand = $('<div></div>').attr('id', 'div_strand-'+id_link)
                                               .append('Strand:')
                                               .append('<br>')

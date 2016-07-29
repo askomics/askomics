@@ -7,9 +7,9 @@ class AskomicsPositionableLink extends AskomicsLink {
 
     this.type     = 'included' ;
     this.label    = 'included in';
-    this.same_tax  =   false;
-    this.same_ref  =   false;
-    this.which_strand = 'both' ; // 'both', 'same' or 'opposite'
+    this.same_tax  =   'undef';
+    this.same_ref  =   'undef';
+    this.which_strand = 'both' ; // 'both', 'same' or 'opp'
     this.strict   =  false ;
     this.position_taxon = 'undef' ;
     this.position_ref = 'undef' ;
@@ -117,9 +117,9 @@ class AskomicsPositionableLink extends AskomicsLink {
       //filters.push('FILTER(SAMETERM(?taxon_'+node.SPARQLid+', ?taxon_'+secondNode.SPARQLid+'))');
     }
 
-    if (this.same_strand == 'same') {
+    if (this.which_strand == 'same') {
       filters.push('FILTER(?strand_'+node.SPARQLid+' = ?strand_'+secondNode.SPARQLid+')');
-    }else if (this.same_strand == 'opp') {
+    }else if (this.which_strand == 'opp') {
       filters.push('FILTER(?strand_'+node.SPARQLid+' != ?strand_'+secondNode.SPARQLid+')');
     }
 
