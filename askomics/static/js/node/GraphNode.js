@@ -7,13 +7,8 @@ var colorUriList    = {} ;
 
 class GraphNode extends GraphObject {
   constructor(node,x,y) {
-    super();
+    super(node);
     this.init();
-    for (var prop in node) {
-      if (node.hasOwnProperty(prop)) {
-          this[prop] = node[prop];
-        }
-    }
     /* if this future node have the same coordinate with the previous node, the graph move too much ! */
     var sc = 30;
     var scaleX = Math.random()<0.5?-1:1;
@@ -29,7 +24,7 @@ class GraphNode extends GraphObject {
     this.weight       = 0;
     this.x            = 0;
     this.y            = 0;
-    this.nlink     = {}; // number of relation with a node.
+    this.nlink        = {}; // number of relation with a node.
   }
 
   set actif  (__actif) { this._actif = __actif; }
@@ -49,11 +44,12 @@ class GraphNode extends GraphObject {
 
   setjson(obj) {
     super.setjson(obj);
+
     this._actif = obj._actif;
     this._x = obj._x;
     this._y = obj._y;
     this._weight=obj._weight;
-    this._nlink=obj._nlink;
+    this._nlink=$.extend(true, {}, obj._nlink);
   }
 
   getNodeStrokeColor() { return 'grey'; }

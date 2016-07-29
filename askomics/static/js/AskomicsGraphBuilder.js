@@ -68,7 +68,7 @@ const classesMapping = {
         for (let i=0;i<nodes.length;i++) {
           let className = nodes[i][0];
           let jsonObj = nodes[i][1];
-          let n = new classesMapping[className](jsonObj);
+          let n = new classesMapping[className]({uri:"undefined"});
           n.setjson(jsonObj);
           this.nodes().push(n);
         }
@@ -76,7 +76,7 @@ const classesMapping = {
         for (let i=0;i<links.length;i++) {
           let className = links[i][0];
           let jsonObj = links[i][1];
-          let l = new classesMapping[className]();
+          let l = new classesMapping[className]({uri:"undefined"});
           l.setjson(jsonObj);
           this.links().push(l);
         }
@@ -210,7 +210,7 @@ const classesMapping = {
 
     /* create and return a new ID to instanciate a new SPARQL variate */
     setSPARQLVariateId(nodeOrLinkOrAttribute) {
-      let lab = userAbstraction.removePrefix(nodeOrLinkOrAttribute.uri);
+      let lab = new GraphNode({ uri:nodeOrLinkOrAttribute.uri } ).removePrefix();
       lab = lab.replace(/[%!\"#$%&'\(\)\*\+,\.\/:;<=>\?\@\[\\\]\^`\{\|\}~]/g, '');
       if ( ! this.SPARQLIDgeneration[lab] ) {
         this.SPARQLIDgeneration[lab] = 0 ;
@@ -315,33 +315,12 @@ const classesMapping = {
     }
 
     getAttributeOrCategoryForNode(attributeForUri,node) {
-      console.log(node.categories);
       if (attributeForUri.uri in node.categories ) {
         return node.categories[attributeForUri.uri];
       } else if (attributeForUri.uri in node.attributes) {
         return node.attributes[attributeForUri.uri];
       }
       return null;
-    }
-
-    switchActiveAttribute(uriId,nodeId) {
-      for (var node of this._instanciedNodeGraph ) {
-        if (node.id == nodeId ) {
-          var a;
-          for (a in node.attributes ) {
-            if ( node.attributes[a].id == uriId ) {
-              node.attributes[a].actif = !node.attributes[a].actif ;
-              return ;
-            }
-          }
-          for (a in node.categories ) {
-            if ( node.categories[a].id == uriId ) {
-              node.categories[a].actif = !node.categories[a].actif ;
-              return ;
-            }
-          }
-        }
-      }
     }
 
     synchronizeInstanciatedNodesAndLinks(nodes,links) {

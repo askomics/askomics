@@ -69,8 +69,9 @@ class AskomicsMenuView {
     let lentities = userAbstraction.getEntities();
 
     $.each(lentities, function(i) {
-      let nodeuri = lentities[i];
-      var li = menuView.buildLiView(nodeuri,userAbstraction.removePrefix(nodeuri),false);
+      let node = new GraphObject({'uri' : lentities[i]});
+      let nodeuri = node.uri;
+      var li = menuView.buildLiView(nodeuri,node.removePrefix(),false);
       li.on('click', function() {
         var span = $(this).find(".glyphicon");
         var cur_uri = $(this).attr("uri");
@@ -100,9 +101,11 @@ class AskomicsMenuView {
       let listRelObj = tab[0];
 
       $.each(listRelObj, function(objecturi) {
+        let object = new GraphObject({uri:objecturi});
         $.each(listRelObj[objecturi], function(idxrel) {
-          var rel = listRelObj[objecturi][idxrel];
-          var li = menuView.buildLiView(rel,userAbstraction.removePrefix(rel)+"&#8594;"+userAbstraction.removePrefix(objecturi),true);
+          let rel = listRelObj[objecturi][idxrel];
+          let linkRel = new GraphObject({uri:rel});
+          let li = menuView.buildLiView(rel,linkRel.removePrefix()+"&#8594;"+object.removePrefix(),true);
           li.attr("nodeuri",nodeuri)
             .on('click', function() {
               /* when this li is unavailable, we can do nothing */
@@ -135,7 +138,7 @@ class AskomicsMenuView {
     if (Object.keys(positionableEntities).length>0) {
       /* positionable object */
       let posuri = "positionable";
-      let li = menuView.buildLiView(posuri,userAbstraction.removePrefix(posuri),false);
+      let li = menuView.buildLiView(posuri,posuri,false);
       li.attr("nodeuri",posuri)
         .on('click', function() {
           var span = $(this).find(".glyphicon");

@@ -2,8 +2,8 @@
 
 class AskomicsPositionableLink extends AskomicsLink {
 
-  constructor(uriL,sourceN,targetN) {
-    super(uriL,sourceN,targetN);
+  constructor(link,sourceN,targetN) {
+    super(link,sourceN,targetN);
 
     this.type     = 'included' ;
     this.label    = 'included in';
