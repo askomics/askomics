@@ -284,14 +284,17 @@ class AskomicsNodeView extends AskomicsObjectView {
         if (icon.hasClass('glyphicon-eye-close')) {
             icon.removeClass('glyphicon-eye-close');
             icon.addClass('glyphicon-search');
+            console.log("SEARCH");
             node.setActiveAttribute(sparqlid,true,true);
           } else if (icon.hasClass('glyphicon-search')) {
             icon.removeClass('glyphicon-search');
             icon.addClass('glyphicon-eye-open');
+            console.log("OPEN");
             node.setActiveAttribute(sparqlid,true,false);
           } else {
             icon.removeClass('glyphicon-eye-open');
             icon.addClass('glyphicon-eye-close');
+            console.log("CLOSE");
             node.setActiveAttribute(sparqlid,false,false);
           }
       });

@@ -10,11 +10,10 @@ class AskomicsLink extends GraphLink {
     return new AskomicsLinkView(this);
   }
 
-  buildConstraintsSPARQL(constraintRelations) {
-    constraintRelations.push(["?"+'URI'+this.source.SPARQLid,this.URI(),"?"+'URI'+this.target.SPARQLid]);
-  }
-
-  buildFiltersSPARQL(filters) {
+  buildConstraintsSPARQL() {
+    let blockConstraintByNode = [];
+    blockConstraintByNode.push("?"+'URI'+this.source.SPARQLid+" "+this.URI()+" "+"?"+'URI'+this.target.SPARQLid);
+    return [blockConstraintByNode,''];
   }
 
   instanciateVariateSPARQL(variates) {

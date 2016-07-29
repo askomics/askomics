@@ -42,51 +42,60 @@ class AskomicsNode extends GraphNode {
     return new AskomicsNodeView(this);
   }
 
-  buildConstraintsSPARQL(constraintRelations) {
-    let isOptional = false ; /* request too long with optional */
+  buildConstraintsSPARQL() {
+    let blockConstraintByNode = [];
+
     /* add node inside */
-    constraintRelations.push(["?"+'URI'+this.SPARQLid,'rdf:type',this.URI()]);
-    constraintRelations.push(["?"+'URI'+this.SPARQLid,'rdfs:label',"?"+this.SPARQLid]);
+    blockConstraintByNode.push("?"+'URI'+this.SPARQLid+" "+'rdf:type'+" "+this.URI());
+    blockConstraintByNode.push("?"+'URI'+this.SPARQLid+" "+'rdfs:label'+" "+"?"+this.SPARQLid);
 
     for (let uri in this.attributes) {
         let SparqlId = this.attributes[uri].SPARQLid;
         let isFiltered =  SparqlId in this.filters;
         if ( isFiltered || this.attributes[uri].actif ) {
-          constraintRelations.push(["?"+'URI'+this.SPARQLid,this.URI(uri),"?"+this.attributes[uri].SPARQLid,isOptional]);
-          constraintRelations.push([this.URI(uri),'rdfs:domain',this.URI(),isOptional]);
-          constraintRelations.push([this.URI(uri),'rdfs:range',this.URI(this.attributes[uri].type),isOptional]);
-          constraintRelations.push([this.URI(uri),'rdf:type',this.URI('owl:DatatypeProperty'),isOptional]);
+          let subBlockConstraint = [];
+          subBlockConstraint.push("?"+'URI'+this.SPARQLid+" "+this.URI(uri)+" "+"?"+this.attributes[uri].SPARQLid);
+          subBlockConstraint.push(this.URI(uri)+" "+'rdfs:domain'+" "+this.URI());
+          subBlockConstraint.push(this.URI(uri)+" "+'rdfs:range'+" "+this.URI(this.attributes[uri].type));
+          subBlockConstraint.push(this.URI(uri)+" "+'rdf:type'+" "+this.URI('owl:DatatypeProperty'));
+          /* check filter if exist */
+          if ( SparqlId in this.filters ) {
+            subBlockConstraint.push(this.filters[SparqlId]);
+          }
+
+          if ( this.attributes[uri].optional ) {
+            blockConstraintByNode.push([subBlockConstraint,'OPTIONAL']);
+          } else {
+            blockConstraintByNode.push([subBlockConstraint,'']);
+          }
         }
     }
     for (let uri in this.categories) {
       let SparqlId = "URICat"+this.categories[uri].SPARQLid;
       let isFiltered = SparqlId in this.filters;
       if ( isFiltered || this.categories[uri].actif ) {
-        constraintRelations.push(["?"+'URI'+this.SPARQLid,this.URI(uri),"?"+SparqlId,isOptional]);
-        constraintRelations.push(["?"+SparqlId,'rdfs:label',"?"+this.categories[uri].SPARQLid,isOptional]);
-      }
-    }
-  }
+        let subBlockConstraint = [];
+        subBlockConstraint.push("?"+'URI'+this.SPARQLid+" "+this.URI(uri)+" "+"?"+SparqlId);
+        subBlockConstraint.push("?"+SparqlId+" "+'rdfs:label'+" "+"?"+this.categories[uri].SPARQLid);
 
-  buildFiltersSPARQL(filters) {
-    // add the filters on entity name
+        if ( SparqlId in this.filters ) {
+          subBlockConstraint.push(this.filters[SparqlId]);
+        }
+
+        if ( this.categories[uri].optional ) {
+          blockConstraintByNode.push([subBlockConstraint,'OPTIONAL']);
+        } else {
+          blockConstraintByNode.push([subBlockConstraint,'']);
+        }
+      }
+    }
+
+    // add the filters on entity name at end
     if (this.SPARQLid in this.filters) {
-      filters.push(this.filters[this.SPARQLid]);
+      blockConstraintByNode.push(this.filters[this.SPARQLid]);
     }
-    console.log(JSON.stringify(this.filters));
-    for (let uri in this.attributes) {
-      let SparqlId = this.attributes[uri].SPARQLid;
-      console.log(SparqlId);
-      if ( SparqlId in this.filters ) {
-        filters.push(this.filters[SparqlId]);
-      }
-    }
-    for (let uri in this.categories) {
-      let SparqlId = "URICat"+this.categories[uri].SPARQLid;
-      if ( SparqlId in this.filters ) {
-          filters.push(this.filters[SparqlId]);
-      }
-    }
+
+    return [blockConstraintByNode,''];
   }
 
   instanciateVariateSPARQL(variates) {
@@ -115,27 +124,25 @@ class AskomicsNode extends GraphNode {
   buildConstraintsGraphForCategory(attributeId) {
     let variates = [] ;
     let constraintRelations = [] ;
-    let filters = [];
-    let isOptional = false ; /* request too long with optional */
 
     if (attributeId === undefined || ($.trim(attributeId) === "") ){
-      return [[],[],[]] ;
+      return [[],[]] ;
     }
     var node = this;
     /* add node inside */
-    constraintRelations.push(["?"+'URI'+node.SPARQLid,'rdf:type',node.URI()]);
-    constraintRelations.push(["?"+'URI'+node.SPARQLid,'rdfs:label',"?"+node.SPARQLid]);
+    constraintRelations.push("?"+'URI'+node.SPARQLid+" "+'rdf:type'+" "+node.URI());
+    constraintRelations.push("?"+'URI'+node.SPARQLid+" "+'rdfs:label'+" "+"?"+node.SPARQLid);
 
     for (let uri in node.categories) {
       if ( node.categories[uri].id != attributeId ) continue;
-      constraintRelations.push(["?"+'URI'+node.SPARQLid,this.URI(uri),"?URICat"+node.categories[uri].SPARQLid,isOptional]);
-      constraintRelations.push(["?URICat"+node.categories[uri].SPARQLid,'rdfs:label',"?"+node.categories[uri].SPARQLid,isOptional]);
+      constraintRelations.push("?"+'URI'+node.SPARQLid+" "+this.URI(uri)+" "+"?URICat"+node.categories[uri].SPARQLid);
+      constraintRelations.push("?URICat"+node.categories[uri].SPARQLid+" "+'rdfs:label'+" "+"?"+node.categories[uri].SPARQLid);
       variates.push("?"+node.categories[uri].SPARQLid);
       variates.push("?URICat"+node.categories[uri].SPARQLid);
-      return [variates,constraintRelations,filters] ;
+      return [variates,[constraintRelations,'']] ;
     }
     /* category are not found */
-    return [[],[],[]] ;
+    return [[],[]] ;
   }
 
   switchRegexpMode(idatt) {
@@ -161,7 +168,7 @@ class AskomicsNode extends GraphNode {
   setActiveAttribute(uriId,boolean,optional) {
     if ( uriId === undefined ) throw "activeAttribute : undefined attribute !";
     let opt = false;
-    if ( optional && (optional !== undefined) ) {
+    if ( typeof optional !== undefined ) {
       opt = true;
     }
     for (let a in this.attributes ) {

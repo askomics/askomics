@@ -363,13 +363,12 @@ const classesMapping = {
     }
 
     buildConstraintsGraph() {
-      var variates = [] ;
-      var constraintRelations = [] ;
-      var filters = [];
+      let variates        = [] ;
+      let blockConstraint = [] ;
 
       /* copy arrays to avoid to removed nodes and links instancied */
-      var dup_node_array = $.extend(true, [], this._instanciedNodeGraph);
-      var dup_link_array = $.extend(true, [], this._instanciedLinkGraph);
+      let dup_node_array = $.extend(true, [], this._instanciedNodeGraph);
+      let dup_link_array = $.extend(true, [], this._instanciedLinkGraph);
 
       //var ua = userAbstraction;
       for (let idx=0;idx<this._instanciedNodeGraph.length;idx++) {
@@ -377,22 +376,22 @@ const classesMapping = {
         /* find relation with this node and add it as a constraint  */
         for (let ilx=dup_link_array.length-1;ilx>=0;ilx--) {
           if ( (dup_link_array[ilx].source.id == node.id) ||  (dup_link_array[ilx].target.id == node.id) ) {
+            let blockConstraintByLink = [] ;
 
-            dup_link_array[ilx].buildConstraintsSPARQL(constraintRelations);
-            dup_link_array[ilx].buildFiltersSPARQL(filters);
+            blockConstraint.push(dup_link_array[ilx].buildConstraintsSPARQL());
             dup_link_array[ilx].instanciateVariateSPARQL(variates);
 
             //remove link to avoid to add two same constraint
             dup_link_array.splice(ilx,1);
           }
         }
+        let blockConstraintByNode = [] ;
         /* adding constraints about attributs about the current node */
-        node.buildConstraintsSPARQL(constraintRelations);
-        node.buildFiltersSPARQL(filters);
+        blockConstraint.push(node.buildConstraintsSPARQL());
         node.instanciateVariateSPARQL(variates);
       }
 
-      return [variates,constraintRelations,filters] ;
+      return [variates,[blockConstraint,'']] ;
     }
 
 

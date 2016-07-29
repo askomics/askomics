@@ -212,13 +212,13 @@ describe('AskomicsNode', function(){
       geneNode.setjson(geneJSON);
       let tab = geneNode.buildConstraintsGraphForCategory();
 
-      chai.expect(tab).to.deep.equal([[],[],[]],'buildConstraintsGraphForCategory with none argument give empty array!');
+      chai.expect(tab).to.deep.equal([[],[]],'buildConstraintsGraphForCategory with none argument give empty array!');
       tab = geneNode.buildConstraintsGraphForCategory("");
       chai.assert.isArray(tab);
-      chai.expect(tab).to.deep.equal([[],[],[]],'buildConstraintsGraphForCategory with a empty string as argument give empty array!');
+      chai.expect(tab).to.deep.equal([[],[]],'buildConstraintsGraphForCategory with a empty string as argument give empty array!');
       tab = geneNode.buildConstraintsGraphForCategory("position_taxon1");
       chai.assert.isArray(tab);
-      chai.expect(tab).to.deep.equal([[],[],[]],'buildConstraintsGraphForCategory with a argument targeting a basic type!');
+      chai.expect(tab).to.deep.equal([[],[]],'buildConstraintsGraphForCategory with a argument targeting a basic type!');
     });
 
     it('* buildConstraintsGraphForCategory *', function(){

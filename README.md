@@ -100,4 +100,5 @@ Then, to run the tests do the following:
 
 ```
 $ nosetests askomics/test
+$ gulp test
 ```
