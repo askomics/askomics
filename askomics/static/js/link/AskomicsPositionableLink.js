@@ -7,8 +7,8 @@ class AskomicsPositionableLink extends AskomicsLink {
 
     this.type     = 'included' ;
     this.label    = 'included in';
-    this.same_tax  =  false ;
-    this.same_ref  =  false ;
+    this.same_tax  =   false;
+    this.same_ref  =   false;
     this.which_strand = 'both' ; // 'both', 'same' or 'opposite'
     this.strict   =  false ;
     this.position_taxon = 'undef' ;
@@ -33,6 +33,9 @@ class AskomicsPositionableLink extends AskomicsLink {
         model.link.position_taxon = data.results.position_taxon;
         model.link.position_ref = data.results.position_ref;
         model.link.position_strand = data.results.position_strand;
+
+        model.link.same_tax = data.results.position_taxon?true:false;
+        model.link.same_ref = data.results.position_ref?true:false;
         hideModal();
     });
   }

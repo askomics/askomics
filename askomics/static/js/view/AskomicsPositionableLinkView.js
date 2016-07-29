@@ -75,7 +75,7 @@ class AskomicsPositionableLinkView extends AskomicsObjectView {
   }
 
   changeStrict(strict) {
-    this.strict = strict;
+    this.link.strict = strict;
   }
 
   changeSameTax(same_tax) {
