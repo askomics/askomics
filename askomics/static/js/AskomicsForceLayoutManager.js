@@ -263,7 +263,7 @@ var AskomicsForceLayoutManager = function () {
         throw new Error("AskomicsForceLayoutManager.prototype.updateInstanciateNode : node is not defined !");
 
       // change label node with the SPARQL Variate Id
-      $('#txt_'+node.id).html(node.label+node.getLabelIndexNodeHtml());
+      $('#txt_'+node.id).html(node.label+node.getLabelIndexHtml());
       // canceled transparency
       $("#node_"+node.id).css("opacity", "1");
       $('#txt_'+node.id).css("opacity","1");
@@ -749,7 +749,7 @@ var AskomicsForceLayoutManager = function () {
                    .attr("font-size","7")
                    .attr("baseline-shift","sub")
                    .text(function (d) {
-                     return d.getLabelIndexNode();
+                     return d.getLabelIndex();
                     });
 
       link.exit().remove();

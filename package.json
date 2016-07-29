@@ -19,6 +19,7 @@
     "jshint": "^2.9.2",
     "mocha": "^2.5.3",
     "mocha-phantomjs-istanbul": "0.0.2",
+    "remap-istanbul": "^0.6.4",
     "should": "^10.0.0"
   },
   "main": "gulpfile.js",
