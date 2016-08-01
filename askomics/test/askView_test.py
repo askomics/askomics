@@ -90,7 +90,7 @@ class AskViewTests(unittest.TestCase):
                 if key2 == 'version':
                     assert data['metadata'][key][key2] == '2.0'
                 elif key2 == 'username':
-                    assert data['metadata'][key][key2] == getpass.getuser() 
+                    assert data['metadata'][key][key2] == getpass.getuser()
                 elif key2 == 'filename':
                     self.assertRegexpMatches(data['metadata'][key][key2], r'^(instrument|enseigne|connait|joue|personne)\.tsv$')
                 elif key2 == 'loadDate':
@@ -191,8 +191,7 @@ class AskViewTests(unittest.TestCase):
 
         self.request.json_body = {
             'variates':['?Personne1'],
-            'constraintesRelations': [['?URIPersonne1', 'rdf:type', '<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Personne>'], ['?URIPersonne1', 'rdfs:label', '?Personne1']],
-            'constraintesFilters': [],
+            'constraintesRelations': [ ['?URIPersonne1 rdf:type <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Personne>','?URIPersonne1 rdfs:label ?Personne1'],''],
             'limit': 30,
             'export': False,
         }
@@ -215,8 +214,7 @@ class AskViewTests(unittest.TestCase):
 
         self.request.json_body = {
             'variates':['?Personne1'],
-            'constraintesRelations': [['?URIPersonne1', 'rdf:type', '<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Personne>'], ['?URIPersonne1', 'rdfs:label', '?Personne1']],
-            'constraintesFilters': [],
+            'constraintesRelations': [['?URIPersonne1 rdf:type <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Personne>','?URIPersonne1 rdfs:label ?Personne1'],''],
             'limit': 30,
             'export': False,
         }

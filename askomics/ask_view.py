@@ -136,7 +136,7 @@ class AskView(object):
                 ql.execute_query(sqb.get_delete_query_string(graph).query)
 
         except Exception as e:
-            data['error'] = traceback.format_exc(limit=4)+"\n\n\n"+str(e)
+            data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
             self.log.error(str(e))
 
         return data
@@ -291,7 +291,7 @@ class AskView(object):
         except Exception as e:
             data["headers_status"] = ""
             data["missing_headers"] = ""
-            data['error'] = traceback.format_exc(limit=4)+"\n\n\n"+str(e)
+            data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
             self.log.error(str(e))
 
         return data
@@ -361,11 +361,10 @@ class AskView(object):
             data['file'] = ql.format_results_csv(rb.build_csv_table(results))
         except Exception as e:
             #exc_type, exc_value, exc_traceback = sys.exc_info()
-            traceback.print_exc(limit=4)
-
+            #traceback.print_exc(limit=8)
             data['values'] = ""
             data['file'] = ""
-            data['error'] = traceback.format_exc(limit=4)+"\n\n\n"+str(e)
+            data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
             self.log.error(str(e))
 
         return data
@@ -383,7 +382,7 @@ class AskView(object):
 
             data['query'] = query
         except Exception as e:
-            data['error'] = traceback.format_exc(limit=4)+"\n\n\n"+str(e)
+            data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
             self.log.error(str(e))
 
         return data
