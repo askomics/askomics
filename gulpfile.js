@@ -40,6 +40,10 @@ var askomicsSourceFiles = [
         'askomics/static/js/MainAskomics.js'
     ];
 
+var askomicsCssFiles = [
+  'askomics'
+];
+
 var dev = !!util.env.dev;
 var reload = !!util.env.reload;
 
@@ -48,7 +52,7 @@ reload ? console.log('---> Reload') : util.noop();
 
 /*
 Default task : run 'build'
-               if `gulp --dev`, watch AskOmics file and run 'build' when a file is modified
+               if `gulp --reload`, watch AskOmics file and run 'build' when a file is modified
 */
 gulp.task('default', ['build'], function () {
   reload ? gulp.watch(askomicsSourceFiles, ['build']) : util.noop();
