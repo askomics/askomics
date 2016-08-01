@@ -1,4 +1,5 @@
 var gulp = require('gulp');
+var util = require('gulp-util');
 var jshint = require('gulp-jshint');
 var concat = require('gulp-concat');
 var sourcemaps = require('gulp-sourcemaps');
@@ -9,10 +10,12 @@ var inject = require('gulp-inject');
 var istanbul = require('gulp-istanbul');
 var mochaPhantomJS = require('gulp-mocha-phantomjs');
 var istanbulReport = require('gulp-istanbul-report');
+var uglify = require('gulp-uglify');
 //var remapIstanbul = require('remap-istanbul/lib/gulpRemapIstanbul');
 
 //console.log(require('istanbul').Report.getReportList());
 
+//var askomicsSourceFiles = ['askomics/static/js/**/*.js','!askomics/static/js/third-party/**/*.js'];
 var askomicsSourceFiles = [
         'askomics/static/js/AskomicsRestManagement.js',
         'askomics/static/js/AskomicsUserAbstraction.js',
@@ -37,8 +40,28 @@ var askomicsSourceFiles = [
         'askomics/static/js/MainAskomics.js'
     ];
 
-//var askomicsSourceFiles = ['askomics/static/js/**/*.js','!askomics/static/js/third-party/**/*.js'];
-gulp.task('default', function() {
+var dev = !!util.env.dev;
+var reload = !!util.env.reload;
+
+dev ? console.log('---> Development') : console.log('---> Production');
+reload ? console.log('---> Reload') : util.noop();
+
+/*
+Default task : run 'build'
+               if `gulp --dev`, watch AskOmics file and run 'build' when a file is modified
+*/
+gulp.task('default', ['build'], function () {
+  reload ? gulp.watch(askomicsSourceFiles, ['build']) : util.noop();
+});
+
+
+/*
+build task : jshint files
+             babel
+             concat all files in askomics.js
+             if `gulp --dev` minify askomics.js
+*/
+gulp.task('build', function() {
     return gulp.src(askomicsSourceFiles)
         .pipe(jshint())
         .pipe(jshint.reporter('default'))
@@ -47,6 +70,7 @@ gulp.task('default', function() {
             presets: ['es2015']
         }))
         .pipe(concat('askomics.js'))
+        .pipe(dev ? util.noop() : uglify())
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest('askomics/static/dist'));
 });
