@@ -120,6 +120,7 @@ gulp.task('test', ['default','pre-test','pre-test-srctest'],function () {
             'text',
             'text-summary',
             {'name': 'lcovonly', file: 'frontend.lcov'},
+            {'name': 'lcovonly', file: 'lcov.info'}, // atom plugin lcov-info
             {'name': 'json', file: 'frontend.json'} // -> ./jsonCov/cov.json
           ]
         }));
