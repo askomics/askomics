@@ -25,6 +25,8 @@ install:
   - npm install gulp-istanbul --save-dev
   - npm install gulp-istanbul-report --save-dev
   - npm install gulp-inject --save-dev
+  - npm install gulp-uglify --save-dev
+  - npm install gulp-util --save-dev
   - gem install coveralls-lcov
 before_script:
   - docker pull tenforce/virtuoso
