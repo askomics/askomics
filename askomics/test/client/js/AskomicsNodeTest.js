@@ -72,6 +72,7 @@ let geneJSON = {
   "_filters": {},
   "_values":  {},
   "_isregexp":{},
+  "_inverseMatch": {},
   "_label":"Gene"
   };
 
@@ -188,6 +189,29 @@ describe('AskomicsNode', function(){
       geneNode.switchRegexpMode(sparqlid);
       chai.assert(geneNode.isRegexpMode(sparqlid));
     });
+
+    it('* inverseMatch *', function(){
+      let geneNode = new AskomicsNode({uri:"http://wwww.system/test1",label:''},0.0,0.0);
+      geneNode.inverseMatch = [];
+      console.log(geneNode.inverseMatch);
+      chai.assert.deepEqual(geneNode.inverseMatch,[]);
+
+      geneNode.setjson(geneJSON);
+      let attSPARQLid = "position_start1";
+      let catSPARQLid = "position_ref1" ;
+      geneNode.inverseMatch[attSPARQLid] = true ;
+      geneNode.setActiveAttribute(attSPARQLid,true);
+      let tab = geneNode.buildConstraintsSPARQL();
+      let attendu = [["?URIGene1 rdf:type <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Gene>","?URIGene1 rdfs:label ?Gene1",[[["?URIGene1 <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#position_start> ?position_start1","<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#position_start> rdfs:domain <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Gene>","<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#position_start> rdfs:range <http://www.w3.org/2001/XMLSchema#decimal>","<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#position_start> rdf:type owl:DatatypeProperty"],"FILTER NOT EXISTS"],""]],""];
+      chai.assert.deepEqual(tab,attendu);
+
+      geneNode.inverseMatch[catSPARQLid] = true ;
+      geneNode.setActiveAttribute(catSPARQLid,true);
+      tab = geneNode.buildConstraintsSPARQL();
+      attendu = [["?URIGene1 rdf:type <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Gene>","?URIGene1 rdfs:label ?Gene1",[[["?URIGene1 <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#position_start> ?position_start1","<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#position_start> rdfs:domain <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Gene>","<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#position_start> rdfs:range <http://www.w3.org/2001/XMLSchema#decimal>","<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#position_start> rdf:type owl:DatatypeProperty"],"FILTER NOT EXISTS"],""],[[["?URIGene1 <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#position_ref> ?URICatposition_ref1","?URICatposition_ref1 rdfs:label ?position_ref1"],"FILTER NOT EXISTS"],""]],""];
+      chai.assert.deepEqual(tab,attendu);
+    });
+
     it('* switchRegexpMode *', function(){
       let geneNode = new AskomicsNode({uri:"http://wwww.system/test1",label:''},0.0,0.0);
       chai.expect(function () { geneNode.switchRegexpMode(); }).
