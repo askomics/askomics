@@ -188,7 +188,16 @@ describe('AskomicsNode', function(){
       geneNode.switchRegexpMode(sparqlid);
       chai.assert(geneNode.isRegexpMode(sparqlid));
     });
-
+    it('* switchRegexpMode *', function(){
+      let geneNode = new AskomicsNode({uri:"http://wwww.system/test1",label:''},0.0,0.0);
+      chai.expect(function () { geneNode.switchRegexpMode(); }).
+        to.throw("switchRegexpMode : undefined attribute !");
+      let sparqlid = "position_ref1";
+      geneNode.switchRegexpMode(sparqlid);
+      chai.assert.isOk(geneNode.isregexp[sparqlid]);
+      geneNode.switchRegexpMode(sparqlid);
+      chai.assert.isNotOk(geneNode.isregexp[sparqlid]);
+    });
   });
   describe('#JSON method', function(){
     it('* initializing object with json format *', function(){
@@ -225,6 +234,92 @@ describe('AskomicsNode', function(){
       let geneNode = new AskomicsNode({uri:"http://wwww.system/test1",label:''},0.0,0.0);
       geneNode.setjson(geneJSON);
       let tab = geneNode.buildConstraintsGraphForCategory("position_ref1");
+    });
+  });
+  describe('#getPanelView', function(){
+    it('* test type *', function(){
+      let geneNode = new AskomicsNode({uri:"http://wwww.system/test1",label:''},0.0,0.0);
+      geneNode.setjson(geneJSON);
+      let panel = geneNode.getPanelView();
+      chai.expect(panel).to.be.an.instanceof(AskomicsNodeView);
+    });
+  });
+  describe('#Build SPARQL Query', function(){
+    let geneNode = new AskomicsNode({uri:"http://wwww.system/test1",label:''},0.0,0.0);
+    geneNode.setjson(geneJSON);
+    let tab ;
+    let sparqlid = "position_ref1";
+    let value = "QQ";
+    let waitResults1 = [["?URIGene1 rdf:type <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Gene>","?URIGene1 rdfs:label ?Gene1",[["?URIGene1 <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#position_ref> ?URICatposition_ref1","?URICatposition_ref1 rdfs:label ?position_ref1"],""]],""];
+    let waitResults2 = [["?URIGene1 rdf:type <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Gene>","?URIGene1 rdfs:label ?Gene1",[["?URIGene1 <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#position_ref> ?URICatposition_ref1","?URICatposition_ref1 rdfs:label ?position_ref1"],"OPTIONAL"]],""];
+
+    it('* buildConstraintsSPARQL simple args *', function(){
+      tab = geneNode.buildConstraintsSPARQL();
+      chai.assert.deepEqual(tab, [["?URIGene1 rdf:type <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Gene>","?URIGene1 rdfs:label ?Gene1"],""]);
+    });
+
+    it('* instanciate variables *', function(){
+      let variates = [];
+      geneNode.instanciateVariateSPARQL(variates);
+      chai.assert.deepEqual(variates, ["?Gene1"]);
+    });
+
+    it('* buildConstraintsSPARQL attribute is not actif *', function(){
+
+      geneNode.setFilterAttributes(sparqlid,value,'FILTER ( ?'+sparqlid+' = "'+value+'" )');
+      // attribute is not actif
+      geneNode.setActiveAttribute(sparqlid,false);
+      tab = geneNode.buildConstraintsSPARQL();
+      chai.assert.deepEqual(tab, [["?URIGene1 rdf:type <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Gene>","?URIGene1 rdfs:label ?Gene1"],""]);
+    });
+
+    it('* setFilterAttributes *', function(){
+      geneNode.setFilterAttributes(sparqlid,'','');
+      tab = geneNode.buildConstraintsSPARQL();
+      chai.assert.deepEqual(tab, [["?URIGene1 rdf:type <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Gene>","?URIGene1 rdfs:label ?Gene1"],""]);
+    });
+
+    // resultats attendus pour les deux prochain tests
+
+    it('* buildConstraintsSPARQL attribute is actif and not optional *', function(){
+      // attribute is actif and not optional
+      geneNode.setActiveAttribute(sparqlid,true);
+      tab = geneNode.buildConstraintsSPARQL();
+      chai.assert.deepEqual(tab, waitResults1);
+    });
+
+    it('* buildConstraintsSPARQL attribute is actif and not optional *', function(){
+      // attribute is actif and not optional
+      geneNode.setActiveAttribute(sparqlid,true,false);
+      tab = geneNode.buildConstraintsSPARQL();
+      chai.assert.deepEqual(tab, waitResults1);
+    });
+
+    it('* buildConstraintsSPARQL attribute is actif and optional *', function(){
+      // attribute is actif and optional
+      geneNode.setActiveAttribute(sparqlid,true,true);
+      tab = geneNode.buildConstraintsSPARQL();
+      chai.assert.deepEqual(tab, waitResults2);
+    });
+/*
+    it('* buildConstraintsSPARQL test active attribute with set false *', function(){
+      geneNode.setActiveAttribute(sparqlid,false);
+      chai.assert.isNotOk(geneNode.isActiveAttribute(sparqlid));
+    });
+    it('* buildConstraintsSPARQL test active attribute with set true *', function(){
+      geneNode.setActiveAttribute(sparqlid,true);
+      chai.assert.isOk(geneNode.isActiveAttribute(sparqlid));
+    });
+    it('* buildConstraintsSPARQL test active attribute with a unknow variable *', function(){
+      chai.expect(function () { geneNode.isActiveAttribute("DOESNOTEXIST"); }).
+        to.throw("isActiveAttribute : can not find attribute:DOESNOTEXIST");
+    });
+    */
+  });
+  describe('#string test', function(){
+    it('* simple test *', function(){
+      let geneNode = new AskomicsNode({uri:"http://wwww.system/test1",label:''},0.0,0.0);
+      chai.assert.typeOf(geneNode.toString(),'string');
     });
   });
 

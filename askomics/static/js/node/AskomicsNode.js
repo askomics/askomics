@@ -187,7 +187,7 @@ class AskomicsNode extends GraphNode {
     }
     throw "activeAttribute : can not find attribute:"+uriId;
   }
-
+/*
   isActiveAttribute(uriId) {
     if ( uriId === undefined ) throw "isActiveAttribute : undefined attribute !";
     for (let a in this.attributes ) {
@@ -202,7 +202,7 @@ class AskomicsNode extends GraphNode {
     }
     throw "isActiveAttribute : can not find attribute:"+uriId;
   }
-
+*/
   setFilterAttributes(SPARQLid,value,filter) {
     if ($.trim(value) === "") { // case if user don't wan anymore a filter
       delete this.filters[SPARQLid];
