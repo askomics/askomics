@@ -49,8 +49,6 @@ class AskomicsNode extends GraphNode {
 
   buildConstraintsSPARQL() {
     let blockConstraintByNode = [];
-    console.log("==================== buildConstraintsSPARQL ==========================");
-    console.log(JSON.stringify(this._inverseMatch));
     /* add node inside */
     blockConstraintByNode.push("?"+'URI'+this.SPARQLid+" "+'rdf:type'+" "+this.URI());
     blockConstraintByNode.push("?"+'URI'+this.SPARQLid+" "+'rdfs:label'+" "+"?"+this.SPARQLid);
