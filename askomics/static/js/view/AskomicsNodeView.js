@@ -188,12 +188,41 @@ class AskomicsNodeView extends AskomicsObjectView {
       let nodeid = $(this).attr('nodeid');
 
       let node = graphBuilder.getInstanciedNode(nodeid);
-      console.log(value);
-      console.log(sparqlid);
-      console.log(nodeid);
       obj.changeFilter(node,sparqlid,value);
     });
       return inp ;
+    }
+
+    // dedicated to String entry
+    makeOptionalIcon(nodeid,sparqlid) {
+      var icon = $('<span></span>')
+              .attr('sparqlid', sparqlid)
+              .attr('nodeid', nodeid)
+              .attr('aria-hidden','true')
+              .addClass('glyphicon')
+              .addClass('glyphicon-filter')
+              .addClass('display');
+
+      let obj = this;
+
+      icon.click(function(d) {
+          if (icon.hasClass('glyphicon-filter')) {
+                icon.removeClass('glyphicon-filter');
+                icon.addClass('glyphicon-font');
+          } else {
+                icon.removeClass('glyphicon-font');
+                icon.addClass('glyphicon-filter');
+          }
+
+          var sparqlid  = $(this).attr('sparqlid');
+          var nodeid = $(this).attr('nodeid');
+          let node = graphBuilder.getInstanciedNode(nodeid);
+          node.switchRegexpMode(sparqlid);
+          if (sparqlid in node.values) {
+            obj.changeFilter(node,sparqlid,node.values[sparqlid]);
+          }
+      });
+      return icon;
     }
 
     // dedicated to String entry
@@ -229,7 +258,7 @@ class AskomicsNodeView extends AskomicsObjectView {
     }
       // Add attributes of the selected node on the right side of AskOmics
     makeRemoveIcon(field) {
-          var removeIcon = $('<span class="glyphicon glyphicon-erase display"></span>');
+          let removeIcon = $('<span class="glyphicon glyphicon-erase display"></span>');
           removeIcon.click(function() { field.val(null).trigger("change"); });
           return removeIcon;
     }
@@ -238,27 +267,36 @@ class AskomicsNodeView extends AskomicsObjectView {
       // =============================================================================================
       //    Manage Attribute variate when eye is selected or deselected
       //
-      var eyeLabel = attribute.actif?'glyphicon-eye-open':'glyphicon-eye-close';
-      var icon = $('<span></span>')
-              .attr('attid', attribute.id)
+      let eyeLabel = attribute.actif?'glyphicon-eye-open':'glyphicon-eye-close';
+      let icon = $('<span></span>')
+              .attr('sparqlid', attribute.SPARQLid)
               .attr('nodeid', node.id)
               .attr('aria-hidden','true')
               .addClass('glyphicon')
               .addClass(eyeLabel)
               .addClass('display');
-
+      // eye-close --> optional search --> exact search
       icon.click(function(d) {
-          if (icon.hasClass('glyphicon-eye-close')) {
-              icon.removeClass('glyphicon-eye-close');
-              icon.addClass('glyphicon-eye-open');
-          } else {
-              icon.removeClass('glyphicon-eye-open');
-              icon.addClass('glyphicon-eye-close');
-          }
+        let sparqlid = $(this).attr('sparqlid');
+        let nodeid = $(this).attr('nodeid');
+        let node = graphBuilder.getInstanciedNode(nodeid);
 
-          var attid = $(this).attr('attid');
-          var nodeid = $(this).attr('nodeid');
-          graphBuilder.switchActiveAttribute(attid,nodeid);
+        if (icon.hasClass('glyphicon-eye-close')) {
+            icon.removeClass('glyphicon-eye-close');
+            icon.addClass('glyphicon-search');
+            console.log("SEARCH");
+            node.setActiveAttribute(sparqlid,true,true);
+          } else if (icon.hasClass('glyphicon-search')) {
+            icon.removeClass('glyphicon-search');
+            icon.addClass('glyphicon-eye-open');
+            console.log("OPEN");
+            node.setActiveAttribute(sparqlid,true,false);
+          } else {
+            icon.removeClass('glyphicon-eye-open');
+            icon.addClass('glyphicon-eye-close');
+            console.log("CLOSE");
+            node.setActiveAttribute(sparqlid,false,false);
+          }
       });
       return icon;
     }

@@ -1,10 +1,26 @@
 /*jshint esversion: 6 */
 
 class GraphObject {
-  constructor() {
+  constructor(obj) {
+
+    if ( !obj || (! ('uri' in obj)) ) {
+    /*  if ( obj && ('_uri' in obj) ) {
+        // load json object
+        this.setjson(obj);
+      } else*/
+        throw "GraphObject : Constructor need an 'uri' node:"+JSON.stringify(obj);
+    }
+
     this._id        = -1;
     this._SPARQLid  = "";
     this._suggested = true ;
+    this._uri       = obj.uri ;
+
+    if ( obj.label ) {
+      this._label   = obj.label ;
+    } else {
+      this._label   = this.removePrefix() ;
+    }
   }
 
   set id (__id) { this._id = __id; }
@@ -16,10 +32,49 @@ class GraphObject {
   set suggested (__sug) { this._suggested = __sug; }
   get suggested () { return this._suggested; }
 
+  set uri (__uri) { this._uri = __uri; }
+  get uri () { return this._uri; }
+
+  set label (__label) { this._label = __label; }
+  get label () { return this._label; }
+
+
   setjson(obj) {
     this.id        = obj._id ;
     this.SPARQLid  = obj._SPARQLid ;
     this.suggested = obj._suggested;
+    this.uri       = obj._uri ;
+    this.label     = obj._label ;
+  }
+
+  URI(uristring) {
+    let uribase = this.uri;
+
+    if ( uristring )
+      uribase = uristring ;
+
+    if ( typeof(uribase) !== "string" ) {
+      throw "removePrefix: uri is not a string :"+JSON.stringify(uribase);
+    }
+
+    if ( uribase.indexOf("#")>0 ) {
+      return '<'+uribase+">";
+    }
+    return uribase;
+  }
+
+  /* Get value of an attribut with RDF format like rdfs:label */
+  removePrefix() {
+    if (typeof(this.uri) !== 'string')
+      throw "removePrefix: uri is not a string :"+JSON.stringify(this.uri);
+
+    var idx =  this.uri.indexOf("#");
+    if ( idx == -1 ) {
+      idx =  this.uri.indexOf(":");
+      if ( idx == -1 ) return this.uri;
+    }
+    var res = this.uri.substr(idx+1,this.uri.length);
+    return res;
   }
 
   formatInHtmlLabelEntity() {
@@ -57,7 +112,7 @@ class GraphObject {
 
   toString() {
     let s = super.toString();
-    return "< id:"+this.id+" ,"+"SPARQLid:"+this.SPARQLid+" ,"+"suggested:"+this.suggested + " >";
+    return "< id:"+this.id+" ,"+"uri:"+this.uri+" ,"+"label:"+this.label+" ,"+"SPARQLid:"+this.SPARQLid+" ,"+"suggested:"+this.suggested + " >";
   }
 
 }

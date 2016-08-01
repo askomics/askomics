@@ -112,27 +112,6 @@ var AskomicsUserAbstraction = function () {
     };
 
     /* Get value of an attribut with RDF format like rdfs:label */
-    AskomicsUserAbstraction.prototype.removePrefix = function(uriEntity) {
-      if (typeof(uriEntity) !== 'string')
-        throw new Error("AskomicsUserAbstraction.prototype.removePrefix: uriEntity is not a string uriEntity :"+JSON.stringify(uriEntity));
-
-      var idx =  uriEntity.indexOf("#");
-      if ( idx == -1 ) {
-        idx =  uriEntity.indexOf(":");
-        if ( idx == -1 ) return uriEntity;
-      }
-      var res = uriEntity.substr(idx+1,uriEntity.length);
-      return res;
-    };
-
-    AskomicsUserAbstraction.prototype.URI = function(uriEntity) {
-      if ( uriEntity.indexOf("#")>0 ) {
-        return '<'+uriEntity+">";
-      }
-      return uriEntity;
-    };
-
-    /* Get value of an attribut with RDF format like rdfs:label */
     AskomicsUserAbstraction.prototype.getAttrib = function(uriEntity,attrib) {
         if (!(uriEntity in entityInformationList)) {
           console.error(JSON.stringify(uriEntity) + " is not referenced in the user abstraction !");

@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import os
+import os,sys, traceback
 import re
 
 from pyramid.view import view_config, view_defaults
@@ -136,7 +136,7 @@ class AskView(object):
                 ql.execute_query(sqb.get_delete_query_string(graph).query)
 
         except Exception as e:
-            data['error'] = str(e)
+            data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
             self.log.error(str(e))
 
         return data
@@ -291,7 +291,7 @@ class AskView(object):
         except Exception as e:
             data["headers_status"] = ""
             data["missing_headers"] = ""
-            data['error'] = str(e)
+            data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
             self.log.error(str(e))
 
         return data
@@ -346,7 +346,7 @@ class AskView(object):
 
         body = self.request.json_body
         try:
-            results,query = tse.build_sparql_query_from_json(body["variates"],body["constraintesRelations"],body["constraintesFilters"],body["limit"],True)
+            results,query = tse.build_sparql_query_from_json(body["variates"],body["constraintesRelations"],body["limit"],True)
 
             # Remove prefixes in the results table
             data['values'] = results
@@ -360,9 +360,11 @@ class AskView(object):
             rb = ResultsBuilder(self.settings, self.request.session)
             data['file'] = ql.format_results_csv(rb.build_csv_table(results))
         except Exception as e:
-            data['values'] = []
+            #exc_type, exc_value, exc_traceback = sys.exc_info()
+            #traceback.print_exc(limit=8)
+            data['values'] = ""
             data['file'] = ""
-            data['error'] = str(e)
+            data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
             self.log.error(str(e))
 
         return data
@@ -376,11 +378,11 @@ class AskView(object):
             tse = TripleStoreExplorer(self.settings, self.request.session)
 
             body = self.request.json_body
-            results,query = tse.build_sparql_query_from_json(body["variates"],body["constraintesRelations"],body["constraintesFilters"],body["limit"],False)
+            results,query = tse.build_sparql_query_from_json(body["variates"],body["constraintesRelations"],body["limit"],False)
 
             data['query'] = query
         except Exception as e:
-            data['error'] = str(e)
+            data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
             self.log.error(str(e))
 
         return data

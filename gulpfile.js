@@ -74,6 +74,15 @@ gulp.task('pre-test', function () {
     .pipe(gulp.dest('askomics/test/client/js/istanbul/'));
 });
 
+// Askomics test files
+var askomicsTestSourceFiles = ['askomics/test/client/js/*.js'];
+gulp.task('pre-test-srctest', function () {
+  return gulp.src(askomicsTestSourceFiles)
+    .pipe(babel({presets: ['es2015']}))
+    // Write the covered files to a temporary directory
+    .pipe(gulp.dest('askomics/test/client/js/istanbul/test'));
+});
+
 // writing dependancies about node_modules test framework
 var testFrameworkFiles=[
   'node_modules/mocha/mocha.js',
@@ -88,15 +97,14 @@ askomicsInstrumentedSourceFiles.forEach(function(element, index) {
   askomicsInstrumentedSourceFiles[index] = askomicsInstrumentedSourceFiles[index].replace('askomics/static/js','askomics/test/client/js/istanbul');
 });
 
-// Askomics test files
-var askomicsTestSourceFiles = ['askomics/test/client/js/*.js'];
 
-gulp.task('test', ['default','pre-test'],function () {
+
+gulp.task('test', ['default','pre-test','pre-test-srctest'],function () {
     return gulp
     .src('askomics/test/client/index_tpl.html')
     .pipe(inject(gulp.src(testFrameworkFiles, {read: false}) , {relative: true, name: 'testFramework'}))
     .pipe(inject(gulp.src(askomicsInstrumentedSourceFiles, {read: false}), {relative: true, name: 'askomics'}))
-    .pipe(inject(gulp.src(askomicsTestSourceFiles, {read: false}) , {relative: true, name: 'askomicsTestFiles'}))
+    .pipe(inject(gulp.src(['askomics/test/client/js/istanbul/test/*.js'], {read: false}) , {relative: true, name: 'askomicsTestFiles'}))
     //.pipe(rename('index.html'))
     .pipe(gulp.dest('askomics/test/client/'))
     .pipe(mochaPhantomJS(mochaPhantomOpts))

@@ -378,12 +378,12 @@ var AskomicsForceLayoutManager = function () {
               nodes.push(suggestedNode);
             }
             /* increment the number of link between the two nodes */
-
-            let uriLink  = objectsTarget[uri][rel] ;
+            let linkbase     = {} ;
+            linkbase.uri     = objectsTarget[uri][rel] ;
             let source   = slt_node ;
             let target   = suggestedList[uri];
 
-            link = new AskomicsLink(uriLink,source,target);
+            link = new AskomicsLink(linkbase,source,target);
             link.id = graphBuilder.getId();
             links.push(link);
           }
@@ -410,12 +410,11 @@ var AskomicsForceLayoutManager = function () {
               nodes.push(suggestedNode);
             }
 
-            //slt_node.nlink[suggestedList[uri].id]++;
-            //suggestedList[uri].nlink[slt_node.id]++;
-            let uriLink  = subjectsTarget[uri][rel2] ;
+            let linkbase     = {} ;
+            linkbase.uri     = subjectsTarget[uri][rel2] ;
             let source   = suggestedList[uri] ;
             let target   = slt_node;
-            link = new AskomicsLink(uriLink,source,target);
+            link = new AskomicsLink(linkbase,source,target);
             link.id = graphBuilder.getId();
             links.push(link);
           }
@@ -448,10 +447,11 @@ var AskomicsForceLayoutManager = function () {
 
           }
 
-          let uriLink  = 'positionable' ;
+          let linkbase     = {} ;
+          linkbase.uri     = 'positionable' ;
           let source   = suggestedList[uri] ;
           let target   = slt_node;
-          link = new AskomicsPositionableLink(uriLink,source,target);
+          link = new AskomicsPositionableLink(linkbase,source,target);
           link.id = graphBuilder.getId();
           links.push(link);
         }
@@ -477,10 +477,12 @@ var AskomicsForceLayoutManager = function () {
         if (! forceLayoutManager.isProposedUri("link",objectsTarget[node2.uri][rel])) continue ;
 
         if ( this.relationInstancied(node1,node2,objectsTarget[node2.uri][rel],links) ) continue ;
-        let uriLink  = objectsTarget[node2.uri][rel];
+
+        let linkbase     = {} ;
+        linkbase.uri     = objectsTarget[node2.uri][rel];
         let source   = node1;
         let target   = node2;
-        let link = new AskomicsLink(uriLink,source,target);
+        let link = new AskomicsLink(linkbase,source,target);
         link.id = graphBuilder.getId();
         links.push(link);
       }
@@ -491,10 +493,11 @@ var AskomicsForceLayoutManager = function () {
 
         if ( this.relationInstancied(node2,node1,subjectsTarget[node2.uri][rel],links) ) continue ;
 
-        let uriLink  = subjectsTarget[node2.uri][rel];
+        let linkbase     = {} ;
+        linkbase.uri     = subjectsTarget[node2.uri][rel];
         let source   = node2;
         let target   = node1;
-        let link = new AskomicsLink(uriLink,source,target);
+        let link = new AskomicsLink(linkbase,source,target);
         link.id = graphBuilder.getId();
         links.push(link);
       }
@@ -504,10 +507,11 @@ var AskomicsForceLayoutManager = function () {
       if ( forceLayoutManager.isProposedUri("link","positionable") &&
            (node1.uri in positionableEntities) && (node2.uri in positionableEntities)) {
 
-        let uriLink  = 'positionable' ;
+        let linkbase     = {} ;
+        linkbase.uri     = 'positionable' ;
         let source   = node2 ;
         let target   = node1;
-        let link = new AskomicsPositionableLink(uriLink,source,target);
+        let link = new AskomicsPositionableLink(linkbase,source,target);
         link.id = graphBuilder.getId();
         links.push(link);
       }
