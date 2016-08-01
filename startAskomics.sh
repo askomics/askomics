@@ -61,6 +61,9 @@ fi
 
 ASKOMICS="$PYTHON ${PYTHON_FLAGS[@]} "${DIR_VENV}/bin/pserve" $CONFIG_PATH ${PSERVE_FLAGS[@]}"
 
+echo "deploy .js"
+gulp
+
 echo "Starting askomics with:"
 echo "$ . '${ACTIVATE}'"
 echo "$ ${ASKOMICS}"
