@@ -131,7 +131,7 @@ class TripleStoreExplorer(ParamManager):
             for elt in constraints:
                 if isinstance(elt, str):
                     req+=tabul+elt+".\n"
-                elif len(elt) == 2 and isinstance(elt[0], list) and isinstance(constraints[1], str):
+                elif len(elt) == 2 and isinstance(elt[0], list) and isinstance(elt[1], str):
                     req+= tabul+elt[1] + "{\n"+ self.buildRecursiveBlock(tabul+'\t',elt[0])+"\n"+tabul+"}\n"
 
                 else:
