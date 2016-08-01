@@ -193,7 +193,6 @@ describe('AskomicsNode', function(){
     it('* inverseMatch *', function(){
       let geneNode = new AskomicsNode({uri:"http://wwww.system/test1",label:''},0.0,0.0);
       geneNode.inverseMatch = [];
-      console.log(geneNode.inverseMatch);
       chai.assert.deepEqual(geneNode.inverseMatch,[]);
 
       geneNode.setjson(geneJSON);
