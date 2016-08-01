@@ -46,12 +46,24 @@ class GraphLink extends GraphObject {
     if (! graphBuilder)
       throw "Devel error: setjson : graphBuilder is not instancied!";
 
+    if (! (('_source' in obj) || ('_target' in obj) ) ) {
+      throw "Devel error: setjson : obj have no _source/_target property : "+JSON.stringify(obj);
+    }
+
+    if (! ('_id' in obj._source) ) {
+      throw "Devel error: setjson : obj._source have no id property : "+JSON.stringify(obj);
+    }
+
+    if (! ('_id' in obj._target) ) {
+      throw "Devel error: setjson : obj._target have no id property : "+JSON.stringify(obj);
+    }
+
     let t = AskomicsGraphBuilder.findElt(graphBuilder.nodes(),obj._source._id);
     if (t[0]<0) {
       throw "Devel error: setjson : nodes have to be initialized to define links.";
     }
     this.source    = t[1];
-    
+
     t = AskomicsGraphBuilder.findElt(graphBuilder.nodes(),obj._target._id);
     if (t[0]<0) {
       throw "Devel error: setjson : nodes have to be initialized to define links.";

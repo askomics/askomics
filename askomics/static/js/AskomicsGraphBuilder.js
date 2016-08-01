@@ -238,14 +238,14 @@ const classesMapping = {
       for (var n of this._instanciedNodeGraph) {
         if (n.id == id ) return n;
       }
-      throw new Exception ("GraphBuilder :: Can not find instancied node:"+JSON.stringify(id));
+      throw "GraphBuilder :: Can not find instancied node:"+JSON.stringify(id);
     }
 
     getInstanciedLink(id) {
       for (var n of this._instanciedLinkGraph) {
         if (n.id == id) return n;
       }
-      throw new Exception ("GraphBuilder :: Can not find instancied link:"+JSON.stringify(id));
+      throw "GraphBuilder :: Can not find instancied link:"+JSON.stringify(id);
     }
 
 

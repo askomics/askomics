@@ -284,18 +284,45 @@ class AskomicsNodeView extends AskomicsObjectView {
         if (icon.hasClass('glyphicon-eye-close')) {
             icon.removeClass('glyphicon-eye-close');
             icon.addClass('glyphicon-search');
-            console.log("SEARCH");
             node.setActiveAttribute(sparqlid,true,true);
           } else if (icon.hasClass('glyphicon-search')) {
             icon.removeClass('glyphicon-search');
             icon.addClass('glyphicon-eye-open');
-            console.log("OPEN");
             node.setActiveAttribute(sparqlid,true,false);
           } else {
             icon.removeClass('glyphicon-eye-open');
             icon.addClass('glyphicon-eye-close');
-            console.log("CLOSE");
             node.setActiveAttribute(sparqlid,false,false);
+          }
+      });
+      return icon;
+    }
+
+    // dedicated to String entry
+    makeNegativeMatchIcon(node,sparql) {
+      var icon = $('<span></span>')
+              .attr('sparqlid', sparql.SPARQLid)
+              .attr('nodeid', node.id)
+              .attr('aria-hidden','true')
+              .addClass('glyphicon')
+              .addClass('glyphicon-plus')
+              .addClass('display');
+
+      let obj = this;
+
+      icon.click(function(d) {
+          let sparqlid  = $(this).attr('sparqlid');
+          let nodeid = $(this).attr('nodeid');
+          let node = graphBuilder.getInstanciedNode(nodeid);
+
+          if (icon.hasClass('glyphicon-plus')) {
+                icon.removeClass('glyphicon-plus');
+                icon.addClass('glyphicon-minus');
+                node.inverseMatch[sparqlid] = true;
+          } else {
+                icon.removeClass('glyphicon-minus');
+                icon.addClass('glyphicon-plus');
+                node.inverseMatch[sparqlid] = false;
           }
       });
       return icon;
@@ -322,6 +349,7 @@ class AskomicsNodeView extends AskomicsObjectView {
       details.append(lab)
              .append(mythis.makeRemoveIcon(inp))
              .append(mythis.makeRegExpIcon(node.id,node.SPARQLid))
+             .append(mythis.makeNegativeMatchIcon(node.id,node.SPARQLid))
              .append(inp);
 
       var attributes = userAbstraction.getAttributesWithURI(node.uri);
@@ -343,6 +371,7 @@ class AskomicsNodeView extends AskomicsObjectView {
             details.append(lab)
                    .append(mythis.makeRemoveIcon(inp))
                    .append(mythis.makeEyeIcon(node,attribute))
+                   .append(mythis.makeNegativeMatchIcon(node,attribute))
                    .append(inp);
           } else if (attribute.type.indexOf("decimal") >= 0) {
             inp = currentObj.buildDecimal(node,attribute);
@@ -350,6 +379,7 @@ class AskomicsNodeView extends AskomicsObjectView {
             details.append(lab)
                    .append(mythis.makeRemoveIcon(inp))
                    .append(mythis.makeEyeIcon(node,attribute))
+                   .append(mythis.makeNegativeMatchIcon(node,attribute))
                    .append(inp);
           } else {
             inp = currentObj.buildString(node,attribute.SPARQLid);
@@ -359,6 +389,7 @@ class AskomicsNodeView extends AskomicsObjectView {
                    .append(mythis.makeRemoveIcon(inp))
                    .append(mythis.makeEyeIcon(node,attribute))
                    .append(mythis.makeRegExpIcon(node.id,attribute.SPARQLid))
+                   .append(mythis.makeNegativeMatchIcon(node,attribute))
                    .append(inp);
           }
 
