@@ -35,7 +35,7 @@ describe('AskomicsPositionableLink', function(){
             }
             
             chai.expect(function () { link2.setjson(JSON_link); }).to.throw('Devel error: setjson : obj._source have no id property : {"_id":11,"_SPARQLid":"positionable1","_suggested":false,"_uri":"positionable","_label":"excluded of","_linkindex":1,"_source":{},"_target":{},"_transitive":true,"_negative":false,"type":"excluded","same_tax":false,"same_ref":true,"strict":false}');
-            //FIXME: make the following work
+            //FIXME: setJSON without throwing an error
             //link.setjson(JSON_link);
             //chai.assert.deepEqual(link, JSON_link);
         });
