@@ -51,7 +51,6 @@ class AskomicsPositionableLink extends AskomicsLink {
 
   buildFiltersSPARQL(filters) {
     let equalsign = '';
-    let ua = userAbstraction;
 
     if (!this.strict) {
       equalsign = '=';
@@ -59,7 +58,6 @@ class AskomicsPositionableLink extends AskomicsLink {
 
     let node = this.target ;
     let secondNode = this.source ;
-    let info = ua.getPositionableEntities();
 
 
     if (this.same_ref) {
@@ -94,7 +92,7 @@ class AskomicsPositionableLink extends AskomicsLink {
           break;
 
       default:
-        throw new Error("buildPositionableConstraintsGraph: unkown type :"+JSON.stringify(type));
+        throw new Error("buildPositionableConstraintsGraph: unkown type: "+this.type);
     }
   }
 
