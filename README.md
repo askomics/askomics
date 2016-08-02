@@ -89,6 +89,7 @@ with:
 
 + triplestore: fuseki or virtuoso
 + mode: production or development
+
 #### Developpment
 
 If you want to develop AskOmics, run:
