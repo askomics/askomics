@@ -231,6 +231,7 @@
                                                 <optgroup label='Relation type'>
                                                     <option value='entity'>General relation to entity</option>
                                                     <option value='entitySym'>Symmetric relation to entity</option>
+                                                    <option value='entityGoterm'>Relation with a goterm (Gene Ontology)</option>
                                                 </optgroup>
                                             {{/if}}
                                         </select>

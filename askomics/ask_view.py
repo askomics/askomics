@@ -136,6 +136,7 @@ class AskView(object):
                 ql.execute_query(sqb.get_delete_query_string(graph).query)
 
         except Exception as e:
+            traceback.print_exc(file=sys.stdout)
             data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
             self.log.error(str(e))
 
@@ -203,12 +204,13 @@ class AskView(object):
 
                 header_num = 0
                 for ih in range(0,len(infos['headers'])):
-                    if infos['headers'][ih].find("@")>0:
-                        infos['column_types'].append("entity")
-                    else:
-                        infos['column_types'].append(src_file.guess_values_type(infos['preview_data'][ih], infos['headers'][header_num]))
+                    #if infos['headers'][ih].find("@")>0:
+                    #    infos['column_types'].append("entity")
+                    #else:
+                    infos['column_types'].append(src_file.guess_values_type(infos['preview_data'][ih], infos['headers'][header_num]))
                     header_num += 1
             except Exception as e:
+                traceback.print_exc(file=sys.stdout)
                 infos['error'] = 'Could not read input file, are you sure it is a valid tabular file?'
                 self.log.error(str(e))
 
@@ -235,6 +237,7 @@ class AskView(object):
         src_file.set_forced_column_types(col_types)
         src_file.set_disabled_columns(disabled_columns)
 
+        cont_ttl = '\n'.join(src_file.get_turtle(preview_only=True))
         data = textwrap.dedent(
         """
         {header}
@@ -256,8 +259,8 @@ class AskView(object):
         ######################
 
         {domain_knowledge_ttl}
-        """).format(header=sfc.get_turtle_template(),
-                    content_ttl = '\n'.join(src_file.get_turtle(preview_only=True)),
+        """).format(header=sfc.get_turtle_template(cont_ttl),
+                    content_ttl = cont_ttl,
                     abstraction_ttl = src_file.get_abstraction(),
                     domain_knowledge_ttl = src_file.get_domain_knowledge()
                     )
@@ -291,6 +294,7 @@ class AskView(object):
         except Exception as e:
             data["headers_status"] = ""
             data["missing_headers"] = ""
+            traceback.print_exc(file=sys.stdout)
             data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
             self.log.error(str(e))
 
@@ -320,6 +324,7 @@ class AskView(object):
             method = 'load'
             data = src_file.persist(urlbase,method)
         except Exception as e:
+            traceback.print_exc(file=sys.stdout)
             data['error'] = 'Probleme with user data file ?</br>'+str(e)
             self.log.error(str(e))
 
@@ -362,6 +367,7 @@ class AskView(object):
         except Exception as e:
             #exc_type, exc_value, exc_traceback = sys.exc_info()
             #traceback.print_exc(limit=8)
+            traceback.print_exc(file=sys.stdout)
             data['values'] = ""
             data['file'] = ""
             data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
@@ -382,6 +388,7 @@ class AskView(object):
 
             data['query'] = query
         except Exception as e:
+            traceback.print_exc(file=sys.stdout)
             data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
             self.log.error(str(e))
 

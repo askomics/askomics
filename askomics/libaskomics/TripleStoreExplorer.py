@@ -165,7 +165,7 @@ class TripleStoreExplorer(ParamManager):
 
 
         sqb = SparqlQueryBuilder(self.settings, self.session)
-        prefixes = sqb.header_sparql_config()
+        prefixes = sqb.header_sparql_config(req)
         query = prefixes+req
 
         results = {}
