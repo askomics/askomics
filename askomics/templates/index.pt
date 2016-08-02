@@ -20,6 +20,7 @@
         <link href="static/css/style.css" rel="stylesheet" type="text/css">
         <link href="static/css/pygment.css" rel="stylesheet" type="text/css">
         <link href="static/css/google-material-icons.css" rel="stylesheet" type="text/css">
+        <link href="static/css/font-awesome.css" rel="stylesheet" type="text/css">
     </head>
 
     <body>
