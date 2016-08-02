@@ -88,3 +88,4 @@ describe('AskomicsLink', function(){
       chai.assert.deepEqual(variates, []);
     });
   });
+});

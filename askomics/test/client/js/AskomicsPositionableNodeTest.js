@@ -17,6 +17,7 @@ let PositionableNodeJSON = {
     "_filters": {},
     "_values": {},
     "_isregexp": {},
+    "_inverseMatch": {}
 }
 
 
