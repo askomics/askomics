@@ -19,13 +19,14 @@
         <link href="static/css/bootstrap.css" rel="stylesheet" type="text/css">
         <link href="static/css/style.css" rel="stylesheet" type="text/css">
         <link href="static/css/pygment.css" rel="stylesheet" type="text/css">
+        <link href="static/css/google-material-icons.css" rel="stylesheet" type="text/css">
     </head>
 
     <body>
         <nav class="navbar navbar-default">
             <div id="navbar_content" class="container">
                 <div class="navbar-header">
-                    <a class="navbar-brand site-header" href="/">${project}</a>
+                    <a class="navbar-brand site-header" href="/"><i class="material-icons md-18">face</i> ${project}</a>
                 </div>
 
                 <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
@@ -199,9 +200,8 @@
                                     <th class='column_header'>
                                         {{#unless @first}}
                                             <input type='checkbox' class='toggle_column' checked />
-
-                                        <img src='/static/images/icons/ok.png' class='relation_present' title='Data with this name is already present in the database' width='24' height='24' />
-                                        <img src='/static/images/icons/new.png' class='relation_new' title='No data with this name was found in the database' width='24' height='24' />
+                                            <i id='relation_present' class="material-icons">done</i>
+                                            <i id='relation_new' class="material-icons">fiber_new</i>
                                         {{/unless}}
                                         {{ this }}
                                     </th>

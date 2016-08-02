@@ -215,12 +215,12 @@ function checkExistingData(file_elem) {
     service.post(model, function(data) {
         file_elem.find('.column_header').each(function( index ) {
             if (data.headers_status[index-1] == 'present') {
-                $(this).find(".relation_present").first().show();
-                $(this).find(".relation_new").first().hide();
+                $(this).find("#relation_present").first().show();
+                $(this).find("#relation_new").first().hide();
             }
             else {
-                $(this).find(".relation_present").first().hide();
-                $(this).find(".relation_new").first().show();
+                $(this).find("#relation_present").first().hide();
+                $(this).find("#relation_new").first().show();
             }
         });
 
