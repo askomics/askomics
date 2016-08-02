@@ -9,7 +9,8 @@ class AskomicsNode extends GraphNode {
     this._categories = {} ;
     this._filters    = {} ; /* filters of attributes key:sparqlid*/
     this._values     = {} ; /* values of attributes key:sparqlid*/
-    this._isregexp   = {} ;
+    this._isregexp   = {} ; /* boolean if exact or regexp match */
+    this._inverseMatch = {} ; /* boolean if negation filter is actived */
     return this;
   }
 
@@ -21,6 +22,7 @@ class AskomicsNode extends GraphNode {
     this._filters    = $.extend(true, {}, obj._filters)    ; /* filters of attributes key:sparqlid*/
     this._values     = $.extend(true, {}, obj._values)     ;
     this._isregexp   = $.extend(true, {}, obj._isregexp)   ;
+    this._inverseMatch = $.extend(true, {}, obj._inverseMatch)   ;
   }
 
   set attributes (attributes) { this._attributes = attributes; }
@@ -38,13 +40,15 @@ class AskomicsNode extends GraphNode {
   set isregexp (__isregexp) { this._isregexp = __isregexp; }
   get isregexp () { return this._isregexp; }
 
+  set inverseMatch (__inverseMatch) { this._inverseMatch = __inverseMatch; }
+  get inverseMatch () { return this._inverseMatch; }
+
   getPanelView() {
     return new AskomicsNodeView(this);
   }
 
   buildConstraintsSPARQL() {
     let blockConstraintByNode = [];
-
     /* add node inside */
     blockConstraintByNode.push("?"+'URI'+this.SPARQLid+" "+'rdf:type'+" "+this.URI());
     blockConstraintByNode.push("?"+'URI'+this.SPARQLid+" "+'rdfs:label'+" "+"?"+this.SPARQLid);
@@ -61,6 +65,10 @@ class AskomicsNode extends GraphNode {
           /* check filter if exist */
           if ( SparqlId in this.filters ) {
             subBlockConstraint.push(this.filters[SparqlId]);
+          }
+          /* If Inverse Match we have to build a block */
+          if ( this._inverseMatch[SparqlId] ) {
+            subBlockConstraint = [subBlockConstraint,'FILTER NOT EXISTS'];
           }
 
           if ( this.attributes[uri].optional ) {
@@ -80,6 +88,11 @@ class AskomicsNode extends GraphNode {
 
         if ( SparqlId in this.filters ) {
           subBlockConstraint.push(this.filters[SparqlId]);
+        }
+
+        /* If Inverse Match we have to build a block */
+        if ( this._inverseMatch[this.categories[uri].SPARQLid] ) {
+          subBlockConstraint = [subBlockConstraint,'FILTER NOT EXISTS'];
         }
 
         if ( this.categories[uri].optional ) {
@@ -187,7 +200,7 @@ class AskomicsNode extends GraphNode {
     }
     throw "activeAttribute : can not find attribute:"+uriId;
   }
-
+/*
   isActiveAttribute(uriId) {
     if ( uriId === undefined ) throw "isActiveAttribute : undefined attribute !";
     for (let a in this.attributes ) {
@@ -202,7 +215,7 @@ class AskomicsNode extends GraphNode {
     }
     throw "isActiveAttribute : can not find attribute:"+uriId;
   }
-
+*/
   setFilterAttributes(SPARQLid,value,filter) {
     if ($.trim(value) === "") { // case if user don't wan anymore a filter
       delete this.filters[SPARQLid];
