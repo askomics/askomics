@@ -151,13 +151,15 @@ class TripleStoreExplorer(ParamManager):
 
         namedGraphs = []
 
-        for indexResult in range(len(res['results']['bindings'])):
-            namedGraphs.append(res['results']['bindings'][indexResult]['g']['value'])
+        #for indexResult in range(len(res['results']['bindings'])):
+        #    namedGraphs.append(res['results']['bindings'][indexResult]['g']['value'])
 
         req = ""
         req += "SELECT DISTINCT "+' '.join(variates)+"\n"
-        for graph in namedGraphs:
-            req += "FROM "+ "<"+graph+ ">"+"\n"
+        #TODO OFI: External Service do not work and, anyway, graphes have to be selectionned by the user in the UI
+        #
+        #for graph in namedGraphs:
+        #    req += "FROM "+ "<"+graph+ ">"+"\n"
         req += "WHERE \n"
         req += self.buildRecursiveBlock('',constraintesRelations)
         if limit != None and limit >0 :
