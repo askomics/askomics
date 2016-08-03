@@ -66,48 +66,41 @@ function displayResults(data) {
        let activesAttributes = {} ;
        let activesAttributesLabel = {};
 
-       let nodeToDisplay = graphBuilder.nodesDisplaying();
-       let i,j,k;
-       let varEntity;
-
-       for (i=0;i<nodeToDisplay.length;i++ ) {
-         varEntity = nodeToDisplay[i];
-         var nodeBuf = {name:varEntity};
-         var label = varEntity;
-         let attr_disp = graphBuilder.attributesDisplaying(varEntity);
-         activesAttributes[varEntity] = attr_disp.id;
-         activesAttributesLabel[varEntity] = attr_disp.label;
-         var nAttributes = activesAttributes[varEntity].length+1;
+       for (let i=0;i<graphBuilder.nodes().length;i++ ) {
+         let node = graphBuilder.nodes()[i];
+         if ( ! node.actif ) continue;
+         let attr_disp = node.getAttributesDisplaying();
+         activesAttributes[node.id] = attr_disp.id;
+         activesAttributesLabel[node.id] = attr_disp.label;
+         let nAttributes = activesAttributes[node.id].length;
          /* Fomattage en indice du numero de l'entité */
          row.append($('<th></th>')
             .addClass("table-bordered")
             .addClass("active")
             .attr("style", "text-align:center;")
-            .attr("colspan",nAttributes).append(label));
+            .attr("colspan",nAttributes).append(node.label));
 
        }
 
        head.append(row);
        row = $('<tr></tr>');
-       for (i=0;i<nodeToDisplay.length;i++ ) {
-         varEntity = nodeToDisplay[i];
-         row.append($('<th></th>').addClass("success").addClass("table-bordered").text("ID"));
-
-         for (var att in activesAttributes[varEntity]) {
-            row.append($('<th></th>').addClass("success").addClass("table-bordered").text(activesAttributesLabel[varEntity][att]));
-
+       for (let i=0;i<graphBuilder.nodes().length;i++ ) {
+         let node = graphBuilder.nodes()[i];
+         if ( ! node.actif ) continue;
+         for (let label in activesAttributes[node.id]) {
+            row.append($('<th></th>')
+               .addClass("success")
+               .addClass("table-bordered").text(activesAttributesLabel[node.id][label]));
          }
        }
       head.append(row);
-
-      for (i=0;i<data.values.length;i++ ) {
+      for (let i=0;i<data.values.length;i++ ) {
         row = $('<tr></tr>');
-        for (j=0;j<nodeToDisplay.length;j++ ) {
-          varEntity = nodeToDisplay[j];
-          //console.log(JSON.stringify(data.values[i]));
-          row.append($('<td></td>').addClass("table-bordered").text(data.values[i][varEntity]));
-          for (k in activesAttributes[varEntity]) {
-            row.append($('<td></td>').text(data.values[i][activesAttributes[varEntity][k]]));
+        for (let j=0;j<graphBuilder.nodes().length;j++ ) {
+          let node = graphBuilder.nodes()[j];
+          if ( ! node.actif ) continue;
+          for (let sparqlId in activesAttributes[node.id]) {
+            row.append($('<td></td>').text(data.values[i][activesAttributes[node.id][sparqlId]]));
           }
         }
         body.append(row);

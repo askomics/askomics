@@ -229,6 +229,30 @@ class AskomicsNode extends GraphNode {
       this.values[SPARQLid]  = value; /* save value to restore it when the views need it*/
     }
   }
+  // TODO: Manage order of display
+  getAttributesDisplaying() {
+    let list_id = [];
+    let list_label = [];
+
+    list_id.push(this.SPARQLid);
+    list_label.push("ID");
+
+    for (let uriAtt in this.attributes) {
+      if (this.attributes[uriAtt].actif) {
+        list_id.push(this.attributes[uriAtt].SPARQLid);
+        list_label.push(this.attributes[uriAtt].label);
+        console.log('---> attr: '+JSON.stringify(this.attributes));
+      }
+    }
+    for (let uriCat in this.categories) {
+      if (this.categories[uriCat].actif) {
+        list_id.push(this.categories[uriCat].SPARQLid);
+        list_label.push(this.categories[uriCat].label);
+        console.log('---> cat: '+JSON.stringify(this.categories));
+      }
+    }
+    return {'id' : list_id, 'label': list_label};
+  }
 
   getTextFillColor() { return 'black'; }
   getTextStrokeColor() { return 'black'; }

@@ -88,7 +88,7 @@ class AskomicsObjectView {
 
         var node = graphBuilder.getInstanciedNode(id);
         if ( node ) {
-          graphBuilder.switchActiveNode(node);
+          node.switchActiveNode();
 
           if (node.actif) {
             $(this).removeClass('glyphicon-eye-close');
@@ -98,7 +98,7 @@ class AskomicsObjectView {
             $(this).addClass('glyphicon-eye-close');
           }
         }
-        // link are not manage
+        // link is not manage
     });
 
     // Node deletion

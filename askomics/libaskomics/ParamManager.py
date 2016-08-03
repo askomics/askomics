@@ -22,7 +22,8 @@ class ParamManager(object):
         self.ASKOMICS_initial_query = "initialQuery.sparql"
         self.ASKOMICS_get_class_info_from_abstraction_queryFile = "getClassInfoFromAbstractionQuery.sparql"
 
-        self.ASKOMICS_prefix = {"": self.get_param("askomics.prefix"),
+        self.ASKOMICS_prefix = {
+                                "": self.get_param("askomics.prefix"),
                                 "displaySetting": self.get_param("askomics.display_setting"),
                                 "xsd": """http://www.w3.org/2001/XMLSchema#""",
                                 "rdfs": """http://www.w3.org/2000/01/rdf-schema#""",
@@ -30,7 +31,8 @@ class ParamManager(object):
                                 "rdfg": """http://www.w3.org/2004/03/trix/rdfg-1/""",
                                 "owl": """http://www.w3.org/2002/07/owl#""",
                                 "prov": """http://www.w3.org/ns/prov#""",
-                                "dc": """http://purl.org/dc/elements/1.1/"""}
+                                "dc": """http://purl.org/dc/elements/1.1/"""
+                                }
 
         self.ASKOMICS_sparql_queries_dir = 'askomics/sparql/'
         self.ASKOMICS_html_template      = 'askomics/templates/integration.pt'

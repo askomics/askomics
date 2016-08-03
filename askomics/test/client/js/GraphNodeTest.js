@@ -37,4 +37,23 @@ describe('GraphNode', function(){
       chai.assert.typeOf(node.toString(),'string');
     });
   });
+  describe('#Switch active node', function(){
+    it('*  *', function(){
+      node.switchActiveNode();
+      chai.assert.isNotOk(node.actif);
+      node.switchActiveNode();
+      chai.assert.isOk(node.actif);
+    });
+  });
+  describe('#Manage Attributes/Categories', function(){
+    it('* setAttributeOrCategoryForNode *', function(){
+      chai.assert.isOk(false);
+    });
+    it('* buildAttributeOrCategoryForNode *', function(){
+      chai.assert.isOk(false);
+    });
+    it('* getAttributeOrCategoryForNode *', function(){
+      chai.assert.isOk(false);
+    });
+  });
 });

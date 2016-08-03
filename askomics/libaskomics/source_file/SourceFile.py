@@ -562,7 +562,8 @@ class SourceFile(ParamManager, HaveCachedProperties):
                 data = self.load_data_from_file(fp, urlbase)
                 if data['status'] == 'failed':
                     return data
-
+                os.remove(fp.name) # Everything ok, remove previous temp file
+                
             total_triple_count += triple_count
 
             # Data is inserted, now insert the abstraction
@@ -571,7 +572,6 @@ class SourceFile(ParamManager, HaveCachedProperties):
             abstraction_ttl = self.get_abstraction()
             domain_knowledge_ttl = self.get_domain_knowledge()
 
-            #os.remove(fp.name) # Everything ok, remove previous temp file
             fp = tempfile.NamedTemporaryFile(dir=pathttl, prefix="tmp_"+self.metadatas['fileName'], suffix=".ttl", mode="w", delete=False)
             fp.write(header_ttl + '\n')
             fp.write(abstraction_ttl + '\n')
@@ -583,6 +583,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
             if data['status'] == 'failed':
                 return data
             data['total_triple_count'] = total_triple_count
+            os.remove(fp.name)
 
         else:
 
