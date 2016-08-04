@@ -37,7 +37,6 @@ class AskomicsNodeView extends AskomicsObjectView {
     var model = {
       'variates': tab[0],
       'constraintesRelations': tab[1],
-      'constraintesFilters': tab[2],
       'limit' :-1,
       'export':false,
     };
@@ -357,10 +356,10 @@ class AskomicsNodeView extends AskomicsObjectView {
 
       $.each(attributes, function(i) {
           /* if attribute is loaded before the creation of attribute view, we don t need to create a new */
-          let attribute = graphBuilder.getAttributeOrCategoryForNode(attributes[i],node);
+          let attribute = node.getAttributeOrCategoryForNode(attributes[i]);
           /* creation of new one otherwise */
           if ( ! attribute ) {
-            attribute = graphBuilder.buildAttributeOrCategoryForNode(attributes[i],node);
+            attribute = node.buildAttributeOrCategoryForNode(attributes[i]);
           }
           var lab = $("<label></label>").attr("for",attribute.label).text(attribute.label);
           let inp ;

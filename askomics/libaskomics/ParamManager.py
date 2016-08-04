@@ -65,7 +65,7 @@ class ParamManager(object):
         return key in self.settings.keys()
 
     def updateListPrefix(self,listPrefix):
-
+        self.log.info("updateListPrefix")
         lPrefix = {}
         url = "http://prefix.cc/"
         ext = ".file.json"
@@ -80,6 +80,7 @@ class ParamManager(object):
                     continue
                 dic = json.loads(response.text)
                 self.ASKOMICS_prefix[item]=dic[item]
+                self.log.info("add prefix:"+str(item)+":"+self.ASKOMICS_prefix[item])
 
     def header_sparql_config(self,sarqlrequest):
         header = ""

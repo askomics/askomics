@@ -70,7 +70,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
             'entity'  : (':', ''),
             'entitySym'  : (':', ''),
             'entity_start'  : (':', ''),
-            'entityGoterm'  : ('', '')}
+            'entityGoterm'  : ('"', '"')}
 
         self.metadatas = {
             'loadDate': '',
@@ -174,6 +174,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
                     return typ
 
         # Then, check if category
+        #if all(re.match(r'^\w+$', val) for val in values):#check if no scape chararcter
         if len(set(values)) < len(values) / 2:
             return 'category'
         elif all(self.is_decimal(val) for val in values): # Then numeric
@@ -563,7 +564,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
                 if data['status'] == 'failed':
                     return data
                 os.remove(fp.name) # Everything ok, remove previous temp file
-                
+
             total_triple_count += triple_count
 
             # Data is inserted, now insert the abstraction
@@ -571,6 +572,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
             # We get the abstraction now as we need first to parse the whole file to have category_values
             abstraction_ttl = self.get_abstraction()
             domain_knowledge_ttl = self.get_domain_knowledge()
+            header_ttl = self.get_turtle_template(abstraction_ttl+"\n"+domain_knowledge_ttl)
 
             fp = tempfile.NamedTemporaryFile(dir=pathttl, prefix="tmp_"+self.metadatas['fileName'], suffix=".ttl", mode="w", delete=False)
             fp.write(header_ttl + '\n')

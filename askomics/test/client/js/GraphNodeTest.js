@@ -47,7 +47,8 @@ describe('GraphNode', function(){
   });
   describe('#Manage Attributes/Categories', function(){
     it('* setAttributeOrCategoryForNode *', function(){
-      chai.assert.isOk(false);
+      node.setAttributeOrCategoryForNode(this.attributes,"test");
+      node.setAttributeOrCategoryForNode(this.categories,"test2");
     });
     it('* buildAttributeOrCategoryForNode *', function(){
       chai.assert.isOk(false);

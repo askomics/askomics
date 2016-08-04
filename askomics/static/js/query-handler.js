@@ -72,6 +72,9 @@ function displayResults(data) {
          let attr_disp = node.getAttributesDisplaying();
          activesAttributes[node.id] = attr_disp.id;
          activesAttributesLabel[node.id] = attr_disp.label;
+         if (activesAttributes[node.id].length != activesAttributesLabel[node.id].length ) {
+           throw "Devel: Error node.getAttributesDisplaying give array with different size:"+str(activesAttributes[node.id].length)+","+str(activesAttributesLabel[node.id].length);
+         }
          let nAttributes = activesAttributes[node.id].length;
          /* Fomattage en indice du numero de l'entité */
          row.append($('<th></th>')
@@ -94,6 +97,9 @@ function displayResults(data) {
          }
        }
       head.append(row);
+
+
+
       for (let i=0;i<data.values.length;i++ ) {
         row = $('<tr></tr>');
         for (let j=0;j<graphBuilder.nodes().length;j++ ) {
