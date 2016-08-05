@@ -44,9 +44,9 @@ class GONode extends GraphNode {
     blockConstraintByNode.push('?oboid rdfs:label ?description');
     blockConstraintByNode.push('?oboid <http://www.geneontology.org/formats/oboInOwl#id> ?goid');
     /* pour les tests*/
-    //blockConstraintByNode.push("VALUES ?oboid { <http://purl.obolibrary.org/obo/GO_0034136> <http://purl.obolibrary.org/obo/GO_0034132> <http://purl.obolibrary.org/obo/GO_0034128>}");
+    blockConstraintByNode.push("VALUES ?oboid { <http://purl.obolibrary.org/obo/GO_0034136> <http://purl.obolibrary.org/obo/GO_0034132> <http://purl.obolibrary.org/obo/GO_0034128>}");
 
-    blockConstraintByNode = [ blockConstraintByNode,'SERVICE <http://localhost:8891/sparql>' ];
+    blockConstraintByNode = [ blockConstraintByNode,'SERVICE <http://cloud-60.genouest.org/go/sparql>' ];
     return [variates,[blockConstraintByNode,'']];
   }
 
@@ -63,7 +63,12 @@ class GONode extends GraphNode {
       }
       valueFilterOnOboId += " }";
       blockConstraintByNode.push(valueFilterOnOboId);
+    } else {
+      //<http://www.geneontology.org/formats/oboInOwl#hasOBONamespace>
+      blockConstraintByNode.push('?URI'+this.SPARQLid+' ?rel'+this.SPARQLid+' ?valueString'+this.SPARQLid);
+      blockConstraintByNode.push('FILTER ( datatype(?valueString'+this.SPARQLid+') = xsd:string )');
     }
+
     /*     TEST       */
     //blockConstraintByNode.push('?subClass'+this.SPARQLid+' rdfs:subClassOf* '+'?URI'+this.SPARQLid);
     // obo: ne match pas avec la bonne url....on met en dure pour les tests
@@ -71,12 +76,16 @@ class GONode extends GraphNode {
     //blockConstraintByNode.push('?subClass'+this.SPARQLid+' rdfs:label ?desc2'+this.SPARQLid);
 
     return [
-            blockConstraintByNode,'SERVICE <http://localhost:8891/sparql>'
+            blockConstraintByNode,'SERVICE <http://cloud-60.genouest.org/go/sparql>'
           ];
   }
 
   instanciateVariateSPARQL(variates) {
     variates.push("?desc"+this.SPARQLid);
+    if ( this.filterOnOboId.length <= 0 ) {
+      variates.push("?rel"+this.SPARQLid);
+      variates.push("?valueString"+this.SPARQLid);
+    }
     //variates.push('?subClass'+this.SPARQLid);
     //variates.push('?desc2'+this.SPARQLid);
     //variates.push('?id2'+this.SPARQLid);
@@ -90,11 +99,13 @@ class GONode extends GraphNode {
     list_label.push("ID");
     list_id.push("desc"+this.SPARQLid);
     list_label.push("Label");
-    //list_id.push('id2'+this.SPARQLid);
-    //list_label.push("SubClassOf");
-    //list_id.push('desc2'+this.SPARQLid);
-    //list_label.push("LabelSubClassOf");
 
+    if ( this.filterOnOboId.length <= 0 ) {
+      list_id.push('rel'+this.SPARQLid);
+      list_label.push("RelationName");
+      list_id.push('valueString'+this.SPARQLid);
+      list_label.push("Value");
+    }
 
     return {'id' : list_id, 'label': list_label};
   }

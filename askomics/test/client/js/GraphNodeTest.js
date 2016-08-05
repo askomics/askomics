@@ -56,5 +56,16 @@ describe('GraphNode', function(){
     it('* getAttributeOrCategoryForNode *', function(){
       chai.assert.isOk(false);
     });
+    it('* getTypeAttribute *', function(){
+      chai.expect(function () { node.getTypeAttribute("anything");}).
+        to.throw("GraphNode::Unknown type:"+"anything");
+      chai.assert(node.getTypeAttribute("http://www.w3.org/2001/XMLSchema#decimal") == "decimal");
+      chai.expect(function () { node.getTypeAttribute("decimal");}).
+        to.throw("GraphNode::Unknown type:"+"decimal");
+      chai.assert(node.getTypeAttribute("http://www.w3.org/2001/XMLSchema#string") == "string");
+      chai.expect(function () { node.getTypeAttribute("string");}).
+        to.throw("GraphNode::Unknown type:"+"string");
+    });
   });
+
 });

@@ -33,11 +33,12 @@ class GONodeView extends AskomicsObjectView {
     let model = {
       'variates': tab[0],
       'constraintesRelations': tab[1],
-      'limit' :-1,
+      'limit' :-1, // resoudre le probleme de la charqge query...
       'export':false,
     };
     let gonode = this;
       service.post(model, function(d) {
+        console.log("Askomics load "+d.values.length+ " GO terms.");
         for (let v of d.values) {
              datalist.append($('<option>')
                      .attr('goid',v.goid)
