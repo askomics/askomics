@@ -239,10 +239,8 @@ var AskomicsForceLayoutManager = function () {
   };
 
     AskomicsForceLayoutManager.prototype.updateInstanciateLinks = function(links) {
-      console.log('updateInstanciateLinks size:'+links.length);
       for (var l of links) {
         let id = l.id;
-        console.log(JSON.stringify(l));
         $("#" + id).css("stroke-dasharray","");
         $("#" + id).css("opacity","1");
         $('#label-'+id).css('opacity', "1");

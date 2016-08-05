@@ -31,6 +31,7 @@ class AskomicsNodeView extends AskomicsObjectView {
     var tab = node.buildConstraintsGraphForCategory(attribute.id);
 
     inp.attr("list", "opt_" + labelSparqlVarId)
+       .attr("nodeid",node.id)
        .attr("sparqlid",URISparqlVarId);
     //console.log(JSON.stringify(nameDiv));
     var service = new RestServiceJs("sparqlquery");
@@ -82,7 +83,7 @@ class AskomicsNodeView extends AskomicsObjectView {
     inp.change(function(d) {
       var value = $(this).val();
       if (!value) value = '';
-      let nodeid = $(this).parent().attr('nodeid');
+      let nodeid = $(this).attr('nodeid');
       let sparqlid = $(this).attr('sparqlid');
 
       if ( sparqlid === undefined ) {
@@ -103,11 +104,11 @@ class AskomicsNodeView extends AskomicsObjectView {
 /* ===============================================================================================*/
   buildDecimal(node,attribute) {
     let labelSparqlVarId = attribute.SPARQLid;
-    let id               = attribute.id;
+
     let inputValue       = "";
     let selectedOpValue  = "";
 
-    let inp = $("<table></table>").attr("sparqlid",labelSparqlVarId);
+    let inp = $("<table></table>");
     if ('op_'+labelSparqlVarId in node.values) {
       selectedOpValue = node.values['op_'+labelSparqlVarId];
     }
@@ -115,7 +116,10 @@ class AskomicsNodeView extends AskomicsObjectView {
       inputValue = node.values[labelSparqlVarId];
     }
 
-    let v = $("<select></select>").addClass("form-control");
+    let v = $("<select></select>")
+                  .addClass("form-control")
+                  .attr("nodeid",node.id)
+                  .attr("sparqlid",labelSparqlVarId);
     let t;
     t=$("<option></option>").attr("value", '=').append('=');
     if ( selectedOpValue=='=') t.attr("selected", "selected");
@@ -138,9 +142,9 @@ class AskomicsNodeView extends AskomicsObjectView {
 
     let tr = $("<tr></tr>");
     tr.append($("<td></td>").append(v));
-    //v = $("<input/>").attr("type", "text").val(inputValue).addClass("form-control");
-    v = $('<input type="text" class="form-control"/>').attr("id",id); // ?????????????????
-    inp.val = v.val.bind(inputValue);// ?????????????????
+
+    v = $('<input type="text" class="form-control"/>').attr("id",attribute.id);
+    inp.val = v.val.bind(inputValue);
 
     tr.append($("<td></td>").append(v));
     inp.append(tr);
@@ -148,8 +152,8 @@ class AskomicsNodeView extends AskomicsObjectView {
     inp.change(function(d) {
       var op = $(this).find("option:selected").text();
       var value = $(this).find('input').val();
-      let nodeid = $(this).parent().attr('nodeid');
-      let sparlid = $(this).attr('sparqlid');
+      let nodeid = $(this).find('select').attr('nodeid');
+      let sparlid = $(this).find('select').attr('sparqlid');
       let node = graphBuilder.getInstanciedNode(nodeid);
       node.setFilterAttributes(sparlid,value,'FILTER ( ?'+sparlid+' '+op+' '+value+')');
       node.setFilterAttributes("op_"+sparlid,op,'');
@@ -190,6 +194,84 @@ class AskomicsNodeView extends AskomicsObjectView {
       obj.changeFilter(node,sparqlid,value);
     });
       return inp ;
+    }
+
+/*
+  Build select list to link wioth other variable in the graph
+*/
+    buildLinkVariable(node,curAtt) {
+      let inp = $("<select/>")
+              .attr("linkvar","true")
+              .attr("nodeid",node.id)
+              .attr("sparqlid",curAtt.SPARQLid)
+              .attr("type", "list")
+              .addClass("form-control")
+              .hide();
+
+      /* Default */
+      inp.append($('<option></option>').prop('disabled', true).prop('selected', true).html("Link with an attribute node..."));
+
+      /* rebuild list when this option is selected */
+      inp.focus(function(d) {
+        let nodeid = $(this).attr('nodeid');
+        let node = graphBuilder.getInstanciedNode(nodeid);
+
+        /* Remove all child */
+        $(this).empty();
+        /* Default */
+        $(this).append($('<option></option>').prop('disabled', true).prop('selected', true).html("Link with an attribute node..."));
+        /* check if query was upload, if a selected value exist */
+        let sparqlIdisSelected = (node.values[curAtt.SPARQLid] !== undefined ) ;
+        let sparqlIdSelected = "" ;
+        if ( sparqlIdisSelected ) {
+          sparqlIdSelected = node.values[curAtt.SPARQLid];
+        }
+        /* set up the list with possible entities to link */
+
+        for ( let n of graphBuilder.nodes() ) {
+          let attributes = userAbstraction.getAttributesWithURI(n.uri);
+          let firstPrintForThisNode = true;
+          for (let a of attributes ) {
+            let att = n.getAttributeOrCategoryForNode(a);
+            /* we can not link the attribute with himself */
+            if ( att.id == curAtt.id ) continue ;
+            /* we can not link attributes with diffente type */
+            if ( n.getTypeAttribute(att) != node.getTypeAttribute(curAtt) ) continue;
+            if ( firstPrintForThisNode ) {
+              inp.append($('<option></option>').prop('disabled', true).html("<b><i> --- "+ n.formatInHtmlLabelEntity()+" --- </i></b>"));
+              firstPrintForThisNode = false;
+            }
+
+            let option = $('<option></option>')
+                        .attr("value",att.label)
+                        .attr("type",n.getTypeAttribute(att)).html(att.SPARQLid)
+                        .attr("nodeAttLink",n.id);
+
+            if ( sparqlIdSelected == att.SPARQLid ) option.prop('selected', true);
+            inp.append(option);
+          }
+        }
+
+      });
+
+      /* set up when var is clicked */
+      inp.change(function(d) {
+        let attLink = $(this).find("option:selected").text();
+        let type = $(this).find("option:selected").attr("type");
+        let nodeAttLink = $(this).find("option:selected").attr("nodeAttLink");
+        let nodeid = $(this).attr('nodeid');
+        let sparlidCurrentAtt = $(this).attr('sparqlid');
+        let node = graphBuilder.getInstanciedNode(nodeid);
+        let node2 = graphBuilder.getInstanciedNode(nodeAttLink);
+
+        if ( type == "category" ) {
+          node.setFilterLinkVariable('URICat'+sparlidCurrentAtt,node2,'URICat'+attLink);
+        } else {
+          node.setFilterLinkVariable(sparlidCurrentAtt,node2,attLink);
+        }
+      });
+
+      return inp;
     }
 
     // dedicated to String entry
@@ -255,10 +337,13 @@ class AskomicsNodeView extends AskomicsObjectView {
       });
       return icon;
     }
-      // Add attributes of the selected node on the right side of AskOmics
-    makeRemoveIcon(field) {
+    // Add attributes of the selected node on the right side of AskOmics
+    makeRemoveIcon() {
           let removeIcon = $('<span class="glyphicon glyphicon-erase display"></span>');
-          removeIcon.click(function() { field.val(null).trigger("change"); });
+          removeIcon.click(function() {
+            $(this).parent().find('input').val(null).trigger("change");
+            $(this).parent().find('select').val(null).trigger("change");
+          });
           return removeIcon;
     }
 
@@ -327,6 +412,41 @@ class AskomicsNodeView extends AskomicsObjectView {
       return icon;
     }
 
+    // dedicated to String entry
+    makeLinkVariableIcon(node,attribute) {
+      var icon = $('<span></span>')
+              .attr('sparqlid', attribute.SPARQLid)
+              .attr('nodeid', node.id)
+              .attr('aria-hidden','true')
+              .addClass('fa')
+              .addClass('fa-chain-broken')
+              .addClass('display');
+
+      let obj = this;
+
+      icon.click(function(d) {
+          let sparqlid  = $(this).attr('sparqlid');
+          let nodeid = $(this).attr('nodeid');
+          let node = graphBuilder.getInstanciedNode(nodeid);
+
+          if (icon.hasClass('fa-chain-broken')) {
+                icon.removeClass('fa-chain-broken');
+                icon.addClass('fa-link');
+                $(this).parent().find('input[linkvar!="true"]').hide();
+                $(this).parent().find('select[linkvar!="true"]').hide();
+                $(this).parent().find('select[linkvar="true"]').show();
+          } else {
+                icon.removeClass('fa-link');
+                icon.addClass('fa-chain-broken');
+                $(this).parent().find('input[linkvar!="true"]').show();
+                $(this).parent().find('select[linkvar!="true"]').show();
+                $(this).parent().find('select[linkvar="true"]').hide();
+                node.removeFilterLinkVariable('URICat'+sparqlid);
+          }
+      });
+      return icon;
+    }
+
 /* ===============================================================================================*/
   create() {
     var mythis = this;
@@ -341,58 +461,55 @@ class AskomicsNodeView extends AskomicsObjectView {
 
       /* Label Entity as ID attribute */
       let lab = $("<label></label>").attr("for",elemId).html(node.label);
-      let inp = this.buildString(node,node.SPARQLid);
 
       node.switchRegexpMode(node.SPARQLid);
 
-      details.append(lab)
-             .append(mythis.makeRemoveIcon(inp))
+      details.append($('<div></div>').append(lab)
+             .append(mythis.makeRemoveIcon())
              .append(mythis.makeRegExpIcon(node.id,node.SPARQLid))
              .append(mythis.makeNegativeMatchIcon(node.id,node.SPARQLid))
-             .append(inp);
+             .append(this.buildString(node,node.SPARQLid)));
 
       var attributes = userAbstraction.getAttributesWithURI(node.uri);
       let currentObj = this;
 
       $.each(attributes, function(i) {
-          /* if attribute is loaded before the creation of attribute view, we don t need to create a new */
           let attribute = node.getAttributeOrCategoryForNode(attributes[i]);
-          /* creation of new one otherwise */
-          if ( ! attribute ) {
-            attribute = node.buildAttributeOrCategoryForNode(attributes[i]);
-          }
           var lab = $("<label></label>").attr("for",attribute.label).text(attribute.label);
-          let inp ;
 
-          if (attribute.type.indexOf("http://www.w3.org/2001/XMLSchema#") < 0) {
-            inp = currentObj.buildCategory(node,attribute,inp);
+          if ( attribute.basic_type == "category" ) {
             /* RemoveIcon, EyeIcon, Attribute IHM */
-            details.append(lab)
-                   .append(mythis.makeRemoveIcon(inp))
+            details.append($('<div></div>').append(lab)
+                   .append(mythis.makeRemoveIcon())
                    .append(mythis.makeEyeIcon(node,attribute))
                    .append(mythis.makeNegativeMatchIcon(node,attribute))
-                   .append(inp);
-          } else if (attribute.type.indexOf("decimal") >= 0) {
-            inp = currentObj.buildDecimal(node,attribute);
+                   .append(mythis.makeLinkVariableIcon(node,attribute))
+                   .append(currentObj.buildCategory(node,attribute))
+                   .append(currentObj.buildLinkVariable(node,attribute)));
+          } else if ( attribute.basic_type == "decimal" ) {
             /* RemoveIcon, EyeIcon, Attribute IHM */
-            details.append(lab)
-                   .append(mythis.makeRemoveIcon(inp))
+            details.append($('<div></div>').append(lab)
+                   .append(mythis.makeRemoveIcon())
                    .append(mythis.makeEyeIcon(node,attribute))
                    .append(mythis.makeNegativeMatchIcon(node,attribute))
-                   .append(inp);
-          } else {
-            inp = currentObj.buildString(node,attribute.SPARQLid);
+                   .append(mythis.makeLinkVariableIcon(node,attribute))
+                   .append(currentObj.buildDecimal(node,attribute))
+                   .append(currentObj.buildLinkVariable(node,attribute)));
+          } else if ( attribute.basic_type == "string" ) {
+
             node.switchRegexpMode(attribute.SPARQLid);
             /* RemoveIcon, EyeIcon, Attribute IHM */
-            details.append(lab)
-                   .append(mythis.makeRemoveIcon(inp))
+            details.append($('<div></div>').append(lab)
+                   .append(mythis.makeRemoveIcon())
                    .append(mythis.makeEyeIcon(node,attribute))
                    .append(mythis.makeRegExpIcon(node.id,attribute.SPARQLid))
                    .append(mythis.makeNegativeMatchIcon(node,attribute))
-                   .append(inp);
+                   .append(mythis.makeLinkVariableIcon(node,attribute))
+                   .append(currentObj.buildString(node,attribute.SPARQLid))
+                   .append(currentObj.buildLinkVariable(node,attribute)));
+          } else {
+            throw typeof this + "::create . Unknown type attribute:"+ attribute.basic_type;
           }
-
-
           //$('#waitModal').modal('hide');
       });
       $("#viewDetails").append(details);

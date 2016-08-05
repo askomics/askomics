@@ -66,6 +66,7 @@ let geneJSON = {
   "_x":0.0,
   "_y":0.0,
   "_nlink":{},
+  "_linkvar": {},
   "_uri":"http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Gene",
   "_attributes": attributesList,
   "_categories": categoriesList,

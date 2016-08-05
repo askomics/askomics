@@ -49,10 +49,10 @@ var askomicsCssFiles = [
   'askomics'
 ];
 
-var dev = !!util.env.dev;
+var prod = !!util.env.prod;
 var reload = !!util.env.reload;
 
-dev ? console.log('---> Development') : console.log('---> Production');
+prod ? console.log('---> Production') : console.log('---> Development');
 reload ? console.log('---> Reload') : util.noop();
 
 /*
@@ -68,7 +68,7 @@ gulp.task('default', ['build'], function () {
 build task : jshint files
              babel
              concat all files in askomics.js
-             if `gulp --dev` minify askomics.js
+             if `gulp --prod` uglify askomics.js
 */
 gulp.task('build', function() {
     return gulp.src(askomicsSourceFiles)
@@ -79,7 +79,7 @@ gulp.task('build', function() {
             presets: ['es2015']
         }))
         .pipe(concat('askomics.js'))
-        .pipe(dev ? util.noop() : uglify())
+        .pipe(prod ? uglify() : util.noop() )
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest('askomics/static/dist'));
 });

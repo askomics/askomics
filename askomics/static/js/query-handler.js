@@ -24,7 +24,7 @@ function viewQueryResults() {
 
     let time = $.now();
     let service = new RestServiceJs("sparqlquery");
-    let jdata = prepareQuery(false, 30, false);
+    let jdata = prepareQuery(false, 100, false);
     service.post(jdata,function(data) {
       hideModal();
       let new_time = $.now();
@@ -81,7 +81,7 @@ function displayResults(data) {
             .addClass("table-bordered")
             .addClass("active")
             .attr("style", "text-align:center;")
-            .attr("colspan",nAttributes).append(node.label));
+            .attr("colspan",nAttributes).append(node.formatInHtmlLabelEntity()));
 
        }
 
