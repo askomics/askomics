@@ -173,12 +173,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
                         break
                     return typ
 
-        # Then, check if category
-        #if all(re.match(r'^\w+$', val) for val in values):#check if no scape chararcter
-        if len(set(values)) < len(values) / 2:
-            return 'category'
-        elif all(self.is_decimal(val) for val in values): # Then numeric
-            return 'numeric'
+
 
         # check if relationShip with an other local entity
         if header.find("@")>0:
@@ -191,6 +186,13 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
             #general relation by default
             return "entity"
+        # Then, check if category
+
+        #if all(re.match(r'^\w+$', val) for val in values):#check if no scape chararcter
+        if len(set(values)) < len(values) / 2:
+            return 'category'
+        elif all(self.is_decimal(val) for val in values): # Then numeric
+            return 'numeric'
 
         # default is text
         return 'text'
