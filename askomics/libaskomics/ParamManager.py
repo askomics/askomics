@@ -1,4 +1,7 @@
 import os.path
+import re
+import requests
+import json
 
 class ParamManager(object):
     """
@@ -19,7 +22,8 @@ class ParamManager(object):
         self.ASKOMICS_initial_query = "initialQuery.sparql"
         self.ASKOMICS_get_class_info_from_abstraction_queryFile = "getClassInfoFromAbstractionQuery.sparql"
 
-        self.ASKOMICS_prefix = {"": self.get_param("askomics.prefix"),
+        self.ASKOMICS_prefix = {
+                                "": self.get_param("askomics.prefix"),
                                 "displaySetting": self.get_param("askomics.display_setting"),
                                 "xsd": """http://www.w3.org/2001/XMLSchema#""",
                                 "rdfs": """http://www.w3.org/2000/01/rdf-schema#""",
@@ -27,7 +31,8 @@ class ParamManager(object):
                                 "rdfg": """http://www.w3.org/2004/03/trix/rdfg-1/""",
                                 "owl": """http://www.w3.org/2002/07/owl#""",
                                 "prov": """http://www.w3.org/ns/prov#""",
-                                "dc": """http://purl.org/dc/elements/1.1/"""}
+                                "dc": """http://purl.org/dc/elements/1.1/"""
+                                }
 
         self.ASKOMICS_sparql_queries_dir = 'askomics/sparql/'
         self.ASKOMICS_html_template      = 'askomics/templates/integration.pt'
@@ -59,8 +64,29 @@ class ParamManager(object):
     def is_defined(self, key):
         return key in self.settings.keys()
 
-    def header_sparql_config(self):
+    def updateListPrefix(self,listPrefix):
+        self.log.info("updateListPrefix")
+        lPrefix = {}
+        url = "http://prefix.cc/"
+        ext = ".file.json"
+
+        for item in listPrefix:
+            if not (item in self.ASKOMICS_prefix):
+                response = requests.get(url+item+ext)
+                if response.status_code != 200:
+                    self.log.error("request:"+str(url+item+ext))
+                    self.log.error("status_code:"+str(response.status_code))
+                    self.log.error(response)
+                    continue
+                dic = json.loads(response.text)
+                self.ASKOMICS_prefix[item]=dic[item]
+                self.log.info("add prefix:"+str(item)+":"+self.ASKOMICS_prefix[item])
+
+    def header_sparql_config(self,sarqlrequest):
         header = ""
+        regex = re.compile('\s(\w+):')
+        listTermPref = regex.findall(sarqlrequest)
+        self.updateListPrefix(listTermPref)
 
         for key, value in self.ASKOMICS_prefix.items():
             header += "PREFIX "+key+": <"+value+">\n"
@@ -76,10 +102,17 @@ class ParamManager(object):
 
         return obj
 
-    def get_turtle_template(self):
-        header = ["@prefix %s: <%s> ." % item
-                           for item in self.ASKOMICS_prefix.items()]
+    def get_turtle_template(self,ttl):
+
+        #add new prefix if needed
+
+        regex = re.compile('\s(\w+):')
+        listTermPref = regex.findall(ttl)
+        self.updateListPrefix(listTermPref)
+
+        header = ["@prefix {0}: <{1}> .".format(k,v) for k,v in self.ASKOMICS_prefix.items() ]
+
         asko_prefix = self.get_param("askomics.prefix")
-        header.append("@base <%s> ." % asko_prefix)
-        header.append("<%s> rdf:type owl:Ontology ." % asko_prefix)
+        header.append("@base <{0}> .".format(asko_prefix))
+        header.append("<{0}> rdf:type owl:Ontology .".format(asko_prefix))
         return '\n'.join(header)

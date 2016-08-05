@@ -114,9 +114,8 @@ var AskomicsUserAbstraction = function () {
     /* Get value of an attribut with RDF format like rdfs:label */
     AskomicsUserAbstraction.prototype.getAttrib = function(uriEntity,attrib) {
         if (!(uriEntity in entityInformationList)) {
-          console.error(JSON.stringify(uriEntity) + " is not referenced in the user abstraction !");
-
-          return;
+          console.log(JSON.stringify(uriEntity) + " is not referenced in the user abstraction !");
+          return "<unknown>";
         }
         var attrib_longterm = attrib ;
         for (var p in prefix) {
@@ -128,8 +127,9 @@ var AskomicsUserAbstraction = function () {
         }
 
         if (!(attrib_longterm in entityInformationList[uriEntity])) {
-          console.error(JSON.stringify(uriEntity) + '['+JSON.stringify(attrib)+']' + " is not referenced in the user abstraction !");
-          return;
+          console.log(JSON.stringify(uriEntity) + '['+JSON.stringify(attrib)+']' + " is not referenced in the user abstraction !");
+
+          return "<unknown>";
         }
 
         return entityInformationList[uriEntity][attrib_longterm];
@@ -183,6 +183,12 @@ var AskomicsUserAbstraction = function () {
 
     AskomicsUserAbstraction.prototype.isPositionable  = function(Uri) {
       return (Uri in entityPositionableInformationList);
+    };
+
+    AskomicsUserAbstraction.prototype.isGoterm  = function(Uri) {
+      // TODO using prefix.cc to update entityInformationList
+      console.log(Uri);
+      return (Uri === "http://purl.org/obo/owl/GO#term");
     };
 
   };

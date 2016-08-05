@@ -17,8 +17,9 @@ let PositionableNodeJSON = {
     "_filters": {},
     "_values": {},
     "_isregexp": {},
-    "_inverseMatch": {}
-}
+    "_inverseMatch": {},
+    "_linkvar": {}
+};
 
 
 describe('AskomicsPositionableNode', function(){

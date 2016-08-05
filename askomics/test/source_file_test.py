@@ -84,15 +84,6 @@ class SourceFileTests(unittest.TestCase):
         assert self.srcfile.guess_values_type(['a', 'b', 'c', 'd'], 'start') != 'start'
         assert self.srcfile.guess_values_type(['a', 'b', 'c', 'd'], 'ref') != 'start'
 
-    def test_guess_column_types(self):
-        # guess_column_types not used
-        assert self.srcfile.guess_column_types([
-                       ['453', '334254', '342', '335'],
-                       ['453', '453', '453', '453'],
-                       ['453', 'ccc', 'bbb', 'aaa'],
-                       ['453', '334254', '342', '335']],
-                      ['hello', 'hello1', 'hello2', 'hello3']) == ['numeric', 'category', 'text', 'numeric']
-
     def test_get_domain_knowledge(self):
         srcfile = SourceFile(self.settings, self.request.session, SIMPLE_SOURCE_FILE, 10)
         srcfile.headers == ['head1', 'head2', 'head3','head4']

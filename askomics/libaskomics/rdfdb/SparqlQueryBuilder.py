@@ -37,7 +37,7 @@ class SparqlQueryBuilder(ParamManager):
 
         query = Template(template).substitute(replacement)
 
-        prefixes = self.header_sparql_config()
+        prefixes = self.header_sparql_config(query)
         return SparqlQuery(prefixes + query)
 
     # The following utilities use prepare_query to fill a template.

@@ -52,6 +52,62 @@ class GraphNode extends GraphObject {
     this._nlink=$.extend(true, {}, obj._nlink);
   }
 
+  switchActiveNode() {
+        this.actif = !this.actif ;
+  }
+
+  getTypeAttribute(attributeForUri) {
+
+    if (attributeForUri.type.indexOf("http://www.w3.org/2001/XMLSchema#") < 0) {
+      return "category";
+    }
+    if (attributeForUri.type.indexOf("http://www.w3.org/2001/XMLSchema#decimal") >= 0) {
+      return "decimal";
+    }
+    if (attributeForUri.type.indexOf("http://www.w3.org/2001/XMLSchema#string") >= 0) {
+      return "string";
+    }
+
+    throw "GraphNode::Unknown type:"+attributeForUri.type;
+  }
+
+  /* Build attribute with id, sparId inside a node from a generic uri attribute */
+  setAttributeOrCategoryForNode(AttOrCatArray,attributeForUri) {
+    AttOrCatArray[attributeForUri.uri] = {} ;
+    AttOrCatArray[attributeForUri.uri].uri       = attributeForUri.uri ;
+    AttOrCatArray[attributeForUri.uri].type = attributeForUri.type ;
+    AttOrCatArray[attributeForUri.uri].basic_type = this.getTypeAttribute(attributeForUri);
+
+    AttOrCatArray[attributeForUri.uri].label = attributeForUri.label ;
+
+    graphBuilder.setSPARQLVariateId(AttOrCatArray[attributeForUri.uri]);
+    AttOrCatArray[attributeForUri.uri].id=graphBuilder.getId();
+
+    /* by default all attributes is ask */
+    AttOrCatArray[attributeForUri.uri].actif = false ;
+
+
+    return AttOrCatArray[attributeForUri.uri];
+  }
+
+  buildAttributeOrCategoryForNode(attributeForUri) {
+    if (attributeForUri.type.indexOf("http://www.w3.org/2001/XMLSchema#") < 0) {
+      return this.setAttributeOrCategoryForNode(this.categories,attributeForUri);
+    }else {
+      return this.setAttributeOrCategoryForNode(this.attributes,attributeForUri);
+    }
+  }
+
+  getAttributeOrCategoryForNode(attributeForUri) {
+    if (attributeForUri.uri in this.categories ) {
+      return this.categories[attributeForUri.uri];
+    } else if (attributeForUri.uri in this.attributes) {
+      return this.attributes[attributeForUri.uri];
+    }
+    /* creation of new one otherwise */
+    return this.buildAttributeOrCategoryForNode(attributeForUri);
+  }
+
   getNodeStrokeColor() { return 'grey'; }
 
   getColorInstanciatedNode() {

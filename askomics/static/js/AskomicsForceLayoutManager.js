@@ -239,10 +239,8 @@ var AskomicsForceLayoutManager = function () {
   };
 
     AskomicsForceLayoutManager.prototype.updateInstanciateLinks = function(links) {
-      console.log('updateInstanciateLinks size:'+links.length);
       for (var l of links) {
         let id = l.id;
-        console.log(JSON.stringify(l));
         $("#" + id).css("stroke-dasharray","");
         $("#" + id).css("opacity","1");
         $('#label-'+id).css('opacity', "1");
@@ -383,7 +381,8 @@ var AskomicsForceLayoutManager = function () {
             let source   = slt_node ;
             let target   = suggestedList[uri];
 
-            link = new AskomicsLink(linkbase,source,target);
+            //link = new AskomicsLink(linkbase,source,target);
+            link = AskomicsObjectBuilder.instanceLink(linkbase,source,target);
             link.id = graphBuilder.getId();
             links.push(link);
           }
@@ -414,7 +413,8 @@ var AskomicsForceLayoutManager = function () {
             linkbase.uri     = subjectsTarget[uri][rel2] ;
             let source   = suggestedList[uri] ;
             let target   = slt_node;
-            link = new AskomicsLink(linkbase,source,target);
+            //link = new AskomicsLink(linkbase,source,target);
+            link = AskomicsObjectBuilder.instanceLink(linkbase,source,target);
             link.id = graphBuilder.getId();
             links.push(link);
           }
@@ -482,7 +482,8 @@ var AskomicsForceLayoutManager = function () {
         linkbase.uri     = objectsTarget[node2.uri][rel];
         let source   = node1;
         let target   = node2;
-        let link = new AskomicsLink(linkbase,source,target);
+        //let link = new AskomicsLink(linkbase,source,target);
+        let link = AskomicsObjectBuilder.instanceLink(linkbase,source,target);
         link.id = graphBuilder.getId();
         links.push(link);
       }
@@ -497,7 +498,8 @@ var AskomicsForceLayoutManager = function () {
         linkbase.uri     = subjectsTarget[node2.uri][rel];
         let source   = node2;
         let target   = node1;
-        let link = new AskomicsLink(linkbase,source,target);
+        //let link = new AskomicsLink(linkbase,source,target);
+        let link = AskomicsObjectBuilder.instanceLink(linkbase,source,target);
         link.id = graphBuilder.getId();
         links.push(link);
       }

@@ -3,8 +3,10 @@ const classesMapping = {
   'GraphNode': GraphNode,
   'AskomicsPositionableNode': AskomicsPositionableNode,
   'AskomicsNode': AskomicsNode,
+  'GONode': GONode,
   'GraphLink': GraphLink,
   'AskomicsLink': AskomicsLink,
+  'GOLink': GOLink,
   'AskomicsPositionableLink': AskomicsPositionableLink
 };
 
@@ -248,21 +250,10 @@ const classesMapping = {
       throw "GraphBuilder :: Can not find instancied link:"+JSON.stringify(id);
     }
 
-
-    /* TODO : find a best solution to unactive a node without matching on sparql variable ID */
-    switchActiveNode(node) {
-          node.actif = !node.actif ;
-    }
-
     setSuggestedNode(node,x,y) {
-      // TODO: Create a builder node inside userAbstraction
-      if ( userAbstraction.isPositionable(node.uri) ) {
-        node = new AskomicsPositionableNode(node,x,y);
-      } else {
-        node = new AskomicsNode(node,x,y);
-      }
-      node.id = this.getId();
-      return node;
+      let iNode = AskomicsObjectBuilder.instanceNode(node,x,y);
+      iNode.id = this.getId();
+      return iNode;
     }
 
     instanciateNode(node) {
@@ -289,38 +280,6 @@ const classesMapping = {
         l = this.setSPARQLVariateId(l);
         this._instanciedLinkGraph.push(l);
       }
-    }
-
-    /* Build attribute with id, sparId inside a node from a generic uri attribute */
-    setAttributeOrCategoryForNode(AttOrCatArray,attributeForUri,node) {
-      AttOrCatArray[attributeForUri.uri] = {} ;
-      AttOrCatArray[attributeForUri.uri].uri = attributeForUri.uri ;
-      AttOrCatArray[attributeForUri.uri].type = attributeForUri.type ;
-      AttOrCatArray[attributeForUri.uri].label = attributeForUri.label ;
-
-      AttOrCatArray[attributeForUri.uri] = this.setSPARQLVariateId(AttOrCatArray[attributeForUri.uri]);
-      AttOrCatArray[attributeForUri.uri].id=this.getId();
-
-      /* by default all attributes is ask */
-      AttOrCatArray[attributeForUri.uri].actif = false ;
-      return AttOrCatArray[attributeForUri.uri];
-    }
-
-    buildAttributeOrCategoryForNode(attributeForUri,node) {
-      if (attributeForUri.type.indexOf("http://www.w3.org/2001/XMLSchema#") < 0) {
-        return this.setAttributeOrCategoryForNode(node.categories,attributeForUri,node);
-      }else {
-        return this.setAttributeOrCategoryForNode(node.attributes,attributeForUri,node);
-      }
-    }
-
-    getAttributeOrCategoryForNode(attributeForUri,node) {
-      if (attributeForUri.uri in node.categories ) {
-        return node.categories[attributeForUri.uri];
-      } else if (attributeForUri.uri in node.attributes) {
-        return node.attributes[attributeForUri.uri];
-      }
-      return null;
     }
 
     synchronizeInstanciatedNodesAndLinks(nodes,links) {
@@ -392,39 +351,5 @@ const classesMapping = {
       }
 
       return [variates,[blockConstraint,'']] ;
-    }
-
-
-   nodesDisplaying() {
-      var list = [];
-      for (var v of this._instanciedNodeGraph) {
-        if (v.actif)
-          list.push(v.SPARQLid);
-      }
-      return list ;
-    }
-
-    attributesDisplaying(SPARQLid) {
-      var list_id = [];
-      var list_label = [];
-      for (var v of this._instanciedNodeGraph) {
-        if (v.SPARQLid == SPARQLid ) {
-          for (var uriAtt in v.attributes) {
-            if (v.attributes[uriAtt].actif) {
-              list_id.push(v.attributes[uriAtt].SPARQLid);
-              list_label.push(v.attributes[uriAtt].label);
-              console.log('---> attr: '+JSON.stringify(v.attributes));
-            }
-          }
-          for (var uriCat in v.categories) {
-            if (v.categories[uriCat].actif) {
-              list_id.push(v.categories[uriCat].SPARQLid);
-              list_label.push(v.categories[uriCat].label);
-              console.log('---> cat: '+JSON.stringify(v.categories));
-            }
-          }
-          return {'id' : list_id, 'label': list_label};
-        }
-      }
     }
   }

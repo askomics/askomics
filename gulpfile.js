@@ -27,14 +27,19 @@ var askomicsSourceFiles = [
         'askomics/static/js/node/GraphNode.js',
         'askomics/static/js/node/AskomicsNode.js',
         'askomics/static/js/node/AskomicsPositionableNode.js',
+        'askomics/static/js/node/GONode.js',
         'askomics/static/js/link/GraphLink.js',
         'askomics/static/js/link/AskomicsLink.js',
         'askomics/static/js/link/AskomicsPositionableLink.js',
+        'askomics/static/js/link/GOLink.js',
         'askomics/static/js/view/AskomicsObjectView.js',
         'askomics/static/js/view/AskomicsLinkView.js',
         'askomics/static/js/view/AskomicsNodeView.js',
         'askomics/static/js/view/AskomicsPositionableLinkView.js',
         'askomics/static/js/view/AskomicsPositionableNodeView.js',
+        'askomics/static/js/view/GOLinkView.js',
+        'askomics/static/js/view/GONodeView.js',
+        'askomics/static/js/AskomicsObjectBuilder.js',
         'askomics/static/js/AskomicsGraphBuilder.js',
         'askomics/static/js/AskomicsForceLayoutManager.js',
         'askomics/static/js/MainAskomics.js'
@@ -44,10 +49,10 @@ var askomicsCssFiles = [
   'askomics'
 ];
 
-var dev = !!util.env.dev;
+var prod = !!util.env.prod;
 var reload = !!util.env.reload;
 
-dev ? console.log('---> Development') : console.log('---> Production');
+prod ? console.log('---> Production') : console.log('---> Development');
 reload ? console.log('---> Reload') : util.noop();
 
 /*
@@ -63,7 +68,7 @@ gulp.task('default', ['build'], function () {
 build task : jshint files
              babel
              concat all files in askomics.js
-             if `gulp --dev` minify askomics.js
+             if `gulp --prod` uglify askomics.js
 */
 gulp.task('build', function() {
     return gulp.src(askomicsSourceFiles)
@@ -74,7 +79,7 @@ gulp.task('build', function() {
             presets: ['es2015']
         }))
         .pipe(concat('askomics.js'))
-        .pipe(dev ? util.noop() : uglify())
+        .pipe(prod ? uglify() : util.noop() )
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest('askomics/static/dist'));
 });
