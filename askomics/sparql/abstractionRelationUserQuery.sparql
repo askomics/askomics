@@ -7,5 +7,7 @@ WHERE {
     ?relation rdf:type $OwlProperty;
                 rdfs:domain ?subject;
                 rdfs:range ?object.
+    #to avoid Category
+    FILTER NOT EXISTS { ?object displaySetting:category [].}
     }
 }
