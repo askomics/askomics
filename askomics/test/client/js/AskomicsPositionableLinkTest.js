@@ -8,8 +8,8 @@ describe('AskomicsPositionableLink', function(){
         it('* test constructor *', function(){
             chai.assert.deepEqual(link.type, 'included');
             chai.assert.deepEqual(link.label, 'included in');
-            chai.assert.deepEqual(link.same_tax, true);
-            chai.assert.deepEqual(link.same_ref, true);
+            chai.assert.deepEqual(link.same_tax, 'undef');
+            chai.assert.deepEqual(link.same_ref, 'undef');
             chai.assert.deepEqual(link.strict, true);
         });
     });
@@ -46,10 +46,12 @@ describe('AskomicsPositionableLink', function(){
         it('* test the constraints *', function() {
             let expectedResult = [
               [
-                "?URI :position_taxon ?taxon_",
+                "?URI :position_ref ?ref_",
                 "?URI :position_ref ?ref_",
                 "?URI :position_taxon ?taxon_",
-                "?URI :position_ref ?ref_",
+                "?URI :position_taxon ?taxon_",
+                "?URI :position_strand ?strand_",
+                "?URI :position_strand ?strand_",
                 "?URI :position_start ?start_",
                 "?URI :position_end ?end_",
                 "?URI :position_start ?start_",
@@ -88,7 +90,7 @@ describe('AskomicsPositionableLink', function(){
 
     describe('#Positionable link Display methods', function(){
         it('* String output *', function(){
-            chai.assert.typeOf(link.getFillColor(),'string');
+            chai.assert.typeOf(link.getTextFillColor(),'string');
         });
     });
     

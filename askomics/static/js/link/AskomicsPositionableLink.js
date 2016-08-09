@@ -10,7 +10,7 @@ class AskomicsPositionableLink extends AskomicsLink {
     this.same_tax  =   'undef';
     this.same_ref  =   'undef';
     this.which_strand = 'both' ; // 'both', 'same' or 'opp'
-    this.strict   =  false ;
+    this.strict   =  true ;
     this.position_taxon = 'undef' ;
     this.position_ref = 'undef' ;
     this.position_strand = 'undef' ;
