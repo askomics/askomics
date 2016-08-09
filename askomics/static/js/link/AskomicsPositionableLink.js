@@ -62,6 +62,7 @@ class AskomicsPositionableLink extends AskomicsLink {
 
     let node = this.target ;
     let secondNode = this.source ;
+    let blockConstraint = [];
 
     /* constrainte to target the same ref */
     if (this.position_ref) {
