@@ -165,7 +165,7 @@ var AskomicsForceLayoutManager = function () {
 
   // Trigger query with enter key
   $(document).keydown(function (e) {
-    if (e.keyCode == 13 && $('#content_interrogation').is(':visible')) {
+    if (e.keyCode == 13 && $('#queryBuilder').is(':visible')) {
           viewQueryResults();
       }
   });
