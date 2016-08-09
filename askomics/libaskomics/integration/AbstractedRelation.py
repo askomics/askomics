@@ -31,7 +31,7 @@ class AbstractedRelation(object):
 
         #Keep compatibility with old version
         if idx  != -1:
-            type_range =  urllib.parse.quote(identifier[idx+1:len(identifier)])
+            type_range = identifier[idx+1:len(identifier)]
             self.label = identifier[0:idx]
 
         else:
@@ -42,13 +42,13 @@ class AbstractedRelation(object):
 
         self.col_type = relation_type
 
-        if relation_type == "entity":
+        if relation_type.startswith("entity"):
             self.relation_type = "owl:ObjectProperty"
-            self.rdfs_range = ":" + urllib.parse.quote(type_range)
-        elif relation_type == "entitySym":
-            #self.relation_type = "owl:SymmetricProperty"
-            self.relation_type = "owl:ObjectProperty"
-            self.rdfs_range = ":" + urllib.parse.quote(type_range)
+            if type_range.find(":")<0:
+                self.rdfs_range = ":" + urllib.parse.quote(type_range)
+            else:
+                self.rdfs_range = type_range
+
         elif relation_type.lower() in ('category', 'taxon', 'ref', 'strand'):
             self.relation_type = "owl:ObjectProperty"
             self.rdfs_range = ":" + urllib.parse.quote(type_range+"Category")

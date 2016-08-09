@@ -113,32 +113,10 @@ var AskomicsUserAbstraction = function () {
     };
 
     /* Get value of an attribut with RDF format like rdfs:label */
-    AskomicsUserAbstraction.prototype.removePrefix = function(uriEntity) {
-      if (typeof(uriEntity) !== 'string')
-        throw new Error("AskomicsUserAbstraction.prototype.removePrefix: uriEntity is not a string uriEntity :"+JSON.stringify(uriEntity));
-
-      var idx =  uriEntity.indexOf("#");
-      if ( idx == -1 ) {
-        idx =  uriEntity.indexOf(":");
-        if ( idx == -1 ) return uriEntity;
-      }
-      var res = uriEntity.substr(idx+1,uriEntity.length);
-      return res;
-    };
-
-    AskomicsUserAbstraction.prototype.URI = function(uriEntity) {
-      if ( uriEntity.indexOf("#")>0 ) {
-        return '<'+uriEntity+">";
-      }
-      return uriEntity;
-    };
-
-    /* Get value of an attribut with RDF format like rdfs:label */
     AskomicsUserAbstraction.prototype.getAttrib = function(uriEntity,attrib) {
         if (!(uriEntity in entityInformationList)) {
-          console.error(JSON.stringify(uriEntity) + " is not referenced in the user abstraction !");
-
-          return;
+          console.log(JSON.stringify(uriEntity) + " is not referenced in the user abstraction !");
+          return "<unknown>";
         }
         var attrib_longterm = attrib ;
         for (var p in prefix) {
@@ -150,8 +128,9 @@ var AskomicsUserAbstraction = function () {
         }
 
         if (!(attrib_longterm in entityInformationList[uriEntity])) {
-          console.error(JSON.stringify(uriEntity) + '['+JSON.stringify(attrib)+']' + " is not referenced in the user abstraction !");
-          return;
+          console.log(JSON.stringify(uriEntity) + '['+JSON.stringify(attrib)+']' + " is not referenced in the user abstraction !");
+
+          return "<unknown>";
         }
 
         return entityInformationList[uriEntity][attrib_longterm];
@@ -205,6 +184,12 @@ var AskomicsUserAbstraction = function () {
 
     AskomicsUserAbstraction.prototype.isPositionable  = function(Uri) {
       return (Uri in entityPositionableInformationList);
+    };
+
+    AskomicsUserAbstraction.prototype.isGoterm  = function(Uri) {
+      // TODO using prefix.cc to update entityInformationList
+      console.log(Uri);
+      return (Uri === "http://purl.org/obo/owl/GO#term");
     };
 
   };

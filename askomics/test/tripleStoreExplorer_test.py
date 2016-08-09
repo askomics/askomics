@@ -1,6 +1,6 @@
 import unittest
 import os
-import tempfile, shutil
+import tempfile,shutil,copy
 
 from pyramid import testing
 from pyramid.paster import get_appsettings
@@ -30,11 +30,25 @@ class tripleStoreExplorerTests(unittest.TestCase):
 
     def test_build_sparql_query_from_json(self):
         variates              = ['?Personne1', '?label1', '?Age1', '?ID1', '?Sexe1']
-        constraintesRelations = [['?URIPersonne1', 'rdf:type', '<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Personne>'], ['?URIPersonne1', 'rdfs:label', '?Personne1'], ['?URIPersonne1', '<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#label>', '?label1', False], ['<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#label>', 'rdfs:domain', '<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Personne>', False], ['<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#label>', 'rdfs:range', '<http://www.w3.org/2001/XMLSchema#string>', False], ['<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#label>', 'rdf:type', 'owl:DatatypeProperty', False], ['?URIPersonne1', '<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Age>', '?Age1', False], ['<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Age>', 'rdfs:domain', '<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Personne>', False], ['<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Age>', 'rdfs:range', '<http://www.w3.org/2001/XMLSchema#decimal>', False], ['<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Age>', 'rdf:type', 'owl:DatatypeProperty', False], ['?URIPersonne1', '<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#ID>', '?ID1', False], ['<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#ID>', 'rdfs:domain', '<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Personne>', False], ['<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#ID>', 'rdfs:range', '<http://www.w3.org/2001/XMLSchema#string>', False], ['<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#ID>', 'rdf:type', 'owl:DatatypeProperty', False], ['?URIPersonne1', '<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Sexe>', '?Sexe1', False]]
-        constraintesFilters   = []
+        constraintesRelations = [['?URIPersonne1 rdf:type <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Personne>',
+                                 '?URIPersonne1 rdfs:label ?Personne1',
+                                 '?URIPersonne1 <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#label> ?label1',
+                                 '<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#label> rdfs:domain <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Personne>',
+                                 '<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#label> rdfs:range <http://www.w3.org/2001/XMLSchema#string>',
+                                 '<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#label> rdf:type owl:DatatypeProperty',
+                                 '?URIPersonne1 <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Age> ?Age1',
+                                 '<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Age> rdfs:domain <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Personne>',
+                                 '<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Age> rdfs:range <http://www.w3.org/2001/XMLSchema#decimal>',
+                                 '<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Age> rdf:type owl:DatatypeProperty',
+                                 '?URIPersonne1 <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#ID> ?ID1',
+                                 '<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#ID> rdfs:domain <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Personne>',
+                                 '<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#ID> rdfs:range <http://www.w3.org/2001/XMLSchema#string>',
+                                 '<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#ID> rdf:type owl:DatatypeProperty',
+                                 '?URIPersonne1 <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Sexe> ?Sexe1'],'']
+
         limit = 10
         tse = TripleStoreExplorer(self.settings, self.request.session)
-        results,query = tse.build_sparql_query_from_json(variates,constraintesRelations,constraintesFilters,limit,True)
+        results,query = tse.build_sparql_query_from_json(variates,constraintesRelations,limit,True)
 
         a = {'Age1': '23',
         'ID1': 'AZERTY',
@@ -81,15 +95,17 @@ class tripleStoreExplorerTests(unittest.TestCase):
             self.assertTrue(elt in [a,b,c,d,e,f,g])
 
         assert len(results) == 7
+        constraintesR1 = copy.deepcopy(constraintesRelations)
+        constraintesR1[0].append('VALUES ?Sexe1 { :F }')
+        #results,query = tse.build_sparql_query_from_json(variates,constraintesR1,limit,True)
 
-        constraintesFilters   = ['VALUES ?Sexe1 { :F }']
-        results,query = tse.build_sparql_query_from_json(variates,constraintesRelations,constraintesFilters,limit,True)
+        #for elt in results:
+        #    print(elt)
+        #    self.assertTrue(elt in [a,e])
 
-        for elt in results:
-            self.assertTrue(elt in [a,e])
+        #assert len(results) == 2
 
-        assert len(results) == 2
-
-        constraintesFilters   = ['FILTER ( ?Age1 < 25)']
-        results,query = tse.build_sparql_query_from_json(variates,constraintesRelations,constraintesFilters,limit,True)
-        assert results == [a]
+        #constraintesR2 = copy.deepcopy(constraintesRelations)
+        #constraintesR2[0].append('FILTER ( ?Age1 < 25)')
+        #results,query = tse.build_sparql_query_from_json(variates,constraintesR2,limit,True)
+        #assert results == [a]

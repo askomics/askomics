@@ -3,8 +3,10 @@ const classesMapping = {
   'GraphNode': GraphNode,
   'AskomicsPositionableNode': AskomicsPositionableNode,
   'AskomicsNode': AskomicsNode,
+  'GONode': GONode,
   'GraphLink': GraphLink,
   'AskomicsLink': AskomicsLink,
+  'GOLink': GOLink,
   'AskomicsPositionableLink': AskomicsPositionableLink
 };
 
@@ -68,7 +70,7 @@ const classesMapping = {
         for (let i=0;i<nodes.length;i++) {
           let className = nodes[i][0];
           let jsonObj = nodes[i][1];
-          let n = new classesMapping[className](jsonObj);
+          let n = new classesMapping[className]({uri:"undefined"});
           n.setjson(jsonObj);
           this.nodes().push(n);
         }
@@ -76,7 +78,7 @@ const classesMapping = {
         for (let i=0;i<links.length;i++) {
           let className = links[i][0];
           let jsonObj = links[i][1];
-          let l = new classesMapping[className]();
+          let l = new classesMapping[className]({uri:"undefined"});
           l.setjson(jsonObj);
           this.links().push(l);
         }
@@ -210,7 +212,7 @@ const classesMapping = {
 
     /* create and return a new ID to instanciate a new SPARQL variate */
     setSPARQLVariateId(nodeOrLinkOrAttribute) {
-      let lab = userAbstraction.removePrefix(nodeOrLinkOrAttribute.uri);
+      let lab = new GraphNode({ uri:nodeOrLinkOrAttribute.uri } ).removePrefix();
       lab = lab.replace(/[%!\"#$%&'\(\)\*\+,\.\/:;<=>\?\@\[\\\]\^`\{\|\}~]/g, '');
       if ( ! this.SPARQLIDgeneration[lab] ) {
         this.SPARQLIDgeneration[lab] = 0 ;
@@ -238,31 +240,20 @@ const classesMapping = {
       for (var n of this._instanciedNodeGraph) {
         if (n.id == id ) return n;
       }
-      throw new Exception ("GraphBuilder :: Can not find instancied node:"+JSON.stringify(id));
+      throw "GraphBuilder :: Can not find instancied node:"+JSON.stringify(id);
     }
 
     getInstanciedLink(id) {
       for (var n of this._instanciedLinkGraph) {
         if (n.id == id) return n;
       }
-      throw new Exception ("GraphBuilder :: Can not find instancied link:"+JSON.stringify(id));
-    }
-
-
-    /* TODO : find a best solution to unactive a node without matching on sparql variable ID */
-    switchActiveNode(node) {
-          node.actif = !node.actif ;
+      throw "GraphBuilder :: Can not find instancied link:"+JSON.stringify(id);
     }
 
     setSuggestedNode(node,x,y) {
-      // TODO: Create a builder node inside userAbstraction
-      if ( userAbstraction.isPositionable(node.uri) ) {
-        node = new AskomicsPositionableNode(node,x,y);
-      } else {
-        node = new AskomicsNode(node,x,y);
-      }
-      node.id = this.getId();
-      return node;
+      let iNode = AskomicsObjectBuilder.instanceNode(node,x,y);
+      iNode.id = this.getId();
+      return iNode;
     }
 
     instanciateNode(node) {
@@ -288,59 +279,6 @@ const classesMapping = {
         l.suggested = false;
         l = this.setSPARQLVariateId(l);
         this._instanciedLinkGraph.push(l);
-      }
-    }
-
-    /* Build attribute with id, sparId inside a node from a generic uri attribute */
-    setAttributeOrCategoryForNode(AttOrCatArray,attributeForUri,node) {
-      AttOrCatArray[attributeForUri.uri] = {} ;
-      AttOrCatArray[attributeForUri.uri].uri = attributeForUri.uri ;
-      AttOrCatArray[attributeForUri.uri].type = attributeForUri.type ;
-      AttOrCatArray[attributeForUri.uri].label = attributeForUri.label ;
-
-      AttOrCatArray[attributeForUri.uri] = this.setSPARQLVariateId(AttOrCatArray[attributeForUri.uri]);
-      AttOrCatArray[attributeForUri.uri].id=this.getId();
-
-      /* by default all attributes is ask */
-      AttOrCatArray[attributeForUri.uri].actif = false ;
-      return AttOrCatArray[attributeForUri.uri];
-    }
-
-    buildAttributeOrCategoryForNode(attributeForUri,node) {
-      if (attributeForUri.type.indexOf("http://www.w3.org/2001/XMLSchema#") < 0) {
-        return this.setAttributeOrCategoryForNode(node.categories,attributeForUri,node);
-      }else {
-        return this.setAttributeOrCategoryForNode(node.attributes,attributeForUri,node);
-      }
-    }
-
-    getAttributeOrCategoryForNode(attributeForUri,node) {
-      console.log(node.categories);
-      if (attributeForUri.uri in node.categories ) {
-        return node.categories[attributeForUri.uri];
-      } else if (attributeForUri.uri in node.attributes) {
-        return node.attributes[attributeForUri.uri];
-      }
-      return null;
-    }
-
-    switchActiveAttribute(uriId,nodeId) {
-      for (var node of this._instanciedNodeGraph ) {
-        if (node.id == nodeId ) {
-          var a;
-          for (a in node.attributes ) {
-            if ( node.attributes[a].id == uriId ) {
-              node.attributes[a].actif = !node.attributes[a].actif ;
-              return ;
-            }
-          }
-          for (a in node.categories ) {
-            if ( node.categories[a].id == uriId ) {
-              node.categories[a].actif = !node.categories[a].actif ;
-              return ;
-            }
-          }
-        }
       }
     }
 
@@ -384,13 +322,12 @@ const classesMapping = {
     }
 
     buildConstraintsGraph() {
-      var variates = [] ;
-      var constraintRelations = [] ;
-      var filters = [];
+      let variates        = [] ;
+      let blockConstraint = [] ;
 
       /* copy arrays to avoid to removed nodes and links instancied */
-      var dup_node_array = $.extend(true, [], this._instanciedNodeGraph);
-      var dup_link_array = $.extend(true, [], this._instanciedLinkGraph);
+      let dup_node_array = $.extend(true, [], this._instanciedNodeGraph);
+      let dup_link_array = $.extend(true, [], this._instanciedLinkGraph);
 
       //var ua = userAbstraction;
       for (let idx=0;idx<this._instanciedNodeGraph.length;idx++) {
@@ -398,55 +335,21 @@ const classesMapping = {
         /* find relation with this node and add it as a constraint  */
         for (let ilx=dup_link_array.length-1;ilx>=0;ilx--) {
           if ( (dup_link_array[ilx].source.id == node.id) ||  (dup_link_array[ilx].target.id == node.id) ) {
+            let blockConstraintByLink = [] ;
 
-            dup_link_array[ilx].buildConstraintsSPARQL(constraintRelations);
-            dup_link_array[ilx].buildFiltersSPARQL(filters);
+            blockConstraint.push(dup_link_array[ilx].buildConstraintsSPARQL());
             dup_link_array[ilx].instanciateVariateSPARQL(variates);
 
             //remove link to avoid to add two same constraint
             dup_link_array.splice(ilx,1);
           }
         }
+        let blockConstraintByNode = [] ;
         /* adding constraints about attributs about the current node */
-        node.buildConstraintsSPARQL(constraintRelations);
-        node.buildFiltersSPARQL(filters);
+        blockConstraint.push(node.buildConstraintsSPARQL());
         node.instanciateVariateSPARQL(variates);
       }
 
-      return [variates,constraintRelations,filters] ;
-    }
-
-
-   nodesDisplaying() {
-      var list = [];
-      for (var v of this._instanciedNodeGraph) {
-        if (v.actif)
-          list.push(v.SPARQLid);
-      }
-      return list ;
-    }
-
-    attributesDisplaying(SPARQLid) {
-      var list_id = [];
-      var list_label = [];
-      for (var v of this._instanciedNodeGraph) {
-        if (v.SPARQLid == SPARQLid ) {
-          for (var uriAtt in v.attributes) {
-            if (v.attributes[uriAtt].actif) {
-              list_id.push(v.attributes[uriAtt].SPARQLid);
-              list_label.push(v.attributes[uriAtt].label);
-              console.log('---> attr: '+JSON.stringify(v.attributes));
-            }
-          }
-          for (var uriCat in v.categories) {
-            if (v.categories[uriCat].actif) {
-              list_id.push(v.categories[uriCat].SPARQLid);
-              list_label.push(v.categories[uriCat].label);
-              console.log('---> cat: '+JSON.stringify(v.categories));
-            }
-          }
-          return {'id' : list_id, 'label': list_label};
-        }
-      }
+      return [variates,[blockConstraint,'']] ;
     }
   }

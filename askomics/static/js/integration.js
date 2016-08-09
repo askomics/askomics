@@ -81,10 +81,15 @@ function displayTable(data) {
     }
 
     // Select the correct type for each column
+    /*
+      data.file[i]
+      - name : name file
+      - preview_data : first line of file
+      - column_types : text, numeric, etc...
+    */
     for(let i=0, l=data.files.length; i<l; i++) {
 
         if ('column_types' in data.files[i]) {
-
             var cols = data.files[i].column_types;
             for(let j=0; j<cols.length; j++) {
                 var selectbox = $('div#content_integration form.template-source_file:eq(' + i + ') select.column_type:eq(' + j + ')');
@@ -92,6 +97,10 @@ function displayTable(data) {
 
                 if ($.inArray(cols[j], ['start', 'end', 'numeric']) == -1) {
                     $.each(['start', 'end', 'numeric'],getSelectCallback);
+                }
+
+                if ($.inArray(cols[j], ['entityGoterm']) == -1) {
+                    $.each(['entityGoterm'],getSelectCallback);
                 }
 
                 if ($.inArray( cols[j], values) >= 0) {
@@ -257,8 +266,10 @@ function loadSourceFile(file_elem) {
         var insert_status_elem = file_elem.find(".insert_status").first();
         var insert_warning_elem = file_elem.find(".insert_warning").first();
         if (data.status != "ok") {
-            insert_warning_elem.html('<span class="glyphicon glyphicon glyphicon-exclamation-sign"></span>')
-                              .append(data.error);
+            alert(data.error);
+            insert_warning_elem.append('<span class="glyphicon glyphicon glyphicon-exclamation-sign"></span>')
+                               .html(data.error);
+
             if ('url' in data) {
                 insert_warning_elem.append("<br>You can view the ttl file here: <a href=\""+data.url+"\">"+data.url+"</a>");
             }

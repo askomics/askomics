@@ -1,14 +1,14 @@
 /*jshint esversion: 6 */
 
 class GraphLink extends GraphObject {
-  constructor(sourceN,targetN) {
-    super();
+  constructor(link,sourceN,targetN) {
+    super(link);
 
     this.linkindex = -1;
 
     if ( sourceN && sourceN !== null ) {
       this.source    = sourceN ;
-      this.source.weight++;
+      //this.source.weight++;
     } else {
       this.source = null ;
     }
@@ -42,18 +42,31 @@ class GraphLink extends GraphObject {
 
   setjson(obj) {
     super.setjson(obj);
-    this.linkindex = obj.linkindex;
+    this.linkindex = obj._linkindex;
     if (! graphBuilder)
       throw "Devel error: setjson : graphBuilder is not instancied!";
 
-    let t = AskomicsGraphBuilder.findElt(graphBuilder.nodes(),obj.source.id);
+    if (! (('_source' in obj) || ('_target' in obj) ) ) {
+      throw "Devel error: setjson : obj have no _source/_target property : "+JSON.stringify(obj);
+    }
+
+    if (! ('_id' in obj._source) ) {
+      throw "Devel error: setjson : obj._source have no id property : "+JSON.stringify(obj);
+    }
+
+    if (! ('_id' in obj._target) ) {
+      throw "Devel error: setjson : obj._target have no id property : "+JSON.stringify(obj);
+    }
+
+    let t = AskomicsGraphBuilder.findElt(graphBuilder.nodes(),obj._source._id);
     if (t[0]<0) {
-      throw "Devel error: setjson : nodes have to be iniialized to define links.";
+      throw "Devel error: setjson : nodes have to be initialized to define links.";
     }
     this.source    = t[1];
-    t = AskomicsGraphBuilder.findElt(graphBuilder.nodes(),obj.target.id);
+
+    t = AskomicsGraphBuilder.findElt(graphBuilder.nodes(),obj._target._id);
     if (t[0]<0) {
-      throw "Devel error: setjson : nodes have to be iniialized to define links.";
+      throw "Devel error: setjson : nodes have to be initialized to define links.";
     }
     this.target = t[1];
   }

@@ -9,11 +9,14 @@
     "gulp-concat": "^2.6.0",
     "gulp-depend": "^1.0.0",
     "gulp-inject": "^4.1.0",
+    "gulp-istanbul": "^1.0.0",
     "gulp-istanbul-report": "0.0.1",
     "gulp-jshint": "^2.0.1",
     "gulp-mocha": "^2.2.0",
     "gulp-mocha-phantomjs": "^0.11.0",
     "gulp-rename": "^1.2.2",
+    "gulp-sourcemaps": "^1.6.0",
+    "gulp-uglify": "^1.5.4",
     "gulp-util": "^3.0.7",
     "istanbul": "^0.4.4",
     "jshint": "^2.9.2",
@@ -39,5 +42,8 @@
     "ontology"
   ],
   "author": "",
-  "license": "GPL-3.0"
+  "license": "GPL-3.0",
+  "dependencies": {
+    "time-require": "^0.1.2"
+  }
 }

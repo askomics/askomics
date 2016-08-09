@@ -2,8 +2,8 @@
 
 class AskomicsPositionableLink extends AskomicsLink {
 
-  constructor(uriL,sourceN,targetN) {
-    super(uriL,sourceN,targetN);
+  constructor(link,sourceN,targetN) {
+    super(link,sourceN,targetN);
 
     this.type     = 'included' ;
     this.label    = 'included in';
@@ -58,43 +58,42 @@ class AskomicsPositionableLink extends AskomicsLink {
 
   getTextFillColor() { return 'darkgreen'; }
 
-  buildConstraintsSPARQL(constraintRelations) {
+  buildConstraintsSPARQL() {
 
     let node = this.target ;
     let secondNode = this.source ;
-    let ua = userAbstraction;
-
-    let info = ua.getPositionableEntities();
 
     /* constrainte to target the same ref */
     if (this.position_ref) {
-      constraintRelations.push(["?"+'URI'+node.SPARQLid, ":position_ref", "?ref_"+node.SPARQLid]);
-      constraintRelations.push(["?"+'URI'+secondNode.SPARQLid, ":position_ref", "?ref_"+secondNode.SPARQLid]);
+      blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ ":position_ref"+" "+ "?ref_"+node.SPARQLid);
+      blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ ":position_ref"+" "+ "?ref_"+secondNode.SPARQLid);
     }
 
     /* constrainte to target the same taxon */
     if (this.position_taxon) {
-      constraintRelations.push(["?"+'URI'+node.SPARQLid, ":position_taxon", "?taxon_"+node.SPARQLid]);
-      constraintRelations.push(["?"+'URI'+secondNode.SPARQLid, ":position_taxon", "?taxon_"+secondNode.SPARQLid]);
+      blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ ":position_taxon"+" "+ "?taxon_"+node.SPARQLid);
+      blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ ":position_taxon"+" "+ "?taxon_"+secondNode.SPARQLid);
     }
 
     /* constraint to target the same/opposite strand */
     if (this.position_strand) {
-      constraintRelations.push(["?"+'URI'+node.SPARQLid, ":position_strand", "?strand_"+node.SPARQLid]);
-      constraintRelations.push(["?"+'URI'+secondNode.SPARQLid, ":position_strand", "?strand_"+secondNode.SPARQLid]);
+      blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ ":position_strand"+" "+ "?strand_"+node.SPARQLid);
+      blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ ":position_strand"+" "+ "?strand_"+secondNode.SPARQLid);
     }
 
     /* manage start and end variates */
-    constraintRelations.push(["?"+'URI'+node.SPARQLid, ":position_start", "?start_"+node.SPARQLid]);
-    constraintRelations.push(["?"+'URI'+node.SPARQLid, ":position_end", "?end_"+node.SPARQLid]);
+    blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ ":position_start"+" "+ "?start_"+node.SPARQLid);
+    blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ ":position_end"+" "+ "?end_"+node.SPARQLid);
 
-    constraintRelations.push(["?"+'URI'+secondNode.SPARQLid, ":position_start", "?start_"+secondNode.SPARQLid]);
-    constraintRelations.push(["?"+'URI'+secondNode.SPARQLid, ":position_end", "?end_"+secondNode.SPARQLid]);
+    blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ ":position_start"+" "+ "?start_"+secondNode.SPARQLid);
+    blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ ":position_end"+" "+ "?end_"+secondNode.SPARQLid);
+
+    this.buildFiltersSPARQL(blockConstraint);
+    return [blockConstraint,''];
   }
 
   buildFiltersSPARQL(filters) {
     let equalsign = '';
-    let ua = userAbstraction;
 
     if (!this.strict) {
       equalsign = '=';
@@ -102,7 +101,6 @@ class AskomicsPositionableLink extends AskomicsLink {
 
     let node = this.target ;
     let secondNode = this.source ;
-    let info = ua.getPositionableEntities();
 
 
     if (this.same_ref) {
@@ -143,7 +141,7 @@ class AskomicsPositionableLink extends AskomicsLink {
           break;
 
       default:
-        throw new Error("buildPositionableConstraintsGraph: unkown type :"+JSON.stringify(type));
+        throw new Error("buildPositionableConstraintsGraph: unkown type: "+this.type);
     }
   }
 

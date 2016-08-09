@@ -9,8 +9,8 @@
         <script src="static/js/third-party/jquery-ui-1.11.4/jquery-ui.min.js"></script>
 
         <!-- The Templates plugin is included to render the upload/download listings -->
+        <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
         <script src="static/js/third-party/tmpl.min.js"></script>
-
         <script src="static/js/third-party/bootstrap.js"></script>
         <script src="static/js/third-party/handlebars-v4.0.5.js"></script>
 
@@ -232,6 +232,7 @@
                                                 <optgroup label='Relation type'>
                                                     <option value='entity'>General relation to entity</option>
                                                     <option value='entitySym'>Symmetric relation to entity</option>
+                                                    <option value='entityGoterm'>Relation with a goterm (Gene Ontology)</option>
                                                 </optgroup>
                                             {{/if}}
                                         </select>

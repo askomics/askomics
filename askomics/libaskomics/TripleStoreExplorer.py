@@ -119,14 +119,31 @@ class TripleStoreExplorer(ParamManager):
 
 
         return data
+    # build SPARQL Block following this grammar :
+    # B ==> [ A , KEYWORKD ] . KEYWORKD is a string prefix for BLOCK (ex: OPTIONAL, SERVICE)
+    # A ==> [ ((B|F),)+ ] . a list of Block or constraints leafs
+    # F ==> [ CONSTRAINT1, CONSTRAINT2,.... ] an array contains only constraints
+    def buildRecursiveBlock(self,tabul,constraints):
+        if len(constraints) == 2 and isinstance(constraints[0], list) and isinstance(constraints[1], str):
+            return tabul+constraints[1] + "{\n"+ self.buildRecursiveBlock(tabul+'\t',constraints[0])+"\n"+tabul+"}\n"
+        else:
+            req = "";
+            for elt in constraints:
+                if isinstance(elt, str):
+                    req+=tabul+elt+".\n"
+                elif len(elt) == 2 and isinstance(elt[0], list) and isinstance(elt[1], str):
+                    req+= tabul+elt[1] + "{\n"+ self.buildRecursiveBlock(tabul+'\t',elt[0])+"\n"+tabul+"}\n"
 
-    def build_sparql_query_from_json(self,variates,constraintesRelations,constraintesFilters,limit,sendRequestToTPS):
+                else:
+                    raise ValueError("buildRecursiveBlock:: constraint malformed :"+str(elt))
+            return req
+        return ""
+
+    def build_sparql_query_from_json(self,variates,constraintesRelations,limit,sendRequestToTPS):
         self.log.debug("variates")
         self.log.debug(variates)
         self.log.debug("constraintesRelations")
         self.log.debug(constraintesRelations)
-        self.log.debug("constraintesFilters")
-        self.log.debug(constraintesFilters)
 
         sqb = SparqlQueryBuilder(self.settings, self.session)
         ql = QueryLauncher(self.settings, self.session)
@@ -134,33 +151,23 @@ class TripleStoreExplorer(ParamManager):
 
         namedGraphs = []
 
-        for indexResult in range(len(res['results']['bindings'])):
-            namedGraphs.append(res['results']['bindings'][indexResult]['g']['value'])
+        #for indexResult in range(len(res['results']['bindings'])):
+        #    namedGraphs.append(res['results']['bindings'][indexResult]['g']['value'])
 
         req = ""
         req += "SELECT DISTINCT "+' '.join(variates)+"\n"
-        for graph in namedGraphs:
-            req += "FROM "+ "<"+graph+ ">"+"\n"
-        req += "WHERE {"+"\n"
-
-        for contraints in constraintesRelations:
-            if len(contraints)==4:
-                if contraints[3]:
-                    req += "OPTIONAL { "+contraints[0]+" "+contraints[1]+" "+contraints[2]+" } .\n"
-                    continue
-
-            req += "\t"+"\t"+contraints[0]+" "+contraints[1]+" "+contraints[2]+".\n"
-
-        for userFilter in constraintesFilters:
-            req += "\t"+"\t"+userFilter+".\n"
-
-        req += "}"
+        #TODO OFI: External Service do not work and, anyway, graphes have to be selectionned by the user in the UI
+        #
+        #for graph in namedGraphs:
+        #    req += "FROM "+ "<"+graph+ ">"+"\n"
+        req += "WHERE \n"
+        req += self.buildRecursiveBlock('',constraintesRelations)
         if limit != None and limit >0 :
             req +=" LIMIT "+str(limit)
 
 
         sqb = SparqlQueryBuilder(self.settings, self.session)
-        prefixes = sqb.header_sparql_config()
+        prefixes = sqb.header_sparql_config(req)
         query = prefixes+req
 
         results = {}
@@ -169,7 +176,7 @@ class TripleStoreExplorer(ParamManager):
             ql = QueryLauncher(self.settings, self.session)
             results = ql.process_query(query)
         else:
-            #add comment inside query to inform user
+            # add comment inside query to inform user
             query = "# endpoint = "+self.get_param("askomics.endpoint") + "\n" + query
 
         return results,query

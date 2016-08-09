@@ -222,7 +222,9 @@ function loadStatistics() {
             var subjectTarget = t[0];
             for ( var ent2 in subjectTarget) {
               for (var rel of subjectTarget[ent2]) {
-                rels += abstraction.removePrefix(entities[ent1]) + " ----" + abstraction.removePrefix(rel) + "----> " + abstraction.removePrefix(ent2) + "</br>";
+                rels += new GraphObject({ uri : entities[ent1]}).removePrefix() +
+                " ----" + new GraphObject({ uri : rel}).removePrefix() +
+                "----> " + new GraphObject({ uri : ent2}).removePrefix() + "</br>";
               }
             }
 

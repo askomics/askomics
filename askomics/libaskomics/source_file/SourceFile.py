@@ -57,7 +57,8 @@ class SourceFile(ParamManager, HaveCachedProperties):
             'end': 'xsd:decimal',
             'entity'  : ':',
             'entitySym'  : ':',
-            'entity_start'  : ':'}
+            'entity_start'  : ':',
+            'entityGoterm'  : ''}
 
         self.delims = {
             'numeric' : ('', ''),
@@ -70,7 +71,8 @@ class SourceFile(ParamManager, HaveCachedProperties):
             'end' : ('', ''),
             'entity'  : (':', ''),
             'entitySym'  : (':', ''),
-            'entity_start'  : (':', '')}
+            'entity_start'  : (':', ''),
+            'entityGoterm'  : ('"', '"')}
 
         self.metadatas = {
             'loadDate': '',
@@ -145,24 +147,6 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         return data
 
-    #Not used
-    def guess_column_types(self, columns, headers):
-        """
-        For each column given, return a guessed column type
-
-        :param columns: List of List of values
-        :return: List of guessed column types
-        """
-
-        data=[]
-        count=0
-        for col in columns:
-            header = headers[count]
-            data.append(self.guess_values_type(col,header))
-            count+=1
-        return data
-        #return [self.guess_values_type(col) for col in columns]
-
     def guess_values_type(self, values, header):
         """
         From a list of values, guess the data type
@@ -190,13 +174,29 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
                     return typ
 
+
+
+        # check if relationShip with an other local entity
+        if header.find("@")>0:
+            #m = re.search('@(...):', header)
+            if header.lower().find("go:term")>0:
+                return "entityGoterm"
+            #maybe by value
+            #if all( (val.lower().find("go:")>=0) for val in values):
+            #    raise ValueError("header for go:term follow this syntax: relationName@go:term")
+
+            #general relation by default
+            return "entity"
         # Then, check if category
+
+        #if all(re.match(r'^\w+$', val) for val in values):#check if no scape chararcter
         if len(set(values)) < len(values) / 2:
             return 'category'
         elif all(self.is_decimal(val) for val in values): # Then numeric
             return 'numeric'
-        else: # default is text
-            return 'text'
+
+        # default is text
+        return 'text'
 
     @staticmethod
     def is_decimal(value):
@@ -406,7 +406,6 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
                         if current_type == 'entitySym':
                             ttlSym += self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " "+ relationName + " :" + urllib.parse.quote(entity_label)  + " .\n"
-                        # FIXME we will need to store undefined values one day if we want to be able to query on this
 
                 ttl = ttl[:-2] + "."
                 #manage symmetric relation
@@ -432,7 +431,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
         ttlMetadatas += "<" + self.metadatas['graphName'] + "> " + "dc:hasVersion " + '"' + self.metadatas['version'] + '"^^xsd:string .\n'
         ttlMetadatas += "<" + self.metadatas['graphName'] + "> " + "prov:describesService " + '"' + self.metadatas['server'] + '"^^xsd:string .'
 
-        sparqlHeader = sqb.header_sparql_config()
+        sparqlHeader = sqb.header_sparql_config("")
 
         ql.insert_data(ttlMetadatas, self.get_param("askomics.graph"), sparqlHeader)
 
@@ -522,8 +521,6 @@ class SourceFile(ParamManager, HaveCachedProperties):
         :return: a dictionnary with information on the success or failure of the operation
         :rtype: Dict
         """
-
-        header_ttl = self.get_turtle_template()
         content_ttl = self.get_turtle()
 
         ql = QueryLauncher(self.settings, self.session)
@@ -531,42 +528,47 @@ class SourceFile(ParamManager, HaveCachedProperties):
         # use insert data instead of load sparql procedure when the dataset is small
         total_triple_count = 0
         chunk_count = 1
+        chunk = ""
+        pathttl = self.get_ttl_directory()
         if method == 'load':
 
             fp = None
 
             triple_count = 0
             for triple in content_ttl:
-                if not fp:
-                    pathttl = self.get_ttl_directory()
-                    # Temp file must be accessed by http so we place it in askomics/ttl/ dir
-                    fp = tempfile.NamedTemporaryFile(dir=pathttl, prefix="tmp_"+self.metadatas['fileName'], suffix=".ttl", mode="w", delete=False)
-                    fp.write(header_ttl + '\n')
-
-                fp.write(triple + '\n')
-
+                chunk += triple + '\n'
                 triple_count += 1
 
                 if triple_count > int(self.settings['askomics.max_content_size_to_update_database']):
                     # We have reached the maximum chunk size, load it and then we will start a new chunk
                     self.log.debug("Loading ttl chunk %s file %s" % (chunk_count, fp.name))
+                    # Temp file must be accessed by http so we place it in askomics/ttl/ dir
+                    fp = tempfile.NamedTemporaryFile(dir=pathttl, prefix="tmp_"+self.metadatas['fileName'], suffix=".ttl", mode="w", delete=False)
+                    header_ttl = self.get_turtle_template(chunk)
+                    fp.write(header_ttl + '\n')
+                    fp.write(chunk)
                     fp.close()
                     data = self.load_data_from_file(fp, urlbase)
                     if data['status'] == 'failed':
                         return data
 
-                    fp = None
+                    chunk = ""
                     total_triple_count += triple_count
                     triple_count = 0
                     chunk_count += 1
 
             # Load the last chunk
             if triple_count > 0:
-                self.log.debug("Loading ttl chunk %s (last) file %s" % (chunk_count, fp.name))
+                self.log.debug("Loading ttl chunk %s (last)" % (chunk_count))
+                fp = tempfile.NamedTemporaryFile(dir=pathttl, prefix="tmp_"+self.metadatas['fileName'], suffix=".ttl", mode="w", delete=False)
+                header_ttl = self.get_turtle_template(chunk)
+                fp.write(header_ttl + '\n')
+                fp.write(chunk)
                 fp.close()
                 data = self.load_data_from_file(fp, urlbase)
                 if data['status'] == 'failed':
                     return data
+                os.remove(fp.name) # Everything ok, remove previous temp file
 
             total_triple_count += triple_count
 
@@ -575,8 +577,8 @@ class SourceFile(ParamManager, HaveCachedProperties):
             # We get the abstraction now as we need first to parse the whole file to have category_values
             abstraction_ttl = self.get_abstraction()
             domain_knowledge_ttl = self.get_domain_knowledge()
+            header_ttl = self.get_turtle_template(abstraction_ttl+"\n"+domain_knowledge_ttl)
 
-            os.remove(fp.name) # Everything ok, remove previous temp file
             fp = tempfile.NamedTemporaryFile(dir=pathttl, prefix="tmp_"+self.metadatas['fileName'], suffix=".ttl", mode="w", delete=False)
             fp.write(header_ttl + '\n')
             fp.write(abstraction_ttl + '\n')
@@ -588,11 +590,12 @@ class SourceFile(ParamManager, HaveCachedProperties):
             if data['status'] == 'failed':
                 return data
             data['total_triple_count'] = total_triple_count
+            os.remove(fp.name)
 
         else:
 
             sqb = SparqlQueryBuilder(self.settings, self.session)
-            header_ttl = sqb.header_sparql_config()
+
 
             graphName = "urn:sparql:" + self.name + '_' + self.timestamp
 
@@ -608,6 +611,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
                     # We have reached the maximum chunk size, load it and then we will start a new chunk
                     self.log.debug("Inserting ttl chunk %s" % (chunk_count))
                     try:
+                        header_ttl = sqb.header_sparql_config(chunk)
                         queryResults = ql.insert_data(chunk, graphName, header_ttl)
                     except Exception as e:
                         return self._format_exception(e)
@@ -622,6 +626,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
                 self.log.debug("Inserting ttl chunk %s (last)" % (chunk_count))
 
                 try:
+                    header_ttl = sqb.header_sparql_config(chunk)
                     queryResults = ql.insert_data(chunk, graphName, header_ttl)
                 except Exception as e:
                     return self._format_exception(e)
@@ -639,13 +644,14 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
             self.log.debug("Inserting ttl abstraction")
             try:
+                header_ttl = sqb.header_sparql_config(chunk)
                 ql.insert_data(chunk, graphName, header_ttl)
             except Exception as e:
                 return self._format_exception(e)
 
             ttlNamedGraph = "<" + graphName + "> " + "rdfg:subGraphOf" + " <" + self.get_param("askomics.graph") + "> ."
             self.metadatas['graphName'] = graphName
-            sparqlHeader = sqb.header_sparql_config()
+            sparqlHeader = sqb.header_sparql_config("")
             ql.insert_data(ttlNamedGraph, self.get_param("askomics.graph"), sparqlHeader)
 
             data = {}
@@ -677,7 +683,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
         graphName = "urn:sparql:" + self.name + '_' + self.timestamp
         self.metadatas['graphName'] = graphName
         ttlNamedGraph = "<" + graphName + "> " + "rdfg:subGraphOf" + " <" + self.get_param("askomics.graph") + "> ."
-        sparqlHeader = sqb.header_sparql_config()
+        sparqlHeader = sqb.header_sparql_config("")
         ql.insert_data(ttlNamedGraph, self.get_param("askomics.graph"), sparqlHeader)
 
         url = urlbase+"/ttl/"+os.path.basename(fp.name)

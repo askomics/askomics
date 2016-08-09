@@ -16,9 +16,65 @@ class AskomicsLinkView extends AskomicsObjectView {
     displayModal(help_title, help_str, 'ok');
   }
 
+  makeNegativeCheckBox() {
+    let inpNeg = $('<input>')
+    .attr('type', 'checkbox')
+    .attr('linkid', this.link.id);
+
+    inpNeg.click(function(d) {
+      let linkid = $(this).attr('linkid');
+      let link = graphBuilder.getInstanciedLink(linkid);
+      if ($(this).is(':checked')) {
+        link.negative = true;
+      } else {
+        link.negative = false;
+      }
+    });
+
+    if (this.link.negative) {
+      inpNeg.attr('checked', 'checked');
+    }
+
+    return inpNeg ;
+  }
+  makeTransitiveCheckBox() {
+    let inpTrans = $('<input>')
+    .attr('type', 'checkbox')
+    .attr('linkid', this.link.id);
+
+    inpTrans.click(function(d) {
+      let linkid = $(this).attr('linkid');
+      let link = graphBuilder.getInstanciedLink(linkid);
+      if ($(this).is(':checked')) {
+        link.transitive = true;
+      } else {
+        link.transitive = false;
+      }
+    });
+
+    if (this.link.transitive) {
+      inpTrans.attr('checked', 'checked');
+    }
+
+    return inpTrans ;
+  }
+
   create() {
-    var details = this.divPanel() ;
-    details.addClass('div-details').append("No filter available");
+    let details = this.divPanel() ;
+    let inpNeg = this.makeNegativeCheckBox();
+    let inpTrans = this.makeTransitiveCheckBox();
+
+    let listProperties = $('<div></div>')
+                                .append($("<label></label>").html("Relations properties"))
+                                .append($('<br>'))
+                                .append($('<label></label>').append(inpTrans).append('Transitive relation'))
+                                .append($('<br>'))
+                                .append($('<label></label>').append(inpNeg).append('Negative relation'));
+    details
+    .append($('<hr>'))
+    .append(listProperties)
+    .append($('<hr>'));
+
     $("#viewDetails").append(details);
   }
 

@@ -1,8 +1,8 @@
+/*jshint esversion: 6 */
 
-describe('true', function () {
+describe('AskomicsGraphBuilder', function () {
        it('should be true', function () {
-          var v = new AskomicsGraphBuilder();
-          true.should.equal(true);
+          let v = new AskomicsGraphBuilder();
           chai.assert.isOk(v.IDgeneration === 0);
        });
    });

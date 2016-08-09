@@ -1,4 +1,5 @@
 var gulp = require('gulp');
+var util = require('gulp-util');
 var jshint = require('gulp-jshint');
 var concat = require('gulp-concat');
 var sourcemaps = require('gulp-sourcemaps');
@@ -9,10 +10,12 @@ var inject = require('gulp-inject');
 var istanbul = require('gulp-istanbul');
 var mochaPhantomJS = require('gulp-mocha-phantomjs');
 var istanbulReport = require('gulp-istanbul-report');
+var uglify = require('gulp-uglify');
 //var remapIstanbul = require('remap-istanbul/lib/gulpRemapIstanbul');
 
 //console.log(require('istanbul').Report.getReportList());
 
+//var askomicsSourceFiles = ['askomics/static/js/**/*.js','!askomics/static/js/third-party/**/*.js'];
 var askomicsSourceFiles = [
         'askomics/static/js/AskomicsRestManagement.js',
         'askomics/static/js/AskomicsUserAbstraction.js',
@@ -24,21 +27,50 @@ var askomicsSourceFiles = [
         'askomics/static/js/node/GraphNode.js',
         'askomics/static/js/node/AskomicsNode.js',
         'askomics/static/js/node/AskomicsPositionableNode.js',
+        'askomics/static/js/node/GONode.js',
         'askomics/static/js/link/GraphLink.js',
         'askomics/static/js/link/AskomicsLink.js',
         'askomics/static/js/link/AskomicsPositionableLink.js',
+        'askomics/static/js/link/GOLink.js',
         'askomics/static/js/view/AskomicsObjectView.js',
         'askomics/static/js/view/AskomicsLinkView.js',
         'askomics/static/js/view/AskomicsNodeView.js',
         'askomics/static/js/view/AskomicsPositionableLinkView.js',
         'askomics/static/js/view/AskomicsPositionableNodeView.js',
+        'askomics/static/js/view/GOLinkView.js',
+        'askomics/static/js/view/GONodeView.js',
+        'askomics/static/js/AskomicsObjectBuilder.js',
         'askomics/static/js/AskomicsGraphBuilder.js',
         'askomics/static/js/AskomicsForceLayoutManager.js',
         'askomics/static/js/MainAskomics.js'
     ];
 
-//var askomicsSourceFiles = ['askomics/static/js/**/*.js','!askomics/static/js/third-party/**/*.js'];
-gulp.task('default', function() {
+var askomicsCssFiles = [
+  'askomics'
+];
+
+var prod = !!util.env.prod;
+var reload = !!util.env.reload;
+
+prod ? console.log('---> Production') : console.log('---> Development');
+reload ? console.log('---> Reload') : util.noop();
+
+/*
+Default task : run 'build'
+               if `gulp --reload`, watch AskOmics file and run 'build' when a file is modified
+*/
+gulp.task('default', ['build'], function () {
+  reload ? gulp.watch(askomicsSourceFiles, ['build']) : util.noop();
+});
+
+
+/*
+build task : jshint files
+             babel
+             concat all files in askomics.js
+             if `gulp --prod` uglify askomics.js
+*/
+gulp.task('build', function() {
     return gulp.src(askomicsSourceFiles)
         .pipe(jshint())
         .pipe(jshint.reporter('default'))
@@ -47,6 +79,7 @@ gulp.task('default', function() {
             presets: ['es2015']
         }))
         .pipe(concat('askomics.js'))
+        .pipe(prod ? uglify() : util.noop() )
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest('askomics/static/dist'));
 });
@@ -74,6 +107,15 @@ gulp.task('pre-test', function () {
     .pipe(gulp.dest('askomics/test/client/js/istanbul/'));
 });
 
+// Askomics test files
+var askomicsTestSourceFiles = ['askomics/test/client/js/*.js'];
+gulp.task('pre-test-srctest', function () {
+  return gulp.src(askomicsTestSourceFiles)
+    .pipe(babel({presets: ['es2015']}))
+    // Write the covered files to a temporary directory
+    .pipe(gulp.dest('askomics/test/client/js/istanbul/test'));
+});
+
 // writing dependancies about node_modules test framework
 var testFrameworkFiles=[
   'node_modules/mocha/mocha.js',
@@ -88,15 +130,14 @@ askomicsInstrumentedSourceFiles.forEach(function(element, index) {
   askomicsInstrumentedSourceFiles[index] = askomicsInstrumentedSourceFiles[index].replace('askomics/static/js','askomics/test/client/js/istanbul');
 });
 
-// Askomics test files
-var askomicsTestSourceFiles = ['askomics/test/client/js/*.js'];
 
-gulp.task('test', ['default','pre-test'],function () {
+
+gulp.task('test', ['default','pre-test','pre-test-srctest'],function () {
     return gulp
     .src('askomics/test/client/index_tpl.html')
     .pipe(inject(gulp.src(testFrameworkFiles, {read: false}) , {relative: true, name: 'testFramework'}))
     .pipe(inject(gulp.src(askomicsInstrumentedSourceFiles, {read: false}), {relative: true, name: 'askomics'}))
-    .pipe(inject(gulp.src(askomicsTestSourceFiles, {read: false}) , {relative: true, name: 'askomicsTestFiles'}))
+    .pipe(inject(gulp.src(['askomics/test/client/js/istanbul/test/*.js'], {read: false}) , {relative: true, name: 'askomicsTestFiles'}))
     //.pipe(rename('index.html'))
     .pipe(gulp.dest('askomics/test/client/'))
     .pipe(mochaPhantomJS(mochaPhantomOpts))
@@ -112,6 +153,7 @@ gulp.task('test', ['default','pre-test'],function () {
             'text',
             'text-summary',
             {'name': 'lcovonly', file: 'frontend.lcov'},
+            {'name': 'lcovonly', file: 'lcov.info'}, // atom plugin lcov-info
             {'name': 'json', file: 'frontend.json'} // -> ./jsonCov/cov.json
           ]
         }));

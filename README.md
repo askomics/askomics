@@ -1,7 +1,7 @@
 # AskOmics
 
 [![Build Status](https://travis-ci.org/askomics/askomics.svg?branch=master)](https://travis-ci.org/askomics/askomics)
-[![Coverage Status](https://coveralls.io/repos/github/askomics/askomics/badge.svg?branch=master)](https://coveralls.io/github/askomics/askomics?branch=v2.0)
+[![Coverage Status](https://coveralls.io/repos/github/askomics/askomics/badge.svg?branch=master)](https://coveralls.io/github/askomics/askomics?branch=master)
 
 
 AskOmics is a visual SPARQL query builder for RDF database. One of its advantages
@@ -100,4 +100,5 @@ Then, to run the tests do the following:
 
 ```
 $ nosetests askomics/test
+$ gulp test
 ```

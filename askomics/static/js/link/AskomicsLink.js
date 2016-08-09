@@ -2,37 +2,41 @@
 
 class AskomicsLink extends GraphLink {
 
-  constructor(uriL,sourceN,targetN) {
-    super(sourceN,targetN);
-    if ( uriL ) {
-      this.uri = uriL ;
-    } else {
-      this.uri = "undef";
-    }
-    this.label = userAbstraction.removePrefix(this.uri);
+
+  constructor(link,sourceN,targetN) {
+    super(link,sourceN,targetN);
+    this._transitive = false ;
+    this._negative   = false ;
+  }
+
+  set transitive (transitive) { this._transitive = transitive; }
+  get transitive () { return this._transitive; }
+
+  set negative (negative) { this._negative = negative; }
+  get negative () { return this._negative; }
+
+  setjson(obj) {
+    super.setjson(obj);
+    this._transitive = obj._transitive ;
+    this._negative = obj._negative ;
   }
 
   getPanelView() {
     return new AskomicsLinkView(this);
   }
 
-  buildConstraintsSPARQL(constraintRelations) {
-    let ua = userAbstraction;
-    constraintRelations.push(["?"+'URI'+this.source.SPARQLid,ua.URI(this.uri),"?"+'URI'+this.target.SPARQLid]);
-  }
-
-  buildFiltersSPARQL(filters) {
+  buildConstraintsSPARQL() {
+    let blockConstraintByNode = [];
+    let rel = this.URI();
+    if ( this.transitive ) rel += "+";
+    blockConstraintByNode.push("?"+'URI'+this.source.SPARQLid+" "+rel+" "+"?"+'URI'+this.target.SPARQLid);
+    if ( this.negative ) {
+      blockConstraintByNode = [blockConstraintByNode,'FILTER NOT EXISTS'];
+    }
+    return [blockConstraintByNode,''];
   }
 
   instanciateVariateSPARQL(variates) {
 
   }
-
-  setjson(obj) {
-    super.setjson(obj);
-    this.uri = obj.uri;
-    this.label = obj.label;
-  }
-
-
 }
