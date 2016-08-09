@@ -29,13 +29,12 @@ DEPMODE=$2
 case "$DEPMODE" in
     prod|production|"")
         DEPMODE="production"
-        GULPMODE=""
+        GULPMODE="--prod"
         PSERVE_FLAGS+=( -b -q )
         PYTHON_FLAGS+=( -OO )
         ;;
     dev|development)
         DEPMODE="development"
-        GULPMODE="--dev"
         PSERVE_FLAGS+=( --reload )
         PYTHON_FLAGS+=( -bb -Wall )
         ;;
