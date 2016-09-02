@@ -222,7 +222,7 @@
                                                     <option value='text'>Text</option>
                                                     <option value='category'>Category</option>
                                                 </optgroup>
-                                                <optgroup label='Positionables attributes'>
+                                                <optgroup label='Positionable attributes'>
                                                     <option value='taxon'>Taxon</option>
                                                     <option value='ref'>Chromosome</option>
                                                     <option value='strand'>Strand</option>
