@@ -163,11 +163,10 @@ class AskomicsForceLayoutManager {
     $('#icon-resize-attr').attr('value', 'small');
   }
 
-  bunbindFullscreenButtons() {
+  unbindFullscreenButtons() {
     $('#full-screen-graph').unbind();
     $('#full-screen-attr').unbind();
   }
-
 
   colorSelectdObject(prefix,id) {
     $(prefix+id).css("stroke", "firebrick");

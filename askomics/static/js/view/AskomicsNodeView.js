@@ -197,7 +197,7 @@ class AskomicsNodeView extends AskomicsObjectView {
     }
 
 /*
-  Build select list to link wioth other variable in the graph
+  Build select list to link with an other variable in the graph
 */
     buildLinkVariable(node,curAtt) {
       let inp = $("<select/>")
@@ -261,6 +261,11 @@ class AskomicsNodeView extends AskomicsObjectView {
         let nodeAttLink = $(this).find("option:selected").attr("nodeAttLink");
         let nodeid = $(this).attr('nodeid');
         let sparlidCurrentAtt = $(this).attr('sparqlid');
+        if ( (nodeAttLink === undefined) || (nodeid === undefined) )
+          return ;
+
+        console.log($(this).attr('nodeid'));
+        console.log($(this).attr('nodeAttLink'));
         let node = graphBuilder.getInstanciedNode(nodeid);
         let node2 = graphBuilder.getInstanciedNode(nodeAttLink);
 
@@ -341,8 +346,15 @@ class AskomicsNodeView extends AskomicsObjectView {
     makeRemoveIcon() {
           let removeIcon = $('<span class="glyphicon glyphicon-erase display"></span>');
           removeIcon.click(function() {
-            $(this).parent().find('input').val(null).trigger("change");
-            $(this).parent().find('select').val(null).trigger("change");
+            $(this).parent().find('input[linkvar!="true"]').val(null).trigger("change");
+            $(this).parent().find('select[linkvar!="true"]').val(null).trigger("change");
+
+            /* remove linkvar if exist and reset value of the select linkvar */
+            let icon = $(this).parent().find('.fa-link');
+            if ( icon.length > 0 ) {
+              icon.click();
+              icon.parent().find('select[linkvar="true"]').val(null);
+            }
           });
           return removeIcon;
     }
@@ -425,23 +437,22 @@ class AskomicsNodeView extends AskomicsObjectView {
       let obj = this;
 
       icon.click(function(d) {
-          let sparqlid  = $(this).attr('sparqlid');
-          let nodeid = $(this).attr('nodeid');
-          let node = graphBuilder.getInstanciedNode(nodeid);
-
           if (icon.hasClass('fa-chain-broken')) {
-                icon.removeClass('fa-chain-broken');
-                icon.addClass('fa-link');
-                $(this).parent().find('input[linkvar!="true"]').hide();
-                $(this).parent().find('select[linkvar!="true"]').hide();
-                $(this).parent().find('select[linkvar="true"]').show();
+            icon.removeClass('fa-chain-broken');
+            icon.addClass('fa-link');
+            $(this).parent().find('input[linkvar!="true"]').hide();
+            $(this).parent().find('select[linkvar!="true"]').hide();
+            $(this).parent().find('select[linkvar="true"]').show();
           } else {
-                icon.removeClass('fa-link');
-                icon.addClass('fa-chain-broken');
-                $(this).parent().find('input[linkvar!="true"]').show();
-                $(this).parent().find('select[linkvar!="true"]').show();
-                $(this).parent().find('select[linkvar="true"]').hide();
-                node.removeFilterLinkVariable('URICat'+sparqlid);
+            let sparqlid  = $(this).attr('sparqlid');
+            let nodeid = $(this).attr('nodeid');
+            let node = graphBuilder.getInstanciedNode(nodeid);
+            icon.removeClass('fa-link');
+            icon.addClass('fa-chain-broken');
+            $(this).parent().find('input[linkvar!="true"]').show();
+            $(this).parent().find('select[linkvar!="true"]').show();
+            $(this).parent().find('select[linkvar="true"]').hide();
+            node.removeFilterLinkVariable('URICat'+sparqlid);
           }
       });
       return icon;
