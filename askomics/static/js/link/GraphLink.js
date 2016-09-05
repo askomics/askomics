@@ -31,6 +31,10 @@ class GraphLink extends GraphObject {
     }
   }
 
+  getType() {
+    return "link";
+  }
+
   set source  (__source) { this._source = __source; }
   get source () { return this._source; }
 

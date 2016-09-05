@@ -19,6 +19,7 @@ class AskomicsObjectView {
 
     $("#objectName").html(this.objet.formatInHtmlLabelEntity());
     $("#objectName").attr("objid",this.objet.id);
+    $("#objectName").attr("type",this.objet.getType());
     $("#showNode").show();
     $("#deleteNode").show();
 
@@ -104,33 +105,41 @@ class AskomicsObjectView {
     // Node deletion
     $("#deleteNode").click(function() {
         let id = $("#objectName").attr("objid");
-        let node = graphBuilder.getInstanciedNode(id);
+        let type = $("#objectName").attr("type");
+        if ( type == "node" ) {
+          console.debug("remove node");
+          let node = graphBuilder.getInstanciedNode(id);
 
-        if ( node ) {
-          if (node.id == graphBuilder.nodes()[0].id) {
-            let help_title = "Information";
-            let help_str   = "Askomics can not delete the start node. Use the reset button to begin a new query!";
-            displayModal(help_title, help_str, 'ok');
-            return;
-          }
+          if ( node ) {
 
-          let listLinksRemoved = graphBuilder.removeInstanciedNode(node);
-          forceLayoutManager.removeSuggestions();
-          forceLayoutManager.update();
-          node.getPanelView().remove();
-          for (let l of listLinksRemoved) {
-            l.getPanelView().remove();
+            if (node.id == graphBuilder.nodes()[0].id) {
+              let help_title = "Information";
+              let help_str   = "Askomics can not delete the start node. Use the reset button to begin a new query!";
+              displayModal(help_title, help_str, 'ok');
+              return;
+            }
+
+            let listLinksRemoved = graphBuilder.removeInstanciedNode(node);
+            forceLayoutManager.removeSuggestions();
+            forceLayoutManager.update();
+            node.getPanelView().remove();
+            for (let l of listLinksRemoved) {
+              l.getPanelView().remove();
+            }
           }
-        } else {
-          let link =graphBuilder.getInstanciedLink(id);
-          let removenode = graphBuilder.removeInstanciedLink(link);
-          forceLayoutManager.removeSuggestions();
-          forceLayoutManager.update();
-          link.getPanelView().remove();
-          if ( removenode ) {
-            removenode.getPanelView().remove();
-          }
+      } else if ( type == "link") {
+        console.debug("remove link");
+        let link =graphBuilder.getInstanciedLink(id);
+        let removenode = graphBuilder.removeInstanciedLink(link);
+        forceLayoutManager.removeSuggestions();
+        forceLayoutManager.update();
+        link.getPanelView().remove();
+        if ( removenode ) {
+          removenode.getPanelView().remove();
         }
+      } else {
+        throw "Unknown type of this Graph Object:"+type;
+      }
     });
 
     $('#help').click(function() {
