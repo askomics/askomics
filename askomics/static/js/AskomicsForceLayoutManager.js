@@ -83,15 +83,14 @@ class AskomicsForceLayoutManager {
     if ( type == "link" ) {
       return this._hideProposedUriLink;
     }
-    throw "AskomicsForceLayoutManager::getArrayForProposedUri Devel error => type !=node and link :"+type+" uri:"+uri;
+    throw "AskomicsForceLayoutManager::getArrayForProposedUri Devel error => type !=node and link :"+type;
   }
 
   offProposedUri(type,uri) {
-
     let tab = this.getArrayForProposedUri(type);
 
-    for (var uriI of tab) {
-      if (uriI == uri) return;
+    for (let i in tab) {
+      if (tab[i] == uri) return;
     }
     tab.push(uri);
   }
@@ -99,7 +98,7 @@ class AskomicsForceLayoutManager {
   onProposedUri(type,uri) {
     let tab = this.getArrayForProposedUri(type);
 
-    for (var i in tab) {
+    for (let i in tab) {
       if (tab[i] == uri ) {
         tab.splice(i,1);
         return;
@@ -246,8 +245,8 @@ class AskomicsForceLayoutManager {
   }
 
   updateInstanciateLinks(links) {
-      for (var l of links) {
-        let id = l.id;
+      for (var l in links) {
+        let id = links[l].id;
         $("#" + id).css("stroke-dasharray","");
         $("#" + id).css("opacity","1");
         $('#label-'+id).css('opacity', "1");
