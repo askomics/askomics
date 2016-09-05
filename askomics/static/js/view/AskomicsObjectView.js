@@ -66,6 +66,7 @@ class AskomicsObjectView {
     AskomicsObjectView.cleanTitleObjectView();
     $("div[id*='"+ AskomicsObjectView_prefix +"']" ).hide();
   }
+
   static defineClickMenu() {
     // Switch between close and open eye icon for unselected
     $("#showNode").click(function() {
@@ -107,7 +108,6 @@ class AskomicsObjectView {
         let id = $("#objectName").attr("objid");
         let type = $("#objectName").attr("type");
         if ( type == "node" ) {
-          console.debug("remove node");
           let node = graphBuilder.getInstanciedNode(id);
 
           if ( node ) {
@@ -128,7 +128,6 @@ class AskomicsObjectView {
             }
           }
       } else if ( type == "link") {
-        console.debug("remove link");
         let link =graphBuilder.getInstanciedLink(id);
         let removenode = graphBuilder.removeInstanciedLink(link);
         forceLayoutManager.removeSuggestions();
