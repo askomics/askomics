@@ -12,7 +12,7 @@ class AskomicsNodeView extends AskomicsObjectView {
   }
 
   display_help() {
-    let help_title = 'Node '+this.node.label;
+    let help_title = 'Node "'+this.node.label+'"';
     let help_str = ' Choose which attributes you want to see on the right panel.';
     help_str += ' Filter this attributes by choosing values';
     $('#help_figure').addClass( "hidden" );

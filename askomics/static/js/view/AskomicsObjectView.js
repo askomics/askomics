@@ -143,12 +143,19 @@ class AskomicsObjectView {
 
     $('#help').click(function() {
       var id = $("#objectName").attr("objid");
-      let elem = graphBuilder.getInstanciedNode(id);
-      if (! elem)
+      var type = $("#objectName").attr("type");
+
+      let elem ;
+
+      if ( type == "node") {
+        elem = graphBuilder.getInstanciedNode(id);
+      } else if ( type == "link") {
         elem = graphBuilder.getInstanciedLink(id);
-      if (elem)
+      } else {
+        throw "AskomisObjectView::help  ==> unkown type:"+type;
+      }
+      if ( elem !== undefined )
         elem.getPanelView().display_help();
     });
   }
-
 }

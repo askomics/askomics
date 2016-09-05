@@ -9,7 +9,7 @@ class AskomicsLinkView extends AskomicsObjectView {
     this.link = link ;
   }
   display_help() {
-    let help_title = 'Link '+this.link.label;
+    let help_title = 'Link "'+this.link.label+'"';
     let help_str = 'There is a relation between '+this.link.source.label+' and '+this.link.target.label+'.';
     help_str += ' This mean that attribute '+this.link.target.label+' of '+this.link.source.label+' is an entity.';
     $('#help_figure').addClass( "hidden" );
