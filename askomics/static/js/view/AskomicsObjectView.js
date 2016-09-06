@@ -109,23 +109,19 @@ class AskomicsObjectView {
         let type = $("#objectName").attr("type");
         if ( type == "node" ) {
           let node = graphBuilder.getInstanciedNode(id);
-
-          if ( node ) {
-
-            if (node.id == graphBuilder.nodes()[0].id) {
+          if (node.id == graphBuilder.nodes()[0].id) {
               let help_title = "Information";
               let help_str   = "Askomics can not delete the start node. Use the reset button to begin a new query!";
               displayModal(help_title, help_str, 'ok');
               return;
-            }
-
-            let listLinksRemoved = graphBuilder.removeInstanciedNode(node);
-            forceLayoutManager.removeSuggestions();
-            forceLayoutManager.update();
-            node.getPanelView().remove();
-            for (let l of listLinksRemoved) {
-              l.getPanelView().remove();
-            }
+          }
+          
+          let listLinksRemoved = graphBuilder.removeInstanciedNode(node);
+          forceLayoutManager.removeSuggestions();
+          forceLayoutManager.update();
+          node.getPanelView().remove();
+          for (let l of listLinksRemoved) {
+            l.getPanelView().remove();
           }
       } else if ( type == "link") {
         let link =graphBuilder.getInstanciedLink(id);
