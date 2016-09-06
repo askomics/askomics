@@ -24,7 +24,7 @@ class AskomicsNodeView extends AskomicsObjectView {
   buildCategory(node,attribute) {
 
     let labelSparqlVarId = attribute.SPARQLid;
-    let URISparqlVarId   = "URICat"+attribute.SPARQLid;
+    let URISparqlVarId   = "URICat"+labelSparqlVarId;
     let inp = $("<select/>").addClass("form-control").attr("multiple","multiple");
 
     displayModal('Please wait', '', 'Close');
@@ -170,16 +170,16 @@ class AskomicsNodeView extends AskomicsObjectView {
   }
 
   /* ===============================================================================================*/
-  buildString(node,labelSparqlVarId) {
+  buildString(node,SPARQLid) {
     let inputValue       = "";
 
-    if (labelSparqlVarId in node.values) {
-      inputValue = node.values[labelSparqlVarId];
+    if (SPARQLid in node.values) {
+      inputValue = node.values[SPARQLid];
     }
 
     let inp = $("<input/>")
             .attr("nodeid",node.id)
-            .attr("sparqlid",labelSparqlVarId)
+            .attr("sparqlid",SPARQLid)
             .attr("type", "text")
             .val(inputValue)
             .addClass("form-control");
@@ -261,11 +261,10 @@ class AskomicsNodeView extends AskomicsObjectView {
         let nodeAttLink = $(this).find("option:selected").attr("nodeAttLink");
         let nodeid = $(this).attr('nodeid');
         let sparlidCurrentAtt = $(this).attr('sparqlid');
+
         if ( (nodeAttLink === undefined) || (nodeid === undefined) )
           return ;
 
-        console.log($(this).attr('nodeid'));
-        console.log($(this).attr('nodeAttLink'));
         let node = graphBuilder.getInstanciedNode(nodeid);
         let node2 = graphBuilder.getInstanciedNode(nodeAttLink);
 
@@ -280,10 +279,11 @@ class AskomicsNodeView extends AskomicsObjectView {
     }
 
     // dedicated to String entry
-    makeOptionalIcon(nodeid,sparqlid) {
+    /*
+    makeOptionalIcon(node,SPARQLid) {
       var icon = $('<span></span>')
-              .attr('sparqlid', sparqlid)
-              .attr('nodeid', nodeid)
+              .attr('sparqlid', SPARQLid)
+              .attr('nodeid', node.id)
               .attr('aria-hidden','true')
               .addClass('glyphicon')
               .addClass('glyphicon-filter')
@@ -310,12 +310,12 @@ class AskomicsNodeView extends AskomicsObjectView {
       });
       return icon;
     }
-
+*/
     // dedicated to String entry
-    makeRegExpIcon(nodeid,sparqlid) {
+    makeRegExpIcon(node,SPARQLid) {
       var icon = $('<span></span>')
-              .attr('sparqlid', sparqlid)
-              .attr('nodeid', nodeid)
+              .attr('sparqlid', SPARQLid)
+              .attr('nodeid', node.id)
               .attr('aria-hidden','true')
               .addClass('glyphicon')
               .addClass('glyphicon-filter')
@@ -395,9 +395,9 @@ class AskomicsNodeView extends AskomicsObjectView {
     }
 
     // dedicated to String entry
-    makeNegativeMatchIcon(node,sparql) {
+    makeNegativeMatchIcon(node,SPARQLid) {
       var icon = $('<span></span>')
-              .attr('sparqlid', sparql.SPARQLid)
+              .attr('sparqlid', SPARQLid)
               .attr('nodeid', node.id)
               .attr('aria-hidden','true')
               .addClass('glyphicon')
@@ -425,9 +425,9 @@ class AskomicsNodeView extends AskomicsObjectView {
     }
 
     // dedicated to String entry
-    makeLinkVariableIcon(node,attribute) {
+    makeLinkVariableIcon(node,SPARQLid) {
       var icon = $('<span></span>')
-              .attr('sparqlid', attribute.SPARQLid)
+              .attr('sparqlid', SPARQLid)
               .attr('nodeid', node.id)
               .attr('aria-hidden','true')
               .addClass('fa')
@@ -477,8 +477,8 @@ class AskomicsNodeView extends AskomicsObjectView {
 
       details.append($('<div></div>').append(lab)
              .append(mythis.makeRemoveIcon())
-             .append(mythis.makeRegExpIcon(node.id,node.SPARQLid))
-             .append(mythis.makeNegativeMatchIcon(node.id,node.SPARQLid))
+             .append(mythis.makeRegExpIcon(node,node.SPARQLid))
+             .append(mythis.makeNegativeMatchIcon(node,node.SPARQLid))
              .append(this.buildString(node,node.SPARQLid)));
 
       var attributes = userAbstraction.getAttributesWithURI(node.uri);
@@ -493,8 +493,8 @@ class AskomicsNodeView extends AskomicsObjectView {
             details.append($('<div></div>').append(lab)
                    .append(mythis.makeRemoveIcon())
                    .append(mythis.makeEyeIcon(node,attribute))
-                   .append(mythis.makeNegativeMatchIcon(node,attribute))
-                   .append(mythis.makeLinkVariableIcon(node,attribute))
+                   .append(mythis.makeNegativeMatchIcon(node,attribute.SPARQLid))
+                   .append(mythis.makeLinkVariableIcon(node,attribute.SPARQLid))
                    .append(currentObj.buildCategory(node,attribute))
                    .append(currentObj.buildLinkVariable(node,attribute)));
           } else if ( attribute.basic_type == "decimal" ) {
@@ -502,8 +502,8 @@ class AskomicsNodeView extends AskomicsObjectView {
             details.append($('<div></div>').append(lab)
                    .append(mythis.makeRemoveIcon())
                    .append(mythis.makeEyeIcon(node,attribute))
-                   .append(mythis.makeNegativeMatchIcon(node,attribute))
-                   .append(mythis.makeLinkVariableIcon(node,attribute))
+                   .append(mythis.makeNegativeMatchIcon(node,attribute.SPARQLid))
+                   .append(mythis.makeLinkVariableIcon(node,attribute.SPARQLid))
                    .append(currentObj.buildDecimal(node,attribute))
                    .append(currentObj.buildLinkVariable(node,attribute)));
           } else if ( attribute.basic_type == "string" ) {
@@ -513,9 +513,9 @@ class AskomicsNodeView extends AskomicsObjectView {
             details.append($('<div></div>').append(lab)
                    .append(mythis.makeRemoveIcon())
                    .append(mythis.makeEyeIcon(node,attribute))
-                   .append(mythis.makeRegExpIcon(node.id,attribute.SPARQLid))
-                   .append(mythis.makeNegativeMatchIcon(node,attribute))
-                   .append(mythis.makeLinkVariableIcon(node,attribute))
+                   .append(mythis.makeRegExpIcon(node,attribute.SPARQLid))
+                   .append(mythis.makeNegativeMatchIcon(node,attribute.SPARQLid))
+                   .append(mythis.makeLinkVariableIcon(node,attribute.SPARQLid))
                    .append(currentObj.buildString(node,attribute.SPARQLid))
                    .append(currentObj.buildLinkVariable(node,attribute)));
           } else {

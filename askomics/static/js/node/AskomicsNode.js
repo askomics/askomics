@@ -113,7 +113,18 @@ class AskomicsNode extends GraphNode {
 
     // add the filters on entity name at end
     if (this.SPARQLid in this.filters) {
-      blockConstraintByNode.push(this.filters[this.SPARQLid]);
+      /* If Inverse Match we have to build a block */
+
+      if ( this._inverseMatch[this.SPARQLid] ) {
+        let subBlockConstraint = [];
+        subBlockConstraint.push("?"+'URI'+this.SPARQLid+" "+'rdfs:label'+" "+"?negative"+this.SPARQLid);
+        let newfilt = this.filters[this.SPARQLid].replace(this.SPARQLid,"negative"+this.SPARQLid);
+        subBlockConstraint.push(newfilt);
+        subBlockConstraint = [subBlockConstraint,'FILTER NOT EXISTS'];
+        blockConstraintByNode.push([subBlockConstraint,'']);
+      } else {
+        blockConstraintByNode.push(this.filters[this.SPARQLid]);
+      }
     }
 
     return [blockConstraintByNode,''];
