@@ -149,26 +149,34 @@ var AskomicsForceLayoutManager = function () {
   var links = force.links();
 
   var ctrlPressed = false ;
+  var enterPressed = false ;
   var selectNodes = []    ;
   var selectLink  = ''    ;
 
-  /* Definition of an event when CTRL key is actif to select several node */
+  /* Definition of an event when a special key is pressed */
   $(document).keydown(function (e) {
+    // if ctrl is pressed, select several node
     if (e.keyCode == 17) {
-          ctrlPressed = true ;
-      }
+      ctrlPressed = true ;
+    }
+
+    // If enter is pressed, launch the query
+    if (e.keyCode == 13 && $('#queryBuilder').is(':visible') && !enterPressed) {
+      viewQueryResults();
+      enterPressed = true;
+    }
   });
 
   $(document).keyup(function (e) {
-      ctrlPressed = false ;
-  });
+      if (e.keyCode == 17){
+        ctrlPressed = false;
+      }
 
-  // Trigger query with enter key
-  $(document).keydown(function (e) {
-    if (e.keyCode == 13 && $('#queryBuilder').is(':visible')) {
-          viewQueryResults();
+      if (e.keyCode == 13){
+        enterPressed = false;
       }
   });
+
 
   AskomicsForceLayoutManager.prototype.colorSelectdObject = function (prefix,id) {
     $(prefix+id).css("stroke", "firebrick");
