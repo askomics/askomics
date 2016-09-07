@@ -9,7 +9,7 @@
         <script src="static/js/third-party/jquery-ui-1.11.4/jquery-ui.min.js"></script>
 
         <!-- The Templates plugin is included to render the upload/download listings -->
-        <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+        <!-- <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">-->
         <script src="static/js/third-party/tmpl.min.js"></script>
         <script src="static/js/third-party/bootstrap.js"></script>
         <script src="static/js/third-party/handlebars-v4.0.5.js"></script>
@@ -27,7 +27,7 @@
         <nav class="navbar navbar-default">
             <div id="navbar_content" class="container">
                 <div class="navbar-header">
-                    <a class="navbar-brand site-header" href="/"><i class="material-icons md-18">face</i> ${project}</a>
+                    <a class="navbar-brand site-header" href="/"> ${project}</a>
                 </div>
 
                 <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
