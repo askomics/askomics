@@ -193,9 +193,6 @@ class AskView(object):
         sqb = SparqlQueryBuilder(self.settings, self.request.session)
         ql = QueryLauncher(self.settings, self.request.session)
 
-        self.log.debug('first entity: '+body['node'])
-        self.log.debug('second entity: '+body['second_node'])
-
         # Check if the two entity are positionable
         positionable1 = ql.process_query(sqb.get_if_positionable(body['node']).query)
         positionable2 = ql.process_query(sqb.get_if_positionable(body['node']).query)
@@ -217,8 +214,6 @@ class AskView(object):
 
         for elem in list_pos_attr:
             data['results'][elem] = False not in [bool(int(p['status'])) for p in results if p['pos_attr'] == "http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#"+elem]
-
-        self.log.debug('---> '+str(data['results']))
 
         return data
 
