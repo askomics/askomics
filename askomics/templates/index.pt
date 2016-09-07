@@ -6,7 +6,8 @@
 
         <script src="static/js/third-party/d3.min.js" charset="utf-8"></script>
         <script src="static/js/third-party/jquery-1.12.4.min.js"></script>
-        <script src="static/js/third-party/jquery-ui-1.11.4/jquery-ui.min.js"></script>
+      <!--  <script src="static/js/third-party/jquery-ui-1.11.4/jquery-ui.min.js"></script> -->
+        <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
 
         <!-- The Templates plugin is included to render the upload/download listings -->
         <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
@@ -16,9 +17,11 @@
 
         <script src="static/dist/askomics.js"></script>
 
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.12.0/themes/base/jquery-ui.css">
         <link href="static/css/bootstrap.css" rel="stylesheet" type="text/css">
         <link href="static/css/style.css" rel="stylesheet" type="text/css">
         <link href="static/css/pygment.css" rel="stylesheet" type="text/css">
+
     </head>
 
     <body>

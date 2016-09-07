@@ -464,18 +464,17 @@ class AskomicsNodeView extends AskomicsObjectView {
     var node = this.node;
 
      var elemUri = node.uri,
-          elemId  = node.SPARQLid,
+          //elemId  = node.SPARQLid,
           nameDiv = this.prefix+node.SPARQLid ;
 
-      var details = this.divPanel() ;
-      details.attr("nodeid", node.id).attr("sparqlid", node.SPARQLid).addClass('div-details');
+      this.divPanelUlSortable() ;
 
       /* Label Entity as ID attribute */
-      let lab = $("<label></label>").attr("for",elemId).html(node.label);
-
+      //let lab = $("<label></label>").attr("for",elemId).html(node.label);
+      let lab = $("<label></label>").attr("urinode",node.uri).attr("uri",node.uri).attr("for",node.label).html(node.label);
       node.switchRegexpMode(node.SPARQLid);
 
-      details.append($('<div></div>').append(lab)
+      this.addPanel($('<div></div>').append(lab)
              .append(mythis.makeRemoveIcon())
              .append(mythis.makeRegExpIcon(node,node.SPARQLid))
              .append(mythis.makeNegativeMatchIcon(node,node.SPARQLid))
@@ -486,11 +485,11 @@ class AskomicsNodeView extends AskomicsObjectView {
 
       $.each(attributes, function(i) {
           let attribute = node.getAttributeOrCategoryForNode(attributes[i]);
-          var lab = $("<label></label>").attr("for",attribute.label).text(attribute.label);
+          var lab = $("<label></label>").attr("uri",attribute.uri).attr("for",attribute.label).text(attribute.label);
 
           if ( attribute.basic_type == "category" ) {
             /* RemoveIcon, EyeIcon, Attribute IHM */
-            details.append($('<div></div>').append(lab)
+            currentObj.addPanel($('<div></div>').append(lab)
                    .append(mythis.makeRemoveIcon())
                    .append(mythis.makeEyeIcon(node,attribute))
                    .append(mythis.makeNegativeMatchIcon(node,attribute.SPARQLid))
@@ -499,7 +498,7 @@ class AskomicsNodeView extends AskomicsObjectView {
                    .append(currentObj.buildLinkVariable(node,attribute)));
           } else if ( attribute.basic_type == "decimal" ) {
             /* RemoveIcon, EyeIcon, Attribute IHM */
-            details.append($('<div></div>').append(lab)
+            currentObj.addPanel($('<div></div>').append(lab)
                    .append(mythis.makeRemoveIcon())
                    .append(mythis.makeEyeIcon(node,attribute))
                    .append(mythis.makeNegativeMatchIcon(node,attribute.SPARQLid))
@@ -510,7 +509,7 @@ class AskomicsNodeView extends AskomicsObjectView {
 
             node.switchRegexpMode(attribute.SPARQLid);
             /* RemoveIcon, EyeIcon, Attribute IHM */
-            details.append($('<div></div>').append(lab)
+            currentObj.addPanel($('<div></div>').append(lab)
                    .append(mythis.makeRemoveIcon())
                    .append(mythis.makeEyeIcon(node,attribute))
                    .append(mythis.makeRegExpIcon(node,attribute.SPARQLid))
@@ -523,6 +522,7 @@ class AskomicsNodeView extends AskomicsObjectView {
           }
           //$('#waitModal').modal('hide');
       });
-      $("#viewDetails").append(details);
+      //TODO: set a method in super class
+      $("#viewDetails").append(this.details);
   }
 }

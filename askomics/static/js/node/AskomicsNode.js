@@ -290,9 +290,36 @@ class AskomicsNode extends GraphNode {
     let list_id = [];
     let list_label = [];
 
-    list_id.push(this.SPARQLid);
-    list_label.push("ID");
+    //list_id.push(this.SPARQLid);
+    //list_label.push(this.label);
 
+    let orderAttributes = userAbstraction.getOrderAttributesList(this.uri);
+    console.log(JSON.stringify(orderAttributes));
+
+    for ( let uriAttI in orderAttributes ) {
+      let uriAtt = orderAttributes[uriAttI];
+      if ( uriAtt in this.attributes ) {
+        if (this.attributes[uriAtt].actif) {
+          list_id.push(this.attributes[uriAtt].SPARQLid);
+          list_label.push(this.attributes[uriAtt].label);
+        }
+        continue;
+      }
+      if ( uriAtt in this.categories ) {
+        if (this.categories[uriAtt].actif) {
+          list_id.push(this.categories[uriAtt].SPARQLid);
+          list_label.push(this.categories[uriAtt].label);
+        }
+        continue;
+      }
+      if ( uriAtt != this.uri ) {
+        throw "AskomicsNode::getAttributesDisplaying wrong attribute uri:"+uriAtt;
+      }
+      /* last uri is the node */
+      list_id.push(this.SPARQLid);
+      list_label.push(this.label);
+    }
+/*
     for (let uriAtt in this.attributes) {
       if (this.attributes[uriAtt].actif) {
         list_id.push(this.attributes[uriAtt].SPARQLid);
@@ -300,6 +327,7 @@ class AskomicsNode extends GraphNode {
         console.log('---> attr: '+JSON.stringify(this.attributes));
       }
     }
+
     for (let uriCat in this.categories) {
       if (this.categories[uriCat].actif) {
         list_id.push(this.categories[uriCat].SPARQLid);
@@ -307,6 +335,7 @@ class AskomicsNode extends GraphNode {
         console.log('---> cat: '+JSON.stringify(this.categories));
       }
     }
+    */
     return {'id' : list_id, 'label': list_label};
   }
 

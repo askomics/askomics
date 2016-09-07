@@ -6,6 +6,7 @@ class AskomicsObjectView {
 
   constructor(objet) {
     this.objet = objet ;
+    this.details = undefined;
   }
 
   static cleanTitleObjectView() {
@@ -58,8 +59,54 @@ class AskomicsObjectView {
   }
 
   divPanel () {
-    let details = $("<div></div>").attr("id",AskomicsObjectView_prefix+this.objet.id);
-    return details;
+    this.details = $("<div></div>")
+                 .attr("id",AskomicsObjectView_prefix+this.objet.id)
+                 .attr("nodeid", this.objet.id)
+                 .attr("sparqlid", this.objet.SPARQLid)
+                 .addClass('div-details');
+  }
+
+  /* Build a Panel for attribute with attribute movable to change order of the attribute view display */
+  divPanelUlSortable () {
+
+    this.divPanel ();
+    let ul = $("<ul></ul>")
+              .attr("id","sortableAttribute")
+              .css("list-style-type","none")
+              .sortable({
+                placeholder: "ui-state-highlight",
+                update: function (event, ui) {
+                  let orderAttributes = [];
+                  $(this).parent().find(".attribute").each(function(){
+                    let label = $(this).find("label").attr("uri");
+                    orderAttributes.push(label);
+                  });
+                  let l = $(this).parent().find("[urinode]") ;
+                  if ( l.length === 0 ) {
+                    throw "Devel Error :: Attribute list have to defined a urinode !!";
+                  }
+                  userAbstraction.setOrderAttributesList(l.first().attr("urinode"),orderAttributes);
+                }
+              });
+
+    this.details.append(ul);
+  }
+
+  addPanel(element) {
+    let ul = this.details.find("#sortableAttribute");
+    if ( ul.length === 0 ) {
+      this.details.append(element);
+    } else {
+      element.addClass("attribute");
+      ul.append($("<li></li>")
+        .addClass("ui-state-default")
+        .css("margin","5px")
+        .css("padding","5px")
+        .css("border-radius","10px")
+        .append(element)
+        );
+      this.details.append(ul);
+    }
   }
 
   static hideAll () {
@@ -115,7 +162,7 @@ class AskomicsObjectView {
               displayModal(help_title, help_str, 'ok');
               return;
           }
-          
+
           let listLinksRemoved = graphBuilder.removeInstanciedNode(node);
           forceLayoutManager.removeSuggestions();
           forceLayoutManager.update();

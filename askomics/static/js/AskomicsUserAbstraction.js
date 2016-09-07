@@ -18,8 +18,8 @@ var AskomicsUserAbstraction = function () {
     var entityInformationList = {}; /*   entityInformationList[uri1][rel] = uri2 ; */
     var attributesEntityList = {};  /*   attributesEntityList[uri1] = [ att1, att2,... ] */
     /* uri ->W get information about ref, taxon, start, end */
-    var entityPositionableInformationList = {}; /*   entityPositionableInformationList[uri1] = { taxon, ref, start, end } */
-
+    var entityPositionableInformationList = {}; /* entityPositionableInformationList[uri1] = { taxon, ref, start, end } */
+    var attributesOrderDisplay = {} ;           /* manage a order list by URInode */
 
     AskomicsUserAbstraction.prototype.getEntities = function() {
       return JSON.parse(JSON.stringify(Object.keys(entityInformationList))) ;
@@ -191,4 +191,22 @@ var AskomicsUserAbstraction = function () {
       return (Uri === "http://purl.org/obo/owl/GO#term");
     };
 
+    /* Setting order attribute display */
+    AskomicsUserAbstraction.prototype.setOrderAttributesList = function(URINode,listAtt) {
+      attributesOrderDisplay[URINode] = {};
+      attributesOrderDisplay[URINode] = listAtt.slice();
+    };
+
+    AskomicsUserAbstraction.prototype.getOrderAttributesList = function(URINode) {
+      if ( URINode in attributesOrderDisplay ) {
+        return attributesOrderDisplay[URINode];
+      }
+      /* by default */
+      let v = [];
+      v.push(URINode);
+      for (let i in attributesEntityList[URINode] ) {
+          v.push(attributesEntityList[URINode][i].uri);
+      }
+      return v;
+    };
   };

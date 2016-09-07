@@ -214,7 +214,6 @@ function loadStatistics() {
     table.append(th);
 
     for (let ent1 in entities ) {
-      console.log(abstraction.getAttrib(entities[ent1],'rdfs:label'));
       let tr = $("<tr></tr>")
             .append($("<td></td>").text(abstraction.getAttrib(entities[ent1],'rdfs:label')));
             let rels = "";

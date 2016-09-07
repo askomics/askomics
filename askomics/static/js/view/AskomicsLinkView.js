@@ -60,7 +60,7 @@ class AskomicsLinkView extends AskomicsObjectView {
   }
 
   create() {
-    let details = this.divPanel() ;
+    this.divPanel() ;
     let inpNeg = this.makeNegativeCheckBox();
     let inpTrans = this.makeTransitiveCheckBox();
 
@@ -70,12 +70,11 @@ class AskomicsLinkView extends AskomicsObjectView {
                                 .append($('<label></label>').append(inpTrans).append('Transitive relation'))
                                 .append($('<br>'))
                                 .append($('<label></label>').append(inpNeg).append('Negative relation'));
-    details
-    .append($('<hr>'))
-    .append(listProperties)
-    .append($('<hr>'));
+    this.details.append($('<hr>'))
+                .append(listProperties)
+                .append($('<hr>'));
 
-    $("#viewDetails").append(details);
+    $("#viewDetails").append(this.details);
   }
 
 }

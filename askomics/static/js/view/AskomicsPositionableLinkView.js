@@ -90,8 +90,7 @@ class AskomicsPositionableLinkView extends AskomicsObjectView {
     var id_link = this.link.id;
     var elemUri = this.link.uri;
 
-    var details = this.divPanel() ;
-    details.addClass('div-details');
+    this.divPanel() ;
 
     var reverseArrow = $('<div></div>').attr('id', 'change_dir-div-'+id_link).append($('<span><span>').attr('class', 'glyphicon glyphicon-resize-horizontal')
                                                                 .attr('aria-hidden', 'true')
@@ -145,7 +144,7 @@ class AskomicsPositionableLinkView extends AskomicsObjectView {
       strict = $('<div></div>').append($('<label></label>').append($('<input>').attr('type', 'checkbox').attr('id', 'strict-'+id_link).attr('value', 'strict')).append('Strict'));
     }
 
-    details//.append(reverseArrow)
+    this.details//.append(reverseArrow)
            .append(relation).append(reverseArrow)
            .append($('<hr>'))
            .append(onTheSame)
@@ -187,6 +186,6 @@ class AskomicsPositionableLinkView extends AskomicsObjectView {
       view.reverseDir();
     });
 
-    $("#viewDetails").append(details);
+    $("#viewDetails").append(this.details);
   }
 }

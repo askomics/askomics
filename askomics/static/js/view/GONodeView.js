@@ -53,8 +53,7 @@ class GONodeView extends AskomicsObjectView {
   }
 
   create() {
-    var details = this.divPanel() ;
-    details.attr("nodeid", this.objet.id).addClass('div-details');
+    this.divPanel() ;
 
     let lab = $("<label></label>").attr("for",this.objet.uri).html("Description filtering");
 
@@ -148,12 +147,12 @@ class GONodeView extends AskomicsObjectView {
       filterList.append(li);
     });
 
-    details.append(lab)
+    this.details.append(lab)
              .append(inp)
              .append(button_add)
              .append(titleFilter)
              .append(listFilter);
 
-      $("#viewDetails").append(details);
+      $("#viewDetails").append(this.details);
   }
 }
