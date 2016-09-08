@@ -9,7 +9,7 @@
         <script src="static/js/third-party/jquery-ui-1.11.4/jquery-ui.min.js"></script>
 
         <!-- The Templates plugin is included to render the upload/download listings -->
-        <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+        <!-- <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">-->
         <script src="static/js/third-party/tmpl.min.js"></script>
         <script src="static/js/third-party/bootstrap.js"></script>
         <script src="static/js/third-party/handlebars-v4.0.5.js"></script>
@@ -19,6 +19,8 @@
         <link href="static/css/bootstrap.css" rel="stylesheet" type="text/css">
         <link href="static/css/style.css" rel="stylesheet" type="text/css">
         <link href="static/css/pygment.css" rel="stylesheet" type="text/css">
+        <link href="static/css/google-material-icons.css" rel="stylesheet" type="text/css">
+        <link href="static/css/font-awesome.css" rel="stylesheet" type="text/css">
     </head>
 
     <body>
@@ -199,9 +201,8 @@
                                     <th class='column_header'>
                                         {{#unless @first}}
                                             <input type='checkbox' class='toggle_column' checked />
-
-                                        <img src='/static/images/icons/ok.png' class='relation_present' title='Data with this name is already present in the database' width='24' height='24' />
-                                        <img src='/static/images/icons/new.png' class='relation_new' title='No data with this name was found in the database' width='24' height='24' />
+                                            <i id='relation_present' class="material-icons">done</i>
+                                            <i id='relation_new' class="material-icons">fiber_new</i>
                                         {{/unless}}
                                         {{ this }}
                                     </th>
@@ -222,9 +223,10 @@
                                                     <option value='text'>Text</option>
                                                     <option value='category'>Category</option>
                                                 </optgroup>
-                                                <optgroup label='Positionables attributes'>
+                                                <optgroup label='Positionable attributes'>
                                                     <option value='taxon'>Taxon</option>
                                                     <option value='ref'>Chromosome</option>
+                                                    <option value='strand'>Strand</option>
                                                     <option value='start'>Start</option>
                                                     <option value='end'>End</option>
                                                 </optgroup>

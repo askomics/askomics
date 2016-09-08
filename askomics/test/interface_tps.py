@@ -50,13 +50,21 @@ class InterfaceTPS(object):
         #empty database
         self.empty()
 
-        col_types = ['entity_start','text','category','numeric','text']
-        self.load_file("personne.tsv",col_types)
-        col_types = ['entity_start','text']
-        self.load_file("instrument.tsv",col_types)
-        col_types = ['entity','entitySym']
-        self.load_file("connait.tsv",col_types)
-        col_types = ['entity','entity']
-        self.load_file("enseigne.tsv",col_types)
-        col_types = ['entity','entity']
-        self.load_file("joue.tsv",col_types)
+        col_types = ['entity_start', 'text', 'category', 'numeric', 'text']
+        self.load_file("personne.tsv", col_types)
+        col_types = ['entity_start', 'text']
+        self.load_file("instrument.tsv", col_types)
+        col_types = ['entity', 'entitySym']
+        self.load_file("connait.tsv", col_types)
+        col_types = ['entity', 'entity']
+        self.load_file("enseigne.tsv", col_types)
+        col_types = ['entity', 'entity']
+        self.load_file("joue.tsv", col_types)
+
+    def load_test3(self):
+        # Transcripts
+        col_types = ['entity', 'taxon', 'ref', 'start', 'end', 'strand', 'category']
+        self.load_file('transcript.tsv', col_types)
+        # QTL
+        col_types = ['entity', 'taxon', 'ref', 'start', 'end']
+        self.load_file('qtl.tsv', col_types)

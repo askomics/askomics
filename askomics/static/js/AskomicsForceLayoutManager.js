@@ -149,19 +149,34 @@ var AskomicsForceLayoutManager = function () {
   var links = force.links();
 
   var ctrlPressed = false ;
+  var enterPressed = false ;
   var selectNodes = []    ;
   var selectLink  = ''    ;
 
-  /* Definition of an event when CTRL key is actif to select several node */
+  /* Definition of an event when a special key is pressed */
   $(document).keydown(function (e) {
+    // if ctrl is pressed, select several node
     if (e.keyCode == 17) {
-          ctrlPressed = true ;
-      }
+      ctrlPressed = true ;
+    }
+
+    // If enter is pressed, launch the query
+    if (e.keyCode == 13 && $('#queryBuilder').is(':visible') && !enterPressed) {
+      viewQueryResults();
+      enterPressed = true;
+    }
   });
 
   $(document).keyup(function (e) {
-      ctrlPressed = false ;
+      if (e.keyCode == 17){
+        ctrlPressed = false;
+      }
+
+      if (e.keyCode == 13){
+        enterPressed = false;
+      }
   });
+
 
   AskomicsForceLayoutManager.prototype.colorSelectdObject = function (prefix,id) {
     $(prefix+id).css("stroke", "firebrick");
@@ -452,6 +467,7 @@ var AskomicsForceLayoutManager = function () {
           let source   = suggestedList[uri] ;
           let target   = slt_node;
           link = new AskomicsPositionableLink(linkbase,source,target);
+          link.setCommonPosAttr();
           link.id = graphBuilder.getId();
           links.push(link);
         }
@@ -514,6 +530,7 @@ var AskomicsForceLayoutManager = function () {
         let source   = node2 ;
         let target   = node1;
         let link = new AskomicsPositionableLink(linkbase,source,target);
+        link.setCommonPosAttr();
         link.id = graphBuilder.getId();
         links.push(link);
       }

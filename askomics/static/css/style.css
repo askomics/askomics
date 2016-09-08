@@ -65,6 +65,11 @@ pre {
     color: chocolate;
 }
 
+.fa:hover {
+    cursor: pointer;
+    color: chocolate;
+}
+
 #btn-file {
     float: left;
 }

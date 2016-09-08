@@ -52,6 +52,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
             'category': ':',
             'taxon': ':',
             'ref': ':',
+            'strand': ':',
             'start': 'xsd:decimal',
             'end': 'xsd:decimal',
             'entity'  : ':',
@@ -65,6 +66,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
             'category': (':', ''),
             'taxon': (':', ''),
             'ref': (':', ''),
+            'strand': (':', ''),
             'start' : ('', ''),
             'end' : ('', ''),
             'entity'  : (':', ''),
@@ -151,10 +153,10 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         :param values: a List of values to evaluate
         :param num: index of the header
-        :return: the guessed type ('taxon','ref', 'start', 'end', 'numeric', 'text' or 'category')
+        :return: the guessed type ('taxon','ref', 'strand', 'start', 'end', 'numeric', 'text' or 'category')
         """
 
-        types = {'ref':('chrom', 'ref'), 'taxon':('taxon', 'species'), 'start':('start', 'begin'), 'end':('end', 'stop')}
+        types = {'ref':('chrom', 'ref'), 'taxon':('taxon', 'species'), 'strand':('strand',), 'start':('start', 'begin'), 'end':('end', 'stop')}
 
         # First check if it is specific type
         self.log.debug('header: '+header)
@@ -166,11 +168,10 @@ class SourceFile(ParamManager, HaveCachedProperties):
                     if typ in ('start', 'end') and not all(self.is_decimal(val) for val in values):
                         self.log.debug('ERROR! '+typ+' is not decimal!')
                         break
-                    # test if taxon and ref are category
-                    # FIXME: taxon and ref may not be a category ?
-                    if typ in ('ref', 'taxon') and not len(set(values)) < len(values) / 2:
-                        self.log.debug('ERROR! '+typ+' is not category!')
+                    # Test if strand is a category with only 2 elements max
+                    if typ == 'strand' and len(set(values)) != 2:
                         break
+
                     return typ
 
 
@@ -257,7 +258,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
         # Store all the relations
         for key, key_type in enumerate(self.forced_column_types):
             if key > 0 and not key_type.startswith('entity'):
-                if key_type in ('taxon', 'ref', 'start', 'end'):
+                if key_type in ('taxon', 'ref', 'strand', 'start', 'end'):
                     uri = 'position_'+key_type
                 else:
                     uri = urllib.parse.quote(self.headers[key])
@@ -282,7 +283,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         ttl = ''
 
-        if all(types in self.forced_column_types for types in ('start', 'end', 'ref', 'taxon')):
+        if all(types in self.forced_column_types for types in ('start', 'end')): # a positionable entity have to have a start and a end
             ttl += ":" + urllib.parse.quote(self.headers[0]) + ' displaySetting:is_positionable "true"^^xsd:boolean .\n'
             ttl += ":is_positionable rdfs:label 'is_positionable' .\n"
             ttl += ":is_positionable rdf:type owl:ObjectProperty .\n"
@@ -326,7 +327,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
                 entity_label = row[0]
                 for i, (header, current_type) in enumerate(zip(self.headers, self.forced_column_types)):
-                    if current_type in ('category', 'taxon', 'ref'):
+                    if current_type in ('category', 'taxon', 'ref', 'strand'):
                         # This is a category, keep track of allowed values for this column
                         self.category_values.setdefault(header, set()).add(row[i])
 
@@ -382,7 +383,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
                             if ( idx > 0 ):
                                 relationName = ":"+urllib.parse.quote(header[0:idx])
 
-                        if current_type in ('category', 'taxon', 'ref'):
+                        if current_type in ('category', 'taxon', 'ref', 'strand'):
                             # This is a category, keep track of allowed values for this column
                             self.category_values[header].add(row[i])
                             row[i] = urllib.parse.quote(row[i])
@@ -398,6 +399,8 @@ class SourceFile(ParamManager, HaveCachedProperties):
                                 ttl += indent + " " + ':position_taxon' + " " + self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " ;\n"
                             elif current_type == 'ref':
                                 ttl += indent + " " + ':position_ref' + " " + self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " ;\n"
+                            elif current_type == 'strand':
+                                ttl += indent + " " + ':position_strand' + " " + self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " ;\n"
                             else:
                                 ttl += indent + " "+ relationName + " " + self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " ;\n"
 

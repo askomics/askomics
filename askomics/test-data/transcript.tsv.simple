@@ -1,0 +1,11 @@
+transcript	taxon	chromosomeName	start	end	strand	biotype
+AT3G10490	Arabidopsis_thaliana	At3	3267835	3270883	plus	protein_coding
+AT3G13660	Arabidopsis_thaliana	At3	4464908	4465586	plus	protein_coding
+AT3G51470	Arabidopsis_thaliana	At3	19097787	19099275	minus	protein_coding
+AT3G10460	Arabidopsis_thaliana	At3	3255800	3256439	plus	protein_coding
+AT3G22640	Arabidopsis_thaliana	At3	8011724	8013902	minus	protein_coding
+AT1G33615	Arabidopsis_thaliana	At1	12193325	12194374	minus	ncRNA
+AT5G41905	Arabidopsis_thaliana	At5	16775524	16775658	minus	miRNA
+AT1G57800	Arabidopsis_thaliana	At1	21408623	21412283	minus	protein_coding
+AT1G49500	Arabidopsis_thaliana	At1	18321295	18322284	minus	protein_coding
+AT5G35334	Arabidopsis_thaliana	At5	13537917	13538984	plus	transposable_element

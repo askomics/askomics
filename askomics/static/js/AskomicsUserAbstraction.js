@@ -102,6 +102,7 @@ var AskomicsUserAbstraction = function () {
               entityPositionableInformationList[uri4] = {};
               entityPositionableInformationList[uri4].taxon = ":position_taxon";
               entityPositionableInformationList[uri4].ref = ":position_ref";
+              entityPositionableInformationList[uri4].strand = ":position_strand";
               entityPositionableInformationList[uri4].start = ":position_start";
               entityPositionableInformationList[uri4].end = ":position_end";
           } else {

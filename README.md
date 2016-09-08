@@ -26,6 +26,7 @@ AskOmics also uses the following bundled libraries:
 * [jQuery-File-Upload](https://github.com/blueimp/jQuery-File-Upload)
 * [Handlebars.js](http://handlebarsjs.com/)
 * [Google Material icons](https://design.google.com/icons/)
+* [Font Awesome icons](http://fontawesome.io/icons/)
 
 #### Browser compatibility
 
@@ -33,55 +34,71 @@ AskOmics also uses the following bundled libraries:
 |---|---|---|---|---|---|
 | 38+  | 13+  | Not supported  | 25+  |  7.1+ |
 
-### Install Pyramid
+### Install Askomics
 
-#### Create your Virtual Python Environment and activate it
+#### Requirements
 
-```
-$ virtualenv -p python3 ~/askomics-env
-$ . ~/askomics-env/bin/activate
-```
++ python3.3
++ pip
++ venv
 
-#### Install Pyramid Into the Virtual Python Environment
-
-```
-$ pip install "pyramid==1.5.7"
-```
-
-### Install SPARQLWrapper
+You will need to install some [npm](https://www.npmjs.com/package/npm) packages:
 
 ```
-$ pip install "SPARQLWrapper==1.6.4"
-```
+npm install --save-dev gulp
+npm install --save-dev gulp-util
+npm install --save-dev gulp-concat
+npm install --save-dev gulp-sourcemaps
+npm install --save-dev gulp-babel babel-preset-es2015
+npm install --save-dev gulp-mocha
+npm install gulp-mocha-phantomjs --save-dev
+npm install should --save-dev
+npm install --save-dev mocha
+npm install --save-dev chai
+npm install jshint gulp-jshint --save-dev
+npm install mocha-phantomjs-istanbul --save-dev
+npm install gulp-istanbul --save-dev
+npm install gulp-istanbul-report --save-dev
+npm install gulp-inject --save-dev
+npm install gulp-uglify --save-dev
+npm install gulp-util --save-dev
+gem install coveralls-lcov
 
-### Install AskOmics in your Virtual Python Environment
-
-To be able to launch AskOmics, you will need to install it in your virtual environment.
-
-If you want to develop AskOmics:
-```
-$ cd rdf-visual-query-builder/
-$ python3 setup.py develop
-```
-
-If you don't want to develop AskOmics:
-```
-$ cd rdf-visual-query-builder/
-$ python3 setup.py install
-```
-
-### Launch AskOmics server
-
-Once installed, you will be able to launch AskOmics in 2 ways depending of your needs (development or production).
 
 ```
-$ pserve development.ini 		# Add --reload if you don't want to relaunch your server everytime you make a change.
-```
-or
+
+#### Installation with Docker
+
 
 ```
-$ pserve production.ini
+$ ./startService.sh <triplestore> <mode>
 ```
+with:
+
++ triplestore: fuseki or virtuoso
++ mode: production or development
+
+#### Manual installation
+
++ Install  Virtuoso or Fuseki
++ Run `startAskomics.sh`
+
+```
+$ ./startAskomics <triplestore> <mode>
+```
+with:
+
++ triplestore: fuseki or virtuoso
++ mode: production or development
+
+#### Developpment
+
+If you want to develop AskOmics, run:
+
+```
+$ gulp --dev --reload
+```
+It will reload javascript files when a file is modified.
 
 ### Using AskOmics
 
@@ -90,15 +107,17 @@ Once launched, AskOmics will be available at http://localhost:6543/
 ### Running tests
 
 AskOmics comes with some unit and functional tests.
-To run them, you will first need to install some python packages:
+
+#### Python tests
 
 ```
-$ pip install nose webtest
+$ ./testAskomics.sh
 ```
+Python test work only with Virtuoso
 
-Then, to run the tests do the following:
+#### Javascript tests
 
 ```
-$ nosetests askomics/test
 $ gulp test
 ```
+
