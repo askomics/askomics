@@ -76,23 +76,23 @@ class AskomicsForceLayoutManager {
     $(document).keydown(function (e) {
       // if ctrl is pressed, select several node
       if (e.keyCode == 17) {
-        this.ctrlPressed = true ;
+        currentFL.ctrlPressed = true ;
       }
 
       // If enter is pressed, launch the query
       if (e.keyCode == 13 && $('#queryBuilder').is(':visible') && !this.enterPressed) {
         viewQueryResults();
-        this.enterPressed = true;
+        currentFL.enterPressed = true;
       }
+      console.log(currentFL.ctrlPressed);
     });
 
     $(document).keyup(function (e) {
-        if (e.keyCode == 17){
-          this.ctrlPressed = false;
-        }
+        console.log(currentFL.ctrlPressed);
+        currentFL.ctrlPressed = false;
 
         if (e.keyCode == 13){
-          this.enterPressed = false;
+          currentFL.enterPressed = false;
         }
     });
 
@@ -289,7 +289,7 @@ class AskomicsForceLayoutManager {
 
     /* Update the label of cercle when a node is instanciated */
     manageSelectedNodes(node) {
-
+      console.log(this.ctrlPressed);
       if (! this.ctrlPressed) {
         $("[id*='node_']").each(function (index, value) {
           $(this).css("stroke", "grey");
@@ -345,6 +345,7 @@ class AskomicsForceLayoutManager {
     }
 
     unSelectLink() {
+      this.selectLink = '';
       $(".link").each(function (index) {
         $(this).css("stroke", "grey");
         this.selectLink = '';
@@ -616,10 +617,8 @@ class AskomicsForceLayoutManager {
                 .attr('fill', function(d){ return d.getTextFillColor();})
                 .text(function(d){return d.label;})
                 .on('click', function(d) { // Mouse down on a link label
-
                   if (d != currentFL.selectLink) { //if link is not selected
                     /* user want a new relation contraint betwwenn two node*/
-
                     //deselect all nodes and links
                     currentFL.unSelectNodes();
                     currentFL.unSelectLink();
