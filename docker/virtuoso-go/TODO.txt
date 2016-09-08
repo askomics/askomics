@@ -1,0 +1,4 @@
+#To incrase number of results
+
+ResultSetMaxRows                = 500000
+
