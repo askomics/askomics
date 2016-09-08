@@ -11,7 +11,8 @@ RUN apt-get update && apt-get install -y \
   python3.4-venv \
   vim \
   ruby \
-  npm
+  npm \
+  nodejs-legacy
 
 # Install Askomics
 #------------------------------------------------------------------------------------------
@@ -22,16 +23,17 @@ RUN rm -rf $VENV
 WORKDIR /usr/local/AskomicsWeb/
 
 #--------------------------------------------------------------------------------------------
-RUN npm install --save-dev gulp
-RUN npm install --save-dev gulp-util
-RUN npm install --save-dev gulp-concat
-RUN npm install --save-dev gulp-sourcemaps
-RUN npm install --save-dev gulp-babel babel-preset-es2015
-RUN npm install --save-dev gulp-mocha
+RUN npm config set prefix /usr/local
+RUN npm install gulp -g
+RUN npm install gulp-util
+RUN npm install gulp-concat
+RUN npm install gulp-sourcemaps
+RUN npm install gulp-babel babel-preset-es2015
+RUN npm install gulp-mocha
 RUN npm install gulp-mocha-phantomjs --save-dev
-RUN npm install should --save-dev
-RUN npm install --save-dev mocha
-RUN npm install --save-dev chai
+RUN npm install should
+RUN npm install mocha
+RUN npm install chai
 RUN npm install jshint gulp-jshint --save-dev
 RUN npm install mocha-phantomjs-istanbul --save-dev
 RUN npm install gulp-istanbul --save-dev
