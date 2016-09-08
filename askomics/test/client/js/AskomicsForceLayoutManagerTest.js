@@ -87,9 +87,9 @@ describe('AskomicsForceLayoutManager', function(){
       fl.normalsizeRightview();
     });
 
-    it('* bunbindFullscreenButtons *', function(){
+    it('* unbindFullscreenButtons *', function(){
       let fl = new AskomicsForceLayoutManager();
-      fl.bunbindFullscreenButtons();
+      fl.unbindFullscreenButtons();
     });
     it('* colorSelectdObject *', function(){
       let fl = new AskomicsForceLayoutManager();
