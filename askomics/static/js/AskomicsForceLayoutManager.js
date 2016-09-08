@@ -48,6 +48,13 @@ class AskomicsForceLayoutManager {
                 .attr("viewBox", "0 0 " + this.w + " " + this.h)
                 .attr("perserveAspectRatio", "xMinYMid")
                 .append('svg:g');
+/*
+                $("#svgdiv").resizable({
+                  containment: "#graph",
+                  minHeight: this.h,
+                  minWidth: this.w
+                });
+                */
               //  .call(d3.behavior.zoom().on("zoom", console.log("redraw")));
   /*
                 .on("mouseover", function() { focus.style("display", null); })
