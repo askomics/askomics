@@ -23,8 +23,23 @@ const classesMapping = {
       this._instanciedLinkGraph = [] ;
     }
 
-    nodes() {
-      return this._instanciedNodeGraph;
+    /* get node */
+    nodes(selectedOrderList,kindparam) {
+
+      if ( selectedOrderList === undefined )
+        return this._instanciedNodeGraph;
+
+      let nodeL = [];
+      for (let i in selectedOrderList ) {
+          for (let j in this._instanciedNodeGraph) {
+            console.log(this._instanciedNodeGraph[j][kindparam]);
+            if ( selectedOrderList[i] == this._instanciedNodeGraph[j][kindparam]) {
+              nodeL.push(this._instanciedNodeGraph[j]);
+              break;
+            }
+          }
+        }
+        return nodeL;
     }
 
     links() {
@@ -240,14 +255,14 @@ const classesMapping = {
       for (var n of this._instanciedNodeGraph) {
         if (n.id == id ) return n;
       }
-      throw "GraphBuilder :: Can not find instancied node:"+JSON.stringify(id);
+      throw "GraphBuilder::getInstanciedNode Can not find instancied node:"+JSON.stringify(id);
     }
 
     getInstanciedLink(id) {
       for (var n of this._instanciedLinkGraph) {
         if (n.id == id) return n;
       }
-      throw "GraphBuilder :: Can not find instancied link:"+JSON.stringify(id);
+      throw "GraphBuilder::getInstanciedLink Can not find instancied link:"+JSON.stringify(id);
     }
 
     setSuggestedNode(node,x,y) {

@@ -9,7 +9,7 @@ class AskomicsLinkView extends AskomicsObjectView {
     this.link = link ;
   }
   display_help() {
-    let help_title = 'Link '+this.link.label;
+    let help_title = 'Link "'+this.link.label+'"';
     let help_str = 'There is a relation between '+this.link.source.label+' and '+this.link.target.label+'.';
     help_str += ' This mean that attribute '+this.link.target.label+' of '+this.link.source.label+' is an entity.';
     $('#help_figure').addClass( "hidden" );
@@ -60,7 +60,7 @@ class AskomicsLinkView extends AskomicsObjectView {
   }
 
   create() {
-    let details = this.divPanel() ;
+    this.divPanel() ;
     let inpNeg = this.makeNegativeCheckBox();
     let inpTrans = this.makeTransitiveCheckBox();
 
@@ -70,12 +70,11 @@ class AskomicsLinkView extends AskomicsObjectView {
                                 .append($('<label></label>').append(inpTrans).append('Transitive relation'))
                                 .append($('<br>'))
                                 .append($('<label></label>').append(inpNeg).append('Negative relation'));
-    details
-    .append($('<hr>'))
-    .append(listProperties)
-    .append($('<hr>'));
+    this.details.append($('<hr>'))
+                .append(listProperties)
+                .append($('<hr>'));
 
-    $("#viewDetails").append(details);
+    $("#viewDetails").append(this.details);
   }
 
 }

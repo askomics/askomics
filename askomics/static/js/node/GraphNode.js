@@ -19,6 +19,10 @@ class GraphNode extends GraphObject {
     return this;
   }
 
+  getType() {
+    return "node";
+  }
+
   init() {
     this.actif        = false ;
     this.weight       = 0;

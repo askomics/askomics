@@ -6,6 +6,7 @@ class AskomicsObjectView {
 
   constructor(objet) {
     this.objet = objet ;
+    this.details = undefined;
   }
 
   static cleanTitleObjectView() {
@@ -19,6 +20,7 @@ class AskomicsObjectView {
 
     $("#objectName").html(this.objet.formatInHtmlLabelEntity());
     $("#objectName").attr("objid",this.objet.id);
+    $("#objectName").attr("type",this.objet.getType());
     $("#showNode").show();
     $("#deleteNode").show();
 
@@ -57,14 +59,61 @@ class AskomicsObjectView {
   }
 
   divPanel () {
-    let details = $("<div></div>").attr("id",AskomicsObjectView_prefix+this.objet.id);
-    return details;
+    this.details = $("<div></div>")
+                 .attr("id",AskomicsObjectView_prefix+this.objet.id)
+                 .attr("nodeid", this.objet.id)
+                 .attr("sparqlid", this.objet.SPARQLid)
+                 .addClass('div-details');
+  }
+
+  /* Build a Panel for attribute with attribute movable to change order of the attribute view display */
+  divPanelUlSortable () {
+
+    this.divPanel ();
+    let ul = $("<ul></ul>")
+              .attr("id","sortableAttribute")
+              .css("list-style-type","none")
+              .sortable({
+                placeholder: "ui-state-highlight",
+                update: function (event, ui) {
+                  let orderAttributes = [];
+                  $(this).parent().find(".attribute").each(function(){
+                    let label = $(this).find("label").attr("uri");
+                    orderAttributes.push(label);
+                  });
+                  let l = $(this).parent().find("[urinode]") ;
+                  if ( l.length === 0 ) {
+                    throw "Devel Error :: Attribute list have to defined a urinode !!";
+                  }
+                  userAbstraction.setOrderAttributesList(l.first().attr("urinode"),orderAttributes);
+                }
+              });
+
+    this.details.append(ul);
+  }
+
+  addPanel(element) {
+    let ul = this.details.find("#sortableAttribute");
+    if ( ul.length === 0 ) {
+      this.details.append(element);
+    } else {
+      element.addClass("attribute");
+      ul.append($("<li></li>")
+        .addClass("ui-state-default")
+        .css("margin","5px")
+        .css("padding","5px")
+        .css("border-radius","10px")
+        .append(element)
+        );
+      this.details.append(ul);
+    }
   }
 
   static hideAll () {
     AskomicsObjectView.cleanTitleObjectView();
     $("div[id*='"+ AskomicsObjectView_prefix +"']" ).hide();
   }
+
   static defineClickMenu() {
     // Switch between close and open eye icon for unselected
     $("#showNode").click(function() {
@@ -104,14 +153,14 @@ class AskomicsObjectView {
     // Node deletion
     $("#deleteNode").click(function() {
         let id = $("#objectName").attr("objid");
-        let node = graphBuilder.getInstanciedNode(id);
-
-        if ( node ) {
+        let type = $("#objectName").attr("type");
+        if ( type == "node" ) {
+          let node = graphBuilder.getInstanciedNode(id);
           if (node.id == graphBuilder.nodes()[0].id) {
-            let help_title = "Information";
-            let help_str   = "Askomics can not delete the start node. Use the reset button to begin a new query!";
-            displayModal(help_title, help_str, 'ok');
-            return;
+              let help_title = "Information";
+              let help_str   = "Askomics can not delete the start node. Use the reset button to begin a new query!";
+              displayModal(help_title, help_str, 'ok');
+              return;
           }
 
           let listLinksRemoved = graphBuilder.removeInstanciedNode(node);
@@ -121,26 +170,35 @@ class AskomicsObjectView {
           for (let l of listLinksRemoved) {
             l.getPanelView().remove();
           }
-        } else {
-          let link =graphBuilder.getInstanciedLink(id);
-          let removenode = graphBuilder.removeInstanciedLink(link);
-          forceLayoutManager.removeSuggestions();
-          forceLayoutManager.update();
-          link.getPanelView().remove();
-          if ( removenode ) {
-            removenode.getPanelView().remove();
-          }
+      } else if ( type == "link") {
+        let link =graphBuilder.getInstanciedLink(id);
+        let removenode = graphBuilder.removeInstanciedLink(link);
+        forceLayoutManager.removeSuggestions();
+        forceLayoutManager.update();
+        link.getPanelView().remove();
+        if ( removenode ) {
+          removenode.getPanelView().remove();
         }
+      } else {
+        throw "Unknown type of this Graph Object:"+type;
+      }
     });
 
     $('#help').click(function() {
       var id = $("#objectName").attr("objid");
-      let elem = graphBuilder.getInstanciedNode(id);
-      if (! elem)
+      var type = $("#objectName").attr("type");
+
+      let elem ;
+
+      if ( type == "node") {
+        elem = graphBuilder.getInstanciedNode(id);
+      } else if ( type == "link") {
         elem = graphBuilder.getInstanciedLink(id);
-      if (elem)
+      } else {
+        throw "AskomisObjectView::help  ==> unkown type:"+type;
+      }
+      if ( elem !== undefined )
         elem.getPanelView().display_help();
     });
   }
-
 }

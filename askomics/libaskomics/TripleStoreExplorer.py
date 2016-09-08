@@ -125,14 +125,17 @@ class TripleStoreExplorer(ParamManager):
     # F ==> [ CONSTRAINT1, CONSTRAINT2,.... ] an array contains only constraints
     def buildRecursiveBlock(self,tabul,constraints):
         if len(constraints) == 2 and isinstance(constraints[0], list) and isinstance(constraints[1], str):
-            return tabul+constraints[1] + "{\n"+ self.buildRecursiveBlock(tabul+'\t',constraints[0])+"\n"+tabul+"}\n"
+            return tabul+constraints[1] + "{\n"+ self.buildRecursiveBlock(tabul+'\t',constraints[0])+tabul+"}\n"
         else:
             req = "";
             for elt in constraints:
                 if isinstance(elt, str):
                     req+=tabul+elt+".\n"
                 elif len(elt) == 2 and isinstance(elt[0], list) and isinstance(elt[1], str):
-                    req+= tabul+elt[1] + "{\n"+ self.buildRecursiveBlock(tabul+'\t',elt[0])+"\n"+tabul+"}\n"
+                    if elt[1]!="":
+                        req+= tabul+elt[1] + " {\n"+ self.buildRecursiveBlock(tabul+'\t',elt[0])+tabul+"}\n"
+                    else:
+                        req+= self.buildRecursiveBlock(tabul,elt[0])
 
                 else:
                     raise ValueError("buildRecursiveBlock:: constraint malformed :"+str(elt))
