@@ -57,7 +57,7 @@ const classesMapping = {
       for (let i=0;i<this.links().length;i++) {
         links.push([this.links()[i].constructor.name,this.links()[i]]);
       }
-      return JSON.stringify([this.AskomicsGraphBuilderVersion,nodes,links,this.SPARQLIDgeneration,this.IDgeneration]);
+      return JSON.stringify([this.AskomicsGraphBuilderVersion,nodes,links,this.SPARQLIDgeneration,this.IDgeneration],null,'\t');
     }
 
     /* create and return list of nodes and links to build a new grpah from a dump file */

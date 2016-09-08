@@ -29,6 +29,7 @@ DEPMODE=$2
 case "$DEPMODE" in
     prod|production|"")
         DEPMODE="production"
+        GULPMODE="--prod"
         PSERVE_FLAGS+=( -b -q )
         PYTHON_FLAGS+=( -OO )
         ;;
@@ -62,7 +63,7 @@ fi
 ASKOMICS="$PYTHON ${PYTHON_FLAGS[@]} "${DIR_VENV}/bin/pserve" $CONFIG_PATH ${PSERVE_FLAGS[@]}"
 
 echo "deploy .js"
-gulp
+gulp $GULPMODE
 
 echo "Starting askomics with:"
 echo "$ . '${ACTIVATE}'"

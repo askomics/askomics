@@ -69,16 +69,31 @@ class AskomicsForceLayoutManager {
     this.ctrlPressed = false ;
     this.selectNodes = []    ;
     this.selectLink  = ''    ;
+    this.enterPressed = false;
 
     /* Definition of an event when CTRL key is actif to select several node */
+    /* Definition of an event when a special key is pressed */
     $(document).keydown(function (e) {
+      // if ctrl is pressed, select several node
       if (e.keyCode == 17) {
-            currentFL.ctrlPressed = true ;
-        }
+        this.ctrlPressed = true ;
+      }
+
+      // If enter is pressed, launch the query
+      if (e.keyCode == 13 && $('#queryBuilder').is(':visible') && !this.enterPressed) {
+        viewQueryResults();
+        this.enterPressed = true;
+      }
     });
 
     $(document).keyup(function (e) {
-        currentFL.ctrlPressed = false ;
+        if (e.keyCode == 17){
+          this.ctrlPressed = false;
+        }
+
+        if (e.keyCode == 13){
+          this.enterPressed = false;
+        }
     });
 
   }
@@ -464,6 +479,7 @@ class AskomicsForceLayoutManager {
           let source   = suggestedList[uri] ;
           let target   = slt_node;
           link = new AskomicsPositionableLink(linkbase,source,target);
+          link.setCommonPosAttr();
           link.id = graphBuilder.getId();
           this.links.push(link);
         }
@@ -526,6 +542,7 @@ class AskomicsForceLayoutManager {
         let source   = node2 ;
         let target   = node1;
         let link = new AskomicsPositionableLink(linkbase,source,target);
+        link.setCommonPosAttr();
         link.id = graphBuilder.getId();
         this.links.push(link);
       }

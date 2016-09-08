@@ -73,7 +73,7 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.statistics()
 
-        assert data['ntriples'] == 267
+        assert data['ntriples'] == 279
         assert data['nclasses'] == '6'
         assert data['nentities'] == '19'
         assert data['ngraphs'] == '5'
@@ -226,3 +226,20 @@ class AskViewTests(unittest.TestCase):
         self.request.json_body = {
         }
         data = self.askview.getSparqlQueryInTextFormat()
+
+    def test_positionable_attr(self):
+        self.it.empty()
+        self.it.load_test3()
+
+        self.request.json_body = {
+            'node' : 'http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#transcript',
+            'second_node' : 'http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#qtl',
+        }
+
+        resAttendu = {
+            'results' : {'position_ref': True, 'position_strand': False, 'position_taxon': True}
+        }
+
+        data = self.askview.positionable_attr()
+
+        assert data == resAttendu
