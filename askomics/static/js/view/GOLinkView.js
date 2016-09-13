@@ -4,8 +4,8 @@
 
 */
 class GOLinkView extends AskomicsObjectView {
-  constructor(node) {
-    super(node);
+  constructor(graphBuilder,node) {
+    super(graphBuilder,node);
   }
   display_help() {
     let help_title = 'todo';

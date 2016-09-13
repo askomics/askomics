@@ -33,9 +33,9 @@ describe('AskomicsLink', function(){
       graphBuilder.nodes().push(node2);
       let linkJSON ;
       let link = new AskomicsLink({ uri:'http://wwww.system/link1'},node1,node2);
-      chai.expect(function () { link.setjson({});}).
+      chai.expect(function () { link.setjson({},graphBuilder);}).
         to.throw("Devel error: setjson : obj have no _source/_target property : {}");
-      chai.expect(function () { link.setjson({_source: {} , _target: {}});}).
+      chai.expect(function () { link.setjson({_source: {} , _target: {}},graphBuilder);}).
         to.throw("Devel error: setjson : obj._source have no id property : {\"_source\":{},\"_target\":{}}");
 
       let resAtt = {
@@ -46,7 +46,7 @@ describe('AskomicsLink', function(){
         "_transitive":false,
         "_negative":false
       } ;
-      link.setjson(resAtt);
+      link.setjson(resAtt,graphBuilder);
       //chai.assert.deepEqual(link, resAtt);
     });
   });

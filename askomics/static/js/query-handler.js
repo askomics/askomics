@@ -8,6 +8,7 @@ function prepareQuery(exp, lim, roq) {
     //           true = complete results file generation
     //     :lim: LIMIT value in the SPARQL query
     //     :roq: bool, if true, don't launch the query, only return it
+
     var tab = graphBuilder.buildConstraintsGraph();
     return {
               'export'               : exp,
@@ -34,7 +35,7 @@ function viewQueryResults() {
         alert(data.error);
         return;
       }
-      new AskomicsResultsView(data).displayResults();
+      new AskomicsResultsView(graphBuilder,data).displayResults();
       //resize graph if fullscreen
       if ($('#icon-resize-graph').attr('value') == 'full') {
         forceLayoutManager.normalsizeGraph();

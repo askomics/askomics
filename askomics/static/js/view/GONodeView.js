@@ -7,8 +7,8 @@ var datalist_go_description_upload = false;
 
 class GONodeView extends AskomicsObjectView {
 
-  constructor(node) {
-    super(node);
+  constructor(graphBuilder,node) {
+    super(graphBuilder,node);
     this.upload_go_description();
   }
 
@@ -121,7 +121,7 @@ class GONodeView extends AskomicsObjectView {
         alert("GOID Unknown:"+goid);
         return;
       }
-      let node = graphBuilder.getInstanciedNode(nodeid);
+      let node = this.graphBuilder.getInstanciedNode(nodeid);
       node.addOboIdFilter(oboid);
 
       /* Add to Html Filter list */
@@ -139,7 +139,7 @@ class GONodeView extends AskomicsObjectView {
                           .on('click',function(e){
                             let nodeid   = $(this).parent().attr("nodeid");
                             let oboid   = $(this).parent().attr("oboid");
-                            let node = graphBuilder.getInstanciedNode(nodeid);
+                            let node = this.graphBuilder.getInstanciedNode(nodeid);
                             node.deleteOboIdFilter(oboid);
                             $(this).parent().remove();
                           });

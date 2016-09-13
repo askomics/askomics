@@ -20,8 +20,8 @@ class GONode extends GraphNode {
     this.filterOnOboId = obj._filterOnOboId ;
   }
 
-  getPanelView() {
-    return new GONodeView(this);
+  getPanelView(graphBuilder) {
+    return new GONodeView(graphBuilder,this);
   }
 
   addOboIdFilter(oboid) {

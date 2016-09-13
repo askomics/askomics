@@ -3,13 +3,13 @@
 /* Manage theses variables with a Singleton Classes */
 var askomicsInitialization = false;
 var abstraction;
-var graphBuilder ;
+var graphBuilder;
 var forceLayoutManager ;
-var userAbstraction ;
-var menuView ;
-var menuFile ;
 
 function startRequestSessionAskomics() {
+
+  let Session = {};
+
   if ( askomicsInitialization ) return ;
   // Initialize the graph with the selected start point.
   $("#init").hide();
@@ -17,19 +17,13 @@ function startRequestSessionAskomics() {
   d3.select("svg").remove();
 
   /* To manage construction of SPARQL Query */
-  graphBuilder = new AskomicsGraphBuilder();
-  /* To manage the D3.js Force Layout  */
-  forceLayoutManager = new AskomicsForceLayoutManager();
-  /* To manage information about User Datasrtucture  */
-  userAbstraction = new AskomicsUserAbstraction();
-  /* To manage information about menu propositional view */
-  menuView = new AskomicsMenuView();
-  /* To manage information about File menu */
-  menuFile = new AskomicsMenuFile();
+  graphBuilder = new AskomicsGraphBuilder(new AskomicsUserAbstraction());
 
-  AskomicsObjectView.defineClickMenu();
+  /* To manage the D3.js Force Layout  */
+  forceLayoutManager = new AskomicsForceLayoutManager(graphBuilder);
 
   askomicsInitialization = true;
+  return Session ;
 }
 
 function startVisualisation() {
@@ -50,14 +44,8 @@ function resetGraph() {
   //remove all rightviews
   AskomicsObjectView.removeAll();
 
-  //reset view menu
-  menuView.reset();
-
-  //unbind files menu
-  menuFile.unbindDownloadButtons();
-
-  //unbind fullscreen buttons
-  forceLayoutManager.unbindFullscreenButtons();
+  //FL
+  forceLayoutManager.reset() ;
 
   // delete the svg
   d3.select("svg").remove();

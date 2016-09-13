@@ -5,8 +5,9 @@
 */
 class AskomicsMenuView {
 
-  constructor() {
-
+  constructor (_graphBuilder,_forceLayoutManager) {
+    this.graphBuilder = _graphBuilder;
+    this.forceLayoutManager = _forceLayoutManager;
   }
 
   buildLiView(uri,label,submenu) {
@@ -66,40 +67,42 @@ class AskomicsMenuView {
 
 
     // <li><a href="#" class="small" data-value="option1" tabIndex="-1"><input type="checkbox"/>&nbsp;Option 1</a></li>
-    let lentities = userAbstraction.getEntities();
+    let lentities = this.graphBuilder.getUserAbstraction().getEntities();
 
     $.each(lentities, function(i) {
       let node = new GraphObject({'uri' : lentities[i]});
       let nodeuri = node.uri;
       var li = menuView.buildLiView(nodeuri,node.removePrefix(),false);
+      console.log("$.each(lentities, function(i) ");
       li.on('click', function() {
         var span = $(this).find(".glyphicon");
         var cur_uri = $(this).attr("uri");
         if ( span.css("visibility") == "visible" ) {
           span.css("visibility","hidden");
-          forceLayoutManager.offProposedUri("node",cur_uri);
+          menuView.forceLayoutManager.offProposedUri("node",cur_uri);
           // disable all predicate associated with this node
           $(this).parent().parent().find("li[nodeuri='"+cur_uri+"']").attr("class","disabled");
         } else {
           span.css("visibility","visible");
-          forceLayoutManager.onProposedUri("node",cur_uri);
+          menuView.forceLayoutManager.onProposedUri("node",cur_uri);
           // enable all predicate associated with this node
           $(this).parent().parent().find("li[nodeuri='"+cur_uri+"']").removeAttr("class");
         }
         // remove old suggestion
-        forceLayoutManager.removeSuggestions();
+        menuView.forceLayoutManager.removeSuggestions();
         // insert new suggestion
-        forceLayoutManager.insertSuggestions();
+        menuView.forceLayoutManager.insertSuggestions();
         // regenerate the graph
-        forceLayoutManager.update();
+        menuView.forceLayoutManager.update();
       });
       $("#viewListNodesAndLinks").append(li);
       /* --------------------------- */
       /* Adding filter on relations  */
       /* --------------------------- */
-      let tab = userAbstraction.getRelationsObjectsAndSubjectsWithURI(nodeuri);
+      console.log("menuView.userAbstraction:"+nodeuri);
+      let tab = menuView.graphBuilder.getUserAbstraction().getRelationsObjectsAndSubjectsWithURI(nodeuri);
       let listRelObj = tab[0];
-
+      console.log("each..................."+nodeuri);
       $.each(listRelObj, function(objecturi) {
         let object = new GraphObject({uri:objecturi});
         $.each(listRelObj[objecturi], function(idxrel) {
@@ -115,17 +118,17 @@ class AskomicsMenuView {
               var cur_uri = $(this).attr("uri");
               if ( span.css("visibility") == "visible" ) {
                span.css("visibility","hidden");
-               forceLayoutManager.offProposedUri("link",cur_uri);
+               menuView.forceLayoutManager.offProposedUri("link",cur_uri);
               } else {
                span.css("visibility","visible");
-               forceLayoutManager.onProposedUri("link",cur_uri);
+               menuView.forceLayoutManager.onProposedUri("link",cur_uri);
              }
              /* remove old suggestion */
-             forceLayoutManager.removeSuggestions();
+             menuView.forceLayoutManager.removeSuggestions();
              /* insert new suggestion */
-             forceLayoutManager.insertSuggestions();
+             menuView.forceLayoutManager.insertSuggestions();
              /* regenerate the graph */
-             forceLayoutManager.update();
+             menuView.forceLayoutManager.update();
           });
           $("#viewListNodesAndLinks").append(li);
         });
@@ -134,7 +137,7 @@ class AskomicsMenuView {
       /* next entity */
     });
 
-    let positionableEntities = userAbstraction.getPositionableEntities();
+    let positionableEntities = menuView.graphBuilder.getUserAbstraction().getPositionableEntities();
     if (Object.keys(positionableEntities).length>0) {
       /* positionable object */
       let posuri = "positionable";
@@ -145,17 +148,17 @@ class AskomicsMenuView {
           var cur_uri = $(this).attr("uri");
           if ( span.css("visibility") == "visible" ) {
             span.css("visibility","hidden");
-            forceLayoutManager.offProposedUri("link",cur_uri);
+            menuView.forceLayoutManager.offProposedUri("link",cur_uri);
           } else {
             span.css("visibility","visible");
-            forceLayoutManager.onProposedUri("link",cur_uri);
+            menuView.forceLayoutManager.onProposedUri("link",cur_uri);
           }
           /* remove old suggestion */
-          forceLayoutManager.removeSuggestions();
+          menuView.forceLayoutManager.removeSuggestions();
           /* insert new suggestion */
-          forceLayoutManager.insertSuggestions();
+          menuView.forceLayoutManager.insertSuggestions();
           /* regenerate the graph */
-          forceLayoutManager.update();
+          menuView.forceLayoutManager.update();
         });
         $("#viewListNodesAndLinks").append(li);
         //$("#viewListNodesAndLinks").append($("<li></li>").attr("class","divider"));

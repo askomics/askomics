@@ -6,8 +6,8 @@
 
 class AskomicsNodeView extends AskomicsObjectView {
 
-  constructor(node) {
-    super(node);
+  constructor(graphBuilder,node) {
+    super(graphBuilder,node);
     this.node = node;
   }
 
@@ -42,6 +42,7 @@ class AskomicsNodeView extends AskomicsObjectView {
       'export':false,
     };
 
+    let mythis = this;
   //  console.log(attribute.uri);
     service.post(model, function(d) {
         let selectedValue = "";
@@ -94,7 +95,7 @@ class AskomicsNodeView extends AskomicsObjectView {
       for (let i=0;i<value.length;i++) {
         listValue+="<"+value[i]+"> ";
       }
-      let node = graphBuilder.getInstanciedNode(nodeid);
+      let node = mythis.graphBuilder.getInstanciedNode(nodeid);
       node.setFilterAttributes(sparqlid,value,'VALUES ?'+sparqlid+' { '+listValue +'}');
     });
 
@@ -149,12 +150,14 @@ class AskomicsNodeView extends AskomicsObjectView {
     tr.append($("<td></td>").append(v));
     inp.append(tr);
 
+    let mythis = this;
+
     inp.change(function(d) {
       var op = $(this).find("option:selected").text();
       var value = $(this).find('input').val();
       let nodeid = $(this).find('select').attr('nodeid');
       let sparlid = $(this).find('select').attr('sparqlid');
-      let node = graphBuilder.getInstanciedNode(nodeid);
+      let node = mythis.graphBuilder.getInstanciedNode(nodeid);
       node.setFilterAttributes(sparlid,value,'FILTER ( ?'+sparlid+' '+op+' '+value+')');
       node.setFilterAttributes("op_"+sparlid,op,'');
     });
@@ -183,15 +186,15 @@ class AskomicsNodeView extends AskomicsObjectView {
             .attr("type", "text")
             .val(inputValue)
             .addClass("form-control");
-    let obj = this;
+    let mythis = this;
 
     inp.change(function(d) {
       let value = $(this).val();
       let sparqlid = $(this).attr('sparqlid');
       let nodeid = $(this).attr('nodeid');
 
-      let node = graphBuilder.getInstanciedNode(nodeid);
-      obj.changeFilter(node,sparqlid,value);
+      let node = mythis.graphBuilder.getInstanciedNode(nodeid);
+      mythis.changeFilter(node,sparqlid,value);
     });
       return inp ;
     }
@@ -211,10 +214,11 @@ class AskomicsNodeView extends AskomicsObjectView {
       /* Default */
       inp.append($('<option></option>').prop('disabled', true).prop('selected', true).html("Link with an attribute node..."));
 
+      let mythis = this ;
       /* rebuild list when this option is selected */
       inp.focus(function(d) {
         let nodeid = $(this).attr('nodeid');
-        let node = graphBuilder.getInstanciedNode(nodeid);
+        let node = mythis.graphBuilder.getInstanciedNode(nodeid);
 
         /* Remove all child */
         $(this).empty();
@@ -228,11 +232,11 @@ class AskomicsNodeView extends AskomicsObjectView {
         }
         /* set up the list with possible entities to link */
 
-        for ( let n of graphBuilder.nodes() ) {
-          let attributes = userAbstraction.getAttributesWithURI(n.uri);
+        for ( let n of mythis.graphBuilder.nodes() ) {
+          let attributes = mythis.graphBuilder.getUserAbstraction().getAttributesWithURI(n.uri);
           let firstPrintForThisNode = true;
           for (let a of attributes ) {
-            let att = n.getAttributeOrCategoryForNode(a);
+            let att = n.getAttributeOrCategoryForNode(mythis.graphBuilder,a);
             /* we can not link the attribute with himself */
             if ( att.id == curAtt.id ) continue ;
             /* we can not link attributes with diffente type */
@@ -265,8 +269,8 @@ class AskomicsNodeView extends AskomicsObjectView {
         if ( (nodeAttLink === undefined) || (nodeid === undefined) )
           return ;
 
-        let node = graphBuilder.getInstanciedNode(nodeid);
-        let node2 = graphBuilder.getInstanciedNode(nodeAttLink);
+        let node = mythis.graphBuilder.getInstanciedNode(nodeid);
+        let node2 = mythis.graphBuilder.getInstanciedNode(nodeAttLink);
 
         if ( type == "category" ) {
           node.setFilterLinkVariable('URICat'+sparlidCurrentAtt,node2,'URICat'+attLink);
@@ -302,7 +306,7 @@ class AskomicsNodeView extends AskomicsObjectView {
 
           var sparqlid  = $(this).attr('sparqlid');
           var nodeid = $(this).attr('nodeid');
-          let node = graphBuilder.getInstanciedNode(nodeid);
+          let node = this.graphBuilder.getInstanciedNode(nodeid);
           node.switchRegexpMode(sparqlid);
           if (sparqlid in node.values) {
             obj.changeFilter(node,sparqlid,node.values[sparqlid]);
@@ -321,7 +325,7 @@ class AskomicsNodeView extends AskomicsObjectView {
               .addClass('glyphicon-filter')
               .addClass('display');
 
-      let obj = this;
+      let mythis = this;
 
       icon.click(function(d) {
           if (icon.hasClass('glyphicon-filter')) {
@@ -334,10 +338,10 @@ class AskomicsNodeView extends AskomicsObjectView {
 
           var sparqlid  = $(this).attr('sparqlid');
           var nodeid = $(this).attr('nodeid');
-          let node = graphBuilder.getInstanciedNode(nodeid);
+          let node = mythis.graphBuilder.getInstanciedNode(nodeid);
           node.switchRegexpMode(sparqlid);
           if (sparqlid in node.values) {
-            obj.changeFilter(node,sparqlid,node.values[sparqlid]);
+            mythis.changeFilter(node,sparqlid,node.values[sparqlid]);
           }
       });
       return icon;
@@ -371,11 +375,14 @@ class AskomicsNodeView extends AskomicsObjectView {
               .addClass('glyphicon')
               .addClass(eyeLabel)
               .addClass('display');
+
+      let mythis = this;
+
       // eye-close --> optional search --> exact search
       icon.click(function(d) {
         let sparqlid = $(this).attr('sparqlid');
         let nodeid = $(this).attr('nodeid');
-        let node = graphBuilder.getInstanciedNode(nodeid);
+        let node = mythis.graphBuilder.getInstanciedNode(nodeid);
 
         if (icon.hasClass('glyphicon-eye-close')) {
             icon.removeClass('glyphicon-eye-close');
@@ -404,12 +411,12 @@ class AskomicsNodeView extends AskomicsObjectView {
               .addClass('glyphicon-plus')
               .addClass('display');
 
-      let obj = this;
+      let mythis = this;
 
       icon.click(function(d) {
           let sparqlid  = $(this).attr('sparqlid');
           let nodeid = $(this).attr('nodeid');
-          let node = graphBuilder.getInstanciedNode(nodeid);
+          let node = mythis.graphBuilder.getInstanciedNode(nodeid);
 
           if (icon.hasClass('glyphicon-plus')) {
                 icon.removeClass('glyphicon-plus');
@@ -434,7 +441,7 @@ class AskomicsNodeView extends AskomicsObjectView {
               .addClass('fa-chain-broken')
               .addClass('display');
 
-      let obj = this;
+      let mythis = this;
 
       icon.click(function(d) {
           if (icon.hasClass('fa-chain-broken')) {
@@ -446,13 +453,13 @@ class AskomicsNodeView extends AskomicsObjectView {
           } else {
             let sparqlid  = $(this).attr('sparqlid');
             let nodeid = $(this).attr('nodeid');
-            let node = graphBuilder.getInstanciedNode(nodeid);
+            let node = this.graphBuilder.getInstanciedNode(nodeid);
             icon.removeClass('fa-link');
             icon.addClass('fa-chain-broken');
             $(this).parent().find('input[linkvar!="true"]').show();
             $(this).parent().find('select[linkvar!="true"]').show();
             $(this).parent().find('select[linkvar="true"]').hide();
-            node.removeFilterLinkVariable('URICat'+sparqlid);
+            node.removeFilterLinkVariable('URICat'+sparqlid,mythis.graphBuilder);
           }
       });
       return icon;
@@ -480,14 +487,17 @@ class AskomicsNodeView extends AskomicsObjectView {
              .append(mythis.makeNegativeMatchIcon(node,node.SPARQLid))
              .append(this.buildString(node,node.SPARQLid)));
 
-      var attributes = userAbstraction.getAttributesWithURI(node.uri);
+      var attributes = this.graphBuilder.getUserAbstraction().getAttributesWithURI(node.uri);
       let currentObj = this;
 
       $.each(attributes, function(i) {
-          let attribute = node.getAttributeOrCategoryForNode(attributes[i]);
-          var lab = $("<label></label>").attr("uri",attribute.uri).attr("for",attribute.label).text(attribute.label);
 
+          let attribute = node.getAttributeOrCategoryForNode(mythis.graphBuilder,attributes[i]);
+          console.log("each.....1");
+          var lab = $("<label></label>").attr("uri",attribute.uri).attr("for",attribute.label).text(attribute.label);
+          console.log("each.....2");
           if ( attribute.basic_type == "category" ) {
+            console.log("each.....3");
             /* RemoveIcon, EyeIcon, Attribute IHM */
             currentObj.addPanel($('<div></div>').append(lab)
                    .append(mythis.makeRemoveIcon())
@@ -497,6 +507,7 @@ class AskomicsNodeView extends AskomicsObjectView {
                    .append(currentObj.buildCategory(node,attribute))
                    .append(currentObj.buildLinkVariable(node,attribute)));
           } else if ( attribute.basic_type == "decimal" ) {
+            console.log("each.....32");
             /* RemoveIcon, EyeIcon, Attribute IHM */
             currentObj.addPanel($('<div></div>').append(lab)
                    .append(mythis.makeRemoveIcon())
@@ -506,7 +517,7 @@ class AskomicsNodeView extends AskomicsObjectView {
                    .append(currentObj.buildDecimal(node,attribute))
                    .append(currentObj.buildLinkVariable(node,attribute)));
           } else if ( attribute.basic_type == "string" ) {
-
+            console.log("each.....3222");
             node.switchRegexpMode(attribute.SPARQLid);
             /* RemoveIcon, EyeIcon, Attribute IHM */
             currentObj.addPanel($('<div></div>').append(lab)

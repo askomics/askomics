@@ -10,8 +10,8 @@ class AskomicsPositionableNode extends AskomicsNode {
     super.setjson(obj);
   }
 
-  getPanelView() {
-    return new AskomicsPositionableNodeView(this);
+  getPanelView(graphBuilder) {
+    return new AskomicsPositionableNodeView(graphBuilder,this);
   }
 
   getTextFillColor() { return 'darkgreen'; }

@@ -12,7 +12,7 @@ const classesMapping = {
 
 /* constructeur de AskomicsGraphBuilder */
   class AskomicsGraphBuilder {
-    constructor() {
+    constructor(_userAbstraction) {
       this.AskomicsGraphBuilderVersion = 1.1 ;
       /* ========================================= ATTRIBUTES ============================================= */
       this.SPARQLIDgeneration = {} ; /* { <ENT1> : 5, ... }  last index used to named variable */
@@ -21,6 +21,12 @@ const classesMapping = {
       /* We keep information about instancied Node and Link to be able to rebuild graph */
       this._instanciedNodeGraph = [] ;
       this._instanciedLinkGraph = [] ;
+
+      this.userAbstraction = _userAbstraction;
+    }
+
+    getUserAbstraction() {
+      return this.userAbstraction;
     }
 
     /* get node */
@@ -29,10 +35,11 @@ const classesMapping = {
       if ( selectedOrderList === undefined )
         return this._instanciedNodeGraph;
 
+      if ( kindparam === undefined ) throw "AskomicsGraphBuilder :: nodes -> Define kindparam when use selectedOrderList param";
+
       let nodeL = [];
       for (let i in selectedOrderList ) {
           for (let j in this._instanciedNodeGraph) {
-            console.log(this._instanciedNodeGraph[j][kindparam]);
             if ( selectedOrderList[i] == this._instanciedNodeGraph[j][kindparam]) {
               nodeL.push(this._instanciedNodeGraph[j]);
               break;
@@ -78,6 +85,9 @@ const classesMapping = {
           alert("Dump file are builded with the Askomics Graph Builder Version:"+versionOfFile+"\n"+". Current version is "+ AskomicsGraphBuilderVersion +".\nReload of dump are not guaranteed !");
         }
 
+        this._instanciedNodeGraph = [] ;
+        this._instanciedLinkGraph = [] ;
+
         this.nodes().splice(0, this.nodes().length);
         this.links().splice(0, this.links().length);
 
@@ -89,12 +99,13 @@ const classesMapping = {
           n.setjson(jsonObj);
           this.nodes().push(n);
         }
+
         //setup links
         for (let i=0;i<links.length;i++) {
           let className = links[i][0];
           let jsonObj = links[i][1];
           let l = new classesMapping[className]({uri:"undefined"});
-          l.setjson(jsonObj);
+          l.setjson(jsonObj,this);
           this.links().push(l);
         }
         return [this.nodes(),this.links()];
@@ -252,27 +263,26 @@ const classesMapping = {
 
 
     getInstanciedNode(id) {
-      for (var n of this._instanciedNodeGraph) {
-        if (n.id == id ) return n;
+      for (var n in this._instanciedNodeGraph) {
+        if (this._instanciedNodeGraph[n].id == id ) return this._instanciedNodeGraph[n];
       }
       throw "GraphBuilder::getInstanciedNode Can not find instancied node:"+JSON.stringify(id);
     }
 
     getInstanciedLink(id) {
-      for (var n of this._instanciedLinkGraph) {
-        if (n.id == id) return n;
+      for (var n in this._instanciedLinkGraph) {
+        if (this._instanciedLinkGraph[n].id == id) return this._instanciedLinkGraph[n];
       }
       throw "GraphBuilder::getInstanciedLink Can not find instancied link:"+JSON.stringify(id);
     }
 
     setSuggestedNode(node,x,y) {
-      let iNode = AskomicsObjectBuilder.instanceNode(node,x,y);
+      let iNode = AskomicsObjectBuilder.instanceNode(this.userAbstraction,node,x,y);
       iNode.id = this.getId();
       return iNode;
     }
 
     instanciateNode(node) {
-
       node.suggested = false;
       node.actif     = true ;
       node           = this.setSPARQLVariateId(node);
@@ -282,18 +292,18 @@ const classesMapping = {
 
     isInstanciatedNode(node) {
 
-      for (var n of this._instanciedNodeGraph) {
-        if (n.id === node.id)
+      for (var n in this._instanciedNodeGraph) {
+        if (this._instanciedNodeGraph[n].id === node.id)
           return true;
       }
       return false;
     }
 
     instanciateLink(links) {
-      for (var l of links ) {
-        l.suggested = false;
-        l = this.setSPARQLVariateId(l);
-        this._instanciedLinkGraph.push(l);
+      for (var l in links ) {
+        links[l].suggested = false;
+        links[l] = this.setSPARQLVariateId(links[l]);
+        this._instanciedLinkGraph.push(links[l]);
       }
     }
 
@@ -303,8 +313,8 @@ const classesMapping = {
       for ( var idn in nodes ) {
         if ( nodes[idn].suggested ) continue ;
         present = false ;
-        for (var n of this._instanciedNodeGraph){
-            if (n.id == nodes[idn].id) {
+        for (var n in this._instanciedNodeGraph){
+            if (this._instanciedNodeGraph[n].id == nodes[idn].id) {
               present = true;
               break;
             }
@@ -321,8 +331,8 @@ const classesMapping = {
       for ( var idl in links ) {
         if ( links[idl].suggested ) continue ;
         present = false ;
-        for (var l of this._instanciedLinkGraph){
-            if (l.id == links[idl].id) {
+        for (var l in this._instanciedLinkGraph){
+            if (this._instanciedLinkGraph[l].id == links[idl].id) {
               present = true;
               break;
             }
@@ -349,6 +359,7 @@ const classesMapping = {
         var node = dup_node_array[idx];
         /* find relation with this node and add it as a constraint  */
         for (let ilx=dup_link_array.length-1;ilx>=0;ilx--) {
+
           if ( (dup_link_array[ilx].source.id == node.id) ||  (dup_link_array[ilx].target.id == node.id) ) {
             let blockConstraintByLink = [] ;
 
@@ -364,7 +375,6 @@ const classesMapping = {
         blockConstraint.push(node.buildConstraintsSPARQL());
         node.instanciateVariateSPARQL(variates);
       }
-
       return [variates,[blockConstraint,'']] ;
     }
   }

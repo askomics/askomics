@@ -88,6 +88,7 @@ gulp.task('build', function() {
 var coverageFile = './coverage/coverage.json';
 var mochaPhantomOpts = {
   reporter: 'spec',
+  dump:'output_test.log',
   phantomjs: {
     useColors: true,
     hooks: 'mocha-phantomjs-istanbul',

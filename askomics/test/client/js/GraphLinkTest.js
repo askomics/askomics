@@ -36,7 +36,7 @@ describe('GraphLink', function(){
       var node1 = new GraphNode({ uri:"http://wwww.system/test1",label:'n1', _id: 15,  _SPARQLid: "HelloWorldNode1", _suggested: false }, 12.5,16.3);
       var node2 = new GraphNode({ uri:"http://wwww.system/test1",label:'n2', _id: 16,  _SPARQLid: "HelloWorlNode2", _suggested: true }, 14.1,26.3);
       var l = new GraphLink({ uri:"http://wwww.system/test1",label:'l1'}, node1,node2);
-      chai.expect(function () { link.setjson(l); }).to.throw("Devel error: setjson : nodes have to be initialized to define links.");
+      chai.expect(function () { link.setjson(l,graphBuilder); }).to.throw("Devel error: setjson : nodes have to be initialized to define links.");
       link.source.x = 1.0;
       link.source.y = 2.0;
       link.target.x = 3.0;

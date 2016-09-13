@@ -15,14 +15,16 @@ class AskomicsLink extends GraphLink {
   set negative (negative) { this._negative = negative; }
   get negative () { return this._negative; }
 
-  setjson(obj) {
-    super.setjson(obj);
+  setjson(obj,graphBuilder) {
+    super.setjson(obj,graphBuilder);
+
     this._transitive = obj._transitive ;
     this._negative = obj._negative ;
+
   }
 
-  getPanelView() {
-    return new AskomicsLinkView(this);
+  getPanelView(graphBuilder) {
+    return new AskomicsLinkView(graphBuilder,this);
   }
 
   buildConstraintsSPARQL() {

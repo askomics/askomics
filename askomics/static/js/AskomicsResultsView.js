@@ -1,17 +1,33 @@
 /*jshint esversion: 6 */
 
 class AskomicsResultsView {
-  constructor(data) {
+  constructor(graphBuilder,data) {
+    this.graphBuilder = graphBuilder ;
     this.data = data ;
-    this.activesAttributes      = {} ; // Attributes id by Node Id to Display
-    this.activesAttributesLabel = {} ; // Attributes label by Node Id to Display
+    this.activesAttributes      = undefined ; // Attributes id by Node Id to Display
+    this.activesAttributesLabel = undefined ; // Attributes label by Node Id to Display
+  }
+
+  is_valid() {
+    if ( this.graphBuilder === undefined ) throw "AskomicsResultsView :: graphBuilder in unset!";
+    if ( this.data === undefined ) throw "AskomicsResultsView :: data prototyperty in unset!";
+  }
+
+  is_activedAttribute() {
+    if (this.activesAttributes === undefined ) throw "AskomicsResultsView :: activesAttributes is not set.";
   }
 
   setActivesAttributes() {
-    for (let i=0;i<graphBuilder.nodes().length;i++ ) {
-      let node = graphBuilder.nodes()[i];
+
+    this.is_valid();
+
+    this.activesAttributes      = {} ;
+    this.activesAttributesLabel = {} ;
+
+    for (let i=0;i<this.graphBuilder.nodes().length;i++ ) {
+      let node = this.graphBuilder.nodes()[i];
       if ( ! node.actif ) continue;
-      let attr_disp = node.getAttributesDisplaying();
+      let attr_disp = node.getAttributesDisplaying(this.graphBuilder.getUserAbstraction());
       this.activesAttributes[node.id] = attr_disp.id;
       this.activesAttributesLabel[node.id] = attr_disp.label;
       if (this.activesAttributes[node.id].length != this.activesAttributesLabel[node.id].length ) {
@@ -21,8 +37,10 @@ class AskomicsResultsView {
   }
 
   displayResults() {
+      this.is_valid();
       // to clear and print new results
       $("#results").empty();
+
       this.setActivesAttributes();
 
       if (this.data.values.length <= 0) {
@@ -38,18 +56,22 @@ class AskomicsResultsView {
 
       $("#results")
         .append(table.append(this.build_header_results())
-        .append(this.build_subheader_results(graphBuilder.nodes()))
-        .append(this.build_body_results(graphBuilder.nodes())));
+        .append(this.build_subheader_results(this.graphBuilder.nodes()))
+        .append(this.build_body_results(this.graphBuilder.nodes())));
   }
 
   build_header_results() {
     let head = $('<thead></thead>');
     let row = $('<tr></tr>');
 
+    this.is_valid();
+    this.is_activedAttribute();
+
     /* set Entity Header */
-    for (let i=0;i<graphBuilder.nodes().length;i++ ) {
-      let node = graphBuilder.nodes()[i];
+    for (let i=0;i<this.graphBuilder.nodes().length;i++ ) {
+      let node = this.graphBuilder.nodes()[i];
       if ( ! node.actif ) continue;
+
       let nAttributes = this.activesAttributes[node.id].length;
       /* Fomattage en indice du numero de l'entité */
       row.append($('<th></th>')
@@ -79,7 +101,7 @@ class AskomicsResultsView {
            $(".entityHeaderResults").each(function( index ) {
              nodeList.push($(this).attr("id"));
            });
-           let lNodes = graphBuilder.nodes(nodeList,'id');
+           let lNodes = currentView.graphBuilder.nodes(nodeList,'id');
            $(this).parent().parent().find("thead:eq(1)").remove();
            $(this).parent().parent().find("tbody").remove();
 
@@ -93,6 +115,10 @@ class AskomicsResultsView {
   }
 
   build_subheader_results(nodeList) {
+
+    this.is_valid();
+    this.is_activedAttribute();
+
     let head = $('<thead></thead>');
     let row = $('<tr></tr>');
     for (let i=0;i<nodeList.length;i++ ) {
@@ -113,7 +139,6 @@ class AskomicsResultsView {
          items: ":not(.ui-state-disabled)",
          cancel: '.ui-state-disabled',
          start: function (event, ui) {
-           console.log("start");
            $(".attributesHeaderResults").css({width: $(ui.item).width()});
            // unactive cells associated with other node
            let currentCell = $(".attributesHeaderResults:eq("+ui.item.index()+")");
@@ -124,7 +149,6 @@ class AskomicsResultsView {
            $('.attributesHeaderResults[nodeid!='+nodeid+']').addClass('ui-state-disabled');
          },
          stop: function (event, ui) {
-           console.log("stop");
            $('.attributesHeaderResults').removeClass('ui-state-disabled');
          },
          update: function (event, ui) {
@@ -133,7 +157,7 @@ class AskomicsResultsView {
            $(".entityHeaderResults").each(function( index ) {
              nodeList.push($(this).attr("id"));
            });
-           let lNodes = graphBuilder.nodes(nodeList,'id');
+           let lNodes = currentView.graphBuilder.nodes(nodeList,'id');
 
            let attList = [];
            $(".attributesHeaderResults").each(function( index ) {
@@ -145,7 +169,7 @@ class AskomicsResultsView {
            /*
               rebuild activesAttributesLabel activesAttributes
            */
-           console.log("AVANT:"+JSON.stringify(currentView.activesAttributes));
+
            currentView.activesAttributes = {};
            for (let ielt in attList) {
               let elt = attList[ielt];
@@ -153,19 +177,21 @@ class AskomicsResultsView {
                 currentView.activesAttributes[elt.nodeid] = [];
               currentView.activesAttributes[elt.nodeid].push(elt.sparqlid);
            }
-           console.log("APRES:"+JSON.stringify(currentView.activesAttributes));
+
            $(this).parent().parent().parent().find("tbody").remove();
            $(this).parent().parent().append(currentView.build_body_results(lNodes));
          }
        }).disableSelection();
 
     head.append(row);
-    console.log("HEAD");
-    console.log(JSON.stringify(head));
     return head;
   }
 
   build_body_results(nodeList) {
+
+    this.is_valid();
+    this.is_activedAttribute();
+
     let body = $('<tbody></tbody');
     for (let i=0;i<this.data.values.length;i++ ) {
       let row = $('<tr></tr>');
@@ -178,7 +204,6 @@ class AskomicsResultsView {
       }
       body.append(row);
     }
-    console.log(JSON.stringify(body));
     return body;
   }
 

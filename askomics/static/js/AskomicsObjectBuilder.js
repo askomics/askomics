@@ -2,13 +2,13 @@
 
 class AskomicsObjectBuilder {
 
-  constructor(objet) {
+  constructor() {
   }
 
-  static instanceNode(node,x,y) {
-    if ( userAbstraction.isPositionable(node.uri) ) {
+  static instanceNode(_userAbstraction,node,x,y) {
+    if ( _userAbstraction.isPositionable(node.uri) ) {
       return new AskomicsPositionableNode(node,x,y);
-    } else if (userAbstraction.isGoterm(node.uri)) {
+    } else if (_userAbstraction.isGoterm(node.uri)) {
       return new GONode(node,x,y);
     } else {
       return new AskomicsNode(node,x,y);
@@ -16,9 +16,9 @@ class AskomicsObjectBuilder {
     return null;
   }
 
-  static instanceLink(linkbase,source,target) {
+  static instanceLink(_userAbstraction,linkbase,source,target) {
     let link = null;
-    if (userAbstraction.isGoterm(source.uri) || userAbstraction.isGoterm(target.uri)) {
+    if (_userAbstraction.isGoterm(source.uri) || _userAbstraction.isGoterm(target.uri)) {
       link = new GOLink(linkbase,source,target);
     } else {
       link = new AskomicsLink(linkbase,source,target);

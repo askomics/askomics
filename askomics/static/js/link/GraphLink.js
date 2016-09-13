@@ -44,8 +44,9 @@ class GraphLink extends GraphObject {
   set linkindex  (__linkindex) { this._linkindex = __linkindex; }
   get linkindex () { return this._linkindex; }
 
-  setjson(obj) {
+  setjson(obj,graphBuilder) {
     super.setjson(obj);
+
     this.linkindex = obj._linkindex;
     if (! graphBuilder)
       throw "Devel error: setjson : graphBuilder is not instancied!";
@@ -66,6 +67,7 @@ class GraphLink extends GraphObject {
     if (t[0]<0) {
       throw "Devel error: setjson : nodes have to be initialized to define links.";
     }
+
     this.source    = t[1];
 
     t = AskomicsGraphBuilder.findElt(graphBuilder.nodes(),obj._target._id);

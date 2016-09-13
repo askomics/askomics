@@ -20,6 +20,7 @@
         <link href="static/css/pygment.css" rel="stylesheet" type="text/css">
         <link href="static/css/google-material-icons.css" rel="stylesheet" type="text/css">
         <link href="static/css/font-awesome.css" rel="stylesheet" type="text/css">
+
     </head>
 
     <body>
@@ -45,7 +46,7 @@
                     <label for="startpoint" class="col-md-offset-2">Please select a start point for your query :</label>
                     <select id='startpoints' size='4' class="form-control col-md-offset-2"></select>
                 </div>
-                <button  id="starter" class="btn btn-default col-md-offset-2" onclick="startVisualisation()">Start</button>
+                <button  id="starter" class="btn btn-default col-md-offset-2" onclick="startVisualisation();">Start</button>
                 <br><br><br>
                 <div class="col-md-offset-2"><p>Or upload a AskOmics file</p>
                     <div class="uploadBtn btn btn-default">

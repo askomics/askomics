@@ -5,8 +5,8 @@
 */
 class AskomicsPositionableLinkView extends AskomicsObjectView {
 
-  constructor(link) {
-    super(link);
+  constructor(graphBuilder,link) {
+    super(graphBuilder,link);
     this.link = link ;
   }
 
