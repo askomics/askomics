@@ -27,6 +27,7 @@ install:
   - npm install gulp-inject --save-dev
   - npm install gulp-uglify --save-dev
   - npm install gulp-util --save-dev
+  - npm install intro.js --save
   - gem install coveralls-lcov
 before_script:
   - docker pull tenforce/virtuoso

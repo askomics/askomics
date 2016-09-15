@@ -44,6 +44,7 @@
   "author": "",
   "license": "GPL-3.0",
   "dependencies": {
+    "intro.js": "^2.3.0",
     "time-require": "^0.1.2"
   }
 }

@@ -372,15 +372,25 @@ $(function () {
 
     // Visual effect on active tab (Ask! / Integrate / Credits)
     $('.nav li').click(function(e) {
+
         $('.nav li.active').removeClass('active');
-        var $this = $(this);
-        if (!$this.hasClass('active')) {
-            $this.addClass('active');
+
+        if (!$(this).hasClass('active')) {
+            $(this).addClass('active');
         }
-        $('.container').hide();
-        $('.container#navbar_content').show();
-        $('.container#content_' + $this.attr('id')).show();
+
+
+
+        if (  ! ( $(this).attr('id') in { 'help' : '','admin':'' }) ) {
+          $('.container').hide();
+          $('.container#navbar_content').show();
+          $('.container#content_' + $(this).attr('id')).show();
+        } else {
+          $('.container#navbar_content').show();
+        }
+
         e.preventDefault();
+
     });
 
     // A helper for handlebars

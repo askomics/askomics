@@ -11,6 +11,7 @@
         <script src="static/js/third-party/tmpl.min.js"></script>
         <script src="static/js/third-party/bootstrap.js"></script>
         <script src="static/js/third-party/handlebars-v4.0.5.js"></script>
+        <script type="text/javascript" src="static/js/third-party/intro.js"></script>
 
         <script src="static/dist/askomics.js"></script>
 
@@ -20,7 +21,7 @@
         <link href="static/css/pygment.css" rel="stylesheet" type="text/css">
         <link href="static/css/google-material-icons.css" rel="stylesheet" type="text/css">
         <link href="static/css/font-awesome.css" rel="stylesheet" type="text/css">
-
+        <link href="static/css/introjs.css" rel="stylesheet" type="text/css">
     </head>
 
     <body>
@@ -30,12 +31,21 @@
                     <a class="navbar-brand site-header" href="/">${project}</a>
                 </div>
 
-                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <div id="collapse-menu-main" class="collapse navbar-collapse">
                     <ul class="nav navbar-nav navbar-right">
                         <li id="interrogation" class="active"><a href="#" onclick="loadStartPoints();">Ask!</a></li>
                         <li id="integration"><a href="#">Upload</a></li>
-                        <li id="statistics" onclick="loadNamedGraphs()"><a href="#">Datasets</a></li>
-                        <li id="about"><a href="#">About</a></li>
+                        <li id="admin" class="dropdown">
+                          <a class="dropdown-toggle" data-toggle="dropdown" href="#">Administration
+                            <span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                              <li id="datasets"><a href="#">Datasets</a></li>
+                              <li id="external_services"><a href="#">External Services</a></li>
+                              <li id="statistics" onclick="loadNamedGraphs()"><a href="#statistics_content">Statistics</a></li>
+                            </ul>
+                          </li>
+                        <li id="about"><a href="#">About</a></li><!---->
+                        <li id="help"><a href="#" onclick="AskomicsHelp.start();" >Help</a></li>
                     </ul>
                 </div>
             </div>
@@ -129,8 +139,10 @@
         <div id="content_integration" class="container" hidden>
             <div id="overview" class="row"></div>
         </div>
-        <div id="content_statistics" class="container" hidden>
-            <h3>Manage datasets</h3>
+
+        <div id="content_datasets" class="container" hidden>
+            <hr/>
+            <h3 class="header-div">Manage User Datasets</h3>
             <hr/>
 
             <form class="form-horizontal">
@@ -142,8 +154,11 @@
                 <div id="btn-del-graph" class="btn-group"><button id="btn-empty-graph" class="btn btn-primary" onclick="deleteNamedGraph($('#dropNamedGraphSelected').val())" type="button" id="dropNamedGraphButton">Delete</button></div>
                 <div id="btn-del" class="btn-group"><button id="btn-empty" onclick="emptyDatabase('confirm')" class="btn btn-danger">Delete all</button></div>
             </form>
+        </div>
 
-            <h3>Statistics</h3>
+        <div id="content_statistics" class="container" hidden>
+            <hr/>
+            <h3 class="header-div">Statistics</h3>
             <hr/>
             <p id='btn-st'>
                 <button id='btn-stats' onclick='loadStatistics()' class='btn btn-default'>Get stats</button>
@@ -152,9 +167,18 @@
             <div id="statistics_div" class="row"></div>
         </div>
 
+        <div id="content_administration" class="container" hidden>
+            <hr/>
+            <h3 class="header-div">Administration</h3>
+            <hr/>
+
+        </div>
+
         <div id="content_about" class="container" hidden>
           <hr/>
-          <h3 class="header-div">Project</h3>
+          <h3 class="header-div">About</h3>
+          <hr/>
+
           <p>
           AskOmics provide a visual
           representation of the user abstraction as a graph.

@@ -17,6 +17,7 @@ var uglify = require('gulp-uglify');
 
 //var askomicsSourceFiles = ['askomics/static/js/**/*.js','!askomics/static/js/third-party/**/*.js'];
 var askomicsSourceFiles = [
+        'askomics/static/js/help/AskomicsHelp.js',
         'askomics/static/js/AskomicsRestManagement.js',
         'askomics/static/js/AskomicsUserAbstraction.js',
         'askomics/static/js/integration.js',
@@ -85,7 +86,7 @@ gulp.task('build', function() {
         .pipe(gulp.dest('askomics/static/dist'));
 });
 
-var coverageFile = './coverage/coverage.json';
+var coverageFile = './.coverage-js/coverage.json';
 var mochaPhantomOpts = {
   reporter: 'spec',
   dump:'output_test.log',
@@ -124,7 +125,8 @@ var testFrameworkFiles=[
   'node_modules/mocha/mocha.css',
   'node_modules/should/should.js',
   'node_modules/chai/chai.js',
-  'node_modules/jquery/dist/jquery.js'
+  'node_modules/jquery/dist/jquery.js',
+  'node_modules/intro.js/intro.js'
 ];
 // New Askomics files instrumented for coverage
 var askomicsInstrumentedSourceFiles = askomicsSourceFiles.slice();
