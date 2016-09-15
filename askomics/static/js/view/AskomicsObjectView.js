@@ -8,8 +8,6 @@ class AskomicsObjectView {
     this.objet = objet ;
     this.details = undefined;
     this.graphBuilder = graphBuilder;
-
-    this.defineClickMenu();
   }
 
   static cleanTitleObjectView() {
@@ -47,6 +45,10 @@ class AskomicsObjectView {
 
   static removeAll() {
     $("div[id*='"+ AskomicsObjectView_prefix +"']" ).remove();
+
+    $("#showNode").unbind();
+    $("#deleteNode").unbind();
+    $('#helpNode').unbind();
   }
 
   show() {
@@ -120,20 +122,20 @@ class AskomicsObjectView {
     $("div[id*='"+ AskomicsObjectView_prefix +"']" ).hide();
   }
 
-  defineClickMenu() {
+  static defineClickMenu(graphBuilder) {
     let mythis = this;
     // Switch between close and open eye icon for unselected
     $("#showNode").click(function() {
         var id = $("#objectName").attr("objid");
-        if (mythis.graphBuilder.nodes().length <= 1) {
+        if (graphBuilder.nodes().length <= 1) {
           let help_title = "Information";
           let help_str   = "Askomics can not disable a single node.";
           displayModal(help_title, help_str, 'ok');
           return;
         }
         let countActif = 0;
-        for(let i=0;i<mythis.graphBuilder.nodes().length;i++) {
-          if ( mythis.graphBuilder.nodes()[i].actif) countActif++ ;
+        for(let i=0;i<graphBuilder.nodes().length;i++) {
+          if ( graphBuilder.nodes()[i].actif) countActif++ ;
         }
         if (countActif <= 1) {
           let help_title = "Information";
@@ -142,7 +144,7 @@ class AskomicsObjectView {
           return;
         }
 
-        var node = mythis.graphBuilder.getInstanciedNode(id);
+        var node = graphBuilder.getInstanciedNode(id);
         if ( node ) {
           node.switchActiveNode();
 
@@ -162,15 +164,15 @@ class AskomicsObjectView {
         let id = $("#objectName").attr("objid");
         let type = $("#objectName").attr("type");
         if ( type == "node" ) {
-          let node = mythis.graphBuilder.getInstanciedNode(id);
-          if (node.id == mythis.graphBuilder.nodes()[0].id) {
+          let node = graphBuilder.getInstanciedNode(id);
+          if (node.id == graphBuilder.nodes()[0].id) {
               let help_title = "Information";
               let help_str   = "Askomics can not delete the start node. Use the reset button to begin a new query!";
               displayModal(help_title, help_str, 'ok');
               return;
           }
 
-          let listLinksRemoved = mythis.graphBuilder.removeInstanciedNode(node);
+          let listLinksRemoved = graphBuilder.removeInstanciedNode(node);
           forceLayoutManager.removeSuggestions();
           forceLayoutManager.update();
           node.getPanelView().remove();
@@ -178,8 +180,8 @@ class AskomicsObjectView {
             l.getPanelView().remove();
           }
       } else if ( type == "link") {
-        let link =mythis.graphBuilder.getInstanciedLink(id);
-        let removenode = mythis.graphBuilder.removeInstanciedLink(link);
+        let link = graphBuilder.getInstanciedLink(id);
+        let removenode = graphBuilder.removeInstanciedLink(link);
         forceLayoutManager.removeSuggestions();
         forceLayoutManager.update();
         link.getPanelView().remove();
@@ -191,16 +193,16 @@ class AskomicsObjectView {
       }
     });
 
-    $('#help').click(function() {
+    $('#helpNode').click(function() {
       var id = $("#objectName").attr("objid");
       var type = $("#objectName").attr("type");
 
       let elem ;
 
       if ( type == "node") {
-        elem = mythis.graphBuilder.getInstanciedNode(id);
+        elem = graphBuilder.getInstanciedNode(id);
       } else if ( type == "link") {
-        elem = mythis.graphBuilder.getInstanciedLink(id);
+        elem = graphBuilder.getInstanciedLink(id);
       } else {
         throw "AskomisObjectView::help  ==> unkown type:"+type;
       }

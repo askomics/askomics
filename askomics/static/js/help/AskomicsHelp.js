@@ -65,6 +65,15 @@ class AskomicsHelp {
           intro: "Have you ever upload your data with the 'Upload' section ? Next this step, you can select a started element to begin an askomics session with you integrated data.",
           position: 'right'
         },
+
+        {
+          element: '.glyphicon-plus',
+          intro: "<p>Match or negative match if the expression is not empty.</p><ul class=\"list-group\">\
+            <li class=\"list-group-item\"><span class=\"glyphicon glyphicon-plus\">&nbsp;match</li>\
+            <li class=\"list-group-item\"><span class=\"glyphicon glyphicon-minus\">&nbsp;negative match</li>\
+            </ul>",
+          position: 'left'
+        },
         /* Keep at end */
 /* =============================   NAV BAR ========================================================================*/
         {

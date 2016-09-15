@@ -453,7 +453,7 @@ class AskomicsNodeView extends AskomicsObjectView {
           } else {
             let sparqlid  = $(this).attr('sparqlid');
             let nodeid = $(this).attr('nodeid');
-            let node = this.graphBuilder.getInstanciedNode(nodeid);
+            let node = mythis.graphBuilder.getInstanciedNode(nodeid);
             icon.removeClass('fa-link');
             icon.addClass('fa-chain-broken');
             $(this).parent().find('input[linkvar!="true"]').show();

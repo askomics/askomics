@@ -8,8 +8,6 @@ var forceLayoutManager ;
 
 function startRequestSessionAskomics() {
 
-  let Session = {};
-
   if ( askomicsInitialization ) return ;
   // Initialize the graph with the selected start point.
   $("#init").hide();
@@ -23,7 +21,8 @@ function startRequestSessionAskomics() {
   forceLayoutManager = new AskomicsForceLayoutManager(graphBuilder);
 
   askomicsInitialization = true;
-  return Session ;
+
+  AskomicsObjectView.defineClickMenu(graphBuilder);
 }
 
 function startVisualisation() {

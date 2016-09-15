@@ -188,7 +188,6 @@ var AskomicsUserAbstraction = function () {
 
     AskomicsUserAbstraction.prototype.isGoterm  = function(Uri) {
       // TODO using prefix.cc to update entityInformationList
-      console.log(Uri);
       return (Uri === "http://purl.org/obo/owl/GO#term");
     };
 

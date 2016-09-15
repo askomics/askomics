@@ -5,11 +5,64 @@
 */
 var datalist_go_description_upload = false;
 
+var service_url_gene_ontology = "http://cloud-60.genouest.org/go/sparql";
+var number_char_search_allow = 6;
+var goid_link_web = "http://amigo.geneontology.org/amigo/term/";
+
 class GONodeView extends AskomicsObjectView {
 
   constructor(graphBuilder,node) {
     super(graphBuilder,node);
-    this.upload_go_description();
+  }
+
+  static configuration(keyword) {
+
+    switch(keyword) {
+      case 'url_service':
+        return service_url_gene_ontology;
+      case 'number_char_search_allow':
+        return number_char_search_allow;
+      case 'web_link':
+          return goid_link_web;
+    default:
+      throw "GONodeView::configuration unkown keyword:"+keyword;
+
+    }
+  }
+
+  static configurationView() {
+
+    /* if the content have ever been created */
+    if ( $("#content_gene_ontology").length>0) return;
+
+    /* build otherwise */
+    let container = $("<div></div>").addClass("container").attr("id","content_gene_ontology");
+
+    let lab = $("<h3></h3>").html("Gene Ontology Service");
+
+    /* URL */
+    let divUrl = $("<div></div>").addClass("row");
+    let labUrl = $("<label></label>").html("URL");
+    let inpUrl = $("<input/>")
+            .attr("type", "text")
+            .val(GONodeView.configuration('url_service'))
+            .addClass("form-control");
+
+    inpUrl.change(function(d) {
+      service_url_gene_ontology = $(this).val();
+    });
+
+    divUrl.append(labUrl);
+    divUrl.append(inpUrl);
+
+    /* NBbr Char */
+
+    container.append($('<hr/>'))
+             .append(lab)
+             .append($('<hr/>'))
+             .append(divUrl);
+
+    $('body').append(container);
   }
 
   display_help() {
@@ -18,16 +71,17 @@ class GONodeView extends AskomicsObjectView {
     displayModal(help_title, help_str, 'ok');
   }
 
-  upload_go_description() {
+  upload_go_description(filterStr) {
     /* load once time for all GO node */
     if (datalist_go_description_upload) return;
 
     displayModal('Please wait', '', 'Close');
 
+    $('#matchGoValue').remove();
     /* General datalist available for all GOnode */
     let datalist = $('<datalist>').attr('id','matchGoValue');
 
-    let tab = this.objet.buildListOfGODescriptionsSPARQL();
+    let tab = this.objet.buildListOfGODescriptionsSPARQL(filterStr);
 
     let service = new RestServiceJs("sparqlquery");
     let model = {
@@ -70,7 +124,8 @@ class GONodeView extends AskomicsObjectView {
     /* button to add filter */
     let button_add = $("<input/>")
               .addClass("form-control")
-              .attr("id",sparqlId)
+              .attr("id","button_go_"+sparqlId)
+              .attr("sparqlId",sparqlId)
               .attr("type","button")
               .attr("value","add to filter");
     /* Filter list */
@@ -79,8 +134,18 @@ class GONodeView extends AskomicsObjectView {
                      .addClass("list-group")
                      .attr("id","gofilterlist_"+sparqlId);
 
+    inp.change(function(d) {
+      let valueFilter = $(this).val();
+      if ( valueFilter === undefined || valueFilter.length < number_char_search_allow ) {
+        $("#button_go_"+sparqlId).attr('disable',true);
+        return;
+      }
+      this.upload_go_description(valueFilter);
+      $("#button_go_"+sparqlId).attr('disable',false);
+    });
+
     button_add.on('click',function(e){
-      let sparqlid = $(this).attr("id");
+      let sparqlid = $(this).attr("sparqlid");
       if ( sparqlid === undefined ) {
         console.error("Can not find attribute ID ");
         return;

@@ -45,8 +45,9 @@ class GONode extends GraphNode {
     blockConstraintByNode.push('?oboid <http://www.geneontology.org/formats/oboInOwl#id> ?goid');
     /* pour les tests*/
     blockConstraintByNode.push("VALUES ?oboid { <http://purl.obolibrary.org/obo/GO_0034136> <http://purl.obolibrary.org/obo/GO_0034132> <http://purl.obolibrary.org/obo/GO_0034128>}");
+    //blockConstraintByNode.push("FILTER ( regex(str(?transcript1), \"hel\", \"i\" ))");
 
-    blockConstraintByNode = [ blockConstraintByNode,'SERVICE <http://cloud-60.genouest.org/go/sparql>' ];
+    blockConstraintByNode = [ blockConstraintByNode,'SERVICE <'+GONodeView.configuration('url_service')+'>' ];
     return [variates,[blockConstraintByNode,'']];
   }
 
@@ -76,7 +77,7 @@ class GONode extends GraphNode {
     //blockConstraintByNode.push('?subClass'+this.SPARQLid+' rdfs:label ?desc2'+this.SPARQLid);
 
     return [
-            blockConstraintByNode,'SERVICE <http://cloud-60.genouest.org/go/sparql>'
+            blockConstraintByNode,'SERVICE <'+GONodeView.configuration('url_service')+'>'
           ];
   }
 
