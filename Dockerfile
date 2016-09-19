@@ -18,7 +18,6 @@ RUN apt-get update && apt-get install -y \
 #------------------------------------------------------------------------------------------
 ENV VENV=/usr/local/AskomicsWeb/venv
 RUN mkdir -p /usr/local/AskomicsWeb
-COPY . /usr/local/AskomicsWeb/
 RUN rm -rf $VENV
 WORKDIR /usr/local/AskomicsWeb/
 
@@ -40,6 +39,12 @@ RUN npm install gulp-istanbul --save-dev
 RUN npm install gulp-istanbul-report --save-dev
 RUN npm install gulp-inject --save-dev
 RUN gem install coveralls-lcov
+RUN npm install --save-dev gulp
+RUN npm install bluebird
+RUN npm install any-promise
+RUN npm install gulp-uglify
+
+COPY . /usr/local/AskomicsWeb/
 
 RUN gulp
 
