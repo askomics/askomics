@@ -2,8 +2,6 @@
 
 /* Manage theses variables with a Singleton Classes */
 var askomicsInitialization = false;
-var abstraction;
-var graphBuilder;
 var forceLayoutManager ;
 
 function startRequestSessionAskomics() {
@@ -15,14 +13,14 @@ function startRequestSessionAskomics() {
   d3.select("svg").remove();
 
   /* To manage construction of SPARQL Query */
-  graphBuilder = new AskomicsGraphBuilder(new AskomicsUserAbstraction());
+  //graphBuilder = new AskomicsGraphBuilder(new AskomicsUserAbstraction());
 
   /* To manage the D3.js Force Layout  */
-  forceLayoutManager = new AskomicsForceLayoutManager(graphBuilder);
+  forceLayoutManager = new AskomicsForceLayoutManager();
 
   askomicsInitialization = true;
 
-  AskomicsObjectView.defineClickMenu(graphBuilder);
+  AskomicsObjectView.defineClickMenu();
 }
 
 function startVisualisation() {

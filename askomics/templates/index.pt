@@ -11,10 +11,12 @@
         <script src="static/js/third-party/tmpl.min.js"></script>
         <script src="static/js/third-party/bootstrap.js"></script>
         <script src="static/js/third-party/handlebars-v4.0.5.js"></script>
-        <script type="text/javascript" src="static/js/third-party/intro.js"></script>
+        <script src="static/js/third-party/intro.js"></script>
 
         <script src="static/dist/askomics.js"></script>
 
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
+        
         <link href="static/css/jquery-ui.min.css" rel="stylesheet" >
         <link href="static/css/bootstrap.min.css" rel="stylesheet" type="text/css">
         <link href="static/css/style.css" rel="stylesheet" type="text/css">
@@ -22,6 +24,9 @@
         <link href="static/css/google-material-icons.css" rel="stylesheet" type="text/css">
         <link href="static/css/font-awesome.css" rel="stylesheet" type="text/css">
         <link href="static/css/introjs.css" rel="stylesheet" type="text/css">
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
+
     </head>
 
     <body>
@@ -42,7 +47,8 @@
                               <li id="datasets"><a href="#">Datasets</a></li>
                               <li id="statistics" onclick="loadNamedGraphs()"><a href="#">Statistics</a></li>
                               <li class="divider"></li>
-                              <li id="gene_ontology"><a onclick="GONodeView.configurationView();" href="#"><span class="glyphicon glyphicon-cloud"></span>&nbsp;Gene Ontology</a></li>
+                              <li id="triplestore_parameters"><a onclick="new TriplestoreParametersView().configurationView();" href="#"><span class="glyphicon glyphicon-cloud"></span>&nbsp;Private Triplestore</a></li>
+                              <li id="gene_ontology"><a onclick="new GOParametersView().configurationView();" href="#"><span class="glyphicon glyphicon-cloud"></span>&nbsp;Gene Ontology</a></li>
                             </ul>
                           </li>
                         <li id="about"><a href="#"><span class="glyphicon glyphicon-info-sign"></span></a></li><!---->

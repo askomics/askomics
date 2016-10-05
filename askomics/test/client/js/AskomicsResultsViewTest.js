@@ -1,4 +1,6 @@
 /*jshint esversion: 6 */
+/*jshint multistr:true */
+
 var dump_graphBuilder = '[\
 	1.1,\
 	[\
@@ -270,34 +272,30 @@ var data_test = {
   ]
 };
 
+new AskomicsGraphBuilder().setNodesAndLinksFromState(dump_graphBuilder);
 
 describe('AskomicsResultsView', function () {
   describe('#Constructor/JSON', function(){
     it('* Empty constructor *', function(){
-      let r = new AskomicsResultsView(new AskomicsGraphBuilder(new AskomicsUserAbstraction()));
+      let r = new AskomicsResultsView();
     });
     it('* Constructor *', function(){
       /* state of GraphBuilder corresponding with the resultst data_test */
-      let graphBuilder = new AskomicsGraphBuilder(new AskomicsUserAbstraction());
-      graphBuilder.setNodesAndLinksFromState(dump_graphBuilder);
-      let r = new AskomicsResultsView(graphBuilder,data_test);
+
+      let r = new AskomicsResultsView(data_test);
     });
   });
 
   describe('#is valid', function(){
     it('* Constructor with data && graphBuilder null*', function(){
-      let r = new AskomicsResultsView(new AskomicsUserAbstraction());
+      let r = new AskomicsResultsView();
       chai.expect(function () {  r.is_valid();}).
         to.throw("AskomicsResultsView :: data prototyperty in unset!");
     });
   });
   describe('#is valid', function(){
     it('* Constructor with data null*', function(){
-
-      let graphBuilder = new AskomicsGraphBuilder(new AskomicsUserAbstraction());
-      graphBuilder.setNodesAndLinksFromState(dump_graphBuilder);
-
-      let r = new AskomicsResultsView(graphBuilder);
+      let r = new AskomicsResultsView();
 
       chai.expect(function () {  r.is_valid();}).
         to.throw("AskomicsResultsView :: data prototyperty in unset!");
@@ -305,18 +303,14 @@ describe('AskomicsResultsView', function () {
   });
   describe('#setActivesAttributes', function(){
     it('* Constructor *', function(){
-      let graphBuilder = new AskomicsGraphBuilder(new AskomicsUserAbstraction());
-      graphBuilder.setNodesAndLinksFromState(dump_graphBuilder);
-      let r = new AskomicsResultsView(graphBuilder,data_test);
+      let r = new AskomicsResultsView(data_test);
 
       r.setActivesAttributes();
     });
   });
   describe('#displayResults', function(){
     it('* displayResults *', function(){
-      let graphBuilder = new AskomicsGraphBuilder(new AskomicsUserAbstraction());
-      graphBuilder.setNodesAndLinksFromState(dump_graphBuilder);
-      let r = new AskomicsResultsView(graphBuilder,data_test);
+      let r = new AskomicsResultsView(data_test);
       r.setActivesAttributes();
       r.displayResults();
     });
@@ -324,17 +318,13 @@ describe('AskomicsResultsView', function () {
 
   describe('#build_header_results', function(){
     it('* build_header_results without execute activeAttribute*', function(){
-      let graphBuilder = new AskomicsGraphBuilder(new AskomicsUserAbstraction());
-      graphBuilder.setNodesAndLinksFromState(dump_graphBuilder);
-      let r = new AskomicsResultsView(graphBuilder,data_test);
+      let r = new AskomicsResultsView(data_test);
       chai.expect(function () { r.build_header_results();}).
         to.throw("AskomicsResultsView :: activesAttributes is not set.");
     // console.log(.html());
     });
     it('* build_header_results without execute activeAttribute*', function(){
-      let graphBuilder = new AskomicsGraphBuilder(new AskomicsUserAbstraction());
-      graphBuilder.setNodesAndLinksFromState(dump_graphBuilder);
-      let r = new AskomicsResultsView(graphBuilder,data_test);
+      let r = new AskomicsResultsView(data_test);
       r.setActivesAttributes();
       let header = r.build_header_results();
       chai.assert.isOk(header.find("th").length == 2);
@@ -342,35 +332,27 @@ describe('AskomicsResultsView', function () {
   });
   describe('#build_subheader_results', function(){
     it('* build_subheader_results without execute activeAttribute*', function(){
-      let graphBuilder = new AskomicsGraphBuilder(new AskomicsUserAbstraction());
-      graphBuilder.setNodesAndLinksFromState(dump_graphBuilder);
-      let r = new AskomicsResultsView(graphBuilder,data_test);
-      chai.expect(function () { r.build_subheader_results(graphBuilder.nodes());}).
+      let r = new AskomicsResultsView(data_test);
+      chai.expect(function () { r.build_subheader_results(new AskomicsGraphBuilder().nodes());}).
         to.throw("AskomicsResultsView :: activesAttributes is not set.");
     });
     it('* build_subheader_results without execute activeAttribute*', function(){
-      let graphBuilder = new AskomicsGraphBuilder(new AskomicsUserAbstraction());
-      graphBuilder.setNodesAndLinksFromState(dump_graphBuilder);
-      let r = new AskomicsResultsView(graphBuilder,data_test);
+      let r = new AskomicsResultsView(data_test);
       r.setActivesAttributes();
-      let header = r.build_subheader_results(graphBuilder.nodes());
+      let header = r.build_subheader_results(new AskomicsGraphBuilder().nodes());
       chai.assert.isOk(header.find("th").length == 2);
     });
   });
   describe('#build_body_results', function(){
     it('* build_subheader_results without execute activeAttribute*', function(){
-      let graphBuilder = new AskomicsGraphBuilder(new AskomicsUserAbstraction());
-      graphBuilder.setNodesAndLinksFromState(dump_graphBuilder);
-      let r = new AskomicsResultsView(graphBuilder,data_test);
-      chai.expect(function () { r.build_body_results(graphBuilder.nodes());}).
+      let r = new AskomicsResultsView(data_test);
+      chai.expect(function () { r.build_body_results(new AskomicsGraphBuilder().nodes());}).
         to.throw("AskomicsResultsView :: activesAttributes is not set.");
     });
     it('* build_body_results without execute activeAttribute*', function(){
-      let graphBuilder = new AskomicsGraphBuilder(new AskomicsUserAbstraction());
-      graphBuilder.setNodesAndLinksFromState(dump_graphBuilder);
-      let r = new AskomicsResultsView(graphBuilder,data_test);
+      let r = new AskomicsResultsView(data_test);
       r.setActivesAttributes();
-      let body = r.build_body_results(graphBuilder.nodes());
+      let body = r.build_body_results(new AskomicsGraphBuilder().nodes());
       chai.assert.isOk(body.find("tr").length == 8);
     });
   });

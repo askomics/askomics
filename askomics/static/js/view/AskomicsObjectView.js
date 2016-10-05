@@ -4,10 +4,9 @@ const AskomicsObjectView_prefix = "rightview_";
 /* General class to manage Askomics Panel View*/
 class AskomicsObjectView {
 
-  constructor(graphBuilder,objet) {
+  constructor(objet) {
     this.objet = objet ;
     this.details = undefined;
-    this.graphBuilder = graphBuilder;
   }
 
   static cleanTitleObjectView() {
@@ -76,8 +75,6 @@ class AskomicsObjectView {
 
     this.divPanel ();
 
-    let mythis = this;
-
     let ul = $("<ul></ul>")
               .attr("id","sortableAttribute")
               .css("list-style-type","none")
@@ -93,7 +90,7 @@ class AskomicsObjectView {
                   if ( l.length === 0 ) {
                     throw "Devel Error :: Attribute list have to defined a urinode !!";
                   }
-                  mythis.graphBuilder.getUserAbstraction().setOrderAttributesList(l.first().attr("urinode"),orderAttributes);
+                  new AskomicsUserAbstraction().setOrderAttributesList(l.first().attr("urinode"),orderAttributes);
                 }
               });
 
@@ -122,20 +119,20 @@ class AskomicsObjectView {
     $("div[id*='"+ AskomicsObjectView_prefix +"']" ).hide();
   }
 
-  static defineClickMenu(graphBuilder) {
+  static defineClickMenu() {
     let mythis = this;
     // Switch between close and open eye icon for unselected
     $("#showNode").click(function() {
         var id = $("#objectName").attr("objid");
-        if (graphBuilder.nodes().length <= 1) {
+        if (new AskomicsGraphBuilder().nodes().length <= 1) {
           let help_title = "Information";
           let help_str   = "Askomics can not disable a single node.";
           displayModal(help_title, help_str, 'ok');
           return;
         }
         let countActif = 0;
-        for(let i=0;i<graphBuilder.nodes().length;i++) {
-          if ( graphBuilder.nodes()[i].actif) countActif++ ;
+        for(let i=0;i<new AskomicsGraphBuilder().nodes().length;i++) {
+          if ( new AskomicsGraphBuilder().nodes()[i].actif) countActif++ ;
         }
         if (countActif <= 1) {
           let help_title = "Information";
@@ -144,7 +141,7 @@ class AskomicsObjectView {
           return;
         }
 
-        var node = graphBuilder.getInstanciedNode(id);
+        var node = new AskomicsGraphBuilder().getInstanciedNode(id);
         if ( node ) {
           node.switchActiveNode();
 
@@ -164,15 +161,15 @@ class AskomicsObjectView {
         let id = $("#objectName").attr("objid");
         let type = $("#objectName").attr("type");
         if ( type == "node" ) {
-          let node = graphBuilder.getInstanciedNode(id);
-          if (node.id == graphBuilder.nodes()[0].id) {
+          let node = new AskomicsGraphBuilder().getInstanciedNode(id);
+          if (node.id == new AskomicsGraphBuilder().nodes()[0].id) {
               let help_title = "Information";
               let help_str   = "Askomics can not delete the start node. Use the reset button to begin a new query!";
               displayModal(help_title, help_str, 'ok');
               return;
           }
 
-          let listLinksRemoved = graphBuilder.removeInstanciedNode(node);
+          let listLinksRemoved = new AskomicsGraphBuilder().removeInstanciedNode(node);
           forceLayoutManager.removeSuggestions();
           forceLayoutManager.update();
           node.getPanelView().remove();
@@ -180,8 +177,8 @@ class AskomicsObjectView {
             l.getPanelView().remove();
           }
       } else if ( type == "link") {
-        let link = graphBuilder.getInstanciedLink(id);
-        let removenode = graphBuilder.removeInstanciedLink(link);
+        let link = new AskomicsGraphBuilder().getInstanciedLink(id);
+        let removenode = new AskomicsGraphBuilder().removeInstanciedLink(link);
         forceLayoutManager.removeSuggestions();
         forceLayoutManager.update();
         link.getPanelView().remove();
@@ -200,9 +197,9 @@ class AskomicsObjectView {
       let elem ;
 
       if ( type == "node") {
-        elem = graphBuilder.getInstanciedNode(id);
+        elem = new AskomicsGraphBuilder().getInstanciedNode(id);
       } else if ( type == "link") {
-        elem = graphBuilder.getInstanciedLink(id);
+        elem = new AskomicsGraphBuilder().getInstanciedLink(id);
       } else {
         throw "AskomisObjectView::help  ==> unkown type:"+type;
       }

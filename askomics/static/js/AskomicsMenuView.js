@@ -5,8 +5,7 @@
 */
 class AskomicsMenuView {
 
-  constructor (_graphBuilder,_forceLayoutManager) {
-    this.graphBuilder = _graphBuilder;
+  constructor (_forceLayoutManager) {
     this.forceLayoutManager = _forceLayoutManager;
   }
 
@@ -67,7 +66,7 @@ class AskomicsMenuView {
 
 
     // <li><a href="#" class="small" data-value="option1" tabIndex="-1"><input type="checkbox"/>&nbsp;Option 1</a></li>
-    let lentities = this.graphBuilder.getUserAbstraction().getEntities();
+    let lentities = new AskomicsUserAbstraction().getEntities();
 
     $.each(lentities, function(i) {
       let node = new GraphObject({'uri' : lentities[i]});
@@ -100,7 +99,7 @@ class AskomicsMenuView {
       /* Adding filter on relations  */
       /* --------------------------- */
       console.log("menuView.userAbstraction:"+nodeuri);
-      let tab = menuView.graphBuilder.getUserAbstraction().getRelationsObjectsAndSubjectsWithURI(nodeuri);
+      let tab = new AskomicsUserAbstraction().getRelationsObjectsAndSubjectsWithURI(nodeuri);
       let listRelObj = tab[0];
       console.log("each..................."+nodeuri);
       $.each(listRelObj, function(objecturi) {
@@ -137,7 +136,7 @@ class AskomicsMenuView {
       /* next entity */
     });
 
-    let positionableEntities = menuView.graphBuilder.getUserAbstraction().getPositionableEntities();
+    let positionableEntities = new AskomicsUserAbstraction().getPositionableEntities();
     if (Object.keys(positionableEntities).length>0) {
       /* positionable object */
       let posuri = "positionable";

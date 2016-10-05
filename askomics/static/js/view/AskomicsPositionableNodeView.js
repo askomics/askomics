@@ -4,8 +4,8 @@
   Manage Information Link View With a current selected link
 */
 class AskomicsPositionableNodeView extends AskomicsNodeView {
-  constructor(graphBuilder,node) {
-    super(graphBuilder,node);
+  constructor(node) {
+    super(node);
   }
   display_help() {
     let help_title = 'positionable node '+this.node.label;

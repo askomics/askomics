@@ -5,11 +5,11 @@ class GOLink extends GraphLink {
   constructor(link,sourceN,targetN) {
     super(link,sourceN,targetN);
   }
-  setjson(obj,graphBuilder) {
-    super.setjson(obj,graphBuilder);
+  setjson(obj) {
+    super.setjson(obj);
   }
-  getPanelView(graphBuilder) {
-    return new GOLinkView(graphBuilder,this);
+  getPanelView() {
+    return new GOLinkView(this);
   }
 
   getFillColor() { return 'darkgreen'; }

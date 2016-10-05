@@ -40,8 +40,8 @@ class AskomicsPositionableLink extends AskomicsLink {
     });
   }
 
-  setjson(obj,graphBuilder) {
-    super.setjson(obj,graphBuilder);
+  setjson(obj) {
+    super.setjson(obj);
     this.type     = obj.type ;
     this.label    = obj.label;
     this.same_tax  =  obj.same_tax ;
@@ -52,8 +52,8 @@ class AskomicsPositionableLink extends AskomicsLink {
     this.position_ref = obj.position_ref ;
     this.position_strand = obj.position_strand ;
   }
-  getPanelView(graphBuilder) {
-    return new AskomicsPositionableLinkView(graphBuilder,this);
+  getPanelView() {
+    return new AskomicsPositionableLinkView(this);
   }
 
   getTextFillColor() { return 'darkgreen'; }

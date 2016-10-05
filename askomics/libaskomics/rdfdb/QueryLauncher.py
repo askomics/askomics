@@ -72,6 +72,7 @@ class QueryLauncher(ParamManager):
                 hack_virtuoso = self.get_param("askomics.hack_virtuoso")
                 if hack_virtuoso.lower() == "ok" or hack_virtuoso.lower() == "true":
                     data_endpoint.queryType = 'SELECT'
+            print(data_endpoint)
             results = data_endpoint.query()
             time1 = time.time()
         else:

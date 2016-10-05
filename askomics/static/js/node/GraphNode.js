@@ -76,7 +76,7 @@ class GraphNode extends GraphObject {
   }
 
   /* Build attribute with id, sparId inside a node from a generic uri attribute */
-  setAttributeOrCategoryForNode(graphBuilder,AttOrCatArray,attributeForUri) {
+  setAttributeOrCategoryForNode(AttOrCatArray,attributeForUri) {
     AttOrCatArray[attributeForUri.uri] = {} ;
     AttOrCatArray[attributeForUri.uri].uri       = attributeForUri.uri ;
     AttOrCatArray[attributeForUri.uri].type = attributeForUri.type ;
@@ -84,8 +84,8 @@ class GraphNode extends GraphObject {
 
     AttOrCatArray[attributeForUri.uri].label = attributeForUri.label ;
 
-    graphBuilder.setSPARQLVariateId(AttOrCatArray[attributeForUri.uri]);
-    AttOrCatArray[attributeForUri.uri].id=graphBuilder.getId();
+    new AskomicsGraphBuilder().setSPARQLVariateId(AttOrCatArray[attributeForUri.uri]);
+    AttOrCatArray[attributeForUri.uri].id=new AskomicsGraphBuilder().getId();
 
     /* by default all attributes is ask */
     AttOrCatArray[attributeForUri.uri].actif = false ;
@@ -93,22 +93,22 @@ class GraphNode extends GraphObject {
     return AttOrCatArray[attributeForUri.uri];
   }
 
-  buildAttributeOrCategoryForNode(graphBuilder,attributeForUri) {
+  buildAttributeOrCategoryForNode(attributeForUri) {
     if (attributeForUri.type.indexOf("http://www.w3.org/2001/XMLSchema#") < 0) {
-      return this.setAttributeOrCategoryForNode(graphBuilder,this.categories,attributeForUri);
+      return this.setAttributeOrCategoryForNode(this.categories,attributeForUri);
     }else {
-      return this.setAttributeOrCategoryForNode(graphBuilder,this.attributes,attributeForUri);
+      return this.setAttributeOrCategoryForNode(this.attributes,attributeForUri);
     }
   }
 
-  getAttributeOrCategoryForNode(graphBuilder,attributeForUri) {
+  getAttributeOrCategoryForNode(attributeForUri) {
     if (attributeForUri.uri in this.categories ) {
       return this.categories[attributeForUri.uri];
     } else if (attributeForUri.uri in this.attributes) {
       return this.attributes[attributeForUri.uri];
     }
     /* creation of new one otherwise */
-    return this.buildAttributeOrCategoryForNode(graphBuilder,attributeForUri);
+    return this.buildAttributeOrCategoryForNode(attributeForUri);
   }
 
   getNodeStrokeColor() { return 'grey'; }

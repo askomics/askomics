@@ -5,8 +5,8 @@
 */
 class AskomicsPositionableLinkView extends AskomicsObjectView {
 
-  constructor(graphBuilder,link) {
-    super(graphBuilder,link);
+  constructor(link) {
+    super(link);
     this.link = link ;
   }
 
@@ -44,7 +44,7 @@ class AskomicsPositionableLinkView extends AskomicsObjectView {
     // reload graph (it will recreate the link)
     forceLayoutManager.update();
     //select the link
-    forceLayoutManager.selectLink(this.link);
+    forceLayoutManager.setSelectLink(this.link);
   }
 
   reverseDir() {
@@ -71,7 +71,7 @@ class AskomicsPositionableLinkView extends AskomicsObjectView {
     // reload graph (it will recreate the link)
     forceLayoutManager.update();
     //select the link
-    forceLayoutManager.selectLink(this.link);
+    forceLayoutManager.setSelectLink(this.link);
   }
 
   changeStrict(strict) {

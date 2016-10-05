@@ -1,15 +1,14 @@
 /*jshint esversion: 6 */
 
 class AskomicsResultsView {
-  constructor(graphBuilder,data) {
-    this.graphBuilder = graphBuilder ;
+  constructor(data) {
     this.data = data ;
     this.activesAttributes      = undefined ; // Attributes id by Node Id to Display
     this.activesAttributesLabel = undefined ; // Attributes label by Node Id to Display
+    this.activesAttributesUrl   = undefined ; // Url when results is clickable
   }
 
   is_valid() {
-    if ( this.graphBuilder === undefined ) throw "AskomicsResultsView :: graphBuilder in unset!";
     if ( this.data === undefined ) throw "AskomicsResultsView :: data prototyperty in unset!";
   }
 
@@ -23,13 +22,20 @@ class AskomicsResultsView {
 
     this.activesAttributes      = {} ;
     this.activesAttributesLabel = {} ;
+    this.activesAttributesUrl   = {} ;
+    let graphBuilder = new AskomicsGraphBuilder();
 
-    for (let i=0;i<this.graphBuilder.nodes().length;i++ ) {
-      let node = this.graphBuilder.nodes()[i];
+    for (let i=0;i<graphBuilder.nodes().length;i++ ) {
+      let node = graphBuilder.nodes()[i];
       if ( ! node.actif ) continue;
-      let attr_disp = node.getAttributesDisplaying(this.graphBuilder.getUserAbstraction());
+      let attr_disp = node.getAttributesDisplaying();
       this.activesAttributes[node.id] = attr_disp.id;
       this.activesAttributesLabel[node.id] = attr_disp.label;
+      if ( 'url' in attr_disp ) { //if results is clickable
+        this.activesAttributesUrl[node.id] = attr_disp.url;
+      } else {
+         this.activesAttributesUrl[node.id] = {};
+       }
       if (this.activesAttributes[node.id].length != this.activesAttributesLabel[node.id].length ) {
         throw "Devel: Error node.getAttributesDisplaying give array with different size:"+str(this.activesAttributes[node.id].length)+","+str(this.activesAttributesLabel[node.id].length);
       }
@@ -56,8 +62,8 @@ class AskomicsResultsView {
 
       $("#results")
         .append(table.append(this.build_header_results())
-        .append(this.build_subheader_results(this.graphBuilder.nodes()))
-        .append(this.build_body_results(this.graphBuilder.nodes())));
+        .append(this.build_subheader_results(new AskomicsGraphBuilder().nodes()))
+        .append(this.build_body_results(new AskomicsGraphBuilder().nodes())));
   }
 
   build_header_results() {
@@ -68,8 +74,8 @@ class AskomicsResultsView {
     this.is_activedAttribute();
 
     /* set Entity Header */
-    for (let i=0;i<this.graphBuilder.nodes().length;i++ ) {
-      let node = this.graphBuilder.nodes()[i];
+    for (let i=0;i<new AskomicsGraphBuilder().nodes().length;i++ ) {
+      let node = new AskomicsGraphBuilder().nodes()[i];
       if ( ! node.actif ) continue;
 
       let nAttributes = this.activesAttributes[node.id].length;
@@ -101,7 +107,7 @@ class AskomicsResultsView {
            $(".entityHeaderResults").each(function( index ) {
              nodeList.push($(this).attr("id"));
            });
-           let lNodes = currentView.graphBuilder.nodes(nodeList,'id');
+           let lNodes = new AskomicsGraphBuilder().nodes(nodeList,'id');
            $(this).parent().parent().find("thead:eq(1)").remove();
            $(this).parent().parent().find("tbody").remove();
 
@@ -157,7 +163,7 @@ class AskomicsResultsView {
            $(".entityHeaderResults").each(function( index ) {
              nodeList.push($(this).attr("id"));
            });
-           let lNodes = currentView.graphBuilder.nodes(nodeList,'id');
+           let lNodes = new AskomicsGraphBuilder().nodes(nodeList,'id');
 
            let attList = [];
            $(".attributesHeaderResults").each(function( index ) {
@@ -199,7 +205,14 @@ class AskomicsResultsView {
         let node = nodeList[j];
         if ( ! node.actif ) continue;
         for (let sparqlId in this.activesAttributes[node.id]) {
-          row.append($('<td></td>').text(this.data.values[i][this.activesAttributes[node.id][sparqlId]]));
+          let headerName = this.activesAttributes[node.id][sparqlId];
+          let val = this.data.values[i][this.activesAttributes[node.id][sparqlId]];
+          if ( headerName in this.activesAttributesUrl[node.id] ) {
+            let url = this.activesAttributesUrl[node.id][headerName].replace("%s",this.data.values[i][this.activesAttributes[node.id][sparqlId]]);
+            row.append($('<td></td>').html($('<a></a>').attr('href',url).attr('target','_blank').text(val)));
+          } else {
+            row.append($('<td></td>').text(val));
+          }
         }
       }
       body.append(row);

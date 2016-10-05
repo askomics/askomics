@@ -18,6 +18,7 @@ var uglify = require('gulp-uglify');
 //var askomicsSourceFiles = ['askomics/static/js/**/*.js','!askomics/static/js/third-party/**/*.js'];
 var askomicsSourceFiles = [
         'askomics/static/js/help/AskomicsHelp.js',
+        'askomics/static/js/jquery.sparql.js',
         'askomics/static/js/AskomicsRestManagement.js',
         'askomics/static/js/AskomicsUserAbstraction.js',
         'askomics/static/js/integration.js',
@@ -34,6 +35,9 @@ var askomicsSourceFiles = [
         'askomics/static/js/link/AskomicsLink.js',
         'askomics/static/js/link/AskomicsPositionableLink.js',
         'askomics/static/js/link/GOLink.js',
+        'askomics/static/js/view/parameters/InterfaceParametersView.js',
+        'askomics/static/js/view/parameters/TriplestoreParametersView.js',
+        'askomics/static/js/view/parameters/GOParametersView.js',
         'askomics/static/js/view/AskomicsObjectView.js',
         'askomics/static/js/view/AskomicsLinkView.js',
         'askomics/static/js/view/AskomicsNodeView.js',

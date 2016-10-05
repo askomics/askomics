@@ -2,17 +2,16 @@
 
 class AskomicsForceLayoutManager {
 
-  constructor(_graphBuilder) {
-    this.graphBuilder = _graphBuilder;
+  constructor() {
     this.w = $("#svgdiv").width();
     this.h = 350 ;
     this.charge   = -700 ;
     this.distance = 175 ;
     this.friction = 0.7 ;
     /* To manage information about menu propositional view */
-    this.menuView = new AskomicsMenuView(_graphBuilder,this);
+    this.menuView = new AskomicsMenuView(this);
     /* To manage information about File menu */
-    this.menuFile = new AskomicsMenuFile(_graphBuilder,this);
+    this.menuFile = new AskomicsMenuFile(this);
 
 
     let currentFL = this;
@@ -201,25 +200,25 @@ class AskomicsForceLayoutManager {
     /* Get information about start point to bgin query */
     let startPoint = $('#startpoints').find(":selected").data("value");
     /* load abstraction */
-    this.graphBuilder.getUserAbstraction().loadUserAbstraction();
-    startPoint = this.graphBuilder.getUserAbstraction().buildBaseNode(startPoint.uri);
+    new AskomicsUserAbstraction().loadUserAbstraction();
+    startPoint = new AskomicsUserAbstraction().buildBaseNode(startPoint.uri);
     /* initialize menus */
     this.menuView.start();
 
     this.menuFile.start();
 
-    startPoint = this.graphBuilder.getUserAbstraction().buildBaseNode(startPoint.uri);
+    startPoint = new AskomicsUserAbstraction().buildBaseNode(startPoint.uri);
 
     /* Setting up an ID for the first variate */
-    startPoint = this.graphBuilder.setStartpoint(startPoint);
+    startPoint = new AskomicsGraphBuilder().setStartpoint(startPoint);
 
     /* first node */
     this.nodes.push(startPoint);
     this.manageSelectedNodes(startPoint);
 
-    startPoint.getPanelView(this.graphBuilder).create();
+    startPoint.getPanelView().create();
     /* update right view with attribute view */
-    startPoint.getPanelView(this.graphBuilder).show();
+    startPoint.getPanelView().show();
     /* insert new suggestion with startpoints */
     this.insertSuggestions();
     /* build graph */
@@ -230,14 +229,14 @@ class AskomicsForceLayoutManager {
 
   startWithQuery(dump) {
     d3.select("g").selectAll("*").remove();
-    this.graphBuilder.getUserAbstraction().loadUserAbstraction();
+    new AskomicsUserAbstraction().loadUserAbstraction();
     /* initialize menus */
     this.menuView.start();
     this.menuFile.start();
 
     this.nodes.splice(0, this.nodes.length);
     this.links.splice(0, this.links.length);
-    let t = this.graphBuilder.setNodesAndLinksFromState(dump);
+    let t = new AskomicsGraphBuilder().setNodesAndLinksFromState(dump);
     let lnodes = t[0];
     let llinks = t[1];
 
@@ -245,23 +244,23 @@ class AskomicsForceLayoutManager {
 
     for (var n of lnodes) {
       this.nodes.push(n);
-      n.getPanelView(this.graphBuilder).create();
+      n.getPanelView().create();
     }
     AskomicsObjectView.hideAll();
 
     for (var l of llinks) {
       this.links.push(l);
-      l.getPanelView(this.graphBuilder).create(l);
+      l.getPanelView().create(l);
     }
 
     AskomicsObjectView.hideAll();
 
     /* select the last node */
-    var lastn = this.graphBuilder.nodes()[this.graphBuilder.nodes().length-1];
+    var lastn = new AskomicsGraphBuilder().nodes()[new AskomicsGraphBuilder().nodes().length-1];
     this.unSelectNodes();
     this.manageSelectedNodes(lastn);
     /* update right view with attribute view */
-    lastn.getPanelView(this.graphBuilder).show();
+    lastn.getPanelView().show();
     /* insert new suggestion with startpoints */
     this.insertSuggestions();
     this.update();
@@ -391,7 +390,7 @@ class AskomicsForceLayoutManager {
 
     insertSuggestionsWithNewNode(slt_node) {
         /* get All suggested node and relation associated to get orientation of arc */
-        let tab = this.graphBuilder.getUserAbstraction().getRelationsObjectsAndSubjectsWithURI(slt_node.uri);
+        let tab = new AskomicsUserAbstraction().getRelationsObjectsAndSubjectsWithURI(slt_node.uri);
         let objectsTarget = tab[0];  /* All triplets which slt_node URI are the subject */
         let subjectsTarget = tab[1]; /* All triplets which slt_node URI are the object */
 
@@ -402,9 +401,9 @@ class AskomicsForceLayoutManager {
           /* Filter if node are not desired by the user */
           if (! this.isProposedUri("node",uri)) continue ;
           /* creatin node */
-          let suggestedNode = this.graphBuilder.getUserAbstraction().buildBaseNode(uri);
+          let suggestedNode = new AskomicsUserAbstraction().buildBaseNode(uri);
           /* specific attribute for suggested node */
-          suggestedNode = this.graphBuilder.setSuggestedNode(suggestedNode,slt_node.x,slt_node.y);
+          suggestedNode = new AskomicsGraphBuilder().setSuggestedNode(suggestedNode,slt_node.x,slt_node.y);
 
           for (var rel in objectsTarget[uri]) {
             /* Filter if link are not desired by the user */
@@ -423,8 +422,8 @@ class AskomicsForceLayoutManager {
             let target   = suggestedList[uri];
 
             //link = new AskomicsLink(linkbase,source,target);
-            link = AskomicsObjectBuilder.instanceLink(this.graphBuilder.getUserAbstraction(),linkbase,source,target);
-            link.id = this.graphBuilder.getId();
+            link = AskomicsObjectBuilder.instanceLink(linkbase,source,target);
+            link.id = new AskomicsGraphBuilder().getId();
             this.links.push(link);
           }
         }
@@ -434,8 +433,8 @@ class AskomicsForceLayoutManager {
           if (! this.isProposedUri("node",uri)) continue ;
           let suggestedNode;
           if ( ! (uri in suggestedList) ) {
-            suggestedNode = this.graphBuilder.getUserAbstraction().buildBaseNode(uri);
-            suggestedNode = this.graphBuilder.setSuggestedNode(suggestedNode,slt_node.x,slt_node.y);
+            suggestedNode = new AskomicsUserAbstraction().buildBaseNode(uri);
+            suggestedNode = new AskomicsGraphBuilder().setSuggestedNode(suggestedNode,slt_node.x,slt_node.y);
           } else {
             suggestedNode = suggestedList[uri];
           }
@@ -455,15 +454,15 @@ class AskomicsForceLayoutManager {
             let source   = suggestedList[uri] ;
             let target   = slt_node;
             //link = new AskomicsLink(linkbase,source,target);
-            link = AskomicsObjectBuilder.instanceLink(this.graphBuilder.getUserAbstraction(),linkbase,source,target);
-            link.id = this.graphBuilder.getId();
+            link = AskomicsObjectBuilder.instanceLink(linkbase,source,target);
+            link.id = new AskomicsGraphBuilder().getId();
             this.links.push(link);
           }
         }
         // add neighbours of a node to the graph as propositions.
 
         // Manage positionnable entities
-        let positionableEntities = this.graphBuilder.getUserAbstraction().getPositionableEntities();
+        let positionableEntities = new AskomicsUserAbstraction().getPositionableEntities();
 
         for (uri in positionableEntities) {
           // if selected node is not a positionable node, donc create a positionable
@@ -479,9 +478,9 @@ class AskomicsForceLayoutManager {
           let suggestedNode;
           if ( ! (uri in suggestedList) ) {
             /* creatin node */
-            suggestedNode = this.graphBuilder.getUserAbstraction().buildBaseNode(uri);
+            suggestedNode = new AskomicsUserAbstraction().buildBaseNode(uri);
             /* specific attribute for suggested node */
-            suggestedNode = this.graphBuilder.setSuggestedNode(suggestedNode,slt_node.x,slt_node.y);
+            suggestedNode = new AskomicsGraphBuilder().setSuggestedNode(suggestedNode,slt_node.x,slt_node.y);
             /* adding in the node list to create D3.js graph */
             this.nodes.push(suggestedNode);
             suggestedList[uri] = suggestedNode ;
@@ -494,7 +493,7 @@ class AskomicsForceLayoutManager {
           let target   = slt_node;
           link = new AskomicsPositionableLink(linkbase,source,target);
           link.setCommonPosAttr();
-          link.id = this.graphBuilder.getId();
+          link.id = new AskomicsGraphBuilder().getId();
           this.links.push(link);
         }
 
@@ -510,7 +509,7 @@ class AskomicsForceLayoutManager {
     insertSuggestionsWithTwoNodesInstancied(node1, node2) {
 
       /* get All suggested node and relation associated to get orientation of arc */
-      let tab = this.graphBuilder.getUserAbstraction().getRelationsObjectsAndSubjectsWithURI(node1.uri);
+      let tab = new AskomicsUserAbstraction().getRelationsObjectsAndSubjectsWithURI(node1.uri);
       let objectsTarget = tab[0];  /* All triplets which slt_node URI are the subject */
       let subjectsTarget = tab[1]; /* All triplets which slt_node URI are the object */
 
@@ -525,8 +524,8 @@ class AskomicsForceLayoutManager {
         let source   = node1;
         let target   = node2;
         //let link = new AskomicsLink(linkbase,source,target);
-        let link = AskomicsObjectBuilder.instanceLink(this.graphBuilder.getUserAbstraction(),linkbase,source,target);
-        link.id = this.graphBuilder.getId();
+        let link = AskomicsObjectBuilder.instanceLink(linkbase,source,target);
+        link.id = new AskomicsGraphBuilder().getId();
         this.links.push(link);
       }
 
@@ -541,12 +540,12 @@ class AskomicsForceLayoutManager {
         let source   = node2;
         let target   = node1;
         //let link = new AskomicsLink(linkbase,source,target);
-        let link = AskomicsObjectBuilder.instanceLink(this.graphBuilder.getUserAbstraction(),linkbase,source,target);
-        link.id = this.graphBuilder.getId();
+        let link = AskomicsObjectBuilder.instanceLink(linkbase,source,target);
+        link.id = new AskomicsGraphBuilder().getId();
         this.links.push(link);
       }
       // Manage positionnable entities
-      let positionableEntities = this.graphBuilder.getUserAbstraction().getPositionableEntities();
+      let positionableEntities = new AskomicsUserAbstraction().getPositionableEntities();
 
       if ( this.isProposedUri("link","positionable") &&
            (node1.uri in positionableEntities) && (node2.uri in positionableEntities)) {
@@ -557,7 +556,7 @@ class AskomicsForceLayoutManager {
         let target   = node1;
         let link = new AskomicsPositionableLink(linkbase,source,target);
         link.setCommonPosAttr();
-        link.id = this.graphBuilder.getId();
+        link.id = new AskomicsGraphBuilder().getId();
         this.links.push(link);
       }
     }
@@ -640,15 +639,15 @@ class AskomicsForceLayoutManager {
                     currentFL.setSelectLink(d);
                     if ( d.suggested ) {
                       let ll = [d];
-                      currentFL.graphBuilder.instanciateLink(ll);
+                      new AskomicsGraphBuilder().instanciateLink(ll);
 
                       currentFL.updateInstanciateLinks(ll);
 
                       if ( d.source.suggested || d.target.suggested  ) {
                         var node = d.source.suggested?d.source:d.target;
-                        currentFL.graphBuilder.instanciateNode(node);
+                        new AskomicsGraphBuilder().instanciateNode(node);
                         currentFL.updateInstanciatedNode(node);
-                        node.getPanelView(currentFL.graphBuilder).create();
+                        node.getPanelView().create();
                         // remove old suggestion
                         currentFL.removeSuggestions();
                         if (currentFL.selectNodes.length <= 1) {
@@ -659,12 +658,12 @@ class AskomicsForceLayoutManager {
                         }
                       }
                       //linksView.create(d);
-                      d.getPanelView(currentFL.graphBuilder).create();
+                      d.getPanelView().create();
                     }else{
                       currentFL.removeSuggestions();
                     }
                     /* update link view */
-                    d.getPanelView(currentFL.graphBuilder).show();
+                    d.getPanelView().show();
 
                     currentFL.update();
                   }else{
@@ -676,7 +675,7 @@ class AskomicsForceLayoutManager {
               });
 
     /* nodes or links could be removed by other views */
-    currentFL.graphBuilder.synchronizeInstanciatedNodesAndLinks(this.nodes,this.links);
+    new AskomicsGraphBuilder().synchronizeInstanciatedNodesAndLinks(this.nodes,this.links);
 
     // Arrows
     arrow.enter().append("svg:defs").append("svg:marker")
@@ -747,21 +746,21 @@ class AskomicsForceLayoutManager {
               // Mouse up on a link
               //document.body.style.cursor = 'default';
                 // nothing todo for intance
-                if (! currentFL.graphBuilder.isInstanciatedNode(d)) {
+                if (! new AskomicsGraphBuilder().isInstanciatedNode(d)) {
                   // When selected a node is not considered suggested anymore.
-                  currentFL.graphBuilder.instanciateNode(d);
+                  new AskomicsGraphBuilder().instanciateNode(d);
                   currentFL.updateInstanciatedNode(d);
                   var listOfLinksInstancied = currentFL.selectListLinksUser(currentFL.links,d);
-                  currentFL.graphBuilder.instanciateLink(listOfLinksInstancied);
+                  new AskomicsGraphBuilder().instanciateLink(listOfLinksInstancied);
                   currentFL.updateInstanciateLinks(listOfLinksInstancied);
                   for (var ll of listOfLinksInstancied ) {
-                    ll.getPanelView(currentFL.graphBuilder).create();
+                    ll.getPanelView().create();
                   }
-                  d.getPanelView(currentFL.graphBuilder).create();
+                  d.getPanelView().create();
                 }
                 // show attribute view only if node is not selected
                 if (!$.inArray(d, currentFL.selectNodes)) {
-                  d.getPanelView(currentFL.graphBuilder).show();
+                  d.getPanelView().show();
                 }
 
                 /* remove old suggestion */

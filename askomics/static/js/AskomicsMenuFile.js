@@ -5,8 +5,7 @@
 */
 class AskomicsMenuFile {
 
-  constructor (_graphBuilder) {
-    this.graphBuilder = _graphBuilder;
+  constructor () {
   }
 
   start() {
@@ -14,7 +13,7 @@ class AskomicsMenuFile {
     //$("#uploadedQuery")
     $("#dwl-query").on('click', function(d) {
       var date = new Date().getTime();
-      $(this).attr("href", "data:application/octet-stream," + encodeURIComponent(mythis.graphBuilder.getInternalState())).attr("download", "query-" + date + ".json");
+      $(this).attr("href", "data:application/octet-stream," + encodeURIComponent(new AskomicsGraphBuilder().getInternalState())).attr("download", "query-" + date + ".json");
     });
 
 

@@ -1,17 +1,4 @@
 /*jshint esversion: 6 */
-function set_varglob() {
-  graphBuilder = new AskomicsGraphBuilder();
-  /* To manage the D3.js Force Layout  */
-  //forceLayoutManager = new AskomicsForceLayoutManager();
-  /* To manage information about User Datasrtucture  */
-  //userAbstraction = new AskomicsUserAbstraction();
-  /* To manage information about menu propositional view */
-  //menuView = new AskomicsMenuView();
-  /* To manage information about File menu */
-  //menuFile = new AskomicsMenuFile();
-}
-
-set_varglob();
 
 describe('AskomicsLink', function(){
 
@@ -29,13 +16,13 @@ describe('AskomicsLink', function(){
 
   describe('#Constructor/JSON', function(){
     it('*  *', function(){
-      graphBuilder.nodes().push(node1);
-      graphBuilder.nodes().push(node2);
+      new AskomicsGraphBuilder().nodes().push(node1);
+      new AskomicsGraphBuilder().nodes().push(node2);
       let linkJSON ;
       let link = new AskomicsLink({ uri:'http://wwww.system/link1'},node1,node2);
-      chai.expect(function () { link.setjson({},graphBuilder);}).
+      chai.expect(function () { link.setjson({},new AskomicsGraphBuilder());}).
         to.throw("Devel error: setjson : obj have no _source/_target property : {}");
-      chai.expect(function () { link.setjson({_source: {} , _target: {}},graphBuilder);}).
+      chai.expect(function () { link.setjson({_source: {} , _target: {}},new AskomicsGraphBuilder());}).
         to.throw("Devel error: setjson : obj._source have no id property : {\"_source\":{},\"_target\":{}}");
 
       let resAtt = {
@@ -46,7 +33,7 @@ describe('AskomicsLink', function(){
         "_transitive":false,
         "_negative":false
       } ;
-      link.setjson(resAtt,graphBuilder);
+      link.setjson(resAtt,new AskomicsGraphBuilder());
       //chai.assert.deepEqual(link, resAtt);
     });
   });

@@ -1,4 +1,5 @@
 /*jshint esversion: 6 */
+/*jshint multistr:true */
 
 var dump_graphBuilder = '[\
 	1.1,\
@@ -261,15 +262,14 @@ var dump_graphBuilder = '[\
 describe('AskomicsGraphBuilder', function () {
   describe('#Constructor', function(){
     it('* Constructor *', function() {
-
-      let graphBuilder = new AskomicsGraphBuilder(new AskomicsUserAbstraction());
-      //graphBuilder.setNodesAndLinksFromState(dump_graphBuilder);
+      let graphBuilder = new AskomicsGraphBuilder();
     });
   });
   describe('#nodes', function(){
     it('* without args *', function(){
 
-      let graphBuilder = new AskomicsGraphBuilder(new AskomicsUserAbstraction());
+      let graphBuilder = new AskomicsGraphBuilder();
+			graphBuilder.reset();
       chai.assert.deepEqual(graphBuilder.nodes(), []);
       /*
       chai.expect(function () {  r.is_valid();}).
@@ -277,13 +277,15 @@ describe('AskomicsGraphBuilder', function () {
         });*/
       });
     it('* without args and with nodes != [] *', function(){
-      let graphBuilder = new AskomicsGraphBuilder(new AskomicsUserAbstraction());
+      let graphBuilder = new AskomicsGraphBuilder();
+			graphBuilder.reset();
       graphBuilder.setNodesAndLinksFromState(dump_graphBuilder);
       chai.assert.equal(graphBuilder.nodes().length, 2);
     });
 
     it('* without args and with only one args selectednode *', function(){
-      let graphBuilder = new AskomicsGraphBuilder(new AskomicsUserAbstraction());
+      let graphBuilder = new AskomicsGraphBuilder();
+			graphBuilder.reset();
       graphBuilder.setNodesAndLinksFromState(dump_graphBuilder);
       let selectedNode = graphBuilder.nodes()[1];
       chai.expect(function () {  graphBuilder.nodes(selectedNode);}).
@@ -291,7 +293,8 @@ describe('AskomicsGraphBuilder', function () {
     });
 
     it('* without args  *', function(){
-      let graphBuilder = new AskomicsGraphBuilder(new AskomicsUserAbstraction());
+      let graphBuilder = new AskomicsGraphBuilder();
+			graphBuilder.reset();
       graphBuilder.setNodesAndLinksFromState(dump_graphBuilder);
       let selectedNode = [8];
       chai.assert.equal(graphBuilder.nodes(selectedNode,'id').length, 1);
@@ -304,13 +307,15 @@ describe('AskomicsGraphBuilder', function () {
   describe('#links', function(){
     it('* without args *', function(){
 
-      let graphBuilder = new AskomicsGraphBuilder(new AskomicsUserAbstraction());
+      let graphBuilder = new AskomicsGraphBuilder();
+			graphBuilder.reset();
       chai.assert.deepEqual(graphBuilder.links(), []);
 
       });
     it('* with args *', function(){
 
-        let graphBuilder = new AskomicsGraphBuilder(new AskomicsUserAbstraction());
+        let graphBuilder = new AskomicsGraphBuilder();
+				graphBuilder.reset();
         graphBuilder.setNodesAndLinksFromState(dump_graphBuilder);
         chai.assert.equal(graphBuilder.nodes().length, 2);
 
@@ -318,21 +323,24 @@ describe('AskomicsGraphBuilder', function () {
     });
     describe('#getInternalState', function(){
       it('*  *', function(){
-        let graphBuilder = new AskomicsGraphBuilder(new AskomicsUserAbstraction());
+        let graphBuilder = new AskomicsGraphBuilder();
+				graphBuilder.reset();
         graphBuilder.setNodesAndLinksFromState(dump_graphBuilder);
         graphBuilder.getInternalState();
       });
     });
     describe('#addInstanciedElt', function(){
       it('*  *', function(){
-        let graphBuilder = new AskomicsGraphBuilder(new AskomicsUserAbstraction());
+        let graphBuilder = new AskomicsGraphBuilder();
+				graphBuilder.reset();
         var n = {_uri:"http://wwww.system/test1",_label:'node1',_id:15,_SPARQLid:"H12",_suggested:true, _nothing:'nothing', _weight:0, _nlink : {} };
         graphBuilder.addInstanciedElt(n);
       });
     });
     describe('#addInstanciedLink', function(){
       it('*  *', function(){
-        let graphBuilder = new AskomicsGraphBuilder(new AskomicsUserAbstraction());
+        let graphBuilder = new AskomicsGraphBuilder();
+				graphBuilder.reset();
         var node1 = new GraphNode({ uri:"http://wwww.system/test1",label:'',_id: 15,  _SPARQLid: "HelloWorldNode1", _suggested: false }, 12.5,16.3);
         var node2 = new GraphNode({ uri:"http://wwww.system/test2",_id: 16,  _SPARQLid: "HelloWorlNode2", _suggested: true }, 14.1,26.3);
 
@@ -342,7 +350,8 @@ describe('AskomicsGraphBuilder', function () {
     });
     describe('#findElt', function(){
       it('*  *', function(){
-        let graphBuilder = new AskomicsGraphBuilder(new AskomicsUserAbstraction());
+        let graphBuilder = new AskomicsGraphBuilder();
+				graphBuilder.reset();
         graphBuilder.setNodesAndLinksFromState(dump_graphBuilder);
         let v = AskomicsGraphBuilder.findElt(graphBuilder.nodes(),8);
         chai.assert.equal(v[0], 1);
@@ -350,7 +359,8 @@ describe('AskomicsGraphBuilder', function () {
     });
     describe('#removeInstanciedNode', function(){
       it('*  *', function(){
-        let graphBuilder = new AskomicsGraphBuilder(new AskomicsUserAbstraction());
+        let graphBuilder = new AskomicsGraphBuilder();
+				graphBuilder.reset();
         graphBuilder.setNodesAndLinksFromState(dump_graphBuilder);
         let v = graphBuilder.removeInstanciedNode(graphBuilder.nodes()[1]);
         chai.assert.equal(graphBuilder.nodes().length, 1);
@@ -358,7 +368,8 @@ describe('AskomicsGraphBuilder', function () {
     });
     describe('#removeInstanciedLink', function(){
       it('*  *', function(){
-        let graphBuilder = new AskomicsGraphBuilder(new AskomicsUserAbstraction());
+        let graphBuilder = new AskomicsGraphBuilder();
+				graphBuilder.reset();
         graphBuilder.setNodesAndLinksFromState(dump_graphBuilder);
         chai.assert.equal(graphBuilder.links().length, 1);
         let v = graphBuilder.removeInstanciedLink(graphBuilder.links()[0]);
@@ -367,68 +378,76 @@ describe('AskomicsGraphBuilder', function () {
     });
     describe('#setSPARQLVariateId', function(){
       it('*  *', function(){
-        let graphBuilder = new AskomicsGraphBuilder(new AskomicsUserAbstraction());
+        let graphBuilder = new AskomicsGraphBuilder();
+				graphBuilder.reset();
         graphBuilder.setNodesAndLinksFromState(dump_graphBuilder);
-        graphBuilder.setSPARQLVariateId(graphBuilder.nodes()[0])
+        graphBuilder.setSPARQLVariateId(graphBuilder.nodes()[0]);
       });
     });
     describe('#getId', function(){
       it('*  *', function(){
-        let graphBuilder = new AskomicsGraphBuilder(new AskomicsUserAbstraction());
+        let graphBuilder = new AskomicsGraphBuilder();
+				graphBuilder.reset();
         graphBuilder.setNodesAndLinksFromState(dump_graphBuilder);
-        graphBuilder.getId(graphBuilder.nodes()[0])
+        graphBuilder.getId(graphBuilder.nodes()[0]);
       });
     });
     describe('#setStartpoint', function(){
       it('*  *', function(){
-        let graphBuilder = new AskomicsGraphBuilder(new AskomicsUserAbstraction());
+        let graphBuilder = new AskomicsGraphBuilder();
+				graphBuilder.reset();
         graphBuilder.setNodesAndLinksFromState(dump_graphBuilder);
-        graphBuilder.setStartpoint(graphBuilder.nodes()[0])
+        graphBuilder.setStartpoint(graphBuilder.nodes()[0]);
       });
     });
     describe('#getInstanciedNode', function(){
       it('*  without nodes *', function(){
-        let graphBuilder = new AskomicsGraphBuilder(new AskomicsUserAbstraction());
-
+        let graphBuilder = new AskomicsGraphBuilder();
+				graphBuilder.reset();
         chai.expect(function () {  graphBuilder.getInstanciedNode(0);}).
               to.throw("GraphBuilder::getInstanciedNode Can not find instancied node:0");
       });
       it('*  with nodes *', function(){
-        let graphBuilder = new AskomicsGraphBuilder(new AskomicsUserAbstraction());
+        let graphBuilder = new AskomicsGraphBuilder();
+				graphBuilder.reset();
         graphBuilder.setNodesAndLinksFromState(dump_graphBuilder);
         graphBuilder.getInstanciedNode(0);
       });
     });
     describe('#getInstanciedLink', function(){
       it('*  without links *', function(){
-        let graphBuilder = new AskomicsGraphBuilder(new AskomicsUserAbstraction());
-
+        let graphBuilder = new AskomicsGraphBuilder();
+				graphBuilder.reset();
         chai.expect(function () {  graphBuilder.getInstanciedLink(0);}).
               to.throw("GraphBuilder::getInstanciedLink Can not find instancied link:0");
       });
       it('*  with links *', function(){
-        let graphBuilder = new AskomicsGraphBuilder(new AskomicsUserAbstraction());
+        let graphBuilder = new AskomicsGraphBuilder();
+				graphBuilder.reset();
         graphBuilder.setNodesAndLinksFromState(dump_graphBuilder);
         graphBuilder.getInstanciedLink(9);
       });
     });
     describe('#setSuggestedNode', function(){
       it('*  *', function(){
-        let graphBuilder = new AskomicsGraphBuilder(new AskomicsUserAbstraction());
+        let graphBuilder = new AskomicsGraphBuilder();
+				graphBuilder.reset();
         let geneNode = new AskomicsNode({uri:"http://wwww.system/test1",label:''},0.0,0.0);
         graphBuilder.setSuggestedNode(geneNode,0.5,0.5);
       });
     });
     describe('#instanciateNode', function(){
       it('*  *', function(){
-        let graphBuilder = new AskomicsGraphBuilder(new AskomicsUserAbstraction());
+        let graphBuilder = new AskomicsGraphBuilder();
+				graphBuilder.reset();
         let geneNode = new AskomicsNode({uri:"http://wwww.system/test1",label:''},0.0,0.0);
         graphBuilder.instanciateNode(geneNode);
       });
     });
     describe('#isInstanciatedNode', function(){
       it('*  *', function(){
-        let graphBuilder = new AskomicsGraphBuilder(new AskomicsUserAbstraction());
+        let graphBuilder = new AskomicsGraphBuilder();
+				graphBuilder.reset();
         let geneNode = new AskomicsNode({uri:"http://wwww.system/test1",label:''},0.0,0.0);
         graphBuilder.setSuggestedNode(geneNode);
         chai.assert.isNotOk(graphBuilder.isInstanciatedNode(geneNode));
@@ -438,20 +457,23 @@ describe('AskomicsGraphBuilder', function () {
     });
     describe('#instanciateLink', function(){
       it('*  *', function(){
-        let graphBuilder = new AskomicsGraphBuilder(new AskomicsUserAbstraction());
+        let graphBuilder = new AskomicsGraphBuilder();
+				graphBuilder.reset();
         graphBuilder.instanciateLink([{uri:"H1"},{uri:"H2"}]);
       });
     });
     describe('#synchronizeInstanciatedNodesAndLinks', function(){
       it('*  *', function(){
-        let graphBuilder = new AskomicsGraphBuilder(new AskomicsUserAbstraction());
+        let graphBuilder = new AskomicsGraphBuilder();
+				graphBuilder.reset();
         graphBuilder.setNodesAndLinksFromState(dump_graphBuilder);
         graphBuilder.synchronizeInstanciatedNodesAndLinks(graphBuilder.nodes(),graphBuilder.links());
       });
     });
     describe('#buildConstraintsGraph', function(){
       it('*  *', function(){
-        let graphBuilder = new AskomicsGraphBuilder(new AskomicsUserAbstraction());
+        let graphBuilder = new AskomicsGraphBuilder();
+				graphBuilder.reset();
         graphBuilder.setNodesAndLinksFromState(dump_graphBuilder);
         let v = graphBuilder.buildConstraintsGraph();
         //console.log(v);

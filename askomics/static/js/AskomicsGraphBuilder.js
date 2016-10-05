@@ -10,10 +10,23 @@ const classesMapping = {
   'AskomicsPositionableLink': AskomicsPositionableLink
 };
 
+let instanceGraphBuilder ;
+
 /* constructeur de AskomicsGraphBuilder */
   class AskomicsGraphBuilder {
-    constructor(_userAbstraction) {
+    constructor() {
+
+      /* Implement a Singleton */
+      if ( instanceGraphBuilder !== undefined ) {
+          return instanceGraphBuilder;
+      }
+
       this.AskomicsGraphBuilderVersion = 1.1 ;
+      this.reset();
+      instanceGraphBuilder = this;
+    }
+
+    reset() {
       /* ========================================= ATTRIBUTES ============================================= */
       this.SPARQLIDgeneration = {} ; /* { <ENT1> : 5, ... }  last index used to named variable */
       this.IDgeneration = 0;
@@ -21,12 +34,6 @@ const classesMapping = {
       /* We keep information about instancied Node and Link to be able to rebuild graph */
       this._instanciedNodeGraph = [] ;
       this._instanciedLinkGraph = [] ;
-
-      this.userAbstraction = _userAbstraction;
-    }
-
-    getUserAbstraction() {
-      return this.userAbstraction;
     }
 
     /* get node */
@@ -206,7 +213,7 @@ const classesMapping = {
       }
       var t = AskomicsGraphBuilder.findElt(this._instanciedLinkGraph,link.id);
       var removeNode = null;
-      console.log(JSON.stringify(this._instanciedLinkGraph));
+      //console.log(JSON.stringify(this._instanciedLinkGraph));
 
       var indexLinkNode = t[0];
       var linkNode = t[1] ;
@@ -277,7 +284,7 @@ const classesMapping = {
     }
 
     setSuggestedNode(node,x,y) {
-      let iNode = AskomicsObjectBuilder.instanceNode(this.userAbstraction,node,x,y);
+      let iNode = AskomicsObjectBuilder.instanceNode(node,x,y);
       iNode.id = this.getId();
       return iNode;
     }
@@ -354,7 +361,6 @@ const classesMapping = {
       let dup_node_array = $.extend(true, [], this._instanciedNodeGraph);
       let dup_link_array = $.extend(true, [], this._instanciedLinkGraph);
 
-      //var ua = userAbstraction;
       for (let idx=0;idx<this._instanciedNodeGraph.length;idx++) {
         var node = dup_node_array[idx];
         /* find relation with this node and add it as a constraint  */

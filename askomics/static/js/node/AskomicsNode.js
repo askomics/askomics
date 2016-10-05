@@ -48,8 +48,8 @@ class AskomicsNode extends GraphNode {
   set linkvar (__inverseMatch) { this._linkvar = __linkvar; }
   get linkvar () { return this._linkvar; }
 
-  getPanelView(graphBuilder) {
-    return new AskomicsNodeView(graphBuilder,this);
+  getPanelView() {
+    return new AskomicsNodeView(this);
   }
 
   buildConstraintsSPARQL() {
@@ -285,7 +285,7 @@ class AskomicsNode extends GraphNode {
 
   }
 
-  removeFilterLinkVariable(SPARQLid1,graphBuilder) {
+  removeFilterLinkVariable(SPARQLid1) {
 
     if (! (SPARQLid1 in this.values)  ) return ;
 
@@ -293,18 +293,18 @@ class AskomicsNode extends GraphNode {
     this.setFilterAttributes(SPARQLid1,"","");
 
     this.linkvar[SPARQLid1].cpt--;
-    let n = graphBuilder.nodes(this.linkvar[SPARQLid1].nodelink);
+    let n = new AskomicsGraphBuilder().nodes(this.linkvar[SPARQLid1].nodelink);
     n.linkvar[SPARQLid2].cpt--;
 
     if ( this.linkvar[SPARQLid1].cpt <= 0 ) delete this.linkvar[SPARQLid1];
     if ( n.linkvar[SPARQLid2].cpt <= 0 ) delete n.linkvar[SPARQLid2];
   }
 
-  getAttributesDisplaying(userAbstraction) {
+  getAttributesDisplaying() {
     let list_id = [];
     let list_label = [];
 
-    let orderAttributes = userAbstraction.getOrderAttributesList(this.uri);
+    let orderAttributes = new AskomicsUserAbstraction().getOrderAttributesList(this.uri);
 
     for ( let uriAttI in orderAttributes ) {
       let uriAtt = orderAttributes[uriAttI];

@@ -4,8 +4,8 @@
   Manage Information Link View With a current selected link
 */
 class AskomicsLinkView extends AskomicsObjectView {
-  constructor(graphBuilder,link) {
-    super(graphBuilder,link);
+  constructor(link) {
+    super(link);
     this.link = link ;
   }
   display_help() {
@@ -25,7 +25,7 @@ class AskomicsLinkView extends AskomicsObjectView {
 
     inpNeg.click(function(d) {
       let linkid = $(this).attr('linkid');
-      let link = mythis.graphBuilder.getInstanciedLink(linkid);
+      let link = new AskomicsGraphBuilder().getInstanciedLink(linkid);
       if ($(this).is(':checked')) {
         link.negative = true;
       } else {
@@ -48,7 +48,7 @@ class AskomicsLinkView extends AskomicsObjectView {
 
     inpTrans.click(function(d) {
       let linkid = $(this).attr('linkid');
-      let link = mythis.graphBuilder.getInstanciedLink(linkid);
+      let link = new AskomicsGraphBuilder().getInstanciedLink(linkid);
       if ($(this).is(':checked')) {
         link.transitive = true;
       } else {
