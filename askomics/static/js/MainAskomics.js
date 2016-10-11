@@ -43,6 +43,7 @@ function resetGraph() {
 
   //FL
   forceLayoutManager.reset() ;
+  new AskomicsGraphBuilder().reset();
 
   // delete the svg
   d3.select("svg").remove();

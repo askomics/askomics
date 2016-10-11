@@ -2,7 +2,8 @@ var gulp = require('gulp');
 var util = require('gulp-util');
 var jshint = require('gulp-jshint');
 var concat = require('gulp-concat');
-var sourcemaps = require('gulp-sourcemaps');
+//version 1.7.1 with bug
+//var sourcemaps = require('gulp-sourcemaps');
 var babel = require('gulp-babel');
 var mocha = require('gulp-mocha');
 var inject = require('gulp-inject');
@@ -80,13 +81,13 @@ gulp.task('build', function() {
     return gulp.src(askomicsSourceFiles)
         .pipe(jshint())
         .pipe(jshint.reporter('default'))
-        .pipe(sourcemaps.init())
+    //    .pipe(sourcemaps.init())
         .pipe(babel({
             presets: ['es2015']
         }))
         .pipe(concat('askomics.js'))
         .pipe(prod ? uglify() : util.noop() )
-        .pipe(sourcemaps.write('.'))
+     //   .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest('askomics/static/dist'));
 });
 
@@ -94,22 +95,30 @@ var coverageFile = './.coverage-js/coverage.json';
 var mochaPhantomOpts = {
   reporter: 'spec',
   dump:'output_test.log',
+  //https://github.com/ariya/phantomjs/wiki/API-Reference-WebPage#webpage-settings
   phantomjs: {
     useColors: true,
     hooks: 'mocha-phantomjs-istanbul',
-    coverageFile: coverageFile
+    coverageFile: coverageFile,
+    settings: {
+      //userName,password
+      webSecurityEnabled : false
+    },
+    browserConsoleLogOptions: true
   },
+  suppressStdout: false,
+  suppressStderr: false,
   globals: ['script*', 'jQuery*']
 };
 
 //https://github.com/willembult/gulp-istanbul-report
 gulp.task('pre-test', function () {
   return gulp.src(askomicsSourceFiles, {base: "askomics/static/js"})
-    .pipe(sourcemaps.init())
+  //  .pipe(sourcemaps.init())
     .pipe(babel({presets: ['es2015']}))
     // Covering files
     .pipe(istanbul({coverageVariable: '__coverage__'}))
-    .pipe(sourcemaps.write('.'))
+  //  .pipe(sourcemaps.write('.'))
     // Write the covered files to a temporary directory
     .pipe(gulp.dest('askomics/test/client/js/istanbul/'));
 });

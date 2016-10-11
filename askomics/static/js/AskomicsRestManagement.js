@@ -1,5 +1,9 @@
 function RestServiceJs(newurl) {
-  this.myurl = location.pathname + newurl;
+  if ( location.pathname.indexOf("http") > 0 ) {
+    this.myurl = location.pathname + newurl;
+  } else { // TEST MODE IF FILE PATH WE SEARCH FOR A LOCAL SERVER on 6543 port
+    this.myurl = "http://0.0.0.0:6543/" + newurl;
+  }
 
   this.post = function(model, callback) {
     $.ajax({
