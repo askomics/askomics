@@ -16,6 +16,9 @@ dist/
 
 # Javascript & utils
 node_modules
+askomics/test/client/js/istanbul
+.coverage-js
+output_test.log
 
 # Editors & tooling
 *.orig

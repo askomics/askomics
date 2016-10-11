@@ -3,17 +3,39 @@
 class AskomicsResultsView {
   constructor(data) {
     this.data = data ;
-    this.activesAttributes      = {} ; // Attributes id by Node Id to Display
-    this.activesAttributesLabel = {} ; // Attributes label by Node Id to Display
+    this.activesAttributes      = undefined ; // Attributes id by Node Id to Display
+    this.activesAttributesLabel = undefined ; // Attributes label by Node Id to Display
+    this.activesAttributesUrl   = undefined ; // Url when results is clickable
+  }
+
+  is_valid() {
+    if ( this.data === undefined ) throw "AskomicsResultsView :: data prototyperty in unset!";
+  }
+
+  is_activedAttribute() {
+    if (this.activesAttributes === undefined ) throw "AskomicsResultsView :: activesAttributes is not set.";
   }
 
   setActivesAttributes() {
+
+    this.is_valid();
+
+    this.activesAttributes      = {} ;
+    this.activesAttributesLabel = {} ;
+    this.activesAttributesUrl   = {} ;
+    let graphBuilder = new AskomicsGraphBuilder();
+
     for (let i=0;i<graphBuilder.nodes().length;i++ ) {
       let node = graphBuilder.nodes()[i];
       if ( ! node.actif ) continue;
       let attr_disp = node.getAttributesDisplaying();
       this.activesAttributes[node.id] = attr_disp.id;
       this.activesAttributesLabel[node.id] = attr_disp.label;
+      if ( 'url' in attr_disp ) { //if results is clickable
+        this.activesAttributesUrl[node.id] = attr_disp.url;
+      } else {
+         this.activesAttributesUrl[node.id] = {};
+       }
       if (this.activesAttributes[node.id].length != this.activesAttributesLabel[node.id].length ) {
         throw "Devel: Error node.getAttributesDisplaying give array with different size:"+str(this.activesAttributes[node.id].length)+","+str(this.activesAttributesLabel[node.id].length);
       }
@@ -21,8 +43,10 @@ class AskomicsResultsView {
   }
 
   displayResults() {
+      this.is_valid();
       // to clear and print new results
       $("#results").empty();
+
       this.setActivesAttributes();
 
       if (this.data.values.length <= 0) {
@@ -38,18 +62,22 @@ class AskomicsResultsView {
 
       $("#results")
         .append(table.append(this.build_header_results())
-        .append(this.build_subheader_results(graphBuilder.nodes()))
-        .append(this.build_body_results(graphBuilder.nodes())));
+        .append(this.build_subheader_results(new AskomicsGraphBuilder().nodes()))
+        .append(this.build_body_results(new AskomicsGraphBuilder().nodes())));
   }
 
   build_header_results() {
     let head = $('<thead></thead>');
     let row = $('<tr></tr>');
 
+    this.is_valid();
+    this.is_activedAttribute();
+
     /* set Entity Header */
-    for (let i=0;i<graphBuilder.nodes().length;i++ ) {
-      let node = graphBuilder.nodes()[i];
+    for (let i=0;i<new AskomicsGraphBuilder().nodes().length;i++ ) {
+      let node = new AskomicsGraphBuilder().nodes()[i];
       if ( ! node.actif ) continue;
+
       let nAttributes = this.activesAttributes[node.id].length;
       /* Fomattage en indice du numero de l'entité */
       row.append($('<th></th>')
@@ -79,7 +107,7 @@ class AskomicsResultsView {
            $(".entityHeaderResults").each(function( index ) {
              nodeList.push($(this).attr("id"));
            });
-           let lNodes = graphBuilder.nodes(nodeList,'id');
+           let lNodes = new AskomicsGraphBuilder().nodes(nodeList,'id');
            $(this).parent().parent().find("thead:eq(1)").remove();
            $(this).parent().parent().find("tbody").remove();
 
@@ -93,6 +121,10 @@ class AskomicsResultsView {
   }
 
   build_subheader_results(nodeList) {
+
+    this.is_valid();
+    this.is_activedAttribute();
+
     let head = $('<thead></thead>');
     let row = $('<tr></tr>');
     for (let i=0;i<nodeList.length;i++ ) {
@@ -113,7 +145,6 @@ class AskomicsResultsView {
          items: ":not(.ui-state-disabled)",
          cancel: '.ui-state-disabled',
          start: function (event, ui) {
-           console.log("start");
            $(".attributesHeaderResults").css({width: $(ui.item).width()});
            // unactive cells associated with other node
            let currentCell = $(".attributesHeaderResults:eq("+ui.item.index()+")");
@@ -124,7 +155,6 @@ class AskomicsResultsView {
            $('.attributesHeaderResults[nodeid!='+nodeid+']').addClass('ui-state-disabled');
          },
          stop: function (event, ui) {
-           console.log("stop");
            $('.attributesHeaderResults').removeClass('ui-state-disabled');
          },
          update: function (event, ui) {
@@ -133,7 +163,7 @@ class AskomicsResultsView {
            $(".entityHeaderResults").each(function( index ) {
              nodeList.push($(this).attr("id"));
            });
-           let lNodes = graphBuilder.nodes(nodeList,'id');
+           let lNodes = new AskomicsGraphBuilder().nodes(nodeList,'id');
 
            let attList = [];
            $(".attributesHeaderResults").each(function( index ) {
@@ -145,7 +175,7 @@ class AskomicsResultsView {
            /*
               rebuild activesAttributesLabel activesAttributes
            */
-           console.log("AVANT:"+JSON.stringify(currentView.activesAttributes));
+
            currentView.activesAttributes = {};
            for (let ielt in attList) {
               let elt = attList[ielt];
@@ -153,19 +183,21 @@ class AskomicsResultsView {
                 currentView.activesAttributes[elt.nodeid] = [];
               currentView.activesAttributes[elt.nodeid].push(elt.sparqlid);
            }
-           console.log("APRES:"+JSON.stringify(currentView.activesAttributes));
+
            $(this).parent().parent().parent().find("tbody").remove();
            $(this).parent().parent().append(currentView.build_body_results(lNodes));
          }
        }).disableSelection();
 
     head.append(row);
-    console.log("HEAD");
-    console.log(JSON.stringify(head));
     return head;
   }
 
   build_body_results(nodeList) {
+
+    this.is_valid();
+    this.is_activedAttribute();
+
     let body = $('<tbody></tbody');
     for (let i=0;i<this.data.values.length;i++ ) {
       let row = $('<tr></tr>');
@@ -173,12 +205,18 @@ class AskomicsResultsView {
         let node = nodeList[j];
         if ( ! node.actif ) continue;
         for (let sparqlId in this.activesAttributes[node.id]) {
-          row.append($('<td></td>').text(this.data.values[i][this.activesAttributes[node.id][sparqlId]]));
+          let headerName = this.activesAttributes[node.id][sparqlId];
+          let val = this.data.values[i][this.activesAttributes[node.id][sparqlId]];
+          if ( headerName in this.activesAttributesUrl[node.id] ) {
+            let url = this.activesAttributesUrl[node.id][headerName].replace("%s",this.data.values[i][this.activesAttributes[node.id][sparqlId]]);
+            row.append($('<td></td>').html($('<a></a>').attr('href',url).attr('target','_blank').text(val)));
+          } else {
+            row.append($('<td></td>').text(val));
+          }
         }
       }
       body.append(row);
     }
-    console.log(JSON.stringify(body));
     return body;
   }
 

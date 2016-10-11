@@ -45,7 +45,7 @@ AskOmics also uses the following bundled libraries:
 You will need to install some [npm](https://www.npmjs.com/package/npm) packages:
 
 ```
-npm install --save-dev gulp
+npm install -g gulp
 npm install --save-dev gulp-util
 npm install --save-dev gulp-concat
 npm install --save-dev gulp-sourcemaps
@@ -55,7 +55,7 @@ npm install gulp-mocha-phantomjs --save-dev
 npm install should --save-dev
 npm install --save-dev mocha
 npm install --save-dev chai
-npm install jshint gulp-jshint --save-dev
+npm install -g jshint gulp-jshint
 npm install mocha-phantomjs-istanbul --save-dev
 npm install gulp-istanbul --save-dev
 npm install gulp-istanbul-report --save-dev

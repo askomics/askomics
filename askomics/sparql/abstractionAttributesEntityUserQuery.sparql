@@ -4,12 +4,12 @@ WHERE {
     ?g rdfg:subGraphOf <urn:sparql:tests-askomics:insert:informative1> }
     GRAPH ?g {
         ?entity rdf:type owl:Class .
-	        ?attribute displaySetting:attribute "true"^^xsd:boolean .
+	      ?attribute displaySetting:attribute "true"^^xsd:boolean .
 
         ?attribute rdf:type owl:DatatypeProperty;
-					    rdfs:label ?labelAttribute ;
-                    rdfs:domain ?entity;
-                    rdfs:range ?typeAttribute.
+					         rdfs:label ?labelAttribute ;
+                   rdfs:domain ?entity;
+                   rdfs:range ?typeAttribute.
 
 	    VALUES ?entity { $entities }
 		VALUES ?typeAttribute { xsd:decimal xsd:string }

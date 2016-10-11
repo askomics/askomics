@@ -21,9 +21,11 @@ class AskomicsLinkView extends AskomicsObjectView {
     .attr('type', 'checkbox')
     .attr('linkid', this.link.id);
 
+    let mythis = this;
+
     inpNeg.click(function(d) {
       let linkid = $(this).attr('linkid');
-      let link = graphBuilder.getInstanciedLink(linkid);
+      let link = new AskomicsGraphBuilder().getInstanciedLink(linkid);
       if ($(this).is(':checked')) {
         link.negative = true;
       } else {
@@ -42,9 +44,11 @@ class AskomicsLinkView extends AskomicsObjectView {
     .attr('type', 'checkbox')
     .attr('linkid', this.link.id);
 
+    let mythis = this;
+
     inpTrans.click(function(d) {
       let linkid = $(this).attr('linkid');
-      let link = graphBuilder.getInstanciedLink(linkid);
+      let link = new AskomicsGraphBuilder().getInstanciedLink(linkid);
       if ($(this).is(':checked')) {
         link.transitive = true;
       } else {

@@ -39,6 +39,7 @@ RUN npm install gulp-istanbul --save-dev
 RUN npm install gulp-istanbul-report --save-dev
 RUN npm install gulp-inject --save-dev
 RUN gem install coveralls-lcov
+RUN npm install intro.js --save
 RUN npm install --save-dev gulp
 RUN npm install bluebird
 RUN npm install any-promise

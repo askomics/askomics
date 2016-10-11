@@ -293,23 +293,18 @@ class AskomicsNode extends GraphNode {
     this.setFilterAttributes(SPARQLid1,"","");
 
     this.linkvar[SPARQLid1].cpt--;
-    let n = graphBuilder().nodes(this.linkvar[SPARQLid1].nodelink);
+    let n = new AskomicsGraphBuilder().nodes(this.linkvar[SPARQLid1].nodelink);
     n.linkvar[SPARQLid2].cpt--;
 
     if ( this.linkvar[SPARQLid1].cpt <= 0 ) delete this.linkvar[SPARQLid1];
     if ( n.linkvar[SPARQLid2].cpt <= 0 ) delete n.linkvar[SPARQLid2];
   }
 
-  // TODO: Manage order of display
   getAttributesDisplaying() {
     let list_id = [];
     let list_label = [];
 
-    //list_id.push(this.SPARQLid);
-    //list_label.push(this.label);
-
-    let orderAttributes = userAbstraction.getOrderAttributesList(this.uri);
-    console.log(JSON.stringify(orderAttributes));
+    let orderAttributes = new AskomicsUserAbstraction().getOrderAttributesList(this.uri);
 
     for ( let uriAttI in orderAttributes ) {
       let uriAtt = orderAttributes[uriAttI];

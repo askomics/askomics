@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-#set -x
+set -x
 
 DIR_ASKOMICS=$(dirname "$0")
 
@@ -41,6 +41,7 @@ case "$DEPMODE" in
     *)
         usage
 esac
+echo "-----------------------------------------------------------------------------"
 
 CONFIG_NAME="${DEPMODE}.${RDFTYPE}.ini"
 CONFIG_PATH="${DIR_CONFIG}/${CONFIG_NAME}"
@@ -48,17 +49,18 @@ if [[ ! -f $CONFIG_PATH ]]; then
     echo "Configuration file ${CONFIG_NAME} not found in ${DIR_CONFIG}."
     usage
 fi
-
+echo "${DIR_VENV}-----------------------------------------------------------------------------"
 ACTIVATE="${DIR_VENV}/bin/activate"
 if [[ ! -f $ACTIVATE ]] ; then
     echo "Building python virtual environment at ${DIR_VENV}..."
-    $PYTHON -m ensurepip
+    #$PYTHON -m ensurepip
     $PYVENV "$DIR_VENV"
     source "$ACTIVATE"
     $PIP install -e .
 else
     source "$ACTIVATE"
 fi
+echo "-----------------------------------------------------------------------------"
 
 ASKOMICS="$PYTHON ${PYTHON_FLAGS[@]} "${DIR_VENV}/bin/pserve" $CONFIG_PATH ${PSERVE_FLAGS[@]}"
 

@@ -2,14 +2,10 @@
 
 /* Manage theses variables with a Singleton Classes */
 var askomicsInitialization = false;
-var abstraction;
-var graphBuilder ;
 var forceLayoutManager ;
-var userAbstraction ;
-var menuView ;
-var menuFile ;
 
 function startRequestSessionAskomics() {
+
   if ( askomicsInitialization ) return ;
   // Initialize the graph with the selected start point.
   $("#init").hide();
@@ -17,19 +13,14 @@ function startRequestSessionAskomics() {
   d3.select("svg").remove();
 
   /* To manage construction of SPARQL Query */
-  graphBuilder = new AskomicsGraphBuilder();
+  //graphBuilder = new AskomicsGraphBuilder(new AskomicsUserAbstraction());
+
   /* To manage the D3.js Force Layout  */
   forceLayoutManager = new AskomicsForceLayoutManager();
-  /* To manage information about User Datasrtucture  */
-  userAbstraction = new AskomicsUserAbstraction();
-  /* To manage information about menu propositional view */
-  menuView = new AskomicsMenuView();
-  /* To manage information about File menu */
-  menuFile = new AskomicsMenuFile();
-
-  AskomicsObjectView.defineClickMenu();
 
   askomicsInitialization = true;
+
+  AskomicsObjectView.defineClickMenu();
 }
 
 function startVisualisation() {
@@ -50,14 +41,9 @@ function resetGraph() {
   //remove all rightviews
   AskomicsObjectView.removeAll();
 
-  //reset view menu
-  menuView.reset();
-
-  //unbind files menu
-  menuFile.unbindDownloadButtons();
-
-  //unbind fullscreen buttons
-  forceLayoutManager.unbindFullscreenButtons();
+  //FL
+  forceLayoutManager.reset() ;
+  new AskomicsGraphBuilder().reset();
 
   // delete the svg
   d3.select("svg").remove();
@@ -384,15 +370,25 @@ $(function () {
 
     // Visual effect on active tab (Ask! / Integrate / Credits)
     $('.nav li').click(function(e) {
+
         $('.nav li.active').removeClass('active');
-        var $this = $(this);
-        if (!$this.hasClass('active')) {
-            $this.addClass('active');
+
+        if (!$(this).hasClass('active')) {
+            $(this).addClass('active');
         }
-        $('.container').hide();
-        $('.container#navbar_content').show();
-        $('.container#content_' + $this.attr('id')).show();
+
+
+
+        if (  ! ( $(this).attr('id') in { 'help' : '','admin':'' }) ) {
+          $('.container').hide();
+          $('.container#navbar_content').show();
+          $('.container#content_' + $(this).attr('id')).show();
+        } else {
+          $('.container#navbar_content').show();
+        }
+
         e.preventDefault();
+
     });
 
     // A helper for handlebars

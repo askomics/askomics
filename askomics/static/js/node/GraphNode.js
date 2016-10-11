@@ -84,12 +84,11 @@ class GraphNode extends GraphObject {
 
     AttOrCatArray[attributeForUri.uri].label = attributeForUri.label ;
 
-    graphBuilder.setSPARQLVariateId(AttOrCatArray[attributeForUri.uri]);
-    AttOrCatArray[attributeForUri.uri].id=graphBuilder.getId();
+    new AskomicsGraphBuilder().setSPARQLVariateId(AttOrCatArray[attributeForUri.uri]);
+    AttOrCatArray[attributeForUri.uri].id=new AskomicsGraphBuilder().getId();
 
     /* by default all attributes is ask */
     AttOrCatArray[attributeForUri.uri].actif = false ;
-
 
     return AttOrCatArray[attributeForUri.uri];
   }

@@ -17,8 +17,10 @@ class AskomicsLink extends GraphLink {
 
   setjson(obj) {
     super.setjson(obj);
+
     this._transitive = obj._transitive ;
     this._negative = obj._negative ;
+
   }
 
   getPanelView() {

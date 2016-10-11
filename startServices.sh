@@ -74,15 +74,9 @@ case "$RDFTYPE" in
         ;;
 
       virtuoso)
-        echo "================= VIRTUOSO (askomics/virtuoso - herited from tenforce/virtuoso) ================"
-        if [ -z `sudo docker images | grep "askomis/virtuoso$" | awk '{print $1}'` ];then
-            pushd $DIRROOT/docker/virtuoso/
-            sudo docker build -t askomics/virtuoso .
-            popd
-	fi
-
-        sudo docker run -d --name virtuoso -p 8890:8890 -p 1111:1111  -e DBA_PASSWORD=dba -e SPARQL_UPDATE=true -e DEFAULT_GRAPH=http://localhost:8890/DAV --net="host" -t askomics/virtuoso
-        ;;
+        echo "================= VIRTUOSO (tenforce/virtuoso) ================"
+        sudo docker run -d --name virtuoso -p 8890:8890 -p 1111:1111  -e VIRT_Parameters_DirsAllowed="/data,/data/dumps,., /usr/local/virtuoso-opensource/share/virtuoso/vad" -e VIRT_Parameters_TN_MAX_memory=4000000000 -e VIRT_SPARQL_ResultSetMaxRows=100000 -e VIRT_SPARQL_MaxQueryCostEstimationTime=300 -e VIRT_SPARQL_MaxQueryExecutionTime=300 -e VIRT_SPARQL_MaxDataSourceSize=1000000000 -e VIRT_Flags_TN_MAX_memory=4000000000 -e DBA_PASSWORD=dba -e SPARQL_UPDATE=true -e DEFAULT_GRAPH=http://localhost:8890/DAV --net="host" -t tenforce/virtuoso
+	;;
     *)
         usage
 esac
