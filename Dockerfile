@@ -53,4 +53,4 @@ RUN gulp
 #-------------------------------------------------------------------------------------------
 EXPOSE 6543
 ENTRYPOINT ["./startAskomics.sh"]
-CMD ["fuseki", "prod"]
+CMD ["virtuoso", "prod"]
