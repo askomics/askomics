@@ -44,7 +44,7 @@ describe('AskomicsUserAbstraction', function () {
 
       $.ajax({
         type: 'POST',
-        url: "http://0.0.0.0:6543/empty_database/",
+        url: "http://localhost:6543/empty_database/",
         dataType: 'json',
         processData: false,
         contentType: 'application/json',
@@ -62,7 +62,7 @@ describe('AskomicsUserAbstraction', function () {
 
       $.ajax({
         type: 'POST',
-        url: "http://0.0.0.0:6543/load_data_into_graph/",
+        url: "http://localhost:6543/load_data_into_graph/",
         dataType: 'json',
         data: JSON.stringify({
           file_name: "toto",
