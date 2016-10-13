@@ -36,6 +36,20 @@ class SourceFileConvertor(ParamManager):
 
         return files
 
+    def get_rdf_files(self):
+        """
+        :return: List of the file to convert paths
+        :rtype: List
+        """
+        src_dir = self.get_source_file_directory()
+        paths = glob(src_dir + '/*[.ttl,.rdf]')
+
+        files = []
+        for p in paths:
+            files.append(SourceFile(self.settings, self.session, p, int(self.settings["askomics.overview_lines_limit"])))
+
+        return files
+
     def get_source_file(self, name):
         """
         Return an object representing a source file
@@ -48,7 +62,6 @@ class SourceFileConvertor(ParamManager):
         files = self.get_source_files()
 
         for f in files:
-            print(f.name)
             if f.name == name:
                 return f
 

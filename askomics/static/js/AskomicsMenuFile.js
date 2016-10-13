@@ -26,7 +26,7 @@ class AskomicsMenuFile {
       service.postsync(jdata,function(data) {
         query = data.query;
       });
-      $(this).attr("href", "data:application/sparql-query," + encodeURIComponent(query)).attr("download", "query-" + date + ".sparql");
+      $(this).attr("href", "data:application/sparql-query," + encodeURIComponent(query)).attr("download", "query-" + date + ".rq");
     });
   }
 

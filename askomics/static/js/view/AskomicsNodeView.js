@@ -385,17 +385,17 @@ class AskomicsNodeView extends AskomicsObjectView {
         let node = new AskomicsGraphBuilder().getInstanciedNode(nodeid);
 
         if (icon.hasClass('glyphicon-eye-close')) {
-            icon.removeClass('glyphicon-eye-close');
-            icon.addClass('glyphicon-search');
-            node.setActiveAttribute(sparqlid,true,true);
-          } else if (icon.hasClass('glyphicon-search')) {
-            icon.removeClass('glyphicon-search');
-            icon.addClass('glyphicon-eye-open');
-            node.setActiveAttribute(sparqlid,true,false);
-          } else {
-            icon.removeClass('glyphicon-eye-open');
-            icon.addClass('glyphicon-eye-close');
-            node.setActiveAttribute(sparqlid,false,false);
+          icon.removeClass('glyphicon-eye-close');
+          icon.addClass('glyphicon-eye-open');
+          node.setActiveAttribute(sparqlid,true,false);
+        } else if (icon.hasClass('glyphicon-eye-open')) {
+          icon.removeClass('glyphicon-eye-open');
+          icon.addClass('glyphicon-search');
+          node.setActiveAttribute(sparqlid,true,true);
+        } else {
+          icon.removeClass('glyphicon-search');
+          icon.addClass('glyphicon-eye-close');
+          node.setActiveAttribute(sparqlid,false,false);
           }
       });
       return icon;

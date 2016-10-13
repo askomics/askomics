@@ -1,0 +1,83 @@
+{
+    "variables": {
+        "ssh_name": "askomics",
+        "ssh_pass": "askomics",
+        "hostname": "askomics-vm",
+        "zipaskomics":"https://github.com/askomics/askomics/archive/master.zip",
+        "rootaskomics":"askomics-master"
+    },
+
+    "builders": [{
+        "headless" : true,
+	       "name": "{{user `rootaskomics`}}",
+        "type": "virtualbox-iso",
+        "guest_os_type": "Ubuntu_64",
+
+        "vboxmanage": [
+            ["modifyvm", "{{.Name}}", "--vram", "32"],
+            ["modifyvm", "{{.Name}}", "--memory", "1024"],
+            ["modifyvm", "{{.Name}}", "--cpus", "2"],
+            ["modifyvm", "{{.Name}}", "--natpf1", "guest_ssh,tcp,,3022,,22" ],
+            ["modifyvm", "{{.Name}}", "--natpf1", "guest_http_askomics,tcp,,6543,,6543" ],
+            ["modifyvm", "{{.Name}}", "--natpf1", "guest_http_virtuoso,tcp,,8890,,8890" ]
+        ],
+
+        "disk_size" : 50000,
+
+        "iso_url": "http://releases.ubuntu.com/14.04/ubuntu-14.04.4-server-amd64.iso",
+        "iso_checksum": "2ac1f3e0de626e54d05065d6f549fa3a",
+        "iso_checksum_type": "md5",
+
+        "http_directory" : "httpdir",
+        "http_port_min" : 9001,
+        "http_port_max" : 9001,
+
+        "ssh_username": "{{user `ssh_name`}}",
+        "ssh_password": "{{user `ssh_pass`}}",
+        "ssh_wait_timeout": "20m",
+        "output_directory": "build/Ubuntu-14-04.4-{{user `rootaskomics`}}",
+        "shutdown_command": "echo {{user `ssh_pass`}} | sudo -S shutdown -P now",
+
+        "boot_command" : [
+            "<esc><esc><enter><wait>",
+            "/install/vmlinuz noapic ",
+            "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ubuntu-14.04/preseed.cfg ",
+            "debian-installer=fr_FR auto locale=fr_FR kbd-chooser/method=fr ",
+            "hostname={{user `hostname`}} ",
+            "fb=false debconf/frontend=noninteractive ",
+            "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=FR ",
+            "keyboard-configuration/variant=FR console-setup/ask_detect=false ",
+            "initrd=/install/initrd.gz -- <enter>"
+        ]
+    }],
+
+    "provisioners": [{
+      "type": "shell",
+      "execute_command" : "echo '{{user `ssh_pass`}}' | {{ .Vars }} sudo -E -S sh '{{ .Path }}'",
+      "inline": [
+        "sleep 30",
+        "loadkeys fr",
+        "apt-get update",
+        "apt-get install -y apt-transport-https ca-certificates",
+        "apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D",
+        "echo 'deb https://apt.dockerproject.org/repo ubuntu-trusty main' > /etc/apt/sources.list.d/docker.list",
+        "apt-get update",
+        "apt-get install linux-image-extra-$(uname -r) linux-image-extra-virtual",
+        "apt-get update",
+        "apt-get install -y docker-engine zip unzip",
+        "service docker start",
+        "cd /",
+        "wget {{user `zipaskomics`}} -O askomics.zip",
+        "unzip askomics.zip",
+        "cd /{{user `rootaskomics`}}",
+        "docker build -t askomics/web .",
+        "docker pull tenforce/virtuoso",
+        "docker run -d --name virtuoso -p 8890:8890 -p 1111:1111  -e DBA_PASSWORD=dba -e SPARQL_UPDATE=true -e VIRT_Parameters_TN_MAX_memory=4000000000 -e VIRT_SPARQL_ResultSetMaxRows=100000 -e VIRT_SPARQL_MaxQueryCostEstimationTime=300 -e VIRT_SPARQL_MaxQueryExecutionTime=300 -e VIRT_SPARQL_MaxDataSourceSize=1000000000 -e VIRT_Flags_TN_MAX_memory=4000000000 -e DEFAULT_GRAPH=http://localhost:8890/DAV -v /virtuoso-db:/data --net=\"host\" -t tenforce/virtuoso",
+        "docker run -d --net=\"host\" -p 6543:6543 -t askomics/web virtuoso prod",
+        "echo 'docker start $(docker ps -a | sed \"1d\" | cut -d\" \" -f1)' > /etc/rc.local",
+        "echo 'docker stop  $(docker ps -a | sed \"1d\" | cut -d\" \" -f1)' > /etc/rc6.d/K99_askomics",
+        "sudo chmod +x /etc/rc6.d/K99_askomics",
+        "sleep 120"
+    ]
+  }]
+}

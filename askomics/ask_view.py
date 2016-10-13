@@ -1,8 +1,8 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import os,sys, traceback
-import re
+import os,sys,traceback
+import re,shutil
 
 from pyramid.view import view_config, view_defaults
 from pyramid.response import FileResponse
@@ -250,6 +250,40 @@ class AskView(object):
                 traceback.print_exc(file=sys.stdout)
                 infos['error'] = 'Could not read input file, are you sure it is a valid tabular file?'
                 self.log.error(str(e))
+
+            data['files'].append(infos)
+
+        return data
+
+    @view_config(route_name='insert_files_rdf', request_method='GET')
+    def source_files_overview_rdf(self):
+        """
+        Get preview data for all the available files
+        """
+        self.log.debug(" ========= Askview:source_files_overview_rdf =============")
+        sfc = SourceFileConvertor(self.settings, self.request.session)
+
+        files = sfc.get_rdf_files()
+
+        data = {}
+        data['files'] = []
+
+        urlbase = re.search(r'(http:\/\/.*)\/.*', self.request.current_route_url())
+        urlbase = urlbase.group(1)
+
+        for src_f in files:
+            pathttl = src_f.get_ttl_directory()
+            infos = {}
+            infos['filename'] = os.path.basename(src_f.path)
+            try:
+                shutil.copy(src_f.path,pathttl);
+                fo = open(pathttl+"/"+infos['filename'],'r');
+                src_f.load_data_from_file(fo,urlbase);
+            except Exception as e:
+                traceback.print_exc(file=sys.stdout)
+                data['error'] = str(e)
+                self.log.error(str(e))
+                return data
 
             data['files'].append(infos)
 
