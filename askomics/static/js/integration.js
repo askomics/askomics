@@ -56,7 +56,7 @@ function cols2rows(items) {
 /**
  * Show preview data on the page
  */
-function displayTable(data) {
+function displayTableTabularFile(data) {
     // Transform columns to rows
     for(let i=0;i<data.files.length;i++) {
         if ('preview_data' in data.files[i]) {
@@ -112,6 +112,18 @@ function displayTable(data) {
             }
         }
     }
+}
+
+/**
+ *
+ */
+function displayTableRDF(data) {
+  let info = "";//$('<div></div>');
+  for(let i=0;i<data.files.length;i++) {
+    info+="Insertion of "+ data.files[i].filename+".\n";
+  }
+  displayModal(info, '', 'Close');
+  if (data.error !== undefined ) alert(JSON.stringify(data.error));
 }
 
 /**

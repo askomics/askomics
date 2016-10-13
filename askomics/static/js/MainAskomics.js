@@ -80,6 +80,8 @@ function loadStartPoints() {
 
 function loadNamedGraphs() {
 
+    new AskomicsUserAbstraction().loadUserAbstraction();
+    
     var select = $('#dropNamedGraphSelected');
     select.empty();
     manageDelGraphButton();
@@ -138,10 +140,7 @@ function loadStatistics() {
 
   displayModal('Please Wait', '', 'Close');
 
-
-  abstraction = new AskomicsUserAbstraction();
-  abstraction.loadUserAbstraction();
-
+  new AskomicsUserAbstraction().loadUserAbstraction();
 
   var service = new RestServiceJs("statistics");
   service.getAll(function(stats) {
@@ -191,7 +190,7 @@ function loadStatistics() {
     });
     $('#statistics_div').append(table);
 
-    var entities = abstraction.getEntities() ;
+    var entities = new AskomicsUserAbstraction().getEntities() ;
 
     table=$("<table></table>").addClass('table').addClass('table-bordered');
     th = $("<tr></tr>").addClass("table-bordered").attr("style", "text-align:center;");
@@ -201,9 +200,9 @@ function loadStatistics() {
 
     for (let ent1 in entities ) {
       let tr = $("<tr></tr>")
-            .append($("<td></td>").text(abstraction.getAttrib(entities[ent1],'rdfs:label')));
+            .append($("<td></td>").text(new AskomicsUserAbstraction().getAttrib(entities[ent1],'rdfs:label')));
             let rels = "";
-            var t = abstraction.getRelationsObjectsAndSubjectsWithURI(entities[ent1]);
+            var t = new AskomicsUserAbstraction().getRelationsObjectsAndSubjectsWithURI(entities[ent1]);
             var subjectTarget = t[0];
             for ( var ent2 in subjectTarget) {
               for (var rel of subjectTarget[ent2]) {
@@ -229,10 +228,10 @@ function loadStatistics() {
     for (let ent1 in entities ) {
     //$.each(stats['class'], function(key, value) {
       let tr = $("<tr></tr>")
-            .append($("<td></td>").text(abstraction.getAttrib(entities[ent1],'rdfs:label')));
+            .append($("<td></td>").text(new AskomicsUserAbstraction().getAttrib(entities[ent1],'rdfs:label')));
             let attrs = "";
             let cats = "";
-            var listAtt = abstraction.getAttributesEntity(entities[ent1]);
+            var listAtt = new AskomicsUserAbstraction().getAttributesEntity(entities[ent1]);
             for (var att of listAtt) {
                 attrs += '- '+att.label +"</br>";
             }
@@ -341,6 +340,59 @@ function downloadTextAsFile(filename, text) {
 }
 
 
+function setUploadForm(content,titleForm,route_overview,callback) {
+  var service = new RestServiceJs("up/");
+  service.getAll(function(formHtmlforUploadFiles) {
+    formHtmlforUploadFiles.html = formHtmlforUploadFiles.html.replace("___TITLE_UPLOAD___",titleForm);
+
+    $(content).html(formHtmlforUploadFiles.html);
+    /*
+
+          MAIN UPLOAD Third party => copy from /static/js/third-party/upload/main.js (thi file is disbale in askomics)
+
+    */
+    // Initialize the jQuery File Upload widget
+    $(content).find('#fileupload').fileupload({
+        // Uncomment the following to send cross-domain cookies:
+        //xhrFields: {withCredentials: true},
+        url: '/up/file/'
+    });
+
+    // Enable iframe cross-domain access via redirect option
+    $(content).find('#fileupload').fileupload(
+        'option',
+        'redirect',
+        window.location.href.replace(
+            /\/[^\/]*$/,
+            '/cors/result.html?%s'
+        )
+    );
+
+    // Load existing files
+    $(content).find('#fileupload').addClass('fileupload-processing');
+    $.ajax({
+        // Uncomment the following to send cross-domain cookies:
+        //xhrFields: {withCredentials: true},
+        url: $(content).find('#fileupload').fileupload('option', 'url'),
+        dataType: 'json',
+        context: $(content).find('#fileupload')[0]
+    }).always(function () {
+        $(this).removeClass('fileupload-processing');
+    }).done(function (result) {
+        $(this).fileupload('option', 'done')
+            .call(this, $.Event('done'), {result: result});
+    });
+
+    // Integrate button
+    $('.integrate-button').click(function() {
+        var service = new RestServiceJs(route_overview);
+        service.getAll(function(data) {
+            callback(data);
+        });
+    });
+  });
+}
+
 $(function () {
   // TODO: move inside AskomicsMenuFile
     // Startpoints definition
@@ -360,12 +412,21 @@ $(function () {
       }
     });
 
+    /*
+
+      Click general GU Interface of Askomics :
+      - manage navbar
+      - show/hide content_{section}
+
+    */
+
     // Get the overview of files to integrate
     $("#integration").click(function() {
-        var service = new RestServiceJs("up/");
-        service.getAll(function(formHtmlforUploadFiles) {
-          $('div#content_integration').html(formHtmlforUploadFiles.html);
-        });
+        setUploadForm('div#content_integration',"Upload User CSV/TSV Files","source_files_overview",displayTableTabularFile);
+    });
+
+    $("#integration_ttl").click(function() {
+        setUploadForm('div#content_integration_ttl',"Upload User TTL Files","insert_files_rdf",displayTableRDF);
     });
 
     // Visual effect on active tab (Ask! / Integrate / Credits)
@@ -378,8 +439,7 @@ $(function () {
         }
 
 
-
-        if (  ! ( $(this).attr('id') in { 'help' : '','admin':'' }) ) {
+        if (  ! ( $(this).attr('id') in { 'help' : '','admin':'','userdata':'' }) ) {
           $('.container').hide();
           $('.container#navbar_content').show();
           $('.container#content_' + $(this).attr('id')).show();

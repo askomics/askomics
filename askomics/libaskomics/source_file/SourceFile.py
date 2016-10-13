@@ -687,6 +687,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
         ql.insert_data(ttlNamedGraph, self.get_param("askomics.graph"), sparqlHeader)
 
         url = urlbase+"/ttl/"+os.path.basename(fp.name)
+        self.log.debug(url)
         data = {}
         try:
             if self.is_defined("askomics.file_upload_url"):

@@ -48,6 +48,8 @@ $(function () {
 
     // Integrate button
     $('.integrate-button').click(function() {
+        console.log("-----------------------------------");
+        console.log($('[id="^content_"]').length);
         var service = new RestServiceJs("source_files_overview");
         service.getAll(function(data) {
             displayTable(data);
