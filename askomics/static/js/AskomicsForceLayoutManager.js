@@ -621,7 +621,7 @@ class AskomicsForceLayoutManager {
     link.enter().append("text")
                 .attr("style", "text-anchor:middle; font: 10px sans-serif; cursor: pointer;")
                 .attr("dy", "-5")
-                .attr('id', function(d) {return 'label-'+d.id;})
+                .attr('id', function(d) {return d.getLabelId();})
                 .style("opacity", function(d) {return d.getTextOpacity();})
                 .append("textPath")
                 .attr("xlink:href",function(d) {return "#"+d.id;})

@@ -87,6 +87,9 @@ class GraphObject {
     return "<em>"+ labelEntity + "<sub>"+ indiceEntity[0] +"</sub>"+"</em>";
   }
 
+  getLabelId() {
+      return "label-"+this.id;
+  }
   /*
     return the index name of the node to set up and update the graph
   */
