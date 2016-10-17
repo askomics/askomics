@@ -195,7 +195,9 @@ class AskomicsUserAbstraction {
 
     /* return a list of attributes according a uri node */
     getAttributesWithURI(UriSelectedNode) {
-      return this.attributesEntityList[UriSelectedNode];
+      if ( UriSelectedNode in this.attributesEntityList )
+        return this.attributesEntityList[UriSelectedNode];
+      return [];
     }
 
     isPositionable(Uri) {

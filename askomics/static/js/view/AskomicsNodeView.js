@@ -220,7 +220,7 @@ class AskomicsNodeView extends AskomicsObjectView {
         let nodeid = $(this).attr('nodeid');
         let node = new AskomicsGraphBuilder().getInstanciedNode(nodeid);
 
-        /* Remove all child */
+        /* Remove all childs */
         $(this).empty();
         /* Default */
         $(this).append($('<option></option>').prop('disabled', true).prop('selected', true).html("Link with an attribute node..."));
@@ -235,20 +235,44 @@ class AskomicsNodeView extends AskomicsObjectView {
         for ( let n of new AskomicsGraphBuilder().nodes() ) {
           let attributes = new AskomicsUserAbstraction().getAttributesWithURI(n.uri);
           let firstPrintForThisNode = true;
+          /* Manage Link node id  */
+          if ( (n.id != curAtt.id) ) {
+
+            inp.append($('<option></option>').prop('disabled', true).html("<b><i> --- "+ n.formatInHtmlLabelEntity()+" --- </i></b>"));
+            firstPrintForThisNode = false;
+            //ID Label is a string
+            if ( ! ('type' in curAtt) || ("string" == node.getTypeAttribute(curAtt)) ) { // if not, it's a NODE ID
+
+                let option = $('<option></option>')
+                        .attr("value",n.SPARQLid)
+                        .attr("type","string").html(n.label)
+                        .attr("nodeAttLink",n.id);
+                if ( sparqlIdSelected == n.SPARQLid ) option.prop('selected', true);
+                inp.append(option);
+
+            }
+          }
+
+          /* Manage Attributes */
           for (let a of attributes ) {
             let att = n.getAttributeOrCategoryForNode(a);
             /* we can not link the attribute with himself */
             if ( att.id == curAtt.id ) continue ;
-            /* we can not link attributes with diffente type */
-            if ( n.getTypeAttribute(att) != node.getTypeAttribute(curAtt) ) continue;
+
+            if ( 'type' in curAtt) {
+              /* we can not link attributes with diffente type */
+              if ( n.getTypeAttribute(att) != node.getTypeAttribute(curAtt) ) continue;
+            } else { // It's a node ID
+                if ( n.getTypeAttribute(att) != "string" ) continue;
+            }
             if ( firstPrintForThisNode ) {
               inp.append($('<option></option>').prop('disabled', true).html("<b><i> --- "+ n.formatInHtmlLabelEntity()+" --- </i></b>"));
               firstPrintForThisNode = false;
             }
 
             let option = $('<option></option>')
-                        .attr("value",att.label)
-                        .attr("type",n.getTypeAttribute(att)).html(att.SPARQLid)
+                        .attr("value",att.SPARQLid)
+                        .attr("type",n.getTypeAttribute(att)).html(att.label)
                         .attr("nodeAttLink",n.id);
 
             if ( sparqlIdSelected == att.SPARQLid ) option.prop('selected', true);
@@ -260,7 +284,7 @@ class AskomicsNodeView extends AskomicsObjectView {
 
       /* set up when var is clicked */
       inp.change(function(d) {
-        let attLink = $(this).find("option:selected").text();
+        let attLink = $(this).find("option:selected").attr("value");
         let type = $(this).find("option:selected").attr("type");
         let nodeAttLink = $(this).find("option:selected").attr("nodeAttLink");
         let nodeid = $(this).attr('nodeid');
@@ -481,14 +505,15 @@ class AskomicsNodeView extends AskomicsObjectView {
       let lab = $("<label></label>").attr("urinode",node.uri).attr("uri",node.uri).attr("for",node.label).html(node.label);
       node.switchRegexpMode(node.SPARQLid);
 
-      this.addPanel($('<div></div>').append(lab)
+      mythis.addPanel($('<div></div>').append(lab)
              .append(mythis.makeRemoveIcon())
              .append(mythis.makeRegExpIcon(node,node.SPARQLid))
              .append(mythis.makeNegativeMatchIcon(node,node.SPARQLid))
-             .append(this.buildString(node,node.SPARQLid)));
-
+             .append(mythis.makeLinkVariableIcon(node,node.SPARQLid))
+             .append(mythis.buildString(node,node.SPARQLid))
+             .append(mythis.buildLinkVariable(node,node)));
+      console.log("=========================================================================================");
       var attributes = new AskomicsUserAbstraction().getAttributesWithURI(node.uri);
-      let currentObj = this;
 
       $.each(attributes, function(i) {
 
@@ -496,33 +521,33 @@ class AskomicsNodeView extends AskomicsObjectView {
           var lab = $("<label></label>").attr("uri",attribute.uri).attr("for",attribute.label).text(attribute.label);
           if ( attribute.basic_type == "category" ) {
             /* RemoveIcon, EyeIcon, Attribute IHM */
-            currentObj.addPanel($('<div></div>').append(lab)
+            mythis.addPanel($('<div></div>').append(lab)
                    .append(mythis.makeRemoveIcon())
                    .append(mythis.makeEyeIcon(node,attribute))
                    .append(mythis.makeNegativeMatchIcon(node,attribute.SPARQLid))
                    .append(mythis.makeLinkVariableIcon(node,attribute.SPARQLid))
-                   .append(currentObj.buildCategory(node,attribute))
-                   .append(currentObj.buildLinkVariable(node,attribute)));
+                   .append(mythis.buildCategory(node,attribute))
+                   .append(mythis.buildLinkVariable(node,attribute)));
           } else if ( attribute.basic_type == "decimal" ) {
             /* RemoveIcon, EyeIcon, Attribute IHM */
-            currentObj.addPanel($('<div></div>').append(lab)
+            mythis.addPanel($('<div></div>').append(lab)
                    .append(mythis.makeRemoveIcon())
                    .append(mythis.makeEyeIcon(node,attribute))
                    .append(mythis.makeNegativeMatchIcon(node,attribute.SPARQLid))
                    .append(mythis.makeLinkVariableIcon(node,attribute.SPARQLid))
-                   .append(currentObj.buildDecimal(node,attribute))
-                   .append(currentObj.buildLinkVariable(node,attribute)));
+                   .append(mythis.buildDecimal(node,attribute))
+                   .append(mythis.buildLinkVariable(node,attribute)));
           } else if ( attribute.basic_type == "string" ) {
             node.switchRegexpMode(attribute.SPARQLid);
             /* RemoveIcon, EyeIcon, Attribute IHM */
-            currentObj.addPanel($('<div></div>').append(lab)
+            mythis.addPanel($('<div></div>').append(lab)
                    .append(mythis.makeRemoveIcon())
                    .append(mythis.makeEyeIcon(node,attribute))
                    .append(mythis.makeRegExpIcon(node,attribute.SPARQLid))
                    .append(mythis.makeNegativeMatchIcon(node,attribute.SPARQLid))
                    .append(mythis.makeLinkVariableIcon(node,attribute.SPARQLid))
-                   .append(currentObj.buildString(node,attribute.SPARQLid))
-                   .append(currentObj.buildLinkVariable(node,attribute)));
+                   .append(mythis.buildString(node,attribute.SPARQLid))
+                   .append(mythis.buildLinkVariable(node,attribute)));
           } else {
             throw typeof this + "::create . Unknown type attribute:"+ attribute.basic_type;
           }

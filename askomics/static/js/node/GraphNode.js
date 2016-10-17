@@ -61,7 +61,9 @@ class GraphNode extends GraphObject {
   }
 
   getTypeAttribute(attributeForUri) {
-
+    if ( ! ('type' in attributeForUri) )
+      return "";
+      
     if (attributeForUri.type.indexOf("http://www.w3.org/2001/XMLSchema#") < 0) {
       return "category";
     }
