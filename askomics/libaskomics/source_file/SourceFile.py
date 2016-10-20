@@ -540,10 +540,10 @@ class SourceFile(ParamManager, HaveCachedProperties):
                 triple_count += 1
 
                 if triple_count > int(self.settings['askomics.max_content_size_to_update_database']):
-                    # We have reached the maximum chunk size, load it and then we will start a new chunk
-                    self.log.debug("Loading ttl chunk %s file %s" % (chunk_count, fp.name))
                     # Temp file must be accessed by http so we place it in askomics/ttl/ dir
                     fp = tempfile.NamedTemporaryFile(dir=pathttl, prefix="tmp_"+self.metadatas['fileName'], suffix=".ttl", mode="w", delete=False)
+                    # We have reached the maximum chunk size, load it and then we will start a new chunk
+                    self.log.debug("Loading ttl chunk %s file %s" % (chunk_count, fp.name))
                     header_ttl = self.get_turtle_template(chunk)
                     fp.write(header_ttl + '\n')
                     fp.write(chunk)
