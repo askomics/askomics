@@ -60,31 +60,13 @@ class GraphNode extends GraphObject {
         this.actif = !this.actif ;
   }
 
-  getTypeAttribute(attributeForUri) {
-    if ( ! ('type' in attributeForUri) )
-      return "";
-      
-    if (attributeForUri.type.indexOf("http://www.w3.org/2001/XMLSchema#") < 0) {
-      return "category";
-    }
-    if (attributeForUri.type.indexOf("http://www.w3.org/2001/XMLSchema#decimal") >= 0) {
-      return "decimal";
-    }
-    if (attributeForUri.type.indexOf("http://www.w3.org/2001/XMLSchema#string") >= 0) {
-      return "string";
-    }
-
-    throw "GraphNode::Unknown type:"+attributeForUri.type;
-  }
-
   /* Build attribute with id, sparId inside a node from a generic uri attribute */
   setAttributeOrCategoryForNode(AttOrCatArray,attributeForUri) {
     AttOrCatArray[attributeForUri.uri] = {} ;
     AttOrCatArray[attributeForUri.uri].uri       = attributeForUri.uri ;
-    AttOrCatArray[attributeForUri.uri].type = attributeForUri.type ;
-    AttOrCatArray[attributeForUri.uri].basic_type = this.getTypeAttribute(attributeForUri);
-
-    AttOrCatArray[attributeForUri.uri].label = attributeForUri.label ;
+    AttOrCatArray[attributeForUri.uri].type      = attributeForUri.type ;
+    AttOrCatArray[attributeForUri.uri].basic_type  = attributeForUri.basic_type ;
+    AttOrCatArray[attributeForUri.uri].label     = attributeForUri.label ;
 
     new AskomicsGraphBuilder().setSPARQLVariateId(AttOrCatArray[attributeForUri.uri]);
     AttOrCatArray[attributeForUri.uri].id=new AskomicsGraphBuilder().getId();
@@ -96,7 +78,8 @@ class GraphNode extends GraphObject {
   }
 
   buildAttributeOrCategoryForNode(attributeForUri) {
-    if (attributeForUri.type.indexOf("http://www.w3.org/2001/XMLSchema#") < 0) {
+    
+    if (attributeForUri.basic_type === "category") {
       return this.setAttributeOrCategoryForNode(this.categories,attributeForUri);
     }else {
       return this.setAttributeOrCategoryForNode(this.attributes,attributeForUri);
@@ -104,13 +87,17 @@ class GraphNode extends GraphObject {
   }
 
   getAttributeOrCategoryForNode(attributeForUri) {
-    if (attributeForUri.uri in this.categories ) {
-      return this.categories[attributeForUri.uri];
-    } else if (attributeForUri.uri in this.attributes) {
-      return this.attributes[attributeForUri.uri];
+    if (attributeForUri.basic_type === "category" ) {
+      if (attributeForUri.uri in this.categories ) {
+        return this.categories[attributeForUri.uri];
+      }
+      return this.buildAttributeOrCategoryForNode(attributeForUri);
+    } else {
+      if (attributeForUri.uri in this.attributes) {
+        return this.attributes[attributeForUri.uri];
+     }
+      return this.buildAttributeOrCategoryForNode(attributeForUri);
     }
-    /* creation of new one otherwise */
-    return this.buildAttributeOrCategoryForNode(attributeForUri);
   }
 
   getNodeStrokeColor() { return 'grey'; }

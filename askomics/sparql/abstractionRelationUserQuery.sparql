@@ -3,11 +3,11 @@ WHERE {
     GRAPH <urn:sparql:tests-askomics:insert:informative1> {
     ?g rdfg:subGraphOf <urn:sparql:tests-askomics:insert:informative1> .
     }
-    GRAPH ?g {
-    ?relation rdf:type $OwlProperty;
+  ####  GRAPH ?g {
+      ?relation rdf:type $OwlProperty;
                 rdfs:domain ?subject;
                 rdfs:range ?object.
-    #to avoid Category
-    FILTER NOT EXISTS { ?object displaySetting:category [].}
-    }
+      ?subject rdf:type owl:Class.
+      ?object rdf:type owl:Class.
+  ####  }
 }

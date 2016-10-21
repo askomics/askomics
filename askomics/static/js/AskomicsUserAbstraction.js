@@ -49,6 +49,18 @@ class AskomicsUserAbstraction {
       return JSON.parse(JSON.stringify(this.entityPositionableInformationList)) ;
     }
 
+    static getTypeAttribute(attributeForUritype) {
+
+      if (attributeForUritype.indexOf("http://www.w3.org/2001/XMLSchema#decimal") >= 0) {
+        return "decimal";
+      }
+      if (attributeForUritype.indexOf("http://www.w3.org/2001/XMLSchema#string") >= 0) {
+        return "string";
+      }
+
+      throw "GraphNode::Unknown type:"+attributeForUritype;
+    }
+
     /*
     load ontology
     see template SPARQL to know sparql variable
@@ -90,9 +102,10 @@ class AskomicsUserAbstraction {
         console.log("ATTRIBUTE:"+JSON.stringify(resultListTripletSubjectRelationObject.attributes[entry2]));
         let uri2 = resultListTripletSubjectRelationObject.attributes[entry2].entity;
         let attribute = {};
-        attribute.uri  = resultListTripletSubjectRelationObject.attributes[entry2].attribute;
+        attribute.uri   = resultListTripletSubjectRelationObject.attributes[entry2].attribute;
         attribute.label = resultListTripletSubjectRelationObject.attributes[entry2].labelAttribute;
         attribute.type  = resultListTripletSubjectRelationObject.attributes[entry2].typeAttribute;
+        attribute.basic_type  = AskomicsUserAbstraction.getTypeAttribute(resultListTripletSubjectRelationObject.attributes[entry2].typeAttribute);
 
           if ( ! (uri2 in instanceUserAbstraction.attributesEntityList) ) {
               instanceUserAbstraction.attributesEntityList[uri2] = [];
@@ -101,13 +114,14 @@ class AskomicsUserAbstraction {
           instanceUserAbstraction.attributesEntityList[uri2].push(attribute);
         }
 
-        for (var entry3 in resultListTripletSubjectRelationObject.categories){
+        for (let entry3 in resultListTripletSubjectRelationObject.categories){
           console.log("CATEGORY:"+JSON.stringify(resultListTripletSubjectRelationObject.categories[entry3]));
-          var uri3 = resultListTripletSubjectRelationObject.categories[entry3].entity;
+          let uri3 = resultListTripletSubjectRelationObject.categories[entry3].entity;
           let attribute = {};
-          attribute.uri  = resultListTripletSubjectRelationObject.categories[entry3].category;
+          attribute.uri   = resultListTripletSubjectRelationObject.categories[entry3].category;
           attribute.label = resultListTripletSubjectRelationObject.categories[entry3].labelCategory;
           attribute.type  = resultListTripletSubjectRelationObject.categories[entry3].typeCategory;
+          attribute.basic_type  = 'category';
 
           if ( ! (uri3 in instanceUserAbstraction.attributesEntityList) ) {
               instanceUserAbstraction.attributesEntityList[uri3] = [];
@@ -125,6 +139,8 @@ class AskomicsUserAbstraction {
             throw new Error("URI:"+uri4+" have several taxon,ref, start, end labels... "+JSON.stringify(instanceUserAbstraction.entityPositionableInformationList[uri4]));
           }
         }
+        console.log("=================== attributesEntityList =========================");
+        console.log(JSON.stringify(instanceUserAbstraction.attributesEntityList));
       });
     }
 
