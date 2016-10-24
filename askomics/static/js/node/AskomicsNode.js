@@ -63,74 +63,98 @@ class AskomicsNode extends GraphNode {
         let SparqlId = this.attributes[uri].SPARQLid;
         let isFiltered =  SparqlId in this.filters;
         let isLinked = SparqlId in this.linkvar;
-        if ( isLinked || isFiltered || this.attributes[uri].actif ) {
+        let isInversedMatch = SparqlId in this.inverseMatch;
+
+        if ( isLinked || isFiltered || isInversedMatch || this.attributes[uri].actif ) {
           let subBlockConstraint = [];
           subBlockConstraint.push("?"+'URI'+this.SPARQLid+" "+this.URI(uri)+" "+"?"+SparqlId);
           subBlockConstraint.push(this.URI(uri)+" "+'rdfs:domain'+" "+this.URI());
           subBlockConstraint.push(this.URI(uri)+" "+'rdfs:range'+" "+this.URI(this.attributes[uri].type));
           subBlockConstraint.push(this.URI(uri)+" "+'rdf:type'+" "+this.URI('owl:DatatypeProperty'));
           /* check filter if exist */
-          if ( SparqlId in this.filters ) {
 
-            /* If Inverse Match we have to build a block */
-            if ( this._inverseMatch[SparqlId] ) {
-              let subBlockNegativeConstraint = [];
-              subBlockNegativeConstraint.push("?"+'URI'+this.SPARQLid+" "+this.URI(uri)+" "+"?negative"+SparqlId);
-              subBlockNegativeConstraint.push(this.URI(uri)+" "+'rdfs:domain'+" "+this.URI());
-              subBlockNegativeConstraint.push(this.URI(uri)+" "+'rdfs:range'+" "+this.URI(this.attributes[uri].type));
-              subBlockNegativeConstraint.push(this.URI(uri)+" "+'rdf:type'+" "+this.URI('owl:DatatypeProperty'));
+          let subBlockNegativeConstraint = [];
+          if ( isInversedMatch && (this.inverseMatch[SparqlId] === 'inverseWithExistingRelation' || this.inverseMatch[SparqlId] === 'inverseWithNoRelation') ) {
+            subBlockNegativeConstraint.push("?"+'URI'+this.SPARQLid+" "+this.URI(uri)+" "+"?negative"+SparqlId);
+            subBlockNegativeConstraint.push(this.URI(uri)+" "+'rdfs:domain'+" "+this.URI());
+            subBlockNegativeConstraint.push(this.URI(uri)+" "+'rdfs:range'+" "+this.URI(this.attributes[uri].type));
+            subBlockNegativeConstraint.push(this.URI(uri)+" "+'rdf:type'+" "+this.URI('owl:DatatypeProperty'));
+          }
+          /* If Inverse Match we have to build a block */
+          if ( isFiltered ) {
+            if ( isInversedMatch && (this.inverseMatch[SparqlId] === 'inverseWithExistingRelation' || this.inverseMatch[SparqlId] === 'inverseWithNoRelation') ) {
               let newfilt = this.filters[SparqlId].replace(SparqlId,"negative"+SparqlId);
               subBlockNegativeConstraint.push(newfilt);
-              subBlockConstraint.push([subBlockNegativeConstraint,'FILTER NOT EXISTS']);
             } else {
               subBlockConstraint.push(this.filters[SparqlId]);
             }
           }
 
-          if ( this.attributes[uri].optional ) {
-            blockConstraintByNode.push([subBlockConstraint,'OPTIONAL']);
+          if ( isInversedMatch && (this.inverseMatch[SparqlId] === 'inverseWithExistingRelation' || this.inverseMatch[SparqlId] === 'inverseWithNoRelation') ) {
+            if ( this._inverseMatch[SparqlId] === 'inverseWithNoRelation' ) {
+                blockConstraintByNode.push([subBlockConstraint,'OPTIONAL']);
+            } else {
+                blockConstraintByNode.push([subBlockConstraint,'']);
+            }
+            blockConstraintByNode.push([subBlockNegativeConstraint,'FILTER NOT EXISTS']);
           } else {
-            blockConstraintByNode.push([subBlockConstraint,'']);
+            if ( this.attributes[uri].optional ) {
+              blockConstraintByNode.push([subBlockConstraint,'OPTIONAL']);
+            } else {
+              blockConstraintByNode.push([subBlockConstraint,'']);
+            }
           }
-        }
+      }
     }
     for (let uri in this.categories) {
       let SparqlId = "URICat"+this.categories[uri].SPARQLid;
       let isFiltered = SparqlId in this.filters;
       let isLinked = SparqlId in this.linkvar;
-      if ( isLinked || isFiltered || this.categories[uri].actif ) {
+      let isInversedMatch = SparqlId in this.inverseMatch;
+    
+      if ( isInversedMatch || isLinked || isFiltered || this.categories[uri].actif ) {
         let subBlockConstraint = [];
         subBlockConstraint.push("?"+'URI'+this.SPARQLid+" "+this.URI(uri)+" "+"?"+SparqlId);
         subBlockConstraint.push("?"+SparqlId+" "+'rdfs:label'+" "+"?"+this.categories[uri].SPARQLid);
 
-        if ( SparqlId in this.filters ) {
 
-          /* If Inverse Match we have to build a block */
-          if ( this._inverseMatch[this.categories[uri].SPARQLid] ) {
-            let subBlockNegativeConstraint = [];
-            subBlockNegativeConstraint.push("?"+'URI'+this.SPARQLid+" "+this.URI(uri)+" "+"?negative"+SparqlId);
-            subBlockNegativeConstraint.push("?negative"+SparqlId+" "+'rdfs:label'+" "+"?negative"+this.categories[uri].SPARQLid);
-            let newfilt = this.filters[SparqlId].replace(SparqlId,"negative"+SparqlId);
-            subBlockNegativeConstraint.push(newfilt);
-            subBlockConstraint.push([subBlockNegativeConstraint,'FILTER NOT EXISTS']);
+        let subBlockNegativeConstraint = [];
+        if ( isInversedMatch && (this.inverseMatch[SparqlId] === 'inverseWithExistingRelation' || this.inverseMatch[SparqlId] === 'inverseWithNoRelation') ) {
+          subBlockNegativeConstraint.push("?"+'URI'+this.SPARQLid+" "+this.URI(uri)+" "+"?negative"+SparqlId);
+          subBlockNegativeConstraint.push("?negative"+SparqlId+" "+'rdfs:label'+" "+"?negative"+this.categories[uri].SPARQLid);
+        }
+        /* If Inverse Match we have to build a block */
+        if ( isFiltered ) {
+            if ( isInversedMatch && (this.inverseMatch[SparqlId] === 'inverseWithExistingRelation' || this.inverseMatch[SparqlId] === 'inverseWithNoRelation') ) {
+              let newfilt = this.filters[SparqlId].replace(SparqlId,"negative"+SparqlId);
+              subBlockNegativeConstraint.push(newfilt);
+            } else {
+              subBlockConstraint.push(this.filters[SparqlId]);
+            }
+          }
+
+        if ( isInversedMatch && (this.inverseMatch[SparqlId] === 'inverseWithExistingRelation' || this.inverseMatch[SparqlId] === 'inverseWithNoRelation') ) {
+            if ( this._inverseMatch[SparqlId] === 'inverseWithNoRelation' ) {
+                blockConstraintByNode.push([subBlockConstraint,'OPTIONAL']);
+            } else {
+                blockConstraintByNode.push([subBlockConstraint,'']);
+            }
+            blockConstraintByNode.push([subBlockNegativeConstraint,'FILTER NOT EXISTS']);
           } else {
-            subBlockConstraint.push(this.filters[SparqlId]);
+            if ( this.categories[uri].optional ) {
+              blockConstraintByNode.push([subBlockConstraint,'OPTIONAL']);
+            } else {
+              blockConstraintByNode.push([subBlockConstraint,'']);
+            }
           }
         }
-
-        if ( this.categories[uri].optional ) {
-          blockConstraintByNode.push([subBlockConstraint,'OPTIONAL']);
-        } else {
-          blockConstraintByNode.push([subBlockConstraint,'']);
-        }
       }
-    }
 
     // add the filters on entity name at end
     if (this.SPARQLid in this.filters) {
       /* If Inverse Match we have to build a block */
 
-      if ( this._inverseMatch[this.SPARQLid] ) {
+      if ( this.inverseMatch[this.SPARQLid] === 'inverseWithExistingRelation' ) {
         let subBlockConstraint = [];
         subBlockConstraint.push("?"+'URI'+this.SPARQLid+" "+'rdfs:label'+" "+"?negative"+this.SPARQLid);
         let newfilt = this.filters[this.SPARQLid].replace(this.SPARQLid,"negative"+this.SPARQLid);
@@ -218,6 +242,7 @@ class AskomicsNode extends GraphNode {
     if ( typeof optional !== undefined ) {
       opt = true;
     }
+
     for (let a in this.attributes ) {
       if ( this.attributes[a].SPARQLid == uriId ) {
         this.attributes[a].actif = boolean ;
