@@ -1,6 +1,6 @@
 /*jshint esversion: 6 */
 
-function prepareQuery(exp, lim, roq) {
+function prepareQuery(exp, roq) {
     //     Get JSON to ask for a SPARQL query corresponding to the graph
     //     and launch it according to given parameters.
     //
@@ -15,7 +15,7 @@ function prepareQuery(exp, lim, roq) {
               'variates'             : tab[0],
               'constraintesRelations': tab[1],
               'constraintesFilters'  : tab[2],
-              'limit'                : lim
+              'limit'                : parseInt(new TriplestoreParametersView().config.max_results_size)
            };
 }
 
@@ -25,7 +25,7 @@ function viewQueryResults() {
 
     let time = $.now();
     let service = new RestServiceJs("sparqlquery");
-    let jdata = prepareQuery(false, 100, false);
+    let jdata = prepareQuery(false, false);
     service.post(jdata,function(data) {
       hideModal();
       let new_time = $.now();
@@ -43,10 +43,10 @@ function viewQueryResults() {
     });
 }
 
-function downloadResultsFile(lim) {
+function downloadResultsFile() {
     displayModal('Generating results file ...', '', 'Close');
     var service = new RestServiceJs("sparqlquery");
-    var jdata = prepareQuery(true, lim, false);
+    var jdata = prepareQuery(true,false);
     service.post(jdata, function(data) {
         hideModal();
         window.location.href = data.file;
