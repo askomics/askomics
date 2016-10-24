@@ -59,6 +59,18 @@ function RestServiceJs(newurl) {
     });
   };
 
+  this.getsync = function(callback) {
+    $.ajax({
+      async: false,
+      type: 'GET',
+      url: this.myurl,
+      contentType: 'application/json',
+      success: callback,
+      error: function(req, status, ex) {},
+      timeout:0
+    });
+  };
+
   this.getAll = function(callback) {
     $.ajax({
       type: 'GET',

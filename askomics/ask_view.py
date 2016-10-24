@@ -401,7 +401,7 @@ class AskView(object):
 
         return data
 
-    @view_config(route_name='getUserAbstraction', request_method='POST')
+    @view_config(route_name='getUserAbstraction', request_method='GET')
     def getUserAbstraction(self):
         """ Get the user asbtraction to manage relation inside javascript """
         self.log.debug("== getUserAbstraction ==")

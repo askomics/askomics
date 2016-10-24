@@ -70,7 +70,7 @@ class AskomicsUserAbstraction {
     loadUserAbstraction() {
       var service = new RestServiceJs("userAbstraction");
 
-      service.postsync({}, function(resultListTripletSubjectRelationObject ) {
+      service.getsync(function(resultListTripletSubjectRelationObject ) {
       console.log("========================= ABSTRACTION =====================================================================");
 
       /* All relation are stored in tripletSubjectRelationObject */
