@@ -6,6 +6,13 @@
 
         <script src="static/js/third-party/d3.min.js" charset="utf-8"></script>
         <script src="static/js/third-party/jquery-1.12.4.min.js"></script>
+        <script src="static/js/third-party/jquery.dataTables.min.js"></script>
+        <script src="static/js/third-party/dataTables.buttons.min.js"></script>
+        <script src="static/js/third-party/buttons.flash.min.js"></script>
+        <script src="static/js/third-party/jszip.min.js"></script>
+        <script src="static/js/third-party/buttons.html5.min.js"></script>
+  
+
         <script src="static/js/third-party/jquery-ui-1.12/jquery-ui.min.js"></script>
 
         <script src="static/js/third-party/tmpl.min.js"></script>
@@ -19,6 +26,8 @@
         <script src="static/js/third-party/jstree.min.js"></script>
 
         <link href="static/css/jquery-ui.min.css" rel="stylesheet" >
+        <link href="static/css/jquery.dataTables.min.css" rel="stylesheet" >
+          <link href="static/css/buttons.dataTables.min.css" rel="stylesheet" >
         <link href="static/css/bootstrap.min.css" rel="stylesheet" type="text/css">
         <link href="static/css/style.css" rel="stylesheet" type="text/css">
         <link href="static/css/pygment.css" rel="stylesheet" type="text/css">
@@ -119,17 +128,21 @@
                       <ul id="viewListNodesAndLinks" class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
                       </ul>
                     </div>
+                    <div class="btn-group pull-right">
+                        <button type="button" class="btn btn-warning" onclick="resetGraph()">Reset</button>
+                    </div>
 
                     <div id="svgdiv"></div>
                     <div id="uploadedQuery" class="uploadedQuery" hidden contenteditable></div>
+                    <!--
                         <div class="btn-group">
-                            <button id="btn-down" type="submit" class="btn btn-default" onclick="downloadResultsFile(10000)">
+                            <button id="btn-down" type="submit" class="btn btn-default" onclick="downloadResultsFile()">
                                 <span class="glyphicon glyphicon-save"></span> Download results
                             </button>
                         </div>
+                      -->
                         <div class="btn-group btn-group-query">
-                            <button type="button" class="btn btn-default" onclick="viewQueryResults()">Launch query</button>
-                            <button type="button" class="btn btn-default" onclick="resetGraph()">Reset</button>
+                            <button type="button" class="btn btn-primary" onclick="viewQueryResults()">Launch query</button>
                         </div>
                 </div>
 
