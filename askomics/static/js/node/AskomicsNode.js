@@ -127,7 +127,7 @@ class AskomicsNode extends GraphNode {
         let subBlockNegativeConstraint = [];
         if ( isInversedMatch && (this.inverseMatch[SparqlId] === 'inverseWithExistingRelation' || this.inverseMatch[SparqlId] === 'inverseWithNoRelation') ) {
           subBlockNegativeConstraint.push("?"+'URI'+this.SPARQLid+" "+this.URI(uri)+" "+"?negative"+SparqlId);
-          subBlockConstraint.push("[] displaySetting:category "+"?negative"+SparqlId);
+          subBlockNegativeConstraint.push("[] displaySetting:category "+"?negative"+SparqlId);
           subBlockNegativeConstraint.push("?negative"+SparqlId+" "+'rdfs:label'+" "+"?negative"+this.categories[uri].SPARQLid);
         }
         /* If Inverse Match we have to build a block */
