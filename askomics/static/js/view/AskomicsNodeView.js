@@ -555,7 +555,11 @@ class AskomicsNodeView extends AskomicsObjectView {
       let lab = $("<label></label>").attr("urinode",node.uri).attr("uri",node.uri).attr("for",node.label).html(node.label);
       node.switchRegexpMode(node.SPARQLid);
 
-      mythis.addPanel($('<div></div>').append(lab)
+      mythis.addPanel($('<div></div>')
+             .attr("id",node.id)
+             .attr("uri",node.uri)
+             .attr("basic_type","string")
+             .append(lab)
              .append(mythis.makeRemoveIcon())
              .append(mythis.makeRegExpIcon(node,node.SPARQLid))
              .append(mythis.makeNegativeMatchIcon(node,node.SPARQLid))
@@ -572,7 +576,11 @@ class AskomicsNodeView extends AskomicsObjectView {
 
           if ( attribute.basic_type == "category" ) {
             /* RemoveIcon, EyeIcon, Attribute IHM */
-            mythis.addPanel($('<div></div>').append(lab)
+            mythis.addPanel($('<div></div>')
+                   .attr("id",attribute.id)
+                   .attr("uri",attribute.uri)
+                   .attr("basic_type",attribute.basic_type)
+                   .append(lab)
                    .append(mythis.makeRemoveIcon())
                    .append(mythis.makeEyeIcon(node,attribute))
                    .append(mythis.makeNegativeMatchIcon(node,'URICat'+attribute.SPARQLid))
@@ -582,6 +590,9 @@ class AskomicsNodeView extends AskomicsObjectView {
           } else if ( attribute.basic_type == "decimal" ) {
             /* RemoveIcon, EyeIcon, Attribute IHM */
             mythis.addPanel($('<div></div>').append(lab)
+                   .attr("id",attribute.id)
+                   .attr("uri",attribute.uri)
+                   .attr("basic_type",attribute.basic_type)
                    .append(mythis.makeRemoveIcon())
                    .append(mythis.makeEyeIcon(node,attribute))
                    .append(mythis.makeNegativeMatchIcon(node,attribute.SPARQLid))
@@ -592,6 +603,9 @@ class AskomicsNodeView extends AskomicsObjectView {
             node.switchRegexpMode(attribute.SPARQLid);
             /* RemoveIcon, EyeIcon, Attribute IHM */
             mythis.addPanel($('<div></div>').append(lab)
+                   .attr("id",attribute.id)
+                   .attr("uri",attribute.uri)
+                   .attr("basic_type",attribute.basic_type)
                    .append(mythis.makeRemoveIcon())
                    .append(mythis.makeEyeIcon(node,attribute))
                    .append(mythis.makeRegExpIcon(node,attribute.SPARQLid))

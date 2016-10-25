@@ -227,7 +227,6 @@ class AskomicsUserAbstraction {
 
     /* Setting order attribute display */
     setOrderAttributesList(URINode,listAtt) {
-      this.attributesOrderDisplay[URINode] = {};
       this.attributesOrderDisplay[URINode] = listAtt.slice();
     }
 
@@ -237,10 +236,12 @@ class AskomicsUserAbstraction {
       }
       /* by default */
       let v = [];
-      v.push(URINode);
+      v.push( { 'uri': URINode , 'basic_type' : 'string' });
+      v = v.concat(this.attributesEntityList[URINode].slice());
+/*
       for (let i in this.attributesEntityList[URINode] ) {
-          v.push(this.attributesEntityList[URINode][i].uri);
-      }
+          v.push(this.attributesEntityList[URINode][i]);
+      }*/
       return v;
     }
   }

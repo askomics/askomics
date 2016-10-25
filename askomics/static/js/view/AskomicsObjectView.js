@@ -83,8 +83,9 @@ class AskomicsObjectView {
                 update: function (event, ui) {
                   let orderAttributes = [];
                   $(this).parent().find(".attribute").each(function(){
-                    let label = $(this).find("label").attr("uri");
-                    orderAttributes.push(label);
+                    let uri = $(this).attr("uri");
+                    let basic_type = $(this).attr("basic_type");
+                    orderAttributes.push({ 'uri' : uri , 'basic_type' : basic_type });
                   });
                   let l = $(this).parent().find("[urinode]") ;
                   if ( l.length === 0 ) {

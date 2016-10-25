@@ -181,10 +181,10 @@ class AskomicsResultsView {
       let node = nodeList[i];
       if ( ! node.actif ) continue;
       for (let sparqlid in this.activesAttributes[node.id]) {
-
+        console.log(sparqlid+"="+this.activesAttributesLabel[node.id][sparqlid]);
         row.append($('<th></th>')
            .addClass("success")
-           .addClass("table-bordered").html(node.SPARQLid+"-"+this.activesAttributesLabel[node.id][sparqlid]));
+           .addClass("table-bordered").html(this.activesAttributesLabel[node.id][sparqlid]+node.getLabelIndex()));
       }
     }
     head.append(row);
