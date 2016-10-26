@@ -13,8 +13,105 @@ class AskomicsForceLayoutManager {
     /* To manage information about File menu */
     this.menuFile = new AskomicsMenuFile(this);
 
-
+    this.optionsView = {
+      attributesFiltering : true,
+      relationsName        : true
+    };
     let currentFL = this;
+
+    /*************************************************/
+    /* Context Menu definition inside SVG Div        */
+    /*************************************************/
+
+    $.contextMenu({
+            selector: '#svgdiv',
+            callback: function(key, options) {
+            },
+            items: {
+                "rmenu-save-query"   : {
+                  name: $("#dwl-query").text(),
+                  icon: "save",
+                  callback: function(key, options) {
+                    $("#dwl-query")[0].click();
+                  }
+                },
+                "rmenu-save-sparql-query" :
+                {
+                  name: $("#dwl-query-sparql").text(),
+                  icon: "save",
+                  callback: function(key, options) {
+                    $("#dwl-query-sparql")[0].click();
+                  }
+                },
+                "sep1"   : "---------",
+                "rmenu-filt-attributes" :
+                {
+                  name  : "Filtering attributes",
+                  type  : 'checkbox',
+                  selected: true
+                },
+                "rmenu-relation-name" : {
+                  name  : "Relations name",
+                  type  : 'checkbox',
+                  selected: true
+                },
+                "sep2"   : "---------",
+                "rmenu-reset"   : {
+                  name: "Reset",
+                  callback: function(){
+                    resetGraph();
+                  }
+                },
+                "rmenu-quit"   : {
+                  name: "Quit",
+                  callback: function(key, options) {
+                    $("#dwl-query-sparql")[0].click();
+                  }
+                }
+              },
+              events: {
+                  show: function(opt) {
+                    // this is the trigger element
+                    var $this = this;
+                    if (Object.keys($this.data()).length === 0 ) return ;
+
+                    // import states from data store
+                    $.contextMenu.setInputValues(opt, $this.data());
+                    // this basically fills the input commands from an object
+                    // like {name: "foo", yesno: true, radio: "3", &hellip;}
+                  },
+                  hide: function(opt) {
+                    // this is the trigger element
+                    var $this = this;
+                    // export states to data store
+                    $.contextMenu.getInputValues(opt, $this.data());
+                    // this basically dumps the input commands' values to an object
+                    // like {name: "foo", yesno: true, radio: "3", &hellip;}
+                  }
+
+            }
+        });
+
+    $("input[name='context-menu-input-rmenu-filt-attributes']").click(function() {
+      if ($(this).is(':checked')) {
+        $("tspan[constraint_node_id]").show();
+        currentFL.optionsView.attributesFiltering = true;
+      } else {
+        $("tspan[constraint_node_id]").hide();
+        currentFL.optionsView.attributesFiltering = false;
+      }
+    });
+
+    $("input[name='context-menu-input-rmenu-relation-name']").click(function() {
+      if ($(this).is(':checked')) {
+        $("[id^=" + GraphObject.getSvgLabelPrefix() + "] textPath").show();
+        currentFL.optionsView.relationsName = true;
+      } else {
+        $("[id^=" + GraphObject.getSvgLabelPrefix() + "] textPath").hide();
+        currentFL.optionsView.relationsName = false;
+      }
+    });
+
     $('#full-screen-graph').click(function() {
       if ($('#icon-resize-graph').attr('value') == 'small') {
         currentFL.fullsizeGraph();
@@ -621,13 +718,14 @@ class AskomicsForceLayoutManager {
     link.enter().append("text")
                 .attr("style", "text-anchor:middle; font: 10px sans-serif; cursor: pointer;")
                 .attr("dy", "-5")
-                .attr('id', function(d) {return d.getLabelId();})
+                .attr('id', function(d) { return d.getSvgLabelId();})
                 .style("opacity", function(d) {return d.getTextOpacity();})
                 .append("textPath")
                 .attr("xlink:href",function(d) {return "#"+d.id;})
                 .attr("startOffset", "35%")
                 .attr('fill', function(d){ return d.getTextFillColor();})
                 .text(function(d){return d.label;})
+                .style('display', currentFL.optionsView.relationsName?'block':'none')
                 .on('click', function(d) { // Mouse down on a link label
                   if (d != currentFL.selectLink) { //if link is not selected
                     /* user want a new relation contraint betwwenn two node*/
@@ -780,14 +878,24 @@ class AskomicsForceLayoutManager {
               .attr("y", ".31em")
               .attr("id", function (d) {
                   return "txt_" + d.id;
-              })
-              .text(function (d) { return d.label; })
-                  .append("tspan")
+              }).text(function (d) { return d.label; })
+              .append("tspan")
                    .attr("font-size","7")
                    .attr("baseline-shift","sub")
                    .text(function (d) {
                      return d.getLabelIndex();
-                    });
+                    })
+             .append("tspan")
+             .attr("constraint_node_id",function(d){
+               return d.id;
+             } )
+             .style('display', currentFL.optionsView.attributesFiltering?'block':'none')
+             .attr("font-size","8")
+             .attr("dy","10" )
+             .attr("x",14 )
+             .text(function (d) { return d.getAttributesWithConstraintsString(); }) ;
+
+
 
       link.exit().remove();
       node.exit().remove();

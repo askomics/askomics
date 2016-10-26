@@ -202,13 +202,22 @@ describe('AskomicsNode', function(){
       geneNode.inverseMatch[attSPARQLid] = true ;
       geneNode.setActiveAttribute(attSPARQLid,true);
       let tab = geneNode.buildConstraintsSPARQL();
-      let attendu = [["?URIGene1 rdf:type <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Gene>","?URIGene1 rdfs:label ?Gene1",[["?URIGene1 <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#position_start> ?position_start1","<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#position_start> rdfs:domain <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Gene>","<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#position_start> rdfs:range <http://www.w3.org/2001/XMLSchema#decimal>","<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#position_start> rdf:type owl:DatatypeProperty"],""]],""];
+      let attendu = [["?URIGene1 rdf:type <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Gene>",
+                      "?URIGene1 rdfs:label ?Gene1",
+                      [["?URIGene1 <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#position_start> ?position_start1",
+                        "FILTER isLiteral(?position_start1)"],""]],""];
       chai.assert.deepEqual(tab,attendu);
 
       geneNode.inverseMatch[catSPARQLid] = true ;
       geneNode.setActiveAttribute(catSPARQLid,true);
       tab = geneNode.buildConstraintsSPARQL();
-      attendu = [["?URIGene1 rdf:type <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Gene>","?URIGene1 rdfs:label ?Gene1",[["?URIGene1 <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#position_start> ?position_start1","<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#position_start> rdfs:domain <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Gene>","<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#position_start> rdfs:range <http://www.w3.org/2001/XMLSchema#decimal>","<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#position_start> rdf:type owl:DatatypeProperty"],""],[["?URIGene1 <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#position_ref> ?URICatposition_ref1","?URICatposition_ref1 rdfs:label ?position_ref1"],""]],""];
+      attendu = [["?URIGene1 rdf:type <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Gene>",
+                  "?URIGene1 rdfs:label ?Gene1",
+                  [["?URIGene1 <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#position_start> ?position_start1",
+                  "FILTER isLiteral(?position_start1)"],""],
+                  [["?URIGene1 <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#position_ref> ?URICatposition_ref1",
+                  "[] displaySetting:category ?URICatposition_ref1",
+                  "?URICatposition_ref1 rdfs:label ?position_ref1"],""]],""];
       chai.assert.deepEqual(tab,attendu);
     });
 
@@ -274,8 +283,14 @@ describe('AskomicsNode', function(){
     let tab ;
     let sparqlid = "position_ref1";
     let value = "QQ";
-    let waitResults1 = [["?URIGene1 rdf:type <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Gene>","?URIGene1 rdfs:label ?Gene1",[["?URIGene1 <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#position_ref> ?URICatposition_ref1","?URICatposition_ref1 rdfs:label ?position_ref1"],""]],""];
-    let waitResults2 = [["?URIGene1 rdf:type <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Gene>","?URIGene1 rdfs:label ?Gene1",[["?URIGene1 <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#position_ref> ?URICatposition_ref1","?URICatposition_ref1 rdfs:label ?position_ref1"],"OPTIONAL"]],""];
+    let waitResults1 = [["?URIGene1 rdf:type <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Gene>","?URIGene1 rdfs:label ?Gene1",
+    [["?URIGene1 <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#position_ref> ?URICatposition_ref1",
+    "[] displaySetting:category ?URICatposition_ref1",
+    "?URICatposition_ref1 rdfs:label ?position_ref1"],""]],""];
+    let waitResults2 = [["?URIGene1 rdf:type <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Gene>","?URIGene1 rdfs:label ?Gene1",
+    [["?URIGene1 <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#position_ref> ?URICatposition_ref1",
+    "[] displaySetting:category ?URICatposition_ref1",
+    "?URICatposition_ref1 rdfs:label ?position_ref1"],"OPTIONAL"]],""];
 
     it('* buildConstraintsSPARQL simple args *', function(){
       tab = geneNode.buildConstraintsSPARQL();

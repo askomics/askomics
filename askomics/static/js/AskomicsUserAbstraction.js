@@ -237,7 +237,9 @@ class AskomicsUserAbstraction {
       /* by default */
       let v = [];
       v.push( { 'uri': URINode , 'basic_type' : 'string' });
-      v = v.concat(this.attributesEntityList[URINode].slice());
+      if ( URINode in this.attributesEntityList ) {
+        v = v.concat(this.attributesEntityList[URINode].slice());
+      }
 /*
       for (let i in this.attributesEntityList[URINode] ) {
           v.push(this.attributesEntityList[URINode][i]);

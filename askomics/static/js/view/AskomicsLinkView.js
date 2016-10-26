@@ -50,8 +50,8 @@ class AskomicsLinkView extends AskomicsObjectView {
       } else {
         link.negative = false;
       }
-      $('#'+mythis.link.getLabelId()).find('textPath').attr('fill',mythis.getTextColorLabel());
-      $('#'+mythis.link.getLabelId()).find('textPath').text(mythis.getTextLabel());
+      $('#'+mythis.link.getSvgLabelId()).find('textPath').attr('fill',mythis.getTextColorLabel());
+      $('#'+mythis.link.getSvgLabelId()).find('textPath').text(mythis.getTextLabel());
     });
 
     if (this.link.negative) {
@@ -75,8 +75,8 @@ class AskomicsLinkView extends AskomicsObjectView {
       } else {
         link.transitive = false;
       }
-      $('#'+mythis.link.getLabelId()).find('textPath').attr('fill',mythis.getTextColorLabel());
-      $('#'+mythis.link.getLabelId()).find('textPath').text(mythis.getTextLabel());
+      $('#'+mythis.link.getSvgLabelId()).find('textPath').attr('fill',mythis.getTextColorLabel());
+      $('#'+mythis.link.getSvgLabelId()).find('textPath').text(mythis.getTextLabel());
     });
 
     if (this.link.transitive) {

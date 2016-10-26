@@ -72,7 +72,7 @@ class AskomicsMenuView {
       let node = new GraphObject({'uri' : lentities[i]});
       let nodeuri = node.uri;
       var li = menuView.buildLiView(nodeuri,node.removePrefix(),false);
-      console.log("$.each(lentities, function(i) ");
+
       li.on('click', function() {
         var span = $(this).find(".glyphicon");
         var cur_uri = $(this).attr("uri");
@@ -98,10 +98,10 @@ class AskomicsMenuView {
       /* --------------------------- */
       /* Adding filter on relations  */
       /* --------------------------- */
-      console.log("menuView.userAbstraction:"+nodeuri);
+
       let tab = new AskomicsUserAbstraction().getRelationsObjectsAndSubjectsWithURI(nodeuri);
       let listRelObj = tab[0];
-      console.log("each..................."+nodeuri);
+      
       $.each(listRelObj, function(objecturi) {
         let object = new GraphObject({uri:objecturi});
         $.each(listRelObj[objecturi], function(idxrel) {

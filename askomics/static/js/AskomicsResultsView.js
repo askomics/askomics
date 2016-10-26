@@ -79,9 +79,9 @@ class AskomicsResultsView {
 
 //https://datatables.net/extensions/buttons/examples/initialisation/export.html
       table.DataTable( {
-       "paging":   true,
-       "ordering": true,
-       "info":     true,
+       "paging"     : true,
+       "ordering"   : true,
+       "info"       : true,
        dom: 'Bfrtip',
         buttons: [
             'copy', 'csv', 'excel'
