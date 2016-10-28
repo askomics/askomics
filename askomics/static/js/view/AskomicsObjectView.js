@@ -176,13 +176,16 @@ class AskomicsObjectView {
           node.getPanelView().remove();
           for (let l of listLinksRemoved) {
             l.getPanelView().remove();
+            forceLayoutManager.removeLinkSvgInformation(l);
           }
       } else if ( type == "link") {
         let link = new AskomicsGraphBuilder().getInstanciedLink(id);
+
         let removenode = new AskomicsGraphBuilder().removeInstanciedLink(link);
         forceLayoutManager.removeSuggestions();
         forceLayoutManager.update();
         link.getPanelView().remove();
+        forceLayoutManager.removeLinkSvgInformation(link);
         if ( removenode ) {
           removenode.getPanelView().remove();
         }
