@@ -166,7 +166,7 @@ div.uploadedQuery {
 }
 
 .results-div {
-    overflow-x: auto;
+    overflow-x: hidden;
 }
 
 .table-results {

@@ -87,6 +87,14 @@ class GraphObject {
     return "<em>"+ labelEntity + "<sub>"+ indiceEntity[0] +"</sub>"+"</em>";
   }
 
+  static getSvgLabelPrefix() {
+      return "label-svg-";
+  }
+
+  getSvgLabelId() {
+      return GraphObject.getSvgLabelPrefix()+this.id;
+  }
+
   /*
     return the index name of the node to set up and update the graph
   */
@@ -103,7 +111,9 @@ class GraphObject {
   }
 
   getLabelIndexHtml() {
-    return '<tspan font-size="7" baseline-shift="sub">'+this.getLabelIndex()+"</tspan>";
+    let v = '<tspan font-size="7" baseline-shift="sub">'+this.getLabelIndex()+"</tspan>";
+    v += '<tspan constraint_node_id='+this.id+' font-size="8" dy="10" x="14"></tspan>' ;
+    return v;
   }
 
   getOpacity() { return this.suggested? "0.5" : "1"; }

@@ -83,8 +83,9 @@ class AskomicsObjectView {
                 update: function (event, ui) {
                   let orderAttributes = [];
                   $(this).parent().find(".attribute").each(function(){
-                    let label = $(this).find("label").attr("uri");
-                    orderAttributes.push(label);
+                    let uri = $(this).attr("uri");
+                    let basic_type = $(this).attr("basic_type");
+                    orderAttributes.push({ 'uri' : uri , 'basic_type' : basic_type });
                   });
                   let l = $(this).parent().find("[urinode]") ;
                   if ( l.length === 0 ) {
@@ -175,13 +176,16 @@ class AskomicsObjectView {
           node.getPanelView().remove();
           for (let l of listLinksRemoved) {
             l.getPanelView().remove();
+            forceLayoutManager.removeLinkSvgInformation(l);
           }
       } else if ( type == "link") {
         let link = new AskomicsGraphBuilder().getInstanciedLink(id);
+
         let removenode = new AskomicsGraphBuilder().removeInstanciedLink(link);
         forceLayoutManager.removeSuggestions();
         forceLayoutManager.update();
         link.getPanelView().remove();
+        forceLayoutManager.removeLinkSvgInformation(link);
         if ( removenode ) {
           removenode.getPanelView().remove();
         }

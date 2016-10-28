@@ -28,6 +28,7 @@ describe('GraphObject', function(){
     });
     it('* getLabelIndexHtml *', function(){
       let waitValue='<tspan font-size="7" baseline-shift="sub">16</tspan>';
+      waitValue += '<tspan constraint_node_id='+node.id+' font-size="8" dy="10" x="14"></tspan>' ;
       chai.assert.isOk(node.getLabelIndexHtml() === waitValue );
     });
     it('* removePrefix *', function(){

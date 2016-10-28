@@ -4,6 +4,7 @@ WHERE {
     ?g rdfg:subGraphOf <urn:sparql:tests-askomics:insert:informative1> }
     GRAPH ?g {
 	    ?entity ?property ?value.
-        VALUES ?entity { $entities }
+      ?entity rdf:type owl:Class.
+      VALUES ?entity { $entities }
     }
 }

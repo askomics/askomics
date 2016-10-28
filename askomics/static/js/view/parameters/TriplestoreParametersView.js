@@ -16,6 +16,7 @@ class TriplestoreParametersView extends InterfaceParametersView {
       endpoint  : 'http://localhost:8890/sparql'     ,
       usergraph : 'askomics:user:graph:'             ,
       max_content_size_to_update_database : '500000' ,
+      max_results_size : '2000' ,
       tpsname   : 'virtuoso'
     };
 
@@ -40,7 +41,9 @@ class TriplestoreParametersView extends InterfaceParametersView {
              .append($('<hr/>'))
              .append(this.createInput("LIMIT UPLOAD SIZE (Ko)",'max_content_size_to_update_database'))
              .append($('<hr/>'))
-             .append(this.createSelect("TRIPLESTORE",'tpsname',['virtuoso','fuseki'],['virtuoso','fuseki']));
+             .append(this.createSelect("TRIPLESTORE",'tpsname',['virtuoso','fuseki'],['virtuoso','fuseki']))
+             .append($('<hr/>'))
+             .append(this.createInput("MAX RESULTS",'max_results_size'));
 
     /* add to the main document */
     $('body').append(container);

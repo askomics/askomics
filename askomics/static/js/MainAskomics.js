@@ -81,7 +81,7 @@ function loadStartPoints() {
 function loadNamedGraphs() {
 
     new AskomicsUserAbstraction().loadUserAbstraction();
-    
+
     var select = $('#dropNamedGraphSelected');
     select.empty();
     manageDelGraphButton();
@@ -318,6 +318,20 @@ function displayModal(title, message, button) {
       $('#modalMessage').text(message);
     }
     $('#modalButton').text(button);
+    $('#modal').modal('show');
+}
+
+function displayModalHtml(title, message, button) {
+    $('#modalTitle').html(title);
+    if (message === '') {
+      $('.modal-body').hide();
+      $('.modal-sm').css('width', '300px');
+    }else{
+      $('.modal-sm').css('width', '700px');
+      $('.modal-body').show();
+      $('#modalMessage').html(message);
+    }
+    $('#modalButton').html(button);
     $('#modal').modal('show');
 }
 

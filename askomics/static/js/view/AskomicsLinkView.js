@@ -3,7 +3,12 @@
 /*
   Manage Information Link View With a current selected link
 */
+const LINKVIEW_NEGATIVE_COLOR_TEXT = 'red';
+const LINKVIEW_TRANSITIVE_COLOR_TEXT = 'purple';
+const LINKVIEW_TRANSITIVE_NEGATIVE_COLOR_TEXT = 'orange';
+
 class AskomicsLinkView extends AskomicsObjectView {
+
   constructor(link) {
     super(link);
     this.link = link ;
@@ -14,6 +19,20 @@ class AskomicsLinkView extends AskomicsObjectView {
     help_str += ' This mean that attribute '+this.link.target.label+' of '+this.link.source.label+' is an entity.';
     $('#help_figure').addClass( "hidden" );
     displayModal(help_title, help_str, 'ok');
+  }
+
+  getTextColorLabel() {
+    if ( this.link.negative && this.link.transitive ) return LINKVIEW_TRANSITIVE_NEGATIVE_COLOR_TEXT;
+    if ( this.link.negative ) return LINKVIEW_NEGATIVE_COLOR_TEXT;
+    if ( this.link.transitive ) return LINKVIEW_TRANSITIVE_COLOR_TEXT;
+    return this.link.getTextFillColor();
+  }
+
+  getTextLabel() {
+    if ( this.link.negative && this.link.transitive ) return 'NOT '+this.link.label+"+";
+    if ( this.link.negative ) return 'NOT '+this.link.label;
+    if ( this.link.transitive ) return this.link.label+"+";
+    return this.link.label;
   }
 
   makeNegativeCheckBox() {
@@ -31,6 +50,8 @@ class AskomicsLinkView extends AskomicsObjectView {
       } else {
         link.negative = false;
       }
+      $('#'+mythis.link.getSvgLabelId()).find('textPath').attr('fill',mythis.getTextColorLabel());
+      $('#'+mythis.link.getSvgLabelId()).find('textPath').text(mythis.getTextLabel());
     });
 
     if (this.link.negative) {
@@ -54,6 +75,8 @@ class AskomicsLinkView extends AskomicsObjectView {
       } else {
         link.transitive = false;
       }
+      $('#'+mythis.link.getSvgLabelId()).find('textPath').attr('fill',mythis.getTextColorLabel());
+      $('#'+mythis.link.getSvgLabelId()).find('textPath').text(mythis.getTextLabel());
     });
 
     if (this.link.transitive) {

@@ -46,6 +46,10 @@ class AskomicsResultsView {
       this.is_valid();
       // to clear and print new results
       $("#results").empty();
+      //.css("overflow","scroll")
+      //.css("height","80px")
+      //.css("width","100%")
+      //.css("overflow","auto");
 
       this.setActivesAttributes();
 
@@ -61,10 +65,56 @@ class AskomicsResultsView {
                     .addClass('table-results');
 
       $("#results")
-        .append(table.append(this.build_header_results())
-        .append(this.build_subheader_results(new AskomicsGraphBuilder().nodes()))
-        .append(this.build_body_results(new AskomicsGraphBuilder().nodes())));
+        //.append($('<table></table>').append(this.build_simple_header_results()))
+        .append(table.append(this.build_simple_subheader_results(new AskomicsGraphBuilder().nodes()))
+                    .append(this.build_body_results(new AskomicsGraphBuilder().nodes()))
+        );
+/*
+        $("#results")
+          .append(table.append(this.build_simple_header_results())
+          .append(this.build_simple_subheader_results(new AskomicsGraphBuilder().nodes()))
+          .append(this.build_body_results(new AskomicsGraphBuilder().nodes())));
+*/
+
+
+//https://datatables.net/extensions/buttons/examples/initialisation/export.html
+      table.DataTable( {
+       "paging"     : true,
+       "ordering"   : true,
+       "info"       : true,
+       dom: 'Bfrtip',
+        buttons: [
+            'copy', 'csv', 'excel'
+        ]
+   } );
+
   }
+
+  build_simple_header_results() {
+    let head = $('<thead></thead>');
+    let row = $('<tr></tr>');
+
+    this.is_valid();
+    this.is_activedAttribute();
+
+    /* set Entity Header */
+    for (let i=0;i<new AskomicsGraphBuilder().nodes().length;i++ ) {
+      let node = new AskomicsGraphBuilder().nodes()[i];
+      if ( ! node.actif ) continue;
+
+      let nAttributes = this.activesAttributes[node.id].length;
+      /* Fomattage en indice du numero de l'entité */
+      row.append($('<th></th>')
+                      .addClass("table-bordered")
+                      .attr("style", "text-align:center;")
+                      .attr("colspan",nAttributes).append(node.formatInHtmlLabelEntity())
+                    );
+    }
+
+    head.append(row);
+    return head;
+  }
+
 
   build_header_results() {
     let head = $('<thead></thead>');
@@ -119,6 +169,28 @@ class AskomicsResultsView {
     head.append(row);
     return head;
   }
+
+  build_simple_subheader_results(nodeList) {
+
+    this.is_valid();
+    this.is_activedAttribute();
+
+    let head = $('<thead></thead>');
+    let row = $('<tr></tr>');
+    for (let i=0;i<nodeList.length;i++ ) {
+      let node = nodeList[i];
+      if ( ! node.actif ) continue;
+      for (let sparqlid in this.activesAttributes[node.id]) {
+        console.log(sparqlid+"="+this.activesAttributesLabel[node.id][sparqlid]);
+        row.append($('<th></th>')
+           .addClass("success")
+           .addClass("table-bordered").html(this.activesAttributesLabel[node.id][sparqlid]+node.getLabelIndex()));
+      }
+    }
+    head.append(row);
+    return head;
+  }
+
 
   build_subheader_results(nodeList) {
 

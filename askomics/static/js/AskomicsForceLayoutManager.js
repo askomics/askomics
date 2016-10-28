@@ -3,8 +3,11 @@
 class AskomicsForceLayoutManager {
 
   constructor() {
-    this.w = $("#svgdiv").width();
-    this.h = 350 ;
+    this.w        = $("#svgdiv").width();
+    this.h        = 350 ;
+    this.maxh     = 700 ;
+    this.curx     = 0   ;
+    this.cury     = 0   ;
     this.charge   = -700 ;
     this.distance = 175 ;
     this.friction = 0.7 ;
@@ -13,8 +16,123 @@ class AskomicsForceLayoutManager {
     /* To manage information about File menu */
     this.menuFile = new AskomicsMenuFile(this);
 
+    this.optionsView = {
+      attributesFiltering  : true,
+      relationsName        : true
+    };
 
     let currentFL = this;
+
+    /*************************************************/
+    /* Context Menu definition inside SVG Div        */
+    /*************************************************/
+    let faCheckEmptBox = 'fa-square-o';
+    let faCheckBox = 'fa-check-square-o';
+
+    let TitleFilterAtt = "Filtering attributes" ;
+    let TitleFilterRelationName = "Relations name" ;
+
+    $.contextMenu({
+            selector: '#svgdiv',
+            items: {
+                "rmenu-save-query"   : {
+                  name: $("#dwl-query").text(),
+                  icon: "fa-download",
+                  callback: function(key, options) {
+                    $("#dwl-query")[0].click();
+                  }
+                },
+                "rmenu-save-sparql-query" :
+                {
+                  name: $("#dwl-query-sparql").text(),
+                  icon: "fa-floppy-o",
+                  callback: function(key, options) {
+                    $("#dwl-query-sparql")[0].click();
+                  }
+                },
+                "sep1"   : "---------",
+                "rmenu-filt-attributes" :
+                {
+                  name  : TitleFilterAtt,
+                  icon  : faCheckBox,
+                  callback: function(key, options) {
+                    $(".context-menu-icon."+faCheckBox+",.context-menu-icon."+faCheckEmptBox).find("span").each(function( index ) {
+                        if ( $( this ).text() === TitleFilterAtt ) {
+                          if ($( this ).parent().hasClass(faCheckBox)) {
+                            currentFL.optionsView.attributesFiltering = false;
+                            $( this ).parent().removeClass(faCheckBox);
+                            $( this ).parent().addClass(faCheckEmptBox);
+                          } else {
+                            currentFL.optionsView.attributesFiltering = true;
+                            $( this ).parent().removeClass(faCheckEmptBox);
+                            $( this ).parent().addClass(faCheckBox);
+                          }
+                        }
+                      });
+                      $("tspan[constraint_node_id]").css('display', currentFL.optionsView.attributesFiltering?'block':'none');
+                      return false;
+                  },
+                },
+                "rmenu-relation-name" :
+                {
+                  name  : TitleFilterRelationName,
+                  icon  : faCheckBox,
+                  callback: function(key, options) {
+
+                    $(".context-menu-icon."+faCheckBox+",.context-menu-icon."+faCheckEmptBox).find("span").each(function( index ) {
+
+                        if ( $( this ).text() === TitleFilterRelationName ) {
+                          if ($( this ).parent().hasClass(faCheckBox)) {
+                            $( this ).parent().removeClass(faCheckBox);
+                            $( this ).parent().addClass(faCheckEmptBox);
+                            currentFL.optionsView.relationsName = false;
+                          } else {
+                            currentFL.optionsView.relationsName = true;
+                            $( this ).parent().removeClass(faCheckEmptBox);
+                            $( this ).parent().addClass(faCheckBox);
+                          }
+                        }
+                      });
+                      $("[id^=" + GraphObject.getSvgLabelPrefix() + "] textPath").css('display', currentFL.optionsView.relationsName?'block':'none');
+                      return false;
+                   }
+                },
+                "sep2"   : "---------",
+                "rmenu-reset"   : {
+                  name: "Reset",
+                  callback: function(){
+                    resetGraph();
+                  }
+                },
+                "rmenu-quit"   : {
+                  name: "Quit",
+                  callback: function(key, options) {
+                    $("#dwl-query-sparql")[0].click();
+                  }
+                }
+              },
+              events: {
+                  show: function(opt) {
+                    // this is the trigger element
+                    var $this = this;
+                    if (Object.keys($this.data()).length === 0 ) return ;
+
+                    // import states from data store
+                    $.contextMenu.setInputValues(opt, $this.data());
+                    // this basically fills the input commands from an object
+                    // like {name: "foo", yesno: true, radio: "3", &hellip;}
+                  },
+                  hide: function(opt) {
+                    // this is the trigger element
+                    var $this = this;
+                    // export states to data store
+                    $.contextMenu.getInputValues(opt, $this.data());
+                    // this basically dumps the input commands' values to an object
+                    // like {name: "foo", yesno: true, radio: "3", &hellip;}
+                  }
+            }
+        });
+
     $('#full-screen-graph').click(function() {
       if ($('#icon-resize-graph').attr('value') == 'small') {
         currentFL.fullsizeGraph();
@@ -45,26 +163,27 @@ class AskomicsForceLayoutManager {
 
     this.vis = d3.select("#svgdiv")
                 .append("svg:svg")
-                .attr("width", this.w)
-                .attr("height", this.h)
                 .attr("id", "svg")
                 .attr("pointer-events", "all")
-                .attr("viewBox", "0 0 " + this.w + " " + this.h)
-                .attr("perserveAspectRatio", "xMinYMid")
+                .attr({
+                  "width": "100%",
+                  "height": "100%"
+                })
+                .attr("viewBox", "0 0 " + this.w + " " + this.h )
+                .attr("perserveAspectRatio", "xMinYMid meet")
+                .call(d3.behavior.zoom().on("zoom", function() {
+                  let velocity = 1/10;
+                  let scale =  Math.pow(d3.event.scale,velocity);
+
+                  let translateY = (currentFL.h - (currentFL.h * scale))/2;
+                  let translateX = (currentFL.w - (currentFL.w * scale))/2;
+
+                  currentFL.vis.attr("transform","translate(" + [translateX,translateY] + ")" + " scale(" +scale+ ")");
+
+                  //  currentFL.vis.attr("transform","translate(" + d3.event.translate + ")" + " scale(" +scale+ ")");
+                }))
                 .append('svg:g');
-/*
-                $("#svgdiv").resizable({
-                  containment: "#graph",
-                  minHeight: this.h,
-                  minWidth: this.w
-                });
-                */
-              //  .call(d3.behavior.zoom().on("zoom", console.log("redraw")));
-  /*
-                .on("mouseover", function() { focus.style("display", null); })
-                .on("mouseout", function() { focus.style("display", "none"); })
-                .on("mousemove", mousemove);
-  */
+
     this.force = d3.layout.force();
 
     this.nodes = this.force.nodes();
@@ -145,8 +264,10 @@ class AskomicsForceLayoutManager {
     $('#viewDetails').hide();
     $('#results').hide();
     $('#graph').attr('class', 'col-md-12');
-    $("#svg").attr('height', 700);
-    $("#svg").attr('width', $("#svgdiv").width());
+
+    $("#svg").attr("viewBox", this.curx +" " + this.cury +" " + $("#content_interrogation").width() + " " + this.maxh);
+    $("#svg").attr('height', this.maxh);
+    $("#svg").attr('width', $("#content_interrogation").width());
 
     //change icon
     $('#icon-resize-graph').attr('class', 'glyphicon glyphicon-resize-small');
@@ -157,8 +278,9 @@ class AskomicsForceLayoutManager {
     $('#viewDetails').show();
     $('#results').show();
     $('#graph').attr('class', 'col-md-6');
-    $("#svg").attr('height', 350);
-    $("#svg").attr('width', $("#svgdiv").width());
+    $("#svg").attr("viewBox", this.curx +" " + this.cury +" " + this.w + " " + this.h);
+    $("#svg").attr('height', this.h);
+    $("#svg").attr('width', this.w);
 
     //change icon
     $('#icon-resize-graph').attr('class', 'glyphicon glyphicon-resize-full');
@@ -194,6 +316,15 @@ class AskomicsForceLayoutManager {
 
   colorSelectdObject(prefix,id) {
     $(prefix+id).css("stroke", "firebrick");
+  }
+
+  updateInstanciedNode() {
+    d3.selectAll('g.node')
+    .each(function(d) {
+      //d3.select(this) // Transform to d3 Object
+      if (! d.suggested )
+        d.getPanelView().define_context_menu();
+    });
   }
 
   start() {
@@ -283,8 +414,9 @@ class AskomicsForceLayoutManager {
         let id = links[l].id;
         $("#" + id).css("stroke-dasharray","");
         $("#" + id).css("opacity","1");
-        $('#label-'+id).css('opacity', "1");
+        $('#'+GraphObject.getSvgLabelPrefix()+id).css('opacity', "1");
       }
+    //  $("[id^=" + GraphObject.getSvgLabelPrefix() + "] textPath").css('display', this.optionsView.relationsName?'block':'none');
     }
 
     /* Update the label of cercle when a node is instanciated */
@@ -298,6 +430,7 @@ class AskomicsForceLayoutManager {
       // canceled transparency
       $("#node_"+node.id).css("opacity", "1");
       $('#txt_'+node.id).css("opacity","1");
+      $("tspan[constraint_node_id]").css('display', this.optionsView.attributesFiltering?'block':'none');
     }
 
     /* Update the label of cercle when a node is instanciated */
@@ -561,6 +694,11 @@ class AskomicsForceLayoutManager {
       }
     }
 
+    removeLinkSvgInformation(l) {
+      $('#'+l.getSvgLabelId()).remove();
+      $('#start-marker-'+l.id).parent().remove();
+      $('#end-marker-'+l.id).parent().remove();
+    }
     /* Remove all nodes and links suggestion */
     removeSuggestions() {
 
@@ -578,6 +716,8 @@ class AskomicsForceLayoutManager {
         }
       }
       for (var j=removeL.length-1;j>=0;j--) {
+        /* remove label, and arraow start/end */
+        this.removeLinkSvgInformation(this.links[removeL[j]]);
         this.links.splice(removeL[j],1);
       }
       var removeN = [];
@@ -621,13 +761,14 @@ class AskomicsForceLayoutManager {
     link.enter().append("text")
                 .attr("style", "text-anchor:middle; font: 10px sans-serif; cursor: pointer;")
                 .attr("dy", "-5")
-                .attr('id', function(d) {return 'label-'+d.id;})
+                .attr('id', function(d) { return d.getSvgLabelId();})
                 .style("opacity", function(d) {return d.getTextOpacity();})
                 .append("textPath")
                 .attr("xlink:href",function(d) {return "#"+d.id;})
                 .attr("startOffset", "35%")
                 .attr('fill', function(d){ return d.getTextFillColor();})
                 .text(function(d){return d.label;})
+                .style('display', currentFL.optionsView.relationsName?'block':'none')
                 .on('click', function(d) { // Mouse down on a link label
                   if (d != currentFL.selectLink) { //if link is not selected
                     /* user want a new relation contraint betwwenn two node*/
@@ -780,14 +921,22 @@ class AskomicsForceLayoutManager {
               .attr("y", ".31em")
               .attr("id", function (d) {
                   return "txt_" + d.id;
-              })
-              .text(function (d) { return d.label; })
-                  .append("tspan")
+              }).text(function (d) { return d.label; })
+              .append("tspan")
                    .attr("font-size","7")
                    .attr("baseline-shift","sub")
                    .text(function (d) {
                      return d.getLabelIndex();
-                    });
+                    })
+             .append("tspan")
+             .attr("constraint_node_id",function(d){
+               return d.id;
+             } )
+             .style('display', currentFL.optionsView.attributesFiltering?'block':'none')
+             .attr("font-size","8")
+             .attr("dy","10" )
+             .attr("x",14 )
+             .text(function (d) { return d.getAttributesWithConstraintsString(); }) ;
 
       link.exit().remove();
       node.exit().remove();
@@ -860,6 +1009,7 @@ class AskomicsForceLayoutManager {
           gnode.parentNode.appendChild(gnode);
       });
 
+      this.updateInstanciedNode() ;
 
       // Restart the force layout.
       this.force.charge(this.charge)

@@ -24,7 +24,7 @@ class AskomicsPositionableLinkView extends AskomicsObjectView {
     // remove link
     var id = this.link.id;
     $('#'+id).remove(); // link
-    $('#label-'+id).remove(); // link label
+    $('#'+GraphObject.getSvgLabelPrefix()+id).remove(); // link label
     $('#marker-'+id).remove(); // arrow
 
     // change link type and label
@@ -57,7 +57,7 @@ class AskomicsPositionableLinkView extends AskomicsObjectView {
     var linkid = $('#'+id).attr("idlink");
 
     $('#'+id).remove(); // link
-    $('#label-'+id).remove(); // link label
+    $('#'+GraphObject.getSvgLabelPrefix()+id).remove(); // link label
     $('#marker-'+id).remove(); // arrow
 
     // swap target and source

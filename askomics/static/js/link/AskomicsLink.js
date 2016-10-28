@@ -41,4 +41,7 @@ class AskomicsLink extends GraphLink {
   instanciateVariateSPARQL(variates) {
 
   }
+
+  getLinkStrokeColor() { return super.getLinkStrokeColor(); }
+  
 }

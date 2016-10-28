@@ -139,7 +139,10 @@ var testFrameworkFiles=[
   'node_modules/should/should.js',
   'node_modules/chai/chai.js',
   'node_modules/jquery/dist/jquery.js',
-  'node_modules/intro.js/intro.js'
+  'node_modules/intro.js/intro.js',
+  'askomics/static/js/third-party/jquery.dataTables.min.js',
+  'askomics/static/js/third-party/jQuery-contextMenu-2.30/jquery.contextMenu.min.js',
+  'askomics/static/js/third-party/jQuery-contextMenu-2.30/jquery.ui.position.min.js',
 ];
 // New Askomics files instrumented for coverage
 var askomicsInstrumentedSourceFiles = askomicsSourceFiles.slice();
