@@ -50,7 +50,7 @@ class AskomicsUserAbstraction {
     }
 
     static getTypeAttribute(attributeForUritype) {
-
+      
       if (attributeForUritype.indexOf("http://www.w3.org/2001/XMLSchema#decimal") >= 0) {
         return "decimal";
       }
@@ -58,7 +58,7 @@ class AskomicsUserAbstraction {
         return "string";
       }
 
-      throw "GraphNode::Unknown type:"+attributeForUritype;
+      return "category";
     }
 
     /*

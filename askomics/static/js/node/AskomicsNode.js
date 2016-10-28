@@ -92,7 +92,10 @@ class AskomicsNode extends GraphNode {
   get linkvar () { return this._linkvar; }
 
   getPanelView() {
-    return new AskomicsNodeView(this);
+    if ( this.panelview === undefined )
+      this.panelview =  new AskomicsNodeView(this);
+
+    return this.panelview ;
   }
 
   buildConstraintsSPARQL() {
@@ -379,7 +382,6 @@ class AskomicsNode extends GraphNode {
         }
       }
     }
-
     return {'id' : list_id, 'label': list_label};
   }
 

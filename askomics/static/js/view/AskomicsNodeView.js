@@ -11,6 +11,48 @@ class AskomicsNodeView extends AskomicsObjectView {
     this.node = node;
   }
 
+  define_context_menu() {
+    let mythis = this;
+    $( '#node_'+this.node.id ).contextmenu(function() {
+      let title = '<h4>'+mythis.node.label+'<tspan font-size="5" baseline-shift="sub">'+mythis.node.getLabelIndexHtml()+'</tspan>'+'</h4>';
+      let mess = "";
+      $("div[id="+AskomicsObjectView_prefix+mythis.node.id+"]").find("div[basic_type][uri]").each(
+        function( index ) {
+          let sparqlid = $( this ).attr('sparqlid');
+
+          let isFiltered = sparqlid in mythis.node.filters;
+          let isInversedMatch = sparqlid in mythis.node.inverseMatch;
+          let isFilteredCat = 'URICat'+sparqlid in mythis.node.filters;
+
+          if ( isFiltered || isInversedMatch || isFilteredCat ) {
+            mess += '<h5>'+$( this ).find('label').text()+'</h5>';
+
+            if ( sparqlid in mythis.node.filters )
+              mess += '<p><pre>'+mythis.node.filters[sparqlid]+'</pre></p>';
+            if ( 'URICat'+sparqlid in mythis.node.filters )
+              mess += '<p><pre>'+mythis.node.filters['URICat'+sparqlid]+'</pre></p>';
+            if ( sparqlid in mythis.node.inverseMatch )
+              mess += '<p><it><small>Inverse match</small><it></p>';
+          }
+      });
+
+      let VarDisplay = mythis.node.getAttributesDisplaying();
+
+      if (VarDisplay.label.length>0) {
+        
+        mess += '<h5>Displaying attributes</h5>';
+        for (let v=0 ; v < VarDisplay.label.length-1; v++ ) {
+          mess += VarDisplay.label[v]+",";
+        }
+        mess += VarDisplay.label[VarDisplay.label.length-1];
+      }
+
+
+      displayModalHtml(title, mess ,'Close');
+      return false;
+    });
+  }
+
   display_help() {
     let help_title = 'Node "'+this.node.label+'"';
     let help_str = ' Choose which attributes you want to see on the right panel.';
@@ -243,7 +285,7 @@ class AskomicsNodeView extends AskomicsObjectView {
             inp.append($('<option></option>').prop('disabled', true).html("<b><i> --- "+ n.formatInHtmlLabelEntity()+" --- </i></b>"));
             firstPrintForThisNode = false;
             //ID Label is a string
-            if ( ! ('type' in curAtt) || ("string" == mythis.node.getTypeAttribute(curAtt)) ) { // if not, it's a NODE ID
+            if ( ! ('type' in curAtt) || ("string" == curAtt.basic_type) ) { // if not, it's a NODE ID
 
                 let option = $('<option></option>')
                         .attr("value",n.SPARQLid)
@@ -263,9 +305,9 @@ class AskomicsNodeView extends AskomicsObjectView {
 
             if ( 'type' in curAtt) {
               /* we can not link attributes with diffente type */
-              if ( n.getTypeAttribute(att) != mythis.node.getTypeAttribute(curAtt) ) continue;
+              if ( att.basic_type != curAtt.basic_type ) continue;
             } else { // It's a node ID
-                if ( n.getTypeAttribute(att) != "string" ) continue;
+                if ( att.basic_type != "string" ) continue;
             }
             if ( firstPrintForThisNode ) {
               inp.append($('<option></option>').prop('disabled', true).html("<b><i> --- "+ n.formatInHtmlLabelEntity()+" --- </i></b>"));
@@ -274,7 +316,7 @@ class AskomicsNodeView extends AskomicsObjectView {
 
             let option = $('<option></option>')
                         .attr("value",att.SPARQLid)
-                        .attr("type",n.getTypeAttribute(att)).html(att.label)
+                        .attr("type",att.basic_type).html(att.label)
                         .attr("nodeAttLink",n.id);
 
             if ( sparqlIdSelected == att.SPARQLid ) option.prop('selected', true);
@@ -291,7 +333,7 @@ class AskomicsNodeView extends AskomicsObjectView {
         let nodeAttLink = $(this).find("option:selected").attr("nodeAttLink");
         let sparlidCurrentAtt = $(this).attr('sparqlid');
 
-        if ( (nodeAttLink === undefined) || (nodeid === undefined) )
+        if ( nodeAttLink === undefined )
           return ;
 
         let node2 = new AskomicsGraphBuilder().getInstanciedNode(nodeAttLink);
@@ -452,16 +494,20 @@ class AskomicsNodeView extends AskomicsObjectView {
           let sparqlid  = $(this).attr('sparqlid');
           let hasSelection = mythis.haveSelectionUserValue(this);
 
-          if (icon.hasClass('fa-plus') && hasSelection ) {
-              icon.removeClass('fa-plus');
-              icon.addClass('fa-minus');
-              mythis.node.inverseMatch[sparqlid] = 'inverseWithExistingRelation';
-          } else if (icon.hasClass('fa-plus')) {
+          /*
+          Confugisng Functionality...waitin reflexion....
+          */
+          //if (icon.hasClass('fa-plus') && hasSelection ) {
+              //icon.removeClass('fa-plus');
+              //icon.addClass('fa-minus');
+              //mythis.node.inverseMatch[sparqlid] = 'inverseWithExistingRelation';
+          //} else if (icon.hasClass('fa-plus')) {
+          if (icon.hasClass('fa-plus')) {
               icon.removeClass('fa-plus');
               icon.addClass('fa-search-minus');
               mythis.node.inverseMatch[sparqlid] = 'inverseWithNoRelation';
           }
-            else if ( icon.hasClass('fa-minus') ) {
+          else if ( icon.hasClass('fa-minus') ) {
                 icon.removeClass('fa-minus');
                 icon.addClass('fa-search-minus');
                 mythis.node.inverseMatch[sparqlid] = 'inverseWithNoRelation';
@@ -546,6 +592,7 @@ class AskomicsNodeView extends AskomicsObjectView {
 
       mythis.addPanel($('<div></div>')
              .attr("id",node.id)
+             .attr("sparqlid",node.SPARQLid)
              .attr("uri",node.uri)
              .attr("basic_type","string")
              .append(lab)
@@ -567,6 +614,7 @@ class AskomicsNodeView extends AskomicsObjectView {
             /* RemoveIcon, EyeIcon, Attribute IHM */
             mythis.addPanel($('<div></div>')
                    .attr("id",attribute.id)
+                   .attr("sparqlid",attribute.SPARQLid)
                    .attr("uri",attribute.uri)
                    .attr("basic_type",attribute.basic_type)
                    .append(lab)
@@ -580,6 +628,7 @@ class AskomicsNodeView extends AskomicsObjectView {
             /* RemoveIcon, EyeIcon, Attribute IHM */
             mythis.addPanel($('<div></div>').append(lab)
                    .attr("id",attribute.id)
+                   .attr("sparqlid",attribute.SPARQLid)
                    .attr("uri",attribute.uri)
                    .attr("basic_type",attribute.basic_type)
                    .append(mythis.makeRemoveIcon())
@@ -593,6 +642,7 @@ class AskomicsNodeView extends AskomicsObjectView {
             /* RemoveIcon, EyeIcon, Attribute IHM */
             mythis.addPanel($('<div></div>').append(lab)
                    .attr("id",attribute.id)
+                   .attr("sparqlid",attribute.SPARQLid)
                    .attr("uri",attribute.uri)
                    .attr("basic_type",attribute.basic_type)
                    .append(mythis.makeRemoveIcon())

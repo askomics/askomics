@@ -132,17 +132,17 @@
                         <!--upload-->
                         <li><a href="#" class="small">
                         <div class="uploadBtn">
-                        <p><span class="glyphicon glyphicon-export" aria-hidden="true"></span> Load query</p>
+                        <p><span class="fa fa-upload" aria-hidden="true"></span> Load query</p>
                         <input id="uploadBtn" type="file" class="upload">
                         </div>
                         </a></li>
                         <!--download-->
                         <li><a href="#" id="dwl-query" class="small">
-                        <p><span class="glyphicon glyphicon-save small" aria-hidden="true"></span> Save query</p>
+                        <p><span class="fa fa-download small" aria-hidden="true"></span> Save query</p>
                         </a></li>
                         <!--download-->
                         <li><a href="#" id="dwl-query-sparql" class="small">
-                        <p><span class="glyphicon glyphicon-download small" aria-hidden="true"></span> Save SPARQL query</p>
+                        <p><span class="fa fa-floppy-o small small" aria-hidden="true"></span> Save SPARQL query</p>
                         </a></li>
                       </ul>
                     </div>

@@ -14,23 +14,27 @@ class AskomicsForceLayoutManager {
     this.menuFile = new AskomicsMenuFile(this);
 
     this.optionsView = {
-      attributesFiltering : true,
+      attributesFiltering  : true,
       relationsName        : true
     };
+
     let currentFL = this;
 
     /*************************************************/
     /* Context Menu definition inside SVG Div        */
     /*************************************************/
+    let faCheckEmptBox = 'fa-square-o';
+    let faCheckBox = 'fa-check-square-o';
+
+    let TitleFilterAtt = "Filtering attributes" ;
+    let TitleFilterRelationName = "Relations name" ;
 
     $.contextMenu({
             selector: '#svgdiv',
-            callback: function(key, options) {
-            },
             items: {
                 "rmenu-save-query"   : {
                   name: $("#dwl-query").text(),
-                  icon: "save",
+                  icon: "fa-download",
                   callback: function(key, options) {
                     $("#dwl-query")[0].click();
                   }
@@ -38,7 +42,7 @@ class AskomicsForceLayoutManager {
                 "rmenu-save-sparql-query" :
                 {
                   name: $("#dwl-query-sparql").text(),
-                  icon: "save",
+                  icon: "fa-floppy-o",
                   callback: function(key, options) {
                     $("#dwl-query-sparql")[0].click();
                   }
@@ -46,14 +50,49 @@ class AskomicsForceLayoutManager {
                 "sep1"   : "---------",
                 "rmenu-filt-attributes" :
                 {
-                  name  : "Filtering attributes",
-                  type  : 'checkbox',
-                  selected: true
+                  name  : TitleFilterAtt,
+                  icon  : faCheckBox,
+                  callback: function(key, options) {
+                    $(".context-menu-icon."+faCheckBox+",.context-menu-icon."+faCheckEmptBox).find("span").each(function( index ) {
+                        if ( $( this ).text() === TitleFilterAtt ) {
+                          if ($( this ).parent().hasClass(faCheckBox)) {
+                            currentFL.optionsView.attributesFiltering = false;
+                            $( this ).parent().removeClass(faCheckBox);
+                            $( this ).parent().addClass(faCheckEmptBox);
+                          } else {
+                            currentFL.optionsView.attributesFiltering = true;
+                            $( this ).parent().removeClass(faCheckEmptBox);
+                            $( this ).parent().addClass(faCheckBox);
+                          }
+                        }
+                      });
+                      $("tspan[constraint_node_id]").css('display', currentFL.optionsView.attributesFiltering?'block':'none');
+                      return false;
+                  },
                 },
-                "rmenu-relation-name" : {
-                  name  : "Relations name",
-                  type  : 'checkbox',
-                  selected: true
+                "rmenu-relation-name" :
+                {
+                  name  : TitleFilterRelationName,
+                  icon  : faCheckBox,
+                  callback: function(key, options) {
+
+                    $(".context-menu-icon."+faCheckBox+",.context-menu-icon."+faCheckEmptBox).find("span").each(function( index ) {
+
+                        if ( $( this ).text() === TitleFilterRelationName ) {
+                          if ($( this ).parent().hasClass(faCheckBox)) {
+                            $( this ).parent().removeClass(faCheckBox);
+                            $( this ).parent().addClass(faCheckEmptBox);
+                            currentFL.optionsView.relationsName = false;
+                          } else {
+                            currentFL.optionsView.relationsName = true;
+                            $( this ).parent().removeClass(faCheckEmptBox);
+                            $( this ).parent().addClass(faCheckBox);
+                          }
+                        }
+                      });
+                      $("[id^=" + GraphObject.getSvgLabelPrefix() + "] textPath").css('display', currentFL.optionsView.relationsName?'block':'none');
+                      return false;
+                   }
                 },
                 "sep2"   : "---------",
                 "rmenu-reset"   : {
@@ -88,29 +127,8 @@ class AskomicsForceLayoutManager {
                     // this basically dumps the input commands' values to an object
                     // like {name: "foo", yesno: true, radio: "3", &hellip;}
                   }
-
             }
         });
-
-    $("input[name='context-menu-input-rmenu-filt-attributes']").click(function() {
-      if ($(this).is(':checked')) {
-        $("tspan[constraint_node_id]").show();
-        currentFL.optionsView.attributesFiltering = true;
-      } else {
-        $("tspan[constraint_node_id]").hide();
-        currentFL.optionsView.attributesFiltering = false;
-      }
-    });
-
-    $("input[name='context-menu-input-rmenu-relation-name']").click(function() {
-      if ($(this).is(':checked')) {
-        $("[id^=" + GraphObject.getSvgLabelPrefix() + "] textPath").show();
-        currentFL.optionsView.relationsName = true;
-      } else {
-        $("[id^=" + GraphObject.getSvgLabelPrefix() + "] textPath").hide();
-        currentFL.optionsView.relationsName = false;
-      }
-    });
 
     $('#full-screen-graph').click(function() {
       if ($('#icon-resize-graph').attr('value') == 'small') {
@@ -293,6 +311,15 @@ class AskomicsForceLayoutManager {
     $(prefix+id).css("stroke", "firebrick");
   }
 
+  updateInstanciedNode() {
+    d3.selectAll('g.node')
+    .each(function(d) {
+      //d3.select(this) // Transform to d3 Object
+      if (! d.suggested )
+        d.getPanelView().define_context_menu();
+    });
+  }
+
   start() {
     /* Get information about start point to bgin query */
     let startPoint = $('#startpoints').find(":selected").data("value");
@@ -382,6 +409,7 @@ class AskomicsForceLayoutManager {
         $("#" + id).css("opacity","1");
         $('#label-'+id).css('opacity', "1");
       }
+      $("[id^=" + GraphObject.getSvgLabelPrefix() + "] textPath").css('display', this.optionsView.relationsName?'block':'none');
     }
 
     /* Update the label of cercle when a node is instanciated */
@@ -395,6 +423,7 @@ class AskomicsForceLayoutManager {
       // canceled transparency
       $("#node_"+node.id).css("opacity", "1");
       $('#txt_'+node.id).css("opacity","1");
+      $("tspan[constraint_node_id]").css('display', this.optionsView.attributesFiltering?'block':'none');
     }
 
     /* Update the label of cercle when a node is instanciated */
@@ -895,8 +924,6 @@ class AskomicsForceLayoutManager {
              .attr("x",14 )
              .text(function (d) { return d.getAttributesWithConstraintsString(); }) ;
 
-
-
       link.exit().remove();
       node.exit().remove();
 
@@ -968,6 +995,7 @@ class AskomicsForceLayoutManager {
           gnode.parentNode.appendChild(gnode);
       });
 
+      this.updateInstanciedNode() ;
 
       // Restart the force layout.
       this.force.charge(this.charge)
