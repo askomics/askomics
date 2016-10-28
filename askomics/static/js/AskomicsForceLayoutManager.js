@@ -407,7 +407,7 @@ class AskomicsForceLayoutManager {
         let id = links[l].id;
         $("#" + id).css("stroke-dasharray","");
         $("#" + id).css("opacity","1");
-        $('#label-'+id).css('opacity', "1");
+        $('#'+GraphObject.getSvgLabelPrefix()+id).css('opacity', "1");
       }
       $("[id^=" + GraphObject.getSvgLabelPrefix() + "] textPath").css('display', this.optionsView.relationsName?'block':'none');
     }
