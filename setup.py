@@ -19,6 +19,7 @@ requires = [
     'nose',
     'webtest',
     'coverage',
+    'biopython',
     'bcbio-gff',
     ]
 
