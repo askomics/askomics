@@ -83,6 +83,7 @@
                             <ul class="dropdown-menu">
                               <li id="integration"><a href="#">Tabular Data Files(CSV,TSV)</a></li>
                               <li id="integration_ttl"><a href="#">RDF Files</a></li>
+                              <li id="integration_gff"><a href="#">GFF3 Files</a></li>
                             </ul>
                           </li>
 
@@ -197,6 +198,9 @@
         </div>
 
         <div id="content_integration_ttl" class="container" hidden>
+        </div>
+
+        <div id="content_integration_gff" class="container" hidden>
         </div>
 
         <div id="content_datasets" class="container" hidden>

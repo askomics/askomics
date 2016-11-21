@@ -19,6 +19,7 @@ requires = [
     'nose',
     'webtest',
     'coverage',
+    'bcbio-gff',
     ]
 
 setup(name='Askomics',

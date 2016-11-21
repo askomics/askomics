@@ -115,7 +115,8 @@ function displayTableTabularFile(data) {
 }
 
 /**
- *
+ * Insert TTL file
+ * FIXME: change function's name
  */
 function displayTableRDF(data) {
   let info = "";//$('<div></div>');
@@ -124,6 +125,47 @@ function displayTableRDF(data) {
   }
   displayModal(info, '', 'Close');
   if (data.error !== undefined ) alert(JSON.stringify(data.error));
+}
+
+/**
+ * Show the gff form to select which entities will be integrated
+ */
+function displayGffForm(data) {
+    console.log('---> displayGffForm');
+
+    $("#content_integration_gff").empty();
+
+    let filename = '';
+    let title = '';
+    let gff_div='';
+
+    for (let i = data.files.length - 1; i >= 0; i--) {
+
+        title = $('<h4></h4>').append('available entities in GFF file '+data.files[i].filename);
+
+        gff_div = $('<div></div>');
+
+        gff_div.append(title);
+
+        for (let j = data.files[i].entities.length - 1; j >= 0; j--) {
+            console.log('+*+> entity: '+data.files[i].entities[j]);
+
+            let selectbox = $('<label></label>').attr('id', 'gff1')
+                                                .append($('<input>').attr('type', 'checkbox')
+                                                                    .attr('id', 'id-'+data.files[i].entities[j])
+                                                                    .attr('checked', 'checked'))
+                                                .append(data.files[i].entities[j]);
+
+
+
+            gff_div.append(selectbox).append($('<br>'));
+        }
+
+        $("#content_integration_gff").append(gff_div)
+                                     .append('<hr><br>');
+
+    }
+
 }
 
 /**

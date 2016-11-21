@@ -5,6 +5,7 @@ import re
 
 from askomics.libaskomics.ParamManager import ParamManager
 from askomics.libaskomics.source_file.SourceFile import SourceFile
+from askomics.libaskomics.source_file.SourceFileGff import SourceFileGff
 
 class SourceFileConvertor(ParamManager):
     """
@@ -66,3 +67,18 @@ class SourceFileConvertor(ParamManager):
                 return f
 
         return None
+
+    def get_source_files_gff(self):
+        """
+        :return: List of the file to convert paths
+        :rtype: List
+        """
+        src_dir = self.get_source_file_directory()
+        paths = glob(src_dir + '/*.gff3')
+
+        files = []
+        for p in paths:
+            # +7 for the header ?
+            files.append(SourceFileGff(self.settings, self.session, p, int(self.settings["askomics.overview_lines_limit"])))
+
+        return files

@@ -253,6 +253,37 @@ class AskView(object):
 
             data['files'].append(infos)
 
+        self.log.debug(str(data))
+
+        return data
+
+    @view_config(route_name='source_files_overview_gff', request_method='GET')
+    def source_files_overview_gff(self):
+        """
+        Get the preview data for all the available files
+        """
+        self.log.debug('===> Askview:source_files_overview_rdf <===')
+        sfc = SourceFileConvertor(self.settings, self.request.session)
+
+        data = {}
+        data['files'] = []
+
+        source_files_gff = sfc.get_source_files_gff()
+
+        for gff in source_files_gff:
+            infos = {}
+            try:
+                entities = gff.get_entities()
+                infos['entities'] = entities
+                infos['filename'] = gff.name
+
+            except Exception as e:
+                traceback.print_exc(file=sys.stdout)
+                infos['error'] = 'Could not parse the file, are you sure it is a valid GFF3 file?'
+                self.log.error(str(e))
+
+            data['files'].append(infos)
+
         return data
 
     @view_config(route_name='insert_files_rdf', request_method='GET')
@@ -288,6 +319,7 @@ class AskView(object):
             data['files'].append(infos)
 
         return data
+
 
     @view_config(route_name='preview_ttl', request_method='POST')
     def preview_ttl(self):

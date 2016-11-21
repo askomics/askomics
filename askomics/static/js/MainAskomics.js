@@ -399,10 +399,13 @@ function setUploadForm(content,titleForm,route_overview,callback) {
 
     // Integrate button
     $('.integrate-button').click(function() {
+        displayModal('Please Wait', '', 'Close');
         var service = new RestServiceJs(route_overview);
         service.getAll(function(data) {
             callback(data);
+            hideModal();
         });
+
     });
   });
 }
@@ -441,6 +444,10 @@ $(function () {
 
     $("#integration_ttl").click(function() {
         setUploadForm('div#content_integration_ttl',"Upload User TTL Files","insert_files_rdf",displayTableRDF);
+    });
+
+    $("#integration_gff").click(function() {
+        setUploadForm('div#content_integration_gff', 'Upload User GFF3 Files', "source_files_overview_gff", displayGffForm);
     });
 
     // Visual effect on active tab (Ask! / Integrate / Credits)
