@@ -33,6 +33,11 @@ $(function () {
     $("#content_integration").on('click', '.load_data', function(event) {
         loadSourceFile($(event.target).closest('.template-source_file'));
     });
+
+    $("#content_integration_gff").on('click', '.load_data', function() {
+        let filename = $(this).attr('id');
+        loadSourceFileGff(filename);
+    });
 });
 
 /**
@@ -131,6 +136,7 @@ function displayTableRDF(data) {
  * Show the gff form to select which entities will be integrated
  */
 function displayGffForm(data) {
+    //FIXME: use handlebars
     console.log('---> displayGffForm');
 
     $("#content_integration_gff").empty();
@@ -143,26 +149,41 @@ function displayGffForm(data) {
 
         title = $('<h4></h4>').append('available entities in GFF file '+data.files[i].filename);
 
-        gff_div = $('<div></div>');
+        gff_div = $('<div></div>').attr('id', data.files[i].filename);
 
         gff_div.append(title);
 
         for (let j = data.files[i].entities.length - 1; j >= 0; j--) {
-            console.log('+*+> entity: '+data.files[i].entities[j]);
 
-            let selectbox = $('<label></label>').attr('id', 'gff1')
+            let selectbox = $('<label></label>').attr('id', 'gff_checkbox-'+data.files[i].filename)
                                                 .append($('<input>').attr('type', 'checkbox')
-                                                                    .attr('id', 'id-'+data.files[i].entities[j])
+                                                                    .attr('id', data.files[i].entities[j])
                                                                     .attr('checked', 'checked'))
                                                 .append(data.files[i].entities[j]);
-
-
 
             gff_div.append(selectbox).append($('<br>'));
         }
 
-        $("#content_integration_gff").append(gff_div)
-                                     .append('<hr><br>');
+        let taxon_field = $('<input>').attr('type', 'text')
+                                      .attr('name', 'frame')
+                                      .attr('id', 'tax-'+data.files[i].filename);
+
+        let integrate_button = $('<input>').attr('type', 'button')
+                                           .attr('id', data.files[i].filename)
+                                           .attr('class', 'btn btn-primary load_data')
+                                           .attr('value', 'Insert in database');
+
+
+
+        gff_div.append('<br>')
+               .append($('<p></p>').append('Enter Taxon (optional)'))
+               .append(taxon_field)
+               .append('<br><br>')
+               .append(integrate_button)
+               .append('<hr><br>');
+
+        $("#content_integration_gff").append(gff_div);
+
 
     }
 
@@ -372,4 +393,35 @@ function loadSourceFile(file_elem) {
         $("#results").empty();
     }
     resetStats();
+}
+
+/**
+ * Load a GFF source_file into the triplestore
+ */
+function loadSourceFileGff(filename) {
+    console.log('-----> loadSourceFileGff <-----');
+    // get taxon
+    let taxon = $('#tax-'+filename).val();
+    // get entities
+    let entities = [];
+
+    $("#"+filename+" > label > input").each(function() {
+        if ($(this).is(":checked")) {
+            entities.push($(this).attr('id'));
+        }
+    });
+
+    displayModal('Please wait', '', 'Close');
+
+    let service = new RestServiceJs("load_gff_into_graph");
+    let model = { 'file_name': filename,
+                  'taxon': taxon,
+                  'entities': entities  };
+
+    service.post(model, function(data) {
+        console.log('-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-');
+        console.log(JSON.stringify(data));
+        console.log('-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-');
+        hideModal();
+    });
 }

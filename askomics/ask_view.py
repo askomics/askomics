@@ -433,6 +433,23 @@ class AskView(object):
 
         return data
 
+    @view_config(route_name='load_gff_into_graph', request_method='POST')
+    def load_gff_into_graph(self):
+        """
+        Load GFF file into the triplestore
+        """
+        self.log.debug("== load_gff_into_graph ==")
+        data = {}
+
+        body = self.request.json_body
+        file_name = body['file_name']
+        taxon = body['taxon']
+        entities = body['entities']
+
+
+
+        return data
+
     @view_config(route_name='getUserAbstraction', request_method='GET')
     def getUserAbstraction(self):
         """ Get the user asbtraction to manage relation inside javascript """
