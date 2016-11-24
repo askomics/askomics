@@ -442,9 +442,22 @@ class AskView(object):
         data = {}
 
         body = self.request.json_body
+        self.log.debug('===> body: '+str(body))
         file_name = body['file_name']
         taxon = body['taxon']
         entities = body['entities']
+
+        sfc = SourceFileConvertor(self.settings, self.request.session)
+        src_file_gff = sfc.get_source_file_gff(file_name)
+
+        try:
+            self.log.debug('--> Parsing GFF')
+            src_file_gff.integrate(taxon, entities)
+        except Exception as e:
+            traceback.print_exc(file=sys.stdout)
+            data['error'] = 'Problem when integration of '+file_name+'.</br>'+str(e)
+            self.log.error(str(e))
+
 
 
 

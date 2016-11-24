@@ -68,6 +68,23 @@ class SourceFileConvertor(ParamManager):
 
         return None
 
+    def get_source_file_gff(self, name):
+        """
+        Return an object representing a gff source file
+
+        :param name: Yhe name of the gff file to return
+        :return: the sourcefile
+        :rtype: SourceFileGff
+        """
+
+        files = self.get_source_files_gff()
+
+        for f in files:
+            if f.name == name:
+                return f
+
+        return None
+
     def get_source_files_gff(self):
         """
         :return: List of the file to convert paths
