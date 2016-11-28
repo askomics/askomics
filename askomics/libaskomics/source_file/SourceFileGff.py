@@ -1,7 +1,7 @@
 """
 Classes to import data from a gff3 source files
 """
-#import re
+import re
 #import logging
 #import csv
 #from collections import defaultdict
@@ -19,7 +19,7 @@ from askomics.libaskomics.source_file.SourceFile import SourceFile
 #from askomics.libaskomics.ParamManager import ParamManager
 #from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
 #from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
-from askomics.libaskomics.utils import cached_property, HaveCachedProperties, pformat_generic_object
+from askomics.libaskomics.utils import cached_property, HaveCachedProperties, pformat_generic_object, rreplace
 #from askomics.libaskomics.integration.AbstractedEntity import AbstractedEntity
 #from askomics.libaskomics.integration.AbstractedRelation import AbstractedRelation
 
@@ -62,12 +62,22 @@ class SourceFileGff(SourceFile):
 
         self.log.debug('--> go!')
 
-        #FIXME: use target_lines to speedup the integration
+        regex = re.compile(r'.*:')
+        ttl = ''
+
+        abstraction_dict = {}
+        pos_attr_list = [
+            'position_taxon', 'position_ref', 'position_start', 'position_end',
+            'position_strand'
+        ]
+
+        #TODO: test which loop is the faster
         # for rec in GFF.parse(handle, limit_info=limit, target_lines=1000):
         for rec in GFF.parse(handle, limit_info=limit):
+            # lists for abstraction
             for feat in rec.features:
                 type_entity = ':'+feat.type
-                id_entity = feat.id.replace(type_entity+":", "")
+                id_entity = regex.sub('', feat.id)
                 start_entity = int(feat.location.start)
                 end_entity = int(feat.location.end)
 
@@ -83,7 +93,7 @@ class SourceFileGff(SourceFile):
 
                 attribute_dict = {
                     'rdf:type': type_entity,
-                    'rdfs:label': id_entity,
+                    'rdfs:label': '\"'+id_entity+'\"',
                     ':position_taxon': taxon_entity,
                     ':position_ref': ref_entity,
                     ':position_start': start_entity,
@@ -91,14 +101,109 @@ class SourceFileGff(SourceFile):
                     ':position_strand': strand_entity
                 }
 
+                # Abstraction
+                if type_entity not in abstraction_dict.keys():
+                    abstraction_dict[type_entity] = {'pos_attr': pos_attr_list, 'normal_attr' : []}
+
                 for qualifier_key, qualifier_value in feat.qualifiers.items():
                     for val in qualifier_value:
-                        attribute_dict[':'+str(qualifier_key)] = str(val)
+                        if qualifier_key == 'Parent':
+                            attribute_dict[':' + str(qualifier_key)] = str(':' + regex.sub('', val))
+                            # Store the parent relation for abstraction
+                            if {'Parent' : re.sub(r':.*', '', val)} not in abstraction_dict[type_entity]['normal_attr']:
+                                abstraction_dict[type_entity]['normal_attr'].append({'Parent' : re.sub(r':.*', '', val)})
+                        else:
+                            attribute_dict[':' + str(qualifier_key)] = str('\"' + val + '\"')
+                            # store normal attr for abstraction
+                            if qualifier_key not in abstraction_dict[type_entity]['normal_attr']:
+                                abstraction_dict[type_entity]['normal_attr'].append(qualifier_key)
 
                 entity = {":"+id_entity: attribute_dict}
 
-                self.log.debug('===================> Entity <===================')
-                self.log.debug(entity)
-                self.log.debug('================================================')
+                # self.log.debug('===================> Entity <===================')
+                # self.log.debug(entity)
+                # self.log.debug('================================================')
+
+                ttl += self.get_content_ttl(entity)
+
+            ttl += self.get_abstraction_ttl(abstraction_dict)
+            ttl += self.get_domain_knowledge_ttl()
+
+            self.log.debug(ttl)
 
         handle.close()
+
+
+    def get_content_ttl(self, entity):
+        """
+
+        """
+
+        for id_entity, attribute_dict in entity.items():
+            first = True
+            ttl = str(id_entity)
+            indent = len(str(id_entity)) * ' ' + ' '
+            for key, attr in attribute_dict.items():
+                if first:
+                    ttl += ' ' + str(key) + ' ' + str(attr) + ' ;\n'
+                    first = False
+                else:
+                    ttl += indent + str(key) + ' ' + str(attr) + ' ;\n'
+
+        ttl += '\n'
+
+        ttl = rreplace(ttl, ';', '.', 1)
+
+        return ttl
+
+    def get_abstraction_ttl(self, abstraction):
+
+
+
+        ttl =  '#################\n'
+        ttl += '#  Abstraction  #\n'
+        ttl += '#################\n\n'
+
+        for entity, attribute_dict in abstraction.items():
+            ttl += entity + ' ' + 'rdf:type owl:Class ;\n'
+            indent = len(entity) * ' ' + ' '
+            ttl += indent + 'rdfs:label \"' + entity.replace(":", "") + "\" ;\n"
+            ttl += indent + 'displaySetting:startPoint \"true\"^^xsd:boolean .\n\n'
+            for type_attr, attr_list in attribute_dict.items():
+                if type_attr == 'pos_attr': # positionable attributes
+                    for pos_attr in attr_list:
+                        ttl += ':' + pos_attr + ' displaySetting:attribute \"true\"^^xsd:boolean ;\n'
+                        indent = len(pos_attr) * ' ' + '  '
+                        ttl += indent + 'rdf:type owl:ObjectProperty ;\n'
+                        ttl += indent + 'rdfs:label \"' + pos_attr.replace('position_', '') + '\" ;\n'
+                        ttl += indent + 'rdfs:domain ' + entity + ' ;\n'
+                        ttl += indent + 'rdfs:range :' + pos_attr.replace('position_', '') + "Category .\n\n"
+                else: # other attributes
+                    for attr in attr_list:
+                        if type(attr) == type({}): # Parent relation
+                            for key, value in attr.items():
+                                ttl += ':' + key + ' rdf:type owl:ObjectProperty ;\n'
+                                indent = len(key) * ' ' + '  '
+                                ttl += indent + 'rdfs:label \"' + key + '\" ;\n'
+                                ttl += indent + 'rdfs:domain ' + entity + " ;\n"
+                                ttl += indent + 'rdfs:range :' + value + ' .\n\n'
+                        else: # normal attributes
+                            ttl += ':'+ attr + ' displaySetting:attribute \"true\"^^xsd:boolean ;\n'
+                            indent = len(attr) * ' ' + '  '
+                            ttl += indent + 'rdf:type owl:DatatypeProperty ;\n'
+                            ttl += indent + 'rdfs:label \"' + attr + '\" ;\n'
+                            ttl += indent + 'rdfs:domain ' + entity + " ;\n"
+                            ttl += indent + 'rdfs:range xsd:string .\n\n'
+
+        return ttl
+
+    def get_domain_knowledge_ttl(self):
+
+
+
+        ttl =  '######################\n'
+        ttl += '#  Domain knowledge  #\n'
+        ttl += '######################\n\n'
+
+
+        return ttl
