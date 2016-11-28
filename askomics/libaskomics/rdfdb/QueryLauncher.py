@@ -5,6 +5,7 @@ from pprint import pformat
 from SPARQLWrapper import SPARQLWrapper, JSON
 import requests
 import logging
+import urllib.request
 
 from askomics.libaskomics.ParamManager import ParamManager
 
@@ -36,6 +37,11 @@ class QueryLauncher(ParamManager):
             - log_raw_results: if True the raw json response is logged. Set to False
             if you're doing a select and parsing the results with parse_results.
         """
+        # Set no proxy 
+        proxy_support = urllib.request.ProxyHandler({})
+        opener = urllib.request.build_opener(proxy_support)
+        urllib.request.install_opener(opener)
+
         if self.log.isEnabledFor(logging.DEBUG):
             # Prefixes should always be the same, so drop them for logging
             query_log = query #'\n'.join(line for line in query.split('\n')
