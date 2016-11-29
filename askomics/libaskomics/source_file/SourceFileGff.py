@@ -66,15 +66,16 @@ class SourceFileGff(SourceFile):
         ttl = ''
 
         abstraction_dict = {}
+        domain_knowledge_dict = {}
         pos_attr_list = [
             'position_taxon', 'position_ref', 'position_start', 'position_end',
             'position_strand'
         ]
+        categories_list = ['position_taxon', 'position_ref', 'position_strand']
 
         #TODO: test which loop is the faster
         # for rec in GFF.parse(handle, limit_info=limit, target_lines=1000):
         for rec in GFF.parse(handle, limit_info=limit):
-            # lists for abstraction
             for feat in rec.features:
                 type_entity = ':'+feat.type
                 id_entity = regex.sub('', feat.id)
@@ -88,14 +89,15 @@ class SourceFileGff(SourceFile):
                 else:
                     strand_entity = ''
 
-                taxon_entity = taxon
-                ref_entity = feat.ref
+                taxon_entity = ':' + taxon
+                # ref_entity = feat.ref
+                ref_entity = str(':1') #FIXME: feat.ref not working (equal to NONE)
 
                 attribute_dict = {
                     'rdf:type': type_entity,
                     'rdfs:label': '\"'+id_entity+'\"',
                     ':position_taxon': taxon_entity,
-                    ':position_ref': ref_entity,
+                    ':position_ref': str(ref_entity),
                     ':position_start': start_entity,
                     ':position_end': end_entity,
                     ':position_strand': strand_entity
@@ -105,16 +107,35 @@ class SourceFileGff(SourceFile):
                 if type_entity not in abstraction_dict.keys():
                     abstraction_dict[type_entity] = {'pos_attr': pos_attr_list, 'normal_attr' : []}
 
+                # Domain knowledge ---------------------------------------------------------------
+                if type_entity not in domain_knowledge_dict.keys():
+                    domain_knowledge_dict[type_entity] = {'category' : {}}
+
+                if domain_knowledge_dict[type_entity]['category'] == {}:
+                    for category in categories_list:
+                        domain_knowledge_dict[type_entity]['category'][category] = []
+
+                # Strand
+                if strand_entity not in domain_knowledge_dict[type_entity]['category']['position_strand']:
+                    domain_knowledge_dict[type_entity]['category']['position_strand'].append(strand_entity)
+                # taxon
+                if taxon_entity not in domain_knowledge_dict[type_entity]['category']['position_taxon']:
+                    domain_knowledge_dict[type_entity]['category']['position_taxon'].append(taxon_entity)
+                # ref
+                if ref_entity not in domain_knowledge_dict[type_entity]['category']['position_ref']:
+                    domain_knowledge_dict[type_entity]['category']['position_ref'].append(ref_entity)
+                # ---------------------------------------------------------------------------------
+
                 for qualifier_key, qualifier_value in feat.qualifiers.items():
                     for val in qualifier_value:
                         if qualifier_key == 'Parent':
                             attribute_dict[':' + str(qualifier_key)] = str(':' + regex.sub('', val))
-                            # Store the parent relation for abstraction
+                            # Store the parent relation in abstraction
                             if {'Parent' : re.sub(r':.*', '', val)} not in abstraction_dict[type_entity]['normal_attr']:
                                 abstraction_dict[type_entity]['normal_attr'].append({'Parent' : re.sub(r':.*', '', val)})
                         else:
                             attribute_dict[':' + str(qualifier_key)] = str('\"' + val + '\"')
-                            # store normal attr for abstraction
+                            # store normal attr in abstraction
                             if qualifier_key not in abstraction_dict[type_entity]['normal_attr']:
                                 abstraction_dict[type_entity]['normal_attr'].append(qualifier_key)
 
@@ -127,7 +148,7 @@ class SourceFileGff(SourceFile):
                 ttl += self.get_content_ttl(entity)
 
             ttl += self.get_abstraction_ttl(abstraction_dict)
-            ttl += self.get_domain_knowledge_ttl()
+            ttl += self.get_domain_knowledge_ttl(domain_knowledge_dict)
 
             self.log.debug(ttl)
 
@@ -197,13 +218,27 @@ class SourceFileGff(SourceFile):
 
         return ttl
 
-    def get_domain_knowledge_ttl(self):
-
-
+    def get_domain_knowledge_ttl(self, domain_knowledge):
 
         ttl =  '######################\n'
         ttl += '#  Domain knowledge  #\n'
         ttl += '######################\n\n'
 
+        for entity, bla_dict in domain_knowledge.items():
+            # Positionable entity
+            ttl += entity + ' displaySettings:is_positionable \"true\"^^xsd:boolean .\n'
+            ttl += ':is_positionable rdfs:label \'is_positionable\' .\n'
+            ttl += ':is_positionable rdf:type owl:ObjectProperty .\n\n'
+
+            for bla, category_dict in bla_dict.items():
+                for category, cat_list in category_dict.items():
+                    # indent = len(category + ' displaySetting:category ') * ' '
+                    for cat in cat_list:
+                        ttl += ':' + str(category.replace('position_', '')) + 'Category displaySetting:category ' + str(cat) + ' .\n'
+                        ttl += str(cat) + ' rdf:type :strand ;\n'
+                        indent = len(str(cat)) * ' ' + ' '
+                        ttl += indent + 'rdfs:label \"' + str(cat.replace(':', '')) + '\" .\n'
+
+            ttl += '\n'
 
         return ttl
