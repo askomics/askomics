@@ -10,7 +10,7 @@ import re
 #import tempfile
 #import time
 #import getpass
-#import urllib.parse
+import urllib.parse
 #from pkg_resources import get_distribution
 from BCBio.GFF import GFFExaminer
 from BCBio import GFF
@@ -27,6 +27,25 @@ class SourceFileGff(SourceFile):
     """
     Class representing a Gff3 Source file
     """
+
+    def __init__(self, settings, session, path, preview_limit, tax, ent):
+
+        SourceFile.__init__(self, settings, session, path, preview_limit)
+
+        self.abstraction_dict = {}
+
+        self.domain_knowledge_dict = {}
+
+        self.pos_attr_list = [
+            'position_taxon', 'position_ref', 'position_start', 'position_end',
+            'position_strand'
+        ]
+
+        self.categories_list = ['position_taxon', 'position_ref', 'position_strand']
+
+        self.taxon = tax
+
+        self.entities = ent
 
 
     def get_entities(self):
@@ -47,17 +66,18 @@ class SourceFileGff(SourceFile):
 
         return entities
 
-    def integrate(self, taxon, entities):
+
+    def get_turtle(self):
         """
-        integrate the gff file
+        Get turtle string for a gff file
         """
 
-        self.log.debug('--> integrate <--')
+        self.log.debug('--> get turtle <--')
         self.log.debug(self.path)
         handle = open(self.path)
 
         limit = dict(
-            gff_type = entities
+            gff_type = self.entities
         )
 
         self.log.debug('--> go!')
@@ -65,17 +85,9 @@ class SourceFileGff(SourceFile):
         regex = re.compile(r'.*:')
         ttl = ''
 
-        abstraction_dict = {}
-        domain_knowledge_dict = {}
-        pos_attr_list = [
-            'position_taxon', 'position_ref', 'position_start', 'position_end',
-            'position_strand'
-        ]
-        categories_list = ['position_taxon', 'position_ref', 'position_strand']
-
         #TODO: test which loop is the faster
-        # for rec in GFF.parse(handle, limit_info=limit, target_lines=1000):
-        for rec in GFF.parse(handle, limit_info=limit):
+        for rec in GFF.parse(handle, limit_info=limit, target_lines=1000):
+        # for rec in GFF.parse(handle, limit_info=limit):
             for feat in rec.features:
                 type_entity = ':'+feat.type
                 id_entity = regex.sub('', feat.id)
@@ -89,7 +101,7 @@ class SourceFileGff(SourceFile):
                 else:
                     strand_entity = ''
 
-                taxon_entity = ':' + taxon
+                taxon_entity = ':' + self.taxon
                 # ref_entity = feat.ref
                 ref_entity = str(':1') #FIXME: feat.ref not working (equal to NONE)
 
@@ -104,26 +116,26 @@ class SourceFileGff(SourceFile):
                 }
 
                 # Abstraction
-                if type_entity not in abstraction_dict.keys():
-                    abstraction_dict[type_entity] = {'pos_attr': pos_attr_list, 'normal_attr' : []}
+                if type_entity not in self.abstraction_dict.keys():
+                    self.abstraction_dict[type_entity] = {'pos_attr': self.pos_attr_list, 'normal_attr' : []}
 
                 # Domain knowledge ---------------------------------------------------------------
-                if type_entity not in domain_knowledge_dict.keys():
-                    domain_knowledge_dict[type_entity] = {'category' : {}}
+                if type_entity not in self.domain_knowledge_dict.keys():
+                    self.domain_knowledge_dict[type_entity] = {'category' : {}}
 
-                if domain_knowledge_dict[type_entity]['category'] == {}:
-                    for category in categories_list:
-                        domain_knowledge_dict[type_entity]['category'][category] = []
+                if self.domain_knowledge_dict[type_entity]['category'] == {}:
+                    for category in self.categories_list:
+                        self.domain_knowledge_dict[type_entity]['category'][category] = []
 
                 # Strand
-                if strand_entity not in domain_knowledge_dict[type_entity]['category']['position_strand']:
-                    domain_knowledge_dict[type_entity]['category']['position_strand'].append(strand_entity)
+                if strand_entity not in self.domain_knowledge_dict[type_entity]['category']['position_strand']:
+                    self.domain_knowledge_dict[type_entity]['category']['position_strand'].append(strand_entity)
                 # taxon
-                if taxon_entity not in domain_knowledge_dict[type_entity]['category']['position_taxon']:
-                    domain_knowledge_dict[type_entity]['category']['position_taxon'].append(taxon_entity)
+                if taxon_entity not in self.domain_knowledge_dict[type_entity]['category']['position_taxon']:
+                    self.domain_knowledge_dict[type_entity]['category']['position_taxon'].append(taxon_entity)
                 # ref
-                if ref_entity not in domain_knowledge_dict[type_entity]['category']['position_ref']:
-                    domain_knowledge_dict[type_entity]['category']['position_ref'].append(ref_entity)
+                if ref_entity not in self.domain_knowledge_dict[type_entity]['category']['position_ref']:
+                    self.domain_knowledge_dict[type_entity]['category']['position_ref'].append(ref_entity)
                 # ---------------------------------------------------------------------------------
 
                 for qualifier_key, qualifier_value in feat.qualifiers.items():
@@ -131,33 +143,25 @@ class SourceFileGff(SourceFile):
                         if qualifier_key == 'Parent':
                             attribute_dict[':' + str(qualifier_key)] = str(':' + regex.sub('', val))
                             # Store the parent relation in abstraction
-                            if {'Parent' : re.sub(r':.*', '', val)} not in abstraction_dict[type_entity]['normal_attr']:
-                                abstraction_dict[type_entity]['normal_attr'].append({'Parent' : re.sub(r':.*', '', val)})
+                            if {'Parent' : re.sub(r':.*', '', val)} not in self.abstraction_dict[type_entity]['normal_attr']:
+                                self.abstraction_dict[type_entity]['normal_attr'].append({'Parent' : re.sub(r':.*', '', val)})
                         else:
                             attribute_dict[':' + str(qualifier_key)] = str('\"' + val + '\"')
                             # store normal attr in abstraction
-                            if qualifier_key not in abstraction_dict[type_entity]['normal_attr']:
-                                abstraction_dict[type_entity]['normal_attr'].append(qualifier_key)
+                            if qualifier_key not in self.abstraction_dict[type_entity]['normal_attr']:
+                                self.abstraction_dict[type_entity]['normal_attr'].append(qualifier_key)
 
                 entity = {":"+id_entity: attribute_dict}
 
-                # self.log.debug('===================> Entity <===================')
-                # self.log.debug(entity)
-                # self.log.debug('================================================')
-
                 ttl += self.get_content_ttl(entity)
-
-            ttl += self.get_abstraction_ttl(abstraction_dict)
-            ttl += self.get_domain_knowledge_ttl(domain_knowledge_dict)
-
-            self.log.debug(ttl)
+                yield ttl
 
         handle.close()
 
 
     def get_content_ttl(self, entity):
         """
-
+        Get the ttl string for an entity
         """
 
         for id_entity, attribute_dict in entity.items():
@@ -177,15 +181,16 @@ class SourceFileGff(SourceFile):
 
         return ttl
 
-    def get_abstraction_ttl(self, abstraction):
-
-
+    def get_abstraction(self):
+        """
+        Get Abstraction (turtle) of the GFF
+        """
 
         ttl =  '#################\n'
         ttl += '#  Abstraction  #\n'
         ttl += '#################\n\n'
 
-        for entity, attribute_dict in abstraction.items():
+        for entity, attribute_dict in self.abstraction_dict.items():
             ttl += entity + ' ' + 'rdf:type owl:Class ;\n'
             indent = len(entity) * ' ' + ' '
             ttl += indent + 'rdfs:label \"' + entity.replace(":", "") + "\" ;\n"
@@ -193,12 +198,20 @@ class SourceFileGff(SourceFile):
             for type_attr, attr_list in attribute_dict.items():
                 if type_attr == 'pos_attr': # positionable attributes
                     for pos_attr in attr_list:
-                        ttl += ':' + pos_attr + ' displaySetting:attribute \"true\"^^xsd:boolean ;\n'
-                        indent = len(pos_attr) * ' ' + '  '
-                        ttl += indent + 'rdf:type owl:ObjectProperty ;\n'
-                        ttl += indent + 'rdfs:label \"' + pos_attr.replace('position_', '') + '\" ;\n'
-                        ttl += indent + 'rdfs:domain ' + entity + ' ;\n'
-                        ttl += indent + 'rdfs:range :' + pos_attr.replace('position_', '') + "Category .\n\n"
+                        if pos_attr in ('position_start', 'position_end'):
+                            ttl += ':' + pos_attr + ' displaySetting:attribute \"true\"^^xsd:boolean ;\n'
+                            indent = len(pos_attr) * ' ' + '  '
+                            ttl += indent + 'rdf:type owl:DatatypeProperty ;\n'
+                            ttl += indent + 'rdfs:label \"' + pos_attr.replace('position_', '') + '\" ;\n'
+                            ttl += indent + 'rdfs:domain ' + entity + ' ;\n'
+                            ttl += indent + 'rdfs:range xsd:decimal .\n\n'
+                        else:
+                            ttl += ':' + pos_attr + ' displaySetting:attribute \"true\"^^xsd:boolean ;\n'
+                            indent = len(pos_attr) * ' ' + '  '
+                            ttl += indent + 'rdf:type owl:ObjectProperty ;\n'
+                            ttl += indent + 'rdfs:label \"' + pos_attr.replace('position_', '') + '\" ;\n'
+                            ttl += indent + 'rdfs:domain ' + entity + ' ;\n'
+                            ttl += indent + 'rdfs:range :' + pos_attr.replace('position_', '') + "Category .\n\n"
                 else: # other attributes
                     for attr in attr_list:
                         if type(attr) == type({}): # Parent relation
@@ -218,24 +231,26 @@ class SourceFileGff(SourceFile):
 
         return ttl
 
-    def get_domain_knowledge_ttl(self, domain_knowledge):
+    def get_domain_knowledge(self):
+        """
+        Get Domain Knowledge (turtle) of the GFF
+        """
 
         ttl =  '######################\n'
         ttl += '#  Domain knowledge  #\n'
         ttl += '######################\n\n'
 
-        for entity, bla_dict in domain_knowledge.items():
+        for entity, bla_dict in self.domain_knowledge_dict.items():
             # Positionable entity
-            ttl += entity + ' displaySettings:is_positionable \"true\"^^xsd:boolean .\n'
+            ttl += entity + ' displaySetting:is_positionable \"true\"^^xsd:boolean .\n'
             ttl += ':is_positionable rdfs:label \'is_positionable\' .\n'
             ttl += ':is_positionable rdf:type owl:ObjectProperty .\n\n'
 
             for bla, category_dict in bla_dict.items():
                 for category, cat_list in category_dict.items():
-                    # indent = len(category + ' displaySetting:category ') * ' '
                     for cat in cat_list:
                         ttl += ':' + str(category.replace('position_', '')) + 'Category displaySetting:category ' + str(cat) + ' .\n'
-                        ttl += str(cat) + ' rdf:type :strand ;\n'
+                        ttl += str(cat) + ' rdf:type :' + str(category.replace('position_', '')) + ' ;\n'
                         indent = len(str(cat)) * ' ' + ' '
                         ttl += indent + 'rdfs:label \"' + str(cat.replace(':', '')) + '\" .\n'
 

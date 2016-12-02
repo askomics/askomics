@@ -448,11 +448,16 @@ class AskView(object):
         entities = body['entities']
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
-        src_file_gff = sfc.get_source_file_gff(file_name)
+        src_file_gff = sfc.get_source_file_gff(file_name,taxon, entities)
+
+        urlbase = re.search(r'(http:\/\/.*)\/.*', self.request.current_route_url())
+        urlbase = urlbase.group(1)
+
+        method = 'load'
 
         try:
             self.log.debug('--> Parsing GFF')
-            src_file_gff.integrate(taxon, entities)
+            src_file_gff.persist(urlbase, method)
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
             data['error'] = 'Problem when integration of '+file_name+'.</br>'+str(e)

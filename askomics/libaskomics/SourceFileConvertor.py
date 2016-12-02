@@ -68,7 +68,7 @@ class SourceFileConvertor(ParamManager):
 
         return None
 
-    def get_source_file_gff(self, name):
+    def get_source_file_gff(self, name, tax, ent):
         """
         Return an object representing a gff source file
 
@@ -77,7 +77,7 @@ class SourceFileConvertor(ParamManager):
         :rtype: SourceFileGff
         """
 
-        files = self.get_source_files_gff()
+        files = self.get_source_files_gff(tax, ent)
 
         for f in files:
             if f.name == name:
@@ -85,7 +85,7 @@ class SourceFileConvertor(ParamManager):
 
         return None
 
-    def get_source_files_gff(self):
+    def get_source_files_gff(self, tax='', ent=[]):
         """
         :return: List of the file to convert paths
         :rtype: List
@@ -96,6 +96,6 @@ class SourceFileConvertor(ParamManager):
         files = []
         for p in paths:
             # +7 for the header ?
-            files.append(SourceFileGff(self.settings, self.session, p, int(self.settings["askomics.overview_lines_limit"])))
+            files.append(SourceFileGff(self.settings, self.session, p, int(self.settings["askomics.overview_lines_limit"]), tax, ent))
 
         return files
