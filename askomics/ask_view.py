@@ -262,7 +262,7 @@ class AskView(object):
         """
         Get the preview data for all the available files
         """
-        self.log.debug('===> Askview:source_files_overview_rdf <===')
+        self.log.debug('===> Askview:source_files_overview_gff <===')
         sfc = SourceFileConvertor(self.settings, self.request.session)
 
         data = {}
@@ -287,11 +287,11 @@ class AskView(object):
         return data
 
     @view_config(route_name='insert_files_rdf', request_method='GET')
-    def source_files_overview_rdf(self):
+    def insert_rdf_files(self):
         """
         Get preview data for all the available files
         """
-        self.log.debug(" ========= Askview:source_files_overview_rdf =============")
+        self.log.debug(" ========= Askview:insert_rdf_files =============")
         sfc = SourceFileConvertor(self.settings, self.request.session)
 
         files = sfc.get_rdf_files()
