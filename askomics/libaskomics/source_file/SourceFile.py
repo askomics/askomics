@@ -308,3 +308,16 @@ class SourceFile(ParamManager, HaveCachedProperties):
         data['status'] = 'failed'
         data['error'] = error
         return data
+
+    def get_number_of_lines(self):
+        """
+        Get the number of line of a tabulated file
+
+        :return: number of ligne (int)
+        """
+
+        with open(self.path) as f:
+            for number, l in enumerate(f):
+                pass
+
+        return number
