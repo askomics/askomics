@@ -5,6 +5,8 @@ import logging
 import os.path
 import tempfile
 import time
+import getpass
+from pkg_resources import get_distribution
 
 from askomics.libaskomics.ParamManager import ParamManager
 from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
@@ -32,6 +34,14 @@ class SourceFile(ParamManager, HaveCachedProperties):
         # FIXME check name uniqueness as we remove extension (collision if uploading example.tsv and example.txt)
 
         self.log = logging.getLogger(__name__)
+
+        self.metadatas = {
+            'loadDate': '',
+            'username': getpass.getuser(),
+            'fileName': self.name,
+            'version': get_distribution('Askomics').version,
+            'server': '',
+            'graphName':''}
 
         self.reset_cache()
 

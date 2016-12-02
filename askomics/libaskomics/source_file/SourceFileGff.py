@@ -15,7 +15,7 @@ class SourceFileGff(SourceFile):
 
     def __init__(self, settings, session, path, preview_limit, tax, ent):
 
-        SourceFile.__init__(self, settings, session, path, preview_limit)
+        SourceFile.__init__(self, settings, session, path)
 
         self.abstraction_dict = {}
 

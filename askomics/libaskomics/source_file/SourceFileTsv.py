@@ -4,7 +4,6 @@ Classes to import data from a gff3 source files
 import re
 import csv
 from collections import defaultdict
-import getpass
 from pkg_resources import get_distribution
 import urllib.parse
 
@@ -55,14 +54,6 @@ class SourceFileTsv(SourceFile):
             'entitySym'  : (':', ''),
             'entity_start'  : (':', ''),
             'entityGoterm'  : ('"', '"')}
-
-        self.metadatas = {
-            'loadDate': '',
-            'username': getpass.getuser(),
-            'fileName': self.name,
-            'version': get_distribution('Askomics').version,
-            'server': '',
-            'graphName':''}
 
     @cached_property
     def dialect(self):
@@ -438,16 +429,3 @@ class SourceFileTsv(SourceFile):
                 headers_status.append('present')
 
         return headers_status, missing_headers
-
-    def get_number_of_lines(self):
-        """
-        Get the number of line of a tabulated file
-
-        :return: number of ligne (int)
-        """
-
-        with open(self.path) as f:
-            for number, l in enumerate(f):
-                pass
-
-        return number
