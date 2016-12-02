@@ -86,8 +86,9 @@ class SourceFileGff(SourceFile):
         ttl = ''
 
         #TODO: test which loop is the faster
-        for rec in GFF.parse(handle, limit_info=limit, target_lines=1000):
+        for rec in GFF.parse(handle, limit_info=limit, target_lines=10000):
         # for rec in GFF.parse(handle, limit_info=limit):
+            ref_entity = ':' + str(rec.id)
             for feat in rec.features:
                 type_entity = ':'+feat.type
                 id_entity = regex.sub('', feat.id)
@@ -102,14 +103,12 @@ class SourceFileGff(SourceFile):
                     strand_entity = ''
 
                 taxon_entity = ':' + self.taxon
-                # ref_entity = feat.ref
-                ref_entity = str(':1') #FIXME: feat.ref not working (equal to NONE)
 
                 attribute_dict = {
                     'rdf:type': type_entity,
                     'rdfs:label': '\"'+id_entity+'\"',
                     ':position_taxon': taxon_entity,
-                    ':position_ref': str(ref_entity),
+                    ':position_ref': ref_entity,
                     ':position_start': start_entity,
                     ':position_end': end_entity,
                     ':position_strand': strand_entity
