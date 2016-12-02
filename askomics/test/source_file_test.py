@@ -7,6 +7,8 @@ from pyramid import testing
 from pyramid.paster import get_appsettings
 
 from askomics.libaskomics.source_file.SourceFile import SourceFile
+from askomics.libaskomics.source_file.SourceFileTsv import SourceFileTsv
+from askomics.libaskomics.source_file.SourceFileGff import SourceFileGff
 
 SIMPLE_SOURCE_FILE = os.path.join( os.path.dirname( __file__ ), "..", "test-data", "sourcefile.tsv.simple" )
 
@@ -18,7 +20,7 @@ class SourceFileTests(unittest.TestCase):
 
         self.request = testing.DummyRequest()
 
-        self.srcfile = SourceFile(self.settings, self.request.session, SIMPLE_SOURCE_FILE, 10)
+        self.srcfile = SourceFileTsv(self.settings, self.request.session, SIMPLE_SOURCE_FILE, 10)
 
     def tearDown( self ):
         shutil.rmtree( self.temp_directory )
@@ -85,7 +87,7 @@ class SourceFileTests(unittest.TestCase):
         assert self.srcfile.guess_values_type(['a', 'b', 'c', 'd'], 'ref') != 'start'
 
     def test_get_domain_knowledge(self):
-        srcfile = SourceFile(self.settings, self.request.session, SIMPLE_SOURCE_FILE, 10)
+        srcfile = SourceFileTsv(self.settings, self.request.session, SIMPLE_SOURCE_FILE, 10)
         srcfile.headers == ['head1', 'head2', 'head3','head4']
         srcfile.set_forced_column_types(['numeric', 'category', 'text', 'numeric']);
 
