@@ -4,8 +4,8 @@ import os.path
 import re
 
 from askomics.libaskomics.ParamManager import ParamManager
-from askomics.libaskomics.source_file.SourceFile import SourceFile
 from askomics.libaskomics.source_file.SourceFileGff import SourceFileGff
+from askomics.libaskomics.source_file.SourceFileTsv import SourceFileTsv
 
 class SourceFileConvertor(ParamManager):
     """
@@ -33,7 +33,7 @@ class SourceFileConvertor(ParamManager):
 
         files = []
         for p in paths:
-            files.append(SourceFile(self.settings, self.session, p, int(self.settings["askomics.overview_lines_limit"])))
+            files.append(SourceFileTsv(self.settings, self.session, p, int(self.settings["askomics.overview_lines_limit"])))
 
         return files
 
@@ -47,7 +47,7 @@ class SourceFileConvertor(ParamManager):
 
         files = []
         for p in paths:
-            files.append(SourceFile(self.settings, self.session, p, int(self.settings["askomics.overview_lines_limit"])))
+            files.append(SourceFileTsv(self.settings, self.session, p, int(self.settings["askomics.overview_lines_limit"])))
 
         return files
 
@@ -95,7 +95,6 @@ class SourceFileConvertor(ParamManager):
 
         files = []
         for p in paths:
-            # +7 for the header ?
             files.append(SourceFileGff(self.settings, self.session, p, int(self.settings["askomics.overview_lines_limit"]), tax, ent))
 
         return files

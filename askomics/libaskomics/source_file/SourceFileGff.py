@@ -2,26 +2,11 @@
 Classes to import data from a gff3 source files
 """
 import re
-#import logging
-#import csv
-#from collections import defaultdict
-#from itertools import count
-#import os.path
-#import tempfile
-#import time
-#import getpass
-import urllib.parse
-#from pkg_resources import get_distribution
 from BCBio.GFF import GFFExaminer
 from BCBio import GFF
 
 from askomics.libaskomics.source_file.SourceFile import SourceFile
-#from askomics.libaskomics.ParamManager import ParamManager
-#from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
-#from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
-from askomics.libaskomics.utils import cached_property, HaveCachedProperties, pformat_generic_object, rreplace
-#from askomics.libaskomics.integration.AbstractedEntity import AbstractedEntity
-#from askomics.libaskomics.integration.AbstractedRelation import AbstractedRelation
+from askomics.libaskomics.utils import rreplace
 
 class SourceFileGff(SourceFile):
     """
