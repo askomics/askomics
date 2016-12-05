@@ -147,7 +147,7 @@ function displayGffForm(data) {
 
     for (let i = data.files.length - 1; i >= 0; i--) {
 
-        title = $('<h4></h4>').append('available entities in GFF file '+data.files[i].filename);
+        title = $('<h4></h4>').append(data.files[i].filename);
 
         gff_div = $('<div></div>').attr('id', data.files[i].filename);
 
@@ -176,6 +176,10 @@ function displayGffForm(data) {
                                          .append('<hr><br>');
             continue;
         }
+
+        // subtitle
+        let subtitle = $('<h5></h5>').append('Select which entities you want to integrate');
+        gff_div.append(subtitle);
 
         for (let j = data.files[i].entities.length - 1; j >= 0; j--) {
 

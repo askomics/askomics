@@ -61,9 +61,7 @@ class SourceFileGff(SourceFile):
         self.log.debug(self.path)
         handle = open(self.path)
 
-        limit = dict(
-            gff_type = self.entities
-        )
+        limit = dict(gff_type=self.entities)
 
         self.log.debug('--> go!')
 
