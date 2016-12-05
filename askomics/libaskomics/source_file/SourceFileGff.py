@@ -136,7 +136,7 @@ class SourceFileGff(SourceFile):
                 entity = {":"+id_entity: attribute_dict}
 
                 ttl += self.get_content_ttl(entity)
-                yield ttl
+        yield ttl
 
         handle.close()
 
