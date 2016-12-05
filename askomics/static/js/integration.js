@@ -153,12 +153,36 @@ function displayGffForm(data) {
 
         gff_div.append(title);
 
+        //TODO: chekbox for checking all entities
+        // let check_all = $('<label></label>').attr('id', 'check_all-'+data.files[i].filename)
+        //                                     .append($('<input>').attr('type', 'checkbox')
+        //                                                         .attr('id', 'check_all-'+data.files[i].filename)
+        //                                                         /*.attr('checked', 'checked')*/)
+        //                                     .append('all');
+
+        // gff_div.append(check_all).append('<br>');
+
+
+        if (data.files[i].error !== undefined) {
+            console.log(data.files[i].error);
+            // error when examine GFF, display error message and continue loop
+            let error_div = $('<div></div>').attr('class', 'alert alert-danger')
+                                            .attr('role', 'alert')
+                                            .append($('<span></span>').attr('class', 'glyphicon glyphicon-exclamation-sign'))
+                                            .append(' ' + data.files[i].error);
+
+            $("#content_integration_gff").append(title)
+                                         .append(error_div)
+                                         .append('<hr><br>');
+            continue;
+        }
+
         for (let j = data.files[i].entities.length - 1; j >= 0; j--) {
 
             let selectbox = $('<label></label>').attr('id', 'gff_checkbox-'+data.files[i].filename)
                                                 .append($('<input>').attr('type', 'checkbox')
                                                                     .attr('id', data.files[i].entities[j])
-                                                                    .attr('checked', 'checked'))
+                                                                    /*.attr('checked', 'checked')*/)
                                                 .append(data.files[i].entities[j]);
 
             gff_div.append(selectbox).append($('<br>'));
@@ -422,6 +446,9 @@ function loadSourceFileGff(filename) {
         console.log('-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-');
         console.log(JSON.stringify(data));
         console.log('-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-');
+        // if (data.status != "ok") {
+            // alert(data.error);
+        // }
         hideModal();
     });
 }

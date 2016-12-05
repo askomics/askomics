@@ -272,15 +272,16 @@ class AskView(object):
 
         for gff in source_files_gff:
             infos = {}
+            infos['filename'] = gff.name
             try:
                 entities = gff.get_entities()
                 infos['entities'] = entities
-                infos['filename'] = gff.name
 
             except Exception as e:
+                self.log.debug('error !!')
                 traceback.print_exc(file=sys.stdout)
                 infos['error'] = 'Could not parse the file, are you sure it is a valid GFF3 file?'
-                self.log.error(str(e))
+                self.log.error('error with gff examiner: ' + str(e))
 
             data['files'].append(infos)
 
@@ -307,9 +308,9 @@ class AskView(object):
             infos = {}
             infos['filename'] = os.path.basename(src_f.path)
             try:
-                shutil.copy(src_f.path,pathttl);
-                fo = open(pathttl+"/"+infos['filename'],'r');
-                src_f.load_data_from_file(fo,urlbase);
+                shutil.copy(src_f.path, pathttl)
+                fo = open(pathttl+"/"+infos['filename'], 'r')
+                src_f.load_data_from_file(fo, urlbase)
             except Exception as e:
                 traceback.print_exc(file=sys.stdout)
                 data['error'] = str(e)
