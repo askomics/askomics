@@ -447,12 +447,26 @@ function loadSourceFileGff(filename) {
                   'entities': entities  };
 
     service.post(model, function(data) {
-        console.log('-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-');
-        console.log(JSON.stringify(data));
-        console.log('-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-');
-        // if (data.status != "ok") {
-            // alert(data.error);
-        // }
+        // Show a success message isertion is OK
+        let div_entity = $("#" + filename);
+        let entities_string = '';
+        for (var i = 0; i < entities.length; i++) {
+            entities_string += '<b>' + entities[i] + '</b>';
+            if (i != entities.length - 2 && i != entities.length -1) {
+                entities_string += ', ';
+            }
+            if (i == entities.length - 2) {
+                entities_string += ' and ';
+            }
+        }
+
+        let success_div = $('<div></div>').attr('class', 'alert alert-success')
+                                          .attr('role', 'alert')
+                                          .append($('<span></span>').attr('class', 'glyphicon glyphicon-ok'))
+                                          .append(' ' + entities_string + ' inserterd with success.');
+
+        div_entity.append(success_div);
+
         hideModal();
     });
 }
