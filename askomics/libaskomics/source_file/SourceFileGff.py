@@ -151,6 +151,8 @@ class SourceFileGff(SourceFile):
             ttl = str(id_entity)
             indent = len(str(id_entity)) * ' ' + ' '
             for key, attr in attribute_dict.items():
+                if attr == ':': # empty attr, dont insert triple
+                    continue
                 if first:
                     ttl += ' ' + str(key) + ' ' + str(attr) + ' ;\n'
                     first = False
@@ -188,6 +190,9 @@ class SourceFileGff(SourceFile):
                             ttl += indent + 'rdfs:domain ' + entity + ' ;\n'
                             ttl += indent + 'rdfs:range xsd:decimal .\n\n'
                         else:
+                            # No taxon, don't write triple and continue loop
+                            if pos_attr == 'position_taxon' and self.taxon == '':
+                                continue
                             ttl += ':' + pos_attr + ' displaySetting:attribute \"true\"^^xsd:boolean ;\n'
                             indent = len(pos_attr) * ' ' + '  '
                             ttl += indent + 'rdf:type owl:ObjectProperty ;\n'
@@ -230,6 +235,9 @@ class SourceFileGff(SourceFile):
 
             for bla, category_dict in bla_dict.items():
                 for category, cat_list in category_dict.items():
+                    # dont write triple for taxon if user don't enter one
+                    if category == 'position_taxon' and self.taxon == '':
+                        continue
                     for cat in cat_list:
                         ttl += ':' + str(category.replace('position_', '')) + 'Category displaySetting:category ' + str(cat) + ' .\n'
                         ttl += str(cat) + ' rdf:type :' + str(category.replace('position_', '')) + ' ;\n'
