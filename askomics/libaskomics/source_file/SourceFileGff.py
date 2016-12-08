@@ -74,7 +74,10 @@ class SourceFileGff(SourceFile):
             ref_entity = ':' + str(rec.id)
             for feat in rec.features:
                 type_entity = ':'+feat.type
-                id_entity = regex.sub('', feat.id)
+                if feat.id == '': # if there is no ID field, take the entity type as id
+                    id_entity = feat.type
+                else:
+                    id_entity = regex.sub('', feat.id)
                 start_entity = int(feat.location.start)
                 end_entity = int(feat.location.end)
 
