@@ -38,6 +38,10 @@ $(function () {
         let filename = $(this).attr('id');
         loadSourceFileGff(filename);
     });
+
+    // $('.taxon-selector').change(function() {
+    //     console.log('---> ' + $(this).val);
+    // });
 });
 
 /**
@@ -141,6 +145,8 @@ function displayGffForm(data) {
 
     $("#content_integration_gff").empty();
 
+    console.log(JSON.stringify(data.taxons));
+
     let filename = '';
     let title = '';
     let gff_div='';
@@ -192,6 +198,30 @@ function displayGffForm(data) {
             gff_div.append(selectbox).append($('<br>'));
         }
 
+        // Taxon selector
+        let taxon_select;
+        let taxon_select_title;
+        let taxon_field_title;
+        let separator;
+        if (data.taxons.length !== 0) {
+            taxon_select = $('<select></select>').attr('id', data.files[i].filename + '-selector')
+                                                     .attr('class', 'taxon-selector')
+                                                     .append($('<option></option>').attr('selected', 'selected')
+                                                                                   .attr('disabled', 'disabled')
+                                                                                   .attr('hidden', 'hidden')
+                                                                                   .append('Enter taxon'));
+            for (let j = 0; j < data.taxons.length; j++) {
+                taxon_select.append($('<option></option>').attr('value', data.taxons[j])
+                                                          .attr('id', data.files[i].filename + '-' + data.taxons[j])
+                                                          .append(data.taxons[j]));
+            }
+            taxon_select_title = $('<p></p>').append('Select an existing taxon');
+            taxon_field_title = $('<p></p>').append('Or enter a new one');
+            separator = '<br><br>';
+        }else{
+            taxon_field_title = $('<p></p>').append('Enter a taxon');
+        }
+
         let taxon_field = $('<input>').attr('type', 'text')
                                       .attr('name', 'frame')
                                       .attr('id', 'tax-'+data.files[i].filename);
@@ -204,7 +234,10 @@ function displayGffForm(data) {
 
 
         gff_div.append('<br>')
-               .append($('<p></p>').append('Enter Taxon (optional)'))
+               .append(taxon_select_title)
+               .append(taxon_select)
+               .append(separator)
+               .append(taxon_field_title)
                .append(taxon_field)
                .append('<br><br>')
                .append(integrate_button)
@@ -429,7 +462,15 @@ function loadSourceFile(file_elem) {
 function loadSourceFileGff(filename) {
     console.log('-----> loadSourceFileGff <-----');
     // get taxon
-    let taxon = $('#tax-'+filename).val();
+    let taxon = '';
+
+    // get the taxon in the selector or in the input field
+    if ($('#' + filename + '-selector').val() === null || $('#' + filename + '-selector').val() === undefined) {
+        taxon = $('#tax-'+filename).val();
+    }else{
+        taxon = $('#' + filename + '-selector').val();
+    }
+
     // get entities
     let entities = [];
 

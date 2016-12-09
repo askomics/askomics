@@ -269,6 +269,16 @@ class AskView(object):
         data['files'] = []
 
         source_files_gff = sfc.get_source_files_gff()
+        sqb = SparqlQueryBuilder(self.settings, self.request.session)
+        ql = QueryLauncher(self.settings, self.request.session)
+
+        # get all taxon present in database
+        res = ql.execute_query(sqb.get_all_taxon().query)
+        taxons_list = []
+        for elem in res['results']['bindings']:
+            taxons_list.append(elem['taxon']['value'])
+
+        data['taxons'] = taxons_list
 
         for gff in source_files_gff:
             infos = {}
