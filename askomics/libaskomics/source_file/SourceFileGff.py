@@ -230,13 +230,13 @@ class SourceFileGff(SourceFile):
         ttl += '#  Domain knowledge  #\n'
         ttl += '######################\n\n'
 
-        for entity, bla_dict in self.domain_knowledge_dict.items():
+        for entity, dk_dict in self.domain_knowledge_dict.items():
             # Positionable entity
             ttl += entity + ' displaySetting:is_positionable \"true\"^^xsd:boolean .\n'
             ttl += ':is_positionable rdfs:label \'is_positionable\' .\n'
             ttl += ':is_positionable rdf:type owl:ObjectProperty .\n\n'
 
-            for bla, category_dict in bla_dict.items():
+            for category_dict in dk_dict.values():
                 for category, cat_list in category_dict.items():
                     # dont write triple for taxon if user don't enter one
                     if category == 'position_taxon' and self.taxon == '':
