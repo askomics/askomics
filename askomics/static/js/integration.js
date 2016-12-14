@@ -120,7 +120,7 @@ function setCorrectType(file) {
     if ('column_types' in file) {
         var cols = file.column_types;
         for(let i=0; i<cols.length; i++) {
-            var selectbox = $('div#content_integration form#source-file-' + file.name + ' select.column_type:eq(' + i + ')');
+            var selectbox = $('div#content_integration form#source-file-tsv-' + file.name + ' select.column_type:eq(' + i + ')');
             var values = selectbox.find("option").map(mapCallback);
 
             if ($.inArray(cols[i], ['start', 'end', 'numeric']) == -1) {
@@ -136,7 +136,7 @@ function setCorrectType(file) {
             }
 
             // Check what is in the db
-            checkExistingData($('div#content_integration form#source-file-' + file.name));
+            checkExistingData($('div#content_integration form#source-file-tsv-' + file.name));
         }
     }
 
@@ -221,7 +221,7 @@ function containAll(Array1,Array2){
  */
 function checkExistingData(file_elem) {
 
-    var file_name = file_elem.find('.file_name').text();
+    var file_name = file_elem.find('.file_name').attr('id');
 
     // Get column types
     var col_types = file_elem.find('.column_type').map(function() {
@@ -283,7 +283,7 @@ function checkExistingData(file_elem) {
  */
 function loadSourceFile(file_elem) {
 
-    var file_name = file_elem.find('.file_name').text();
+    var file_name = file_elem.find('.file_name').attr('id');
 
     // Get column types
     var col_types = file_elem.find('.column_type').map(function() {
@@ -352,7 +352,7 @@ function loadSourceFile(file_elem) {
 
         // Check what is in the db now
         $('.template-source_file').each(function( index ) {
-            checkExistingData($(this));
+            checkExistingData(file_elem);
         });
     });
 

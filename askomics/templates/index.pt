@@ -270,7 +270,7 @@
 
         <!-- template to display preview of a gff file -->
         <script id="template-gff-form" type="text/x-handlebars-template">
-            <form id="source-file-{{file.name}}" class="template-source_file form-horizontal text-center">
+            <form id="source-file-gff-{{file.name}}" class="template-source_file form-horizontal text-center">
                 <div id="{{file.name}}">
                     <h4>GFF file: {{file.name}} </h4>
                     <h5>Select which entities you want to integrate</h5>
@@ -303,8 +303,8 @@
 
         <!-- template to display preview of a csv file -->
         <script id="template-csv-form" type="text/x-handlebars-template">
-            <form id="source-file-{{file.name}}" class="template-source_file form-horizontal text-center">
-                <h4 class="file_name">TSV file: {{ file.name }}</h4>
+            <form id="source-file-tsv-{{file.name}}" class="template-source_file form-horizontal text-center">
+                <h4 class="file_name" id="{{file.name}}" >TSV file: {{ file.name }}</h4>
                 <br>
                 {{#if error}}
                     <p class="error">{{ error }}</p>
