@@ -78,12 +78,7 @@
                         <li id="interrogation" class="active"><a href="#" onclick="loadStartPoints();"><span class="glyphicon glyphicon-play"></span></a></li>
 
                         <li id="userdata" class="dropdown">
-                          <a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="glyphicon glyphicon-cloud-upload"></span><span class="caret"></span></a>
-                            <ul class="dropdown-menu">
-                              <li id="integration"><a href="#">Tabular Data Files(CSV,TSV)</a></li>
-                              <li id="integration_ttl"><a href="#">RDF Files</a></li>
-                              <li id="integration_gff"><a href="#">GFF3 Files</a></li>
-                            </ul>
+                            <li id="integration"><a href="#"><span class="glyphicon glyphicon-cloud-upload"></span></a></li>
                           </li>
 
                         <li id="admin" class="dropdown">
@@ -272,89 +267,121 @@
           </div><!-- /.modal-dialog -->
         </div><!-- /.modal -->
 
-        <!-- The template to display preview of source files -->
-        <script id="template-source_file-preview" type="text/x-handlebars-template">
-            {{#each files}}
-                <form class="template-source_file form-horizontal text-center">
-                    <h4 class="file_name">{{ this.name }}</h4>
+
+        <!-- template to display preview of a gff file -->
+        <script id="template-gff-form" type="text/x-handlebars-template">
+            <form id="source-file-{{file.name}}" class="template-source_file form-horizontal text-center">
+                <div id="{{file.name}}">
+                    <h4>GFF file: {{file.name}} </h4>
+                    <h5>Select which entities you want to integrate</h5>
+                    {{#each file.entities}}
+                        <label id="gff_checkbox-{{../file.name}}">
+                            <input type="checkbox" id="{{this}}">{{this}}
+                        </label><br>
+                    {{/each}}
                     <br>
-                    {{#if error}}
-                        <p class="error">{{ error }}</p>
+                    {{#if taxons.length}}
+                        <p>Select an existing taxon</p>
+                        <select>
+                            <option selected disabled hidden>choose taxon</option>
+                            {{#each taxons}}
+                                <option value="{{this}}" id="{{../file.name}}-{{this}}">{{this}}</option>
+                            {{/each}}
+                        </select>
+                        <p>Or enter a new one</p>
                     {{else}}
-                        <table class='table table-striped preview_table'>
-                            <thead>
-                                <tr>
-                                {{#each headers}}
-                                    <th class='column_header'>
-                                        {{#unless @first}}
-                                            <input type='checkbox' class='toggle_column' checked />
-                                            <i id='relation_present' class="material-icons">done</i>
-                                            <i id='relation_new' class="material-icons">fiber_new</i>
-                                        {{/unless}}
-                                        {{ this }}
-                                    </th>
-                                {{/each}}
-
-                                </tr>
-                                <tr>
-                                {{#each headers}}
-                                    <th>
-                                        <select class='column_type form-control'>
-                                            {{#if @first}}
-                                                <optgroup label='Reference entity'>
-                                                    <option value='entity_start'>Entity (Start)</option>
-                                                    <option value='entity'>Entity</option>
-                                            {{else}}
-                                                <optgroup label='Attributes'>
-                                                    <option value='numeric'>Numeric</option>
-                                                    <option value='text'>Text</option>
-                                                    <option value='category'>Category</option>
-                                                </optgroup>
-                                                <optgroup label='Positionable attributes'>
-                                                    <option value='taxon'>Taxon</option>
-                                                    <option value='ref'>Chromosome</option>
-                                                    <option value='strand'>Strand</option>
-                                                    <option value='start'>Start</option>
-                                                    <option value='end'>End</option>
-                                                </optgroup>
-                                                <optgroup label='Relation type'>
-                                                    <option value='entity'>General relation to entity</option>
-                                                    <option value='entitySym'>Symmetric relation to entity</option>
-                                                    <option value='entityGoterm'>Relation with a goterm (Gene Ontology)</option>
-                                                </optgroup>
-                                            {{/if}}
-                                        </select>
-                                    </th>
-                                {{/each}}
-
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {{#each preview_data}}
-                                    <tr>
-                                        {{#each this}}
-                                            <td>
-                                                {{ this }}
-                                            </td>
-                                        {{/each}}
-                                    </tr>
-                                {{/each}}
-                            </tbody>
-                        </table>
-                        <pre class='preview_field'></pre>
-                        <p class="insert_status text-left alert hidden"></p>
-                        <p class="insert_warning text-left alert hidden"></p>
-                        <div class="warning-message hidden"></div>
-                        <div class="form-group form-inline">
-                            <div class="btn-group" role="group" aria-label="metadata">
-                                <input type="button" class="btn btn-success preview_button" value="Preview RDF" />
-                                <input type="button" class="btn btn-primary load_data" value="Insert in database" />
-                            </div>
-                        </div>
+                        <p>Enter a taxon</p>
                     {{/if}}
-                </form>
-                <hr />
-            {{/each}}
+                    <input type="text" name="frame" id="tax-{{file.name}}">
+                    <br><br>
+                    <input type="button" id="{{file.name}}" class="btn btn-primary load_data_gff" value="Insert in database">
+                    <hr><br>
+                </div>
+            </form>
+        </script>
+
+
+        <!-- template to display preview of a csv file -->
+        <script id="template-csv-form" type="text/x-handlebars-template">
+            <form id="source-file-{{file.name}}" class="template-source_file form-horizontal text-center">
+                <h4 class="file_name">TSV file: {{ file.name }}</h4>
+                <br>
+                {{#if error}}
+                    <p class="error">{{ error }}</p>
+                {{else}}
+                    <table class='table table-striped preview_table'>
+                        <thead>
+                            <tr>
+                            {{#each file.headers}}
+                                <th class='column_header'>
+                                    {{#unless @first}}
+                                        <input type='checkbox' class='toggle_column' checked />
+                                        <i id='relation_present' class="material-icons">done</i>
+                                        <i id='relation_new' class="material-icons">fiber_new</i>
+                                    {{/unless}}
+                                    {{ this }}
+                                </th>
+                            {{/each}}
+
+                            </tr>
+                            <tr>
+                            {{#each file.headers}}
+                                <th>
+                                    <select class='column_type form-control'>
+                                        {{#if @first}}
+                                            <optgroup label='Reference entity'>
+                                                <option value='entity_start'>Entity (Start)</option>
+                                                <option value='entity'>Entity</option>
+                                        {{else}}
+                                            <optgroup label='Attributes'>
+                                                <option value='numeric'>Numeric</option>
+                                                <option value='text'>Text</option>
+                                                <option value='category'>Category</option>
+                                            </optgroup>
+                                            <optgroup label='Positionable attributes'>
+                                                <option value='taxon'>Taxon</option>
+                                                <option value='ref'>Chromosome</option>
+                                                <option value='strand'>Strand</option>
+                                                <option value='start'>Start</option>
+                                                <option value='end'>End</option>
+                                            </optgroup>
+                                            <optgroup label='Relation type'>
+                                                <option value='entity'>General relation to entity</option>
+                                                <option value='entitySym'>Symmetric relation to entity</option>
+                                                <option value='entityGoterm'>Relation with a goterm (Gene Ontology)</option>
+                                            </optgroup>
+                                        {{/if}}
+                                    </select>
+                                </th>
+                            {{/each}}
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{#each file.preview_data}}
+                                <tr>
+                                    {{#each this}}
+                                        <td>
+                                            {{ this }}
+                                        </td>
+                                    {{/each}}
+                                </tr>
+                            {{/each}}
+                        </tbody>
+                    </table>
+                    <pre class='preview_field'></pre>
+                    <p class="insert_status text-left alert hidden"></p>
+                    <p class="insert_warning text-left alert hidden"></p>
+                    <div class="warning-message hidden"></div>
+                    <div class="form-group form-inline">
+                        <div class="btn-group" role="group" aria-label="metadata">
+                            <input type="button" class="btn btn-success preview_button" value="Preview RDF" />
+                            <input type="button" class="btn btn-primary load_data_tsv" value="Insert in database" />
+                        </div>
+                    </div>
+                {{/if}}
+            </form>
+            <hr />
         </script>
 
         <!-- The template to display ttl preview -->

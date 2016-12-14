@@ -32,10 +32,26 @@ class SourceFileConvertor(ParamManager):
         paths = glob(src_dir + '/*')
 
         files = []
+
         for p in paths:
-            files.append(SourceFileTsv(self.settings, self.session, p, int(self.settings["askomics.overview_lines_limit"])))
+            file_type = self.guess_file_type(p)
+            if file_type == 'gff':
+                files.append(SourceFileGff(self.settings, self.session, p, int(self.settings["askomics.overview_lines_limit"]), '', []))
+            elif file_type == 'csv':
+                files.append(SourceFileTsv(self.settings, self.session, p, int(self.settings["askomics.overview_lines_limit"])))
+            elif file_type == 'ttl':
+                pass
 
         return files
+
+    def guess_file_type(self, filepath):
+        extension = os.path.splitext(filepath)[1]
+        if extension.lower() in ('.gff', '.gff2', '.gff3'):
+            return 'gff'
+        elif extension.lower() in ('.ttl',):
+            return 'ttl'
+        else:
+            return 'csv'
 
     def get_rdf_files(self):
         """

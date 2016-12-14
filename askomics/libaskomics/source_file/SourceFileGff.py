@@ -17,6 +17,8 @@ class SourceFileGff(SourceFile):
 
         SourceFile.__init__(self, settings, session, path)
 
+        self.type = 'gff'
+
         self.abstraction_dict = {}
 
         self.domain_knowledge_dict = {}

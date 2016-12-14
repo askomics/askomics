@@ -30,11 +30,11 @@ $(function () {
         }
     });
 
-    $("#content_integration").on('click', '.load_data', function(event) {
+    $("#content_integration").on('click', '.load_data_tsv', function(event) {
         loadSourceFile($(event.target).closest('.template-source_file'));
     });
 
-    $("#content_integration_gff").on('click', '.load_data', function() {
+    $("#content_integration").on('click', '.load_data_gff', function() {
         let filename = $(this).attr('id');
         loadSourceFileGff(filename);
     });
@@ -62,66 +62,87 @@ function cols2rows(items) {
     return out;
 }
 
-/**
- * Show preview data on the page
- */
-function displayTableTabularFile(data) {
-    // Transform columns to rows
-    for(let i=0;i<data.files.length;i++) {
-        if ('preview_data' in data.files[i]) {
-            data.files[i].preview_data = cols2rows(data.files[i].preview_data);
-        }
-    }
-
-    // display received data
-    var template = $('#template-source_file-preview').html();
-
-    var templateScript = Handlebars.compile(template);
-    var html = templateScript(data);
-
-    $("#content_integration").html(html);
-
-    function mapCallback() {
-      return $(this).val();
-    }
-
-    function getSelectCallback(index, value) {
-      selectbox.find("option[value="+value+"]").hide();
-    }
-
-    // Select the correct type for each column
-    /*
-      data.file[i]
-      - name : name file
-      - preview_data : first line of file
-      - column_types : text, numeric, etc...
-    */
-    for(let i=0, l=data.files.length; i<l; i++) {
-
-        if ('column_types' in data.files[i]) {
-            var cols = data.files[i].column_types;
-            for(let j=0; j<cols.length; j++) {
-                var selectbox = $('div#content_integration form.template-source_file:eq(' + i + ') select.column_type:eq(' + j + ')');
-                var values = selectbox.find("option").map(mapCallback);
-
-                if ($.inArray(cols[j], ['start', 'end', 'numeric']) == -1) {
-                    $.each(['start', 'end', 'numeric'],getSelectCallback);
-                }
-
-                if ($.inArray(cols[j], ['entityGoterm']) == -1) {
-                    $.each(['entityGoterm'],getSelectCallback);
-                }
-
-                if ($.inArray( cols[j], values) >= 0) {
-                    selectbox.val(cols[j]);
-                }
-
-                // Check what is in the db
-                checkExistingData($('div#content_integration form.template-source_file:eq(' + i + ')'));
-            }
+function displayIntegrationForm(data) {
+    console.log('--- displayIntegrationForm ---');
+    $("#content_integration").empty();
+    for (var i = data.files.length - 1; i >= 0; i--) {
+        switch (data.files[i].type) {
+            case 'tsv':
+                displayTSVForm(data.files[i]);
+            break;
+            case 'gff':
+                displayGffForm(data.files[i], data.taxons);
+            break;
         }
     }
 }
+
+
+function displayTSVForm(file) {
+    console.log('-+-+- displayTSVForm -+-+-');
+    // tranform columns to rows
+    if ('preview_data' in file) {
+        file.preview_data = cols2rows(file.preview_data);
+    }
+
+    let source = $('#template-csv-form').html();
+    let template = Handlebars.compile(source);
+
+    let context = {file: file};
+    let html = template(context);
+
+    $("#content_integration").append(html);
+    setCorrectType(file);
+}
+
+function displayGffForm(file, taxons) {
+    console.log('-+-+- displayGffForm -+-+-');
+    let source = $('#template-gff-form').html();
+    let template = Handlebars.compile(source);
+
+    let context = {file: file, taxons: taxons};
+    let html = template(context);
+
+    $("#content_integration").append(html);
+}
+
+function setCorrectType(file) {
+    console.log('--- setCorrectType ---');
+
+    function mapCallback() {
+        return $(this).val();
+    }
+
+    function getSelectCallback(index, value) {
+        selectbox.find("option[value="+value+"]").hide();
+    }
+
+    if ('column_types' in file) {
+        var cols = file.column_types;
+        for(let i=0; i<cols.length; i++) {
+            var selectbox = $('div#content_integration form#source-file-' + file.name + ' select.column_type:eq(' + i + ')');
+            var values = selectbox.find("option").map(mapCallback);
+
+            if ($.inArray(cols[i], ['start', 'end', 'numeric']) == -1) {
+                $.each(['start', 'end', 'numeric'],getSelectCallback);
+            }
+
+            if ($.inArray(cols[i], ['entityGoterm']) == -1) {
+                $.each(['entityGoterm'],getSelectCallback);
+            }
+
+            if ($.inArray( cols[i], values) >= 0) {
+                selectbox.val(cols[i]);
+            }
+
+            // Check what is in the db
+            checkExistingData($('div#content_integration form#source-file-' + file.name));
+        }
+    }
+
+
+}
+
 
 /**
  * Insert TTL file
@@ -136,119 +157,6 @@ function displayTableRDF(data) {
   if (data.error !== undefined ) alert(JSON.stringify(data.error));
 }
 
-/**
- * Show the gff form to select which entities will be integrated
- */
-function displayGffForm(data) {
-    //FIXME: use handlebars
-    console.log('---> displayGffForm');
-
-    $("#content_integration_gff").empty();
-
-    console.log(JSON.stringify(data.taxons));
-
-    let filename = '';
-    let title = '';
-    let gff_div='';
-
-    for (let i = data.files.length - 1; i >= 0; i--) {
-
-        title = $('<h4></h4>').append(data.files[i].filename);
-
-        gff_div = $('<div></div>').attr('id', data.files[i].filename);
-
-        gff_div.append(title);
-
-        //TODO: chekbox for checking all entities
-        // let check_all = $('<label></label>').attr('id', 'check_all-'+data.files[i].filename)
-        //                                     .append($('<input>').attr('type', 'checkbox')
-        //                                                         .attr('id', 'check_all-'+data.files[i].filename)
-        //                                                         /*.attr('checked', 'checked')*/)
-        //                                     .append('all');
-
-        // gff_div.append(check_all).append('<br>');
-
-
-        if (data.files[i].error !== undefined) {
-            console.log(data.files[i].error);
-            // error when examine GFF, display error message and continue loop
-            let error_div = $('<div></div>').attr('class', 'alert alert-danger')
-                                            .attr('role', 'alert')
-                                            .append($('<span></span>').attr('class', 'glyphicon glyphicon-exclamation-sign'))
-                                            .append(' ' + data.files[i].error);
-
-            $("#content_integration_gff").append(title)
-                                         .append(error_div)
-                                         .append('<hr><br>');
-            continue;
-        }
-
-        // subtitle
-        let subtitle = $('<h5></h5>').append('Select which entities you want to integrate');
-        gff_div.append(subtitle);
-
-        for (let j = data.files[i].entities.length - 1; j >= 0; j--) {
-
-            let selectbox = $('<label></label>').attr('id', 'gff_checkbox-'+data.files[i].filename)
-                                                .append($('<input>').attr('type', 'checkbox')
-                                                                    .attr('id', data.files[i].entities[j])
-                                                                    /*.attr('checked', 'checked')*/)
-                                                .append(data.files[i].entities[j]);
-
-            gff_div.append(selectbox).append($('<br>'));
-        }
-
-        // Taxon selector
-        let taxon_select;
-        let taxon_select_title;
-        let taxon_field_title;
-        let separator;
-        if (data.taxons.length !== 0) {
-            taxon_select = $('<select></select>').attr('id', data.files[i].filename + '-selector')
-                                                     .attr('class', 'taxon-selector')
-                                                     .append($('<option></option>').attr('selected', 'selected')
-                                                                                   .attr('disabled', 'disabled')
-                                                                                   .attr('hidden', 'hidden')
-                                                                                   .append('Enter taxon'));
-            for (let j = 0; j < data.taxons.length; j++) {
-                taxon_select.append($('<option></option>').attr('value', data.taxons[j])
-                                                          .attr('id', data.files[i].filename + '-' + data.taxons[j])
-                                                          .append(data.taxons[j]));
-            }
-            taxon_select_title = $('<p></p>').append('Select an existing taxon');
-            taxon_field_title = $('<p></p>').append('Or enter a new one');
-            separator = '<br><br>';
-        }else{
-            taxon_field_title = $('<p></p>').append('Enter a taxon');
-        }
-
-        let taxon_field = $('<input>').attr('type', 'text')
-                                      .attr('name', 'frame')
-                                      .attr('id', 'tax-'+data.files[i].filename);
-
-        let integrate_button = $('<input>').attr('type', 'button')
-                                           .attr('id', data.files[i].filename)
-                                           .attr('class', 'btn btn-primary load_data')
-                                           .attr('value', 'Insert in database');
-
-
-
-        gff_div.append('<br>')
-               .append(taxon_select_title)
-               .append(taxon_select)
-               .append(separator)
-               .append(taxon_field_title)
-               .append(taxon_field)
-               .append('<br><br>')
-               .append(integrate_button)
-               .append('<hr><br>');
-
-        $("#content_integration_gff").append(gff_div);
-
-
-    }
-
-}
 
 /**
  * Get ttl representation of preview data

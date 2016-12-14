@@ -21,6 +21,8 @@ class SourceFileTsv(SourceFile):
 
         SourceFile.__init__(self, settings, session, path)
 
+        self.type = 'tsv'
+
         self.preview_limit = preview_limit
 
         self.forced_column_types = ['entity']

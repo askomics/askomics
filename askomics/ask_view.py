@@ -230,30 +230,52 @@ class AskView(object):
         data = {}
         data['files'] = []
 
-        for src_file in source_files:
+        # get all taxon in the TS
+        sqb = SparqlQueryBuilder(self.settings, self.request.session)
+        ql = QueryLauncher(self.settings, self.request.session)
+        res = ql.execute_query(sqb.get_all_taxon().query)
+        taxons_list = []
+        for elem in res['results']['bindings']:
+            taxons_list.append(elem['taxon']['value'])
+        data['taxons'] = taxons_list
 
+        for src_file in source_files:
             infos = {}
             infos['name'] = src_file.name
-            try:
-                infos['headers'] = src_file.headers
-                infos['preview_data'] = src_file.get_preview_data()
-                infos['column_types'] = [];
+            infos['type'] = src_file.type
+            if src_file.type == 'tsv':
+                try:
+                    infos['headers'] = src_file.headers
+                    infos['preview_data'] = src_file.get_preview_data()
+                    infos['column_types'] = []
+                    header_num = 0
+                    for ih in range(0, len(infos['headers'])):
+                        #if infos['headers'][ih].find("@")>0:
+                        #    infos['column_types'].append("entity")
+                        #else:
+                        infos['column_types'].append(src_file.guess_values_type(infos['preview_data'][ih], infos['headers'][header_num]))
+                        header_num += 1
+                except Exception as e:
+                    traceback.print_exc(file=sys.stdout)
+                    infos['error'] = 'Could not read input file, are you sure it is a valid tabular file?'
+                    self.log.error(str(e))
 
-                header_num = 0
-                for ih in range(0,len(infos['headers'])):
-                    #if infos['headers'][ih].find("@")>0:
-                    #    infos['column_types'].append("entity")
-                    #else:
-                    infos['column_types'].append(src_file.guess_values_type(infos['preview_data'][ih], infos['headers'][header_num]))
-                    header_num += 1
-            except Exception as e:
-                traceback.print_exc(file=sys.stdout)
-                infos['error'] = 'Could not read input file, are you sure it is a valid tabular file?'
-                self.log.error(str(e))
+                data['files'].append(infos)
 
-            data['files'].append(infos)
+            elif src_file.type == 'gff':
+                try:
+                    entities = src_file.get_entities()
+                    infos['entities'] = entities
+                except Exception as e:
+                    self.log.debug('error !!')
+                    traceback.print_exc(file=sys.stdout)
+                    infos['error'] = 'Could not parse the file, are you sure it is a valid GFF3 file?'
+                    self.log.error('error with gff examiner: ' + str(e))
 
-        self.log.debug(str(data))
+                data['files'].append(infos)
+
+            elif src_file.type == 'ttl':
+                pass
 
         return data
 
