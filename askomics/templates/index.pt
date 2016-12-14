@@ -295,6 +295,9 @@
                     <input type="text" name="frame" id="tax-{{file.name}}">
                     <br><br>
                     <input type="button" id="{{file.name}}" class="btn btn-primary load_data_gff" value="Insert in database">
+                    <br><br>
+                    <p class="insert_status text-left alert hidden"></p>
+                    <p class="insert_warning text-left alert hidden"></p>
                     <hr><br>
                 </div>
             </form>
@@ -370,15 +373,15 @@
                         </tbody>
                     </table>
                     <pre class='preview_field'></pre>
-                    <p class="insert_status text-left alert hidden"></p>
-                    <p class="insert_warning text-left alert hidden"></p>
-                    <div class="warning-message hidden"></div>
                     <div class="form-group form-inline">
                         <div class="btn-group" role="group" aria-label="metadata">
                             <input type="button" class="btn btn-success preview_button" value="Preview RDF" />
                             <input type="button" class="btn btn-primary load_data_tsv" value="Insert in database" />
                         </div>
                     </div>
+                    <p class="insert_status text-left alert hidden"></p>
+                    <p class="insert_warning text-left alert hidden"></p>
+                    <div class="warning-message hidden"></div>
                 {{/if}}
             </form>
             <hr />

@@ -372,6 +372,8 @@ function loadSourceFileGff(filename) {
     // get taxon
     let taxon = '';
 
+    let file_elem = $("#source-file-gff-" + filename);
+
     // get the taxon in the selector or in the input field
     if ($('#' + filename + '-selector').val() === null || $('#' + filename + '-selector').val() === undefined) {
         taxon = $('#tax-'+filename).val();
@@ -409,12 +411,16 @@ function loadSourceFileGff(filename) {
             }
         }
 
-        let success_div = $('<div></div>').attr('class', 'alert alert-success')
-                                          .attr('role', 'alert')
-                                          .append($('<span></span>').attr('class', 'glyphicon glyphicon-ok'))
-                                          .append(' ' + entities_string + ' inserterd with success.');
+        let insert_status_elem = file_elem.find(".insert_status").first();
+        let insert_warning_elem = file_elem.find(".insert_warning").first();
 
-        div_entity.append(success_div);
+        //TODO: check if insertion is ok and then, display the success message or a warning message
+
+        insert_status_elem.html('<span class="glyphicon glyphicon-ok"></span> ' + entities_string + ' inserted with success.')
+                                              .removeClass('hidden alert-danger')
+                                              .removeClass('hidden alert-warning')
+                                              .addClass('show alert-success');
+
 
         hideModal();
     });
