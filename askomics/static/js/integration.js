@@ -39,6 +39,11 @@ $(function () {
         loadSourceFileGff(filename);
     });
 
+    $("#content_integration").on('click', '.load_data_ttl', function() {
+        let filename = $(this).attr('id');
+        loadSourceFileTtl(filename);
+    });
+
     // $('.taxon-selector').change(function() {
     //     console.log('---> ' + $(this).val);
     // });
@@ -64,6 +69,7 @@ function cols2rows(items) {
 
 function displayIntegrationForm(data) {
     console.log('--- displayIntegrationForm ---');
+    console.log(JSON.stringify(data));
     $("#content_integration").empty();
     for (var i = data.files.length - 1; i >= 0; i--) {
         switch (data.files[i].type) {
@@ -73,10 +79,12 @@ function displayIntegrationForm(data) {
             case 'gff':
                 displayGffForm(data.files[i], data.taxons);
             break;
+            case 'ttl':
+                displayTtlForm(data.files[i]);
+            break;
         }
     }
 }
-
 
 function displayTSVForm(file) {
     console.log('-+-+- displayTSVForm -+-+-');
@@ -104,6 +112,20 @@ function displayGffForm(file, taxons) {
     let html = template(context);
 
     $("#content_integration").append(html);
+}
+
+function displayTtlForm(file) {
+    console.log('--- displayTtlForm ---');
+    let source = $('#template-ttl-form').html();
+    let template = Handlebars.compile(source);
+
+    let context = {file: file};
+    let html = template(context);
+
+    $('#content_integration').append(html);
+
+    $('#source-file-ttl-' + file.name).find(".preview_field").html(file.preview);
+    $('#source-file-ttl-' + file.name).find(".preview_field").show();
 }
 
 function setCorrectType(file) {
@@ -163,7 +185,7 @@ function displayTableRDF(data) {
  */
 function previewTtl(file_elem) {
 
-    var file_name = file_elem.find('.file_name').text();
+    var file_name = file_elem.find('.file_name').attr('id');
 
     // Get column types
     var col_types = file_elem.find('.column_type').map(function() {
@@ -422,6 +444,19 @@ function loadSourceFileGff(filename) {
                                               .addClass('show alert-success');
 
 
+        hideModal();
+    });
+}
+
+function loadSourceFileTtl(filename) {
+    console.log('--- loadSourceFileTtl ---');
+    displayModal('Please wait', '', 'Close');
+
+    let service = new RestServiceJs('load_ttl_into_graph');
+    let model = {'file_name' : filename};
+
+    service.post(model, function(data) {
+        console.log('---> ttl insert');
         hideModal();
     });
 }

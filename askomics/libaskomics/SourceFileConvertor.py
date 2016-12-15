@@ -6,6 +6,7 @@ import re
 from askomics.libaskomics.ParamManager import ParamManager
 from askomics.libaskomics.source_file.SourceFileGff import SourceFileGff
 from askomics.libaskomics.source_file.SourceFileTsv import SourceFileTsv
+from askomics.libaskomics.source_file.SourceFileTtl import SourceFileTtl
 
 class SourceFileConvertor(ParamManager):
     """
@@ -40,7 +41,7 @@ class SourceFileConvertor(ParamManager):
             elif file_type == 'csv':
                 files.append(SourceFileTsv(self.settings, self.session, p, int(self.settings["askomics.overview_lines_limit"])))
             elif file_type == 'ttl':
-                pass
+                files.append(SourceFileTtl(self.settings, self.session, p))
 
         return files
 

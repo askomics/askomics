@@ -275,10 +275,13 @@ class AskView(object):
                 data['files'].append(infos)
 
             elif src_file.type == 'ttl':
-                pass
+                infos['preview'] = src_file.get_preview_ttl()
+                data['files'].append(infos)
+
 
         return data
 
+    #FIXME: DEAD CODE
     @view_config(route_name='source_files_overview_gff', request_method='GET')
     def source_files_overview_gff(self):
         """
@@ -500,6 +503,29 @@ class AskView(object):
 
 
         return data
+
+    @view_config(route_name='load_ttl_into_graph', request_method='POST')
+    def load_ttl_into_graph(self):
+        """
+        Load TTL file into the triplestore
+        """
+        self.log.debug('*** load_ttl_into_graph ***')
+        data = {}
+        body = self.request.json_body
+        file_name = body['file_name']
+        sfc = SourceFileConvertor(self.settings, self.request.session)
+        src_file_ttl = sfc.get_source_file(file_name)
+
+        urlbase = re.search(r'(http:\/\/.*)\/.*', self.request.current_route_url())
+        urlbase = urlbase.group(1)
+
+
+        try:
+            src_file_ttl.persist(urlbase)
+        except Exception as e:
+            data['error'] = 'Problem when integration of ' + file_name + '</br>' + str(e)
+            self.log.error('ERROR: ' + str(e))
+
 
     @view_config(route_name='getUserAbstraction', request_method='GET')
     def getUserAbstraction(self):

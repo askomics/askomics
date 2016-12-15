@@ -387,6 +387,23 @@
             <hr />
         </script>
 
+
+        <!-- template to display preview of a ttl file -->
+        <script id="template-ttl-form" type="text/x-handlebars-template">
+            <form id="source-file-ttl-{{file.name}}" class="template-source_file form-horizontal text-center">
+                <div id="{{file.name}}">
+                    <h4>TTL file: {{file.name}} </h4>
+                    <h5>Preview of the first 100 lines of the file</h5>
+                    <pre class='preview_field'></pre>
+                    <input type="button" id="{{file.name}}" class="btn btn-primary load_data_ttl" value="Insert in database">
+                    <br><br>
+                    <p class="insert_status text-left alert hidden"></p>
+                    <p class="insert_warning text-left alert hidden"></p>
+                    <hr><br>
+                </div>
+            </form>
+        </script>
+
         <!-- The template to display ttl preview -->
         <script id="template-ttl-preview" type="text/x-handlebars-template">{{ header }}
 
