@@ -277,7 +277,7 @@
                     <h5>Select which entities you want to integrate</h5>
                     {{#each file.entities}}
                         <label id="gff_checkbox-{{../file.name}}">
-                            <input type="checkbox" id="{{this}}">{{this}}
+                            <input type="checkbox" id="{{this}}"> {{this}}
                         </label><br>
                     {{/each}}
                     <br>
