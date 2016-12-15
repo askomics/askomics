@@ -438,11 +438,17 @@ function loadSourceFileGff(filename) {
 
         //TODO: check if insertion is ok and then, display the success message or a warning message
 
-        insert_status_elem.html('<span class="glyphicon glyphicon-ok"></span> ' + entities_string + ' inserted with success.')
-                                              .removeClass('hidden alert-danger')
-                                              .removeClass('hidden alert-warning')
-                                              .addClass('show alert-success');
-
+        if (data.error) {
+            insert_status_elem.html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> ERROR:</strong> ' + JSON.stringify(data.error))
+                              .removeClass('hidden alert-success')
+                              .removeClass('hidden alert-warning')
+                              .addClass('show alert-danger');
+        }else{
+            insert_status_elem.html('<span class="glyphicon glyphicon-ok"></span> ' + entities_string + ' inserted with success.')
+                                                  .removeClass('hidden alert-danger')
+                                                  .removeClass('hidden alert-warning')
+                                                  .addClass('show alert-success');
+        }
 
         hideModal();
     });
@@ -452,11 +458,28 @@ function loadSourceFileTtl(filename) {
     console.log('--- loadSourceFileTtl ---');
     displayModal('Please wait', '', 'Close');
 
+    let file_elem = $("#source-file-ttl-" + filename);
+
     let service = new RestServiceJs('load_ttl_into_graph');
     let model = {'file_name' : filename};
 
     service.post(model, function(data) {
         console.log('---> ttl insert');
+
+        let insert_status_elem = file_elem.find(".insert_status").first();
+        let insert_warning_elem = file_elem.find(".insert_warning").first();
+
+        if (data.error) {
+            insert_status_elem.html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> ERROR:</strong> ' + JSON.stringify(data.error))
+                              .removeClass('hidden alert-success')
+                              .removeClass('hidden alert-warning')
+                              .addClass('show alert-danger');
+        }else{
+            insert_status_elem.html('<span class="glyphicon glyphicon-ok"></span> ' + filename + ' inserted with success.')
+                                                  .removeClass('hidden alert-danger')
+                                                  .removeClass('hidden alert-warning')
+                                                  .addClass('show alert-success');
+        }
         hideModal();
     });
 }

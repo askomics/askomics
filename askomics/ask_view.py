@@ -451,6 +451,8 @@ class AskView(object):
             data['error'] = 'Problem when integration of ' + file_name + '</br>' + str(e)
             self.log.error('ERROR: ' + str(e))
 
+        return data
+
 
     @view_config(route_name='getUserAbstraction', request_method='GET')
     def getUserAbstraction(self):
