@@ -13,7 +13,7 @@ class SourceFileGff(SourceFile):
     Class representing a Gff3 Source file
     """
 
-    def __init__(self, settings, session, path, preview_limit, tax, ent):
+    def __init__(self, settings, session, path, tax, ent):
 
         SourceFile.__init__(self, settings, session, path)
 
