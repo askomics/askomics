@@ -8,7 +8,6 @@ from pyramid.paster import get_appsettings
 
 from askomics.libaskomics.source_file.SourceFile import SourceFile
 from askomics.libaskomics.source_file.SourceFileTsv import SourceFileTsv
-from askomics.libaskomics.source_file.SourceFileGff import SourceFileGff
 
 SIMPLE_SOURCE_FILE = os.path.join( os.path.dirname( __file__ ), "..", "test-data", "sourcefile.tsv.simple" )
 
