@@ -67,7 +67,7 @@
     </head>
 
     <body>
-        <nav class="navbar navbar-default">
+        <nav class="navbar navbar-default navbar-fixed-top">
             <div id="navbar_content" class="container">
                 <div class="navbar-header">
                     <a class="navbar-brand site-header" href="/">${project}</a>
@@ -97,6 +97,7 @@
                 </div>
             </div>
         </nav>
+        <br><br><br>
         <div id="content_interrogation" class="container">
             <div id="init" class="row">
                 <div class="form-group">

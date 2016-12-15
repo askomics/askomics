@@ -23,8 +23,6 @@ def main(global_config, **settings):
     config.add_route('sparqlquery', '/sparqlquery')
     config.add_route('getSparqlQueryInTextFormat', '/getSparqlQueryInTextFormat')
     config.add_route('source_files_overview', '/source_files_overview')
-    config.add_route('source_files_overview_gff', '/source_files_overview_gff')
-    config.add_route('insert_files_rdf', '/insert_files_rdf')
     config.add_route('load_data_into_graph', '/load_data_into_graph')
     config.add_route('load_gff_into_graph', '/load_gff_into_graph')
     config.add_route('load_ttl_into_graph', '/load_ttl_into_graph')
