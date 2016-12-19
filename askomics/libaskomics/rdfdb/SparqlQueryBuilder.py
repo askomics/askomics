@@ -141,3 +141,19 @@ class SparqlQueryBuilder(ParamManager):
             :taxonCategory displaySetting:category ?URItax .
             ?URItax rdfs:label ?taxon .
         }""")
+
+    def check_username_presence(self, username):
+        return self.prepare_query(
+        """SELECT DISTINCT ?status
+        WHERE {
+            GRAPH <"""+self.get_param("askomics.graph")+"""> { ?g rdfg:subGraphOf <"""+self.get_param("askomics.graph")+""">}
+            BIND(EXISTS {:""" + username + """ rdf:type :user} AS ?status)
+        }""")
+
+    def check_email_presence(self, email):
+        return self.prepare_query(
+        """SELECT DISTINCT ?status
+        WHERE {
+            GRAPH <"""+self.get_param("askomics.graph")+"""> { ?g rdfg:subGraphOf <"""+self.get_param("askomics.graph")+""">}
+            BIND(EXISTS {?uri :email \"""" + email + """\"} AS ?status)
+        }""")

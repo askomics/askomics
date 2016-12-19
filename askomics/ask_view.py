@@ -23,6 +23,8 @@ from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
 from askomics.libaskomics.rdfdb.ResultsBuilder import ResultsBuilder
 from askomics.libaskomics.source_file.SourceFile import SourceFile
 
+from askomics.libaskomics.Security import Security
+
 @view_defaults(renderer='json', route_name='start_point')
 class AskView(object):
     """ This class contains method calling the libaskomics functions using parameters from the js web interface (body variable) """
@@ -30,6 +32,7 @@ class AskView(object):
     def __init__(self, request):
         self.request = request
         self.settings = request.registry.settings
+        # self.request.session = {}
 
         self.log = logging.getLogger(__name__)
 
@@ -526,3 +529,77 @@ class AskView(object):
             content_type='text/turtle'
             )
         return response
+
+    @view_config(route_name='signup', request_method='POST')
+    def signup(self):
+        body = self.request.json_body
+        username = body['username']
+        email = body['email']
+        password = body['password']
+        password2 = body['password2']
+
+        self.log.debug('==== user info ====')
+        self.log.debug('username: ' + username)
+        self.log.debug('email: ' + email)
+        self.log.debug('password: ' + password)
+        self.log.debug('password2: ' + password2)
+
+        data = {}
+        data['error'] = []
+        error = False
+
+        security = Security(self.settings, self.request.session, username, email, password, password2)
+
+        is_valid_email = security.check_email()
+        are_passwords_identical = security.check_passwords()
+        is_pw_enough_longer = security.check_password_length()
+        is_username_already_exist = security.check_username_not_in_database()
+        is_email_already_exist = security.check_email_not_in_database()
+
+        if not is_valid_email:
+            data['error'].append('Email is not valid')
+            error = True
+
+        if not are_passwords_identical:
+            data['error'].append('Passwords are not identical')
+            error = True
+
+        if not is_pw_enough_longer:
+            data['error'].append('Password must be at least 8 characters')
+            error = True
+
+        if is_username_already_exist:
+            data['error'].append('Username already exist')
+            error = True
+
+        if is_email_already_exist:
+            data['error'].append('Email already exist')
+            error = True
+
+        if error:
+            return data
+
+        # no error, insert user in TS
+        try:
+            #security.persist_user()
+            pass
+        except Exception as e:
+            traceback.print_exc(file=sys.stdout)
+            data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
+            self.log.error(str(e))
+
+        try:
+            self.log.debug('---> before setting session')
+            self.log.debug(self.request.session)
+
+            security.log_user(self.request)
+
+            self.log.debug('---> after setting session')
+            self.log.debug(self.request.session)
+
+
+        except Exception as e:
+            data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
+            self.log.error(str(e))
+
+        return data

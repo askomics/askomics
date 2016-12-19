@@ -472,6 +472,58 @@ $(function () {
 
     });
 
+    // diplay signup/login form
+    $('#show_signup').click(function(e) {
+      $('#content_login').hide();
+      $('#content_signup').show();
+    });
+
+    $('#show_login').click(function(e) {
+      $('#content_signup').hide();
+      $('#content_login').show();
+    });
+
+    $('#signup_button').click(function(e) {
+      let username = $('#signup_username').val();
+      let email = $('#signup_email').val();
+      let password = $('#signup_password').val();
+      let password2 = $('#signup_password2').val();
+
+
+      console.log('username: ' + username);
+      console.log('email: ' + email);
+      console.log('password: ' + password);
+      console.log('password2: ' + password2);
+
+      var service = new RestServiceJs("signup");
+      var model = { 'username': username,
+                    'email': email,
+                    'password': password,
+                    'password2': password2  };
+
+      displayModal('Please wait', '', 'Close');
+
+      service.post(model, function(data) {
+          hideModal();
+          if (data.error.length !== 0) {
+            console.log(JSON.stringify(data.error));
+            $('#signup_error').empty();
+            for (var i = data.error.length - 1; i >= 0; i--) {
+              $('#signup_error').append(data.error[i] + '<br>');
+            }
+            $('#signup_success').hide();
+            $('#signup_error').show();
+          }else{
+            $('#signup_error').hide();
+            $('#signup_success').empty();
+            $('#signup_success').append('Account successfully created!');
+            $('#signup_success').show();
+            // User is logged, show the special button
+          }
+      });
+
+    });
+
     // A helper for handlebars
     Handlebars.registerHelper('nl2br', function(text) {
         var nl2br = (text + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1' + '<br>' + '$2');

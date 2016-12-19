@@ -37,6 +37,9 @@ def main(global_config, **settings):
     config.add_route('upload_delete', '/up/file{sep:/*}{name:.*}&_method=DELETE')
     config.add_route('upload', '/up/file{sep:/*}{name:.*}')
 
+    # Authentication routes
+    config.add_route('signup', '/signup')
+
 
     # TODO no absolute path to static files
     # TODO check what is cors (iframe redirect?)

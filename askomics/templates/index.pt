@@ -93,6 +93,7 @@
                           </li>
                         <li id="about"><a href="#"><span class="glyphicon glyphicon-info-sign"></span></a></li><!---->
                         <li id="help"><a href="#" onclick="AskomicsHelp.start();"><span class="glyphicon glyphicon-question-sign"></span></a></li>
+                        <li id="login"><a href="#"><span class="glyphicon glyphicon-log-in"></span></a></li>
                     </ul>
                 </div>
             </div>
@@ -246,6 +247,48 @@
           This path can then be transformed into a SPARQL query that can be
           executed on the original dataset.
          </p>
+          <hr/>
+        </div>
+
+        <!-- Login form -->
+        <div id="content_login" class="container" hidden>
+          <h3 class="header-div">Login</h3>
+          <hr/>
+          <label for="username">Username or email adress</label><br/>
+          <input name="username" type="text" placeholder="Username or email adress" required autofocus><br/><br/>
+
+          <label for="username">Password</label><br/>
+          <input name="password" type="password" placeholder="Password" required><br/><br/>
+
+          <button type="button" class="btn btn-primary" data-dismiss="modal" id="login_button">Log in</button>
+          <p>(or <a id='show_signup' href="#">sign up</a> if you don't have an account)</p>
+          <hr/>
+        </div>
+
+        <!-- signup form -->
+        <div id="content_signup" class="container" hidden>
+          <h3 class="header-div">Sign up</h3>
+          <hr/>
+          <label for="username">Username</label><br/>
+          <input id = 'signup_username' name="username" type="text" placeholder="Username" required autofocus><br/><br/>
+
+          <label for="email">Email adress</label><br/>
+          <input id = 'signup_email' name="email" type="email" placeholder="Email" required><br/><br/>
+
+          <label for="password">Password</label><br/>
+          <input id = 'signup_password' name="password" type="password" placeholder="Password" required><br/><br/>
+
+          <label for="password2">Password (confirmation)</label><br/>
+          <input id = 'signup_password2' name="password2" type="password" placeholder="Password" required><br/><br/>
+
+          <button type="button" class="btn btn-primary" data-dismiss="modal" id="signup_button">Sign Up</button>
+          <p>(or <a id='show_login' href="#">log in</a> if you have an account)</p>
+          <!-- error message -->
+            <div id='signup_error' class="alert alert-danger" role="alert" hidden>
+            </div>
+          <!-- success message -->
+            <div id='signup_success' class="alert alert-success" role="alert" hidden>
+            </div>
           <hr/>
         </div>
 
