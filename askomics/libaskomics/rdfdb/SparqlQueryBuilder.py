@@ -157,3 +157,25 @@ class SparqlQueryBuilder(ParamManager):
             GRAPH <"""+self.get_param("askomics.graph")+"""> { ?g rdfg:subGraphOf <"""+self.get_param("askomics.graph")+""">}
             BIND(EXISTS {?uri :email \"""" + email + """\"} AS ?status)
         }""")
+
+    def get_password_with_email(self, email):
+        return self.prepare_query(
+        """SELECT DISTINCT ?salt ?shapw
+        WHERE {
+            GRAPH <"""+self.get_param("askomics.graph")+"""> { ?g rdfg:subGraphOf <"""+self.get_param("askomics.graph")+""">}
+            ?URIusername rdf:type :user .
+            ?URIusername :email \"""" + email + """\" .
+            ?URIusername :randomsalt ?salt .
+            ?URIusername :password ?shapw .
+        }""")
+
+    def get_password_with_username(self, username):
+        return self.prepare_query(
+        """SELECT DISTINCT ?salt ?shapw
+        WHERE {
+            GRAPH <"""+self.get_param("askomics.graph")+"""> { ?g rdfg:subGraphOf <"""+self.get_param("askomics.graph")+""">}
+            ?URIusername rdf:type :user .
+            ?URIusername rdfs:label \"""" + username + """\" .
+            ?URIusername :randomsalt ?salt .
+            ?URIusername :password ?shapw .
+        }""")

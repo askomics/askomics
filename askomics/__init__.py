@@ -1,6 +1,10 @@
 from pyramid.config import Configurator
 from pyramid.session import SignedCookieSessionFactory
 
+from pyramid.authentication import AuthTktAuthenticationPolicy
+from pyramid.authorization import ACLAuthorizationPolicy
+
+
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """
@@ -11,6 +15,12 @@ def main(global_config, **settings):
 
     config.include('pyramid_chameleon')
     config.add_static_view('static', 'static', cache_max_age=3600)
+
+    # Security policies
+    authn_policy = AuthTktAuthenticationPolicy(settings['askomics.secret'])
+    authz_policy = ACLAuthorizationPolicy()
+    config.set_authentication_policy(authn_policy)
+    config.set_authorization_policy(authz_policy)
 
     # Askomics routes
     config.add_route('home', '/')
@@ -39,6 +49,9 @@ def main(global_config, **settings):
 
     # Authentication routes
     config.add_route('signup', '/signup')
+    config.add_route('login', '/login')
+    config.add_route('logout', '/logout')
+    config.add_route('checkuser', '/checkuser')
 
 
     # TODO no absolute path to static files

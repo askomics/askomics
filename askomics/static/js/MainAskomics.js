@@ -5,8 +5,10 @@ var askomicsInitialization = false;
 var forceLayoutManager ;
 
 function startRequestSessionAskomics() {
+  console.log('---> startRequestSessionAskomics');
 
   if ( askomicsInitialization ) return ;
+  console.log('---> once?');
   // Initialize the graph with the selected start point.
   $("#init").hide();
   $("#queryBuilder").show();
@@ -56,6 +58,7 @@ function resetGraph() {
 }
 
 function loadStartPoints() {
+  console.log('---> loadStartPoints');
 
   var service = new RestServiceJs("startpoints");
   $("#btn-down").prop("disabled", true);
@@ -414,6 +417,8 @@ $(function () {
   // TODO: move inside AskomicsMenuFile
     // Startpoints definition
     loadStartPoints();
+    let user = new AskomicsUser('');
+    user.checkUser();
 
     // Loading a sparql query file
     $(".uploadBtn").change( function(event) {
@@ -474,6 +479,7 @@ $(function () {
 
     // diplay signup/login form
     $('#show_signup').click(function(e) {
+      console.log('fuuuuck!!');
       $('#content_login').hide();
       $('#content_signup').show();
     });
@@ -489,14 +495,8 @@ $(function () {
       let password = $('#signup_password').val();
       let password2 = $('#signup_password2').val();
 
-
-      console.log('username: ' + username);
-      console.log('email: ' + email);
-      console.log('password: ' + password);
-      console.log('password2: ' + password2);
-
-      var service = new RestServiceJs("signup");
-      var model = { 'username': username,
+      let service = new RestServiceJs("signup");
+      let model = { 'username': username,
                     'email': email,
                     'password': password,
                     'password2': password2  };
@@ -506,9 +506,8 @@ $(function () {
       service.post(model, function(data) {
           hideModal();
           if (data.error.length !== 0) {
-            console.log(JSON.stringify(data.error));
             $('#signup_error').empty();
-            for (var i = data.error.length - 1; i >= 0; i--) {
+            for (let i = data.error.length - 1; i >= 0; i--) {
               $('#signup_error').append(data.error[i] + '<br>');
             }
             $('#signup_success').hide();
@@ -519,9 +518,48 @@ $(function () {
             $('#signup_success').append('Account successfully created!');
             $('#signup_success').show();
             // User is logged, show the special button
+            console.log(data);
+            let user = new AskomicsUser(data.username);
+            user.logUser();
           }
       });
 
+    });
+
+    $('#login_button').click(function(e) {
+      let username_email = $('#login_username-email').val();
+      let password = $('#login_password').val();
+
+      let service = new RestServiceJs('login');
+      let model = {
+        'username_email': username_email,
+        'password': password
+      };
+
+      displayModal('Please wait', '', 'Close');
+
+      service.post(model, function(data) {
+        hideModal();
+        if (data.error.length !== 0) {
+          $('#login_error').empty();
+          for (let i = data.error.length - 1; i >= 0; i--) {
+            $('#login_error').append(data.error[i] + '<br>');
+          }
+          $('#login_success').hide();
+          $('#login_error').show();
+        }else{
+          $('#login_error').hide();
+          $('#login_success').append('You are loged now');
+          $('#login_success').show();
+          let user = new AskomicsUser(data.username);
+          user.logUser();
+        }
+      });
+    });
+
+    $('#logout').click(function(e) {
+      let user = new AskomicsUser();
+      user.logout();
     });
 
     // A helper for handlebars

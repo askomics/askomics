@@ -23,6 +23,14 @@ from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
 from askomics.libaskomics.rdfdb.ResultsBuilder import ResultsBuilder
 from askomics.libaskomics.source_file.SourceFile import SourceFile
 
+from pyramid.httpexceptions import (
+    HTTPForbidden,
+    HTTPFound,
+    HTTPNotFound,
+    )
+
+from validate_email import validate_email
+
 from askomics.libaskomics.Security import Security
 
 @view_defaults(renderer='json', route_name='start_point')
@@ -32,6 +40,8 @@ class AskView(object):
     def __init__(self, request):
         self.request = request
         self.settings = request.registry.settings
+        if 'username' not in self.request.session.keys():
+            self.request.session['username'] = ''
         # self.request.session = {}
 
         self.log = logging.getLogger(__name__)
@@ -51,6 +61,11 @@ class AskView(object):
     @view_config(route_name='statistics', request_method='GET')
     def statistics(self):
         """ Get information about triplet store """
+
+        # Denny access for non loged users
+        if self.request.session['username'] == '':
+            raise HTTPForbidden
+
         self.log.debug("== STATS ==")
         data = {}
         pm = ParamManager(self.settings, self.request.session)
@@ -126,6 +141,11 @@ class AskView(object):
         """
         Delete all triples in the triplestore
         """
+
+        # Denny access for non loged users
+        if self.request.session['username'] == '':
+            raise HTTPForbidden
+
         data = {}
 
         self.log.debug("=== DELETE ALL TRIPLES ===")
@@ -150,6 +170,11 @@ class AskView(object):
         """
         Delete triples from a list of graph
         """
+
+        # Denny access for non loged users
+        if self.request.session['username'] == '':
+            raise HTTPForbidden
+
         self.log.debug("=== DELETE SELECTED GRAPHS ===")
 
         sqb = SparqlQueryBuilder(self.settings, self.request.session)
@@ -168,6 +193,10 @@ class AskView(object):
         """
         Return a list with all the named graphs.
         """
+
+        # Denny access for non loged users
+        if self.request.session['username'] == '':
+            raise HTTPForbidden
 
         self.log.debug("=== LIST OF NAMED GRAPHS ===")
 
@@ -225,6 +254,11 @@ class AskView(object):
         """
         Get preview data for all the available files
         """
+
+        # Denny access for non loged users
+        if self.request.session['username'] == '':
+            raise HTTPForbidden
+
         self.log.debug(" ========= Askview:source_files_overview =============")
         sfc = SourceFileConvertor(self.settings, self.request.session)
 
@@ -290,6 +324,12 @@ class AskView(object):
         """
         Convert tabulated files to turtle according to the type of the columns set by the user
         """
+
+        # Denny access for non loged users
+        if self.request.session['username'] == '':
+            raise HTTPForbidden
+
+
         self.log.debug("preview_ttl")
         data = {}
 
@@ -341,6 +381,10 @@ class AskView(object):
         Compare the user data and what is already in the triple store
         """
 
+        # Denny access for non loged users
+        if self.request.session['username'] == '':
+            raise HTTPForbidden
+
         data = {}
 
         body = self.request.json_body
@@ -372,6 +416,11 @@ class AskView(object):
         """
         Load tabulated files to triple store according to the type of the columns set by the user
         """
+
+        # Denny access for non loged users
+        if self.request.session['username'] == '':
+            raise HTTPForbidden
+
         data = {}
 
         body = self.request.json_body
@@ -402,6 +451,12 @@ class AskView(object):
         """
         Load GFF file into the triplestore
         """
+
+        # Denny access for non loged users
+        if self.request.session['username'] == '':
+            raise HTTPForbidden
+
+
         self.log.debug("== load_gff_into_graph ==")
         data = {}
 
@@ -437,6 +492,12 @@ class AskView(object):
         """
         Load TTL file into the triplestore
         """
+
+        # Denny access for non loged users
+        if self.request.session['username'] == '':
+            raise HTTPForbidden
+
+
         self.log.debug('*** load_ttl_into_graph ***')
         data = {}
         body = self.request.json_body
@@ -524,6 +585,12 @@ class AskView(object):
     @view_config(route_name='ttl', request_method='GET')
     def upload(self):
 
+        # Denny access for non loged users
+        if self.request.session['username'] == '':
+            raise HTTPForbidden
+
+
+
         response = FileResponse(
             'askomics/ttl/'+self.request.matchdict['name'],
             content_type='text/turtle'
@@ -541,8 +608,6 @@ class AskView(object):
         self.log.debug('==== user info ====')
         self.log.debug('username: ' + username)
         self.log.debug('email: ' + email)
-        self.log.debug('password: ' + password)
-        self.log.debug('password2: ' + password2)
 
         data = {}
         data['error'] = []
@@ -553,8 +618,8 @@ class AskView(object):
         is_valid_email = security.check_email()
         are_passwords_identical = security.check_passwords()
         is_pw_enough_longer = security.check_password_length()
-        is_username_already_exist = security.check_username_not_in_database()
-        is_email_already_exist = security.check_email_not_in_database()
+        is_username_already_exist = security.check_username_in_database()
+        is_email_already_exist = security.check_email_in_database()
 
         if not is_valid_email:
             data['error'].append('Email is not valid')
@@ -581,7 +646,7 @@ class AskView(object):
 
         # no error, insert user in TS
         try:
-            #security.persist_user()
+            security.persist_user()
             pass
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
@@ -589,14 +654,94 @@ class AskView(object):
             self.log.error(str(e))
 
         try:
-            self.log.debug('---> before setting session')
-            self.log.debug(self.request.session)
-
             security.log_user(self.request)
 
-            self.log.debug('---> after setting session')
-            self.log.debug(self.request.session)
+            data['username'] = username
 
+        except Exception as e:
+            data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
+            self.log.error(str(e))
+
+        return data
+
+    @view_config(route_name='checkuser', request_method='GET')
+    def checkuser(self):
+        data = {}
+        if self.request.session['username'] != '':
+            data['username'] = self.request.session['username']
+
+        return data
+
+
+    @view_config(route_name='logout', request_method='GET')
+    def logout(self):
+
+        self.request.session['username'] = ''
+
+        return
+
+    @view_config(route_name='login', request_method='POST')
+    def login(self):
+        body = self.request.json_body
+        username_email = body['username_email']
+        password = body['password']
+        username = ''
+        email = ''
+        data = {}
+        data['error'] = []
+        error = False
+
+        if validate_email(username_email):
+            email = username_email
+            auth_type = 'email'
+        else:
+            username = username_email
+            auth_type = 'username'
+
+        security = Security(self.settings, self.request.session, username, email, password, password)
+
+        if auth_type == 'email':
+            email_in_ts = security.check_email_in_database()
+
+            if not email_in_ts:
+                data['error'].append('email is not registered')
+                error = True
+
+            if error:
+                return data
+
+            password_is_correct = security.check_email_password()
+
+            if not password_is_correct:
+                data['error'].append('Password is incorrect')
+                error = True
+
+            if error:
+                return data
+
+        elif auth_type == 'username':
+            username_in_ts = security.check_username_in_database()
+
+            if not username_in_ts:
+                data['error'].append('username is not registered')
+                error = True
+
+            if error:
+                return data
+
+            password_is_correct = security.check_username_password()
+
+            if not password_is_correct:
+                data['error'].append('Password is incorrect')
+                error = True
+
+            if error:
+                return data
+
+        # User pass the authentication, log him
+        try:
+            security.log_user(self.request)
+            data['username'] = username
 
         except Exception as e:
             data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
