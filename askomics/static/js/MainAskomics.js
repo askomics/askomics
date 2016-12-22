@@ -8,7 +8,6 @@ function startRequestSessionAskomics() {
   console.log('---> startRequestSessionAskomics');
 
   if ( askomicsInitialization ) return ;
-  console.log('---> once?');
   // Initialize the graph with the selected start point.
   $("#init").hide();
   $("#queryBuilder").show();
@@ -413,26 +412,19 @@ function setUploadForm(content,titleForm,route_overview,callback) {
   });
 }
 
-$(function () {
-  // TODO: move inside AskomicsMenuFile
-    // Startpoints definition
-    loadStartPoints();
-    let user = new AskomicsUser('');
-    user.checkUser();
+function displayNavbar(loged, username) {
+    console.log('-+-+- displayNavbar -+-+-');
+    $("#navbar").empty();
+    let source = $('#template-navbar').html();
+    let template = Handlebars.compile(source);
 
-    // Loading a sparql query file
-    $(".uploadBtn").change( function(event) {
-      var uploadedFile = event.target.files[0];
-      if (uploadedFile) {
-          var fr = new FileReader();
-          fr.onload = function(e) {
-            var contents = e.target.result;
-            startRequestSessionAskomics();
-            forceLayoutManager.startWithQuery(contents);
-          };
-          fr.readAsText(uploadedFile);
-      }
-    });
+    let context = {name: 'AskOmics', loged: loged, username: username};
+    let html = template(context);
+
+    $("#navbar").append(html);
+
+    // manage navbar button here
+    //TODO: move this function into a navbar class?
 
     /*
 
@@ -479,7 +471,6 @@ $(function () {
 
     // diplay signup/login form
     $('#show_signup').click(function(e) {
-      console.log('fuuuuck!!');
       $('#content_login').hide();
       $('#content_signup').show();
     });
@@ -560,6 +551,30 @@ $(function () {
     $('#logout').click(function(e) {
       let user = new AskomicsUser();
       user.logout();
+    });
+
+}
+
+$(function () {
+  // TODO: move inside AskomicsMenuFile
+    // Startpoints definition
+    loadStartPoints();
+    // check if a user is loged in
+    let user = new AskomicsUser('');
+    user.checkUser();
+
+    // Loading a sparql query file
+    $(".uploadBtn").change( function(event) {
+      var uploadedFile = event.target.files[0];
+      if (uploadedFile) {
+          var fr = new FileReader();
+          fr.onload = function(e) {
+            var contents = e.target.result;
+            startRequestSessionAskomics();
+            forceLayoutManager.startWithQuery(contents);
+          };
+          fr.readAsText(uploadedFile);
+      }
     });
 
     // A helper for handlebars

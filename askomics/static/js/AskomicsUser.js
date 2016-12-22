@@ -8,15 +8,7 @@ class AskomicsUser {
 
 
     logUser() {
-        // Show the loged_in buttons (integrate and admin)
-        // $('#logeduser_buttons').show();
-
-        // Show a logout button insted of a login button
-        // ...
-
-        // Show the name of the loged in user
-        $('#navbar_title').empty();
-        $('#navbar_title').append(this.username);
+        displayNavbar(true, this.username);
     }
 
     checkUser() {
@@ -30,6 +22,8 @@ class AskomicsUser {
             if (data.username) {
                 self.username = data.username;
                 self.logUser();
+            }else{
+                displayNavbar(false, '');
             }
         });
     }
@@ -42,5 +36,6 @@ class AskomicsUser {
         service.getAll(function() {
             hideModal();
         });
+        displayNavbar(false, '');
     }
 }
