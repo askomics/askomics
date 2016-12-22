@@ -457,7 +457,7 @@ function displayNavbar(loged, username) {
         }
 
 
-        if (  ! ( $(this).attr('id') in { 'help' : '','admin':'','userdata':'' }) ) {
+        if (  ! ( $(this).attr('id') in { 'help' : '','admin':'', 'user_menu': '' }) ) {
           $('.container').hide();
           $('.container#navbar_content').show();
           $('.container#content_' + $(this).attr('id')).show();

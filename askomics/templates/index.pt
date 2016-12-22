@@ -199,6 +199,12 @@
             <div id="statistics_div" class="row"></div>
         </div>
 
+        <div id="content_user_info" class="container" hidden>
+            <hr/>
+            <h3 class="header-div">User page</h3>
+            <hr/>
+        </div>
+
         <div id="content_administration" class="container" hidden>
             <hr/>
             <h3 class="header-div">Administration</h3>
