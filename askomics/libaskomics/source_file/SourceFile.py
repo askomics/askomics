@@ -170,7 +170,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
             sqb = SparqlQueryBuilder(self.settings, self.session)
 
 
-            graphName = "urn:sparql:" + self.name + '_' + self.timestamp
+            graphName = "askomics:graph:" + self.name + '_' + self.timestamp
 
             triple_count = 0
             chunk = ""
@@ -253,7 +253,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         sqb = SparqlQueryBuilder(self.settings, self.session)
         ql = QueryLauncher(self.settings, self.session)
-        graphName = "urn:sparql:" + self.name + '_' + self.timestamp
+        graphName = "askomics:graph:" + self.name + '_' + self.timestamp
         self.metadatas['graphName'] = graphName
         ttlNamedGraph = "<" + graphName + "> " + "rdfg:subGraphOf" + " <" + self.get_param("askomics.graph") + "> ."
         sparqlHeader = sqb.header_sparql_config("")
