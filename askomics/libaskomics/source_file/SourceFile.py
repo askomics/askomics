@@ -8,10 +8,10 @@ from collections import defaultdict
 from itertools import count
 import os.path
 import tempfile
-import time
 import getpass
 import urllib.parse
 from pkg_resources import get_distribution
+import datetime
 
 from askomics.libaskomics.ParamManager import ParamManager
 from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
@@ -32,7 +32,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         ParamManager.__init__(self, settings, session)
 
-        self.timestamp = str(time.time())
+        self.timestamp = datetime.datetime.now().isoformat()
 
         self.path = path
 
