@@ -51,6 +51,21 @@ def prefix_lines(prefix, strings):
     """
     return (prefix + s for s in strings)
 
+def rreplace(string, old, new, occ):
+    """Replace the lasts occurences of a pattern in a string
+
+    Arguments:
+        string {str} -- the string to replace
+        old {str} -- the substring to replace
+        new {str} -- the replacement string
+        occ {int} -- the number of occurence to replace
+
+    Returns:
+        {str} -- the new replaced string
+    """
+    li = string.rsplit(old, occ)
+    return new.join(li)
+
 
 #
 # Decorators

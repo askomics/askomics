@@ -4,7 +4,9 @@ import os.path
 import re
 
 from askomics.libaskomics.ParamManager import ParamManager
-from askomics.libaskomics.source_file.SourceFile import SourceFile
+from askomics.libaskomics.source_file.SourceFileGff import SourceFileGff
+from askomics.libaskomics.source_file.SourceFileTsv import SourceFileTsv
+from askomics.libaskomics.source_file.SourceFileTtl import SourceFileTtl
 
 class SourceFileConvertor(ParamManager):
     """
@@ -31,10 +33,26 @@ class SourceFileConvertor(ParamManager):
         paths = glob(src_dir + '/*')
 
         files = []
+
         for p in paths:
-            files.append(SourceFile(self.settings, self.session, p, int(self.settings["askomics.overview_lines_limit"])))
+            file_type = self.guess_file_type(p)
+            if file_type == 'gff':
+                files.append(SourceFileGff(self.settings, self.session, p, '', []))
+            elif file_type == 'csv':
+                files.append(SourceFileTsv(self.settings, self.session, p, int(self.settings["askomics.overview_lines_limit"])))
+            elif file_type == 'ttl':
+                files.append(SourceFileTtl(self.settings, self.session, p))
 
         return files
+
+    def guess_file_type(self, filepath):
+        extension = os.path.splitext(filepath)[1]
+        if extension.lower() in ('.gff', '.gff2', '.gff3'):
+            return 'gff'
+        elif extension.lower() in ('.ttl',):
+            return 'ttl'
+        else:
+            return 'csv'
 
     def get_rdf_files(self):
         """
@@ -46,7 +64,7 @@ class SourceFileConvertor(ParamManager):
 
         files = []
         for p in paths:
-            files.append(SourceFile(self.settings, self.session, p, int(self.settings["askomics.overview_lines_limit"])))
+            files.append(SourceFileTsv(self.settings, self.session, p, int(self.settings["askomics.overview_lines_limit"])))
 
         return files
 
@@ -66,3 +84,34 @@ class SourceFileConvertor(ParamManager):
                 return f
 
         return None
+
+    def get_source_file_gff(self, name, tax, ent):
+        """
+        Return an object representing a gff source file
+
+        :param name: Yhe name of the gff file to return
+        :return: the sourcefile
+        :rtype: SourceFileGff
+        """
+
+        files = self.get_source_files_gff(tax, ent)
+
+        for f in files:
+            if f.name == name:
+                return f
+
+        return None
+
+    def get_source_files_gff(self, tax='', ent=[]):
+        """
+        :return: List of the file to convert paths
+        :rtype: List
+        """
+        src_dir = self.get_source_file_directory()
+        paths = glob(src_dir + '/*.gff3')
+
+        files = []
+        for p in paths:
+            files.append(SourceFileGff(self.settings, self.session, p, tax, ent))
+
+        return files

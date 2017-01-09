@@ -30,9 +30,23 @@ $(function () {
         }
     });
 
-    $("#content_integration").on('click', '.load_data', function(event) {
+    $("#content_integration").on('click', '.load_data_tsv', function(event) {
         loadSourceFile($(event.target).closest('.template-source_file'));
     });
+
+    $("#content_integration").on('click', '.load_data_gff', function() {
+        let filename = $(this).attr('id');
+        loadSourceFileGff(filename);
+    });
+
+    $("#content_integration").on('click', '.load_data_ttl', function() {
+        let filename = $(this).attr('id');
+        loadSourceFileTtl(filename);
+    });
+
+    // $('.taxon-selector').change(function() {
+    //     console.log('---> ' + $(this).val);
+    // });
 });
 
 /**
@@ -53,69 +67,108 @@ function cols2rows(items) {
     return out;
 }
 
-/**
- * Show preview data on the page
- */
-function displayTableTabularFile(data) {
-    // Transform columns to rows
-    for(let i=0;i<data.files.length;i++) {
-        if ('preview_data' in data.files[i]) {
-            data.files[i].preview_data = cols2rows(data.files[i].preview_data);
-        }
-    }
-
-    // display received data
-    var template = $('#template-source_file-preview').html();
-
-    var templateScript = Handlebars.compile(template);
-    var html = templateScript(data);
-
-    $("#content_integration").html(html);
-
-    function mapCallback() {
-      return $(this).val();
-    }
-
-    function getSelectCallback(index, value) {
-      selectbox.find("option[value="+value+"]").hide();
-    }
-
-    // Select the correct type for each column
-    /*
-      data.file[i]
-      - name : name file
-      - preview_data : first line of file
-      - column_types : text, numeric, etc...
-    */
-    for(let i=0, l=data.files.length; i<l; i++) {
-
-        if ('column_types' in data.files[i]) {
-            var cols = data.files[i].column_types;
-            for(let j=0; j<cols.length; j++) {
-                var selectbox = $('div#content_integration form.template-source_file:eq(' + i + ') select.column_type:eq(' + j + ')');
-                var values = selectbox.find("option").map(mapCallback);
-
-                if ($.inArray(cols[j], ['start', 'end', 'numeric']) == -1) {
-                    $.each(['start', 'end', 'numeric'],getSelectCallback);
-                }
-
-                if ($.inArray(cols[j], ['entityGoterm']) == -1) {
-                    $.each(['entityGoterm'],getSelectCallback);
-                }
-
-                if ($.inArray( cols[j], values) >= 0) {
-                    selectbox.val(cols[j]);
-                }
-
-                // Check what is in the db
-                checkExistingData($('div#content_integration form.template-source_file:eq(' + i + ')'));
-            }
+function displayIntegrationForm(data) {
+    console.log('--- displayIntegrationForm ---');
+    console.log(JSON.stringify(data));
+    $("#content_integration").empty();
+    for (var i = data.files.length - 1; i >= 0; i--) {
+        switch (data.files[i].type) {
+            case 'tsv':
+                displayTSVForm(data.files[i]);
+            break;
+            case 'gff':
+                displayGffForm(data.files[i], data.taxons);
+            break;
+            case 'ttl':
+                displayTtlForm(data.files[i]);
+            break;
         }
     }
 }
 
+function displayTSVForm(file) {
+    console.log('-+-+- displayTSVForm -+-+-');
+    // tranform columns to rows
+    if ('preview_data' in file) {
+        file.preview_data = cols2rows(file.preview_data);
+    }
+
+    let source = $('#template-csv-form').html();
+    let template = Handlebars.compile(source);
+
+    let context = {file: file};
+    let html = template(context);
+
+    $("#content_integration").append(html);
+    setCorrectType(file);
+}
+
+function displayGffForm(file, taxons) {
+    console.log('-+-+- displayGffForm -+-+-');
+    let source = $('#template-gff-form').html();
+    let template = Handlebars.compile(source);
+
+    let context = {file: file, taxons: taxons};
+    let html = template(context);
+
+    $("#content_integration").append(html);
+}
+
+function displayTtlForm(file) {
+    console.log('--- displayTtlForm ---');
+    let source = $('#template-ttl-form').html();
+    let template = Handlebars.compile(source);
+
+    let context = {file: file};
+    let html = template(context);
+
+    $('#content_integration').append(html);
+
+    $('#source-file-ttl-' + file.name).find(".preview_field").html(file.preview);
+    $('#source-file-ttl-' + file.name).find(".preview_field").show();
+}
+
+function setCorrectType(file) {
+    console.log('--- setCorrectType ---');
+
+    function mapCallback() {
+        return $(this).val();
+    }
+
+    function getSelectCallback(index, value) {
+        selectbox.find("option[value="+value+"]").hide();
+    }
+
+    if ('column_types' in file) {
+        var cols = file.column_types;
+        for(let i=0; i<cols.length; i++) {
+            var selectbox = $('div#content_integration form#source-file-tsv-' + file.name + ' select.column_type:eq(' + i + ')');
+            var values = selectbox.find("option").map(mapCallback);
+
+            if ($.inArray(cols[i], ['start', 'end', 'numeric']) == -1) {
+                $.each(['start', 'end', 'numeric'],getSelectCallback);
+            }
+
+            if ($.inArray(cols[i], ['entityGoterm']) == -1) {
+                $.each(['entityGoterm'],getSelectCallback);
+            }
+
+            if ($.inArray( cols[i], values) >= 0) {
+                selectbox.val(cols[i]);
+            }
+
+            // Check what is in the db
+            checkExistingData($('div#content_integration form#source-file-tsv-' + file.name));
+        }
+    }
+
+
+}
+
+
 /**
- *
+ * Insert TTL file
+ * FIXME: change function's name
  */
 function displayTableRDF(data) {
   let info = "";//$('<div></div>');
@@ -126,12 +179,13 @@ function displayTableRDF(data) {
   if (data.error !== undefined ) alert(JSON.stringify(data.error));
 }
 
+
 /**
  * Get ttl representation of preview data
  */
 function previewTtl(file_elem) {
 
-    var file_name = file_elem.find('.file_name').text();
+    var file_name = file_elem.find('.file_name').attr('id');
 
     // Get column types
     var col_types = file_elem.find('.column_type').map(function() {
@@ -189,7 +243,7 @@ function containAll(Array1,Array2){
  */
 function checkExistingData(file_elem) {
 
-    var file_name = file_elem.find('.file_name').text();
+    var file_name = file_elem.find('.file_name').attr('id');
 
     // Get column types
     var col_types = file_elem.find('.column_type').map(function() {
@@ -251,7 +305,7 @@ function checkExistingData(file_elem) {
  */
 function loadSourceFile(file_elem) {
 
-    var file_name = file_elem.find('.file_name').text();
+    var file_name = file_elem.find('.file_name').attr('id');
 
     // Get column types
     var col_types = file_elem.find('.column_type').map(function() {
@@ -320,7 +374,7 @@ function loadSourceFile(file_elem) {
 
         // Check what is in the db now
         $('.template-source_file').each(function( index ) {
-            checkExistingData($(this));
+            checkExistingData(file_elem);
         });
     });
 
@@ -330,4 +384,102 @@ function loadSourceFile(file_elem) {
         $("#results").empty();
     }
     resetStats();
+}
+
+/**
+ * Load a GFF source_file into the triplestore
+ */
+function loadSourceFileGff(filename) {
+    console.log('-----> loadSourceFileGff <-----');
+    // get taxon
+    let taxon = '';
+
+    let file_elem = $("#source-file-gff-" + filename);
+
+    // get the taxon in the selector or in the input field
+    if ($('#' + filename + '-selector').val() === null || $('#' + filename + '-selector').val() === undefined) {
+        taxon = $('#tax-'+filename).val();
+    }else{
+        taxon = $('#' + filename + '-selector').val();
+    }
+
+    // get entities
+    let entities = [];
+
+    $("#"+filename+" > label > input").each(function() {
+        if ($(this).is(":checked")) {
+            entities.push($(this).attr('id'));
+        }
+    });
+
+    displayModal('Please wait', '', 'Close');
+
+    let service = new RestServiceJs("load_gff_into_graph");
+    let model = { 'file_name': filename,
+                  'taxon': taxon,
+                  'entities': entities  };
+
+    service.post(model, function(data) {
+        // Show a success message isertion is OK
+        let div_entity = $("#" + filename);
+        let entities_string = '';
+        for (var i = 0; i < entities.length; i++) {
+            entities_string += '<b>' + entities[i] + '</b>';
+            if (i != entities.length - 2 && i != entities.length -1) {
+                entities_string += ', ';
+            }
+            if (i == entities.length - 2) {
+                entities_string += ' and ';
+            }
+        }
+
+        let insert_status_elem = file_elem.find(".insert_status").first();
+        let insert_warning_elem = file_elem.find(".insert_warning").first();
+
+        //TODO: check if insertion is ok and then, display the success message or a warning message
+
+        if (data.error) {
+            insert_status_elem.html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> ERROR:</strong> ' + JSON.stringify(data.error))
+                              .removeClass('hidden alert-success')
+                              .removeClass('hidden alert-warning')
+                              .addClass('show alert-danger');
+        }else{
+            insert_status_elem.html('<span class="glyphicon glyphicon-ok"></span> ' + entities_string + ' inserted with success.')
+                                                  .removeClass('hidden alert-danger')
+                                                  .removeClass('hidden alert-warning')
+                                                  .addClass('show alert-success');
+        }
+
+        hideModal();
+    });
+}
+
+function loadSourceFileTtl(filename) {
+    console.log('--- loadSourceFileTtl ---');
+    displayModal('Please wait', '', 'Close');
+
+    let file_elem = $("#source-file-ttl-" + filename);
+
+    let service = new RestServiceJs('load_ttl_into_graph');
+    let model = {'file_name' : filename};
+
+    service.post(model, function(data) {
+        console.log('---> ttl insert');
+
+        let insert_status_elem = file_elem.find(".insert_status").first();
+        let insert_warning_elem = file_elem.find(".insert_warning").first();
+
+        if (data.error) {
+            insert_status_elem.html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> ERROR:</strong> ' + JSON.stringify(data.error))
+                              .removeClass('hidden alert-success')
+                              .removeClass('hidden alert-warning')
+                              .addClass('show alert-danger');
+        }else{
+            insert_status_elem.html('<span class="glyphicon glyphicon-ok"></span> ' + filename + ' inserted with success.')
+                                                  .removeClass('hidden alert-danger')
+                                                  .removeClass('hidden alert-warning')
+                                                  .addClass('show alert-success');
+        }
+        hideModal();
+    });
 }
