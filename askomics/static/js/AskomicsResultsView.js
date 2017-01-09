@@ -280,8 +280,9 @@ class AskomicsResultsView {
           let headerName = this.activesAttributes[node.id][sparqlId];
           let val = this.data.values[i][this.activesAttributes[node.id][sparqlId]];
           if ( headerName in this.activesAttributesUrl[node.id] ) {
+            let valWithPrefix = new AskomicsUserAbstraction().shortRDF(val);
             let url = this.activesAttributesUrl[node.id][headerName].replace("%s",this.data.values[i][this.activesAttributes[node.id][sparqlId]]);
-            row.append($('<td></td>').html($('<a></a>').attr('href',url).attr('target','_blank').text(val)));
+            row.append($('<td></td>').html($('<a></a>').attr('href',url).attr('target','_blank').text(valWithPrefix)));
           } else {
             row.append($('<td></td>').text(val));
           }

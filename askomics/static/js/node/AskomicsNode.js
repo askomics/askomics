@@ -360,6 +360,7 @@ class AskomicsNode extends GraphNode {
 
     let list_id = [];
     let list_label = [];
+    let map_url = {} ;
 
     let orderAttributes = new AskomicsUserAbstraction().getOrderAttributesList(this.uri);
 
@@ -369,6 +370,7 @@ class AskomicsNode extends GraphNode {
       if ( this.uri === uriAtt ) {
         list_id.push(this.SPARQLid);
         list_label.push(this.label);
+        map_url[this.SPARQLid] = "%s";
       }
       else if ( orderAttributes[uriAttI].basic_type != "category" ) {
         if (this.attributes[uriAtt].actif) {
@@ -382,7 +384,7 @@ class AskomicsNode extends GraphNode {
         }
       }
     }
-    return {'id' : list_id, 'label': list_label};
+    return {'id' : list_id, 'label': list_label, 'url': map_url};
   }
 
   getTextFillColor() { return 'black'; }
