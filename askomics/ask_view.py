@@ -230,64 +230,57 @@ class AskView(object):
         data = {}
         data['files'] = []
 
-        for src_file in source_files:
+        # get all taxon in the TS
+        sqb = SparqlQueryBuilder(self.settings, self.request.session)
+        ql = QueryLauncher(self.settings, self.request.session)
+        res = ql.execute_query(sqb.get_all_taxon().query)
+        taxons_list = []
+        for elem in res['results']['bindings']:
+            taxons_list.append(elem['taxon']['value'])
+        data['taxons'] = taxons_list
 
+        for src_file in source_files:
             infos = {}
             infos['name'] = src_file.name
-            try:
-                infos['headers'] = src_file.headers
-                infos['preview_data'] = src_file.get_preview_data()
-                infos['column_types'] = [];
+            infos['type'] = src_file.type
+            if src_file.type == 'tsv':
+                try:
+                    infos['headers'] = src_file.headers
+                    infos['preview_data'] = src_file.get_preview_data()
+                    infos['column_types'] = []
+                    header_num = 0
+                    for ih in range(0, len(infos['headers'])):
+                        #if infos['headers'][ih].find("@")>0:
+                        #    infos['column_types'].append("entity")
+                        #else:
+                        infos['column_types'].append(src_file.guess_values_type(infos['preview_data'][ih], infos['headers'][header_num]))
+                        header_num += 1
+                except Exception as e:
+                    traceback.print_exc(file=sys.stdout)
+                    infos['error'] = 'Could not read input file, are you sure it is a valid tabular file?'
+                    self.log.error(str(e))
 
-                header_num = 0
-                for ih in range(0,len(infos['headers'])):
-                    #if infos['headers'][ih].find("@")>0:
-                    #    infos['column_types'].append("entity")
-                    #else:
-                    infos['column_types'].append(src_file.guess_values_type(infos['preview_data'][ih], infos['headers'][header_num]))
-                    header_num += 1
-            except Exception as e:
-                traceback.print_exc(file=sys.stdout)
-                infos['error'] = 'Could not read input file, are you sure it is a valid tabular file?'
-                self.log.error(str(e))
+                data['files'].append(infos)
 
-            data['files'].append(infos)
+            elif src_file.type == 'gff':
+                try:
+                    entities = src_file.get_entities()
+                    infos['entities'] = entities
+                except Exception as e:
+                    self.log.debug('error !!')
+                    traceback.print_exc(file=sys.stdout)
+                    infos['error'] = 'Could not parse the file, are you sure it is a valid GFF3 file?'
+                    self.log.error('error with gff examiner: ' + str(e))
 
-        return data
+                data['files'].append(infos)
 
-    @view_config(route_name='insert_files_rdf', request_method='GET')
-    def source_files_overview_rdf(self):
-        """
-        Get preview data for all the available files
-        """
-        self.log.debug(" ========= Askview:source_files_overview_rdf =============")
-        sfc = SourceFileConvertor(self.settings, self.request.session)
+            elif src_file.type == 'ttl':
+                infos['preview'] = src_file.get_preview_ttl()
+                data['files'].append(infos)
 
-        files = sfc.get_rdf_files()
-
-        data = {}
-        data['files'] = []
-
-        urlbase = re.search(r'(http:\/\/.*)\/.*', self.request.current_route_url())
-        urlbase = urlbase.group(1)
-
-        for src_f in files:
-            pathttl = src_f.get_ttl_directory()
-            infos = {}
-            infos['filename'] = os.path.basename(src_f.path)
-            try:
-                shutil.copy(src_f.path,pathttl);
-                fo = open(pathttl+"/"+infos['filename'],'r');
-                src_f.load_data_from_file(fo,urlbase);
-            except Exception as e:
-                traceback.print_exc(file=sys.stdout)
-                data['error'] = str(e)
-                self.log.error(str(e))
-                return data
-
-            data['files'].append(infos)
 
         return data
+
 
     @view_config(route_name='preview_ttl', request_method='POST')
     def preview_ttl(self):
@@ -400,6 +393,66 @@ class AskView(object):
             self.log.error(str(e))
 
         return data
+
+    @view_config(route_name='load_gff_into_graph', request_method='POST')
+    def load_gff_into_graph(self):
+        """
+        Load GFF file into the triplestore
+        """
+        self.log.debug("== load_gff_into_graph ==")
+        data = {}
+
+        body = self.request.json_body
+        self.log.debug('===> body: '+str(body))
+        file_name = body['file_name']
+        taxon = body['taxon']
+        entities = body['entities']
+
+        sfc = SourceFileConvertor(self.settings, self.request.session)
+        src_file_gff = sfc.get_source_file_gff(file_name, taxon, entities)
+
+        urlbase = re.search(r'(http:\/\/.*)\/.*', self.request.current_route_url())
+        urlbase = urlbase.group(1)
+
+        method = 'load'
+
+        try:
+            self.log.debug('--> Parsing GFF')
+            src_file_gff.persist(urlbase, method)
+        except Exception as e:
+            traceback.print_exc(file=sys.stdout)
+            data['error'] = 'Problem when integration of '+file_name+'.</br>'+str(e)
+            self.log.error(str(e))
+
+
+
+
+        return data
+
+    @view_config(route_name='load_ttl_into_graph', request_method='POST')
+    def load_ttl_into_graph(self):
+        """
+        Load TTL file into the triplestore
+        """
+        self.log.debug('*** load_ttl_into_graph ***')
+        data = {}
+        body = self.request.json_body
+        file_name = body['file_name']
+        sfc = SourceFileConvertor(self.settings, self.request.session)
+        src_file_ttl = sfc.get_source_file(file_name)
+
+        urlbase = re.search(r'(http:\/\/.*)\/.*', self.request.current_route_url())
+        urlbase = urlbase.group(1)
+
+
+        try:
+            src_file_ttl.persist(urlbase)
+        except Exception as e:
+            data['error'] = 'Problem when integration of ' + file_name + '</br>' + str(e)
+            self.log.error('ERROR: ' + str(e))
+
+        return data
+
 
     @view_config(route_name='getUserAbstraction', request_method='GET')
     def getUserAbstraction(self):

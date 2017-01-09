@@ -10,6 +10,7 @@ cache: pip
 install:
   - pip install coveralls
   - python setup.py install
+  - npm install -g gulp
   - npm install --save-dev gulp
   - npm install --save-dev gulp-util
   - npm install --save-dev gulp-concat

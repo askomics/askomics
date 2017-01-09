@@ -132,3 +132,12 @@ class SparqlQueryBuilder(ParamManager):
             VALUES ?uri {<"""+uri1+"""> <"""+uri2+"""> }
             BIND(EXISTS {?pos_attr rdfs:domain ?uri} AS ?status)
         }""")
+
+    def get_all_taxon(self):
+        return self.prepare_query(
+        """SELECT DISTINCT ?taxon
+        WHERE {
+            GRAPH <"""+self.get_param("askomics.graph")+"""> { ?g rdfg:subGraphOf <"""+self.get_param("askomics.graph")+""">}
+            :taxonCategory displaySetting:category ?URItax .
+            ?URItax rdfs:label ?taxon .
+        }""")
