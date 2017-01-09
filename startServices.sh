@@ -17,7 +17,7 @@ function usage {
 
 #trap to remove service docker launch by this script
 function remove_services_docker {
-  sudo docker rm -f `sudo docker ps -n=2 | grep askomics | awk '{print $1}'` 2>/dev/null
+  docker rm -f `docker ps -n=2 | grep askomics | awk '{print $1}'` 2>/dev/null
 }
 trap remove_services_docker ERR
 
@@ -55,36 +55,46 @@ fi
 case "$RDFTYPE" in
     fuseki)
         echo " ================ FUSEKI (askomics/fuseki) =============="
-        if [ -z `sudo docker images | grep "askomics/fuseki$" | awk '{print $1}'` ];then
+        if [ -z `docker images | grep "askomics/fuseki$" | awk '{print $1}'` ];then
             pushd $DIRROOT/docker/fuseki/
-            sudo docker build -t askomics/fuseki .
+            docker build -t askomics/fuseki .
             popd
         fi
 
-        sudo docker run -d --name fuseki -p 3030:3030 --net="host" -t askomics/fuseki:latest
+         docker run -d --name fuseki -p 3030:3030 --net="host" -t askomics/fuseki:latest
         ;;
 
     agraph)
         echo "================= ALLEGROGRAPH (franzinf/agraph ) ================"
-        if [ -z `sudo docker images | grep "franzinc/agraph$" | awk '{print $1}'` ];then
-            sudo docker pull franzinc/agraph
+        if [ -z `docker images | grep "franzinc/agraph$" | awk '{print $1}'` ];then
+            docker pull franzinc/agraph
         fi
 
-        sudo docker run -d -p 10000-10035:10000-10035 --net="host" --name agraph franzinc/agraph
+        docker run -d -p 10000-10035:10000-10035 --net="host" --name agraph franzinc/agraph
         ;;
 
       virtuoso)
         echo "================= VIRTUOSO (tenforce/virtuoso) ================"
-        sudo docker run -d --name virtuoso -p 8890:8890 -p 1111:1111  -e VIRT_Parameters_DirsAllowed="/data,/data/dumps,., /usr/local/virtuoso-opensource/share/virtuoso/vad" -e VIRT_Parameters_TN_MAX_memory=4000000000 -e VIRT_SPARQL_ResultSetMaxRows=100000 -e VIRT_SPARQL_MaxQueryCostEstimationTime=300 -e VIRT_SPARQL_MaxQueryExecutionTime=300 -e VIRT_SPARQL_MaxDataSourceSize=1000000000 -e VIRT_Flags_TN_MAX_memory=4000000000 -e DBA_PASSWORD=dba -e SPARQL_UPDATE=true -e DEFAULT_GRAPH=http://localhost:8890/DAV --net="host" -t tenforce/virtuoso
+        docker run -d --name virtuoso -p 8890:8890 -p 1111:1111  \
+        -e VIRT_Parameters_TN_MAX_memory=4000000000 \
+        -e VIRT_SPARQL_ResultSetMaxRows=100000 \
+        -e VIRT_SPARQL_MaxQueryCostEstimationTime=300 \
+        -e VIRT_SPARQL_MaxQueryExecutionTime=300 \
+        -e VIRT_SPARQL_MaxDataSourceSize=1000000000 \
+        -e VIRT_Flags_TN_MAX_memory=4000000000 \
+        -e DBA_PASSWORD=dba \
+        -e SPARQL_UPDATE=true \
+        -e DEFAULT_GRAPH=http://localhost:8890/DAV \
+        --net="host" -t tenforce/virtuoso
 	;;
     *)
         usage
 esac
 
 # Build Askomics/Web every exec because triplestore could be changed...=> reload production.ini
-if [ -z `sudo docker images | grep "askomics/web$" | awk '{print $1}'` ];then
+if [ -z `docker images | grep "askomics/web$" | awk '{print $1}'` ];then
     pushd $DIRROOT
-    sudo docker build -t askomics/web .
+    docker build -t askomics/web .
     popd
 fi
 
@@ -98,7 +108,7 @@ case "$RDFTYPE" in
         ;;
 esac
 
-sudo docker run -d --net="host" -p 6543:6543 -t askomics/web $RDFTYPE $DEPMODE
+docker run -d --net="host" -p 6543:6543 -t askomics/web $RDFTYPE $DEPMODE
 
 
 echo "------------------------------------------------"
