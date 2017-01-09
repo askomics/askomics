@@ -63,6 +63,12 @@ function loadStartPoints() {
   $("#deleteNode").hide();
 
   service.getAll(function(startPointsDict) {
+
+      if ('error' in startPointsDict) {
+        alert(startPointsDict.error);
+        return;
+      }
+
       $("#startpoints").empty();
 
       $.each(startPointsDict.nodes, function(key, value) {
@@ -127,12 +133,9 @@ function formatGraphName(name) {
   /*
   Transform the name of the graph into a readable string
   */
-  let timestamp = name.substr(name.lastIndexOf('_') + 1);
-  let d = new Date(timestamp*1000);
-  let new_name = name.substr(0,name.lastIndexOf('_'));
-  new_name = new_name.replace(/urn:sparql:/, "");
-
-  return new_name+" ("+d.toLocaleString()+")";
+  let date = name.substr(name.lastIndexOf('/') + 1);
+  let new_name = name.substr(0,name.lastIndexOf('/'));
+  return new_name+" ("+date+")";
 }
 
 function loadStatistics() {
@@ -200,7 +203,7 @@ function loadStatistics() {
 
     for (let ent1 in entities ) {
       let tr = $("<tr></tr>")
-            .append($("<td></td>").text(new AskomicsUserAbstraction().getAttrib(entities[ent1],'rdfs:label')));
+            .append($("<td></td>").text(new AskomicsUserAbstraction().getAttribEntity(entities[ent1],new AskomicsUserAbstraction().longRDF('rdfs:label'))));
             let rels = "";
             var t = new AskomicsUserAbstraction().getRelationsObjectsAndSubjectsWithURI(entities[ent1]);
             var subjectTarget = t[0];
@@ -228,7 +231,7 @@ function loadStatistics() {
     for (let ent1 in entities ) {
     //$.each(stats['class'], function(key, value) {
       let tr = $("<tr></tr>")
-            .append($("<td></td>").text(new AskomicsUserAbstraction().getAttrib(entities[ent1],'rdfs:label')));
+            .append($("<td></td>").text(new AskomicsUserAbstraction().getAttribEntity(entities[ent1],new AskomicsUserAbstraction().longRDF('rdfs:label'))));
             let attrs = "";
             let cats = "";
             var listAtt = new AskomicsUserAbstraction().getAttributesEntity(entities[ent1]);
