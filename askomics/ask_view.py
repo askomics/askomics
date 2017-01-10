@@ -139,7 +139,7 @@ class AskView(object):
     @view_config(route_name='empty_database', request_method='GET')
     def empty_database(self):
         """
-        Delete all triples in the triplestore
+        Delete all named graphs and their metadatas
         """
 
         # Denny access for non loged users
@@ -148,15 +148,19 @@ class AskView(object):
 
         data = {}
 
-        self.log.debug("=== DELETE ALL TRIPLES ===")
+        self.log.debug("=== DELETE ALL NAMED GRAPHS ===")
+
         try:
             sqb = SparqlQueryBuilder(self.settings, self.request.session)
             ql = QueryLauncher(self.settings, self.request.session)
 
-            namedGraphs = self.get_list_named_graphs()
-            namedGraphs.append(ql.get_param("askomics.graph"))
-            for graph in namedGraphs:
-                ql.execute_query(sqb.get_delete_query_string(graph).query)
+            named_graphs = self.get_list_named_graphs()
+
+            for graph in named_graphs:
+                self.log.debug("--- DELETE GRAPH : %s", graph)
+                ql.execute_query(sqb.get_drop_named_graph(graph).query)
+                #delete metadatas
+                ql.execute_query(sqb.get_delete_metadatas_of_graph(graph).query)
 
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
@@ -168,7 +172,7 @@ class AskView(object):
     @view_config(route_name='delete_graph', request_method='POST')
     def delete_graph(self):
         """
-        Delete triples from a list of graph
+        Delete selected named graphs and their metadatas
         """
 
         # Denny access for non loged users
