@@ -29,11 +29,20 @@ class AskomicsLink extends GraphLink {
 
   buildConstraintsSPARQL() {
     let blockConstraintByNode = [];
-    let rel = this.URI();
-    if ( this.transitive ) rel += "+";
-    blockConstraintByNode.push("?"+'URI'+this.source.SPARQLid+" "+rel+" "+"?"+'URI'+this.target.SPARQLid);
-    if ( this.negative ) {
-      blockConstraintByNode = [blockConstraintByNode,'FILTER NOT EXISTS'];
+
+    if ( this.sparql !== undefined ) {
+        /* shortcut case */
+        let code_sparql = this.sparql.replace(/%in0%/g,'URI'+this.source.SPARQLid);
+        code_sparql = code_sparql.replace(/%out0%/g,'URI'+this.target.SPARQLid);
+        blockConstraintByNode.push(code_sparql);
+    } else {
+       /* classical link case */
+      let rel = this.URI();
+      if ( this.transitive ) rel += "+";
+      blockConstraintByNode.push("?"+'URI'+this.source.SPARQLid+" "+rel+" "+"?"+'URI'+this.target.SPARQLid);
+      if ( this.negative ) {
+        blockConstraintByNode = [blockConstraintByNode,'FILTER NOT EXISTS'];
+      }
     }
     return [blockConstraintByNode,''];
   }
@@ -43,5 +52,5 @@ class AskomicsLink extends GraphLink {
   }
 
   getLinkStrokeColor() { return super.getLinkStrokeColor(); }
-  
+
 }

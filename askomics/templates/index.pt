@@ -86,6 +86,7 @@
                             <ul class="dropdown-menu">
                               <li id="datasets" onclick="loadNamedGraphs()"><a href="#">Datasets</a></li>
                               <li id="statistics" onclick="loadStatistics()"><a href="#">Statistics</a></li>
+                              <li id="shortcuts" onclick="new ShortcutsParametersView()"><a href="#">Shortcuts</a></li>
                               <li class="divider"></li>
                               <li id="triplestore_parameters"><a onclick="new TriplestoreParametersView().configurationView();" href="#"><span class="glyphicon glyphicon-cloud"></span>&nbsp;Private Triplestore</a></li>
                               <li id="gene_ontology"><a onclick="new GOParametersView().configurationView();" href="#"><span class="glyphicon glyphicon-cloud"></span>&nbsp;Gene Ontology</a></li>
@@ -218,12 +219,41 @@
             <hr/>
             <h3 class="header-div">Statistics</h3>
             <hr/>
-            <!--
-            <p id='btn-st'>
-                <button id='btn-stats' onclick='loadStatistics()' class='btn btn-default'>Get stats</button>
-            </p>
-            -->
             <div id="statistics_div" class="row"></div>
+        </div>
+
+        <div id="content_shortcuts" class="container" hidden>
+            <hr/>
+            <h3 class="header-div">Shortcuts</h3>
+            <hr/>
+            <br/>
+            <div id="accordion_shortcuts" class="panel-group">
+<!--
+             <div class="panel panel-default">
+              <div class="panel-heading">
+               <h4 class="panel-title">
+                 <a data-toggle="collapse" data-parent="#accordion_shortcuts" href="#collapse1">
+                   Collapsible Group 1</a>
+               </h4>
+              </div>
+             <div id="collapse1" class="panel-collapse collapse in">
+                <div class="panel-body">Test Description</div>
+             </div>
+           </div>
+         -->
+</div>
+            <!--
+            <table id="table_shortcuts_list" >
+            </table>
+          -->
+            <hr/>
+            <h4 class="header-div">Import an Askomics shortcut</h4>
+            <hr/>
+            <textarea id="inputShortcutsLink" class="form-control" rows="10"></textarea>
+            <br/>
+            <button onclick="new ShortcutsParametersView().importShortcut($('#inputShortcutsLink').val())" class="btn btn-primary">Import</button>
+
+
         </div>
 
         <div id="content_administration" class="container" hidden>

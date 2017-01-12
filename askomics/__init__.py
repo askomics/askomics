@@ -30,6 +30,8 @@ def main(global_config, **settings):
     config.add_route('check_existing_data', '/check_existing_data')
     config.add_route('positionable_attr', '/positionable_attr')
     config.add_route('ttl', '/ttl/{name:.*}')
+    config.add_route('importShortcut', '/importShortcut')
+    config.add_route('deleteShortcut', '/deleteShortcut')
 
     # Data upload routes
     # Inspired from https://github.com/blueimp/jQuery-File-Upload/ and https://github.com/grooverdan/pyramid-jQuery-File-Upload-demo/

@@ -38,6 +38,7 @@ var askomicsSourceFiles = [
         'askomics/static/js/link/GOLink.js',
         'askomics/static/js/view/parameters/InterfaceParametersView.js',
         'askomics/static/js/view/parameters/TriplestoreParametersView.js',
+        'askomics/static/js/view/parameters/ShortcutsParametersView.js',
         'askomics/static/js/view/parameters/GOParametersView.js',
         'askomics/static/js/view/AskomicsObjectView.js',
         'askomics/static/js/view/AskomicsLinkView.js',

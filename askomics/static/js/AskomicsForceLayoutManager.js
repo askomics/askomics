@@ -512,22 +512,26 @@ class AskomicsForceLayoutManager {
     }
 
     insertSuggestions() {
+
+      let suggestedList = {} ;
+
       if (this.selectNodes.length === 0 ) {
         return ;
       } else if (this.selectNodes.length === 1 ) {
-        this.insertSuggestionsWithNewNode(this.selectNodes[0]);
+        this.insertSuggestionsWithNewNode(suggestedList,this.selectNodes[0]);
       } else if (this.selectNodes.length === 2) {
         this.insertSuggestionsWithTwoNodesInstancied(this.selectNodes[0],this.selectNodes[1]);
       }
+      //shortcuts
+      this.insertSuggestionsShortcuts(suggestedList,this.selectNodes);
     }
 
-    insertSuggestionsWithNewNode(slt_node) {
+    insertSuggestionsWithNewNode(suggestedList,slt_node) {
         /* get All suggested node and relation associated to get orientation of arc */
         let tab = new AskomicsUserAbstraction().getRelationsObjectsAndSubjectsWithURI(slt_node.uri);
         let objectsTarget = tab[0];  /* All triplets which slt_node URI are the subject */
         let subjectsTarget = tab[1]; /* All triplets which slt_node URI are the object */
 
-        var suggestedList = {} ;
         let link;
 
         for (var uri in objectsTarget ) {
@@ -630,6 +634,7 @@ class AskomicsForceLayoutManager {
           this.links.push(link);
         }
 
+        return suggestedList;
     }
 
     relationInstancied(subj, obj,relation,links) {
@@ -689,6 +694,47 @@ class AskomicsForceLayoutManager {
         let target   = node1;
         let link = new AskomicsPositionableLink(linkbase,source,target);
         link.setCommonPosAttr();
+        link.id = new AskomicsGraphBuilder().getId();
+        this.links.push(link);
+      }
+    }
+
+    insertSuggestionsShortcuts(suggestedList,listSelectedNodes) {
+
+      /* TODO : Manage several entry entity start poin for shortcuts */
+      let slt_node = listSelectedNodes[0];
+
+      let lShortcuts = new ShortcutsParametersView().getShortcuts(listSelectedNodes[0]);
+
+      for (let shortcut in lShortcuts) {
+        let suggestedNode;
+        let uri = Object.keys(lShortcuts[shortcut].out)[0];
+        console.log(uri);
+        if ( ! ( uri in suggestedList) ) {
+          /* creatin node */
+          suggestedNode = new AskomicsUserAbstraction().buildBaseNode(uri);
+          /* specific attribute for suggested node */
+          suggestedNode = new AskomicsGraphBuilder().setSuggestedNode(suggestedNode,slt_node.x,slt_node.y);
+          /* adding in the node list to create D3.js graph */
+          this.nodes.push(suggestedNode);
+          suggestedList[uri] = suggestedNode ;
+        }
+
+        let linkbase     = {} ;
+
+        linkbase.label   = lShortcuts[shortcut].label ;
+
+        linkbase.uri     = shortcut;
+        let source   = slt_node; /* only on entry TODO: multiple */
+        let target   = suggestedList[uri];
+
+        let link = AskomicsObjectBuilder.instanceLink(linkbase,source,target);
+        link.prefix  = lShortcuts[shortcut].prefix_string ;
+
+        link.sparql  = lShortcuts[shortcut].sparql_string ;
+        link.prefix  = lShortcuts[shortcut].prefix_string ;
+        link.shortcut_output_var  = lShortcuts[shortcut].output_var ;
+
         link.id = new AskomicsGraphBuilder().getId();
         this.links.push(link);
       }
