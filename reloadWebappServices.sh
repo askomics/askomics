@@ -14,7 +14,7 @@ dockerimg=`sudo docker ps -a | grep "askomics/web" | awk '{print $1}'`
 if [ -n "$dockerimg" ];then
     echo "===== Reloading Askomics  ======== $dockerimg"
 
-    sudo docker cp . $dockerimg:/usr/local/AskomicsWeb/
+    docker cp . $dockerimg:/usr/local/AskomicsWeb/
 
     if [ "--cp" != "$NORESTART" ];then
         docker restart $dockerimg

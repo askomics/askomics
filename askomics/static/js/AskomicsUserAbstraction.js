@@ -4,22 +4,16 @@
   CLASSE AskomicsUserAbstraction
   Manage Abstraction storing in the TPS.
 */
-const prefix = {
- 'rdf': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
- 'xsd': 'http://www.w3.org/2001/XMLSchema#',
- 'rdfs':'http://www.w3.org/2000/01/rdf-schema#',
- 'owl': 'http://www.w3.org/2002/07/owl#'
- };
 
 let instanceUserAbstraction ;
 
 class AskomicsUserAbstraction {
    constructor() {
-     /* Implement a Singleton */
-     if ( instanceUserAbstraction !== undefined ) {
-         return instanceUserAbstraction;
-     }
-
+    /* Implement a Singleton */
+    if ( instanceUserAbstraction !== undefined ) {
+       return instanceUserAbstraction;
+    }
+    this.prefix = {};
       /* Ontology is save locally to avoid request with TPS  */
       /* --------------------------------------------------- */
       this.tripletSubjectRelationObject = [];
@@ -30,8 +24,26 @@ class AskomicsUserAbstraction {
       this.entityPositionableInformationList = {}; /* entityPositionableInformationList[uri1] = { taxon, ref, start, end } */
       this.attributesOrderDisplay = {} ;           /* manage a order list by URInode */
 
-      instanceUserAbstraction = this;
-      return instanceUserAbstraction;
+    instanceUserAbstraction = this;
+    return instanceUserAbstraction;
+    }
+
+    longRDF(litteral) {
+      if ( litteral === "" || litteral === undefined ) return litteral ;
+      let idx = litteral.lastIndexOf(":");
+      let p = this.getPrefix(litteral.substring(0,idx));
+      return p+litteral.substring(idx+1);
+    }
+
+    shortRDF(litteral) {
+      if ( litteral === "" || litteral === undefined ) return litteral ;
+      for (let p in this.prefix ) {
+        let idx = litteral.indexOf(this.prefix[p]);
+        if ( idx !== -1 ) {
+          return p+":"+litteral.substring(idx+this.prefix[p].length);
+        }
+      }
+      return litteral;
     }
 
     getEntities() {
@@ -50,17 +62,46 @@ class AskomicsUserAbstraction {
     }
 
     static getTypeAttribute(attributeForUritype) {
-      
-      if (attributeForUritype.indexOf("http://www.w3.org/2001/XMLSchema#decimal") >= 0) {
+
+      if ( attributeForUritype.indexOf(new AskomicsUserAbstraction().getPrefix("xsd")) === -1 ) {
+          return "category";
+      }
+
+      if (attributeForUritype === new AskomicsUserAbstraction().longRDF("xsd:decimal")) {
         return "decimal";
       }
-      if (attributeForUritype.indexOf("http://www.w3.org/2001/XMLSchema#string") >= 0) {
+      if (attributeForUritype === new AskomicsUserAbstraction().longRDF("xsd:string")) {
         return "string";
       }
-
-      return "category";
+      if (attributeForUritype === new AskomicsUserAbstraction().longRDF("xsd:boolean")) {
+        return "string";
+      }
+      if (attributeForUritype === new AskomicsUserAbstraction().longRDF("xsd:nonNegativeInteger")) {
+        return "decimal";
+      }
+      if (attributeForUritype === new AskomicsUserAbstraction().longRDF("xsd:integer")) {
+        return "decimal";
+      }
+      if (attributeForUritype === new AskomicsUserAbstraction().longRDF("xsd:float")) {
+        return "decimal";
+      }
+      if (attributeForUritype === new AskomicsUserAbstraction().longRDF("xsd:int")) {
+        return "decimal";
+      }
+      if (attributeForUritype === new AskomicsUserAbstraction().longRDF("xsd:long")) {
+        return "decimal";
+      }
+      if (attributeForUritype === new AskomicsUserAbstraction().longRDF("xsd:short")) {
+        return "decimal";
+      }
+      if (attributeForUritype === new AskomicsUserAbstraction().longRDF("xsd:byte")) {
+        return "decimal";
+      }
+      if (attributeForUritype === new AskomicsUserAbstraction().longRDF("xsd:language")) {
+        return "string";
+      }
+      return attributeForUritype;
     }
-
     /*
     load ontology
     see template SPARQL to know sparql variable
@@ -87,9 +128,9 @@ class AskomicsUserAbstraction {
       /* All information about an entity available in TPS are stored in entityInformationList */
       for (let entry in resultListTripletSubjectRelationObject.entities){
         console.log("ENTITY:"+JSON.stringify(resultListTripletSubjectRelationObject.entities[entry]));
-        var uri = resultListTripletSubjectRelationObject.entities[entry].entity;
-        var rel = resultListTripletSubjectRelationObject.entities[entry].property;
-        var val = resultListTripletSubjectRelationObject.entities[entry].value;
+        let uri = resultListTripletSubjectRelationObject.entities[entry].entity;
+        let rel = resultListTripletSubjectRelationObject.entities[entry].property;
+        let val = resultListTripletSubjectRelationObject.entities[entry].value;
 
         if ( ! (uri in instanceUserAbstraction.entityInformationList) ) {
             instanceUserAbstraction.entityInformationList[uri] = {};
@@ -144,35 +185,71 @@ class AskomicsUserAbstraction {
       });
     }
 
+    getPrefix(ns) {
+      if (! (ns in this.prefix)) {
+        //get info in prefix.cc
+        //
+        $.ajax({
+          async: false,
+          type: 'GET',
+          url: 'http://prefix.cc/'+ns.trim()+'.file.json',
+          success: function( result_json ) {
+            console.log("new prefix:"+ns+"==>"+result_json[ns]);
+            instanceUserAbstraction.prefix[ns] = result_json[ns];
+          },
+          error: function(req, status, ex) {},
+          timeout:30
+        });
+      }
+      return this.prefix[ns];
+    }
+
+    getAttribEntity(uriEntity,attrib) {
+      return this.getGenAttrib(this.entityInformationList,uriEntity,attrib);
+    }
+
+    getAttribRelation(uri,attrib) {
+      return this.getGenAttrib(this.relationInformationList,uri,attrib);
+    }
+
+    getAttribAttributes(uri,attrib) {
+      return this.getGenAttrib(this.attributesInformationList,uri,attrib);
+    }
+
     /* Get value of an attribut with RDF format like rdfs:label */
-    getAttrib(uriEntity,attrib) {
-        if (!(uriEntity in this.entityInformationList)) {
-          console.log(JSON.stringify(uriEntity) + " is not referenced in the user abstraction !");
-          return "<"+uriEntity+">";
-        }
-        var attrib_longterm = attrib ;
-        for (var p in prefix) {
-          var i = attrib_longterm.search(p+":");
-          if ( i != - 1) {
-            attrib_longterm = attrib_longterm.replace(p+":",prefix[p]);
-            break;
-          }
-        }
+    getGenAttrib(diction,uriEntity,attrib) {
+      let nattrib = attrib ;
 
-        if (!(attrib_longterm in this.entityInformationList[uriEntity])) {
-          console.log(JSON.stringify(uriEntity) + '['+JSON.stringify(attrib)+']' + " is not referenced in the user abstraction !");
-
-          return "<unknown>";
+      if (!(uriEntity in diction)) {
+        /*
+        console.log(JSON.stringify(uriEntity) + " is not referenced in the user abstraction !");
+        console.log("Entities referenced:");
+        for (let uri in diction ) {
+          console.log(uri);
         }
+        */
+        return "";
+      }
 
-        return this.entityInformationList[uriEntity][attrib_longterm];
+      if (!(nattrib in diction[uriEntity])) {
+        /*
+        console.log(JSON.stringify(uriEntity) + '['+JSON.stringify(nattrib)+']' + " (attribute) is not referenced in the user abstraction !");
+        console.log("Attributes referenced for uri["+uriEntity+"]:");
+        for (let uri in diction[uriEntity] ) {
+          console.log(uri);
+        }
+        */
+        return "";
+      }
+
+      return diction[uriEntity][nattrib];
     }
 
     /* build node from user abstraction infomation */
     buildBaseNode(uriEntity) {
       var node = {
         uri   : uriEntity,
-        label : this.getAttrib(uriEntity,'rdfs:label')
+        label : this.getAttribEntity(uriEntity,new AskomicsUserAbstraction().longRDF('rdfs:label'))
       } ;
       return node;
     }
@@ -190,7 +267,7 @@ class AskomicsUserAbstraction {
       var objectsTarget = {} ;
       var subjectsTarget = {} ;
 
-      for (var i in this.tripletSubjectRelationObject) {
+      for (let i in this.tripletSubjectRelationObject) {
         if ( this.tripletSubjectRelationObject[i].object == UriSelectedNode ) {
           if (! (this.tripletSubjectRelationObject[i].subject in subjectsTarget) ) {
             subjectsTarget[this.tripletSubjectRelationObject[i].subject] = [];

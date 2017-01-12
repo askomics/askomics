@@ -1,6 +1,6 @@
 {
   "name": "askomics",
-  "version": "2.0.0",
+  "version": "2.0.0-RC1",
   "devDependencies": {
     "babel-preset-es2015": "^6.9.0",
     "chai": "^3.5.0",
@@ -41,10 +41,11 @@
     "web",
     "ontology"
   ],
-  "author": "",
+  "author": "INRA",
   "license": "GPL-3.0",
   "dependencies": {
     "intro.js": "^2.3.0",
     "time-require": "^0.1.2"
-  }
+  },
+  "description": "[![Build Status](https://travis-ci.org/askomics/askomics.svg?branch=master)](https://travis-ci.org/askomics/askomics) [![Coverage Status](https://coveralls.io/repos/github/askomics/askomics/badge.svg?branch=master)](https://coveralls.io/github/askomics/askomics?branch=master)"
 }

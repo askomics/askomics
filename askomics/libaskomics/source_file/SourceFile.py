@@ -4,9 +4,9 @@ Classes to import data from source files
 import logging
 import os.path
 import tempfile
-import time
 import getpass
 from pkg_resources import get_distribution
+import datetime
 
 from askomics.libaskomics.ParamManager import ParamManager
 from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
@@ -25,7 +25,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         ParamManager.__init__(self, settings, session)
 
-        self.timestamp = str(time.time())
+        self.timestamp = datetime.datetime.now().isoformat()
 
         self.path = path
 
@@ -170,7 +170,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
             sqb = SparqlQueryBuilder(self.settings, self.session)
 
 
-            graphName = "urn:sparql:" + self.name + '_' + self.timestamp
+            graphName = "askomics:graph:" + self.name + '_' + self.timestamp
 
             triple_count = 0
             chunk = ""
@@ -253,7 +253,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         sqb = SparqlQueryBuilder(self.settings, self.session)
         ql = QueryLauncher(self.settings, self.session)
-        graphName = "urn:sparql:" + self.name + '_' + self.timestamp
+        graphName = "askomics:graph:" + self.name + '_' + self.timestamp
         self.metadatas['graphName'] = graphName
         ttlNamedGraph = "<" + graphName + "> " + "rdfg:subGraphOf" + " <" + self.get_param("askomics.graph") + "> ."
         sparqlHeader = sqb.header_sparql_config("")
