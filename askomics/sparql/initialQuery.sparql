@@ -1,7 +1,7 @@
 SELECT DISTINCT ?nodeUri ?nodeLabel
 WHERE {
-    GRAPH <urn:sparql:tests-askomics:insert:informative1> {
-    ?g rdfg:subGraphOf <urn:sparql:tests-askomics:insert:informative1> }
+    GRAPH $graph {
+    ?g rdfg:subGraphOf $graph }
     GRAPH ?g {
         ?nodeUri displaySetting:startPoint "true"^^xsd:boolean .
         ?nodeUri rdfs:label ?nodeLabel

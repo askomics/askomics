@@ -657,11 +657,18 @@ class AskView(object):
             data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
             self.log.error(str(e))
 
+        # Create user graph
+        try:
+            security.create_user_graph()
+        except Exception as e:
+            traceback.print_exc(file=sys.stdout)
+            data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
+            self.log.error(str(e))
+
+        # Log user
         try:
             security.log_user(self.request)
-
             data['username'] = username
-
         except Exception as e:
             data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
             self.log.error(str(e))
@@ -681,6 +688,8 @@ class AskView(object):
     def logout(self):
 
         self.request.session['username'] = ''
+        self.request.session['admin'] = ''
+        self.request.session['graph'] = ''
 
         return
 

@@ -61,7 +61,9 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         sparqlHeader = sqb.header_sparql_config("")
 
-        ql.insert_data(ttlMetadatas, self.get_param("askomics.graph"), sparqlHeader)
+        self.log.debug(ttlMetadatas)
+
+        ql.insert_data(ttlMetadatas, self.session['graph'], sparqlHeader)
 
     @cached_property
     def existing_relations(self):
@@ -103,7 +105,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
         chunk_count = 1
         chunk = ""
         pathttl = self.get_ttl_directory()
-        if method == 'load':
+        if method != 'load': #FIXME: load doesn't work
 
             fp = None
 
@@ -170,7 +172,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
             sqb = SparqlQueryBuilder(self.settings, self.session)
 
 
-            graphName = "askomics:graph:" + self.name + '_' + self.timestamp
+            graphName = self.session['graph'] + ':' + self.name + '_' + self.timestamp
 
             triple_count = 0
             chunk = ""
@@ -222,10 +224,10 @@ class SourceFile(ParamManager, HaveCachedProperties):
             except Exception as e:
                 return self._format_exception(e)
 
-            ttlNamedGraph = "<" + graphName + "> " + "rdfg:subGraphOf" + " <" + self.get_param("askomics.graph") + "> ."
+            ttlNamedGraph = "<" + graphName + "> " + "rdfg:subGraphOf" + " <" + self.session['graph'] + "> ."
             self.metadatas['graphName'] = graphName
             sparqlHeader = sqb.header_sparql_config("")
-            ql.insert_data(ttlNamedGraph, self.get_param("askomics.graph"), sparqlHeader)
+            ql.insert_data(ttlNamedGraph, self.session['graph'], sparqlHeader)
 
             data = {}
 
@@ -253,11 +255,11 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         sqb = SparqlQueryBuilder(self.settings, self.session)
         ql = QueryLauncher(self.settings, self.session)
-        graphName = "askomics:graph:" + self.name + '_' + self.timestamp
+        graphName = self.session['graph'] + ':' + self.name + '_' + self.timestamp
         self.metadatas['graphName'] = graphName
-        ttlNamedGraph = "<" + graphName + "> " + "rdfg:subGraphOf" + " <" + self.get_param("askomics.graph") + "> ."
+        ttlNamedGraph = "<" + graphName + "> " + "rdfg:subGraphOf" + " <" + self.session['graph'] + "> ."
         sparqlHeader = sqb.header_sparql_config("")
-        ql.insert_data(ttlNamedGraph, self.get_param("askomics.graph"), sparqlHeader)
+        ql.insert_data(ttlNamedGraph, self.session['graph'], sparqlHeader)
 
         url = urlbase+"/ttl/"+os.path.basename(fp.name)
         self.log.debug(url)

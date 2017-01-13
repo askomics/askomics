@@ -22,6 +22,8 @@ class SparqlQueryBuilder(ParamManager):
 
     def load_from_file(self, template_file, replacement={}):
         """ Get a sparql query from a file, possibly replacing a template word by another given as argument """
+        self.log.debug("***********  QUERY FILE  ***********")
+        self.log.debug(template_file)
         with open(template_file) as template_fd:
             template = template_fd.read()
 
@@ -33,7 +35,7 @@ class SparqlQueryBuilder(ParamManager):
             The `$graph` variable defaults to "askomics.graph" config
         """
         if 'graph' not in replacement:
-            replacement['graph'] = '<%s>' % self.get_param("askomics.graph")
+            replacement['graph'] = '<%s>' % self.session['graph']
 
         query = Template(template).substitute(replacement)
 
@@ -95,7 +97,7 @@ class SparqlQueryBuilder(ParamManager):
     def get_list_named_graphs(self):
         return self.prepare_query(
             """SELECT DISTINCT ?g WHERE {
-            GRAPH <"""+self.get_param("askomics.graph")+"""> { ?g rdfg:subGraphOf <"""+self.get_param("askomics.graph")+""">}
+            GRAPH <"""+self.session['graph']+"""> { ?g rdfg:subGraphOf <"""+self.session['graph']+""">}
             GRAPH ?g { ?s ?p ?o } }""")
 
     def get_drop_named_graph(self, graph):
@@ -105,7 +107,7 @@ class SparqlQueryBuilder(ParamManager):
     def get_delete_metadatas_of_graph(self, graph):
         return self.prepare_query(
             """
-            DELETE WHERE { GRAPH <"""+self.get_param("askomics.graph")+"""> { <"""+graph+"""> ?p ?o }}
+            DELETE WHERE { GRAPH <"""+self.session['graph']+"""> { <"""+graph+"""> ?p ?o }}
             """)
 
     def get_metadatas(self, graph):
@@ -146,36 +148,36 @@ class SparqlQueryBuilder(ParamManager):
         return self.prepare_query(
         """SELECT DISTINCT ?status
         WHERE {
-            GRAPH <"""+self.get_param("askomics.graph")+"""> { ?g rdfg:subGraphOf <"""+self.get_param("askomics.graph")+""">}
-            BIND(EXISTS {:""" + username + """ rdf:type :user} AS ?status)
+            GRAPH <"""+self.get_param("askomics.users_graph")+"""> {
+            BIND(EXISTS {:""" + username + """ rdf:type :user} AS ?status) }
         }""")
 
     def check_email_presence(self, email):
         return self.prepare_query(
         """SELECT DISTINCT ?status
         WHERE {
-            GRAPH <"""+self.get_param("askomics.graph")+"""> { ?g rdfg:subGraphOf <"""+self.get_param("askomics.graph")+""">}
-            BIND(EXISTS {?uri :email \"""" + email + """\"} AS ?status)
+            GRAPH <"""+self.get_param("askomics.users_graph")+"""> {
+            BIND(EXISTS {?uri :email \"""" + email + """\"} AS ?status) }
         }""")
 
     def get_password_with_email(self, email):
         return self.prepare_query(
         """SELECT DISTINCT ?salt ?shapw
         WHERE {
-            GRAPH <"""+self.get_param("askomics.graph")+"""> { ?g rdfg:subGraphOf <"""+self.get_param("askomics.graph")+""">}
+            GRAPH <"""+self.get_param("askomics.users_graph")+"""> {
             ?URIusername rdf:type :user .
             ?URIusername :email \"""" + email + """\" .
             ?URIusername :randomsalt ?salt .
-            ?URIusername :password ?shapw .
+            ?URIusername :password ?shapw . }
         }""")
 
     def get_password_with_username(self, username):
         return self.prepare_query(
         """SELECT DISTINCT ?salt ?shapw
         WHERE {
-            GRAPH <"""+self.get_param("askomics.graph")+"""> { ?g rdfg:subGraphOf <"""+self.get_param("askomics.graph")+""">}
+            GRAPH <"""+self.get_param("askomics.users_graph")+"""> {
             ?URIusername rdf:type :user .
             ?URIusername rdfs:label \"""" + username + """\" .
             ?URIusername :randomsalt ?salt .
-            ?URIusername :password ?shapw .
+            ?URIusername :password ?shapw . }
         }""")

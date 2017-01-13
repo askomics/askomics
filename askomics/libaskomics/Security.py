@@ -128,7 +128,20 @@ class Security(ParamManager):
         chunk += indent + ':randomsalt \"' + self.randomsalt + '\" .\n'
 
         header_ttl = sqb.header_sparql_config(chunk)
-        ql.insert_data(chunk, self.settings["askomics.graph"], header_ttl)
+        ql.insert_data(chunk, self.settings["askomics.users_graph"], header_ttl)
+
+    def create_user_graph(self):
+        """
+        Create a subgraph for the user. All his data will be inserted in this subgraph
+        """
+
+        ql = QueryLauncher(self.settings, self.session)
+        sqb = SparqlQueryBuilder(self.settings, self.session)
+
+        ttl = '<' + self.settings['askomics.private_graph'] + ':' + self.username + '> rdfg:subGraphOf <' + self.settings['askomics.private_graph'] + '>'
+
+        header_ttl = sqb.header_sparql_config(ttl)
+        ql.insert_data(ttl, self.settings["askomics.private_graph"], header_ttl)
 
     def log_user(self, request):
         """
@@ -137,6 +150,10 @@ class Security(ParamManager):
         session = request.session
         session['username'] = self.username
         session['admin'] = self.admin
+        if self.admin:
+            session['graph'] = self.settings['askomics.public_graph']
+        else:
+            session['graph'] = self.settings['askomics.private_graph'] + ':' + self.username
 
 
     def print_sha256_pw(self):
