@@ -31,10 +31,14 @@ class SparqlQueryBuilder(ParamManager):
         return query
 
     def prepare_query(self, template, replacement={}):
-        """Prepare a query from a template and a substitution dictionary.
-            The `$graph` variable defaults to "askomics.graph" config
         """
-        if 'graph' not in replacement:
+        Prepare a query from a template and a substitution dictionary.
+        The `$graph` variable is user graph or public graph if no user logged
+        """
+
+        if 'graph' not in self.session.keys() or self.session['graph'] == '':
+            replacement['graph'] = '<%s>' % self.get_param('askomics.public_graph')
+        else:
             replacement['graph'] = '<%s>' % self.session['graph']
 
         query = Template(template).substitute(replacement)
@@ -180,4 +184,13 @@ class SparqlQueryBuilder(ParamManager):
             ?URIusername rdfs:label \"""" + username + """\" .
             ?URIusername :randomsalt ?salt .
             ?URIusername :password ?shapw . }
+        }""")
+
+    def get_number_of_users(self):
+        return self.prepare_query(
+        """SELECT (count(*) AS ?count)
+        WHERE {
+            GRAPH <"""+self.get_param("askomics.users_graph")+"""> {
+                ?s rdf:type :user .
+            }
         }""")

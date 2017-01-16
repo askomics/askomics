@@ -99,9 +99,6 @@ class Security(ParamManager):
         ql = QueryLauncher(self.settings, self.session)
         sqb = SparqlQueryBuilder(self.settings, self.session)
 
-        ql = QueryLauncher(self.settings, self.session)
-        sqb = SparqlQueryBuilder(self.settings, self.session)
-
         result = ql.process_query(sqb.get_password_with_username(self.username).query)
 
         ts_salt = result[0]['salt']
@@ -112,6 +109,21 @@ class Security(ParamManager):
 
         return bool(int(ts_shapw == shapw))
 
+    def get_number_of_users(self):
+        """
+        get the number of users in the TS
+        """
+
+        ql = QueryLauncher(self.settings, self.session)
+        sqb = SparqlQueryBuilder(self.settings, self.session)
+
+        result = ql.process_query(sqb.get_number_of_users().query)
+
+        self.log.debug(result)
+
+        return int(result[0]['count'])
+
+
     def persist_user(self):
         """
         Persist all user infos in the TS
@@ -119,12 +131,18 @@ class Security(ParamManager):
         ql = QueryLauncher(self.settings, self.session)
         sqb = SparqlQueryBuilder(self.settings, self.session)
 
+        #check if user is the first. if yes, set him admin
+        if self.get_number_of_users() == 0:
+            admin = 'true'
+        else:
+            admin = 'false'
+
         chunk = ':' + self.username + ' rdf:type :user ;\n'
         indent = len(self.username) * ' ' + ' '
         chunk += indent + 'rdfs:label \"' + self.username + '\" ;\n'
         chunk += indent + ':password \"' + self.sha256_pw + '\" ;\n'
         chunk += indent + ':email \"' + self.email + '\" ;\n'
-        chunk += indent + ':isadmin \"false\"^^xsd:boolean ;\n'
+        chunk += indent + ':isadmin \"' + admin + '\"^^xsd:boolean ;\n'
         chunk += indent + ':randomsalt \"' + self.randomsalt + '\" .\n'
 
         header_ttl = sqb.header_sparql_config(chunk)
