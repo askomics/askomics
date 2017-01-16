@@ -2,13 +2,14 @@
 
 class AskomicsUser {
 
-    constructor(username) {
+    constructor(username, admin) {
         this.username = username ;
+        this.admin = admin;
     }
 
 
     logUser() {
-        displayNavbar(true, this.username);
+        displayNavbar(true, this.username, this.admin);
     }
 
     checkUser() {
@@ -21,6 +22,7 @@ class AskomicsUser {
             hideModal();
             if (data.username) {
                 self.username = data.username;
+                self.admin = data.admin;
                 self.logUser();
             }else{
                 displayNavbar(false, '');

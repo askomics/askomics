@@ -415,13 +415,13 @@ function setUploadForm(content,titleForm,route_overview,callback) {
   });
 }
 
-function displayNavbar(loged, username) {
+function displayNavbar(loged, username, admin) {
     console.log('-+-+- displayNavbar -+-+-');
     $("#navbar").empty();
     let source = $('#template-navbar').html();
     let template = Handlebars.compile(source);
 
-    let context = {name: 'AskOmics', loged: loged, username: username};
+    let context = {name: 'AskOmics', loged: loged, username: username, admin: admin};
     let html = template(context);
 
     $("#navbar").append(html);
@@ -514,7 +514,7 @@ function displayNavbar(loged, username) {
             // User is logged, show the special button
             console.log(data);
             let user = new AskomicsUser(data.username);
-            user.logUser();
+            user.checkUser();
           }
       });
 
@@ -545,7 +545,7 @@ function displayNavbar(loged, username) {
           $('#login_error').hide();
           $('#login_success').append('You are loged now');
           $('#login_success').show();
-          let user = new AskomicsUser(data.username);
+          let user = new AskomicsUser(data.username, data.admin);
           user.logUser();
         }
       });

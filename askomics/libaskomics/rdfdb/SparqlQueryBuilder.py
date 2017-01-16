@@ -194,3 +194,23 @@ class SparqlQueryBuilder(ParamManager):
                 ?s rdf:type :user .
             }
         }""")
+
+    def get_admin_status_by_username(self, username):
+        return self.prepare_query(
+        """SELECT DISTINCT ?admin
+        WHERE {
+            GRAPH <"""+self.get_param("askomics.users_graph")+"""> {
+            ?URIusername rdf:type :user .
+            ?URIusername rdfs:label \"""" + username + """\" .
+            ?URIusername :isadmin ?admin}
+        }""")
+
+    def get_admin_status_by_email(self, email):
+        return self.prepare_query(
+        """SELECT DISTINCT ?admin
+        WHERE {
+            GRAPH <"""+self.get_param("askomics.users_graph")+"""> {
+            ?URIusername rdf:type :user .
+            ?URIusername :email \"""" + email + """\" .
+            ?URIusername :isadmin ?admin}
+        }""")

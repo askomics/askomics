@@ -680,6 +680,7 @@ class AskView(object):
         data = {}
         if self.request.session['username'] != '':
             data['username'] = self.request.session['username']
+            data['admin'] = self.request.session['admin']
 
         return data
 
@@ -729,6 +730,10 @@ class AskView(object):
                 data['error'].append('Password is incorrect')
                 error = True
 
+            # Get the admin status
+            admin = security.get_admin_status_by_email()
+            security.set_admin(admin)
+
             if error:
                 return data
 
@@ -738,6 +743,10 @@ class AskView(object):
             if not username_in_ts:
                 data['error'].append('username is not registered')
                 error = True
+
+            # Get the admin status
+            admin = security.get_admin_status_by_username()
+            security.set_admin(admin)
 
             if error:
                 return data
@@ -755,6 +764,7 @@ class AskView(object):
         try:
             security.log_user(self.request)
             data['username'] = username
+            data['admin'] = admin
 
         except Exception as e:
             data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)

@@ -134,8 +134,10 @@ class Security(ParamManager):
         #check if user is the first. if yes, set him admin
         if self.get_number_of_users() == 0:
             admin = 'true'
+            self.set_admin(True)
         else:
             admin = 'false'
+            self.set_admin(False)
 
         chunk = ':' + self.username + ' rdf:type :user ;\n'
         indent = len(self.username) * ' ' + ' '
@@ -160,6 +162,45 @@ class Security(ParamManager):
 
         header_ttl = sqb.header_sparql_config(ttl)
         ql.insert_data(ttl, self.settings["askomics.private_graph"], header_ttl)
+
+    def set_admin(self, admin):
+        """
+        set self.admin at True if user is an admin
+        """
+        self.admin = admin
+        self.session['admin'] = admin
+
+    def get_admin_status_by_username(self):
+        """
+        get the admin status of the user by his username
+        """
+        ql = QueryLauncher(self.settings, self.session)
+        sqb = SparqlQueryBuilder(self.settings, self.session)
+
+        result = ql.process_query(sqb.get_admin_status_by_username(self.username).query)
+
+        self.log.debug(result)
+
+        self.log.debug('===> ADMIN:')
+        self.log.debug(bool(int(result[0]['admin'])))
+
+        return bool(int(result[0]['admin']))
+
+    def get_admin_status_by_email(self):
+        """
+        get the admin status of the user by his username
+        """
+        ql = QueryLauncher(self.settings, self.session)
+        sqb = SparqlQueryBuilder(self.settings, self.session)
+
+        result = ql.process_query(sqb.get_admin_status_by_email(self.email).query)
+
+        self.log.debug(result)
+
+        self.log.debug('===> ADMIN:')
+        self.log.debug(bool(int(result[0]['admin'])))
+
+        return bool(int(result[0]['admin']))
 
     def log_user(self, request):
         """

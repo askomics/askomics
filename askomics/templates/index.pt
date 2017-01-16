@@ -326,7 +326,12 @@
                         <li id="user_menu" class="dropdown">
                           <a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="glyphicon glyphicon-user"></span><span class="caret"></span></a>
                             <ul class="dropdown-menu">
-                              <li id="user_info"><a href="#">Hello {{username}}!</a></li>
+                            {{#if admin}}
+                                <li id="user_info"><a href="#"><span class="glyphicon glyphicon-king"></span> Account managment ({{username}})</a></li>
+                                <li id="administration"><a href="#"><span class="glyphicon glyphicon-cog"></span> Administration</a></li>
+                            {{else}}
+                                <li id="user_info"><a href="#"><span class="glyphicon glyphicon-pawn"></span> Account managment ({{username}})</a></li>
+                            {{/if}}
                               <li class="divider"></li>
                               <li id="logout"><a href="#"><span class="glyphicon glyphicon-log-out"></span> Log out</a></li>
                             </ul>
