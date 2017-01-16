@@ -556,6 +556,27 @@ function displayNavbar(loged, username, admin) {
       user.logout();
     });
 
+    // admin page
+    $('#administration').click(function() {
+      console.log('-+-+- administration -+-+-');
+
+      displayModal('Please wait', '', 'Close');
+
+      let service = new RestServiceJs('get_users_infos');
+      service.getAll(function(data) {
+
+        $("#admin_page").empty();
+        let source = $('#template-admin').html();
+        let template = Handlebars.compile(source);
+
+        let context = {users: data.result};
+        let html = template(context);
+
+        $("#admin_page").append(html);
+        hideModal();
+      });
+    });
+
 }
 
 $(function () {

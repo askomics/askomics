@@ -771,3 +771,31 @@ class AskView(object):
             self.log.error(str(e))
 
         return data
+
+    @view_config(route_name='get_users_infos', request_method='GET')
+    def get_users_infos(self):
+        """
+        For each users store in the triplesore, get their username, email,
+        and admin status
+        """
+
+        # Denny access for non loged users or non admin users
+        if self.request.session['username'] == '' or not self.request.session['admin']:
+            raise HTTPForbidden
+
+        sqb = SparqlQueryBuilder(self.settings, self.request.session)
+        ql = QueryLauncher(self.settings, self.request.session)
+
+        data = {}
+
+        try:
+            result = ql.process_query(sqb.get_users_infos().query)
+        except Exception as e:
+            data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
+            self.log.error(str(e))
+
+        self.log.debug(result)
+
+        data['result'] = result
+
+        return data

@@ -53,6 +53,9 @@ def main(global_config, **settings):
     config.add_route('logout', '/logout')
     config.add_route('checkuser', '/checkuser')
 
+    # Administration
+    config.add_route('get_users_infos', '/get_users_infos')
+
 
     # TODO no absolute path to static files
     # TODO check what is cors (iframe redirect?)

@@ -214,3 +214,14 @@ class SparqlQueryBuilder(ParamManager):
             ?URIusername :email \"""" + email + """\" .
             ?URIusername :isadmin ?admin}
         }""")
+
+    def get_users_infos(self):
+        return self.prepare_query(
+        """SELECT DISTINCT ?username ?email ?admin
+        WHERE {
+            GRAPH <"""+self.get_param("askomics.users_graph")+"""> {
+            ?URIusername rdf:type :user .
+            ?URIusername rdfs:label ?username .
+            ?URIusername :email ?email .
+            ?URIusername :isadmin ?admin}
+        }""")

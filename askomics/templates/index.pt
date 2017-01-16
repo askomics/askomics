@@ -209,6 +209,9 @@
             <hr/>
             <h3 class="header-div">Administration</h3>
             <hr/>
+            <div id='admin_page'>
+            <!-- see the template below (template-admin) -->
+            </div>
 
         </div>
 
@@ -342,6 +345,25 @@
             </div>
         </script>
 
+        <!-- template to display the admin page -->
+        <script id='template-admin' type="text/x-handlebars-template">
+        <h4>Users</h4>
+        <hr/ >
+        <table class="table">
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Admin</th>
+            </tr>
+            {{#each users}}
+            <tr>
+                <td>{{this.username}}</td>
+                <td><a href="mailto:{{this.email}}">{{this.email}}</a></td>
+                <td>{{this.admin}}</td>
+            </tr>
+            {{/each}}
+        </table>
+        </script>
 
         <!-- template to display preview of a gff file -->
         <script id="template-gff-form" type="text/x-handlebars-template">
