@@ -36,7 +36,7 @@ class ParamManager(object):
 
         self.ASKOMICS_sparql_queries_dir = 'askomics/sparql/'
         self.ASKOMICS_html_template      = 'askomics/templates/integration.pt'
-        self.ASKOMICS_ttl_directory      = 'askomics/ttl/'
+        self.ASKOMICS_ttl_directory      = 'askomics/ttl/' + self.session['username'] + '/'
 
     def get_template_sparql(self, sparql_file):
         sparql_template = self.ASKOMICS_sparql_queries_dir + sparql_file

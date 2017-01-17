@@ -269,7 +269,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
         sparqlHeader = sqb.header_sparql_config("")
         ql.insert_data(ttlNamedGraph, self.graph, sparqlHeader)
 
-        url = urlbase+"/ttl/"+os.path.basename(fp.name)
+        url = urlbase+"/ttl/"+ self.session['username'] + '/' + os.path.basename(fp.name)
         self.log.debug(url)
         data = {}
         try:

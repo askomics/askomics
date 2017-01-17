@@ -12,9 +12,12 @@ class FileUpload(object):
         self.request = request
         request.response.headers['Access-Control-Allow-Origin'] = '*'
         request.response.headers['Access-Control-Allow-Methods'] = 'OPTIONS, HEAD, GET, POST, PUT, DELETE'
-        #create tempory directory...
-        if 'upload_directory' not in request.session.keys() or not os.path.isdir(request.session['upload_directory']):
-            request.session['upload_directory'] = tempfile.mkdtemp(suffix='_tmp', prefix='askomics')
+
+        self.dir_string = '__' + self.request.session['username'] + '__'
+
+        # Set the tmp dir
+        if 'upload_directory' not in request.session.keys() or self.dir_string not in request.session['upload_directory'] or not os.path.isdir(request.session['upload_directory']):
+            request.session['upload_directory'] = tempfile.mkdtemp(suffix='_tmp', prefix='__' + self.request.session['username'] + '__')
 
         self.upload_dir = request.session['upload_directory']
         self.log = logging.getLogger(__name__)
