@@ -687,6 +687,9 @@ class AskView(object):
 
     @view_config(route_name='logout', request_method='GET')
     def logout(self):
+        """
+        Log out the user, reset the session
+        """
 
         self.request.session['username'] = ''
         self.request.session['admin'] = ''
