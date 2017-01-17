@@ -44,7 +44,13 @@ class TripleStoreExplorer(ParamManager):
         for result in results:
             uri = result["nodeUri"]
             label = result["nodeLabel"]
-            nodes.append({ 'uri': uri, 'label': label })
+
+            if 'private' in result['g']:
+                public = False
+            else:
+                public = True
+
+            nodes.append({'uri': uri, 'label': label, 'public': public})
 
         return nodes
 

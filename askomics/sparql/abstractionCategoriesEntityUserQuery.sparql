@@ -1,16 +1,24 @@
 SELECT DISTINCT ?entity ?category ?labelCategory ?typeCategory
-WHERE {
-    GRAPH $graph {
-    ?g rdfg:subGraphOf $graph }
+WHERE{
+    {
+        GRAPH $graph {
+            ?g rdfg:subGraphOf $graph
+        }
+    }UNION{
+        GRAPH $graph2 {
+            ?g rdfg:subGraphOf $graph2
+        }
+    }
+
     GRAPH ?g {
         ?entity rdf:type owl:Class .
-	        ?typeCategory displaySetting:category [] .
+            ?typeCategory displaySetting:category [] .
 
         ?category rdf:type owl:ObjectProperty;
                     rdfs:label ?labelCategory ;
                     rdfs:domain ?entity;
                     rdfs:range ?typeCategory.
 
-	    VALUES ?entity { $entities }
+        VALUES ?entity { $entities }
     }
 }

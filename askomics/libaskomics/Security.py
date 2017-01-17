@@ -179,11 +179,6 @@ class Security(ParamManager):
 
         result = ql.process_query(sqb.get_admin_status_by_username(self.username).query)
 
-        self.log.debug(result)
-
-        self.log.debug('===> ADMIN:')
-        self.log.debug(bool(int(result[0]['admin'])))
-
         return bool(int(result[0]['admin']))
 
     def get_admin_status_by_email(self):
@@ -209,11 +204,7 @@ class Security(ParamManager):
         session = request.session
         session['username'] = self.username
         session['admin'] = self.admin
-        if self.admin:
-            session['graph'] = self.settings['askomics.public_graph']
-        else:
-            session['graph'] = self.settings['askomics.private_graph'] + ':' + self.username
-
+        session['graph'] = self.settings['askomics.private_graph'] + ':' + self.username
 
     def print_sha256_pw(self):
         """

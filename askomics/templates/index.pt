@@ -75,11 +75,12 @@
             <div id="init" class="row">
                 <div class="form-group">
                     <label for="startpoint" class="col-md-offset-2">Please select a start point for your query :</label>
-                    <select id='startpoints' size='4' class="form-control col-md-offset-2"></select>
+                    <select id='startpoints' size='8' class="form-control col-md-offset-2"></select>
+                    <div class="col-md-offset-2">Public data are <em class='text-warning'>yellow</em> and private data are <strong class='text-primary'>blue</strong></div>
                 </div>
                 <button  id="starter" class="btn btn-default col-md-offset-2" onclick="startVisualisation();">Start</button>
                 <br><br><br>
-                <div class="col-md-offset-2"><p>Or upload a AskOmics file</p>
+                <div class="col-md-offset-2"><p>Or upload an AskOmics file</p>
                     <div class="uploadBtn btn btn-default">
                         <span>Load query</span>
                         <input id="uploadBtn" type="file" class="upload">
@@ -349,7 +350,7 @@
         <script id='template-admin' type="text/x-handlebars-template">
         <h4>Users</h4>
         <hr/ >
-        <table class="table">
+        <table class="table table-striped">
             <tr>
                 <th>Username</th>
                 <th>Email</th>
@@ -391,7 +392,10 @@
                     {{/if}}
                     <input type="text" name="frame" id="tax-{{file.name}}">
                     <br><br>
-                    <input type="button" id="{{file.name}}" class="btn btn-primary load_data_gff" value="Insert in database">
+                    <input type="button" id="{{file.name}}" class="btn btn-primary load_data_gff" value="Insert in private graph">
+                    {{#if admin}}
+                    <input type="button" class="btn btn-warning load_data_gff_public" value="Insert in public graph" />
+                    {{/if}}
                     <br><br>
                     <p class="insert_status text-left alert hidden"></p>
                     <p class="insert_warning text-left alert hidden"></p>
@@ -473,7 +477,10 @@
                     <div class="form-group form-inline">
                         <div class="btn-group" role="group" aria-label="metadata">
                             <input type="button" class="btn btn-success preview_button" value="Preview RDF" />
-                            <input type="button" class="btn btn-primary load_data_tsv" value="Insert in database" />
+                            <input type="button" class="btn btn-primary load_data_tsv" value="Insert in private graph" />
+                            {{#if admin}}
+                            <input type="button" class="btn btn-warning load_data_tsv_public" value="Insert in public graph" />
+                            {{/if}}
                         </div>
                     </div>
                     <p class="insert_status text-left alert hidden"></p>
@@ -492,7 +499,10 @@
                     <h4>TTL file: {{file.name}} </h4>
                     <h5>Preview of the first 100 lines of the file</h5>
                     <pre class='preview_field'></pre>
-                    <input type="button" id="{{file.name}}" class="btn btn-primary load_data_ttl" value="Insert in database">
+                    <input type="button" id="{{file.name}}" class="btn btn-primary load_data_ttl" value="Insert in private graph">
+                    {{#if admin}}
+                    <input type="button" class="btn btn-warning load_data_ttl_public" value="Insert in public graph" />
+                    {{/if}}
                     <br><br>
                     <p class="insert_status text-left alert hidden"></p>
                     <p class="insert_warning text-left alert hidden"></p>

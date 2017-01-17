@@ -1,7 +1,15 @@
-SELECT DISTINCT ?nodeUri ?nodeLabel
-WHERE {
-    GRAPH $graph {
-    ?g rdfg:subGraphOf $graph }
+SELECT DISTINCT ?nodeUri ?nodeLabel ?g
+WHERE{
+    {
+        GRAPH $graph {
+            ?g rdfg:subGraphOf $graph
+        }
+    }UNION{
+        GRAPH $graph2 {
+            ?g rdfg:subGraphOf $graph2
+        }
+    }
+
     GRAPH ?g {
         ?nodeUri displaySetting:startPoint "true"^^xsd:boolean .
         ?nodeUri rdfs:label ?nodeLabel

@@ -1,9 +1,17 @@
 SELECT DISTINCT ?entity ?property ?value
-WHERE {
-    GRAPH $graph {
-    ?g rdfg:subGraphOf $graph }
+WHERE{
+    {
+        GRAPH $graph {
+            ?g rdfg:subGraphOf $graph
+        }
+    }UNION{
+        GRAPH $graph2 {
+            ?g rdfg:subGraphOf $graph2
+        }
+    }
+
     GRAPH ?g {
-	    ?entity ?property ?value.
+	  ?entity ?property ?value.
       ?entity rdf:type owl:Class.
       VALUES ?entity { $entities }
     }

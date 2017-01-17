@@ -1,7 +1,15 @@
 SELECT DISTINCT ?relation_label
-WHERE {
-    GRAPH $graph {
-    ?g rdfg:subGraphOf $graph }
+WHERE{
+    {
+        GRAPH $graph {
+            ?g rdfg:subGraphOf $graph
+        }
+    }UNION{
+        GRAPH $graph2 {
+            ?g rdfg:subGraphOf $graph2
+        }
+    }
+
     GRAPH ?g {
         ?class rdf:type owl:Class .
         OPTIONAL { ?relation rdfs:domain ?class } .

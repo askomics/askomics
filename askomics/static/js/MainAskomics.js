@@ -71,11 +71,28 @@ function loadStartPoints() {
         return;
       }
 
+      console.log(JSON.stringify(startPointsDict));
+
       $("#startpoints").empty();
 
       $.each(startPointsDict.nodes, function(key, value) {
 
-          $("#startpoints").append($("<option></option>").attr("data-value", JSON.stringify(value)).text(value.label));
+        let text;
+
+        if (value.public) {
+          text = $('<em></em>').attr('class', 'text-warning')
+                               .append($('<i></i>').attr('class', 'fa fa-globe'))
+                               .append(' ' + value.label);
+        }else{
+          text = $('<strong></strong>').attr('class', 'text-primary')
+                                       .append($('<i></i>').attr('class', 'fa fa-lock'))
+                                       .append(' ' + value.label);
+
+        }
+
+          $('#startpoints').append($('<option></option>').attr('data-value', JSON.stringify(value))
+                                                         .append(text));
+
       });
       $("#starter").prop("disabled", true);
       $("#startpoints").click(function(){

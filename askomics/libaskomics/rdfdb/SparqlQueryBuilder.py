@@ -34,12 +34,15 @@ class SparqlQueryBuilder(ParamManager):
         """
         Prepare a query from a template and a substitution dictionary.
         The `$graph` variable is user graph or public graph if no user logged
+        The $graph2 is the public graph
         """
 
         if 'graph' not in self.session.keys() or self.session['graph'] == '':
             replacement['graph'] = '<%s>' % self.get_param('askomics.public_graph')
+            replacement['graph2'] = '<%s>' % self.get_param('askomics.public_graph')
         else:
             replacement['graph'] = '<%s>' % self.session['graph']
+            replacement['graph2'] = '<%s>' % self.get_param('askomics.public_graph')
 
         query = Template(template).substitute(replacement)
 
@@ -100,9 +103,22 @@ class SparqlQueryBuilder(ParamManager):
 
     def get_list_named_graphs(self):
         return self.prepare_query(
-            """SELECT DISTINCT ?g WHERE {
-            GRAPH <"""+self.session['graph']+"""> { ?g rdfg:subGraphOf <"""+self.session['graph']+""">}
-            GRAPH ?g { ?s ?p ?o } }""")
+        """SELECT DISTINCT ?g
+        WHERE{
+            {
+                GRAPH $graph {
+                    ?g rdfg:subGraphOf $graph
+                }
+            }UNION{
+                GRAPH $graph2 {
+                    ?g rdfg:subGraphOf $graph2
+                }
+            }
+
+            GRAPH ?g {
+                ?s ?p ?o
+            }
+        }""")
 
     def get_drop_named_graph(self, graph):
         return self.prepare_query(

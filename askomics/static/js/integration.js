@@ -31,17 +31,32 @@ $(function () {
     });
 
     $("#content_integration").on('click', '.load_data_tsv', function(event) {
-        loadSourceFile($(event.target).closest('.template-source_file'));
+        loadSourceFile($(event.target).closest('.template-source_file'), false);
+    });
+
+    // Load the tsv file into the public graph
+    $("#content_integration").on('click', '.load_data_tsv_public', function(event) {
+        loadSourceFile($(event.target).closest('.template-source_file'), true);
     });
 
     $("#content_integration").on('click', '.load_data_gff', function() {
         let filename = $(this).attr('id');
-        loadSourceFileGff(filename);
+        loadSourceFileGff(filename, false);
+    });
+
+    $("#content_integration").on('click', '.load_data_gff_public', function() {
+        let filename = $(this).attr('id');
+        loadSourceFileGff(filename, true);
     });
 
     $("#content_integration").on('click', '.load_data_ttl', function() {
         let filename = $(this).attr('id');
-        loadSourceFileTtl(filename);
+        loadSourceFileTtl(filename, false);
+    });
+
+    $("#content_integration").on('click', '.load_data_ttl_public', function() {
+        let filename = $(this).attr('id');
+        loadSourceFileTtl(filename, true);
     });
 
     // $('.taxon-selector').change(function() {
@@ -96,7 +111,7 @@ function displayTSVForm(file) {
     let source = $('#template-csv-form').html();
     let template = Handlebars.compile(source);
 
-    let context = {file: file};
+    let context = {file: file, admin: true};
     let html = template(context);
 
     $("#content_integration").append(html);
@@ -167,8 +182,7 @@ function setCorrectType(file) {
 
 
 /**
- * Insert TTL file
- * FIXME: change function's name
+ * FIXME: DEAD CODE - FUNCTION NEVER CALLED
  */
 function displayTableRDF(data) {
   let info = "";//$('<div></div>');
@@ -303,7 +317,7 @@ function checkExistingData(file_elem) {
 /**
  * Load a source_file into the triplestore
  */
-function loadSourceFile(file_elem) {
+function loadSourceFile(file_elem, pub) {
 
     var file_name = file_elem.find('.file_name').attr('id');
 
@@ -325,7 +339,8 @@ function loadSourceFile(file_elem) {
     var service = new RestServiceJs("load_data_into_graph");
     var model = { 'file_name': file_name,
                   'col_types': col_types,
-                  'disabled_columns': disabled_columns  };
+                  'disabled_columns': disabled_columns,
+                  'public': pub};
 
     service.post(model, function(data) {
         hideModal();
@@ -389,7 +404,7 @@ function loadSourceFile(file_elem) {
 /**
  * Load a GFF source_file into the triplestore
  */
-function loadSourceFileGff(filename) {
+function loadSourceFileGff(filename, pub) {
     console.log('-----> loadSourceFileGff <-----');
     // get taxon
     let taxon = '';
@@ -417,7 +432,8 @@ function loadSourceFileGff(filename) {
     let service = new RestServiceJs("load_gff_into_graph");
     let model = { 'file_name': filename,
                   'taxon': taxon,
-                  'entities': entities  };
+                  'entities': entities,
+                  'public': pub  };
 
     service.post(model, function(data) {
         // Show a success message isertion is OK
@@ -454,14 +470,15 @@ function loadSourceFileGff(filename) {
     });
 }
 
-function loadSourceFileTtl(filename) {
+function loadSourceFileTtl(filename, pub) {
     console.log('--- loadSourceFileTtl ---');
     displayModal('Please wait', '', 'Close');
 
     let file_elem = $("#source-file-ttl-" + filename);
 
     let service = new RestServiceJs('load_ttl_into_graph');
-    let model = {'file_name' : filename};
+    let model = {'file_name' : filename,
+                 'public': pub};
 
     service.post(model, function(data) {
         console.log('---> ttl insert');

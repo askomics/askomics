@@ -431,6 +431,13 @@ class AskView(object):
         file_name = body["file_name"]
         col_types = body["col_types"]
         disabled_columns = body["disabled_columns"]
+        public = body['public']
+
+        # Allow data integration in public graph only if user is an admin
+        if public and not self.request.session['admin']:
+            self.log.debug('/!\\ --> NOT ALLOWED TO INSERT IN PUBLIC GRAPH <-- /!\\')
+            public = False
+
         try:
             sfc = SourceFileConvertor(self.settings, self.request.session)
 
@@ -442,7 +449,7 @@ class AskView(object):
             urlbase = urlbase.group(1)
 
             method = 'load'
-            data = src_file.persist(urlbase,method)
+            data = src_file.persist(urlbase, method, public)
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
             data['error'] = 'Probleme with user data file ?</br>'+str(e)
@@ -469,6 +476,12 @@ class AskView(object):
         file_name = body['file_name']
         taxon = body['taxon']
         entities = body['entities']
+        public = body['public']
+
+        # Allow data integration in public graph only if user is an admin
+        if public and not self.request.session['admin']:
+            self.log.debug('/!\\ --> NOT ALLOWED TO INSERT IN PUBLIC GRAPH <-- /!\\')
+            public = False
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
         src_file_gff = sfc.get_source_file_gff(file_name, taxon, entities)
@@ -480,14 +493,11 @@ class AskView(object):
 
         try:
             self.log.debug('--> Parsing GFF')
-            src_file_gff.persist(urlbase, method)
+            src_file_gff.persist(urlbase, method, public)
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
             data['error'] = 'Problem when integration of '+file_name+'.</br>'+str(e)
             self.log.error(str(e))
-
-
-
 
         return data
 
@@ -506,6 +516,13 @@ class AskView(object):
         data = {}
         body = self.request.json_body
         file_name = body['file_name']
+        public = body['public']
+
+        # Allow data integration in public graph only if user is an admin
+        if public and not self.request.session['admin']:
+            self.log.debug('/!\\ --> NOT ALLOWED TO INSERT IN PUBLIC GRAPH <-- /!\\')
+            public = False
+
         sfc = SourceFileConvertor(self.settings, self.request.session)
         src_file_ttl = sfc.get_source_file(file_name)
 
@@ -514,7 +531,7 @@ class AskView(object):
 
 
         try:
-            src_file_ttl.persist(urlbase)
+            src_file_ttl.persist(urlbase, public)
         except Exception as e:
             data['error'] = 'Problem when integration of ' + file_name + '</br>' + str(e)
             self.log.error('ERROR: ' + str(e))
