@@ -11,7 +11,7 @@ class AskomicsUser {
     logUser() {
         displayNavbar(true, this.username, this.admin);
         setTimeout(function() {
-            loadStartPoints();
+            resetGraph();
             $('.container#content_login').hide();
             $('.container#content_signup').hide();
             $('.container#content_interrogation').show();
@@ -43,7 +43,7 @@ class AskomicsUser {
 
         service.getAll(function() {
             hideModal();
-            loadStartPoints();
+            resetGraph();
             displayNavbar(false, '');
             $('.container#content_interrogation').show();
         });
