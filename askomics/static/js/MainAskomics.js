@@ -113,6 +113,9 @@ function loadNamedGraphs() {
 
     var serviceNamedGraphs = new RestServiceJs('list_named_graphs');
     serviceNamedGraphs.getAll(function(namedGraphs) {
+        if (namedGraphs == 'forbidden') {
+          showLoginForm();
+        }
         if (namedGraphs.length === 0) {
           disableDelButton();
           return;
@@ -157,6 +160,13 @@ function formatGraphName(name) {
   return new_name+" ("+date+")";
 }
 
+function showLoginForm() {
+  $(".container:not(#navbar_content)").hide();
+  $('#content_login').show();
+  $('.nav li.active').removeClass('active');
+  $("#login").addClass('active');
+}
+
 function loadStatistics() {
 
 
@@ -166,6 +176,9 @@ function loadStatistics() {
 
   var service = new RestServiceJs("statistics");
   service.getAll(function(stats) {
+    if (stats == 'forbidden') {
+      showLoginForm();
+    }
     $('#statistics_div').empty();
     $('#statistics_div')
     .append($("<p></p>").text("Number of triples  : "+stats.ntriples))
@@ -295,6 +308,9 @@ function emptyDatabase(value) {
         displayModal('Please wait ...', '', 'Close');
         var service = new RestServiceJs("empty_database");
             service.getAll(function(empty_db){
+              if (empty_db == 'forbidden') {
+                showLoginForm();
+              }
               hideModal();
               if ('error' in empty_db ) {
                 alert(empty_db.error);
@@ -315,7 +331,10 @@ function deleteNamedGraph(graphs) {
     displayModal('Please Wait', '', 'Close');
     var service = new RestServiceJs("delete_graph");
     let data = {'namedGraphs':graphs };
-        service.post(data, function(){
+        service.post(data, function(d){
+          if (d == 'forbidden') {
+            showLoginForm();
+          }
         resetGraph();
         resetStats();
         hideModal();

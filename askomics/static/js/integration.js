@@ -220,6 +220,9 @@ function previewTtl(file_elem) {
                   'disabled_columns': disabled_columns };
 
     service.post(model, function(data) {
+        if (data == 'forbidden') {
+          showLoginForm();
+        }
         file_elem.find(".preview_field").html(data);
         file_elem.find(".preview_field").show();
     });
@@ -293,6 +296,9 @@ function checkExistingData(file_elem) {
                   'disabled_columns': disabled_columns };
 
     service.post(model, function(data) {
+        if (data == 'forbidden') {
+          showLoginForm();
+        }
         file_elem.find('.column_header').each(function( index ) {
             if (data.headers_status[index-1] == 'present') {
                 $(this).find("#relation_present").first().show();
@@ -343,6 +349,9 @@ function loadSourceFile(file_elem, pub) {
                   'public': pub};
 
     service.post(model, function(data) {
+        if (data == 'forbidden') {
+          showLoginForm();
+        }
         hideModal();
         var insert_status_elem = file_elem.find(".insert_status").first();
         var insert_warning_elem = file_elem.find(".insert_warning").first();
@@ -436,6 +445,9 @@ function loadSourceFileGff(filename, pub) {
                   'public': pub  };
 
     service.post(model, function(data) {
+        if (data == 'forbidden') {
+          showLoginForm();
+        }
         // Show a success message isertion is OK
         let div_entity = $("#" + filename);
         let entities_string = '';
@@ -482,6 +494,9 @@ function loadSourceFileTtl(filename, pub) {
 
     service.post(model, function(data) {
         console.log('---> ttl insert');
+        if (data == 'forbidden') {
+          showLoginForm();
+        }
 
         let insert_status_elem = file_elem.find(".insert_status").first();
         let insert_warning_elem = file_elem.find(".insert_warning").first();

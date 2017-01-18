@@ -64,7 +64,7 @@ class AskView(object):
 
         # Denny access for non loged users
         if self.request.session['username'] == '':
-            raise HTTPForbidden
+            return 'forbidden'
 
         self.log.debug("== STATS ==")
         data = {}
@@ -144,7 +144,7 @@ class AskView(object):
 
         # Denny access for non loged users
         if self.request.session['username'] == '':
-            raise HTTPForbidden
+            return 'forbidden'
 
         data = {}
 
@@ -177,7 +177,7 @@ class AskView(object):
 
         # Denny access for non loged users
         if self.request.session['username'] == '':
-            raise HTTPForbidden
+            return 'forbidden'
 
         self.log.debug("=== DELETE SELECTED GRAPHS ===")
 
@@ -200,7 +200,7 @@ class AskView(object):
 
         # Denny access for non loged users
         if self.request.session['username'] == '':
-            raise HTTPForbidden
+            return 'forbidden'
 
         self.log.debug("=== LIST OF NAMED GRAPHS ===")
 
@@ -261,7 +261,7 @@ class AskView(object):
 
         # Denny access for non loged users
         if self.request.session['username'] == '':
-            raise HTTPForbidden
+            return 'forbidden'
 
         self.log.debug(" ========= Askview:source_files_overview =============")
         sfc = SourceFileConvertor(self.settings, self.request.session)
@@ -331,7 +331,7 @@ class AskView(object):
 
         # Denny access for non loged users
         if self.request.session['username'] == '':
-            raise HTTPForbidden
+            return 'forbidden'
 
 
         self.log.debug("preview_ttl")
@@ -387,7 +387,7 @@ class AskView(object):
 
         # Denny access for non loged users
         if self.request.session['username'] == '':
-            raise HTTPForbidden
+            return 'forbidden'
 
         data = {}
 
@@ -423,7 +423,7 @@ class AskView(object):
 
         # Denny access for non loged users
         if self.request.session['username'] == '':
-            raise HTTPForbidden
+            return 'forbidden'
 
         data = {}
 
@@ -465,7 +465,7 @@ class AskView(object):
 
         # Denny access for non loged users
         if self.request.session['username'] == '':
-            raise HTTPForbidden
+            return 'forbidden'
 
 
         self.log.debug("== load_gff_into_graph ==")
@@ -509,7 +509,7 @@ class AskView(object):
 
         # Denny access for non loged users
         if self.request.session['username'] == '':
-            raise HTTPForbidden
+            return 'forbidden'
 
 
         self.log.debug('*** load_ttl_into_graph ***')
@@ -608,7 +608,7 @@ class AskView(object):
 
         # Denny access for non loged users
         if self.request.session['username'] == '':
-            raise HTTPForbidden
+            return 'forbidden'
 
 
 
@@ -801,7 +801,7 @@ class AskView(object):
 
         # Denny access for non loged users or non admin users
         if self.request.session['username'] == '' or not self.request.session['admin']:
-            raise HTTPForbidden
+            return 'forbidden'
 
         sqb = SparqlQueryBuilder(self.settings, self.request.session)
         ql = QueryLauncher(self.settings, self.request.session)
