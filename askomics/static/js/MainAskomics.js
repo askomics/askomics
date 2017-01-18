@@ -560,7 +560,8 @@ function displayNavbar(loged, username, admin) {
           $('#login_error').show();
         }else{
           $('#login_error').hide();
-          $('#login_success').append('You are loged now');
+          $('#login_success').empty();
+          $('#login_success').append('You are logged now');
           $('#login_success').show();
           let user = new AskomicsUser(data.username, data.admin);
           user.logUser();
@@ -571,6 +572,7 @@ function displayNavbar(loged, username, admin) {
     $('#logout').click(function(e) {
       let user = new AskomicsUser();
       user.logout();
+      // $('.container#content_interrogation').show();
     });
 
     // admin page

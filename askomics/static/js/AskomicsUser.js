@@ -10,6 +10,12 @@ class AskomicsUser {
 
     logUser() {
         displayNavbar(true, this.username, this.admin);
+        setTimeout(function() {
+            loadStartPoints();
+            $('.container#content_login').hide();
+            $('.container#content_signup').hide();
+            $('.container#content_interrogation').show();
+        }, 1000);
     }
 
     checkUser() {
@@ -37,7 +43,9 @@ class AskomicsUser {
 
         service.getAll(function() {
             hideModal();
+            loadStartPoints();
+            displayNavbar(false, '');
+            $('.container#content_interrogation').show();
         });
-        displayNavbar(false, '');
     }
 }
