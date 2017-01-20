@@ -394,7 +394,7 @@
                     <br><br>
                     <input type="button" id="{{file.name}}" class="btn btn-primary load_data_gff" value="Insert in private graph">
                     {{#if admin}}
-                    <input type="button" class="btn btn-warning load_data_gff_public" value="Insert in public graph" />
+                    <input type="button" id="{{file.name}}" class="btn btn-warning load_data_gff_public" value="Insert in public graph" />
                     {{/if}}
                     <br><br>
                     <p class="insert_status text-left alert hidden"></p>
@@ -501,7 +501,7 @@
                     <pre class='preview_field'></pre>
                     <input type="button" id="{{file.name}}" class="btn btn-primary load_data_ttl" value="Insert in private graph">
                     {{#if admin}}
-                    <input type="button" class="btn btn-warning load_data_ttl_public" value="Insert in public graph" />
+                    <input type="button" id="{{file.name}}" class="btn btn-warning load_data_ttl_public" value="Insert in public graph" />
                     {{/if}}
                     <br><br>
                     <p class="insert_status text-left alert hidden"></p>

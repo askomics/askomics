@@ -108,10 +108,16 @@ function displayTSVForm(file) {
         file.preview_data = cols2rows(file.preview_data);
     }
 
+    // User is admin if administration element is present in navbar
+    let admin = false;
+    if ($('#administration').length) {
+        admin = true;
+    }
+
     let source = $('#template-csv-form').html();
     let template = Handlebars.compile(source);
 
-    let context = {file: file, admin: true};
+    let context = {file: file, admin: admin};
     let html = template(context);
 
     $("#content_integration").append(html);
@@ -123,7 +129,13 @@ function displayGffForm(file, taxons) {
     let source = $('#template-gff-form').html();
     let template = Handlebars.compile(source);
 
-    let context = {file: file, taxons: taxons};
+    // User is admin if administration element is present in navbar
+    let admin = false;
+    if ($('#administration').length) {
+        admin = true;
+    }
+
+    let context = {file: file, taxons: taxons, admin: admin};
     let html = template(context);
 
     $("#content_integration").append(html);
@@ -134,7 +146,13 @@ function displayTtlForm(file) {
     let source = $('#template-ttl-form').html();
     let template = Handlebars.compile(source);
 
-    let context = {file: file};
+    // User is admin if administration element is present in navbar
+    let admin = false;
+    if ($('#administration').length) {
+        admin = true;
+    }
+
+    let context = {file: file, admin: admin};
     let html = template(context);
 
     $('#content_integration').append(html);
