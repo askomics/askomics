@@ -48,7 +48,14 @@ class AskomicsLink extends GraphLink {
   }
 
   instanciateVariateSPARQL(variates) {
-
+    if ('shortcut_output_var' in this ) {
+      for (let s in this.shortcut_output_var) {
+        let idx = s.replace(/%in0%/g,'URI'+this.source.SPARQLid);
+        variates.push(idx);
+        let idxWithouInterrog = idx.replace("?","");
+        this.source.additionalShortcutListDisplayVar[idxWithouInterrog] =  this.shortcut_output_var[s];
+      }
+    }
   }
 
   getLinkStrokeColor() { return super.getLinkStrokeColor(); }

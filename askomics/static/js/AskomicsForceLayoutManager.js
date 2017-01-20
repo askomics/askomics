@@ -16,6 +16,8 @@ class AskomicsForceLayoutManager {
     /* To manage information about File menu */
     this.menuFile = new AskomicsMenuFile(this);
 
+    this.menuShortcuts = new AskomicsMenuShortcuts(this);
+
     this.optionsView = {
       attributesFiltering  : true,
       relationsName        : true
@@ -160,6 +162,8 @@ class AskomicsForceLayoutManager {
     /* filter to hide and show proposition node and links */
     this._hideProposedUriNode    = [] ;
     this._hideProposedUriLink    = [] ;
+    this._hideProposedUriShortcuts    = [] ;
+
 
     this.vis = d3.select("#svgdiv")
                 .append("svg:svg")
@@ -226,6 +230,10 @@ class AskomicsForceLayoutManager {
     if ( type == "link" ) {
       return this._hideProposedUriLink;
     }
+    if ( type == "shortcuts" ) {
+      return this._hideProposedUriShortcuts;
+    }
+
     throw "AskomicsForceLayoutManager::getArrayForProposedUri Devel error => type !=node and link :"+type;
   }
 
@@ -335,7 +343,7 @@ class AskomicsForceLayoutManager {
     startPoint = new AskomicsUserAbstraction().buildBaseNode(startPoint.uri);
     /* initialize menus */
     this.menuView.start();
-
+    this.menuShortcuts.start();
     this.menuFile.start();
 
     startPoint = new AskomicsUserAbstraction().buildBaseNode(startPoint.uri);
@@ -363,6 +371,7 @@ class AskomicsForceLayoutManager {
     new AskomicsUserAbstraction().loadUserAbstraction();
     /* initialize menus */
     this.menuView.start();
+    this.menuShortcuts.start();
     this.menuFile.start();
 
     this.nodes.splice(0, this.nodes.length);
@@ -401,6 +410,7 @@ class AskomicsForceLayoutManager {
   reset() {
     //reset view menu
     this.menuView.reset();
+    this.menuShortcuts.reset();
 
     //unbind files menu
     this.menuFile.unbindDownloadButtons();
@@ -520,7 +530,7 @@ class AskomicsForceLayoutManager {
       } else if (this.selectNodes.length === 1 ) {
         this.insertSuggestionsWithNewNode(suggestedList,this.selectNodes[0]);
       } else if (this.selectNodes.length === 2) {
-        this.insertSuggestionsWithTwoNodesInstancied(this.selectNodes[0],this.selectNodes[1]);
+        this.insertSuggestionsWithTwoNodesInstancied(suggestedList,this.selectNodes[0],this.selectNodes[1]);
       }
       //shortcuts
       this.insertSuggestionsShortcuts(suggestedList,this.selectNodes);
@@ -701,14 +711,14 @@ class AskomicsForceLayoutManager {
 
     insertSuggestionsShortcuts(suggestedList,listSelectedNodes) {
 
-      /* TODO : Manage several entry entity start poin for shortcuts */
-      let slt_node = listSelectedNodes[0];
-
-      let lShortcuts = new ShortcutsParametersView().getShortcuts(listSelectedNodes[0]);
+      let lShortcuts = new ShortcutsParametersView().getShortcuts(listSelectedNodes);
 
       for (let shortcut in lShortcuts) {
         let suggestedNode;
         let uri = Object.keys(lShortcuts[shortcut].out)[0];
+      
+        if (! this.isProposedUri("shortcuts",shortcut)) continue ;
+
         console.log(uri);
         if ( ! ( uri in suggestedList) ) {
           /* creatin node */
@@ -725,12 +735,20 @@ class AskomicsForceLayoutManager {
         linkbase.label   = lShortcuts[shortcut].label ;
 
         linkbase.uri     = shortcut;
-        let source   = slt_node; /* only on entry TODO: multiple */
+
+        let source   ;
+        if ( listSelectedNodes.length >1 ) {
+          source = listSelectedNodes ;
+        } else if ( listSelectedNodes.length === 1 ){
+          source = listSelectedNodes[0];
+        } else {
+          console.error("DEVEL ERROR : can not implement a shortcut link without source !");
+        }
         let target   = suggestedList[uri];
 
         let link = AskomicsObjectBuilder.instanceLink(linkbase,source,target);
-        link.prefix  = lShortcuts[shortcut].prefix_string ;
 
+        console.log(JSON.stringify(lShortcuts[shortcut]));
         link.sparql  = lShortcuts[shortcut].sparql_string ;
         link.prefix  = lShortcuts[shortcut].prefix_string ;
         link.shortcut_output_var  = lShortcuts[shortcut].output_var ;

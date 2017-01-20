@@ -27,6 +27,7 @@ var askomicsSourceFiles = [
         'askomics/static/js/query-handler.js',
         'askomics/static/js/AskomicsMenuFile.js',
         'askomics/static/js/AskomicsMenuView.js',
+        'askomics/static/js/AskomicsMenuShortcuts.js',
         'askomics/static/js/GraphObject.js',
         'askomics/static/js/node/GraphNode.js',
         'askomics/static/js/node/AskomicsNode.js',

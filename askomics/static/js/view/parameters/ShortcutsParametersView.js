@@ -15,9 +15,8 @@ class ShortcutsParametersView extends InterfaceParametersView {
 
     this.config = {};
     this.shortcuts = {};
-
+    this.updateShortcutsIsDone = false ;
     instanceShortcutsParametersView = this;
-
     this.updateShortcuts();
   }
 
@@ -47,16 +46,35 @@ class ShortcutsParametersView extends InterfaceParametersView {
       console.log("SHORTCUT : \n"+JSON.stringify(this.shortcuts[sparql_res.shortcut]));
   }
 
-  getShortcuts(in_entity) {
-    console.log("in_entity:"+in_entity.uri);
+  getShortcuts(list_in_entity) {
     let list = {};
+    new ShortcutsParametersView().updateShortcuts();
+
     for (let l in this.shortcuts) {
+
       console.log("test avec:"+JSON.stringify(this.shortcuts[l].in));
-      if ( in_entity.uri in this.shortcuts[l].in ) {
-          list[l] = (JSON.parse(JSON.stringify(this.shortcuts[l])));
+      if ( this.shortcuts[l].in.length != list_in_entity.lenth ) {
+        console.log("entry list of shortcuts if different with list_in_entity");
+        continue;
+      }
+      let match = true;
+
+      for (let in_entity in list_in_entity ) {
+        if ( ! (list_in_entity[in_entity].uri in this.shortcuts[l].in) ) {
+          match = false;
+          break;
+        }
+      }
+      if ( match ) {
+        list[l] = (JSON.parse(JSON.stringify(this.shortcuts[l])));
       }
     }
     return list ;
+  }
+
+  getAllShortcuts() {
+    new ShortcutsParametersView().updateShortcuts();
+    return (JSON.parse(JSON.stringify(this.shortcuts)));
   }
 
   importShortcut(json_def) {
@@ -115,11 +133,17 @@ class ShortcutsParametersView extends InterfaceParametersView {
        alert("Import has failed !");
        return;
      }
-     new ShortcutsParametersView().updateShortcuts();
+     new ShortcutsParametersView().updateShortcuts(true);
    });
   }
 
-  updateShortcuts() {
+  updateShortcuts(force) {
+    if ( force === undefined || force !== true ) {
+      if ( this.updateShortcutsIsDone ) {
+        return this.shortcuts;
+      }
+    }
+    this.updateShortcutsIsDone = true ;
     console.log("!!! update shortcuts !!!");
     this.shortcuts = {};
     let service = new RestServiceJs("sparqlquery");
@@ -140,41 +164,13 @@ class ShortcutsParametersView extends InterfaceParametersView {
       'limit'                : -1
     };
 
-    service.post(param,function(data) {
-/*
-      let table = $("#table_shortcuts_list");
-
-      table.empty();
-
-      let head = $('<thead></thead>');
-
-      head.append($("<tr></tr>").addClass("table-bordered")
-            .append($("<th></th>").attr("style", "text-align:center;").html("name"))
-            .append($("<th></th>").attr("style", "text-align:center;").html("version"))
-            .append($("<th></th>").attr("style", "text-align:center;").html("comment"))
-          );
-
-      table.append(head);
-
-      let body = $('<tbody></tbody');
-
-      for (let i in data.values) {
-        body.append($("<tr></tr>").addClass("table-bordered")
-                .append($("<td></td>").attr("style", "text-align:center;").html(data.values[i].label))
-                .append($("<td></td>").attr("style", "text-align:center;").html(data.values[i].version))
-                .append($("<td></td>").attr("style", "text-align:center;").html(data.values[i].comment))
-              );
-
-          new ShortcutsParametersView().setShortcut(data.values[i]);
-      }
-      table.append(body);
-*/
+    service.postsync(param,function(data) {
       let accordion = $("#accordion_shortcuts");
       accordion.empty();
       //alert(accordion.find("[id^='collapse_']").length);
       let icount = 0;
       for (let i in data.values) {
-      
+
         icount++;
         let div1 = $("<div></div>").addClass("panel panel-default");
         let div2 = $("<div></div>").addClass("panel-heading").append(
@@ -219,6 +215,7 @@ class ShortcutsParametersView extends InterfaceParametersView {
       }
       console.log("========================= SHORTCUTS ===================================== \n"+JSON.stringify(new ShortcutsParametersView().shortcuts));
     });
+    return this.shortcuts;
   }
 
   buildRemoveButton(shortcut) {
@@ -229,7 +226,7 @@ class ShortcutsParametersView extends InterfaceParametersView {
         'shortcut' : shortcut
       };
       service.post(param,function() {});
-      new ShortcutsParametersView().updateShortcuts();
+      new ShortcutsParametersView().updateShortcuts(true);
     });
     return button;
   }

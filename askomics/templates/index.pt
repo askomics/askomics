@@ -86,7 +86,7 @@
                             <ul class="dropdown-menu">
                               <li id="datasets" onclick="loadNamedGraphs()"><a href="#">Datasets</a></li>
                               <li id="statistics" onclick="loadStatistics()"><a href="#">Statistics</a></li>
-                              <li id="shortcuts" onclick="new ShortcutsParametersView()"><a href="#">Shortcuts</a></li>
+                              <li id="shortcuts"><a href="#">Shortcuts</a></li>
                               <li class="divider"></li>
                               <li id="triplestore_parameters"><a onclick="new TriplestoreParametersView().configurationView();" href="#"><span class="glyphicon glyphicon-cloud"></span>&nbsp;Private Triplestore</a></li>
                               <li id="gene_ontology"><a onclick="new GOParametersView().configurationView();" href="#"><span class="glyphicon glyphicon-cloud"></span>&nbsp;Gene Ontology</a></li>
@@ -149,6 +149,13 @@
                       View<span class="caret"></span>
                       </button>
                       <ul id="viewListNodesAndLinks" class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+                      </ul>
+                    </div>
+                    <div class="btn-group">
+                      <button id="buttonViewListShortcuts" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      Shortcuts<span class="caret"></span>
+                      </button>
+                      <ul id="viewListShortcuts" class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
                       </ul>
                     </div>
                     <div class="btn-group pull-right">

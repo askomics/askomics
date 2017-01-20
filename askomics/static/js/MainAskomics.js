@@ -17,7 +17,6 @@ function startRequestSessionAskomics() {
 
   /* To manage the D3.js Force Layout  */
   forceLayoutManager = new AskomicsForceLayoutManager();
-
   askomicsInitialization = true;
 
   AskomicsObjectView.defineClickMenu();
@@ -414,6 +413,8 @@ function setUploadForm(content,titleForm,route_overview,callback) {
 }
 
 $(function () {
+  //loading shortcuts
+    new ShortcutsParametersView().updateShortcuts();
   // TODO: move inside AskomicsMenuFile
     // Startpoints definition
     loadStartPoints();
