@@ -165,6 +165,7 @@ function showLoginForm() {
   $('#content_login').show();
   $('.nav li.active').removeClass('active');
   $("#login").addClass('active');
+  displayNavbar(false, '');
 }
 
 function loadStatistics() {
