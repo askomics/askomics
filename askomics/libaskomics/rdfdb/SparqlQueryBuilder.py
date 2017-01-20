@@ -1,12 +1,12 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 import logging
-from pprint import pformat
+# from pprint import pformat
 from string import Template
 
 from askomics.libaskomics.rdfdb.SparqlQuery import SparqlQuery
 from askomics.libaskomics.ParamManager import ParamManager
-from askomics.libaskomics.utils import prefix_lines
+# from askomics.libaskomics.utils import prefix_lines
 
 class SparqlQueryBuilder(ParamManager):
     """
@@ -21,7 +21,10 @@ class SparqlQueryBuilder(ParamManager):
         self.log = logging.getLogger(__name__)
 
     def load_from_file(self, template_file, replacement={}):
-        """ Get a sparql query from a file, possibly replacing a template word by another given as argument """
+        """
+        Get a sparql query from a file, possibly replacing a template
+        word by another given as argument
+        """
         self.log.debug("***********  QUERY FILE  ***********")
         self.log.debug(template_file)
         with open(template_file) as template_fd:
@@ -33,21 +36,47 @@ class SparqlQueryBuilder(ParamManager):
     def prepare_query(self, template, replacement={}):
         """
         Prepare a query from a template and a substitution dictionary.
-        The `$graph` variable is user graph or public graph if no user logged
-        The $graph2 is the public graph
+        The `$graph` variable is the public graph
+        The `$graph2` variable is user graph or public graph if no user logged
         """
 
+        replacement['graph'] = '<%s>' % self.get_param('askomics.public_graph')
+
         if 'graph' not in self.session.keys() or self.session['graph'] == '':
-            replacement['graph'] = '<%s>' % self.get_param('askomics.public_graph')
             replacement['graph2'] = '<%s>' % self.get_param('askomics.public_graph')
         else:
-            replacement['graph'] = '<%s>' % self.session['graph']
-            replacement['graph2'] = '<%s>' % self.get_param('askomics.public_graph')
+            replacement['graph2'] = '<%s>' % self.session['graph']
 
         query = Template(template).substitute(replacement)
 
         prefixes = self.header_sparql_config(query)
         return SparqlQuery(prefixes + query)
+
+    def build_query_from_template(self, replacement={}):
+        """
+        choose which template to fill between public or private in
+        function of if a user is logged or not
+        """
+
+        template = self.get_template_sparql(self.ASKOMICS_privateQueryTemplate)
+
+        if 'graph' not in self.session.keys() or self.session['graph'] == '':
+            template = self.get_template_sparql(self.ASKOMICS_publicQueryTemplate)
+            
+        return self.load_from_file(template, replacement)
+
+    def custom_query(self, select, query):
+        """
+        launch a custom query.
+        """
+        self.log.debug('---> custom_query')
+        return self.build_query_from_template({
+            'select': select,
+            'query': query
+        })
+
+
+######### TODO: refactor all the stats function ############
 
     # The following utilities use prepare_query to fill a template.
     def get_statistics_number_of_triples(self):
@@ -101,25 +130,6 @@ class SparqlQueryBuilder(ParamManager):
         return self.prepare_query(
             'CLEAR GRAPH <'+graph+">")
 
-    def get_list_named_graphs(self):
-        return self.prepare_query(
-        """SELECT DISTINCT ?g
-        WHERE{
-            {
-                GRAPH $graph {
-                    ?g rdfg:subGraphOf $graph
-                }
-            }UNION{
-                GRAPH $graph2 {
-                    ?g rdfg:subGraphOf $graph2
-                }
-            }
-
-            GRAPH ?g {
-                ?s ?p ?o
-            }
-        }""")
-
     def get_drop_named_graph(self, graph):
         return self.prepare_query(
             'DROP SILENT GRAPH <' + graph + '>')
@@ -137,32 +147,20 @@ class SparqlQueryBuilder(ParamManager):
 		        { <""" + graph + """> ?p ?o
                 VALUES ?p {prov:generatedAtTime dc:creator dc:hasVersion prov:describesService prov:wasDerivedFrom} } }""")
 
-    def get_if_positionable(self, uri):
-        return self.prepare_query(
-        """SELECT DISTINCT ?exist
-        WHERE {
-            GRAPH <"""+self.get_param("askomics.graph")+"""> { ?g rdfg:subGraphOf <"""+self.get_param("askomics.graph")+""">}
-            BIND(EXISTS {<"""+uri+"""> displaySetting:is_positionable "true"^^xsd:boolean} AS ?exist)
-        }""")
 
-    def get_common_positionable_attributes(self, uri1, uri2):
-        return self.prepare_query(
-        """SELECT DISTINCT ?uri ?pos_attr ?status
-        WHERE {
-            GRAPH <"""+self.get_param("askomics.graph")+"""> { ?g rdfg:subGraphOf <"""+self.get_param("askomics.graph")+""">}
-            VALUES ?pos_attr {:position_taxon :position_ref :position_strand }
-            VALUES ?uri {<"""+uri1+"""> <"""+uri2+"""> }
-            BIND(EXISTS {?pos_attr rdfs:domain ?uri} AS ?status)
-        }""")
+    def get_list_named_graphs(self):
+        """
+        Get the list of named graph
+        """
+        self.log.debug('---> get_list_named_graphs')
+        return self.build_query_from_template({
+            'select': '?g',
+            'query': '?s ?p ?o'
+        })
 
-    def get_all_taxon(self):
-        return self.prepare_query(
-        """SELECT DISTINCT ?taxon
-        WHERE {
-            GRAPH <"""+self.get_param("askomics.graph")+"""> { ?g rdfg:subGraphOf <"""+self.get_param("askomics.graph")+""">}
-            :taxonCategory displaySetting:category ?URItax .
-            ?URItax rdfs:label ?taxon .
-        }""")
+
+
+    # Following function used when signup/login
 
     def check_username_presence(self, username):
         return self.prepare_query(

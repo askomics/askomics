@@ -19,6 +19,7 @@ from askomics.libaskomics.ParamManager import ParamManager
 from askomics.libaskomics.TripleStoreExplorer import TripleStoreExplorer
 from askomics.libaskomics.SourceFileConvertor import SourceFileConvertor
 from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
+from askomics.libaskomics.rdfdb.SparqlQueryGraph import SparqlQueryGraph
 from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
 from askomics.libaskomics.rdfdb.ResultsBuilder import ResultsBuilder
 from askomics.libaskomics.source_file.SourceFile import SourceFile
@@ -204,10 +205,10 @@ class AskView(object):
 
         self.log.debug("=== LIST OF NAMED GRAPHS ===")
 
-        sqb = SparqlQueryBuilder(self.settings, self.request.session)
+        sqg = SparqlQueryGraph(self.settings, self.request.session)
         ql = QueryLauncher(self.settings, self.request.session)
 
-        res = ql.execute_query(sqb.get_list_named_graphs().query)
+        res = ql.execute_query(sqg.get_list_named_graphs().query)
 
         namedGraphs = []
 
@@ -226,18 +227,18 @@ class AskView(object):
         body = self.request.json_body
         data = {}
 
-        sqb = SparqlQueryBuilder(self.settings, self.request.session)
+        sqg = SparqlQueryGraph(self.settings, self.request.session)
         ql = QueryLauncher(self.settings, self.request.session)
 
         # Check if the two entity are positionable
-        positionable1 = ql.process_query(sqb.get_if_positionable(body['node']).query)
-        positionable2 = ql.process_query(sqb.get_if_positionable(body['node']).query)
+        positionable1 = ql.process_query(sqg.get_if_positionable(body['node']).query)
+        positionable2 = ql.process_query(sqg.get_if_positionable(body['node']).query)
 
         if positionable1 == 0 or positionable2 == 0:
             data['error'] = 'not positionable nodes'
             return data
 
-        results = ql.process_query(sqb.get_common_positionable_attributes(body['node'], body['second_node']).query)
+        results = ql.process_query(sqg.get_common_pos_attr(body['node'], body['second_node']).query)
         self.log.debug(results)
 
         data['results'] = {}
@@ -272,9 +273,9 @@ class AskView(object):
         data['files'] = []
 
         # get all taxon in the TS
-        sqb = SparqlQueryBuilder(self.settings, self.request.session)
+        sqg = SparqlQueryGraph(self.settings, self.request.session)
         ql = QueryLauncher(self.settings, self.request.session)
-        res = ql.execute_query(sqb.get_all_taxon().query)
+        res = ql.execute_query(sqg.get_all_taxons().query)
         taxons_list = []
         for elem in res['results']['bindings']:
             taxons_list.append(elem['taxon']['value'])

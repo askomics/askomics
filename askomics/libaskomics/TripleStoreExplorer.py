@@ -5,6 +5,7 @@ import logging
 from askomics.libaskomics.ParamManager import ParamManager
 
 from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
+from askomics.libaskomics.rdfdb.SparqlQueryGraph import SparqlQueryGraph
 from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
 
 
@@ -35,11 +36,9 @@ class TripleStoreExplorer(ParamManager):
         self.log.debug(" =========== TripleStoreExplorer:get_start_points ===========")
         nodes = []
 
-        sqb = SparqlQueryBuilder(self.settings, self.session)
+        sqg = SparqlQueryGraph(self.settings, self.session)
         ql = QueryLauncher(self.settings, self.session)
-        sparql_template = self.get_template_sparql(self.ASKOMICS_initial_query)
-        query = sqb.load_from_file(sparql_template, {}).query
-        results = ql.process_query(query)
+        results = ql.process_query(sqg.get_start_point().query)
 
         for result in results:
             uri = result["nodeUri"]
@@ -125,40 +124,74 @@ class TripleStoreExplorer(ParamManager):
 
 
         return data
-    # build SPARQL Block following this grammar :
-    # B ==> [ A , KEYWORKD ] . KEYWORKD is a string prefix for BLOCK (ex: OPTIONAL, SERVICE)
-    # A ==> [ ((B|F),)+ ] . a list of Block or constraints leafs
-    # F ==> [ CONSTRAINT1, CONSTRAINT2,.... ] an array contains only constraints
-    def buildRecursiveBlock(self,tabul,constraints):
-        if len(constraints) == 2 and isinstance(constraints[0], list) and isinstance(constraints[1], str):
-            return tabul+constraints[1] + "{\n"+ self.buildRecursiveBlock(tabul+'\t',constraints[0])+tabul+"}\n"
+
+    def build_recursive_block(self, tabul, constraints):
+        """
+        build SPARQL Block following this grammar :
+        B ==> [ A , KEYWORKD ] . KEYWORKD is a string prefix for BLOCK (ex: OPTIONAL, SERVICE)
+        A ==> [ ((B|F),)+ ] . a list of Block or constraints leafs
+        F ==> [ CONSTRAINT1, CONSTRAINT2,.... ] an array contains only constraints
+        """
+        if len(constraints) == 2 and isinstance(
+                constraints[0], list) and isinstance(constraints[1], str):
+            return tabul + constraints[1] + "{\n" + self.build_recursive_block(
+                tabul + '\t', constraints[0]) + tabul + "}\n"
         else:
-            req = "";
+            req = ""
             for elt in constraints:
                 if isinstance(elt, str):
-                    req+=tabul+elt+".\n"
-                elif len(elt) == 2 and isinstance(elt[0], list) and isinstance(elt[1], str):
-                    if elt[1]!="":
-                        req+= tabul+elt[1] + " {\n"+ self.buildRecursiveBlock(tabul+'\t',elt[0])+tabul+"}\n"
+                    req += tabul + elt + ".\n"
+                elif len(elt) == 2 and isinstance(elt[0], list) and isinstance(
+                        elt[1], str):
+                    if elt[1] != "":
+                        req += tabul + elt[1] + " {\n" + self.build_recursive_block(
+                            tabul + '\t', elt[0]) + tabul + "}\n"
                     else:
-                        req+= self.buildRecursiveBlock(tabul,elt[0])
+                        req += self.build_recursive_block(tabul, elt[0])
 
                 else:
-                    raise ValueError("buildRecursiveBlock:: constraint malformed :"+str(elt))
+                    raise ValueError("build_recursive_block:: constraint malformed :"
+                                     + str(elt))
             return req
         return ""
 
-    def build_sparql_query_from_json(self,variates,constraintesRelations,limit,sendRequestToTPS):
+    def build_sparql_query_from_json(self, variates, constraintes_relations, limit, send_request_to_tps):
+        """
+        Build a sparql query from JSON constraints
+        """
+
+        select = ' '.join(variates)
+
+        sqb = SparqlQueryBuilder(self.settings, self.session)
+        query_launcher = QueryLauncher(self.settings, self.session)
+
+        query = self.build_recursive_block('', constraintes_relations)
+
+        # if limit != None and limit > 0:
+        #     query += ' LIMIT ' + str(limit)
+
+        if send_request_to_tps:
+            results = query_launcher.process_query(sqb.custom_query(select, query).query)
+        else:
+            pass
+
+        return results, query
+
+
+    def build_sparql_query_from_json2(self, variates, constraintes_relations, limit, send_request_to_TPS):
+        """
+        build a sparql query from json
+        """
         self.log.debug("variates")
         self.log.debug(variates)
-        self.log.debug("constraintesRelations")
-        self.log.debug(constraintesRelations)
+        self.log.debug("constraintes_relations")
+        self.log.debug(constraintes_relations)
 
         sqb = SparqlQueryBuilder(self.settings, self.session)
         ql = QueryLauncher(self.settings, self.session)
-        res = ql.execute_query(sqb.get_list_named_graphs().query)
+        # res = ql.execute_query(sqb.get_list_named_graphs().query)
 
-        namedGraphs = []
+        # namedGraphs = []
 
         #for indexResult in range(len(res['results']['bindings'])):
         #    namedGraphs.append(res['results']['bindings'][indexResult]['g']['value'])
@@ -170,7 +203,7 @@ class TripleStoreExplorer(ParamManager):
         #for graph in namedGraphs:
         #    req += "FROM "+ "<"+graph+ ">"+"\n"
         req += "WHERE \n"
-        req += self.buildRecursiveBlock('',constraintesRelations)
+        req += self.build_recursive_block('', constraintes_relations)
         if limit != None and limit >0 :
             req +=" LIMIT "+str(limit)
 
@@ -181,11 +214,11 @@ class TripleStoreExplorer(ParamManager):
 
         results = {}
 
-        if sendRequestToTPS:
+        if send_request_to_TPS:
             ql = QueryLauncher(self.settings, self.session)
             results = ql.process_query(query)
         else:
             # add comment inside query to inform user
             query = "# endpoint = "+self.get_param("askomics.endpoint") + "\n" + query
 
-        return results,query
+        return results, query
