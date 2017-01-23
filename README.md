@@ -4,11 +4,41 @@
 [![Coverage Status](https://coveralls.io/repos/github/askomics/askomics/badge.svg?branch=master)](https://coveralls.io/github/askomics/askomics?branch=master)
 
 
-AskOmics is a visual SPARQL query builder for RDF database. One of its advantages
-is that you don't need to know how to use SPARQL or the structure of your database.
+ AskOmics is a visual SPARQL query interface supporting both intuitive data integration and querying while shielding the user from most of the technical difficulties underlying RDF and SPARQL
+
+## Run AskOmics
+
+AskOmics is available under two supports : Docker and VM Virtualbox.
+
+### AskOmics on Linux using Docker
+
+Run Virtuoso using the tenforce/virtuoso docker image.
+
+`docker run docker run -d --name virtuoso -p 8890:8890 -p 1111:1111  -e VIRT_Parameters_DirsAllowed="/data,/data/dumps,., /usr/local/virtuoso-opensource/share/virtuoso/vad" -e VIRT_Parameters_TN_MAX_memory=4000000000 -e VIRT_SPARQL_ResultSetMaxRows=100000 -e VIRT_SPARQL_MaxQueryCostEstimationTime=300 -e VIRT_SPARQL_MaxQueryExecutionTime=300 -e VIRT_SPARQL_MaxDataSourceSize=1000000000 -e VIRT_Flags_TN_MAX_memory=4000000000 -e DBA_PASSWORD=dba -e SPARQL_UPDATE=true -e DEFAULT_GRAPH=http://localhost:8890/DAV --net="host" -t tenforce/virtuoso`
+
+Run AskOmics using the askomics/askomics docker image
+
+`docker run -d --net="host" -p 6543:6543 -t askomics/askomics virtuoso prod`
+
+### AskOmics on Windows using Virtualbox
+
+download the last image of AskOmics (http://)
+
+ * Import the image on Virtualbox
+ * Run the virtual machine
+
+Askomics is now available on your local machine !
+If needed (but normaly you need'nt) to log inside the machine use the account login `askomics` and password `askomics`.
+The VM is reachable with a SSH connexion :
+ssh -p 3022 askomics:askomics@localhost
+
+### Using askomics
+
+Go to http://localhost:6543/
 
 ------------------
-## Getting started
+
+## Development information
 
 ### Requirements
 
@@ -27,6 +57,8 @@ AskOmics also uses the following bundled libraries:
 * [Handlebars.js](http://handlebarsjs.com/)
 * [Google Material icons](https://design.google.com/icons/)
 * [Font Awesome icons](http://fontawesome.io/icons/)
+* [DataTables](https://datatables.net/)
+* [jQuery contextMenu](http://swisnl.github.io/jQuery-contextMenu/index.html)
 
 #### Browser compatibility
 
@@ -41,29 +73,10 @@ AskOmics also uses the following bundled libraries:
 + python3.3
 + pip
 + venv
++ npm
++ gulp
 
-You will need to install some [npm](https://www.npmjs.com/package/npm) packages:
-
-```
-npm install -g gulp
-npm install --save-dev gulp-util
-npm install --save-dev gulp-concat
-npm install --save-dev gulp-sourcemaps
-npm install --save-dev gulp-babel babel-preset-es2015
-npm install --save-dev gulp-mocha
-npm install gulp-mocha-phantomjs --save-dev
-npm install should --save-dev
-npm install --save-dev mocha
-npm install --save-dev chai
-npm install -g jshint gulp-jshint
-npm install mocha-phantomjs-istanbul --save-dev
-npm install gulp-istanbul --save-dev
-npm install gulp-istanbul-report --save-dev
-npm install gulp-inject --save-dev
-npm install gulp-uglify --save-dev
-npm install gulp-util --save-dev
-gem install coveralls-lcov
-
+Check the Dockerfile to see dependancies
 
 ```
 
@@ -100,9 +113,6 @@ $ gulp --dev --reload
 ```
 It will reload javascript files when a file is modified.
 
-### Using AskOmics
-
-Once launched, AskOmics will be available at http://localhost:6543/
 
 ### Running tests
 
@@ -120,4 +130,3 @@ Python test work only with Virtuoso
 ```
 $ gulp test
 ```
-

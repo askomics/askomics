@@ -91,7 +91,7 @@ class AbstractedRelation(object):
 
         indent = (len(uri)) * " "
         turtle = uri + " rdf:type " + self.get_relation_type() + " ;\n"
-        turtle += indent + ' rdfs:label "' + self.get_label() + '" ;\n'
+        turtle += indent + ' rdfs:label "' + self.get_label() + '"^^xsd:string ;\n'
         turtle += indent + " rdfs:domain " + self.get_domain() + " ;\n"
         turtle += indent + " rdfs:range " + self.get_range() + " .\n\n"
         return turtle

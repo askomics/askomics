@@ -109,6 +109,7 @@ class AskomicsUserAbstraction {
     /* Request information in the model layer */
     //this.updateOntology();
     loadUserAbstraction() {
+
       var service = new RestServiceJs("userAbstraction");
 
       service.getsync(function(resultListTripletSubjectRelationObject ) {

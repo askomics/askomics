@@ -113,7 +113,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
         chunk_count = 1
         chunk = ""
         pathttl = self.get_ttl_directory()
-        if method != 'load': #FIXME: load doesn't work
+        if method == 'load': #FIXME: load doesn't work
 
             fp = None
 

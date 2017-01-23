@@ -16,6 +16,8 @@ class AskomicsForceLayoutManager {
     /* To manage information about File menu */
     this.menuFile = new AskomicsMenuFile(this);
 
+    this.menuShortcuts = new AskomicsMenuShortcuts(this);
+
     this.optionsView = {
       attributesFiltering  : true,
       relationsName        : true
@@ -160,6 +162,8 @@ class AskomicsForceLayoutManager {
     /* filter to hide and show proposition node and links */
     this._hideProposedUriNode    = [] ;
     this._hideProposedUriLink    = [] ;
+    this._hideProposedUriShortcuts    = [] ;
+
 
     this.vis = d3.select("#svgdiv")
                 .append("svg:svg")
@@ -226,6 +230,10 @@ class AskomicsForceLayoutManager {
     if ( type == "link" ) {
       return this._hideProposedUriLink;
     }
+    if ( type == "shortcuts" ) {
+      return this._hideProposedUriShortcuts;
+    }
+
     throw "AskomicsForceLayoutManager::getArrayForProposedUri Devel error => type !=node and link :"+type;
   }
 
@@ -335,7 +343,7 @@ class AskomicsForceLayoutManager {
     startPoint = new AskomicsUserAbstraction().buildBaseNode(startPoint.uri);
     /* initialize menus */
     this.menuView.start();
-
+    this.menuShortcuts.start();
     this.menuFile.start();
 
     startPoint = new AskomicsUserAbstraction().buildBaseNode(startPoint.uri);
@@ -363,6 +371,7 @@ class AskomicsForceLayoutManager {
     new AskomicsUserAbstraction().loadUserAbstraction();
     /* initialize menus */
     this.menuView.start();
+    this.menuShortcuts.start();
     this.menuFile.start();
 
     this.nodes.splice(0, this.nodes.length);
@@ -401,6 +410,7 @@ class AskomicsForceLayoutManager {
   reset() {
     //reset view menu
     this.menuView.reset();
+    this.menuShortcuts.reset();
 
     //unbind files menu
     this.menuFile.unbindDownloadButtons();
@@ -512,22 +522,26 @@ class AskomicsForceLayoutManager {
     }
 
     insertSuggestions() {
+
+      let suggestedList = {} ;
+
       if (this.selectNodes.length === 0 ) {
         return ;
       } else if (this.selectNodes.length === 1 ) {
-        this.insertSuggestionsWithNewNode(this.selectNodes[0]);
+        this.insertSuggestionsWithNewNode(suggestedList,this.selectNodes[0]);
       } else if (this.selectNodes.length === 2) {
-        this.insertSuggestionsWithTwoNodesInstancied(this.selectNodes[0],this.selectNodes[1]);
+        this.insertSuggestionsWithTwoNodesInstancied(suggestedList,this.selectNodes[0],this.selectNodes[1]);
       }
+      //shortcuts
+      this.insertSuggestionsShortcuts(suggestedList,this.selectNodes);
     }
 
-    insertSuggestionsWithNewNode(slt_node) {
+    insertSuggestionsWithNewNode(suggestedList,slt_node) {
         /* get All suggested node and relation associated to get orientation of arc */
         let tab = new AskomicsUserAbstraction().getRelationsObjectsAndSubjectsWithURI(slt_node.uri);
         let objectsTarget = tab[0];  /* All triplets which slt_node URI are the subject */
         let subjectsTarget = tab[1]; /* All triplets which slt_node URI are the object */
 
-        var suggestedList = {} ;
         let link;
 
         for (var uri in objectsTarget ) {
@@ -630,6 +644,7 @@ class AskomicsForceLayoutManager {
           this.links.push(link);
         }
 
+        return suggestedList;
     }
 
     relationInstancied(subj, obj,relation,links) {
@@ -689,6 +704,55 @@ class AskomicsForceLayoutManager {
         let target   = node1;
         let link = new AskomicsPositionableLink(linkbase,source,target);
         link.setCommonPosAttr();
+        link.id = new AskomicsGraphBuilder().getId();
+        this.links.push(link);
+      }
+    }
+
+    insertSuggestionsShortcuts(suggestedList,listSelectedNodes) {
+
+      let lShortcuts = new ShortcutsParametersView().getShortcuts(listSelectedNodes);
+
+      for (let shortcut in lShortcuts) {
+        let suggestedNode;
+        let uri = Object.keys(lShortcuts[shortcut].out)[0];
+      
+        if (! this.isProposedUri("shortcuts",shortcut)) continue ;
+
+        console.log(uri);
+        if ( ! ( uri in suggestedList) ) {
+          /* creatin node */
+          suggestedNode = new AskomicsUserAbstraction().buildBaseNode(uri);
+          /* specific attribute for suggested node */
+          suggestedNode = new AskomicsGraphBuilder().setSuggestedNode(suggestedNode,slt_node.x,slt_node.y);
+          /* adding in the node list to create D3.js graph */
+          this.nodes.push(suggestedNode);
+          suggestedList[uri] = suggestedNode ;
+        }
+
+        let linkbase     = {} ;
+
+        linkbase.label   = lShortcuts[shortcut].label ;
+
+        linkbase.uri     = shortcut;
+
+        let source   ;
+        if ( listSelectedNodes.length >1 ) {
+          source = listSelectedNodes ;
+        } else if ( listSelectedNodes.length === 1 ){
+          source = listSelectedNodes[0];
+        } else {
+          console.error("DEVEL ERROR : can not implement a shortcut link without source !");
+        }
+        let target   = suggestedList[uri];
+
+        let link = AskomicsObjectBuilder.instanceLink(linkbase,source,target);
+
+        console.log(JSON.stringify(lShortcuts[shortcut]));
+        link.sparql  = lShortcuts[shortcut].sparql_string ;
+        link.prefix  = lShortcuts[shortcut].prefix_string ;
+        link.shortcut_output_var  = lShortcuts[shortcut].output_var ;
+
         link.id = new AskomicsGraphBuilder().getId();
         this.links.push(link);
       }

@@ -550,6 +550,72 @@ class AskView(object):
 
         return data
 
+    @view_config(route_name='importShortcut', request_method='POST')
+    def importShortcut(self):
+        """
+        Import a shortcut definition into the triplestore
+        """
+        # Denny access for non loged users
+        if self.request.session['username'] == '' or not self.request.session['admin'] :
+            return 'forbidden'
+
+        self.log.debug('*** importShortcut ***')
+        data = {}
+        body = self.request.json_body
+        sqb = SparqlQueryBuilder(self.settings, self.request.session)
+        ql = QueryLauncher(self.settings, self.request.session)
+        sparqlHeader = sqb.header_sparql_config("")
+
+        try:
+            sparqlHeader += body["prefix"]+"\n"
+            self.request.session['graph']
+            ql.insert_data(body["shortcut_def"],'askomics:graph:shortcut',sparqlHeader);
+        except Exception as e:
+            #exc_type, exc_value, exc_traceback = sys.exc_info()
+            #traceback.print_exc(limit=8)
+            traceback.print_exc(file=sys.stdout)
+            data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
+            self.log.error(str(e))
+
+        return data
+
+    @view_config(route_name='deleteShortcut', request_method='POST')
+    def deleteShortcut(self):
+        """
+        Delete a shortcut definition into the triplestore
+        """
+        # Denny access for non loged users
+        if self.request.session['username'] == '' or not self.request.session['admin'] :
+            return 'forbidden'
+
+        self.log.debug('*** importShortcut ***')
+        data = {}
+        body = self.request.json_body
+        sqb = SparqlQueryBuilder(self.settings, self.request.session)
+        ql = QueryLauncher(self.settings, self.request.session)
+
+        try:
+            query_string = sqb.header_sparql_config("")
+            query_string += "\n"
+            query_string += "DELETE {\n"
+            query_string += "\tGRAPH "+ "<askomics:graph:shortcut>" +"\n"
+            query_string += "\t\t{\n"
+            query_string += "<"+body["shortcut"]+">" + " ?r ?a.\n"
+            query_string += "\t\t}\n"
+            query_string += "\t}\n"
+            query_string += "WHERE{\n"
+            query_string += "<"+body["shortcut"]+">" + " ?r ?a.\n"
+            query_string += "\t}\n"
+
+            res = ql.execute_query(query_string)
+        except Exception as e:
+            #exc_type, exc_value, exc_traceback = sys.exc_info()
+            #traceback.print_exc(limit=8)
+            traceback.print_exc(file=sys.stdout)
+            data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
+            self.log.error(str(e))
+
+        return data
 
     @view_config(route_name='sparqlquery', request_method='POST')
     def get_value(self):
@@ -606,12 +672,6 @@ class AskView(object):
 
     @view_config(route_name='ttl', request_method='GET')
     def upload(self):
-
-        # Denny access for non loged users
-        if self.request.session['username'] == '':
-            return 'forbidden'
-
-
 
         response = FileResponse(
             'askomics/ttl/'+self.request.matchdict['name'],

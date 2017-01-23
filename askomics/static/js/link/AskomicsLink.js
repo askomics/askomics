@@ -29,19 +29,35 @@ class AskomicsLink extends GraphLink {
 
   buildConstraintsSPARQL() {
     let blockConstraintByNode = [];
-    let rel = this.URI();
-    if ( this.transitive ) rel += "+";
-    blockConstraintByNode.push("?"+'URI'+this.source.SPARQLid+" "+rel+" "+"?"+'URI'+this.target.SPARQLid);
-    if ( this.negative ) {
-      blockConstraintByNode = [blockConstraintByNode,'FILTER NOT EXISTS'];
+
+    if ( this.sparql !== undefined ) {
+        /* shortcut case */
+        let code_sparql = this.sparql.replace(/%in0%/g,'URI'+this.source.SPARQLid);
+        code_sparql = code_sparql.replace(/%out0%/g,'URI'+this.target.SPARQLid);
+        blockConstraintByNode.push(code_sparql);
+    } else {
+       /* classical link case */
+      let rel = this.URI();
+      if ( this.transitive ) rel += "+";
+      blockConstraintByNode.push("?"+'URI'+this.source.SPARQLid+" "+rel+" "+"?"+'URI'+this.target.SPARQLid);
+      if ( this.negative ) {
+        blockConstraintByNode = [blockConstraintByNode,'FILTER NOT EXISTS'];
+      }
     }
     return [blockConstraintByNode,''];
   }
 
   instanciateVariateSPARQL(variates) {
-
+    if ('shortcut_output_var' in this ) {
+      for (let s in this.shortcut_output_var) {
+        let idx = s.replace(/%in0%/g,'URI'+this.source.SPARQLid);
+        variates.push(idx);
+        let idxWithouInterrog = idx.replace("?","");
+        this.source.additionalShortcutListDisplayVar[idxWithouInterrog] =  this.shortcut_output_var[s];
+      }
+    }
   }
 
   getLinkStrokeColor() { return super.getLinkStrokeColor(); }
-  
+
 }

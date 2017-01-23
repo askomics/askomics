@@ -18,7 +18,6 @@ function startRequestSessionAskomics() {
 
   /* To manage the D3.js Force Layout  */
   forceLayoutManager = new AskomicsForceLayoutManager();
-
   askomicsInitialization = true;
 
   AskomicsObjectView.defineClickMenu();
@@ -620,6 +619,7 @@ function displayNavbar(loged, username, admin) {
 
 $(function () {
   // TODO: move inside AskomicsMenuFile
+    new ShortcutsParametersView().updateShortcuts();
     // Startpoints definition
     loadStartPoints();
     // check if a user is loged in

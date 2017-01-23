@@ -12,6 +12,8 @@ class AskomicsNode extends GraphNode {
     this._isregexp   = {} ; /* boolean if exact or regexp match */
     this._inverseMatch = {} ; /* boolean if negation filter is actived */
     this._linkvar      = {} ; /* link variable are listed */
+
+    this.additionalShortcutListDisplayVar = {} ;
     return this;
   }
 
@@ -384,6 +386,12 @@ class AskomicsNode extends GraphNode {
         }
       }
     }
+
+    for ( let sparqlid in this.additionalShortcutListDisplayVar ) {
+      list_id.push(sparqlid);
+      list_label.push(this.additionalShortcutListDisplayVar[sparqlid]);
+    }
+  
     return {'id' : list_id, 'label': list_label, 'url': map_url};
   }
 

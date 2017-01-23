@@ -23,6 +23,31 @@ class TriplestoreParametersView extends InterfaceParametersView {
     instanceTriplestoreParametersView = this;
   }
 
+  createShortCutsManagement() {
+    // get Shortcuts list
+    let div = $("<div></div>").addClass("row");
+    let lab = $("<label></label>").html("SHORTCUTS");
+    let form = $("<form></form>").addClass("form-horizontal")
+            .append(
+               $("<fieldset></fieldset>")
+                                         .append($("<span></sdpan>")
+                                                   .addClass("glyphicon glyphicon-erase display")
+                                                   /*.click(function(d) {
+                                                     //unselect list
+                                                   }))*/
+                                         .append($("<select></select>")
+                                                   .attr("multiple","multiple")
+                                                   .addClass("form-control")
+                                                  /* .change(function(d) {
+                                                     //manage list selected
+                                                   }) */)
+             )
+           );
+    div.append(lab);
+    div.append(form);
+    return div ;
+  }
+
   configurationView() {
 
     /* if the content have ever been created */
@@ -43,7 +68,9 @@ class TriplestoreParametersView extends InterfaceParametersView {
              .append($('<hr/>'))
              .append(this.createSelect("TRIPLESTORE",'tpsname',['virtuoso','fuseki'],['virtuoso','fuseki']))
              .append($('<hr/>'))
-             .append(this.createInput("MAX RESULTS",'max_results_size'));
+             .append(this.createInput("MAX RESULTS",'max_results_size'))
+             .append($('<hr/>'))
+             .append(this.createShortCutsManagement());
 
     /* add to the main document */
     $('body').append(container);

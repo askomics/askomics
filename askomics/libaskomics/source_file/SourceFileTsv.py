@@ -45,7 +45,7 @@ class SourceFileTsv(SourceFile):
 
         self.delims = {
             'numeric' : ('', ''),
-            'text'    : ('"', '"'),
+            'text'    : ('"', '"^^xsd:string'),
             'category': (':', ''),
             'taxon': (':', ''),
             'ref': (':', ''),
