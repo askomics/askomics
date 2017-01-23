@@ -1,0 +1,11 @@
+SELECT DISTINCT $select
+WHERE{
+
+    GRAPH $graph {
+        ?g rdfg:subGraphOf $graph
+    }
+
+    GRAPH ?g {
+        $query
+    }
+}

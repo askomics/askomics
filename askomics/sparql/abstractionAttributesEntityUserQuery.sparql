@@ -1,17 +1,25 @@
 SELECT DISTINCT ?entity ?attribute ?labelAttribute ?typeAttribute
-WHERE {
-    GRAPH <urn:sparql:tests-askomics:insert:informative1> {
-    ?g rdfg:subGraphOf <urn:sparql:tests-askomics:insert:informative1> }
+WHERE{
+    {
+        GRAPH $graph {
+            ?g rdfg:subGraphOf $graph
+        }
+    }UNION{
+        GRAPH $graph2 {
+            ?g rdfg:subGraphOf $graph2
+        }
+    }
+
     GRAPH ?g {
         ?entity rdf:type owl:Class .
-	      ?attribute displaySetting:attribute "true"^^xsd:boolean .
+        ?attribute displaySetting:attribute "true"^^xsd:boolean .
 
         ?attribute rdf:type owl:DatatypeProperty;
-					         rdfs:label ?labelAttribute ;
+                   rdfs:label ?labelAttribute ;
                    rdfs:domain ?entity;
                    rdfs:range ?typeAttribute.
 
-	    VALUES ?entity { $entities }
-		VALUES ?typeAttribute { xsd:decimal xsd:string }
+        VALUES ?entity { $entities }
+        VALUES ?typeAttribute { xsd:decimal xsd:string }
     }
 }

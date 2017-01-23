@@ -21,6 +21,7 @@ requires = [
     'coverage',
     'biopython',
     'bcbio-gff',
+    'validate_email',
     ]
 
 setup(name='Askomics',

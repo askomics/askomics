@@ -1,4 +1,4 @@
-SELECT DISTINCT ?entity
+SELECT DISTINCT $select
 WHERE{
     {
         GRAPH $graph {
@@ -11,7 +11,6 @@ WHERE{
     }
 
     GRAPH ?g {
-        ?entity rdf:type owl:Class .
-        ?entity displaySetting:is_positionable "true"^^xsd:boolean .
+        $query
     }
 }

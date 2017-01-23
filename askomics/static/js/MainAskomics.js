@@ -5,6 +5,7 @@ var askomicsInitialization = false;
 var forceLayoutManager ;
 
 function startRequestSessionAskomics() {
+  console.log('---> startRequestSessionAskomics');
 
   if ( askomicsInitialization ) return ;
   // Initialize the graph with the selected start point.
@@ -56,6 +57,7 @@ function resetGraph() {
 }
 
 function loadStartPoints() {
+  console.log('---> loadStartPoints');
 
   var service = new RestServiceJs("startpoints");
   $("#btn-down").prop("disabled", true);
@@ -69,11 +71,28 @@ function loadStartPoints() {
         return;
       }
 
+      console.log(JSON.stringify(startPointsDict));
+
       $("#startpoints").empty();
 
       $.each(startPointsDict.nodes, function(key, value) {
 
-          $("#startpoints").append($("<option></option>").attr("data-value", JSON.stringify(value)).text(value.label));
+        let text;
+
+        if (value.public) {
+          text = $('<em></em>').attr('class', 'text-warning')
+                               .append($('<i></i>').attr('class', 'fa fa-globe'))
+                               .append(' ' + value.label);
+        }else{
+          text = $('<strong></strong>').attr('class', 'text-primary')
+                                       .append($('<i></i>').attr('class', 'fa fa-lock'))
+                                       .append(' ' + value.label);
+
+        }
+
+          $('#startpoints').append($('<option></option>').attr('data-value', JSON.stringify(value))
+                                                         .append(text));
+
       });
       $("#starter").prop("disabled", true);
       $("#startpoints").click(function(){
@@ -94,6 +113,9 @@ function loadNamedGraphs() {
 
     var serviceNamedGraphs = new RestServiceJs('list_named_graphs');
     serviceNamedGraphs.getAll(function(namedGraphs) {
+        if (namedGraphs == 'forbidden') {
+          showLoginForm();
+        }
         if (namedGraphs.length === 0) {
           disableDelButton();
           return;
@@ -138,6 +160,14 @@ function formatGraphName(name) {
   return new_name+" ("+date+")";
 }
 
+function showLoginForm() {
+  $(".container:not(#navbar_content)").hide();
+  $('#content_login').show();
+  $('.nav li.active').removeClass('active');
+  $("#login").addClass('active');
+  displayNavbar(false, '');
+}
+
 function loadStatistics() {
 
 
@@ -147,6 +177,9 @@ function loadStatistics() {
 
   var service = new RestServiceJs("statistics");
   service.getAll(function(stats) {
+    if (stats == 'forbidden') {
+      showLoginForm();
+    }
     $('#statistics_div').empty();
     $('#statistics_div')
     .append($("<p></p>").text("Number of triples  : "+stats.ntriples))
@@ -276,6 +309,9 @@ function emptyDatabase(value) {
         displayModal('Please wait ...', '', 'Close');
         var service = new RestServiceJs("empty_database");
             service.getAll(function(empty_db){
+              if (empty_db == 'forbidden') {
+                showLoginForm();
+              }
               hideModal();
               if ('error' in empty_db ) {
                 alert(empty_db.error);
@@ -296,7 +332,10 @@ function deleteNamedGraph(graphs) {
     displayModal('Please Wait', '', 'Close');
     var service = new RestServiceJs("delete_graph");
     let data = {'namedGraphs':graphs };
-        service.post(data, function(){
+        service.post(data, function(d){
+          if (d == 'forbidden') {
+            showLoginForm();
+          }
         resetGraph();
         resetStats();
         hideModal();
@@ -413,24 +452,19 @@ function setUploadForm(content,titleForm,route_overview,callback) {
   });
 }
 
-$(function () {
-  // TODO: move inside AskomicsMenuFile
-    // Startpoints definition
-    loadStartPoints();
+function displayNavbar(loged, username, admin) {
+    console.log('-+-+- displayNavbar -+-+-');
+    $("#navbar").empty();
+    let source = $('#template-navbar').html();
+    let template = Handlebars.compile(source);
 
-    // Loading a sparql query file
-    $(".uploadBtn").change( function(event) {
-      var uploadedFile = event.target.files[0];
-      if (uploadedFile) {
-          var fr = new FileReader();
-          fr.onload = function(e) {
-            var contents = e.target.result;
-            startRequestSessionAskomics();
-            forceLayoutManager.startWithQuery(contents);
-          };
-          fr.readAsText(uploadedFile);
-      }
-    });
+    let context = {name: 'AskOmics', loged: loged, username: username, admin: admin};
+    let html = template(context);
+
+    $("#navbar").append(html);
+
+    // manage navbar button here
+    //TODO: move this function into a navbar class?
 
     /*
 
@@ -463,7 +497,7 @@ $(function () {
         }
 
 
-        if (  ! ( $(this).attr('id') in { 'help' : '','admin':'','userdata':'' }) ) {
+        if (  ! ( $(this).attr('id') in { 'help' : '','admin':'', 'user_menu': '' }) ) {
           $('.container').hide();
           $('.container#navbar_content').show();
           $('.container#content_' + $(this).attr('id')).show();
@@ -473,6 +507,137 @@ $(function () {
 
         e.preventDefault();
 
+    });
+
+    // diplay signup/login form
+    $('#show_signup').click(function(e) {
+      $('#content_login').hide();
+      $('#content_signup').show();
+    });
+
+    $('#show_login').click(function(e) {
+      $('#content_signup').hide();
+      $('#content_login').show();
+    });
+
+    $('#signup_button').click(function(e) {
+      let username = $('#signup_username').val();
+      let email = $('#signup_email').val();
+      let password = $('#signup_password').val();
+      let password2 = $('#signup_password2').val();
+
+      let service = new RestServiceJs("signup");
+      let model = { 'username': username,
+                    'email': email,
+                    'password': password,
+                    'password2': password2  };
+
+      displayModal('Please wait', '', 'Close');
+
+      service.post(model, function(data) {
+          hideModal();
+          if (data.error.length !== 0) {
+            $('#signup_error').empty();
+            for (let i = data.error.length - 1; i >= 0; i--) {
+              $('#signup_error').append(data.error[i] + '<br>');
+            }
+            $('#signup_success').hide();
+            $('#signup_error').show();
+          }else{
+            $('#signup_error').hide();
+            $('#signup_success').empty();
+            $('#signup_success').append('Account successfully created!');
+            $('#signup_success').show();
+            // User is logged, show the special button
+            console.log(data);
+            let user = new AskomicsUser(data.username);
+            user.checkUser();
+          }
+      });
+
+    });
+
+    $('#login_button').click(function(e) {
+      let username_email = $('#login_username-email').val();
+      let password = $('#login_password').val();
+
+      let service = new RestServiceJs('login');
+      let model = {
+        'username_email': username_email,
+        'password': password
+      };
+
+      displayModal('Please wait', '', 'Close');
+
+      service.post(model, function(data) {
+        hideModal();
+        if (data.error.length !== 0) {
+          $('#login_error').empty();
+          for (let i = data.error.length - 1; i >= 0; i--) {
+            $('#login_error').append(data.error[i] + '<br>');
+          }
+          $('#login_success').hide();
+          $('#login_error').show();
+        }else{
+          $('#login_error').hide();
+          $('#login_success').empty();
+          $('#login_success').append('You are logged now');
+          $('#login_success').show();
+          let user = new AskomicsUser(data.username, data.admin);
+          user.logUser();
+        }
+      });
+    });
+
+    $('#logout').click(function(e) {
+      let user = new AskomicsUser();
+      user.logout();
+      // $('.container#content_interrogation').show();
+    });
+
+    // admin page
+    $('#administration').click(function() {
+      console.log('-+-+- administration -+-+-');
+
+      displayModal('Please wait', '', 'Close');
+
+      let service = new RestServiceJs('get_users_infos');
+      service.getAll(function(data) {
+
+        $("#admin_page").empty();
+        let source = $('#template-admin').html();
+        let template = Handlebars.compile(source);
+
+        let context = {users: data.result};
+        let html = template(context);
+
+        $("#admin_page").append(html);
+        hideModal();
+      });
+    });
+
+}
+
+$(function () {
+  // TODO: move inside AskomicsMenuFile
+    // Startpoints definition
+    loadStartPoints();
+    // check if a user is loged in
+    let user = new AskomicsUser('');
+    user.checkUser();
+
+    // Loading a sparql query file
+    $(".uploadBtn").change( function(event) {
+      var uploadedFile = event.target.files[0];
+      if (uploadedFile) {
+          var fr = new FileReader();
+          fr.onload = function(e) {
+            var contents = e.target.result;
+            startRequestSessionAskomics();
+            forceLayoutManager.startWithQuery(contents);
+          };
+          fr.readAsText(uploadedFile);
+      }
     });
 
     // A helper for handlebars

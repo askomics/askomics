@@ -31,17 +31,32 @@ $(function () {
     });
 
     $("#content_integration").on('click', '.load_data_tsv', function(event) {
-        loadSourceFile($(event.target).closest('.template-source_file'));
+        loadSourceFile($(event.target).closest('.template-source_file'), false);
+    });
+
+    // Load the tsv file into the public graph
+    $("#content_integration").on('click', '.load_data_tsv_public', function(event) {
+        loadSourceFile($(event.target).closest('.template-source_file'), true);
     });
 
     $("#content_integration").on('click', '.load_data_gff', function() {
         let filename = $(this).attr('id');
-        loadSourceFileGff(filename);
+        loadSourceFileGff(filename, false);
+    });
+
+    $("#content_integration").on('click', '.load_data_gff_public', function() {
+        let filename = $(this).attr('id');
+        loadSourceFileGff(filename, true);
     });
 
     $("#content_integration").on('click', '.load_data_ttl', function() {
         let filename = $(this).attr('id');
-        loadSourceFileTtl(filename);
+        loadSourceFileTtl(filename, false);
+    });
+
+    $("#content_integration").on('click', '.load_data_ttl_public', function() {
+        let filename = $(this).attr('id');
+        loadSourceFileTtl(filename, true);
     });
 
     // $('.taxon-selector').change(function() {
@@ -93,10 +108,16 @@ function displayTSVForm(file) {
         file.preview_data = cols2rows(file.preview_data);
     }
 
+    // User is admin if administration element is present in navbar
+    let admin = false;
+    if ($('#administration').length) {
+        admin = true;
+    }
+
     let source = $('#template-csv-form').html();
     let template = Handlebars.compile(source);
 
-    let context = {file: file};
+    let context = {file: file, admin: admin};
     let html = template(context);
 
     $("#content_integration").append(html);
@@ -108,7 +129,13 @@ function displayGffForm(file, taxons) {
     let source = $('#template-gff-form').html();
     let template = Handlebars.compile(source);
 
-    let context = {file: file, taxons: taxons};
+    // User is admin if administration element is present in navbar
+    let admin = false;
+    if ($('#administration').length) {
+        admin = true;
+    }
+
+    let context = {file: file, taxons: taxons, admin: admin};
     let html = template(context);
 
     $("#content_integration").append(html);
@@ -119,7 +146,13 @@ function displayTtlForm(file) {
     let source = $('#template-ttl-form').html();
     let template = Handlebars.compile(source);
 
-    let context = {file: file};
+    // User is admin if administration element is present in navbar
+    let admin = false;
+    if ($('#administration').length) {
+        admin = true;
+    }
+
+    let context = {file: file, admin: admin};
     let html = template(context);
 
     $('#content_integration').append(html);
@@ -167,8 +200,7 @@ function setCorrectType(file) {
 
 
 /**
- * Insert TTL file
- * FIXME: change function's name
+ * FIXME: DEAD CODE - FUNCTION NEVER CALLED
  */
 function displayTableRDF(data) {
   let info = "";//$('<div></div>');
@@ -206,6 +238,9 @@ function previewTtl(file_elem) {
                   'disabled_columns': disabled_columns };
 
     service.post(model, function(data) {
+        if (data == 'forbidden') {
+          showLoginForm();
+        }
         file_elem.find(".preview_field").html(data);
         file_elem.find(".preview_field").show();
     });
@@ -279,6 +314,9 @@ function checkExistingData(file_elem) {
                   'disabled_columns': disabled_columns };
 
     service.post(model, function(data) {
+        if (data == 'forbidden') {
+          showLoginForm();
+        }
         file_elem.find('.column_header').each(function( index ) {
             if (data.headers_status[index-1] == 'present') {
                 $(this).find("#relation_present").first().show();
@@ -303,7 +341,7 @@ function checkExistingData(file_elem) {
 /**
  * Load a source_file into the triplestore
  */
-function loadSourceFile(file_elem) {
+function loadSourceFile(file_elem, pub) {
 
     var file_name = file_elem.find('.file_name').attr('id');
 
@@ -325,9 +363,13 @@ function loadSourceFile(file_elem) {
     var service = new RestServiceJs("load_data_into_graph");
     var model = { 'file_name': file_name,
                   'col_types': col_types,
-                  'disabled_columns': disabled_columns  };
+                  'disabled_columns': disabled_columns,
+                  'public': pub};
 
     service.post(model, function(data) {
+        if (data == 'forbidden') {
+          showLoginForm();
+        }
         hideModal();
         var insert_status_elem = file_elem.find(".insert_status").first();
         var insert_warning_elem = file_elem.find(".insert_warning").first();
@@ -389,7 +431,7 @@ function loadSourceFile(file_elem) {
 /**
  * Load a GFF source_file into the triplestore
  */
-function loadSourceFileGff(filename) {
+function loadSourceFileGff(filename, pub) {
     console.log('-----> loadSourceFileGff <-----');
     // get taxon
     let taxon = '';
@@ -417,9 +459,13 @@ function loadSourceFileGff(filename) {
     let service = new RestServiceJs("load_gff_into_graph");
     let model = { 'file_name': filename,
                   'taxon': taxon,
-                  'entities': entities  };
+                  'entities': entities,
+                  'public': pub  };
 
     service.post(model, function(data) {
+        if (data == 'forbidden') {
+          showLoginForm();
+        }
         // Show a success message isertion is OK
         let div_entity = $("#" + filename);
         let entities_string = '';
@@ -454,17 +500,21 @@ function loadSourceFileGff(filename) {
     });
 }
 
-function loadSourceFileTtl(filename) {
+function loadSourceFileTtl(filename, pub) {
     console.log('--- loadSourceFileTtl ---');
     displayModal('Please wait', '', 'Close');
 
     let file_elem = $("#source-file-ttl-" + filename);
 
     let service = new RestServiceJs('load_ttl_into_graph');
-    let model = {'file_name' : filename};
+    let model = {'file_name' : filename,
+                 'public': pub};
 
     service.post(model, function(data) {
         console.log('---> ttl insert');
+        if (data == 'forbidden') {
+          showLoginForm();
+        }
 
         let insert_status_elem = file_elem.find(".insert_status").first();
         let insert_warning_elem = file_elem.find(".insert_warning").first();

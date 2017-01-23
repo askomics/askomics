@@ -8,6 +8,7 @@ function prepareQuery(exp, roq) {
     //           true = complete results file generation
     //     :lim: LIMIT value in the SPARQL query
     //     :roq: bool, if true, don't launch the query, only return it
+    console.log('+++ prepareQuery +++');
 
     var tab = new AskomicsGraphBuilder().buildConstraintsGraph();
     return {
