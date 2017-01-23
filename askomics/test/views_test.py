@@ -22,4 +22,4 @@ class ViewTests(unittest.TestCase):
     def test_home(self):
 
         res = self.testapp.get('/', status=200)
-        self.assertIn(b'<a class="navbar-brand site-header" href="/">Askomics</a>', res.body)
+        self.assertIn(b'<nav id=\'navbar\' class="navbar navbar-default navbar-fixed-top">', res.body)

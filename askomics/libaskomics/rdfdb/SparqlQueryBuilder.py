@@ -1,12 +1,12 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 import logging
-from pprint import pformat
+# from pprint import pformat
 from string import Template
 
 from askomics.libaskomics.rdfdb.SparqlQuery import SparqlQuery
 from askomics.libaskomics.ParamManager import ParamManager
-from askomics.libaskomics.utils import prefix_lines
+# from askomics.libaskomics.utils import prefix_lines
 
 class SparqlQueryBuilder(ParamManager):
     """
@@ -21,7 +21,12 @@ class SparqlQueryBuilder(ParamManager):
         self.log = logging.getLogger(__name__)
 
     def load_from_file(self, template_file, replacement={}):
-        """ Get a sparql query from a file, possibly replacing a template word by another given as argument """
+        """
+        Get a sparql query from a file, possibly replacing a template
+        word by another given as argument
+        """
+        self.log.debug("***********  QUERY FILE  ***********")
+        self.log.debug(template_file)
         with open(template_file) as template_fd:
             template = template_fd.read()
 
@@ -29,16 +34,49 @@ class SparqlQueryBuilder(ParamManager):
         return query
 
     def prepare_query(self, template, replacement={}):
-        """Prepare a query from a template and a substitution dictionary.
-            The `$graph` variable defaults to "askomics.graph" config
         """
-        if 'graph' not in replacement:
-            replacement['graph'] = '<%s>' % self.get_param("askomics.graph")
+        Prepare a query from a template and a substitution dictionary.
+        The `$graph` variable is the public graph
+        The `$graph2` variable is user graph or public graph if no user logged
+        """
+
+        replacement['graph'] = '<%s>' % self.get_param('askomics.public_graph')
+
+        if 'graph' not in self.session.keys() or self.session['graph'] == '':
+            replacement['graph2'] = '<%s>' % self.get_param('askomics.public_graph')
+        else:
+            replacement['graph2'] = '<%s>' % self.session['graph']
 
         query = Template(template).substitute(replacement)
 
         prefixes = self.header_sparql_config(query)
         return SparqlQuery(prefixes + query)
+
+    def build_query_from_template(self, replacement={}):
+        """
+        choose which template to fill between public or private in
+        function of if a user is logged or not
+        """
+
+        template = self.get_template_sparql(self.ASKOMICS_privateQueryTemplate)
+
+        if 'graph' not in self.session.keys() or self.session['graph'] == '':
+            template = self.get_template_sparql(self.ASKOMICS_publicQueryTemplate)
+            
+        return self.load_from_file(template, replacement)
+
+    def custom_query(self, select, query):
+        """
+        launch a custom query.
+        """
+        self.log.debug('---> custom_query')
+        return self.build_query_from_template({
+            'select': select,
+            'query': query
+        })
+
+
+######### TODO: refactor all the stats function ############
 
     # The following utilities use prepare_query to fill a template.
     def get_statistics_number_of_triples(self):
@@ -92,12 +130,6 @@ class SparqlQueryBuilder(ParamManager):
         return self.prepare_query(
             'CLEAR GRAPH <'+graph+">")
 
-    def get_list_named_graphs(self):
-        return self.prepare_query(
-            """SELECT DISTINCT ?g WHERE {
-            GRAPH <"""+self.get_param("askomics.graph")+"""> { ?g rdfg:subGraphOf <"""+self.get_param("askomics.graph")+""">}
-            GRAPH ?g { ?s ?p ?o } }""")
-
     def get_drop_named_graph(self, graph):
         return self.prepare_query(
             'DROP SILENT GRAPH <' + graph + '>')
@@ -105,7 +137,7 @@ class SparqlQueryBuilder(ParamManager):
     def get_delete_metadatas_of_graph(self, graph):
         return self.prepare_query(
             """
-            DELETE WHERE { GRAPH <"""+self.get_param("askomics.graph")+"""> { <"""+graph+"""> ?p ?o }}
+            DELETE WHERE { GRAPH <"""+self.session['graph']+"""> { <"""+graph+"""> ?p ?o }}
             """)
 
     def get_metadatas(self, graph):
@@ -115,29 +147,95 @@ class SparqlQueryBuilder(ParamManager):
 		        { <""" + graph + """> ?p ?o
                 VALUES ?p {prov:generatedAtTime dc:creator dc:hasVersion prov:describesService prov:wasDerivedFrom} } }""")
 
-    def get_if_positionable(self, uri):
+
+    def get_list_named_graphs(self):
+        """
+        Get the list of named graph
+        """
+        self.log.debug('---> get_list_named_graphs')
+        return self.build_query_from_template({
+            'select': '?g',
+            'query': '?s ?p ?o'
+        })
+
+
+
+    # Following function used when signup/login
+
+    def check_username_presence(self, username):
         return self.prepare_query(
-        """SELECT DISTINCT ?exist
+        """SELECT DISTINCT ?status
         WHERE {
-            GRAPH <"""+self.get_param("askomics.graph")+"""> { ?g rdfg:subGraphOf <"""+self.get_param("askomics.graph")+""">}
-            BIND(EXISTS {<"""+uri+"""> displaySetting:is_positionable "true"^^xsd:boolean} AS ?exist)
+            GRAPH <"""+self.get_param("askomics.users_graph")+"""> {
+            BIND(EXISTS {:""" + username + """ rdf:type :user} AS ?status) }
         }""")
 
-    def get_common_positionable_attributes(self, uri1, uri2):
+    def check_email_presence(self, email):
         return self.prepare_query(
-        """SELECT DISTINCT ?uri ?pos_attr ?status
+        """SELECT DISTINCT ?status
         WHERE {
-            GRAPH <"""+self.get_param("askomics.graph")+"""> { ?g rdfg:subGraphOf <"""+self.get_param("askomics.graph")+""">}
-            VALUES ?pos_attr {:position_taxon :position_ref :position_strand }
-            VALUES ?uri {<"""+uri1+"""> <"""+uri2+"""> }
-            BIND(EXISTS {?pos_attr rdfs:domain ?uri} AS ?status)
+            GRAPH <"""+self.get_param("askomics.users_graph")+"""> {
+            BIND(EXISTS {?uri :email \"""" + email + """\"} AS ?status) }
         }""")
 
-    def get_all_taxon(self):
+    def get_password_with_email(self, email):
         return self.prepare_query(
-        """SELECT DISTINCT ?taxon
+        """SELECT DISTINCT ?salt ?shapw
         WHERE {
-            GRAPH <"""+self.get_param("askomics.graph")+"""> { ?g rdfg:subGraphOf <"""+self.get_param("askomics.graph")+""">}
-            :taxonCategory displaySetting:category ?URItax .
-            ?URItax rdfs:label ?taxon .
+            GRAPH <"""+self.get_param("askomics.users_graph")+"""> {
+            ?URIusername rdf:type :user .
+            ?URIusername :email \"""" + email + """\" .
+            ?URIusername :randomsalt ?salt .
+            ?URIusername :password ?shapw . }
+        }""")
+
+    def get_password_with_username(self, username):
+        return self.prepare_query(
+        """SELECT DISTINCT ?salt ?shapw
+        WHERE {
+            GRAPH <"""+self.get_param("askomics.users_graph")+"""> {
+            ?URIusername rdf:type :user .
+            ?URIusername rdfs:label \"""" + username + """\" .
+            ?URIusername :randomsalt ?salt .
+            ?URIusername :password ?shapw . }
+        }""")
+
+    def get_number_of_users(self):
+        return self.prepare_query(
+        """SELECT (count(*) AS ?count)
+        WHERE {
+            GRAPH <"""+self.get_param("askomics.users_graph")+"""> {
+                ?s rdf:type :user .
+            }
+        }""")
+
+    def get_admin_status_by_username(self, username):
+        return self.prepare_query(
+        """SELECT DISTINCT ?admin
+        WHERE {
+            GRAPH <"""+self.get_param("askomics.users_graph")+"""> {
+            ?URIusername rdf:type :user .
+            ?URIusername rdfs:label \"""" + username + """\" .
+            ?URIusername :isadmin ?admin}
+        }""")
+
+    def get_admin_status_by_email(self, email):
+        return self.prepare_query(
+        """SELECT DISTINCT ?admin
+        WHERE {
+            GRAPH <"""+self.get_param("askomics.users_graph")+"""> {
+            ?URIusername rdf:type :user .
+            ?URIusername :email \"""" + email + """\" .
+            ?URIusername :isadmin ?admin}
+        }""")
+
+    def get_users_infos(self):
+        return self.prepare_query(
+        """SELECT DISTINCT ?username ?email ?admin
+        WHERE {
+            GRAPH <"""+self.get_param("askomics.users_graph")+"""> {
+            ?URIusername rdf:type :user .
+            ?URIusername rdfs:label ?username .
+            ?URIusername :email ?email .
+            ?URIusername :isadmin ?admin}
         }""")

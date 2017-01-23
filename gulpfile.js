@@ -51,7 +51,8 @@ var askomicsSourceFiles = [
         'askomics/static/js/AskomicsObjectBuilder.js',
         'askomics/static/js/AskomicsGraphBuilder.js',
         'askomics/static/js/AskomicsForceLayoutManager.js',
-        'askomics/static/js/MainAskomics.js'
+        'askomics/static/js/MainAskomics.js',
+        'askomics/static/js/AskomicsUser.js'
     ];
 
 var askomicsCssFiles = [

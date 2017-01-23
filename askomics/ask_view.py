@@ -19,9 +19,20 @@ from askomics.libaskomics.ParamManager import ParamManager
 from askomics.libaskomics.TripleStoreExplorer import TripleStoreExplorer
 from askomics.libaskomics.SourceFileConvertor import SourceFileConvertor
 from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
+from askomics.libaskomics.rdfdb.SparqlQueryGraph import SparqlQueryGraph
 from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
 from askomics.libaskomics.rdfdb.ResultsBuilder import ResultsBuilder
 from askomics.libaskomics.source_file.SourceFile import SourceFile
+
+from pyramid.httpexceptions import (
+    HTTPForbidden,
+    HTTPFound,
+    HTTPNotFound,
+    )
+
+from validate_email import validate_email
+
+from askomics.libaskomics.Security import Security
 
 @view_defaults(renderer='json', route_name='start_point')
 class AskView(object):
@@ -30,6 +41,9 @@ class AskView(object):
     def __init__(self, request):
         self.request = request
         self.settings = request.registry.settings
+        if 'username' not in self.request.session.keys():
+            self.request.session['username'] = ''
+        # self.request.session = {}
 
         self.log = logging.getLogger(__name__)
 
@@ -48,6 +62,11 @@ class AskView(object):
     @view_config(route_name='statistics', request_method='GET')
     def statistics(self):
         """ Get information about triplet store """
+
+        # Denny access for non loged users
+        if self.request.session['username'] == '':
+            return 'forbidden'
+
         self.log.debug("== STATS ==")
         data = {}
         pm = ParamManager(self.settings, self.request.session)
@@ -121,19 +140,28 @@ class AskView(object):
     @view_config(route_name='empty_database', request_method='GET')
     def empty_database(self):
         """
-        Delete all triples in the triplestore
+        Delete all named graphs and their metadatas
         """
+
+        # Denny access for non loged users
+        if self.request.session['username'] == '':
+            return 'forbidden'
+
         data = {}
 
-        self.log.debug("=== DELETE ALL TRIPLES ===")
+        self.log.debug("=== DELETE ALL NAMED GRAPHS ===")
+
         try:
             sqb = SparqlQueryBuilder(self.settings, self.request.session)
             ql = QueryLauncher(self.settings, self.request.session)
 
-            namedGraphs = self.get_list_named_graphs()
-            namedGraphs.append(ql.get_param("askomics.graph"))
-            for graph in namedGraphs:
-                ql.execute_query(sqb.get_delete_query_string(graph).query)
+            named_graphs = self.get_list_named_graphs()
+
+            for graph in named_graphs:
+                self.log.debug("--- DELETE GRAPH : %s", graph)
+                ql.execute_query(sqb.get_drop_named_graph(graph).query)
+                #delete metadatas
+                ql.execute_query(sqb.get_delete_metadatas_of_graph(graph).query)
 
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
@@ -145,8 +173,13 @@ class AskView(object):
     @view_config(route_name='delete_graph', request_method='POST')
     def delete_graph(self):
         """
-        Delete triples from a list of graph
+        Delete selected named graphs and their metadatas
         """
+
+        # Denny access for non loged users
+        if self.request.session['username'] == '':
+            return 'forbidden'
+
         self.log.debug("=== DELETE SELECTED GRAPHS ===")
 
         sqb = SparqlQueryBuilder(self.settings, self.request.session)
@@ -166,12 +199,16 @@ class AskView(object):
         Return a list with all the named graphs.
         """
 
+        # Denny access for non loged users
+        if self.request.session['username'] == '':
+            return 'forbidden'
+
         self.log.debug("=== LIST OF NAMED GRAPHS ===")
 
-        sqb = SparqlQueryBuilder(self.settings, self.request.session)
+        sqg = SparqlQueryGraph(self.settings, self.request.session)
         ql = QueryLauncher(self.settings, self.request.session)
 
-        res = ql.execute_query(sqb.get_list_named_graphs().query)
+        res = ql.execute_query(sqg.get_list_named_graphs().query)
 
         namedGraphs = []
 
@@ -190,18 +227,18 @@ class AskView(object):
         body = self.request.json_body
         data = {}
 
-        sqb = SparqlQueryBuilder(self.settings, self.request.session)
+        sqg = SparqlQueryGraph(self.settings, self.request.session)
         ql = QueryLauncher(self.settings, self.request.session)
 
         # Check if the two entity are positionable
-        positionable1 = ql.process_query(sqb.get_if_positionable(body['node']).query)
-        positionable2 = ql.process_query(sqb.get_if_positionable(body['node']).query)
+        positionable1 = ql.process_query(sqg.get_if_positionable(body['node']).query)
+        positionable2 = ql.process_query(sqg.get_if_positionable(body['node']).query)
 
         if positionable1 == 0 or positionable2 == 0:
             data['error'] = 'not positionable nodes'
             return data
 
-        results = ql.process_query(sqb.get_common_positionable_attributes(body['node'], body['second_node']).query)
+        results = ql.process_query(sqg.get_common_pos_attr(body['node'], body['second_node']).query)
         self.log.debug(results)
 
         data['results'] = {}
@@ -222,6 +259,11 @@ class AskView(object):
         """
         Get preview data for all the available files
         """
+
+        # Denny access for non loged users
+        if self.request.session['username'] == '':
+            return 'forbidden'
+
         self.log.debug(" ========= Askview:source_files_overview =============")
         sfc = SourceFileConvertor(self.settings, self.request.session)
 
@@ -231,9 +273,9 @@ class AskView(object):
         data['files'] = []
 
         # get all taxon in the TS
-        sqb = SparqlQueryBuilder(self.settings, self.request.session)
+        sqg = SparqlQueryGraph(self.settings, self.request.session)
         ql = QueryLauncher(self.settings, self.request.session)
-        res = ql.execute_query(sqb.get_all_taxon().query)
+        res = ql.execute_query(sqg.get_all_taxons().query)
         taxons_list = []
         for elem in res['results']['bindings']:
             taxons_list.append(elem['taxon']['value'])
@@ -287,6 +329,12 @@ class AskView(object):
         """
         Convert tabulated files to turtle according to the type of the columns set by the user
         """
+
+        # Denny access for non loged users
+        if self.request.session['username'] == '':
+            return 'forbidden'
+
+
         self.log.debug("preview_ttl")
         data = {}
 
@@ -338,6 +386,10 @@ class AskView(object):
         Compare the user data and what is already in the triple store
         """
 
+        # Denny access for non loged users
+        if self.request.session['username'] == '':
+            return 'forbidden'
+
         data = {}
 
         body = self.request.json_body
@@ -369,12 +421,24 @@ class AskView(object):
         """
         Load tabulated files to triple store according to the type of the columns set by the user
         """
+
+        # Denny access for non loged users
+        if self.request.session['username'] == '':
+            return 'forbidden'
+
         data = {}
 
         body = self.request.json_body
         file_name = body["file_name"]
         col_types = body["col_types"]
         disabled_columns = body["disabled_columns"]
+        public = body['public']
+
+        # Allow data integration in public graph only if user is an admin
+        if public and not self.request.session['admin']:
+            self.log.debug('/!\\ --> NOT ALLOWED TO INSERT IN PUBLIC GRAPH <-- /!\\')
+            public = False
+
         try:
             sfc = SourceFileConvertor(self.settings, self.request.session)
 
@@ -386,7 +450,7 @@ class AskView(object):
             urlbase = urlbase.group(1)
 
             method = 'load'
-            data = src_file.persist(urlbase,method)
+            data = src_file.persist(urlbase, method, public)
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
             data['error'] = 'Probleme with user data file ?</br>'+str(e)
@@ -399,6 +463,12 @@ class AskView(object):
         """
         Load GFF file into the triplestore
         """
+
+        # Denny access for non loged users
+        if self.request.session['username'] == '':
+            return 'forbidden'
+
+
         self.log.debug("== load_gff_into_graph ==")
         data = {}
 
@@ -407,6 +477,12 @@ class AskView(object):
         file_name = body['file_name']
         taxon = body['taxon']
         entities = body['entities']
+        public = body['public']
+
+        # Allow data integration in public graph only if user is an admin
+        if public and not self.request.session['admin']:
+            self.log.debug('/!\\ --> NOT ALLOWED TO INSERT IN PUBLIC GRAPH <-- /!\\')
+            public = False
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
         src_file_gff = sfc.get_source_file_gff(file_name, taxon, entities)
@@ -418,14 +494,11 @@ class AskView(object):
 
         try:
             self.log.debug('--> Parsing GFF')
-            src_file_gff.persist(urlbase, method)
+            src_file_gff.persist(urlbase, method, public)
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
             data['error'] = 'Problem when integration of '+file_name+'.</br>'+str(e)
             self.log.error(str(e))
-
-
-
 
         return data
 
@@ -434,10 +507,23 @@ class AskView(object):
         """
         Load TTL file into the triplestore
         """
+
+        # Denny access for non loged users
+        if self.request.session['username'] == '':
+            return 'forbidden'
+
+
         self.log.debug('*** load_ttl_into_graph ***')
         data = {}
         body = self.request.json_body
         file_name = body['file_name']
+        public = body['public']
+
+        # Allow data integration in public graph only if user is an admin
+        if public and not self.request.session['admin']:
+            self.log.debug('/!\\ --> NOT ALLOWED TO INSERT IN PUBLIC GRAPH <-- /!\\')
+            public = False
+
         sfc = SourceFileConvertor(self.settings, self.request.session)
         src_file_ttl = sfc.get_source_file(file_name)
 
@@ -446,7 +532,7 @@ class AskView(object):
 
 
         try:
-            src_file_ttl.persist(urlbase)
+            src_file_ttl.persist(urlbase, public)
         except Exception as e:
             data['error'] = 'Problem when integration of ' + file_name + '</br>' + str(e)
             self.log.error('ERROR: ' + str(e))
@@ -469,6 +555,10 @@ class AskView(object):
         """
         Import a shortcut definition into the triplestore
         """
+        # Denny access for non loged users
+        if self.request.session['username'] == '' or not self.request.session['admin'] :
+            return 'forbidden'
+
         self.log.debug('*** importShortcut ***')
         data = {}
         body = self.request.json_body
@@ -478,6 +568,7 @@ class AskView(object):
 
         try:
             sparqlHeader += body["prefix"]+"\n"
+            self.request.session['graph']
             ql.insert_data(body["shortcut_def"],'askomics:graph:shortcut',sparqlHeader);
         except Exception as e:
             #exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -493,6 +584,10 @@ class AskView(object):
         """
         Delete a shortcut definition into the triplestore
         """
+        # Denny access for non loged users
+        if self.request.session['username'] == '' or not self.request.session['admin'] :
+            return 'forbidden'
+
         self.log.debug('*** importShortcut ***')
         data = {}
         body = self.request.json_body
@@ -583,3 +678,205 @@ class AskView(object):
             content_type='text/turtle'
             )
         return response
+
+    @view_config(route_name='signup', request_method='POST')
+    def signup(self):
+        body = self.request.json_body
+        username = body['username']
+        email = body['email']
+        password = body['password']
+        password2 = body['password2']
+
+        self.log.debug('==== user info ====')
+        self.log.debug('username: ' + username)
+        self.log.debug('email: ' + email)
+
+        data = {}
+        data['error'] = []
+        error = False
+
+        security = Security(self.settings, self.request.session, username, email, password, password2)
+
+        is_valid_email = security.check_email()
+        are_passwords_identical = security.check_passwords()
+        is_pw_enough_longer = security.check_password_length()
+        is_username_already_exist = security.check_username_in_database()
+        is_email_already_exist = security.check_email_in_database()
+
+        if not is_valid_email:
+            data['error'].append('Email is not valid')
+            error = True
+
+        if not are_passwords_identical:
+            data['error'].append('Passwords are not identical')
+            error = True
+
+        if not is_pw_enough_longer:
+            data['error'].append('Password must be at least 8 characters')
+            error = True
+
+        if is_username_already_exist:
+            data['error'].append('Username already exist')
+            error = True
+
+        if is_email_already_exist:
+            data['error'].append('Email already exist')
+            error = True
+
+        if error:
+            return data
+
+        # no error, insert user in TS
+        try:
+            security.persist_user()
+            pass
+        except Exception as e:
+            traceback.print_exc(file=sys.stdout)
+            data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
+            self.log.error(str(e))
+
+        # Create user graph
+        try:
+            security.create_user_graph()
+        except Exception as e:
+            traceback.print_exc(file=sys.stdout)
+            data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
+            self.log.error(str(e))
+
+        # Log user
+        try:
+            security.log_user(self.request)
+            data['username'] = username
+        except Exception as e:
+            data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
+            self.log.error(str(e))
+
+        return data
+
+    @view_config(route_name='checkuser', request_method='GET')
+    def checkuser(self):
+        data = {}
+        if self.request.session['username'] != '':
+            data['username'] = self.request.session['username']
+            data['admin'] = self.request.session['admin']
+
+        return data
+
+
+    @view_config(route_name='logout', request_method='GET')
+    def logout(self):
+        """
+        Log out the user, reset the session
+        """
+
+        self.request.session['username'] = ''
+        self.request.session['admin'] = ''
+        self.request.session['graph'] = ''
+
+        return
+
+    @view_config(route_name='login', request_method='POST')
+    def login(self):
+        body = self.request.json_body
+        username_email = body['username_email']
+        password = body['password']
+        username = ''
+        email = ''
+        data = {}
+        data['error'] = []
+        error = False
+
+        if validate_email(username_email):
+            email = username_email
+            auth_type = 'email'
+        else:
+            username = username_email
+            auth_type = 'username'
+
+        security = Security(self.settings, self.request.session, username, email, password, password)
+
+        if auth_type == 'email':
+            email_in_ts = security.check_email_in_database()
+
+            if not email_in_ts:
+                data['error'].append('email is not registered')
+                error = True
+
+            if error:
+                return data
+
+            password_is_correct = security.check_email_password()
+
+            if not password_is_correct:
+                data['error'].append('Password is incorrect')
+                error = True
+
+            # Get the admin status
+            admin = security.get_admin_status_by_email()
+            security.set_admin(admin)
+
+            if error:
+                return data
+
+        elif auth_type == 'username':
+            username_in_ts = security.check_username_in_database()
+
+            if not username_in_ts:
+                data['error'].append('username is not registered')
+                error = True
+
+            # Get the admin status
+            admin = security.get_admin_status_by_username()
+            security.set_admin(admin)
+
+            if error:
+                return data
+
+            password_is_correct = security.check_username_password()
+
+            if not password_is_correct:
+                data['error'].append('Password is incorrect')
+                error = True
+
+            if error:
+                return data
+
+        # User pass the authentication, log him
+        try:
+            security.log_user(self.request)
+            data['username'] = username
+            data['admin'] = admin
+
+        except Exception as e:
+            data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
+            self.log.error(str(e))
+
+        return data
+
+    @view_config(route_name='get_users_infos', request_method='GET')
+    def get_users_infos(self):
+        """
+        For each users store in the triplesore, get their username, email,
+        and admin status
+        """
+
+        # Denny access for non loged users or non admin users
+        if self.request.session['username'] == '' or not self.request.session['admin']:
+            return 'forbidden'
+
+        sqb = SparqlQueryBuilder(self.settings, self.request.session)
+        ql = QueryLauncher(self.settings, self.request.session)
+
+        data = {}
+
+        try:
+            result = ql.process_query(sqb.get_users_infos().query)
+        except Exception as e:
+            data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
+            self.log.error(str(e))
+
+        self.log.debug(result)
+
+        data['result'] = result
+
+        return data

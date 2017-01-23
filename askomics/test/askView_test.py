@@ -26,6 +26,7 @@ class AskViewTests(unittest.TestCase):
         self.config.scan()
 
         self.request.session['upload_directory'] = os.path.join( os.path.dirname( __file__ ), "..", "test-data")
+        self.request.session['username'] = 'test'
         self.temp_directory = tempfile.mkdtemp()
 
         self.it = InterfaceTPS(self.settings,self.request)

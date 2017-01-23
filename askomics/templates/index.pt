@@ -67,6 +67,7 @@
     </head>
 
     <body>
+<!--
         <nav class="navbar navbar-default navbar-fixed-top">
             <div id="navbar_content" class="container">
                 <div class="navbar-header">
@@ -92,22 +93,26 @@
                               <li id="gene_ontology"><a onclick="new GOParametersView().configurationView();" href="#"><span class="glyphicon glyphicon-cloud"></span>&nbsp;Gene Ontology</a></li>
                             </ul>
                           </li>
-                        <li id="about"><a href="#"><span class="glyphicon glyphicon-info-sign"></span></a></li><!---->
+                        <li id="about"><a href="#"><span class="glyphicon glyphicon-info-sign"></span></a></li>
                         <li id="help"><a href="#" onclick="AskomicsHelp.start();"><span class="glyphicon glyphicon-question-sign"></span></a></li>
                     </ul>
                 </div>
             </div>
+-->
+        <nav id='navbar' class="navbar navbar-default navbar-fixed-top">
+        <!-- navbar is defined in a template below -->
         </nav>
         <br><br><br>
         <div id="content_interrogation" class="container">
             <div id="init" class="row">
                 <div class="form-group">
                     <label for="startpoint" class="col-md-offset-2">Please select a start point for your query :</label>
-                    <select id='startpoints' size='4' class="form-control col-md-offset-2"></select>
+                    <select id='startpoints' size='8' class="form-control col-md-offset-2"></select>
+                    <div class="col-md-offset-2">Public data are <em class='text-warning'>yellow</em> and private data are <strong class='text-primary'>blue</strong></div>
                 </div>
                 <button  id="starter" class="btn btn-default col-md-offset-2" onclick="startVisualisation();">Start</button>
                 <br><br><br>
-                <div class="col-md-offset-2"><p>Or upload a AskOmics file</p>
+                <div class="col-md-offset-2"><p>Or upload an AskOmics file</p>
                     <div class="uploadBtn btn btn-default">
                         <span>Load query</span>
                         <input id="uploadBtn" type="file" class="upload">
@@ -235,20 +240,7 @@
             <hr/>
             <br/>
             <div id="accordion_shortcuts" class="panel-group">
-<!--
-             <div class="panel panel-default">
-              <div class="panel-heading">
-               <h4 class="panel-title">
-                 <a data-toggle="collapse" data-parent="#accordion_shortcuts" href="#collapse1">
-                   Collapsible Group 1</a>
-               </h4>
-              </div>
-             <div id="collapse1" class="panel-collapse collapse in">
-                <div class="panel-body">Test Description</div>
-             </div>
            </div>
-         -->
-</div>
             <!--
             <table id="table_shortcuts_list" >
             </table>
@@ -260,13 +252,21 @@
             <br/>
             <button onclick="new ShortcutsParametersView().importShortcut($('#inputShortcutsLink').val())" class="btn btn-primary">Import</button>
 
+</div>
 
+        <div id="content_user_info" class="container" hidden>
+            <hr/>
+            <h3 class="header-div">User page</h3>
+            <hr/>
         </div>
 
         <div id="content_administration" class="container" hidden>
             <hr/>
             <h3 class="header-div">Administration</h3>
             <hr/>
+            <div id='admin_page'>
+            <!-- see the template below (template-admin) -->
+            </div>
 
         </div>
 
@@ -283,6 +283,53 @@
           This path can then be transformed into a SPARQL query that can be
           executed on the original dataset.
          </p>
+          <hr/>
+        </div>
+
+        <!-- Login form -->
+        <div id="content_login" class="container" hidden>
+          <h3 class="header-div">Login</h3>
+          <hr/>
+          <label for="username">Username or email adress</label><br/>
+          <input id='login_username-email' name="username" type="text" placeholder="Username or email adress" required autofocus><br/><br/>
+
+          <label for="username">Password</label><br/>
+          <input id='login_password' name="password" type="password" placeholder="Password" required><br/><br/>
+
+          <button type="button" class="btn btn-primary" data-dismiss="modal" id="login_button">Log in</button>
+          <p>(or <a id='show_signup' href="#">sign up</a> if you don't have an account)</p>
+          <!-- error message -->
+            <div id='login_error' class="alert alert-danger" role="alert" hidden>
+            </div>
+          <!-- success message -->
+            <div id='login_success' class="alert alert-success" role="alert" hidden>
+            </div>
+        </div>
+
+        <!-- signup form -->
+        <div id="content_signup" class="container" hidden>
+          <h3 class="header-div">Sign up</h3>
+          <hr/>
+          <label for="username">Username</label><br/>
+          <input id = 'signup_username' name="username" type="text" placeholder="Username" required autofocus><br/><br/>
+
+          <label for="email">Email adress</label><br/>
+          <input id = 'signup_email' name="email" type="email" placeholder="Email" required><br/><br/>
+
+          <label for="password">Password</label><br/>
+          <input id = 'signup_password' name="password" type="password" placeholder="Password" required><br/><br/>
+
+          <label for="password2">Password (confirmation)</label><br/>
+          <input id = 'signup_password2' name="password2" type="password" placeholder="Password" required><br/><br/>
+
+          <button type="button" class="btn btn-primary" data-dismiss="modal" id="signup_button">Sign Up</button>
+          <p>(or <a id='show_login' href="#">log in</a> if you have an account)</p>
+          <!-- error message -->
+            <div id='signup_error' class="alert alert-danger" role="alert" hidden>
+            </div>
+          <!-- success message -->
+            <div id='signup_success' class="alert alert-success" role="alert" hidden>
+            </div>
           <hr/>
         </div>
 
@@ -305,6 +352,74 @@
           </div><!-- /.modal-dialog -->
         </div><!-- /.modal -->
 
+
+        <!-- template for the navbar -->
+        <script id='template-navbar' type="text/x-handlebars-template">
+            <div id="navbar_content" class="container">
+                <div class="navbar-header">
+                    <a id='navbar_title' class="navbar-brand site-header" href="/">{{name}}</a>
+                </div>
+                <div id="collapse-menu-main" class="collapse navbar-collapse">
+                    <ul class="nav navbar-nav navbar-right">
+                        <li id="interrogation" class="active"><a href="#" onclick="loadStartPoints();"><span class="glyphicon glyphicon-play"></span></a></li>
+                        {{#if loged}}
+                        <li id="userdata" class="dropdown">
+                            <li id="integration"><a href="#"><span class="glyphicon glyphicon-cloud-upload"></span></a></li>
+                        </li>
+                        <li id="admin" class="dropdown">
+                          <a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="glyphicon glyphicon-cog"></span><span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                              <li id="datasets" onclick="loadNamedGraphs()"><a href="#">Datasets</a></li>
+                              <li id="statistics" onclick="loadStatistics()"><a href="#">Statistics</a></li>
+                              <li id="shortcuts"><a href="#">Shortcuts</a></li>
+                              <li class="divider"></li>
+                              <li id="triplestore_parameters"><a onclick="new TriplestoreParametersView().configurationView();" href="#"><span class="glyphicon glyphicon-cloud"></span>&nbsp;Private Triplestore</a></li>
+                              <li id="gene_ontology"><a onclick="new GOParametersView().configurationView();" href="#"><span class="glyphicon glyphicon-cloud"></span>&nbsp;Gene Ontology</a></li>
+                            </ul>
+                          </li>
+                        {{/if}}
+                        <li id="about"><a href="#"><span class="glyphicon glyphicon-info-sign"></span></a></li>
+                        <li id="help"><a href="#" onclick="AskomicsHelp.start();"><span class="glyphicon glyphicon-question-sign"></span></a></li>
+                        {{#if loged}}
+
+                        <li id="user_menu" class="dropdown">
+                          <a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="glyphicon glyphicon-user"></span><span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li id="user_info"><a href="#"><span class="glyphicon glyphicon-cog"></span> Account managment ({{username}})</a></li>
+                            {{#if admin}}
+                                <li id="administration"><a href="#"><span class="glyphicon glyphicon-king"></span> Administration</a></li>
+                            {{/if}}
+                              <li class="divider"></li>
+                              <li id="logout"><a href="#"><span class="glyphicon glyphicon-log-out"></span> Log out</a></li>
+                            </ul>
+                          </li>
+                        {{else}}
+                        <li id="login"><a href="#"><span class="glyphicon glyphicon-log-in"></span></a></li>
+                        {{/if}}
+                    </ul>
+                </div>
+            </div>
+        </script>
+
+        <!-- template to display the admin page -->
+        <script id='template-admin' type="text/x-handlebars-template">
+        <h4>Users</h4>
+        <hr/ >
+        <table class="table table-striped">
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Admin</th>
+            </tr>
+            {{#each users}}
+            <tr>
+                <td>{{this.username}}</td>
+                <td><a href="mailto:{{this.email}}">{{this.email}}</a></td>
+                <td>{{this.admin}}</td>
+            </tr>
+            {{/each}}
+        </table>
+        </script>
 
         <!-- template to display preview of a gff file -->
         <script id="template-gff-form" type="text/x-handlebars-template">
@@ -332,7 +447,10 @@
                     {{/if}}
                     <input type="text" name="frame" id="tax-{{file.name}}">
                     <br><br>
-                    <input type="button" id="{{file.name}}" class="btn btn-primary load_data_gff" value="Insert in database">
+                    <input type="button" id="{{file.name}}" class="btn btn-primary load_data_gff" value="Insert in private graph">
+                    {{#if admin}}
+                    <input type="button" id="{{file.name}}" class="btn btn-warning load_data_gff_public" value="Insert in public graph" />
+                    {{/if}}
                     <br><br>
                     <p class="insert_status text-left alert hidden"></p>
                     <p class="insert_warning text-left alert hidden"></p>
@@ -414,7 +532,10 @@
                     <div class="form-group form-inline">
                         <div class="btn-group" role="group" aria-label="metadata">
                             <input type="button" class="btn btn-success preview_button" value="Preview RDF" />
-                            <input type="button" class="btn btn-primary load_data_tsv" value="Insert in database" />
+                            <input type="button" class="btn btn-primary load_data_tsv" value="Insert in private graph" />
+                            {{#if admin}}
+                            <input type="button" class="btn btn-warning load_data_tsv_public" value="Insert in public graph" />
+                            {{/if}}
                         </div>
                     </div>
                     <p class="insert_status text-left alert hidden"></p>
@@ -433,7 +554,10 @@
                     <h4>TTL file: {{file.name}} </h4>
                     <h5>Preview of the first 100 lines of the file</h5>
                     <pre class='preview_field'></pre>
-                    <input type="button" id="{{file.name}}" class="btn btn-primary load_data_ttl" value="Insert in database">
+                    <input type="button" id="{{file.name}}" class="btn btn-primary load_data_ttl" value="Insert in private graph">
+                    {{#if admin}}
+                    <input type="button" id="{{file.name}}" class="btn btn-warning load_data_ttl_public" value="Insert in public graph" />
+                    {{/if}}
                     <br><br>
                     <p class="insert_status text-left alert hidden"></p>
                     <p class="insert_warning text-left alert hidden"></p>
