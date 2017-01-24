@@ -489,14 +489,19 @@ function displayNavbar(loged, username, admin) {
     // Visual effect on active tab (Ask! / Integrate / Credits)
     $('.nav li').click(function(e) {
 
-        $('.nav li.active').removeClass('active');
+      //TODO : We can not defined nav li inside otherwise this function apply (define for the min nav ASKOMIS ).....
+      // for now, to avoid a bad behaviours, we need to not defined id in sub nav tag
+      if ( $(this).attr('id')=== undefined) return;
+
+      $('.nav li.active').removeClass('active');
 
         if (!$(this).hasClass('active')) {
             $(this).addClass('active');
         }
 
 
-        if (  ! ( $(this).attr('id') in { 'help' : '','admin':'', 'user_menu': '' }) ) {
+        if ( ! ( $(this).attr('id') in { 'help' : '','admin':'', 'user_menu': '' }) ) {
+
           $('.container').hide();
           $('.container#navbar_content').show();
           $('.container#content_' + $(this).attr('id')).show();
@@ -602,17 +607,18 @@ function displayNavbar(loged, username, admin) {
 
       let service = new RestServiceJs('get_users_infos');
       service.getAll(function(data) {
-
-        $("#admin_page").empty();
-        let source = $('#template-admin').html();
+        $("#Users_adm").empty();
+        let source = $('#template-admin-users').html();
         let template = Handlebars.compile(source);
 
         let context = {users: data.result};
         let html = template(context);
 
-        $("#admin_page").append(html);
+        $("#Users_adm").append(html);
         hideModal();
       });
+
+      new ShortcutsParametersView().updateShortcuts(true);
     });
 
 }
