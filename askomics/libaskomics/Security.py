@@ -9,7 +9,7 @@ from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
 
 class Security(ParamManager):
     """[summary]
-    
+
     [description]
     """
 
@@ -178,6 +178,12 @@ class Security(ParamManager):
         sqb = SparqlQueryBuilder(self.settings, self.session)
 
         result = ql.process_query(sqb.get_admin_status_by_username(self.username).query)
+
+        if len(result) == 0 :
+            return False
+
+        if not ('admin' in result[0]) :
+            return False
 
         return bool(int(result[0]['admin']))
 
