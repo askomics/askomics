@@ -712,11 +712,17 @@ class AskomicsForceLayoutManager {
     insertSuggestionsShortcuts(suggestedList,listSelectedNodes) {
 
       let lShortcuts = new ShortcutsParametersView().getShortcuts(listSelectedNodes);
-
+      let x=0,y=0;
+      if (listSelectedNodes.length>0) {
+        x = listSelectedNodes[0].x;
+        y = listSelectedNodes[0].y;
+      }
+      x+=0.5;y+=0.5;
+      
       for (let shortcut in lShortcuts) {
         let suggestedNode;
         let uri = Object.keys(lShortcuts[shortcut].out)[0];
-      
+
         if (! this.isProposedUri("shortcuts",shortcut)) continue ;
 
         console.log(uri);
@@ -724,7 +730,7 @@ class AskomicsForceLayoutManager {
           /* creatin node */
           suggestedNode = new AskomicsUserAbstraction().buildBaseNode(uri);
           /* specific attribute for suggested node */
-          suggestedNode = new AskomicsGraphBuilder().setSuggestedNode(suggestedNode,slt_node.x,slt_node.y);
+          suggestedNode = new AskomicsGraphBuilder().setSuggestedNode(suggestedNode,x,y);
           /* adding in the node list to create D3.js graph */
           this.nodes.push(suggestedNode);
           suggestedList[uri] = suggestedNode ;

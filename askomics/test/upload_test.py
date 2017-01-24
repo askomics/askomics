@@ -11,6 +11,8 @@ class FileUploadTests(unittest.TestCase):
         self.settings = get_appsettings('configs/development.virtuoso.ini', name='main')
         self.request = testing.DummyRequest()
         self.request.session['upload_directory'] = os.path.join( os.path.dirname( __file__ ), "..", "test-data")
+        self.request.session['username'] = 'jdoe'
+
         self.temp_directory = tempfile.mkdtemp()
         self.request.registry.settings = self.settings
 

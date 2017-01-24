@@ -144,6 +144,7 @@ class ShortcutsParametersView extends InterfaceParametersView {
       }
     }
     this.updateShortcutsIsDone = true ;
+
     console.log("!!! update shortcuts !!!");
     this.shortcuts = {};
     let service = new RestServiceJs("sparqlquery");
@@ -165,69 +166,30 @@ class ShortcutsParametersView extends InterfaceParametersView {
     };
 
     service.postsync(param,function(data) {
-      let accordion = $("#accordion_shortcuts");
-      accordion.empty();
       //alert(accordion.find("[id^='collapse_']").length);
-      let icount = 0;
       for (let i in data.values) {
-
-        icount++;
-        let div1 = $("<div></div>").addClass("panel panel-default");
-        let div2 = $("<div></div>").addClass("panel-heading").append(
-          $("<h4></h4>").addClass("panel-title").append(
-              $("<a></a>").attr("data-toggle","collapse")
-                          .attr("data-parent","#accordion_shortcuts")//+data.values[i].label+data.values[i].version
-                          .attr("href","#collapse_"+icount.toString()).html(data.values[i].label)
-          )
-        );
-        let button = new ShortcutsParametersView().buildRemoveButton(data.values[i].shortcut);
-
-        div1.append(div2);
-        let div3 = $("<div></div>").attr("id","collapse_"+icount.toString()).addClass("panel-collapse collapse").append(
-            $("<div></div>").addClass("panel-body").html(
-              $("<div></div>").append($("<h4></h4>").html("Definition"))
-                              .append($("<p></p>").html(data.values[i].comment))
-                              .append($("<hr/>"))
-                              .append($("<h4></h4>").html("Version"))
-                              .append($("<p></p>").html(data.values[i].version))
-                              .append($("<hr/>"))
-                              .append($("<h4></h4>").html("Input"))
-                              .append($("<p></p>").html(data.values[i].in))
-                              .append($("<hr/>"))
-                              .append($("<h4></h4>").html("Output"))
-                              .append($("<p></p>").html(data.values[i].out))
-                              .append($("<hr/>"))
-                              .append($("<h4></h4>").html("Printing Output"))
-                              .append($("<p></p>").html(data.values[i].output_var+":"+data.values[i].output_varname))
-                              .append($("<hr/>"))
-                              .append($("<h4></h4>").html("Prefix"))
-                              .append($("<p></p>").text(data.values[i].prefix_string))
-                              .append($("<hr/>"))
-                              .append($("<h4></h4>").html("Sparql"))
-                              .append($("<p></p>").text(data.values[i].sparql_string))
-                              .append(button)
-            )
-        );
-        div1.append(div3);
-
-        accordion.append(div1);
         new ShortcutsParametersView().setShortcut(data.values[i]);
       }
-      console.log("========================= SHORTCUTS ===================================== \n"+JSON.stringify(new ShortcutsParametersView().shortcuts));
+
+      $("#Shortcuts_adm").empty();
+      let source = $('#template-admin-shortcuts').html();
+      let template = Handlebars.compile(source);
+
+      let context = {shortcuts: data.values};
+      let html = template(context);
+
+      $("#Shortcuts_adm").append(html);
     });
     return this.shortcuts;
   }
 
-  buildRemoveButton(shortcut) {
-    let button = $("<button></button>").addClass("btn btn-danger").html("remove");
-    button.on( "click",function (d) {
+
+  removeShortcut(shortcut) {
       let service = new RestServiceJs("deleteShortcut");
       let param = {
         'shortcut' : shortcut
       };
       service.post(param,function() {});
       new ShortcutsParametersView().updateShortcuts(true);
-    });
-    return button;
-  }
+    }
 }
