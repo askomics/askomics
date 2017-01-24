@@ -20,50 +20,46 @@ class SparqlQueryBuilder(ParamManager):
 
         self.log = logging.getLogger(__name__)
 
-    def load_from_file(self, template_file, replacement={}):
+
+    def build_query_from_template(self, replacement):
         """
-        Get a sparql query from a file, possibly replacing a template
-        word by another given as argument
+        Build a query from the private or public template
         """
-        self.log.debug("***********  QUERY FILE  ***********")
-        self.log.debug(template_file)
-        with open(template_file) as template_fd:
-            template = template_fd.read()
-
-        query = self.prepare_query(template, replacement=replacement)
-        return query
-
-    def prepare_query(self, template, replacement={}):
-        """
-        Prepare a query from a template and a substitution dictionary.
-        The `$graph` variable is the public graph
-        The `$graph2` variable is user graph or public graph if no user logged
-        """
-
-        replacement['graph'] = '<%s>' % self.get_param('askomics.public_graph')
-
-        if 'graph' not in self.session.keys() or self.session['graph'] == '':
-            replacement['graph2'] = '<%s>' % self.get_param('askomics.public_graph')
-        else:
-            replacement['graph2'] = '<%s>' % self.session['graph']
-
-        query = Template(template).substitute(replacement)
-
-        prefixes = self.header_sparql_config(query)
-        return SparqlQuery(prefixes + query)
-
-    def build_query_from_template(self, replacement={}):
-        """
-        choose which template to fill between public or private in
-        function of if a user is logged or not
-        """
-
-        template = self.get_template_sparql(self.ASKOMICS_privateQueryTemplate)
-
+        #TODO: Don't use a template file
+        
+        replacement['public_graph'] = '<' + self.get_param('askomics.public_graph') + '>'
+        
         if 'graph' not in self.session.keys() or self.session['graph'] == '':
             template = self.get_template_sparql(self.ASKOMICS_publicQueryTemplate)
-            
-        return self.load_from_file(template, replacement)
+        else: # Logged user
+            template = self.get_template_sparql(self.ASKOMICS_privateQueryTemplate)
+            replacement['private_graph'] = '<' + self.session['graph'] + '>'
+
+        with open(template) as template_file:
+            template_string = template_file.read()
+
+        query = Template(template_string).substitute(replacement)
+        prefixes = self.header_sparql_config(query)
+
+        return SparqlQuery(prefixes + query)
+
+    def build_query_for_users_graph(self, replacement):
+        """
+        Build a query to launch on the users graph
+        """
+        #TODO: Don't use a template file
+
+        replacement['graph'] = '<' + self.get_param("askomics.users_graph") +  '>'
+        template = self.get_template_sparql(self.ASKOMICS_usersQueryTemplate)
+
+        with open(template) as template_file:
+            template_string = template_file.read()
+
+        query = Template(template_string).substitute(replacement)
+        prefixes = self.header_sparql_config(query)
+
+        return SparqlQuery(prefixes + query)
+
 
     def custom_query(self, select, query):
         """

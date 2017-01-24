@@ -1,12 +1,12 @@
 SELECT DISTINCT $select
 WHERE{
     {
-        GRAPH $graph {
-            ?g rdfg:subGraphOf $graph
+        GRAPH $public_graph {
+            ?g rdfg:subGraphOf $public_graph
         }
     }UNION{
-        GRAPH $graph2 {
-            ?g rdfg:subGraphOf $graph2
+        GRAPH $private_graph {
+            ?g rdfg:subGraphOf $private_graph
         }
     }
 

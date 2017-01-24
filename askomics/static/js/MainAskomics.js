@@ -114,6 +114,7 @@ function loadStartPoints() {
 function loadNamedGraphs() {
 
     new AskomicsUserAbstraction().loadUserAbstraction();
+    console.log('loadNamedGraphs');
 
     var select = $('#dropNamedGraphSelected');
     select.empty();

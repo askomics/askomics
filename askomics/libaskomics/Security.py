@@ -3,7 +3,7 @@ from validate_email import validate_email
 import random
 
 from askomics.libaskomics.ParamManager import ParamManager
-from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
+from askomics.libaskomics.rdfdb.SparqlQueryAuth import SparqlQueryAuth
 from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
 
 
@@ -54,9 +54,9 @@ class Security(ParamManager):
         """
 
         ql = QueryLauncher(self.settings, self.session)
-        sqb = SparqlQueryBuilder(self.settings, self.session)
+        sqa = SparqlQueryAuth(self.settings, self.session)
 
-        result = ql.process_query(sqb.check_username_presence(self.username).query)
+        result = ql.process_query(sqa.check_username_presence(self.username).query)
         self.log.debug('---> result: ' + str(result))
 
         return bool(int(result[0]['status']))
@@ -67,9 +67,9 @@ class Security(ParamManager):
         """
 
         ql = QueryLauncher(self.settings, self.session)
-        sqb = SparqlQueryBuilder(self.settings, self.session)
+        sqa = SparqlQueryAuth(self.settings, self.session)
 
-        result = ql.process_query(sqb.check_email_presence(self.email).query)
+        result = ql.process_query(sqa.check_email_presence(self.email).query)
 
         return bool(int(result[0]['status']))
 
@@ -79,9 +79,9 @@ class Security(ParamManager):
         """
 
         ql = QueryLauncher(self.settings, self.session)
-        sqb = SparqlQueryBuilder(self.settings, self.session)
+        sqa = SparqlQueryAuth(self.settings, self.session)
 
-        result = ql.process_query(sqb.get_password_with_email(self.email).query)
+        result = ql.process_query(sqa.get_password_with_email(self.email).query)
 
         ts_salt = result[0]['salt']
         ts_shapw = result[0]['shapw']
@@ -97,9 +97,9 @@ class Security(ParamManager):
         """
 
         ql = QueryLauncher(self.settings, self.session)
-        sqb = SparqlQueryBuilder(self.settings, self.session)
+        sqa = SparqlQueryAuth(self.settings, self.session)
 
-        result = ql.process_query(sqb.get_password_with_username(self.username).query)
+        result = ql.process_query(sqa.get_password_with_username(self.username).query)
 
         ts_salt = result[0]['salt']
         ts_shapw = result[0]['shapw']
@@ -115,9 +115,9 @@ class Security(ParamManager):
         """
 
         ql = QueryLauncher(self.settings, self.session)
-        sqb = SparqlQueryBuilder(self.settings, self.session)
+        sqa = SparqlQueryAuth(self.settings, self.session)
 
-        result = ql.process_query(sqb.get_number_of_users().query)
+        result = ql.process_query(sqa.get_number_of_users().query)
 
         self.log.debug(result)
 
@@ -129,7 +129,7 @@ class Security(ParamManager):
         Persist all user infos in the TS
         """
         ql = QueryLauncher(self.settings, self.session)
-        sqb = SparqlQueryBuilder(self.settings, self.session)
+        sqa = SparqlQueryAuth(self.settings, self.session)
 
         #check if user is the first. if yes, set him admin
         if self.get_number_of_users() == 0:
@@ -147,7 +147,7 @@ class Security(ParamManager):
         chunk += indent + ':isadmin \"' + admin + '\"^^xsd:boolean ;\n'
         chunk += indent + ':randomsalt \"' + self.randomsalt + '\" .\n'
 
-        header_ttl = sqb.header_sparql_config(chunk)
+        header_ttl = sqa.header_sparql_config(chunk)
         ql.insert_data(chunk, self.settings["askomics.users_graph"], header_ttl)
 
     def create_user_graph(self):
@@ -156,11 +156,11 @@ class Security(ParamManager):
         """
 
         ql = QueryLauncher(self.settings, self.session)
-        sqb = SparqlQueryBuilder(self.settings, self.session)
+        sqa = SparqlQueryAuth(self.settings, self.session)
 
         ttl = '<' + self.settings['askomics.private_graph'] + ':' + self.username + '> rdfg:subGraphOf <' + self.settings['askomics.private_graph'] + '>'
 
-        header_ttl = sqb.header_sparql_config(ttl)
+        header_ttl = sqa.header_sparql_config(ttl)
         ql.insert_data(ttl, self.settings["askomics.private_graph"], header_ttl)
 
     def set_admin(self, admin):
@@ -175,9 +175,9 @@ class Security(ParamManager):
         get the admin status of the user by his username
         """
         ql = QueryLauncher(self.settings, self.session)
-        sqb = SparqlQueryBuilder(self.settings, self.session)
+        sqa = SparqlQueryAuth(self.settings, self.session)
 
-        result = ql.process_query(sqb.get_admin_status_by_username(self.username).query)
+        result = ql.process_query(sqa.get_admin_status_by_username(self.username).query)
 
         return bool(int(result[0]['admin']))
 
@@ -186,9 +186,9 @@ class Security(ParamManager):
         get the admin status of the user by his username
         """
         ql = QueryLauncher(self.settings, self.session)
-        sqb = SparqlQueryBuilder(self.settings, self.session)
+        sqa = SparqlQueryAuth(self.settings, self.session)
 
-        result = ql.process_query(sqb.get_admin_status_by_email(self.email).query)
+        result = ql.process_query(sqa.get_admin_status_by_email(self.email).query)
 
         self.log.debug(result)
 

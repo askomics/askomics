@@ -10,6 +10,7 @@ import datetime
 
 from askomics.libaskomics.ParamManager import ParamManager
 from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
+from askomics.libaskomics.rdfdb.SparqlQueryGraph import SparqlQueryGraph
 from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
 from askomics.libaskomics.utils import cached_property, HaveCachedProperties
 
@@ -78,13 +79,15 @@ class SourceFile(ParamManager, HaveCachedProperties):
         self.log.debug("existing_relations")
         existing_relations = []
 
-        sqb = SparqlQueryBuilder(self.settings, self.session)
+        sqg = SparqlQueryGraph(self.settings, self.session)
         ql = QueryLauncher(self.settings, self.session)
 
-        sparql_template = self.get_template_sparql(self.ASKOMICS_get_class_info_from_abstraction_queryFile)
-        query = sqb.load_from_file(sparql_template, {"nodeClass": self.headers[0]}).query
+        # sparql_template = self.get_template_sparql(self.ASKOMICS_get_class_info_from_abstraction_queryFile)
+        # query = sqb.load_from_file(sparql_template, {"nodeClass": self.headers[0]}).query
 
-        results = ql.process_query(query)
+        results = ql.process_query(sqg.get_class_info_from_abstraction(self.headers[0]).query)
+
+        # results = ql.process_query(query)
 
         return existing_relations
 
