@@ -55,7 +55,17 @@ class AskView(object):
         tse = TripleStoreExplorer(self.settings, self.request.session)
 
         nodes = tse.get_start_points()
-        data["nodes"] = {n['uri']: n for n in nodes}
+
+        data['nodes'] = {}
+
+        for node in nodes:
+            if node['uri'] in data['nodes'].keys():
+                if node['public'] and not data['nodes'][node['uri']]['public']:
+                    data['nodes'][node['uri']]['public'] = True
+                if node['private'] and not data['nodes'][node['uri']]['private']:
+                    data['nodes'][node['uri']]['private'] = True
+            else:
+                data['nodes'][node['uri']] = node
 
         return data
 

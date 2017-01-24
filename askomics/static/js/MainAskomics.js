@@ -78,18 +78,27 @@ function loadStartPoints() {
 
         let text;
 
-        if (value.public) {
+        if (value.public && value.private) {
+          text = $('<em></em>').append($('<strong></strong>').attr('class', 'text-warning')
+                               .append($('<i></i>').attr('class', 'fa fa-globe text-warning'))
+                               .append(' ')
+                               .append($('<i></i>').attr('class', 'fa fa-lock text-primary'))
+                               .append(' ' + value.label));
+        }
+
+        if (value.public && !value.private) {
           text = $('<em></em>').attr('class', 'text-warning')
                                .append($('<i></i>').attr('class', 'fa fa-globe'))
                                .append(' ' + value.label);
-        }else{
-          text = $('<strong></strong>').attr('class', 'text-primary')
-                                       .append($('<i></i>').attr('class', 'fa fa-lock'))
-                                       .append(' ' + value.label);
-
         }
 
-          $('#startpoints').append($('<option></option>').attr('data-value', JSON.stringify(value))
+        if (!value.public && value.private) {
+          text = $('<strong></strong>').attr('class', 'text-primary')
+                               .append($('<i></i>').attr('class', 'fa fa-lock'))
+                               .append(' ' + value.label);
+        }
+
+        $('#startpoints').append($('<option></option>').attr('data-value', JSON.stringify(value))
                                                          .append(text));
 
       });

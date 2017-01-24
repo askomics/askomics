@@ -46,10 +46,12 @@ class TripleStoreExplorer(ParamManager):
 
             if 'private' in result['g']:
                 public = False
+                private = True
             else:
                 public = True
+                private = False
 
-            nodes.append({'uri': uri, 'label': label, 'public': public})
+            nodes.append({'uri': uri, 'label': label, 'public': public, 'private': private})
 
         return nodes
 
