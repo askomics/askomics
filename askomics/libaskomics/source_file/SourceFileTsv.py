@@ -3,6 +3,8 @@ Classes to import data from a gff3 source files
 """
 import re
 import csv
+import uuid
+
 from collections import defaultdict
 from pkg_resources import get_distribution
 
@@ -331,7 +333,8 @@ class SourceFileTsv(SourceFile):
                 # Create the entity (first column)
                 entity_label = row[0]
                 indent = (len(entity_label) + 1) * " "
-                ttl += ":" + self.encodeToRDFURI(entity_label) + " rdf:type :" + self.encodeToRDFURI(self.headers[0]) + " ;\n"
+                #ttl += ":" + self.encodeToRDFURI(entity_label) + " rdf:type :" + self.encodeToRDFURI(self.headers[0]) + " ;\n"
+                ttl += ":" + self.encodeToRDFURI(entity_label+"_"+str(uuid.uuid1())) + " rdf:type :" + self.encodeToRDFURI(self.headers[0]) + " ;\n"
                 ttl += indent + " rdfs:label \"" + entity_label + "\" ;\n"
 
                 # Add data from other columns

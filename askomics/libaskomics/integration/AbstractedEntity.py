@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+
 from askomics.libaskomics.ParamManager import ParamManager
 from askomics.libaskomics.utils import pformat_generic_object
 
