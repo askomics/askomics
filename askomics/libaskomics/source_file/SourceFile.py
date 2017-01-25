@@ -116,7 +116,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
         chunk_count = 1
         chunk = ""
         pathttl = self.get_ttl_directory()
-        if method == 'load': #FIXME: load doesn't work
+        if method == 'load':
 
             fp = None
 
@@ -247,7 +247,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
             data['status'] = 'ok'
             data['total_triple_count'] = total_triple_count
-            self.get_metadatas()
+        self.get_metadatas()
 
         data['expected_lines_number'] = self.get_number_of_lines()
 
@@ -293,7 +293,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
             else:
                 os.remove(fp.name) # Everything ok, remove temp file
 
-        self.get_metadatas()
+        # self.get_metadatas()
 
         return data
 
