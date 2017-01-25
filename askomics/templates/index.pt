@@ -235,26 +235,6 @@
             <div id="statistics_div" class="row"></div>
         </div>
 
-        <div id="content_shortcuts" class="container" hidden>
-            <hr/>
-            <h3 class="header-div">Shortcuts</h3>
-            <hr/>
-            <br/>
-            <div id="accordion_shortcuts" class="panel-group">
-           </div>
-            <!--
-            <table id="table_shortcuts_list" >
-            </table>
-          -->
-            <hr/>
-            <h4 class="header-div">Import an Askomics shortcut</h4>
-            <hr/>
-            <textarea id="inputShortcutsLink" class="form-control" rows="10"></textarea>
-            <br/>
-            <button onclick="new ShortcutsParametersView().importShortcut($('#inputShortcutsLink').val())" class="btn btn-primary">Import</button>
-
-</div>
-
         <div id="content_user_info" class="container" hidden>
             <hr/>
             <h3 class="header-div">User page</h3>
@@ -266,11 +246,17 @@
             <h3 class="header-div">Administration</h3>
             <hr/>
             <div id='admin_page'>
-            <!-- see the template below (template-admin) -->
+             <!-- see the template below (template-admin) -->
+             <ul class="nav nav-tabs">
+              <li class="active"><a data-toggle="tab" href="#Users_adm">Users</a></li>
+              <li><a data-toggle="tab" href="#Shortcuts_adm">Shortcuts</a></li>
+             </ul>
+             <div id="admin_page_tab_content" class="tab-content">
+                  <div id="Users_adm" class="tab-pane fade in active"></div>
+                  <div id="Shortcuts_adm" class="tab-pane fade"></div>
+             </div>
             </div>
-
-        </div>
-
+         </div>
         <div id="content_about" class="container" hidden>
           <hr/>
           <h3 class="header-div">About</h3>
@@ -372,7 +358,6 @@
                             <ul class="dropdown-menu">
                               <li id="datasets" onclick="loadNamedGraphs()"><a href="#">Datasets</a></li>
                               <li id="statistics" onclick="loadStatistics()"><a href="#">Statistics</a></li>
-                              <li id="shortcuts"><a href="#">Shortcuts</a></li>
                               <li class="divider"></li>
                               <li id="triplestore_parameters"><a onclick="new TriplestoreParametersView().configurationView();" href="#"><span class="glyphicon glyphicon-cloud"></span>&nbsp;Private Triplestore</a></li>
                               <li id="gene_ontology"><a onclick="new GOParametersView().configurationView();" href="#"><span class="glyphicon glyphicon-cloud"></span>&nbsp;Gene Ontology</a></li>
@@ -403,10 +388,10 @@
         </script>
 
         <!-- template to display the admin page -->
-        <script id='template-admin' type="text/x-handlebars-template">
-        <h4>Users</h4>
-        <hr/ >
-        <table class="table table-striped">
+        <script id='template-admin-users' type="text/x-handlebars-template">
+          <h4>Users</h4>
+          <hr/ >
+          <table class="table table-striped">
             <tr>
                 <th>Username</th>
                 <th>Email</th>
@@ -419,7 +404,64 @@
                 <td>{{this.admin}}</td>
             </tr>
             {{/each}}
-        </table>
+          </table>
+      </script>
+
+     <script id='template-admin-shortcuts' type="text/x-handlebars-template">
+          <hr/>
+          <h3 class="header-div">Shortcuts</h3>
+          <hr/>
+
+          <ul class="nav nav-pills">
+           <li class="active"><a data-toggle="tab" href="#Shortcuts_List_adm">List</a></li>
+           <li><a data-toggle="tab" href="#Shortcuts_Import_adm">Import</a></li>
+          </ul>
+
+          <div id="Shortcuts_adm_tab_content" class="tab-content">
+               <div id="Shortcuts_List_adm" class="tab-pane fade in active">
+                 <table class="table table-striped">
+                     <tr>
+                         <th>Shortcuts</th>
+                         <th>Definition</th>
+                         <th>Version</th>
+                         <th>Input</th>
+                         <th>Output</th>
+                         <th></th>
+                     </tr>
+                     {{#each shortcuts}}
+                     <tr data-toggle="collapse" data-target="#accordion_{{@index}}" class="clickable">
+                         <td>{{this.shortcut}}</td>
+                         <td>{{this.comment}}</td>
+                         <td>{{this.version}}</td>
+                         <td>{{this.in}}</td>
+                         <td>{{this.out}}</td>
+                         <td onclick="new ShortcutsParametersView().removeShortcut('{{this.shortcut}}');"><span class="glyphicon glyphicon-remove"></span></td>
+                     </tr>
+                     <tr>
+                      <td colspan="6">
+                       <div id="accordion_{{@index}}" class="collapse">
+                          <h4>Printing Output</h4>
+                          <p>{{this.output_var}}+":"+{{this.output_varname}}</p>
+                          <h4>Prefix</h4>
+                          <p>{{this.prefix_string}}</p>
+                          <h4>Sparql</h4>
+                          <p>{{this.sparql_string}}</p>
+                       </div>
+                      </td>
+                     </tr>
+                     {{/each}}
+                 </table>
+               </div>
+               <div id="Shortcuts_Import_adm" class="tab-pane fade">
+                 <br/>
+                 <hr/>
+                 <h4 class="header-div">Import an Askomics shortcut</h4>
+                 <hr/>
+                 <textarea id="inputShortcutsLink" class="form-control" rows="10"></textarea>
+                 <br/>
+                 <button onclick="new ShortcutsParametersView().importShortcut($('#inputShortcutsLink').val())" class="btn btn-primary">Import</button>
+               </div>
+          </div>
         </script>
 
         <!-- template to display preview of a gff file -->

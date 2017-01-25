@@ -7,6 +7,8 @@ class InterfaceTPS(object):
     def __init__(self,settings,request):
         self.settings = settings
         self.request = request
+        self.request.session['username'] = 'jdoe'
+        
         pass
 
     def empty(self):
