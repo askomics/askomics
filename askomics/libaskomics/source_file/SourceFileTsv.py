@@ -40,8 +40,7 @@ class SourceFileTsv(SourceFile):
             'end': 'xsd:decimal',
             'entity'  : ':',
             'entitySym'  : ':',
-            'entity_start'  : ':',
-            'entityGoterm'  : ''}
+            'entity_start'  : ':'}
 
         self.delims = {
             'numeric' : ('', ''),
@@ -54,8 +53,7 @@ class SourceFileTsv(SourceFile):
             'end' : ('', ''),
             'entity'  : (':', ''),
             'entitySym'  : (':', ''),
-            'entity_start'  : (':', ''),
-            'entityGoterm'  : ('"', '"')}
+            'entity_start'  : (':', '')}
 
     @cached_property
     def dialect(self):
@@ -150,8 +148,6 @@ class SourceFileTsv(SourceFile):
         # check if relationShip with an other local entity
         if header.find("@")>0:
             #m = re.search('@(...):', header)
-            if header.lower().find("go:term")>0:
-                return "entityGoterm"
             #maybe by value
             #if all( (val.lower().find("go:")>=0) for val in values):
             #    raise ValueError("header for go:term follow this syntax: relationName@go:term")
@@ -161,10 +157,11 @@ class SourceFileTsv(SourceFile):
         # Then, check if category
 
         #if all(re.match(r'^\w+$', val) for val in values):#check if no scape chararcter
-        if len(set(values)) < len(values) / 2:
-            return 'category'
-        elif all(self.is_decimal(val) for val in values): # Then numeric
+        if all(self.is_decimal(val) for val in values): # Then numeric
             return 'numeric'
+        elif len(set(values)) < len(values) / 2:
+            return 'category'
+
 
         # default is text
         return 'text'
