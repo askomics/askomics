@@ -62,7 +62,7 @@ class SourceFileTsv(SourceFile):
         """
         with open(self.path, 'r') as tabfile:
             # The sniffer needs to have enough data to guess, and we restrict to a list of allowed delimiters to avoid strange results
-            dialect = csv.Sniffer().sniff(tabfile.read(1024*16), delimiters=',\t ')
+            dialect = csv.Sniffer().sniff(tabfile.read(1024*16), delimiters=';,\t ')
             self.log.debug("CSV dialect in %r: %s" % (self.path, pformat_generic_object(dialect)))
             return dialect
 
