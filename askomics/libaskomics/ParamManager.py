@@ -119,3 +119,11 @@ class ParamManager(object):
         header.append("@base <{0}> .".format(asko_prefix))
         header.append("<{0}> rdf:type owl:Ontology .".format(asko_prefix))
         return '\n'.join(header)
+
+    @staticmethod
+    def encodeToRDFURI(toencode):
+        import urllib.parse
+        obj = urllib.parse.quote(toencode)
+        obj = obj.replace(".", "_dot_")
+        obj = obj.replace("-", "_sep_")
+        return obj
