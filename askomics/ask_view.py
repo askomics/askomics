@@ -20,6 +20,7 @@ from askomics.libaskomics.TripleStoreExplorer import TripleStoreExplorer
 from askomics.libaskomics.SourceFileConvertor import SourceFileConvertor
 from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
 from askomics.libaskomics.rdfdb.SparqlQueryGraph import SparqlQueryGraph
+from askomics.libaskomics.rdfdb.SparqlQueryStats import SparqlQueryStats
 from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
 from askomics.libaskomics.rdfdb.ResultsBuilder import ResultsBuilder
 from askomics.libaskomics.source_file.SourceFile import SourceFile
@@ -71,81 +72,111 @@ class AskView(object):
 
     @view_config(route_name='statistics', request_method='GET')
     def statistics(self):
-        """ Get information about triplet store """
-
+        """
+        Get stats
+        """
         # Denny access for non loged users
         if self.request.session['username'] == '':
             return 'forbidden'
 
-        self.log.debug("== STATS ==")
+        self.log.debug('=== stats ===')
+
         data = {}
-        pm = ParamManager(self.settings, self.request.session)
+        data['username'] = self.request.session['username']
 
-        sqb = SparqlQueryBuilder(self.settings, self.request.session)
-        ql = QueryLauncher(self.settings, self.request.session)
-        tse = TripleStoreExplorer(self.settings, self.request.session)
+        sqs_pub = SparqlQueryStats(self.settings, self.request.session, True)
+        sqs_priv = SparqlQueryStats(self.settings, self.request.session, False)
+        qlaucher = QueryLauncher(self.settings, self.request.session)
 
-        results = ql.process_query(sqb.get_statistics_number_of_triples().query)
-        resultsGraphs = ql.process_query(sqb.get_statistics_number_of_triples_AskOmics_graphs().query)
-        data["ntriples"] = int(results[0]["no"]) + int(resultsGraphs[0]["no"])
+        public_stats = {}
+        private_stats = {}
 
-        results = ql.process_query(sqb.get_statistics_number_of_entities().query)
-        data["nentities"] = results[0]["no"]
+        # Number of triples
+        results_pub = qlaucher.process_query(sqs_pub.get_number_of_triple().query)
+        results_priv = qlaucher.process_query(sqs_priv.get_number_of_triple().query)
 
-        results = ql.process_query(sqb.get_statistics_distinct_classes().query)
-        data["nclasses"] = results[0]["no"]
+        public_stats['ntriples'] = results_pub[0]['number']
+        private_stats['ntriples'] = results_priv[0]['number']
 
-        # Get the number of graphs
-        results = ql.process_query(sqb.get_statistics_number_of_graphs().query)
-        data["ngraphs"] = results[0]["no"]
+        # Number of entities
+        results_pub = qlaucher.process_query(sqs_pub.get_number_of_entities().query)
+        results_priv = qlaucher.process_query(sqs_priv.get_number_of_entities().query)
 
-        self.log.debug("=== LIST OF METADATAS ")
+        public_stats['nentities'] = results_pub[0]['number']
+        private_stats['nentities'] = results_priv[0]['number']
 
-        # Get the list of named graphs
-        namedGraphsResults = ql.execute_query(sqb.get_list_named_graphs().query)
+        # Number of classes
+        results_pub = qlaucher.process_query(sqs_pub.get_number_of_classes().query)
+        results_priv = qlaucher.process_query(sqs_priv.get_number_of_classes().query)
 
-        namedGraphsMetadatas = {}
+        public_stats['nclasses'] = results_pub[0]['number']
+        private_stats['nclasses'] = results_priv[0]['number']
 
-        # Get a dictionnary containing the metadatas for each graph
-        for indexResult in range(len(namedGraphsResults['results']['bindings'])):
-            metadatasResults = ql.execute_query(sqb.get_metadatas(namedGraphsResults['results']['bindings'][indexResult]['g']['value']).query)
-            metadatas = {}
-            for indexMetadatasResults in range(len(metadatasResults['results']['bindings'])):
-                if metadatasResults['results']['bindings'][indexMetadatasResults]['p']['value'] == "http://www.w3.org/ns/prov#generatedAtTime":
-                    metadatas['loadDate'] = metadatasResults['results']['bindings'][indexMetadatasResults]['o']['value']
-                if metadatasResults['results']['bindings'][indexMetadatasResults]['p']['value'] == "http://purl.org/dc/elements/1.1/creator":
-                    metadatas['username'] = metadatasResults['results']['bindings'][indexMetadatasResults]['o']['value']
-                if metadatasResults['results']['bindings'][indexMetadatasResults]['p']['value'] == "http://purl.org/dc/elements/1.1/hasVersion":
-                    metadatas['version'] = metadatasResults['results']['bindings'][indexMetadatasResults]['o']['value']
-                if metadatasResults['results']['bindings'][indexMetadatasResults]['p']['value'] == "http://www.w3.org/ns/prov#describesService":
-                    metadatas['server'] = metadatasResults['results']['bindings'][indexMetadatasResults]['o']['value']
-                if metadatasResults['results']['bindings'][indexMetadatasResults]['p']['value'] == "http://www.w3.org/ns/prov#wasDerivedFrom":
-                    metadatas['filename'] = metadatasResults['results']['bindings'][indexMetadatasResults]['o']['value']
-            namedGraphsMetadatas[namedGraphsResults['results']['bindings'][indexResult]['g']['value']] = metadatas
+        # Number of graphs
+        results_pub = qlaucher.process_query(sqs_pub.get_number_of_subgraph().query)
+        results_priv = qlaucher.process_query(sqs_priv.get_number_of_subgraph().query)
 
-        data['metadata'] = namedGraphsMetadatas
+        public_stats['ngraphs'] = results_pub[0]['number']
+        private_stats['ngraphs'] = results_priv[0]['number']
 
-        # Get the list of classes
-        res_list_classes = ql.process_query(sqb.get_statistics_list_classes().query)
+        # Graphs info
+        results_pub = qlaucher.process_query(sqs_pub.get_subgraph_infos().query)
+        results_priv = qlaucher.process_query(sqs_priv.get_subgraph_infos().query)
 
-        data["class"] = {}
-        for obj in res_list_classes:
-            print(obj['class'])
-            class_name = pm.remove_prefix(obj['class'])
-            print(class_name)
-            data["class"][class_name] = {}
+        public_stats['graphs'] = results_pub
+        private_stats['graphs'] = results_priv
 
-        # Get the number of instances by class
-        res_nb_instances = ql.process_query(sqb.get_statistics_nb_instances_by_classe().query)
+        # Classes and relations
+        results_pub = qlaucher.process_query(sqs_pub.get_rel_of_classes().query)
+        results_priv = qlaucher.process_query(sqs_priv.get_rel_of_classes().query)
 
-        for obj in res_nb_instances:
-            if 'class' in obj:
-                print(data['class'])
-                class_name = pm.remove_prefix(obj['class'])
-                data["class"][class_name]["count"] = obj['count']
+        # public_stats['class_rel'] = results_pub
+        # private_stats['class_rel'] = results_priv
+
+        tmp = {}
+
+        for result in results_pub:
+            if result['domain'] not in tmp.keys():
+                tmp[result['domain']] = []
+            if result['relname'] not in tmp[result['domain']]:
+                tmp[result['domain']].append({'relname': result['relname'], 'target': result['range']})
+        public_stats['class_rel'] = tmp
+
+        tmp = {}
+
+        for result in results_priv:
+            if result['domain'] not in tmp.keys():
+                tmp[result['domain']] = []
+            if result['relname'] not in tmp[result['domain']]:
+                tmp[result['domain']].append({'relname': result['relname'], 'target': result['range']})
+        private_stats['class_rel'] = tmp
+
+        # class and attributes
+        results_pub = qlaucher.process_query(sqs_pub.get_attr_of_classes().query)
+        results_priv = qlaucher.process_query(sqs_priv.get_attr_of_classes().query)
+
+        tmp = {}
+
+        for result in results_pub:
+            if result['class'] not in tmp.keys():
+                tmp[result['class']] = []
+            if result['attr'] not in tmp[result['class']]:
+                tmp[result['class']].append(result['attr'])
+        public_stats['class_attr'] = tmp
+
+        tmp = {}
+
+        for result in results_priv:
+            if result['class'] not in tmp.keys():
+                tmp[result['class']] = []
+            if result['attr'] not in tmp[result['class']]:
+                tmp[result['class']].append(result['attr'])
+        private_stats['class_attr'] = tmp
+
+        data['public'] = public_stats
+        data['private'] = private_stats
 
         return data
-
 
     @view_config(route_name='empty_database', request_method='GET')
     def empty_database(self):

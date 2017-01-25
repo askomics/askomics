@@ -229,10 +229,6 @@
         </div>
 
         <div id="content_statistics" class="container" hidden>
-            <hr/>
-            <h3 class="header-div">Statistics</h3>
-            <hr/>
-            <div id="statistics_div" class="row"></div>
         </div>
 
         <div id="content_user_info" class="container" hidden>
@@ -609,26 +605,138 @@
             </form>
         </script>
 
-        <!-- The template to display ttl preview -->
-        <script id="template-ttl-preview" type="text/x-handlebars-template">{{ header }}
 
-=============
-=  Content  =
-=============
 
-{{ content_ttl }}
+        <!-- template to display stats -->
+        <script id="template-stats" type="text/x-handlebars-template">
+        <hr/>
+        <h3 class="header-div">Statistics</h3>
+        <hr/>
+        {{!-- Public stats --}}
+        <div class='col-md-8'>
+          <h4>Public data</h4>
+          <ul class="list-group col-md-4">
+            <li class="list-group-item"><span class="badge">{{stats.public.ntriples}}</span>Number of triples</li>
+            <li class="list-group-item"><span class="badge">{{stats.public.nentities}}</span>Number of entities</li>
+            <li class="list-group-item"><span class="badge">{{stats.public.nclasses}}</span>Number of classes</li>
+            <li class="list-group-item"><span class="badge">{{stats.public.ngraphs}}</span>Number of graphs</li>
+          </ul>
 
-=================
-=  Abstraction  =
-=================
+        <table class="table table-striped table-bordered">
+          <tr>
+            <th>Graph</th>
+            <th>Loading date</th>
+            <th>Owner</th>
+            <th>Server</th>
+            <th>AskOmics version</th>
+          </tr>
+          {{#each stats.public.graphs}}
+          <tr>
+              <td>{{this.graph}}</td>
+              <td>{{this.date}}</td>
+              <td>{{this.owner}}</td>
+              <td>{{this.server}}</td>
+              <td>{{this.version}}</td>
+          </tr>
+          {{/each}}
+        </table>
 
-{{ abstraction_ttl }}
+        <table class="table table-striped table-bordered">
+          <tr>
+            <th>Class</th>
+            <th>Relation</th>
+          </tr>
+          {{#each stats.public.class_rel}}
+          <tr>
+              <td>{{@key}}</td>
+              <td>{{#each this}}
+              ---- {{this.relname}} ---> {{this.target}} <br>
+              {{/each}}</td>
+          </tr>
+          {{/each}}
+        </table>
 
-======================
-=  Domain knowledge  =
-======================
 
-{{ domain_knowledge_ttl }}
+        <table class="table table-striped table-bordered">
+          <tr>
+            <th>Class</th>
+            <th>Attributes</th>
+          </tr>
+          {{#each stats.public.class_attr}}
+          <tr>
+              <td>{{@key}}</td>
+              <td>
+              {{#each this}}
+              - {{this}} <br>
+              {{/each}}
+              </td>
+          </tr>
+          {{/each}}
+        </table>
+        </div>
+
+        {{!-- Private stats --}}
+        <div class='col-md-8'>
+          <h4>{{stats.username}} data</h4>
+          <ul class="list-group col-md-4">
+            <li class="list-group-item"><span class="badge">{{stats.private.ntriples}}</span>Number of triples</li>
+            <li class="list-group-item"><span class="badge">{{stats.private.nentities}}</span>Number of entities</li>
+            <li class="list-group-item"><span class="badge">{{stats.private.nclasses}}</span>Number of classes</li>
+            <li class="list-group-item"><span class="badge">{{stats.private.ngraphs}}</span>Number of graphs</li>
+          </ul>
+        </div>
+
+        <table class="table table-striped table-bordered">
+          <tr>
+            <th>Graph</th>
+            <th>Loading date</th>
+            <th>Owner</th>
+            <th>Server</th>
+            <th>AskOmics version</th>
+          </tr>
+          {{#each stats.private.graphs}}
+          <tr>
+              <td>{{this.graph}}</td>
+              <td>{{this.date}}</td>
+              <td>{{this.owner}}</td>
+              <td>{{this.server}}</td>
+              <td>{{this.version}}</td>
+          </tr>
+          {{/each}}
+        </table>
+
+        <table class="table table-striped table-bordered">
+          <tr>
+            <th>Class</th>
+            <th>Relation</th>
+          </tr>
+          {{#each stats.private.class_rel}}
+          <tr>
+              <td>{{@key}}</td>
+              <td>{{#each this}}
+              ---- {{this.relname}} ---> {{this.target}} <br>
+              {{/each}}</td>
+          </tr>
+          {{/each}}
+        </table>
+
+        <table class="table table-striped table-bordered">
+          <tr>
+            <th>Class</th>
+            <th>Attributes</th>
+          </tr>
+          {{#each stats.private.class_attr}}
+          <tr>
+              <td>{{@key}}</td>
+              <td>
+              {{#each this}}
+              - {{this}} <br>
+              {{/each}}
+              </td>
+          </tr>
+          {{/each}}
+        </table>
         </script>
+
     </body>
 </html>

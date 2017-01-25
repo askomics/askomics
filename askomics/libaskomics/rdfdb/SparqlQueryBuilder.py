@@ -43,14 +43,31 @@ class SparqlQueryBuilder(ParamManager):
 
         return SparqlQuery(prefixes + query)
 
-    def build_query_for_users_graph(self, replacement):
+    def build_query_for_graph(self, replacement, graph):
         """
-        Build a query to launch on the users graph
+        Build a query to launch on a specific graph
         """
         #TODO: Don't use a template file
 
-        replacement['graph'] = '<' + self.get_param("askomics.users_graph") +  '>'
+        replacement['graph'] = '<' + graph +  '>'
         template = self.get_template_sparql(self.ASKOMICS_usersQueryTemplate)
+
+        with open(template) as template_file:
+            template_string = template_file.read()
+
+        query = Template(template_string).substitute(replacement)
+        prefixes = self.header_sparql_config(query)
+
+        return SparqlQuery(prefixes + query)
+
+    def build_query_for_subgraphof(self, replacement, graph):
+        """
+        Build a query to launch on all subgraph of a specific graph
+        """
+        #TODO: Don't use a template file
+
+        replacement['public_graph'] = '<' + graph +  '>'
+        template = self.get_template_sparql(self.ASKOMICS_publicQueryTemplate)
 
         with open(template) as template_file:
             template_string = template_file.read()
@@ -72,55 +89,7 @@ class SparqlQueryBuilder(ParamManager):
         })
 
 
-######### TODO: refactor all the stats function ############
 
-    # The following utilities use prepare_query to fill a template.
-    def get_statistics_number_of_triples(self):
-        return self.prepare_query(
-            """SELECT (COUNT(?s) AS ?no) WHERE {
-            GRAPH <"""+self.get_param("askomics.graph")+"""> { ?g rdfg:subGraphOf <"""+self.get_param("askomics.graph")+""">}
-            GRAPH ?g { ?s ?p ?o }}""")
-
-    def get_statistics_number_of_triples_AskOmics_graphs(self):
-        return self.prepare_query(
-            """SELECT (COUNT(?s) AS ?no) WHERE {
-            GRAPH <"""+self.get_param("askomics.graph")+"""> { ?s ?p ?o}}""")
-
-    def get_statistics_number_of_entities(self):
-        return self.prepare_query(
-            """SELECT (COUNT(distinct ?s) AS ?no) WHERE {
-            GRAPH <"""+self.get_param("askomics.graph")+"""> { ?g rdfg:subGraphOf <"""+self.get_param("askomics.graph")+""">}
-            GRAPH ?g { ?s a [] }}""")
-
-    def get_statistics_number_of_graphs(self):
-        return self.prepare_query(
-            """SELECT (COUNT(distinct ?g) AS ?no) WHERE {
-            GRAPH <"""+self.get_param("askomics.graph")+"""> { ?g rdfg:subGraphOf <"""+self.get_param("askomics.graph")+""">}
-            GRAPH ?g { ?s ?p ?o } }""")
-
-    def get_statistics_distinct_classes(self):
-        return self.prepare_query(
-            """SELECT (COUNT(distinct ?o) AS ?no) WHERE {
-            GRAPH <"""+self.get_param("askomics.graph")+"""> { ?g rdfg:subGraphOf <"""+self.get_param("askomics.graph")+""">}
-            GRAPH ?g { ?s rdf:type ?o }}""")
-
-    def get_statistics_list_classes(self):
-        return self.prepare_query(
-            """SELECT DISTINCT ?class WHERE {
-            GRAPH <"""+self.get_param("askomics.graph")+"""> { ?g rdfg:subGraphOf <"""+self.get_param("askomics.graph")+""">}
-            GRAPH ?g { ?s a ?classVar. ?classVar rdfs:label ?class. }}""")
-
-    def get_statistics_nb_instances_by_classe(self):
-        return self.prepare_query(
-            """SELECT ?class (COUNT(distinct ?s) AS ?count ) WHERE {
-            GRAPH <"""+self.get_param("askomics.graph")+"""> { ?g rdfg:subGraphOf <"""+self.get_param("askomics.graph")+""">}
-            GRAPH ?g { ?s a ?classVar. ?classVar rdfs:label ?class. }} GROUP BY ?class ORDER BY ?count""")
-
-    def get_statistics_by_startpoint(self):
-        return self.prepare_query(
-            """SELECT ?p (COUNT(?p) AS ?pTotal) WHERE {
-            GRAPH <"""+self.get_param("askomics.graph")+"""> { ?g rdfg:subGraphOf <"""+self.get_param("askomics.graph")+""">}
-            GRAPH ?g { ?node displaySetting:startPoint "true"^^xsd:boolean . }}""")
 
     def get_delete_query_string(self, graph):
         return self.prepare_query(
