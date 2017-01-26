@@ -47,7 +47,7 @@ class SparqlQueryStats(SparqlQueryBuilder):
         """
         return self.build_query_for_subgraphof({
             'select': '(COUNT(DISTINCT ?s) AS ?number)',
-            'query': '?s rdf:type ?o# owl:Class' #FIXME: 
+            'query': '?s rdf:type owl:Class'
         }, self.graph)
 
     def get_number_of_subgraph(self):
@@ -66,11 +66,12 @@ class SparqlQueryStats(SparqlQueryBuilder):
         """
         return self.build_query_for_graph({
             'select': '?graph ?date ?owner ?server ?version',
-            'query': '?graph rdfg:subGraphOf <' + self.graph + '> .\n' +
-                     '\t?s dc:creator ?owner .\n' +
-                     '\t?s dc:hasVersion ?version .\n' +
-                     '\t?s prov:describesService ?server .\n' +
-                     '\t?s prov:generatedAtTime ?date .'
+            'query': '?graph_uri rdfg:subGraphOf <' + self.graph + '> .\n' +
+                     '\t?graph_uri prov:wasDerivedFrom ?graph .\n' +
+                     '\t?graph_uri dc:creator ?owner .\n' +
+                     '\t?graph_uri dc:hasVersion ?version .\n' +
+                     '\t?graph_uri prov:describesService ?server .\n' +
+                     '\t?graph_uri prov:generatedAtTime ?date .'
         }, self.graph)
 
 

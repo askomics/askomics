@@ -342,6 +342,7 @@ function checkExistingData(file_elem) {
  * Load a source_file into the triplestore
  */
 function loadSourceFile(file_elem, pub) {
+    console.log('---> loadSourceFile');
 
     var file_name = file_elem.find('.file_name').attr('id');
 

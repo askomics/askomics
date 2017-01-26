@@ -204,3 +204,23 @@ class SparqlQueryBuilder(ParamManager):
             ?URIusername :email ?email .
             ?URIusername :isadmin ?admin}
         }""")
+
+
+    def prepare_query(self, template, replacement={}):
+        """
+        Prepare a query from a template and a substitution dictionary.
+        The `$graph` variable is the public graph
+        The `$graph2` variable is user graph or public graph if no user logged
+        """
+
+        replacement['graph'] = '<%s>' % self.get_param('askomics.public_graph')
+
+        if 'graph' not in self.session.keys() or self.session['graph'] == '':
+            replacement['graph2'] = '<%s>' % self.get_param('askomics.public_graph')
+        else:
+            replacement['graph2'] = '<%s>' % self.session['graph']
+
+        query = Template(template).substitute(replacement)
+
+        prefixes = self.header_sparql_config(query)
+        return SparqlQuery(prefixes + query)
