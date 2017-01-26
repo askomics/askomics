@@ -23,7 +23,7 @@ class SparqlQueryAuth(SparqlQueryBuilder):
         """
         return self.build_query_for_graph({
             'select': '?status',
-            'query': 'BIND(EXISTS {:' + username + ' rdf:type :user} AS ?status)'
+            'query': 'BIND(EXISTS {:' + username + ' rdf:type foaf:Person} AS ?status)'
         }, self.get_param("askomics.users_graph"))
 
     def check_email_presence(self, email):
@@ -32,7 +32,7 @@ class SparqlQueryAuth(SparqlQueryBuilder):
         """
         return self.build_query_for_graph({
             'select': '?status',
-            'query': 'BIND(EXISTS {?uri :email \"' + email + '\"} AS ?status)'
+            'query': 'BIND(EXISTS { ?uri foaf:mbox <mailto:' + email + '> } AS ?status)'
         }, self.get_param("askomics.users_graph"))
 
     def get_password_with_email(self, email):
@@ -41,9 +41,8 @@ class SparqlQueryAuth(SparqlQueryBuilder):
         """
         return self.build_query_for_graph({
             'select': '?salt ?shapw',
-            'query': '?URIusername rdf:type :user .\n' +
-                     '\t?URIusername rdf:type :user .\n' +
-                     '\t?URIusername :email \"' + email + '\" .\n' +
+            'query': '?URIusername rdf:type foaf:Person .\n' +
+                     '\t?URIusername foaf:mbox <mailto:' + email + '> .\n' +
                      '\t?URIusername :randomsalt ?salt .\n' +
                      '\t?URIusername :password ?shapw .'
         }, self.get_param("askomics.users_graph"))
@@ -54,9 +53,8 @@ class SparqlQueryAuth(SparqlQueryBuilder):
         """
         return self.build_query_for_graph({
             'select': '?salt ?shapw',
-            'query': '?URIusername rdf:type :user .\n' +
-                     '\t?URIusername rdf:type :user .\n' +
-                     '\t?URIusername rdfs:label \"' + username + '\" .\n' +
+            'query': '?URIusername rdf:type foaf:Person .\n' +
+                     '\t?URIusername foaf:name \"' + username + '\" .\n' +
                      '\t?URIusername :randomsalt ?salt .\n' +
                      '\t?URIusername :password ?shapw .'
         }, self.get_param("askomics.users_graph"))
@@ -67,7 +65,7 @@ class SparqlQueryAuth(SparqlQueryBuilder):
         """
         return self.build_query_for_graph({
             'select': '(count(*) AS ?count)',
-            'query': '?s rdf:type :user .'
+            'query': '?s rdf:type foaf:Person .'
         }, self.get_param("askomics.users_graph"))
 
     def get_admin_status_by_username(self, username):
@@ -76,8 +74,8 @@ class SparqlQueryAuth(SparqlQueryBuilder):
         """
         return self.build_query_for_graph({
             'select': '?admin',
-            'query': '?URIusername rdf:type :user .\n' +
-                     '\t?URIusername rdfs:label \"' + username + '\" .\n' +
+            'query': '?URIusername rdf:type foaf:Person .\n' +
+                     '\t?URIusername foaf:name \"' + username + '\" .\n' +
                      '\t?URIusername :isadmin ?admin .'
         }, self.get_param("askomics.users_graph"))
 
@@ -87,8 +85,8 @@ class SparqlQueryAuth(SparqlQueryBuilder):
         """
         return self.build_query_for_graph({
             'select': '?admin',
-            'query': '?URIusername rdf:type :user .\n' +
-                     '\t?URIusername :email \"' + email + '\" .\n' +
+            'query': '?URIusername rdf:type foaf:Person .\n' +
+                     '\t?URIusername foaf:mbox <mailto:' + email + '> .\n' +
                      '\t?URIusername :isadmin ?admin .'
         }, self.get_param("askomics.users_graph"))
 
@@ -98,8 +96,8 @@ class SparqlQueryAuth(SparqlQueryBuilder):
         """
         return self.build_query_for_graph({
             'select': '?username ?email ?admin',
-            'query': '?URIusername rdf:type :user .\n' +
-                     '\t?URIusername rdfs:label ?username .\n' +
-                     '\t?URIusername :email ?email .\n' +
+            'query': '?URIusername rdf:type foaf:Person .\n' +
+                     '\t?URIusername foaf:name ?username .\n' +
+                     '\t?URIusername foaf:mbox ?email .\n' +
                      '\t?URIusername :isadmin ?admin .'
         }, self.get_param("askomics.users_graph"))
