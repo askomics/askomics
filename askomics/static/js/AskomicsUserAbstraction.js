@@ -118,10 +118,7 @@ class AskomicsUserAbstraction {
       /* All relation are stored in tripletSubjectRelationObject */
       instanceUserAbstraction.tripletSubjectRelationObject = resultListTripletSubjectRelationObject.relations;
       /* == External Service can add external relation == */
-      // TODO : Faire un systeme generique appelant tou les instance de service externe au lieu de mettre en dur le nom des services
-      instanceUserAbstraction.tripletSubjectRelationObject = instanceUserAbstraction.tripletSubjectRelationObject.concat(GONode.getRemoteRelations());
       console.log("RELATIONS::"+JSON.stringify(instanceUserAbstraction.tripletSubjectRelationObject));
-
 
       instanceUserAbstraction.entityInformationList = {};
       instanceUserAbstraction.entityPositionableInformationList = {};
@@ -297,12 +294,7 @@ class AskomicsUserAbstraction {
     isPositionable(Uri) {
       return (Uri in this.entityPositionableInformationList);
     }
-
-    isGoterm(Uri) {
-      // TODO using prefix.cc to update entityInformationList
-      return (Uri === "http://purl.org/obo/owl/GO#term");
-    }
-
+    
     /* Setting order attribute display */
     setOrderAttributesList(URINode,listAtt) {
       this.attributesOrderDisplay[URINode] = listAtt.slice();

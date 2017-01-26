@@ -3,10 +3,8 @@ const classesMapping = {
   'GraphNode': GraphNode,
   'AskomicsPositionableNode': AskomicsPositionableNode,
   'AskomicsNode': AskomicsNode,
-  'GONode': GONode,
   'GraphLink': GraphLink,
   'AskomicsLink': AskomicsLink,
-  'GOLink': GOLink,
   'AskomicsPositionableLink': AskomicsPositionableLink
 };
 

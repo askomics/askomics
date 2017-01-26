@@ -15,7 +15,7 @@ class InterfaceParametersView  {
     }
 
     if ( ! (keyword in this.config))
-      throw "GOParametersView::configuration unkown keyword:"+keyword;
+      throw "InterfaceParametersView::configuration unkown keyword:"+keyword;
 
     return this.config[keyword];
   }
@@ -44,7 +44,7 @@ class InterfaceParametersView  {
   createSelect(label,configKey,listOptionsValue,listOptionsText) {
 
     if ( listOptionsValue.length != listOptionsText.length ) {
-      throw "TriplestoreParametersView::createSelect bads arguments with option list ";
+      throw "InterfaceParametersView::createSelect bads arguments with option list ";
     }
 
     let div = $("<div></div>").addClass("row");
