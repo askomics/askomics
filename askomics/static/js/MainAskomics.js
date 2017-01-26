@@ -536,10 +536,7 @@ function displayNavbar(loged, username, admin) {
                     'password': password,
                     'password2': password2  };
 
-      displayModal('Please wait', '', 'Close');
-
       service.post(model, function(data) {
-          hideModal();
           if (data.error.length !== 0) {
             $('#signup_error').empty();
             for (let i = data.error.length - 1; i >= 0; i--) {
