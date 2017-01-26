@@ -342,12 +342,14 @@ class AskView(object):
         file_name = body["file_name"]
         col_types = body["col_types"]
         disabled_columns = body["disabled_columns"]
+        key_columns = body["key_columns"]
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
 
         src_file = sfc.get_source_file(file_name)
         src_file.set_forced_column_types(col_types)
         src_file.set_disabled_columns(disabled_columns)
+        src_file.set_key_columns(key_columns)
 
         cont_ttl = '\n'.join(src_file.get_turtle(preview_only=True))
         data = textwrap.dedent(
@@ -396,12 +398,14 @@ class AskView(object):
         file_name = body["file_name"]
         col_types = body["col_types"]
         disabled_columns = body["disabled_columns"]
+        key_columns = body["key_columns"]
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
         try:
             src_file = sfc.get_source_file(file_name)
             src_file.set_forced_column_types(col_types)
             src_file.set_disabled_columns(disabled_columns)
+            src_file.set_key_columns(key_columns)
 
             headers_status, missing_headers = src_file.compare_to_database()
 
@@ -432,6 +436,7 @@ class AskView(object):
         file_name = body["file_name"]
         col_types = body["col_types"]
         disabled_columns = body["disabled_columns"]
+        key_columns = body["key_columns"]
         public = body['public']
 
         # Allow data integration in public graph only if user is an admin
@@ -445,6 +450,7 @@ class AskView(object):
             src_file = sfc.get_source_file(file_name)
             src_file.set_forced_column_types(col_types)
             src_file.set_disabled_columns(disabled_columns)
+            src_file.set_key_columns(key_columns)
 
             urlbase = re.search(r'(http:\/\/.*)\/.*', self.request.current_route_url())
             urlbase = urlbase.group(1)

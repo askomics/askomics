@@ -506,7 +506,7 @@
         <script id="template-csv-form" type="text/x-handlebars-template">
             <form id="source-file-tsv-{{file.name}}" class="template-source_file form-horizontal text-center">
                 <h4 class="file_name" id="{{file.name}}" >TSV file: {{ file.name }}</h4>
-                <br>
+                <br/>
                 {{#if error}}
                     <p class="error">{{ error }}</p>
                 {{else}}
@@ -516,15 +516,28 @@
                             {{#each file.headers}}
                                 <th class='column_header'>
                                     {{#unless @first}}
-                                        <input type='checkbox' class='toggle_column' checked />
+                                        <input type='checkbox' class='toggle_column_present' checked />
+                                        <!--
                                         <i id='relation_present' class="material-icons">done</i>
                                         <i id='relation_new' class="material-icons">fiber_new</i>
+                                        -->
                                     {{/unless}}
                                     {{ this }}
+
                                 </th>
                             {{/each}}
-
                             </tr>
+                            <tr>
+                              {{#each file.headers}}
+                               <th>
+                                 {{#if @first}}
+                                  <input type='checkbox' class='toggle_column_key' checked /> <i class="material-icons md-18">vpn_key</i>
+                                 {{else}}
+                                  <input type='checkbox' class='toggle_column_key'/> <i class="material-icons md-18">vpn_key</i>
+                                 {{/if}}
+                              </th>
+                              {{/each}}
+                           </tr>
                             <tr>
                             {{#each file.headers}}
                                 <th>

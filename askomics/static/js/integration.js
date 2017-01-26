@@ -5,7 +5,7 @@
 $(function () {
 
     // Generate preview data
-    $("#content_integration").on('change', '.toggle_column', function(event) {
+    $("#content_integration").on('change', '.toggle_column_present', function(event) {
         var block = $(event.target).closest('.template-source_file');
         if (block.find('.preview_field').is(':visible')) {
             previewTtl(block);
@@ -226,15 +226,28 @@ function previewTtl(file_elem) {
 
     // Find which column is disabled
     var disabled_columns = [];
-    file_elem.find('.toggle_column').each(function( index ) {
+    file_elem.find('.toggle_column_present').each(function( index ) {
         if (!$(this).is(':checked')) {
             disabled_columns.push(index + 1); // +1 to take into account the first non-disablable column
         }
     });
 
+    let key_columns = [];
+    file_elem.find('.toggle_column_key').each(function( index ) {
+        if ($(this).is(':checked')) {
+            key_columns.push(index); // +1 to take into account the first non-disablable column
+        }
+    });
+
+    if ( key_columns.length <= 0 ) {
+        displayModal('Select one column to define a unique key', '', 'Close');
+        return;
+    }
+
     var service = new RestServiceJs("preview_ttl");
     var model = { 'file_name': file_name,
                   'col_types': col_types,
+                  'key_columns' : key_columns,
                   'disabled_columns': disabled_columns };
 
     service.post(model, function(data) {
@@ -302,16 +315,30 @@ function checkExistingData(file_elem) {
 
     // Find which column is disabled
     var disabled_columns = [];
-    file_elem.find('.toggle_column').each(function( index ) {
+    file_elem.find('.toggle_column_present').each(function( index ) {
         if (!$(this).is(':checked')) {
             disabled_columns.push(index + 1); // +1 to take into account the first non-disablable column
         }
     });
 
+    let key_columns = [];
+    file_elem.find('.toggle_column_key').each(function( index ) {
+        if ($(this).is(':checked')) {
+            key_columns.push(index); // +1 to take into account the first non-disablable column
+        }
+    });
+
+    if ( key_columns.length <= 0 ) {
+        displayModal('Select one column to define a unique key', '', 'Close');
+        return;
+    }
+
     var service = new RestServiceJs("check_existing_data");
     var model = { 'file_name': file_name,
                   'col_types': col_types,
-                  'disabled_columns': disabled_columns };
+                  'disabled_columns': disabled_columns,
+                  'key_columns':key_columns
+                };
 
     service.post(model, function(data) {
         if (data == 'forbidden') {
@@ -343,20 +370,32 @@ function checkExistingData(file_elem) {
  */
 function loadSourceFile(file_elem, pub) {
 
-    var file_name = file_elem.find('.file_name').attr('id');
+    let file_name = file_elem.find('.file_name').attr('id');
 
     // Get column types
-    var col_types = file_elem.find('.column_type').map(function() {
+    let col_types = file_elem.find('.column_type').map(function() {
         return $(this).val();
     }).get();
 
     // Find which column is disabled
-    var disabled_columns = [];
-    file_elem.find('.toggle_column').each(function( index ) {
+    let disabled_columns = [];
+    file_elem.find('.toggle_column_present').each(function( index ) {
         if (!$(this).is(':checked')) {
             disabled_columns.push(index + 1); // +1 to take into account the first non-disablable column
         }
     });
+
+    let key_columns = [];
+    file_elem.find('.toggle_column_key').each(function( index ) {
+        if ($(this).is(':checked')) {
+            key_columns.push(index); // +1 to take into account the first non-disablable column
+        }
+    });
+
+    if ( key_columns.length <= 0 ) {
+        displayModal('Select one column to define a unique key', '', 'Close');
+        return;
+    }
 
     displayModal('Please wait', '', 'Close');
 
@@ -364,6 +403,7 @@ function loadSourceFile(file_elem, pub) {
     var model = { 'file_name': file_name,
                   'col_types': col_types,
                   'disabled_columns': disabled_columns,
+                  'key_columns':key_columns,
                   'public': pub};
 
     service.post(model, function(data) {
@@ -374,9 +414,9 @@ function loadSourceFile(file_elem, pub) {
         var insert_status_elem = file_elem.find(".insert_status").first();
         var insert_warning_elem = file_elem.find(".insert_warning").first();
         if (data.status != "ok") {
-            alert(data.error);
-            insert_warning_elem.append('<span class="glyphicon glyphicon glyphicon-exclamation-sign"></span>')
-                               .html(data.error);
+           console.log(data.error);
+            insert_warning_elem.append($('<span class="glyphicon glyphicon glyphicon-exclamation-sign"></span>')).
+                               append($('<p></p>').html(data.error));
 
             if ('url' in data) {
                 insert_warning_elem.append("<br>You can view the ttl file here: <a href=\""+data.url+"\">"+data.url+"</a>");

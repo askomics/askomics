@@ -173,7 +173,7 @@ class TripleStoreExplorer(ParamManager):
         if send_request_to_tps:
             results = query_launcher.process_query(sqb.custom_query(select, query).query)
         else:
-            pass
+            results = []
 
         return results, query
 

@@ -27,6 +27,8 @@ class SourceFileTsv(SourceFile):
         self.preview_limit = preview_limit
 
         self.forced_column_types = ['entity']
+        self.disabled_columns = []
+        self.key_columns = [];
 
         self.category_values = defaultdict(set)
 
@@ -208,6 +210,31 @@ class SourceFileTsv(SourceFile):
 
         self.disabled_columns = disabled_columns
 
+    def set_key_columns(self, key_columns):
+        """
+        Set all column to build unqiue ID
+
+        :param disabled_columns: a List of column ids (0 based) that should not be imported
+        """
+
+        self.key_columns = key_columns
+
+    def key_id(self,row):
+
+        retval = None
+        print("===============================================")
+        print(self.key_columns)
+        print(row)
+        for key in self.key_columns:
+            if retval == None:
+                retval = row[int(self.key_columns[key])]
+            else:
+                retval += "_"+ row[int(self.key_columns[key])]
+
+        print(retval)
+        print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
+        return retval
+
     def get_abstraction(self):
         # TODO use rdflib or other abstraction layer to create rdf
         """
@@ -332,9 +359,9 @@ class SourceFileTsv(SourceFile):
 
                 # Create the entity (first column)
                 entity_label = row[0]
-                indent = (len(entity_label) + 1) * " "
-                #ttl += ":" + self.encodeToRDFURI(entity_label) + " rdf:type :" + self.encodeToRDFURI(self.headers[0]) + " ;\n"
-                ttl += ":" + self.encodeToRDFURI(entity_label+"_"+str(uuid.uuid1())) + " rdf:type :" + self.encodeToRDFURI(self.headers[0]) + " ;\n"
+                entity_id = self.key_id(row)
+                indent = (len(entity_id) + 1) * " "
+                ttl += ":" + self.encodeToRDFURI(entity_id) + " rdf:type :" + self.encodeToRDFURI(self.headers[0]) + " ;\n"
                 ttl += indent + " rdfs:label \"" + entity_label + "\" ;\n"
 
                 # Add data from other columns
