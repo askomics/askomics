@@ -78,18 +78,27 @@ function loadStartPoints() {
 
         let text;
 
-        if (value.public) {
+        if (value.public && value.private) {
+          text = $('<em></em>').append($('<strong></strong>').attr('class', 'text-warning')
+                               .append($('<i></i>').attr('class', 'fa fa-globe text-warning'))
+                               .append(' ')
+                               .append($('<i></i>').attr('class', 'fa fa-lock text-primary'))
+                               .append(' ' + value.label));
+        }
+
+        if (value.public && !value.private) {
           text = $('<em></em>').attr('class', 'text-warning')
                                .append($('<i></i>').attr('class', 'fa fa-globe'))
                                .append(' ' + value.label);
-        }else{
-          text = $('<strong></strong>').attr('class', 'text-primary')
-                                       .append($('<i></i>').attr('class', 'fa fa-lock'))
-                                       .append(' ' + value.label);
-
         }
 
-          $('#startpoints').append($('<option></option>').attr('data-value', JSON.stringify(value))
+        if (!value.public && value.private) {
+          text = $('<strong></strong>').attr('class', 'text-primary')
+                               .append($('<i></i>').attr('class', 'fa fa-lock'))
+                               .append(' ' + value.label);
+        }
+
+        $('#startpoints').append($('<option></option>').attr('data-value', JSON.stringify(value))
                                                          .append(text));
 
       });
@@ -105,6 +114,7 @@ function loadStartPoints() {
 function loadNamedGraphs() {
 
     new AskomicsUserAbstraction().loadUserAbstraction();
+    console.log('loadNamedGraphs');
 
     var select = $('#dropNamedGraphSelected');
     select.empty();
@@ -168,117 +178,28 @@ function showLoginForm() {
 }
 
 function loadStatistics() {
+    console.log('-+-+- loadStatistics -+-+-');
 
+    let service = new RestServiceJs('statistics');
 
-  displayModal('Please Wait', '', 'Close');
+    displayModal('Loading statistics...', '', 'Close');
+    service.getAll(function(stats) {
+      if (stats == 'forbidden') {
+        showLoginForm();
+        return;
+      }
 
-  new AskomicsUserAbstraction().loadUserAbstraction();
+      $('#content_statistics').empty();
+      let source = $('#template-stats').html();
+      let template = Handlebars.compile(source);
+      let context = {stats: stats};
+      let html = template(context);
+      $('#content_statistics').append(html);
 
-  var service = new RestServiceJs("statistics");
-  service.getAll(function(stats) {
-    if (stats == 'forbidden') {
-      showLoginForm();
-    }
-    $('#statistics_div').empty();
-    $('#statistics_div')
-    .append($("<p></p>").text("Number of triples  : "+stats.ntriples))
-    .append($("<p></p>").text("Number of entities : "+stats.nentities))
-    .append($("<p></p>").text("Number of classes : "+stats.nclasses))
-    .append($("<p></p>").text("Number of graphs: "+stats.ngraphs));
-
-    let table=$("<table></table>").addClass('table').addClass('table-bordered');
-    let th = $("<tr></tr>").addClass("table-bordered").attr("style", "text-align:center;");
-    th.append($("<th></th>").text("Graph"));
-    th.append($("<th></th>").text("Load Date"));
-    th.append($("<th></th>").text("Username"));
-    th.append($("<th></th>").text("Server"));
-    th.append($("<th></th>").text("AskOmics Version"));
-    table.append(th);
-
-    $.each(stats.metadata, function(key) {
-
-      let d = new Date(stats.metadata[key].loadDate*1000);
-      let date = d.toLocaleString();
-
-        let tr = $("<tr></tr>")
-            .append($("<td></td>").text(stats.metadata[key].filename))
-            .append($("<td></td>").text(date))
-            .append($("<td></td>").text(stats.metadata[key].username))
-            .append($("<td></td>").text(stats.metadata[key].server))
-            .append($("<td></td>").text(stats.metadata[key].version));
-        table.append(tr);
+      hideModal();
     });
-
-    $('#statistics_div').append(table);
-
-    table=$("<table></table>").addClass('table').addClass('table-bordered');
-    th = $("<tr></tr>").addClass("table-bordered").attr("style", "text-align:center;");
-    th.append($("<th></th>").text("Class"));
-    th.append($("<th></th>").text("Nb"));
-    table.append(th);
-
-    $.each(stats['class'], function(key, value) {
-      let tr = $("<tr></tr>")
-            .append($("<td></td>").text(key))
-            .append($("<td></td>").text(value.count));
-      table.append(tr);
-    });
-    $('#statistics_div').append(table);
-
-    var entities = new AskomicsUserAbstraction().getEntities() ;
-
-    table=$("<table></table>").addClass('table').addClass('table-bordered');
-    th = $("<tr></tr>").addClass("table-bordered").attr("style", "text-align:center;");
-    th.append($("<th></th>").text("Class"));
-    th.append($("<th></th>").text("Relations"));
-    table.append(th);
-
-    for (let ent1 in entities ) {
-      let tr = $("<tr></tr>")
-            .append($("<td></td>").text(new AskomicsUserAbstraction().getAttribEntity(entities[ent1],new AskomicsUserAbstraction().longRDF('rdfs:label'))));
-            let rels = "";
-            var t = new AskomicsUserAbstraction().getRelationsObjectsAndSubjectsWithURI(entities[ent1]);
-            var subjectTarget = t[0];
-            for ( var ent2 in subjectTarget) {
-              for (var rel of subjectTarget[ent2]) {
-                rels += new GraphObject({ uri : entities[ent1]}).removePrefix() +
-                " ----" + new GraphObject({ uri : rel}).removePrefix() +
-                "----> " + new GraphObject({ uri : ent2}).removePrefix() + "</br>";
-              }
-            }
-
-            tr.append($("<td></td>").html(rels));
-      table.append(tr);
-    }
-
-    $('#statistics_div').append(table);
-
-
-    table = $("<table></table>").addClass('table').addClass('table-bordered');
-    th = $("<tr></tr>").addClass("table-bordered").attr("style", "text-align:center;");
-    th.append($("<th></th>").text("Class"));
-    th.append($("<th></th>").text("Attributes"));
-    table.append(th);
-
-    for (let ent1 in entities ) {
-    //$.each(stats['class'], function(key, value) {
-      let tr = $("<tr></tr>")
-            .append($("<td></td>").text(new AskomicsUserAbstraction().getAttribEntity(entities[ent1],new AskomicsUserAbstraction().longRDF('rdfs:label'))));
-            let attrs = "";
-            let cats = "";
-            var listAtt = new AskomicsUserAbstraction().getAttributesEntity(entities[ent1]);
-            for (var att of listAtt) {
-                attrs += '- '+att.label +"</br>";
-            }
-            tr.append($("<td></td>").html(attrs));
-      table.append(tr);
-    //});
-    }
-
-    hideModal();
-    $('#statistics_div').append(table);
-  });
 }
+
 
 function emptyDatabase(value) {
     if (value == 'confirm') {

@@ -46,10 +46,12 @@ class TripleStoreExplorer(ParamManager):
 
             if 'private' in result['g']:
                 public = False
+                private = True
             else:
                 public = True
+                private = False
 
-            nodes.append({'uri': uri, 'label': label, 'public': public})
+            nodes.append({'uri': uri, 'label': label, 'public': public, 'private': private})
 
         return nodes
 
@@ -61,29 +63,32 @@ class TripleStoreExplorer(ParamManager):
         :rtype:
         """
         data = {}
-        listEntities = {}
+        list_entities = {}
 
         self.log.debug(" =========== TripleStoreExplorer:getUserAbstraction ===========")
 
         nodes_startpoint = self.get_start_points()
         # add start node at first
         for node in nodes_startpoint:
-            listEntities[node['uri']]=0
+            list_entities[node['uri']] = 0
 
-        sqb = SparqlQueryBuilder(self.settings, self.session)
+        # sqb = SparqlQueryBuilder(self.settings, self.session)
+        sqg = SparqlQueryGraph(self.settings, self.session)
         ql = QueryLauncher(self.settings, self.session)
 
-        sparql_template = self.get_template_sparql(self.ASKOMICS_abstractionRelationUser)
-        query = sqb.load_from_file(sparql_template, { 'OwlProperty' : 'owl:ObjectProperty'}).query
-        results = ql.process_query(query)
+        # sparql_template = self.get_template_sparql(self.ASKOMICS_abstractionRelationUser)
+        # query = sqb.load_from_file(sparql_template, { 'OwlProperty' : 'owl:ObjectProperty'}).query
+        # results = ql.process_query(query)
+
+        results = ql.process_query(sqg.get_abstraction_relation('owl:ObjectProperty').query)
 
         data['relations'] = results
 
         for elt in results:
-            if not elt['object'] in listEntities:
-                listEntities[elt['object']]=0
-            if not elt['subject'] in listEntities:
-                listEntities[elt['subject']]=0
+            if not elt['object'] in list_entities:
+                list_entities[elt['object']] = 0
+            if not elt['subject'] in list_entities:
+                list_entities[elt['subject']] = 0
 
         #sparql_template = self.get_template_sparql(self.ASKOMICS_abstractionRelationUser)
         #query = sqb.load_from_file(sparql_template, { 'OwlProperty' : 'owl:SymmetricProperty'}).query
@@ -92,33 +97,41 @@ class TripleStoreExplorer(ParamManager):
         #data['relationsSym'] = results
 
         #for elt in results:
-        #    if not elt['object'] in listEntities:
-        #        listEntities[elt['object']]=0
-        #    if not elt['subject'] in listEntities:
-        #        listEntities[elt['subject']]=0
+        #    if not elt['object'] in list_entities:
+        #        list_entities[elt['object']]=0
+        #    if not elt['subject'] in list_entities:
+        #        list_entities[elt['subject']]=0
 
-        filterEntities = ' '.join(["<"+s+">" for s in listEntities.keys()])
-        sparql_template = self.get_template_sparql(self.ASKOMICS_abstractionEntityUser)
-        query = sqb.load_from_file(sparql_template, {"entities" : filterEntities }).query
-        results = ql.process_query(query)
+        filter_entities = ' '.join(["<"+s+">" for s in list_entities.keys()])
+        # sparql_template = self.get_template_sparql(self.ASKOMICS_abstractionEntityUser)
+        # query = sqb.load_from_file(sparql_template, {"entities" : filter_entities }).query
+        # results = ql.process_query(query)
+
+        results = ql.process_query(sqg.get_abstraction_entity(filter_entities).query)
 
         data['entities'] = results
 
-        sparql_template = self.get_template_sparql(self.ASKOMICS_abstractionAttributesEntityUser)
-        query = sqb.load_from_file(sparql_template, {"entities" : filterEntities }).query
-        results = ql.process_query(query)
+        # sparql_template = self.get_template_sparql(self.ASKOMICS_abstractionAttributesEntityUser)
+        # query = sqb.load_from_file(sparql_template, {"entities" : filter_entities }).query
+        # results = ql.process_query(query)
+
+        results = ql.process_query(sqg.get_abstraction_attribute_entity(filter_entities).query)
 
         data['attributes'] = results
 
-        sparql_template = self.get_template_sparql(self.ASKOMICS_abstractionCategoriesEntityUser)
-        query = sqb.load_from_file(sparql_template, {"entities" : filterEntities }).query
-        results = ql.process_query(query)
+        # sparql_template = self.get_template_sparql(self.ASKOMICS_abstractionCategoriesEntityUser)
+        # query = sqb.load_from_file(sparql_template, {"entities" : filter_entities }).query
+        # results = ql.process_query(query)
+
+        results = ql.process_query(sqg.get_abstraction_category_entity(filter_entities).query)
 
         data['categories'] = results
 
-        sparql_template = self.get_template_sparql(self.ASKOMICS_abstractionPositionableEntityUser)
-        query = sqb.load_from_file(sparql_template, {}).query
-        results = ql.process_query(query)
+        # sparql_template = self.get_template_sparql(self.ASKOMICS_abstractionPositionableEntityUser)
+        # query = sqb.load_from_file(sparql_template, {}).query
+        # results = ql.process_query(query)
+
+        results = ql.process_query(sqg.get_abstraction_positionable_entity().query)
 
         data['positionable'] = results
 

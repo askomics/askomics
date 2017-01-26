@@ -9,7 +9,8 @@ from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
 class SparqlQueryGraph(SparqlQueryBuilder):
     """
     This class contain method to build a sparql query to
-    extract data
+    extract data from public and private graph
+    It replace the template files
     """
 
     def __init__(self, settings, session):
@@ -79,12 +80,13 @@ class SparqlQueryGraph(SparqlQueryBuilder):
                      '\t?URItax rdfs:label ?taxon'
         })
 
-    def get_abstraction(self, entities):
+    def get_abstraction_attribute_entity(self, entities):
         """
+        Get all attributes of an entity
         """
         return self.build_query_from_template({
             'select': '?entity ?attribute ?labelAttribute ?typeAttribute',
-            'query': '?entity rdf:type owl:class .\n' +
+            'query': '?entity rdf:type owl:Class .\n' +
                      '\t?attribute displaySetting:attribute "true"^^xsd:boolean .\n\n' +
                      '\t?attribute rdf:type owl:DatatypeProperty ;\n' +
                      '\t           rdfs:label ?labelAttribute ;\n' +
@@ -93,3 +95,66 @@ class SparqlQueryGraph(SparqlQueryBuilder):
                      '\tVALUES ?entity { ' + entities + ' }\n' +
                      '\tVALUES ?typeAttribute { xsd:decimal xsd:string }'
         })
+
+    def get_abstraction_relation(self, prop):
+        """
+        Get the relation of an entity
+        """
+        return self.build_query_from_template({
+            'select': '?subject ?relation ?object',
+            'query': '?relation rdf:type ' + prop + ' ;\n' +
+                     '\t          rdf:domain ?subject ;\n' +
+                     '\t          rdfs:range ?object .\n' +
+                     '\t?subject rdf:type owl:Class .\n' +
+                     '\t?object rdf:type owl:Class\n'
+            })
+
+
+    def get_abstraction_entity(self, entities):
+        """
+        Get theproperty of an entity
+        """
+        return self.build_query_from_template({
+            'select': '?entity ?property ?value',
+            'query': '?entity ?property ?value .\n' +
+                     '\t?entity rdf:type owl:Class .\n' +
+                     '\tVALUES ?entity { ' + entities + ' }'
+            })
+
+    def get_abstraction_positionable_entity(self):
+        """
+        Get all positionable entities
+        """
+        return self.build_query_from_template({
+            'select': '?entity',
+            'query': '?entity rdf:type owl:Class .\n' +
+                     '\t?entity displaySetting:is_positionable "true"^^xsd:boolean .'
+            })
+
+    def get_abstraction_category_entity(self, entities):
+        """
+        Get the category of an entity
+        """
+        return self.build_query_from_template({
+            'select': '?entity ?category ?labelCategory ?typeCategory',
+            'query': '?entity rdf:type owl:Class .\n' +
+                     '\t?typeCategory displaySetting:category [] .\n' +
+                     '\t?category rdf:type owl:ObjectProperty ;\n' +
+                     '\t            rdfs:label ?labelCategory ;\n' +
+                     '\t            rdfs:domain ?entity;\n' +
+                     '\t            rdfs:range ?typeCategory\n' +
+                     '\tVALUES ?entity { ' + entities + ' }'
+            })
+
+    def get_class_info_from_abstraction(self, node_class):
+        """
+        get 
+        """
+        return self.build_query_from_template({
+            'select': '?relation_label',
+            'query': '?class rdf:type owl:Class .\n' +
+                     '\tOPTIONAL { ?relation rdfs:domain ?class } .\n' +
+                     '\tOPTIONAL { ?relation rdfs:range ?range } .\n' +
+                     '\tOPTIONAL { ?relation rdfs:label ?relation_label } .\n' +
+                     '\tVALUES ?class { :' + node_class + ' }'
+            })

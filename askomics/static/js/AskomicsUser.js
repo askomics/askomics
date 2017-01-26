@@ -22,10 +22,10 @@ class AskomicsUser {
         let service = new RestServiceJs("checkuser");
         let self = this;
 
-        displayModal('Please wait', '', 'Close');
+        // displayModal('Please wait', '', 'Close');
 
         service.getAll(function(data) {
-            hideModal();
+            // hideModal();
             if (data.username) {
                 self.username = data.username;
                 self.admin = data.admin;
