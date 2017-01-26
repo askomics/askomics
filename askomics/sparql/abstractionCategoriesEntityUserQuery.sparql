@@ -14,7 +14,7 @@ WHERE{
         ?entity rdf:type owl:Class .
             ?typeCategory displaySetting:category [] .
 
-        ?category rdf:type owl:ObjectProperty;
+        ?category rdf:type owl:ObjectProperty ;
                     rdfs:label ?labelCategory ;
                     rdfs:domain ?entity;
                     rdfs:range ?typeCategory.

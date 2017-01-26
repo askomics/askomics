@@ -10,6 +10,7 @@ import datetime
 
 from askomics.libaskomics.ParamManager import ParamManager
 from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
+from askomics.libaskomics.rdfdb.SparqlQueryGraph import SparqlQueryGraph
 from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
 from askomics.libaskomics.utils import cached_property, HaveCachedProperties
 
@@ -27,6 +28,10 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         self.timestamp = datetime.datetime.now().isoformat()
 
+        self.graph = ''
+
+        self.parent_graph = ''
+
         self.path = path
 
         # The name should not contain extension as dots are not allowed in rdf names
@@ -35,37 +40,30 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         self.log = logging.getLogger(__name__)
 
-        self.metadatas = {
-            'loadDate': '',
-            'username': getpass.getuser(),
-            'fileName': self.name,
-            'version': get_distribution('Askomics').version,
-            'server': '',
-            'graphName':''}
-
         self.reset_cache()
 
-        self.graph = ''
+    def insert_metadatas(self):
+        """
+        Insert the metadatas into the parent graph
+        """
 
-    def get_metadatas(self):
-        """
-        Create metadatas and insert them into AskOmics main graph.
-        """
-        self.log.debug("====== INSERT METADATAS ======")
+        self.log.debug('--- insert_metadatas ---')
+
         sqb = SparqlQueryBuilder(self.settings, self.session)
-        ql = QueryLauncher(self.settings, self.session)
+        query_laucher = QueryLauncher(self.settings, self.session)
 
-        ttlMetadatas = "<" + self.metadatas['graphName'] + "> " + "prov:generatedAtTime " + '"' + self.metadatas['loadDate'] + '"^^xsd:dateTime .\n'
-        ttlMetadatas += "<" + self.metadatas['graphName'] + "> " + "dc:creator " + '"' + self.metadatas['username'] + '"^^xsd:string  .\n'
-        ttlMetadatas += "<" + self.metadatas['graphName'] + "> " + "prov:wasDerivedFrom " + '"' + self.metadatas['fileName'] + '"^^xsd:string .\n'
-        ttlMetadatas += "<" + self.metadatas['graphName'] + "> " + "dc:hasVersion " + '"' + self.metadatas['version'] + '"^^xsd:string .\n'
-        ttlMetadatas += "<" + self.metadatas['graphName'] + "> " + "prov:describesService " + '"' + self.metadatas['server'] + '"^^xsd:string .'
+        ttl = '<' + self.graph + '> prov:generatedAtTime "' + self.timestamp + '"^^xsd:dateTime .\n'
+        ttl += '<' + self.graph + '> dc:creator "' + self.session['username'] + '" .\n'
+        ttl += '<' + self.graph + '> prov:wasDerivedFrom "' + self.name + '" .\n'
+        ttl += '<' + self.graph + '> dc:hasVersion "' + get_distribution('Askomics').version + '" .\n'
+        ttl += '<' + self.graph + '> prov:describesService "' + self.get_param('askomics.triplestore') + '" .\n'
 
-        sparqlHeader = sqb.header_sparql_config("")
+        # Insert triple subgraphof
+        ttl += '<' + self.graph + '> rdfg:subGraphOf ' + '<' + self.parent_graph + '>'
 
-        self.log.debug(ttlMetadatas)
+        sparql_header = sqb.header_sparql_config('')
 
-        ql.insert_data(ttlMetadatas, self.graph, sparqlHeader)
+        query_laucher.insert_data(ttl, self.parent_graph, sparql_header)
 
     @cached_property
     def existing_relations(self):
@@ -75,20 +73,16 @@ class SourceFile(ParamManager, HaveCachedProperties):
         :return: a List of relation names
         :rtype: List
         """
+        #FIXME: Useless function, always return an empty list
         self.log.debug("existing_relations")
         existing_relations = []
 
-        sqb = SparqlQueryBuilder(self.settings, self.session)
+        sqg = SparqlQueryGraph(self.settings, self.session)
         ql = QueryLauncher(self.settings, self.session)
 
-        sparql_template = self.get_template_sparql(self.ASKOMICS_get_class_info_from_abstraction_queryFile)
-        query = sqb.load_from_file(sparql_template, {"nodeClass": self.headers[0]}).query
-
-        results = ql.process_query(query)
+        results = ql.process_query(sqg.get_class_info_from_abstraction(self.headers[0]).query)
 
         return existing_relations
-
-
 
     def persist(self, urlbase, method, public):
         """
@@ -98,22 +92,28 @@ class SourceFile(ParamManager, HaveCachedProperties):
         :return: a dictionnary with information on the success or failure of the operation
         :rtype: Dict
         """
+
+
+        # First step, complete the metadatas: graph and parent_graph
+
+        if public:
+            self.parent_graph = self.get_param('askomics.public_graph')
+        else:
+            self.parent_graph = self.session['graph']
+
+        self.graph = self.parent_graph + ':' + self.name + '_' + self.timestamp
+
+
         content_ttl = self.get_turtle()
 
         ql = QueryLauncher(self.settings, self.session)
-
-        # Get in which graph data will be inserted
-        if public:
-            self.graph = self.get_param("askomics.public_graph")
-        else:
-            self.graph = self.session['graph']
 
         # use insert data instead of load sparql procedure when the dataset is small
         total_triple_count = 0
         chunk_count = 1
         chunk = ""
         pathttl = self.get_ttl_directory()
-        if method == 'load': #FIXME: load doesn't work
+        if method == 'load':
 
             fp = None
 
@@ -124,7 +124,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
                 if triple_count > int(self.settings['askomics.max_content_size_to_update_database']):
                     # Temp file must be accessed by http so we place it in askomics/ttl/ dir
-                    fp = tempfile.NamedTemporaryFile(dir=pathttl, prefix="tmp_"+self.metadatas['fileName'], suffix=".ttl", mode="w", delete=False)
+                    fp = tempfile.NamedTemporaryFile(dir=pathttl, prefix="tmp_"+self.name, suffix=".ttl", mode="w", delete=False)
                     # We have reached the maximum chunk size, load it and then we will start a new chunk
                     self.log.debug("Loading ttl chunk %s file %s" % (chunk_count, fp.name))
                     header_ttl = self.get_turtle_template(chunk)
@@ -143,7 +143,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
             # Load the last chunk
             if triple_count > 0:
                 self.log.debug("Loading ttl chunk %s (last)" % (chunk_count))
-                fp = tempfile.NamedTemporaryFile(dir=pathttl, prefix="tmp_"+self.metadatas['fileName'], suffix=".ttl", mode="w", delete=False)
+                fp = tempfile.NamedTemporaryFile(dir=pathttl, prefix="tmp_"+self.name, suffix=".ttl", mode="w", delete=False)
                 header_ttl = self.get_turtle_template(chunk)
                 fp.write(header_ttl + '\n')
                 fp.write(chunk)
@@ -162,7 +162,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
             domain_knowledge_ttl = self.get_domain_knowledge()
             header_ttl = self.get_turtle_template(abstraction_ttl+"\n"+domain_knowledge_ttl)
 
-            fp = tempfile.NamedTemporaryFile(dir=pathttl, prefix="tmp_"+self.metadatas['fileName'], suffix=".ttl", mode="w", delete=False)
+            fp = tempfile.NamedTemporaryFile(dir=pathttl, prefix="tmp_"+self.name, suffix=".ttl", mode="w", delete=False)
             fp.write(header_ttl + '\n')
             fp.write(abstraction_ttl + '\n')
             fp.write(domain_knowledge_ttl + '\n')
@@ -240,11 +240,11 @@ class SourceFile(ParamManager, HaveCachedProperties):
             data = {}
 
             self.metadatas['server'] = queryResults.info()['server']
-            self.metadatas['loadDate'] = self.timestamp
 
             data['status'] = 'ok'
             data['total_triple_count'] = total_triple_count
-            self.get_metadatas()
+
+        self.insert_metadatas()
 
         data['expected_lines_number'] = self.get_number_of_lines()
 
@@ -263,24 +263,15 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         sqb = SparqlQueryBuilder(self.settings, self.session)
         ql = QueryLauncher(self.settings, self.session)
-        graphName = self.graph + ':' + self.name + '_' + self.timestamp
-        self.metadatas['graphName'] = graphName
-        ttlNamedGraph = "<" + graphName + "> " + "rdfg:subGraphOf" + " <" + self.graph + "> ."
-        sparqlHeader = sqb.header_sparql_config("")
-        ql.insert_data(ttlNamedGraph, self.graph, sparqlHeader)
 
         url = urlbase+"/ttl/"+ self.session['username'] + '/' + os.path.basename(fp.name)
         self.log.debug(url)
         data = {}
         try:
             if self.is_defined("askomics.file_upload_url"):
-                queryResults = ql.upload_data(fp.name, graphName)
-                self.metadatas['server'] = queryResults.headers['Server']
-                self.metadatas['loadDate'] = self.timestamp
+                queryResults = ql.upload_data(fp.name, self.graph)
             else:
-                queryResults = ql.load_data(url, graphName)
-                self.metadatas['server'] = queryResults.info()['server']
-                self.metadatas['loadDate'] = self.timestamp
+                queryResults = ql.load_data(url, self.graph)
             data['status'] = 'ok'
         except Exception as e:
             self._format_exception(e, data=data)
@@ -289,8 +280,6 @@ class SourceFile(ParamManager, HaveCachedProperties):
                 data['url'] = url
             else:
                 os.remove(fp.name) # Everything ok, remove temp file
-
-        self.get_metadatas()
 
         return data
 

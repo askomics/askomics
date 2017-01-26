@@ -13,16 +13,18 @@ class ParamManager(object):
         self.session = session
 
         # Dev SPARQL files template
+        # Template file are no longer used
         # FIXME use a dict to store settings
-        self.ASKOMICS_abstractionRelationUser = "abstractionRelationUserQuery.sparql"
-        self.ASKOMICS_abstractionEntityUser = "abstractionEntityUserQuery.sparql"
-        self.ASKOMICS_abstractionPositionableEntityUser = "abstractionPositionableEntityUserQuery.sparql"
-        self.ASKOMICS_abstractionAttributesEntityUser = "abstractionAttributesEntityUserQuery.sparql"
-        self.ASKOMICS_abstractionCategoriesEntityUser = "abstractionCategoriesEntityUserQuery.sparql"
-        self.ASKOMICS_initial_query = "initialQuery.sparql"
-        self.ASKOMICS_get_class_info_from_abstraction_queryFile = "getClassInfoFromAbstractionQuery.sparql"
+        # self.ASKOMICS_abstractionRelationUser = "abstractionRelationUserQuery.sparql"
+        # self.ASKOMICS_abstractionEntityUser = "abstractionEntityUserQuery.sparql"
+        # self.ASKOMICS_abstractionPositionableEntityUser = "abstractionPositionableEntityUserQuery.sparql"
+        #self.ASKOMICS_abstractionAttributesEntityUser = "abstractionAttributesEntityUserQuery.sparql"
+        # self.ASKOMICS_abstractionCategoriesEntityUser = "abstractionCategoriesEntityUserQuery.sparql"
+        # self.ASKOMICS_initial_query = "initialQuery.sparql"
+        # self.ASKOMICS_get_class_info_from_abstraction_queryFile = "getClassInfoFromAbstractionQuery.sparql"
         self.ASKOMICS_privateQueryTemplate = 'privateQueryTemplate.rq'
         self.ASKOMICS_publicQueryTemplate = 'publicQueryTemplate.rq'
+        self.ASKOMICS_usersQueryTemplate = 'usersQueryTemplate.rq'
 
 
         self.ASKOMICS_prefix = {
