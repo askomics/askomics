@@ -21,6 +21,7 @@ from askomics.libaskomics.SourceFileConvertor import SourceFileConvertor
 from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
 from askomics.libaskomics.rdfdb.SparqlQueryGraph import SparqlQueryGraph
 from askomics.libaskomics.rdfdb.SparqlQueryStats import SparqlQueryStats
+from askomics.libaskomics.rdfdb.SparqlQueryAuth import SparqlQueryAuth
 from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
 from askomics.libaskomics.rdfdb.ResultsBuilder import ResultsBuilder
 from askomics.libaskomics.source_file.SourceFile import SourceFile
@@ -936,11 +937,11 @@ class AskView(object):
         if self.request.session['username'] == '' or not self.request.session['admin']:
             return 'forbidden'
 
-        sqb = SparqlQueryBuilder(self.settings, self.request.session)
+        sqa = SparqlQueryAuth(self.settings, self.request.session)
         ql = QueryLauncher(self.settings, self.request.session)
 
         try:
-            result = ql.process_query(sqb.get_users_infos().query)
+            result = ql.process_query(sqa.get_users_infos().query)
         except Exception as e:
             self.data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
             self.log.error(str(e))
