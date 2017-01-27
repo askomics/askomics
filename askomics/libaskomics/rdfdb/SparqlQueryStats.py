@@ -26,7 +26,7 @@ class SparqlQueryStats(SparqlQueryBuilder):
         """
         Get number of triples in public graph
         """
-        return self.build_query_for_subgraphof({
+        return self.build_query_on_the_fly({
             'select': '(COUNT(*) AS ?number)',
             'query': '?s ?p ?o'
         }, self.graph)
@@ -35,7 +35,7 @@ class SparqlQueryStats(SparqlQueryBuilder):
         """
         Get number of triples in public graph
         """
-        return self.build_query_for_subgraphof({
+        return self.build_query_on_the_fly({
             'select': '(COUNT(DISTINCT ?s) AS ?number)',
             'query': '?s a []'
         }, self.graph)
@@ -45,7 +45,7 @@ class SparqlQueryStats(SparqlQueryBuilder):
         """
         Get number of triples in public graph
         """
-        return self.build_query_for_subgraphof({
+        return self.build_query_on_the_fly({
             'select': '(COUNT(DISTINCT ?s) AS ?number)',
             'query': '?s rdf:type owl:Class'
         }, self.graph)
@@ -54,7 +54,7 @@ class SparqlQueryStats(SparqlQueryBuilder):
         """
         Get number of triples in public graph
         """
-        return self.build_query_for_subgraphof({
+        return self.build_query_on_the_fly({
             'select': '(COUNT(DISTINCT ?g) AS ?number)',
             'query': '?s ?p ?o'
         }, self.graph)
@@ -64,7 +64,7 @@ class SparqlQueryStats(SparqlQueryBuilder):
         """
         Get number of triples in public graph
         """
-        return self.build_query_for_graph({
+        return self.build_query_on_the_fly({
             'select': '?graph ?date ?owner ?server ?version',
             'query': '?graph_uri rdfg:subGraphOf <' + self.graph + '> .\n' +
                      '\t?graph_uri prov:wasDerivedFrom ?graph .\n' +
@@ -79,7 +79,7 @@ class SparqlQueryStats(SparqlQueryBuilder):
         """
         Get all the attributes of a class
         """
-        return self.build_query_for_subgraphof({
+        return self.build_query_on_the_fly({
             'select': '?class ?attr',
             'query': '?uri_class a owl:Class .\n' +
                      '\t?uri_class rdfs:label ?class .\n' +
@@ -92,7 +92,7 @@ class SparqlQueryStats(SparqlQueryBuilder):
         """
         Get all the attributes of a class
         """
-        return self.build_query_for_subgraphof({
+        return self.build_query_on_the_fly({
             'select': '?domain ?relname ?range',
             'query': '?rel a owl:ObjectProperty .\n' +
                      '\t?rel rdfs:label ?relname .\n' +

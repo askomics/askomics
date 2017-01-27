@@ -45,7 +45,8 @@ class AskomicsUser {
             hideModal();
             loadStartPoints();
             displayNavbar(false, '');
-            $('.container#content_interrogation').show();
+            //$('.container#content_interrogation').show();
+            location.reload();
         });
     }
 }

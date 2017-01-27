@@ -30,8 +30,6 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         self.graph = ''
 
-        self.parent_graph = ''
-
         self.path = path
 
         # The name should not contain extension as dots are not allowed in rdf names
@@ -42,7 +40,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         self.reset_cache()
 
-    def insert_metadatas(self):
+    def insert_metadatas(self,accessL):
         """
         Insert the metadatas into the parent graph
         """
@@ -52,18 +50,19 @@ class SourceFile(ParamManager, HaveCachedProperties):
         sqb = SparqlQueryBuilder(self.settings, self.session)
         query_laucher = QueryLauncher(self.settings, self.session)
 
+        valAcces = 'public' if accessL else 'private'
+
         ttl = '<' + self.graph + '> prov:generatedAtTime "' + self.timestamp + '"^^xsd:dateTime .\n'
         ttl += '<' + self.graph + '> dc:creator "' + self.session['username'] + '" .\n'
+        ttl += '<' + self.graph + '> :accessLevel "' +  valAcces + '" .\n'
+        ttl += '<' + self.graph + '> foaf:Group "' +  self.session['group']  + '" .\n'
         ttl += '<' + self.graph + '> prov:wasDerivedFrom "' + self.name + '" .\n'
         ttl += '<' + self.graph + '> dc:hasVersion "' + get_distribution('Askomics').version + '" .\n'
-        ttl += '<' + self.graph + '> prov:describesService "' + self.get_param('askomics.triplestore') + '" .\n'
-
-        # Insert triple subgraphof
-        ttl += '<' + self.graph + '> rdfg:subGraphOf ' + '<' + self.parent_graph + '>'
+        #ttl += '<' + self.graph + '> prov:describesService "' + self.get_param('askomics.triplestore') + '" .\n'
 
         sparql_header = sqb.header_sparql_config('')
 
-        query_laucher.insert_data(ttl, self.parent_graph, sparql_header)
+        query_laucher.insert_data(ttl, self.graph, sparql_header)
 
     @cached_property
     def existing_relations(self):
@@ -93,16 +92,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
         :rtype: Dict
         """
 
-
-        # First step, complete the metadatas: graph and parent_graph
-
-        if public:
-            self.parent_graph = self.get_param('askomics.public_graph')
-        else:
-            self.parent_graph = self.session['graph']
-
-        self.graph = self.parent_graph + ':' + self.name + '_' + self.timestamp
-
+        self.graph = self.session['graph'] + ':' + self.name + '_' + self.timestamp
 
         content_ttl = self.get_turtle()
 
@@ -244,7 +234,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
             data['status'] = 'ok'
             data['total_triple_count'] = total_triple_count
 
-        self.insert_metadatas()
+        self.insert_metadatas(public)
 
         data['expected_lines_number'] = self.get_number_of_lines()
 

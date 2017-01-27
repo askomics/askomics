@@ -55,6 +55,20 @@ function resetGraph() {
   askomicsInitialization = false;
 }
 
+function managePythonErrorEvent(data) {
+  if (data.error) {
+    $("#main_warning_display").html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> ERROR:</strong> ' +
+                       data.error.replace(/\n/g,'<br/>'))//.replace('\\n',"&#13;")
+                      .removeClass('hidden alert-success')
+                      .removeClass('hidden alert-warning')
+                      .addClass('show alert-danger');
+    return false;
+  }
+  //otherwise empty last message !
+  $("#main_warning_display").empty();
+  return true;
+}
+
 function loadStartPoints() {
   console.log('---> loadStartPoints');
 
@@ -64,11 +78,7 @@ function loadStartPoints() {
   $("#deleteNode").hide();
 
   service.getAll(function(startPointsDict) {
-
-      if ('error' in startPointsDict) {
-        alert(startPointsDict.error);
-        return;
-      }
+      if (! managePythonErrorEvent(startPointsDict)) return;
 
       console.log(JSON.stringify(startPointsDict));
 
@@ -477,6 +487,14 @@ function displayNavbar(loged, username, admin) {
           }
       });
 
+    });
+
+    // log next a 'enter' key when password was filled !
+    $('#login_password').keypress(function (e) {
+      if(e.which == 13)  // the enter key code
+      {
+        $('#login_button').click();
+      }
     });
 
     $('#login_button').click(function(e) {

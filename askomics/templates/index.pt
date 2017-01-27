@@ -65,6 +65,7 @@
         <nav id='navbar' class="navbar navbar-default navbar-fixed-top">
         <!-- navbar is defined in a template below -->
         </nav>
+
         <br><br><br>
         <div id="content_interrogation" class="container">
             <div id="init" class="row">
@@ -291,6 +292,8 @@
           </div><!-- /.modal-dialog -->
         </div><!-- /.modal -->
 
+        <!-- Printing Warning message when error occurs -->
+        <div id="main_warning_display" class="insert_warning text-left alert hidden"></div>
 
         <!-- template for the navbar -->
         <script id='template-navbar' type="text/x-handlebars-template">

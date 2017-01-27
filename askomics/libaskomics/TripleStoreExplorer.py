@@ -44,7 +44,7 @@ class TripleStoreExplorer(ParamManager):
             uri = result["nodeUri"]
             label = result["nodeLabel"]
 
-            if 'private' in result['g']:
+            if 'private' in result['accesLevel']:
                 public = False
                 private = True
             else:
@@ -202,12 +202,6 @@ class TripleStoreExplorer(ParamManager):
 
         sqb = SparqlQueryBuilder(self.settings, self.session)
         ql = QueryLauncher(self.settings, self.session)
-        # res = ql.execute_query(sqb.get_list_named_graphs().query)
-
-        # namedGraphs = []
-
-        #for indexResult in range(len(res['results']['bindings'])):
-        #    namedGraphs.append(res['results']['bindings'][indexResult]['g']['value'])
 
         req = ""
         req += "SELECT DISTINCT "+' '.join(variates)+"\n"

@@ -121,7 +121,11 @@ class QueryLauncher(ParamManager):
             time1 = time.time()
         else:
             data_endpoint.setReturnFormat(JSON)
-            results = data_endpoint.query().convert()
+            try:
+                results = data_endpoint.query().convert()
+            except urllib.error.URLError as URLError:
+                raise ValueError(URLError.reason)
+
             time1 = time.time()
 
         queryTime = time1 - time0
@@ -158,7 +162,6 @@ class QueryLauncher(ParamManager):
 
     def process_query(self, query):
         json_query = self.execute_query(query, log_raw_results=False)
-
         results = self.parse_results(json_query)
         return results
 
@@ -225,7 +228,7 @@ class QueryLauncher(ParamManager):
         :return: The status
         """
 
-        self.log.debug("Loading into triple store (INSERT DATA method) the content: "+ttl_string[:500]+"[...]")
+        self.log.debug("Loading into triple store (INSERT DATA method) the content: "+ttl_string[:50]+"[...]")
 
         query_string = ttl_header
         query_string += "\n"
