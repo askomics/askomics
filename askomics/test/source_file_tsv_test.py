@@ -18,6 +18,8 @@ class SourceFileTests(unittest.TestCase):
         self.settings = get_appsettings('configs/development.ini', name='main')
 
         self.request = testing.DummyRequest()
+        self.request.session['username'] = 'jdoe'
+        self.request.session['group']    = 'base'
 
         self.srcfile = SourceFileTsv(self.settings, self.request.session, SIMPLE_SOURCE_FILE, 10)
 
@@ -55,7 +57,7 @@ class SourceFileTests(unittest.TestCase):
     def test_guess_column_type(self):
 
         # category
-        assert self.srcfile.guess_values_type(['453', '453', '453', '453'], 'category') == 'category'
+        assert self.srcfile.guess_values_type(['453', '453', '453', '453'], 'category') == 'numeric'
 
         #text
         assert self.srcfile.guess_values_type(['453', '33a4254', '342', '335'], 'text') == 'text'

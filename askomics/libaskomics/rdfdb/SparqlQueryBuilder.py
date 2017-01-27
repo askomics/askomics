@@ -30,12 +30,14 @@ class SparqlQueryBuilder(ParamManager):
         query = ""
         query += "SELECT DISTINCT "+replacement['select']+"\n"
 
+        #security test
+        if not 'admin' in self.session or type(self.session['admin']) != bool :
+            self.session['admin'] = bool
+
         # ADM can query on all database !
         if not self.session['admin']:
             if type(adminRequest) != bool or not adminRequest :
                 query += "FROM <>\n"
-                print("çççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççç")
-                print(self.session['from'])
                 if (not 'from' in self.session) or (len(self.session['from'])<=0):
                     pass
                     # None solution because none graph !

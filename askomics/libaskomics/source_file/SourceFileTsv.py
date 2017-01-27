@@ -222,17 +222,17 @@ class SourceFileTsv(SourceFile):
     def key_id(self,row):
 
         retval = None
-        print("===============================================")
-        print(self.key_columns)
-        print(row)
+
         for key in self.key_columns:
             if retval == None:
                 retval = row[int(self.key_columns[key])]
             else:
                 retval += "_"+ row[int(self.key_columns[key])]
 
-        print(retval)
-        print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
+        #by default the first element is index
+        if retval == None:
+            retval = row[0]
+
         return retval
 
     def get_abstraction(self):

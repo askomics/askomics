@@ -63,7 +63,10 @@ class ParamManager(object):
         return self.ASKOMICS_ttl_directory
 
     def get_param(self, key):
-        return self.settings[key]
+        if key in self.settings:
+            return self.settings[key]
+        else:
+            return ''
 
     def is_defined(self, key):
         return key in self.settings.keys()

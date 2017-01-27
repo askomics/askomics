@@ -1,5 +1,6 @@
 
 from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
+from askomics.libaskomics.rdfdb.SparqlQueryGraph import SparqlQueryGraph
 from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
 from askomics.libaskomics.SourceFileConvertor import SourceFileConvertor
 
@@ -7,23 +8,20 @@ class InterfaceTPS(object):
     def __init__(self,settings,request):
         self.settings = settings
         self.request = request
-        self.request.session['username'] = 'jdoe'
-        
-        pass
 
     def empty(self):
         #empty database
-        sqb = SparqlQueryBuilder(self.settings, self.request.session)
+        sqb = SparqlQueryGraph(self.settings, self.request.session)
         ql = QueryLauncher(self.settings, self.request.session)
-        namedGraphs = self.list_named_graphs()
+        namedGraphs = self.list_private_graphs()
         for graph in namedGraphs:
             ql.execute_query(sqb.get_delete_query_string(graph).query)
 
-    def list_named_graphs(self):
-        sqb = SparqlQueryBuilder(self.settings, self.request.session)
+    def list_private_graphs(self):
+        sqb = SparqlQueryGraph(self.settings, self.request.session)
         ql = QueryLauncher(self.settings, self.request.session)
 
-        res = ql.execute_query(sqb.get_list_named_graphs().query)
+        res = ql.execute_query(sqb.get_private_graphs().query)
 
         namedGraphs = []
 
@@ -31,10 +29,17 @@ class InterfaceTPS(object):
             namedGraphs.append(res['results']['bindings'][indexResult]['g']['value'])
 
         return namedGraphs
-    def drop_graph(self, graph):
-        sqb = SparqlQueryBuilder(self.settings, self.request.session)
+
+    def list_public_graph(self):
+        sqb = SparqlQueryGraph(self.settings, self.request.session)
         ql = QueryLauncher(self.settings, self.request.session)
-        ql.execute_query(sqb.get_drop_named_graph(graph).query)
+
+        res = ql.execute_query(sqb.get_public_graphs().query)
+
+        for indexResult in range(len(res['results']['bindings'])):
+            namedGraphs.append(res['results']['bindings'][indexResult]['g']['value'])
+
+        return namedGraphs
 
     def load_file(self,f,col_types):
         disabled_columns = []
@@ -42,7 +47,7 @@ class InterfaceTPS(object):
         src_file = sfc.get_source_file(f)
         src_file.set_forced_column_types(col_types)
         src_file.set_disabled_columns(disabled_columns)
-        data = src_file.persist('','noload')
+        data = src_file.persist('','noload','public')
 
     def load_test1(self):
         col_types = ['entity_start','text','category','numeric','text']
@@ -50,8 +55,9 @@ class InterfaceTPS(object):
 
     def load_test2(self):
         #empty database
-        self.empty()
 
+        return
+        self.empty()
         col_types = ['entity_start', 'text', 'category', 'numeric', 'text']
         self.load_file("personne.tsv", col_types)
         col_types = ['entity_start', 'text']
@@ -64,9 +70,15 @@ class InterfaceTPS(object):
         self.load_file("joue.tsv", col_types)
 
     def load_test3(self):
+        return
         # Transcripts
         col_types = ['entity', 'taxon', 'ref', 'start', 'end', 'strand', 'category']
         self.load_file('transcript.tsv', col_types)
         # QTL
         col_types = ['entity', 'taxon', 'ref', 'start', 'end']
         self.load_file('qtl.tsv', col_types)
+
+    def drop_graph(self, graph):
+        sqb = SparqlQueryBuilder(self.settings, self.request.session)
+        ql = QueryLauncher(self.settings, self.request.session)
+        ql.execute_query(sqb.get_drop_named_graph(graph).query)

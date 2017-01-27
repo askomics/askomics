@@ -12,24 +12,19 @@ class SparqlQueryStats(SparqlQueryBuilder):
     extract data from the users graph
     """
 
-    def __init__(self, settings, session, public):
+    def __init__(self, settings, session):
         SparqlQueryBuilder.__init__(self, settings, session)
         self.log = logging.getLogger(__name__)
 
-        self.graph = self.get_param("askomics.public_graph")
 
-        if not public:
-            self.graph = self.session['graph']
-
-
-    def get_number_of_triple(self):
+    def get_number_of_triples(self):
         """
         Get number of triples in public graph
         """
         return self.build_query_on_the_fly({
             'select': '(COUNT(*) AS ?number)',
             'query': '?s ?p ?o'
-        }, self.graph)
+        })
 
     def get_number_of_entities(self):
         """
@@ -66,8 +61,7 @@ class SparqlQueryStats(SparqlQueryBuilder):
         """
         return self.build_query_on_the_fly({
             'select': '?graph ?date ?owner ?server ?version',
-            'query': '?graph_uri rdfg:subGraphOf <' + self.graph + '> .\n' +
-                     '\t?graph_uri prov:wasDerivedFrom ?graph .\n' +
+            'query': '?graph_uri prov:wasDerivedFrom ?graph .\n' +
                      '\t?graph_uri dc:creator ?owner .\n' +
                      '\t?graph_uri dc:hasVersion ?version .\n' +
                      '\t?graph_uri prov:describesService ?server .\n' +

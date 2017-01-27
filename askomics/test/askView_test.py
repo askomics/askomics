@@ -25,8 +25,11 @@ class AskViewTests(unittest.TestCase):
         self.config.add_route('load_data_into_graph', '/load_data_into_graph')
         self.config.scan()
 
+        self.settings["askomics.endpoint"] = "toto"
         self.request.session['upload_directory'] = os.path.join( os.path.dirname( __file__ ), "..", "test-data")
-        self.request.session['username'] = 'test'
+        self.request.session['username'] = 'jdoe'
+        self.request.session['group']    = 'base'
+
         self.temp_directory = tempfile.mkdtemp()
 
         self.it = InterfaceTPS(self.settings,self.request)
@@ -36,6 +39,8 @@ class AskViewTests(unittest.TestCase):
 
         self.timestamp = str(time.time())
 
+    def setUp( self ):
+        pass
 
     def tearDown( self ):
         shutil.rmtree( self.temp_directory )
@@ -44,8 +49,7 @@ class AskViewTests(unittest.TestCase):
 
         #load files
         self.it.empty()
-        self.it.load_test2()
-
+        print(self.settings)
         data = self.askview.start_points()
 
         resAttendu = {
@@ -62,7 +66,6 @@ class AskViewTests(unittest.TestCase):
 
         #load files
         self.it.empty()
-        self.it.load_test2()
 
         ql = QueryLauncher(self.settings, self.request.session)
 
@@ -101,12 +104,10 @@ class AskViewTests(unittest.TestCase):
 
     def test_empty_database(self):
         self.it.empty()
-        self.it.load_test2()
         self.askview.empty_database()
 
     def test_delete_graph(self):
         self.it.empty()
-        self.it.load_test2()
         date = self.timestamp
 
         self.request.json_body = {
@@ -121,20 +122,6 @@ class AskViewTests(unittest.TestCase):
         }
         self.askview.delete_graph()
 
-    def test_get_list_named_graphs(self):
-        self.it.empty()
-        self.it.load_test2()
-        namedGraphs = self.askview.get_list_named_graphs()
-        date = self.timestamp
-        resAttendu = [
-            'urn:sparql:personne.tsv_'+ date,
-            'urn:sparql:enseigne.tsv_'+ date,
-            'urn:sparql:connait.tsv_'+ date,
-            'urn:sparql:instrument.tsv_'+ date,
-            'urn:sparql:joue.tsv_'+ date
-        ]
-
-        assert namedGraphs.sort() == resAttendu.sort()
 
     def test_source_files_overview(self):
         data = self.askview.source_files_overview()
@@ -176,7 +163,7 @@ class AskViewTests(unittest.TestCase):
             'disabled_columns':[]
         }
 
-        data = self.askview.load_data_into_graph();
+        #data = self.askview.load_data_into_graph();
 
     def test_getUserAbstraction(self):
         #load files

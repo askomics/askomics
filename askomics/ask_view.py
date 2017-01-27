@@ -124,51 +124,50 @@ class AskView(object):
 
         self.data['username'] = self.request.session['username']
 
-        sqs_pub = SparqlQueryStats(self.settings, self.request.session, True)
-        sqs_priv = SparqlQueryStats(self.settings, self.request.session, False)
+        sqs = SparqlQueryStats(self.settings, self.request.session)
         qlaucher = QueryLauncher(self.settings, self.request.session)
 
         public_stats = {}
         private_stats = {}
 
         # Number of triples
-        results_pub = qlaucher.process_query(sqs_pub.get_number_of_triple().query)
-        results_priv = qlaucher.process_query(sqs_priv.get_number_of_triple().query)
+        results_pub = qlaucher.process_query(sqs.get_number_of_triples().query)
+        results_priv = qlaucher.process_query(sqs.get_number_of_triples().query)
 
         public_stats['ntriples'] = results_pub[0]['number']
         private_stats['ntriples'] = results_priv[0]['number']
 
         # Number of entities
-        results_pub = qlaucher.process_query(sqs_pub.get_number_of_entities().query)
-        results_priv = qlaucher.process_query(sqs_priv.get_number_of_entities().query)
+        results_pub = qlaucher.process_query(sqs.get_number_of_entities().query)
+        results_priv = qlaucher.process_query(sqs.get_number_of_entities().query)
 
         public_stats['nentities'] = results_pub[0]['number']
         private_stats['nentities'] = results_priv[0]['number']
 
         # Number of classes
-        results_pub = qlaucher.process_query(sqs_pub.get_number_of_classes().query)
-        results_priv = qlaucher.process_query(sqs_priv.get_number_of_classes().query)
+        results_pub = qlaucher.process_query(sqs.get_number_of_classes().query)
+        results_priv = qlaucher.process_query(sqs.get_number_of_classes().query)
 
         public_stats['nclasses'] = results_pub[0]['number']
         private_stats['nclasses'] = results_priv[0]['number']
 
         # Number of graphs
-        results_pub = qlaucher.process_query(sqs_pub.get_number_of_subgraph().query)
-        results_priv = qlaucher.process_query(sqs_priv.get_number_of_subgraph().query)
+        results_pub = qlaucher.process_query(sqs.get_number_of_subgraph().query)
+        results_priv = qlaucher.process_query(sqs.get_number_of_subgraph().query)
 
         public_stats['ngraphs'] = results_pub[0]['number']
         private_stats['ngraphs'] = results_priv[0]['number']
 
         # Graphs info
-        results_pub = qlaucher.process_query(sqs_pub.get_subgraph_infos().query)
-        results_priv = qlaucher.process_query(sqs_priv.get_subgraph_infos().query)
+        results_pub = qlaucher.process_query(sqs.get_subgraph_infos().query)
+        results_priv = qlaucher.process_query(sqs.get_subgraph_infos().query)
 
         public_stats['graphs'] = results_pub
         private_stats['graphs'] = results_priv
 
         # Classes and relations
-        results_pub = qlaucher.process_query(sqs_pub.get_rel_of_classes().query)
-        results_priv = qlaucher.process_query(sqs_priv.get_rel_of_classes().query)
+        results_pub = qlaucher.process_query(sqs.get_rel_of_classes().query)
+        results_priv = qlaucher.process_query(sqs.get_rel_of_classes().query)
 
         # public_stats['class_rel'] = results_pub
         # private_stats['class_rel'] = results_priv
@@ -192,8 +191,8 @@ class AskView(object):
         private_stats['class_rel'] = tmp
 
         # class and attributes
-        results_pub = qlaucher.process_query(sqs_pub.get_attr_of_classes().query)
-        results_priv = qlaucher.process_query(sqs_priv.get_attr_of_classes().query)
+        results_pub = qlaucher.process_query(sqs.get_attr_of_classes().query)
+        results_priv = qlaucher.process_query(sqs.get_attr_of_classes().query)
 
         tmp = {}
 

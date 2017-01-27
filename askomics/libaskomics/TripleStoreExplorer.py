@@ -168,7 +168,7 @@ class TripleStoreExplorer(ParamManager):
             return req
         return ""
 
-    def build_sparql_query_from_json(self, variates, constraintes_relations, limit, send_request_to_tps):
+    def build_sparql_query_from_json(self, variates, constraintes_relations, limit, send_request_to_tps=True):
         """
         Build a sparql query from JSON constraints
         """
@@ -177,7 +177,6 @@ class TripleStoreExplorer(ParamManager):
 
         sqb = SparqlQueryBuilder(self.settings, self.session)
         query_launcher = QueryLauncher(self.settings, self.session)
-
         query = self.build_recursive_block('', constraintes_relations)
 
         # if limit != None and limit > 0:

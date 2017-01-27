@@ -32,6 +32,8 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         self.path = path
 
+        self.metadatas = {}
+
         # The name should not contain extension as dots are not allowed in rdf names
         self.name = os.path.splitext(os.path.basename(path))[0]
         # FIXME check name uniqueness as we remove extension (collision if uploading example.tsv and example.txt)
@@ -92,7 +94,11 @@ class SourceFile(ParamManager, HaveCachedProperties):
         :rtype: Dict
         """
 
-        self.graph = self.session['graph'] + ':' + self.name + '_' + self.timestamp
+        g = 'askomics:unkown:uri:graph'
+        if 'graph' in self.session:
+            g = self.session['graph']
+
+        self.graph = g + ':' + self.name + '_' + self.timestamp
 
         content_ttl = self.get_turtle()
 

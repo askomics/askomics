@@ -73,6 +73,7 @@ class QueryLauncher(ParamManager):
             - log_raw_results: if True the raw json response is logged. Set to False
             if you're doing a select and parsing the results with parse_results.
         """
+
         # Proxy handling
         if self.is_defined("askomics.proxy"):
             proxy_config = self.get_param("askomics.proxy")
@@ -93,6 +94,7 @@ class QueryLauncher(ParamManager):
         if self.is_defined("askomics.endpoint"):
             data_endpoint = SPARQLWrapper(self.get_param("askomics.endpoint"), urlupdate)
         else:
+            print(self.settings)
             raise ValueError("askomics.endpoint")
 
         if self.is_defined("askomics.endpoint.username") and self.is_defined("askomics.endpoint.passwd"):
@@ -109,6 +111,7 @@ class QueryLauncher(ParamManager):
 
         data_endpoint.setQuery(query)
         data_endpoint.method = 'POST'
+
         if data_endpoint.isSparqlUpdateRequest():
             data_endpoint.setMethod('POST')
             # Hack for Virtuoso to LOAD a turtle file
@@ -116,7 +119,7 @@ class QueryLauncher(ParamManager):
                 hack_virtuoso = self.get_param("askomics.hack_virtuoso")
                 if hack_virtuoso.lower() == "ok" or hack_virtuoso.lower() == "true":
                     data_endpoint.queryType = 'SELECT'
-            print(data_endpoint)
+
             results = data_endpoint.query()
             time1 = time.time()
         else:
