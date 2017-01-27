@@ -294,7 +294,7 @@ class AskomicsUserAbstraction {
     isPositionable(Uri) {
       return (Uri in this.entityPositionableInformationList);
     }
-    
+
     /* Setting order attribute display */
     setOrderAttributesList(URINode,listAtt) {
       this.attributesOrderDisplay[URINode] = listAtt.slice();
@@ -306,7 +306,7 @@ class AskomicsUserAbstraction {
       }
       /* by default */
       let v = [];
-      v.push( { 'uri': URINode , 'basic_type' : 'string' });
+      v.push( { 'uri': URINode , 'basic_type' : 'string' , 'actif' : false });
       if ( URINode in this.attributesEntityList ) {
         v = v.concat(this.attributesEntityList[URINode].slice());
       }
