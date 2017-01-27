@@ -53,10 +53,10 @@ class Security(ParamManager):
         Check if the username is present in the TS
         """
 
-        ql = QueryLauncher(self.settings, self.session)
+        query_laucher = QueryLauncher(self.settings, self.session)
         sqa = SparqlQueryAuth(self.settings, self.session)
 
-        result = ql.process_query(sqa.check_username_presence(self.username).query)
+        result = query_laucher.process_query(sqa.check_username_presence(self.username).query)
         self.log.debug('---> result: ' + str(result))
 
         return bool(int(result[0]['status']))
@@ -66,10 +66,10 @@ class Security(ParamManager):
         Check if the email is present in the TS
         """
 
-        ql = QueryLauncher(self.settings, self.session)
+        query_laucher = QueryLauncher(self.settings, self.session)
         sqa = SparqlQueryAuth(self.settings, self.session)
 
-        result = ql.process_query(sqa.check_email_presence(self.email).query)
+        result = query_laucher.process_query(sqa.check_email_presence(self.email).query)
 
         return bool(int(result[0]['status']))
 
@@ -78,10 +78,10 @@ class Security(ParamManager):
         check if the password is the good password associate with the email
         """
 
-        ql = QueryLauncher(self.settings, self.session)
+        query_laucher = QueryLauncher(self.settings, self.session)
         sqa = SparqlQueryAuth(self.settings, self.session)
 
-        result = ql.process_query(sqa.get_password_with_email(self.email).query)
+        result = query_laucher.process_query(sqa.get_password_with_email(self.email).query)
 
         ts_salt = result[0]['salt']
         ts_shapw = result[0]['shapw']
@@ -96,10 +96,10 @@ class Security(ParamManager):
         check if the password is the good password associate with the username
         """
 
-        ql = QueryLauncher(self.settings, self.session)
+        query_laucher = QueryLauncher(self.settings, self.session)
         sqa = SparqlQueryAuth(self.settings, self.session)
 
-        result = ql.process_query(sqa.get_password_with_username(self.username).query)
+        result = query_laucher.process_query(sqa.get_password_with_username(self.username).query)
 
         ts_salt = result[0]['salt']
         ts_shapw = result[0]['shapw']
@@ -114,10 +114,10 @@ class Security(ParamManager):
         get the number of users in the TS
         """
 
-        ql = QueryLauncher(self.settings, self.session)
+        query_laucher = QueryLauncher(self.settings, self.session)
         sqa = SparqlQueryAuth(self.settings, self.session)
 
-        result = ql.process_query(sqa.get_number_of_users().query)
+        result = query_laucher.process_query(sqa.get_number_of_users().query)
 
         self.log.debug(result)
 
@@ -128,7 +128,7 @@ class Security(ParamManager):
         """
         Persist all user infos in the TS
         """
-        ql = QueryLauncher(self.settings, self.session)
+        query_laucher = QueryLauncher(self.settings, self.session)
         sqa = SparqlQueryAuth(self.settings, self.session)
 
         #check if user is the first. if yes, set him admin
@@ -139,29 +139,29 @@ class Security(ParamManager):
             admin = 'false'
             self.set_admin(False)
 
-        chunk = ':' + self.username + ' rdf:type :user ;\n'
+        chunk = ':' + self.username + ' rdf:type foaf:Person ;\n'
         indent = len(self.username) * ' ' + ' '
-        chunk += indent + 'rdfs:label \"' + self.username + '\" ;\n'
+        chunk += indent + 'foaf:name \"' + self.username + '\" ;\n'
         chunk += indent + ':password \"' + self.sha256_pw + '\" ;\n'
-        chunk += indent + ':email \"' + self.email + '\" ;\n'
+        chunk += indent + 'foaf:mbox <mailto:' + self.email + '> ;\n'
         chunk += indent + ':isadmin \"' + admin + '\"^^xsd:boolean ;\n'
         chunk += indent + ':randomsalt \"' + self.randomsalt + '\" .\n'
 
         header_ttl = sqa.header_sparql_config(chunk)
-        ql.insert_data(chunk, self.settings["askomics.users_graph"], header_ttl)
+        query_laucher.insert_data(chunk, self.settings["askomics.users_graph"], header_ttl)
 
     def create_user_graph(self):
         """
         Create a subgraph for the user. All his data will be inserted in this subgraph
         """
 
-        ql = QueryLauncher(self.settings, self.session)
+        query_laucher = QueryLauncher(self.settings, self.session)
         sqa = SparqlQueryAuth(self.settings, self.session)
 
         ttl = '<' + self.settings['askomics.private_graph'] + ':' + self.username + '> rdfg:subGraphOf <' + self.settings['askomics.private_graph'] + '>'
 
         header_ttl = sqa.header_sparql_config(ttl)
-        ql.insert_data(ttl, self.settings["askomics.private_graph"], header_ttl)
+        query_laucher.insert_data(ttl, self.settings["askomics.private_graph"], header_ttl)
 
     def set_admin(self, admin):
         """
@@ -174,10 +174,10 @@ class Security(ParamManager):
         """
         get the admin status of the user by his username
         """
-        ql = QueryLauncher(self.settings, self.session)
+        query_laucher = QueryLauncher(self.settings, self.session)
         sqa = SparqlQueryAuth(self.settings, self.session)
 
-        result = ql.process_query(sqa.get_admin_status_by_username(self.username).query)
+        result = query_laucher.process_query(sqa.get_admin_status_by_username(self.username).query)
 
         if len(result) == 0 :
             return False
@@ -191,10 +191,10 @@ class Security(ParamManager):
         """
         get the admin status of the user by his username
         """
-        ql = QueryLauncher(self.settings, self.session)
+        query_laucher = QueryLauncher(self.settings, self.session)
         sqa = SparqlQueryAuth(self.settings, self.session)
 
-        result = ql.process_query(sqa.get_admin_status_by_email(self.email).query)
+        result = query_laucher.process_query(sqa.get_admin_status_by_email(self.email).query)
 
         self.log.debug(result)
 
