@@ -61,14 +61,21 @@ let instanceGraphBuilder ;
     getInternalState() {
       let nodes = [];
       let links = [];
-
       /* Save class name to rebuild the object when loading */
       for (let i=0;i<this.nodes().length;i++) {
+        let output = "";
+        for (let property in this.nodes()[i]) {
+          console.log("prop:"+property);
+          console.log(typeof(this.nodes()[i][property]));
+          output += property + ': ' + JSON.stringify(this.nodes()[i][property])+'; ';
+        }
+        console.log(output);
         nodes.push([this.nodes()[i].constructor.name,this.nodes()[i]]);
       }
       for (let i=0;i<this.links().length;i++) {
         links.push([this.links()[i].constructor.name,this.links()[i]]);
       }
+
       return JSON.stringify([this.AskomicsGraphBuilderVersion,nodes,links,this.SPARQLIDgeneration,this.IDgeneration],null,'\t');
     }
 

@@ -52,9 +52,6 @@ class AskomicsPositionableLink extends AskomicsLink {
     this.position_ref = obj.position_ref ;
     this.position_strand = obj.position_strand ;
   }
-  getPanelView() {
-    return new AskomicsPositionableLinkView(this);
-  }
 
   getTextFillColor() { return 'darkgreen'; }
 

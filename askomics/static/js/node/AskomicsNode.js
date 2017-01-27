@@ -93,13 +93,6 @@ class AskomicsNode extends GraphNode {
   set linkvar (__inverseMatch) { this._linkvar = __linkvar; }
   get linkvar () { return this._linkvar; }
 
-  getPanelView() {
-    if ( this.panelview === undefined )
-      this.panelview =  new AskomicsNodeView(this);
-
-    return this.panelview ;
-  }
-
   buildConstraintsSPARQL() {
 
     let blockConstraintByNode = [];
@@ -391,7 +384,7 @@ class AskomicsNode extends GraphNode {
       list_id.push(sparqlid);
       list_label.push(this.additionalShortcutListDisplayVar[sparqlid]);
     }
-  
+
     return {'id' : list_id, 'label': list_label, 'url': map_url};
   }
 

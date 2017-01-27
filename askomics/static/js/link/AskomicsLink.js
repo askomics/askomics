@@ -23,10 +23,6 @@ class AskomicsLink extends GraphLink {
 
   }
 
-  getPanelView() {
-    return new AskomicsLinkView(this);
-  }
-
   buildConstraintsSPARQL() {
     let blockConstraintByNode = [];
 

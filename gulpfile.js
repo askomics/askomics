@@ -21,6 +21,7 @@ var askomicsSourceFiles = [
         'askomics/static/js/help/AskomicsHelp.js',
         'askomics/static/js/AskomicsRestManagement.js',
         'askomics/static/js/AskomicsUserAbstraction.js',
+        'askomics/static/js/view/AskomicsPanelViewBuilder.js',
         'askomics/static/js/integration.js',
         'askomics/static/js/AskomicsResultsView.js',
         'askomics/static/js/query-handler.js',
