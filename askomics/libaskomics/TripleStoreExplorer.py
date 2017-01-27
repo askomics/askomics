@@ -187,7 +187,7 @@ class TripleStoreExplorer(ParamManager):
         else:
             results = []
 
-        return results, query
+        return results, sqb.custom_query(select, query).query
 
 
     def build_sparql_query_from_json2(self, variates, constraintes_relations, limit, send_request_to_TPS):
