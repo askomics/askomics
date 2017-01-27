@@ -49,7 +49,7 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         """
         Get the list of public named graph
         """
-        self.log.debug('---> get_list_named_graphs')
+        self.log.debug('---> get_public_graphs')
         return self.build_query_on_the_fly({
             'select': '?g',
             'query': 'GRAPH ?g {\n'+
@@ -62,7 +62,7 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         """
         Get the list of privat named graph
         """
-        self.log.debug('---> get_list_named_graphs')
+        self.log.debug('---> get_private_graphs')
         return self.build_query_on_the_fly({
             'select': '?g',
             'query': 'GRAPH ?g {\n'+

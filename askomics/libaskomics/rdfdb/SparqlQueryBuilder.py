@@ -32,8 +32,10 @@ class SparqlQueryBuilder(ParamManager):
 
         # ADM can query on all database !
         if not self.session['admin']:
-            if not adminRequest :
+            if type(adminRequest) != bool or not adminRequest :
                 query += "FROM <>\n"
+                print("çççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççç")
+                print(self.session['from'])
                 if (not 'from' in self.session) or (len(self.session['from'])<=0):
                     pass
                     # None solution because none graph !

@@ -218,7 +218,7 @@ class AskView(object):
 
         return self.data
 
-    @view_config(route_name='empty_database', request_method='GET')
+    @view_config(route_name='empty_user_database', request_method='GET')
     def empty_database(self):
         """
         Delete all named graphs and their metadatas
@@ -234,7 +234,7 @@ class AskView(object):
             sqb = SparqlQueryBuilder(self.settings, self.request.session)
             ql = QueryLauncher(self.settings, self.request.session)
 
-            named_graphs = self.get_list_named_graphs()
+            named_graphs = self.get_list_private_graphs()
 
             for graph in named_graphs:
                 self.log.debug("--- DELETE GRAPH : %s", graph)
@@ -244,7 +244,7 @@ class AskView(object):
 
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
-            self.data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
+            self.data['error'] = str(e)
             self.log.error(str(e))
 
         return self.data
@@ -272,8 +272,8 @@ class AskView(object):
             #delete metadatas
             ql.execute_query(sqb.get_delete_metadatas_of_graph(graph).query)
 
-    @view_config(route_name='list_named_graphs', request_method='GET')
-    def get_list_named_graphs(self):
+    @view_config(route_name='list_private_graphs', request_method='GET')
+    def get_list_private_graphs(self):
         """
         Return a list with all the named graphs.
         """
@@ -287,7 +287,7 @@ class AskView(object):
         sqg = SparqlQueryGraph(self.settings, self.request.session)
         ql = QueryLauncher(self.settings, self.request.session)
 
-        res = ql.execute_query(sqg.get_list_named_graphs().query)
+        res = ql.execute_query(sqg.get_private_graphs().query)
 
         namedGraphs = []
 
@@ -313,7 +313,7 @@ class AskView(object):
         positionable2 = ql.process_query(sqg.get_if_positionable(body['node']).query)
 
         if positionable1 == 0 or positionable2 == 0:
-            self.data['error'] = 'not positionable nodes'
+            self.data['error'] = 'Entities are not positionable nodes !'
             return self.data
 
         results = ql.process_query(sqg.get_common_pos_attr(body['node'], body['second_node']).query)
@@ -489,7 +489,7 @@ class AskView(object):
             self.data["headers_status"] = ""
             self.data["missing_headers"] = ""
             traceback.print_exc(file=sys.stdout)
-            self.data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
+            self.data['error'] = str(e)
             self.log.error(str(e))
 
         return self.data
@@ -651,7 +651,7 @@ class AskView(object):
             #exc_type, exc_value, exc_traceback = sys.exc_info()
             #traceback.print_exc(limit=8)
             traceback.print_exc(file=sys.stdout)
-            self.data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
+            self.data['error'] = str(e)
             self.log.error(str(e))
 
         return self.data
@@ -689,7 +689,7 @@ class AskView(object):
             #exc_type, exc_value, exc_traceback = sys.exc_info()
             #traceback.print_exc(limit=8)
             traceback.print_exc(file=sys.stdout)
-            self.data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
+            self.data['error'] = str(e)
             self.log.error(str(e))
 
         return self.data
@@ -721,7 +721,7 @@ class AskView(object):
             traceback.print_exc(file=sys.stdout)
             self.data['values'] = ""
             self.data['file'] = ""
-            self.data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
+            self.data['error'] = str(e)
             self.log.error(str(e))
 
         return self.data
@@ -739,7 +739,7 @@ class AskView(object):
             self.data['query'] = query
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
-            self.data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
+            self.data['error'] = str(e)
             self.log.error(str(e))
 
         return self.data
@@ -921,7 +921,7 @@ class AskView(object):
             self.data['admin'] = admin
 
         except Exception as e:
-            self.data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
+            self.data['error'] = str(e)
             self.log.error(str(e))
 
         return self.data
@@ -943,7 +943,7 @@ class AskView(object):
         try:
             result = ql.process_query(sqa.get_users_infos().query)
         except Exception as e:
-            self.data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
+            self.data['error'] = str(e)
             self.log.error(str(e))
 
         self.log.debug(result)

@@ -124,13 +124,12 @@ function loadStartPoints() {
 function loadNamedGraphs() {
 
     new AskomicsUserAbstraction().loadUserAbstraction();
-    console.log('loadNamedGraphs');
 
     var select = $('#dropNamedGraphSelected');
     select.empty();
     manageDelGraphButton();
 
-    var serviceNamedGraphs = new RestServiceJs('list_named_graphs');
+    var serviceNamedGraphs = new RestServiceJs('list_private_graphs');
     serviceNamedGraphs.getAll(function(namedGraphs) {
         if (namedGraphs == 'forbidden') {
           showLoginForm();
@@ -237,7 +236,7 @@ function emptyDatabase(value) {
 
     if (value == 'yes') {
         displayModal('Please wait ...', '', 'Close');
-        var service = new RestServiceJs("empty_database");
+        var service = new RestServiceJs("empty_user_database");
             service.getAll(function(empty_db){
               if (empty_db == 'forbidden') {
                 showLoginForm();
@@ -453,6 +452,14 @@ function displayNavbar(loged, username, admin) {
     $('#show_login').click(function(e) {
       $('#content_signup').hide();
       $('#content_login').show();
+    });
+
+    // 'enter' key when password2 was filled !
+    $('#signup_password2').keypress(function (e) {
+      if(e.which == 13)  // the enter key code
+      {
+        $('#signup_button').click();
+      }
     });
 
     $('#signup_button').click(function(e) {
