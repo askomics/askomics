@@ -55,6 +55,20 @@ function resetGraph() {
   askomicsInitialization = false;
 }
 
+function managePythonErrorEvent(data) {
+  if (data.error) {
+    $("#main_warning_display").html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> ERROR:</strong> ' +
+                       data.error.replace(/\n/g,'<br/>'))//.replace('\\n',"&#13;")
+                      .removeClass('hidden alert-success')
+                      .removeClass('hidden alert-warning')
+                      .addClass('show alert-danger');
+    return false;
+  }
+  //otherwise empty last message !
+  $("#main_warning_display").empty();
+  return true;
+}
+
 function loadStartPoints() {
   console.log('---> loadStartPoints');
 
@@ -64,11 +78,7 @@ function loadStartPoints() {
   $("#deleteNode").hide();
 
   service.getAll(function(startPointsDict) {
-
-      if ('error' in startPointsDict) {
-        alert(startPointsDict.error);
-        return;
-      }
+      if (! managePythonErrorEvent(startPointsDict)) return;
 
       console.log(JSON.stringify(startPointsDict));
 
@@ -114,13 +124,12 @@ function loadStartPoints() {
 function loadNamedGraphs() {
 
     new AskomicsUserAbstraction().loadUserAbstraction();
-    console.log('loadNamedGraphs');
 
     var select = $('#dropNamedGraphSelected');
     select.empty();
     manageDelGraphButton();
 
-    var serviceNamedGraphs = new RestServiceJs('list_named_graphs');
+    var serviceNamedGraphs = new RestServiceJs('list_private_graphs');
     serviceNamedGraphs.getAll(function(namedGraphs) {
         if (namedGraphs == 'forbidden') {
           showLoginForm();
@@ -227,7 +236,7 @@ function emptyDatabase(value) {
 
     if (value == 'yes') {
         displayModal('Please wait ...', '', 'Close');
-        var service = new RestServiceJs("empty_database");
+        var service = new RestServiceJs("empty_user_database");
             service.getAll(function(empty_db){
               if (empty_db == 'forbidden') {
                 showLoginForm();
@@ -445,6 +454,14 @@ function displayNavbar(loged, username, admin) {
       $('#content_login').show();
     });
 
+    // 'enter' key when password2 was filled !
+    $('#signup_password2').keypress(function (e) {
+      if(e.which == 13)  // the enter key code
+      {
+        $('#signup_button').click();
+      }
+    });
+
     $('#signup_button').click(function(e) {
       let username = $('#signup_username').val();
       let email = $('#signup_email').val();
@@ -457,10 +474,7 @@ function displayNavbar(loged, username, admin) {
                     'password': password,
                     'password2': password2  };
 
-      displayModal('Please wait', '', 'Close');
-
       service.post(model, function(data) {
-          hideModal();
           if (data.error.length !== 0) {
             $('#signup_error').empty();
             for (let i = data.error.length - 1; i >= 0; i--) {
@@ -480,6 +494,14 @@ function displayNavbar(loged, username, admin) {
           }
       });
 
+    });
+
+    // log next a 'enter' key when password was filled !
+    $('#login_password').keypress(function (e) {
+      if(e.which == 13)  // the enter key code
+      {
+        $('#login_button').click();
+      }
     });
 
     $('#login_button').click(function(e) {

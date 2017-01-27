@@ -125,4 +125,7 @@ class GraphObject {
     return "< id:"+this.id+" ,"+"uri:"+this.uri+" ,"+"label:"+this.label+" ,"+"SPARQLid:"+this.SPARQLid+" ,"+"suggested:"+this.suggested + " >";
   }
 
+  getPanelView() {
+    return new AskomicsPanelViewBuilder().getPanelView(this) ;
+  }
 }

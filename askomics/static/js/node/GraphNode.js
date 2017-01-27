@@ -78,7 +78,7 @@ class GraphNode extends GraphObject {
   }
 
   buildAttributeOrCategoryForNode(attributeForUri) {
-    
+
     if (attributeForUri.basic_type === "category") {
       return this.setAttributeOrCategoryForNode(this.categories,attributeForUri);
     }else {

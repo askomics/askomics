@@ -1,7 +1,0 @@
-SELECT DISTINCT $select
-WHERE{
-
-    GRAPH $graph {
-        $query
-    }
-}

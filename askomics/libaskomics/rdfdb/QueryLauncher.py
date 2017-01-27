@@ -73,6 +73,7 @@ class QueryLauncher(ParamManager):
             - log_raw_results: if True the raw json response is logged. Set to False
             if you're doing a select and parsing the results with parse_results.
         """
+
         # Proxy handling
         if self.is_defined("askomics.proxy"):
             proxy_config = self.get_param("askomics.proxy")
@@ -93,6 +94,7 @@ class QueryLauncher(ParamManager):
         if self.is_defined("askomics.endpoint"):
             data_endpoint = SPARQLWrapper(self.get_param("askomics.endpoint"), urlupdate)
         else:
+            print(self.settings)
             raise ValueError("askomics.endpoint")
 
         if self.is_defined("askomics.endpoint.username") and self.is_defined("askomics.endpoint.passwd"):
@@ -109,6 +111,7 @@ class QueryLauncher(ParamManager):
 
         data_endpoint.setQuery(query)
         data_endpoint.method = 'POST'
+
         if data_endpoint.isSparqlUpdateRequest():
             data_endpoint.setMethod('POST')
             # Hack for Virtuoso to LOAD a turtle file
@@ -116,12 +119,16 @@ class QueryLauncher(ParamManager):
                 hack_virtuoso = self.get_param("askomics.hack_virtuoso")
                 if hack_virtuoso.lower() == "ok" or hack_virtuoso.lower() == "true":
                     data_endpoint.queryType = 'SELECT'
-            print(data_endpoint)
+
             results = data_endpoint.query()
             time1 = time.time()
         else:
             data_endpoint.setReturnFormat(JSON)
-            results = data_endpoint.query().convert()
+            try:
+                results = data_endpoint.query().convert()
+            except urllib.error.URLError as URLError:
+                raise ValueError(URLError.reason)
+
             time1 = time.time()
 
         queryTime = time1 - time0
@@ -158,7 +165,6 @@ class QueryLauncher(ParamManager):
 
     def process_query(self, query):
         json_query = self.execute_query(query, log_raw_results=False)
-
         results = self.parse_results(json_query)
         return results
 
@@ -225,7 +231,7 @@ class QueryLauncher(ParamManager):
         :return: The status
         """
 
-        self.log.debug("Loading into triple store (INSERT DATA method) the content: "+ttl_string[:500]+"[...]")
+        self.log.debug("Loading into triple store (INSERT DATA method) the content: "+ttl_string[:50]+"[...]")
 
         query_string = ttl_header
         query_string += "\n"

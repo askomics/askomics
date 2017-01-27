@@ -16,7 +16,7 @@ function prepareQuery(exp, roq) {
               'variates'             : tab[0],
               'constraintesRelations': tab[1],
               'constraintesFilters'  : tab[2],
-              'limit'                : parseInt(new TriplestoreParametersView().config.max_results_size)
+              'limit'                : -1
            };
 }
 

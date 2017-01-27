@@ -19,7 +19,8 @@ class SourceFileTests(unittest.TestCase):
         self.settings = get_appsettings('configs/development.ini', name='main')
 
         self.request = testing.DummyRequest()
-
+        self.request.session['username'] = 'jdoe'
+        self.request.session['group']    = 'base'
         self.srcfile1 = SourceFileGff(self.settings, self.request.session,
                                       SIMPLE_SOURCE_FILE, '', [])
 
@@ -58,4 +59,3 @@ class SourceFileTests(unittest.TestCase):
 
         #FIXME can't assert the result because order of triples is completely random
         assert type(self.srcfile.get_content_ttl(entity)) == type('')
-

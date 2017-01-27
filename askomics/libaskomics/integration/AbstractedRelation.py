@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import urllib.parse
+from askomics.libaskomics.ParamManager import ParamManager
 from askomics.libaskomics.utils import pformat_generic_object
 
 class AbstractedRelation(object):
@@ -37,7 +37,7 @@ class AbstractedRelation(object):
         else:
             self.label = identifier
 
-        identifier =  urllib.parse.quote(self.label)
+        identifier =  ParamManager.encodeToRDFURI(self.label)
         self.uri = ":"+identifier
 
         self.col_type = relation_type
@@ -45,18 +45,18 @@ class AbstractedRelation(object):
         if relation_type.startswith("entity"):
             self.relation_type = "owl:ObjectProperty"
             if type_range.find(":")<0:
-                self.rdfs_range = ":" + urllib.parse.quote(type_range)
+                self.rdfs_range = ":" + ParamManager.encodeToRDFURI(type_range)
             else:
                 self.rdfs_range = type_range
 
         elif relation_type.lower() in ('category', 'taxon', 'ref', 'strand'):
             self.relation_type = "owl:ObjectProperty"
-            self.rdfs_range = ":" + urllib.parse.quote(type_range+"Category")
+            self.rdfs_range = ":" + ParamManager.encodeToRDFURI(type_range+"Category")
         else:
             self.relation_type = "owl:DatatypeProperty"
             self.rdfs_range = rdfs_range
 
-        self.rdfs_domain = ":" + urllib.parse.quote(rdfs_domain)
+        self.rdfs_domain = ":" + ParamManager.encodeToRDFURI(rdfs_domain)
         self.log = logging.getLogger(__name__)
 
     def get_uri(self):

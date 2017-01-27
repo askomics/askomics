@@ -21,8 +21,9 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         """
         Query exemple. used for testing
         """
-        return self.build_query_from_template({
+        return self.build_query_on_the_fly({
             'select': '?s ?p ?o',
+            'from'  : '*',
             'query': '?s ?p ?o .'
             })
 
@@ -31,28 +32,52 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         Get the start point and in which graph they are
         """
         self.log.debug('---> get_start_point')
-        return self.build_query_from_template({
-            'select': '?nodeUri ?nodeLabel ?g',
-            'query': '?nodeUri displaySetting:startPoint "true"^^xsd:boolean .\n' +
-                     '\t?nodeUri rdfs:label ?nodeLabel'
-        })
+        return self.build_query_on_the_fly({
+            'select': '?nodeUri ?nodeLabel ?accesLevel',
+            'query': 'GRAPH ?g {\n'+
+                     '\t?nodeUri displaySetting:startPoint "true"^^xsd:boolean .\n' +
+                     '\t?nodeUri rdfs:label ?nodeLabel.\n'+
+                     "}\n"+
+                     "{ { ?g :accessLevel ?accesLevel VALUES ?accesLevel {'public'} } "+
+                     " UNION "+
+                     "{ ?g :accessLevel ?accesLevel.\n "+
+                       "?g dc:creator '" + self.session['username'] + "' }\n"+
+                      "}."
+        },True)
 
-    def get_list_named_graphs(self):
+    def get_public_graphs(self):
         """
-        Get the list of named graph
+        Get the list of public named graph
         """
-        self.log.debug('---> get_list_named_graphs')
-        return self.build_query_from_template({
+        self.log.debug('---> get_public_graphs')
+        return self.build_query_on_the_fly({
             'select': '?g',
-            'query': '?s ?p ?o'
-        })
+            'query': 'GRAPH ?g {\n'+
+                     '?s ?p ?o.\n'+
+                     "}\n"+
+                     "{ ?g :accessLevel 'public'. } "
+        },True)
+
+    def get_private_graphs(self):
+        """
+        Get the list of privat named graph
+        """
+        self.log.debug('---> get_private_graphs')
+        return self.build_query_on_the_fly({
+            'select': '?g',
+            'query': 'GRAPH ?g {\n'+
+                 '?s ?p ?o.\n'+
+                 "}\n"+
+                 "{ ?g dc:creator '" + self.session['username'] + "' . } "
+        },True)
+
 
     def get_if_positionable(self, uri):
         """
         Get if an entity is positionable
         """
         self.log.debug('---> get_if_positionable')
-        return self.build_query_from_template({
+        return self.build_query_on_the_fly({
             'select': '?exist',
             'query': 'BIND(EXISTS {<' + uri + '> displaySetting:is_positionable "true"^^xsd:boolean} AS ?exist)'
         })
@@ -62,7 +87,7 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         Get the common positionable attributes between 2 entity
         """
         self.log.debug('---> get_common_pos_attr')
-        return self.build_query_from_template({
+        return self.build_query_on_the_fly({
             'select': '?uri ?pos_attr ?status',
             'query': 'VALUES ?pos_attr {:position_taxon :position_ref :position_strand }\n' +
                      '\tVALUES ?uri {<'+uri1+'> <'+uri2+'> }\n' +
@@ -74,7 +99,7 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         Get the list of all taxon
         """
         self.log.debug('---> get_all_taxons')
-        return self.build_query_from_template({
+        return self.build_query_on_the_fly({
             'select': '?taxon',
             'query': ':taxonCategory displaySetting:category ?URItax .\n' +
                      '\t?URItax rdfs:label ?taxon'
@@ -84,7 +109,7 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         """
         Get all attributes of an entity
         """
-        return self.build_query_from_template({
+        return self.build_query_on_the_fly({
             'select': '?entity ?attribute ?labelAttribute ?typeAttribute',
             'query': '?entity rdf:type owl:Class .\n' +
                      '\t?attribute displaySetting:attribute "true"^^xsd:boolean .\n\n' +
@@ -100,10 +125,10 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         """
         Get the relation of an entity
         """
-        return self.build_query_from_template({
+        return self.build_query_on_the_fly({
             'select': '?subject ?relation ?object',
             'query': '?relation rdf:type ' + prop + ' ;\n' +
-                     '\t          rdf:domain ?subject ;\n' +
+                     '\t          rdfs:domain ?subject ;\n' +
                      '\t          rdfs:range ?object .\n' +
                      '\t?subject rdf:type owl:Class .\n' +
                      '\t?object rdf:type owl:Class\n'
@@ -114,7 +139,7 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         """
         Get theproperty of an entity
         """
-        return self.build_query_from_template({
+        return self.build_query_on_the_fly({
             'select': '?entity ?property ?value',
             'query': '?entity ?property ?value .\n' +
                      '\t?entity rdf:type owl:Class .\n' +
@@ -125,7 +150,7 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         """
         Get all positionable entities
         """
-        return self.build_query_from_template({
+        return self.build_query_on_the_fly({
             'select': '?entity',
             'query': '?entity rdf:type owl:Class .\n' +
                      '\t?entity displaySetting:is_positionable "true"^^xsd:boolean .'
@@ -135,7 +160,7 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         """
         Get the category of an entity
         """
-        return self.build_query_from_template({
+        return self.build_query_on_the_fly({
             'select': '?entity ?category ?labelCategory ?typeCategory',
             'query': '?entity rdf:type owl:Class .\n' +
                      '\t?typeCategory displaySetting:category [] .\n' +
@@ -148,9 +173,9 @@ class SparqlQueryGraph(SparqlQueryBuilder):
 
     def get_class_info_from_abstraction(self, node_class):
         """
-        get 
+        get
         """
-        return self.build_query_from_template({
+        return self.build_query_on_the_fly({
             'select': '?relation_label',
             'query': '?class rdf:type owl:Class .\n' +
                      '\tOPTIONAL { ?relation rdfs:domain ?class } .\n' +

@@ -41,35 +41,75 @@ class AskView(object):
     """ This class contains method calling the libaskomics functions using parameters from the js web interface (body variable) """
 
     def __init__(self, request):
+        # Manage solution/data/error inside. This object is return to client side
+        self.data = {}
+        self.log = logging.getLogger(__name__)
         self.request = request
         self.settings = request.registry.settings
-        if 'username' not in self.request.session.keys():
-            self.request.session['username'] = ''
-        # self.request.session = {}
 
-        self.log = logging.getLogger(__name__)
+        try:
+
+            if 'admin' not in self.request.session.keys():
+                self.request.session['admin'] = False
+
+            if 'group' not in self.request.session.keys():
+                self.request.session['group'] = ''
+
+            self.request.session['from'] = []
+            if 'username' not in self.request.session.keys():
+                self.request.session['username'] = ''
+            else:
+                #finding all private graph graph
+                sqg = SparqlQueryGraph(self.settings, self.request.session)
+                ql = QueryLauncher(self.settings, self.request.session)
+                results = ql.process_query(sqg.get_private_graphs().query)
+
+                for elt in results:
+                    self.request.session['from'].append(elt['g'])
+
+                # self.request.session = {}
+
+            #finding all public graph
+            sqg = SparqlQueryGraph(self.settings, self.request.session)
+            ql = QueryLauncher(self.settings, self.request.session)
+            results = ql.process_query(sqg.get_public_graphs().query)
+
+            for elt in results:
+                self.request.session['from'].append(elt['g'])
+
+        except Exception as e:
+                traceback.print_exc(file=sys.stdout)
+                self.data['error'] = str(e)
+                self.log.error(str(e))
+
+    def check_error(self):
+        if 'error' in self.data :
+            return True
+        return False
 
     @view_config(route_name='start_point', request_method='GET')
     def start_points(self):
         """ Get the nodes being query starters """
         self.log.debug("== START POINT ==")
-        data = {}
-        tse = TripleStoreExplorer(self.settings, self.request.session)
 
+        if self.check_error() :
+            return self.data
+
+        tse = TripleStoreExplorer(self.settings, self.request.session)
         nodes = tse.get_start_points()
 
-        data['nodes'] = {}
+        self.data['nodes'] = {}
 
         for node in nodes:
-            if node['uri'] in data['nodes'].keys():
-                if node['public'] and not data['nodes'][node['uri']]['public']:
-                    data['nodes'][node['uri']]['public'] = True
-                if node['private'] and not data['nodes'][node['uri']]['private']:
-                    data['nodes'][node['uri']]['private'] = True
+            if node['uri'] in self.data['nodes'].keys():
+                if node['public'] and not self.data['nodes'][node['uri']]['public']:
+                    self.data['nodes'][node['uri']]['public'] = True
+                if node['private'] and not self.data['nodes'][node['uri']]['private']:
+                    self.data['nodes'][node['uri']]['private'] = True
             else:
-                data['nodes'][node['uri']] = node
+                self.data['nodes'][node['uri']] = node
 
-        return data
+        return self.data
 
     @view_config(route_name='statistics', request_method='GET')
     def statistics(self):
@@ -82,54 +122,52 @@ class AskView(object):
 
         self.log.debug('=== stats ===')
 
-        data = {}
-        data['username'] = self.request.session['username']
+        self.data['username'] = self.request.session['username']
 
-        sqs_pub = SparqlQueryStats(self.settings, self.request.session, True)
-        sqs_priv = SparqlQueryStats(self.settings, self.request.session, False)
+        sqs = SparqlQueryStats(self.settings, self.request.session)
         qlaucher = QueryLauncher(self.settings, self.request.session)
 
         public_stats = {}
         private_stats = {}
 
         # Number of triples
-        results_pub = qlaucher.process_query(sqs_pub.get_number_of_triple().query)
-        results_priv = qlaucher.process_query(sqs_priv.get_number_of_triple().query)
+        results_pub = qlaucher.process_query(sqs.get_number_of_triples().query)
+        results_priv = qlaucher.process_query(sqs.get_number_of_triples().query)
 
         public_stats['ntriples'] = results_pub[0]['number']
         private_stats['ntriples'] = results_priv[0]['number']
 
         # Number of entities
-        results_pub = qlaucher.process_query(sqs_pub.get_number_of_entities().query)
-        results_priv = qlaucher.process_query(sqs_priv.get_number_of_entities().query)
+        results_pub = qlaucher.process_query(sqs.get_number_of_entities().query)
+        results_priv = qlaucher.process_query(sqs.get_number_of_entities().query)
 
         public_stats['nentities'] = results_pub[0]['number']
         private_stats['nentities'] = results_priv[0]['number']
 
         # Number of classes
-        results_pub = qlaucher.process_query(sqs_pub.get_number_of_classes().query)
-        results_priv = qlaucher.process_query(sqs_priv.get_number_of_classes().query)
+        results_pub = qlaucher.process_query(sqs.get_number_of_classes().query)
+        results_priv = qlaucher.process_query(sqs.get_number_of_classes().query)
 
         public_stats['nclasses'] = results_pub[0]['number']
         private_stats['nclasses'] = results_priv[0]['number']
 
         # Number of graphs
-        results_pub = qlaucher.process_query(sqs_pub.get_number_of_subgraph().query)
-        results_priv = qlaucher.process_query(sqs_priv.get_number_of_subgraph().query)
+        results_pub = qlaucher.process_query(sqs.get_number_of_subgraph().query)
+        results_priv = qlaucher.process_query(sqs.get_number_of_subgraph().query)
 
         public_stats['ngraphs'] = results_pub[0]['number']
         private_stats['ngraphs'] = results_priv[0]['number']
 
         # Graphs info
-        results_pub = qlaucher.process_query(sqs_pub.get_subgraph_infos().query)
-        results_priv = qlaucher.process_query(sqs_priv.get_subgraph_infos().query)
+        results_pub = qlaucher.process_query(sqs.get_subgraph_infos().query)
+        results_priv = qlaucher.process_query(sqs.get_subgraph_infos().query)
 
         public_stats['graphs'] = results_pub
         private_stats['graphs'] = results_priv
 
         # Classes and relations
-        results_pub = qlaucher.process_query(sqs_pub.get_rel_of_classes().query)
-        results_priv = qlaucher.process_query(sqs_priv.get_rel_of_classes().query)
+        results_pub = qlaucher.process_query(sqs.get_rel_of_classes().query)
+        results_priv = qlaucher.process_query(sqs.get_rel_of_classes().query)
 
         # public_stats['class_rel'] = results_pub
         # private_stats['class_rel'] = results_priv
@@ -153,8 +191,8 @@ class AskView(object):
         private_stats['class_rel'] = tmp
 
         # class and attributes
-        results_pub = qlaucher.process_query(sqs_pub.get_attr_of_classes().query)
-        results_priv = qlaucher.process_query(sqs_priv.get_attr_of_classes().query)
+        results_pub = qlaucher.process_query(sqs.get_attr_of_classes().query)
+        results_priv = qlaucher.process_query(sqs.get_attr_of_classes().query)
 
         tmp = {}
 
@@ -174,12 +212,12 @@ class AskView(object):
                 tmp[result['class']].append(result['attr'])
         private_stats['class_attr'] = tmp
 
-        data['public'] = public_stats
-        data['private'] = private_stats
+        self.data['public'] = public_stats
+        self.data['private'] = private_stats
 
-        return data
+        return self.data
 
-    @view_config(route_name='empty_database', request_method='GET')
+    @view_config(route_name='empty_user_database', request_method='GET')
     def empty_database(self):
         """
         Delete all named graphs and their metadatas
@@ -189,15 +227,13 @@ class AskView(object):
         if self.request.session['username'] == '':
             return 'forbidden'
 
-        data = {}
-
         self.log.debug("=== DELETE ALL NAMED GRAPHS ===")
 
         try:
             sqb = SparqlQueryBuilder(self.settings, self.request.session)
             ql = QueryLauncher(self.settings, self.request.session)
 
-            named_graphs = self.get_list_named_graphs()
+            named_graphs = self.get_list_private_graphs()
 
             for graph in named_graphs:
                 self.log.debug("--- DELETE GRAPH : %s", graph)
@@ -207,10 +243,10 @@ class AskView(object):
 
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
-            data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
+            self.data['error'] = str(e)
             self.log.error(str(e))
 
-        return data
+        return self.data
 
     @view_config(route_name='delete_graph', request_method='POST')
     def delete_graph(self):
@@ -235,8 +271,8 @@ class AskView(object):
             #delete metadatas
             ql.execute_query(sqb.get_delete_metadatas_of_graph(graph).query)
 
-    @view_config(route_name='list_named_graphs', request_method='GET')
-    def get_list_named_graphs(self):
+    @view_config(route_name='list_private_graphs', request_method='GET')
+    def get_list_private_graphs(self):
         """
         Return a list with all the named graphs.
         """
@@ -250,7 +286,7 @@ class AskView(object):
         sqg = SparqlQueryGraph(self.settings, self.request.session)
         ql = QueryLauncher(self.settings, self.request.session)
 
-        res = ql.execute_query(sqg.get_list_named_graphs().query)
+        res = ql.execute_query(sqg.get_private_graphs().query)
 
         namedGraphs = []
 
@@ -267,7 +303,6 @@ class AskView(object):
         #FIXEME: Rewrite this ugly method
 
         body = self.request.json_body
-        data = {}
 
         sqg = SparqlQueryGraph(self.settings, self.request.session)
         ql = QueryLauncher(self.settings, self.request.session)
@@ -277,13 +312,13 @@ class AskView(object):
         positionable2 = ql.process_query(sqg.get_if_positionable(body['node']).query)
 
         if positionable1 == 0 or positionable2 == 0:
-            data['error'] = 'not positionable nodes'
-            return data
+            self.data['error'] = 'Entities are not positionable nodes !'
+            return self.data
 
         results = ql.process_query(sqg.get_common_pos_attr(body['node'], body['second_node']).query)
         self.log.debug(results)
 
-        data['results'] = {}
+        self.data['results'] = {}
 
         list_pos_attr = []
 
@@ -292,9 +327,9 @@ class AskView(object):
                 list_pos_attr.append(elem['pos_attr'].replace("http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#", ""))
 
         for elem in list_pos_attr:
-            data['results'][elem] = False not in [bool(int(p['status'])) for p in results if p['pos_attr'] == "http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#"+elem]
+            self.data['results'][elem] = False not in [bool(int(p['status'])) for p in results if p['pos_attr'] == "http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#"+elem]
 
-        return data
+        return self.data
 
     @view_config(route_name='source_files_overview', request_method='GET')
     def source_files_overview(self):
@@ -311,8 +346,7 @@ class AskView(object):
 
         source_files = sfc.get_source_files()
 
-        data = {}
-        data['files'] = []
+        self.data['files'] = []
 
         # get all taxon in the TS
         sqg = SparqlQueryGraph(self.settings, self.request.session)
@@ -321,7 +355,7 @@ class AskView(object):
         taxons_list = []
         for elem in res['results']['bindings']:
             taxons_list.append(elem['taxon']['value'])
-        data['taxons'] = taxons_list
+        self.data['taxons'] = taxons_list
 
         for src_file in source_files:
             infos = {}
@@ -344,7 +378,7 @@ class AskView(object):
                     infos['error'] = 'Could not read input file, are you sure it is a valid tabular file?'
                     self.log.error(str(e))
 
-                data['files'].append(infos)
+                self.data['files'].append(infos)
 
             elif src_file.type == 'gff':
                 try:
@@ -356,14 +390,14 @@ class AskView(object):
                     infos['error'] = 'Could not parse the file, are you sure it is a valid GFF3 file?'
                     self.log.error('error with gff examiner: ' + str(e))
 
-                data['files'].append(infos)
+                self.data['files'].append(infos)
 
             elif src_file.type == 'ttl':
                 infos['preview'] = src_file.get_preview_ttl()
-                data['files'].append(infos)
+                self.data['files'].append(infos)
 
 
-        return data
+        return self.data
 
 
     @view_config(route_name='preview_ttl', request_method='POST')
@@ -378,21 +412,22 @@ class AskView(object):
 
 
         self.log.debug("preview_ttl")
-        data = {}
 
         body = self.request.json_body
         file_name = body["file_name"]
         col_types = body["col_types"]
         disabled_columns = body["disabled_columns"]
+        key_columns = body["key_columns"]
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
 
         src_file = sfc.get_source_file(file_name)
         src_file.set_forced_column_types(col_types)
         src_file.set_disabled_columns(disabled_columns)
+        src_file.set_key_columns(key_columns)
 
         cont_ttl = '\n'.join(src_file.get_turtle(preview_only=True))
-        data = textwrap.dedent(
+        self.data = textwrap.dedent(
         """
         {header}
 
@@ -420,7 +455,7 @@ class AskView(object):
                     )
 
         formatter = HtmlFormatter(cssclass='preview_field', nowrap=True, nobackground=True)
-        return highlight(data, TurtleLexer(), formatter) # Formated html
+        return highlight(self.data, TurtleLexer(), formatter) # Formated html
 
     @view_config(route_name='check_existing_data', request_method='POST')
     def check_existing_data(self):
@@ -432,31 +467,31 @@ class AskView(object):
         if self.request.session['username'] == '':
             return 'forbidden'
 
-        data = {}
-
         body = self.request.json_body
         file_name = body["file_name"]
         col_types = body["col_types"]
         disabled_columns = body["disabled_columns"]
+        key_columns = body["key_columns"]
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
         try:
             src_file = sfc.get_source_file(file_name)
             src_file.set_forced_column_types(col_types)
             src_file.set_disabled_columns(disabled_columns)
+            src_file.set_key_columns(key_columns)
 
             headers_status, missing_headers = src_file.compare_to_database()
 
-            data["headers_status"] = headers_status
-            data["missing_headers"] = missing_headers
+            self.data["headers_status"] = headers_status
+            self.data["missing_headers"] = missing_headers
         except Exception as e:
-            data["headers_status"] = ""
-            data["missing_headers"] = ""
+            self.data["headers_status"] = ""
+            self.data["missing_headers"] = ""
             traceback.print_exc(file=sys.stdout)
-            data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
+            self.data['error'] = str(e)
             self.log.error(str(e))
 
-        return data
+        return self.data
 
     @view_config(route_name='load_data_into_graph', request_method='POST')
     def load_data_into_graph(self):
@@ -468,12 +503,11 @@ class AskView(object):
         if self.request.session['username'] == '':
             return 'forbidden'
 
-        data = {}
-
         body = self.request.json_body
         file_name = body["file_name"]
         col_types = body["col_types"]
         disabled_columns = body["disabled_columns"]
+        key_columns = body["key_columns"]
         public = body['public']
 
         # Allow data integration in public graph only if user is an admin
@@ -487,18 +521,19 @@ class AskView(object):
             src_file = sfc.get_source_file(file_name)
             src_file.set_forced_column_types(col_types)
             src_file.set_disabled_columns(disabled_columns)
+            src_file.set_key_columns(key_columns)
 
             urlbase = re.search(r'(http:\/\/.*)\/.*', self.request.current_route_url())
             urlbase = urlbase.group(1)
 
             method = 'load'
-            data = src_file.persist(urlbase, method, public)
+            self.data = src_file.persist(urlbase, method, public)
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
-            data['error'] = 'Probleme with user data file ?</br>'+str(e)
+            self.data['error'] = 'Probleme with user data file ?</br>'+str(e)
             self.log.error(str(e))
 
-        return data
+        return self.data
 
     @view_config(route_name='load_gff_into_graph', request_method='POST')
     def load_gff_into_graph(self):
@@ -512,7 +547,6 @@ class AskView(object):
 
 
         self.log.debug("== load_gff_into_graph ==")
-        data = {}
 
         body = self.request.json_body
         self.log.debug('===> body: '+str(body))
@@ -539,10 +573,10 @@ class AskView(object):
             src_file_gff.persist(urlbase, method, public)
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
-            data['error'] = 'Problem when integration of '+file_name+'.</br>'+str(e)
+            self.data['error'] = 'Problem when integration of '+file_name+'.</br>'+str(e)
             self.log.error(str(e))
 
-        return data
+        return self.data
 
     @view_config(route_name='load_ttl_into_graph', request_method='POST')
     def load_ttl_into_graph(self):
@@ -556,7 +590,7 @@ class AskView(object):
 
 
         self.log.debug('*** load_ttl_into_graph ***')
-        data = {}
+
         body = self.request.json_body
         file_name = body['file_name']
         public = body['public']
@@ -576,10 +610,10 @@ class AskView(object):
         try:
             src_file_ttl.persist(urlbase, public)
         except Exception as e:
-            data['error'] = 'Problem when integration of ' + file_name + '</br>' + str(e)
+            self.data['error'] = 'Problem when integration of ' + file_name + '</br>' + str(e)
             self.log.error('ERROR: ' + str(e))
 
-        return data
+        return self.data
 
 
     @view_config(route_name='getUserAbstraction', request_method='GET')
@@ -588,9 +622,9 @@ class AskView(object):
         self.log.debug("== getUserAbstraction ==")
 
         tse = TripleStoreExplorer(self.settings, self.request.session)
-        data = tse.getUserAbstraction()
+        self.data.update(tse.getUserAbstraction())
 
-        return data
+        return self.data
 
     @view_config(route_name='importShortcut', request_method='POST')
     def importShortcut(self):
@@ -602,7 +636,7 @@ class AskView(object):
             return 'forbidden'
 
         self.log.debug('*** importShortcut ***')
-        data = {}
+
         body = self.request.json_body
         sqb = SparqlQueryBuilder(self.settings, self.request.session)
         ql = QueryLauncher(self.settings, self.request.session)
@@ -616,10 +650,10 @@ class AskView(object):
             #exc_type, exc_value, exc_traceback = sys.exc_info()
             #traceback.print_exc(limit=8)
             traceback.print_exc(file=sys.stdout)
-            data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
+            self.data['error'] = str(e)
             self.log.error(str(e))
 
-        return data
+        return self.data
 
     @view_config(route_name='deleteShortcut', request_method='POST')
     def deleteShortcut(self):
@@ -631,7 +665,7 @@ class AskView(object):
             return 'forbidden'
 
         self.log.debug('*** importShortcut ***')
-        data = {}
+
         body = self.request.json_body
         sqb = SparqlQueryBuilder(self.settings, self.request.session)
         ql = QueryLauncher(self.settings, self.request.session)
@@ -654,63 +688,60 @@ class AskView(object):
             #exc_type, exc_value, exc_traceback = sys.exc_info()
             #traceback.print_exc(limit=8)
             traceback.print_exc(file=sys.stdout)
-            data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
+            self.data['error'] = str(e)
             self.log.error(str(e))
 
-        return data
+        return self.data
 
     @view_config(route_name='sparqlquery', request_method='POST')
     def get_value(self):
         """ Build a request from a json whith the following contents :variates,constraintesRelations,constraintesFilters"""
         self.log.debug("== Attribute Value ==")
-        data = {}
 
         tse = TripleStoreExplorer(self.settings, self.request.session)
-
         body = self.request.json_body
         try:
             results,query = tse.build_sparql_query_from_json(body["variates"],body["constraintesRelations"],body["limit"],True)
 
             # Remove prefixes in the results table
-            data['values'] = results
+            self.data['values'] = results
 
             if not body['export']:
-                return data
+                return self.data
 
 
             # Provide results file
             ql = QueryLauncher(self.settings, self.request.session)
             rb = ResultsBuilder(self.settings, self.request.session)
-            data['file'] = ql.format_results_csv(rb.build_csv_table(results))
+            self.data['file'] = ql.format_results_csv(rb.build_csv_table(results))
         except Exception as e:
             #exc_type, exc_value, exc_traceback = sys.exc_info()
             #traceback.print_exc(limit=8)
             traceback.print_exc(file=sys.stdout)
-            data['values'] = ""
-            data['file'] = ""
-            data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
+            self.data['values'] = ""
+            self.data['file'] = ""
+            self.data['error'] = str(e)
             self.log.error(str(e))
 
-        return data
+        return self.data
 
     @view_config(route_name='getSparqlQueryInTextFormat', request_method='POST')
     def getSparqlQueryInTextFormat(self):
         """ Build a request from a json whith the following contents :variates,constraintesRelations,constraintesFilters"""
         self.log.debug("== Attribute Value ==")
-        data = {}
         try:
             tse = TripleStoreExplorer(self.settings, self.request.session)
 
             body = self.request.json_body
             results,query = tse.build_sparql_query_from_json(body["variates"],body["constraintesRelations"],body["limit"],False)
 
-            data['query'] = query
+            self.data['query'] = query
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
-            data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
+            self.data['error'] = str(e)
             self.log.error(str(e))
 
-        return data
+        return self.data
 
     @view_config(route_name='ttl', request_method='GET')
     def upload(self):
@@ -733,8 +764,7 @@ class AskView(object):
         self.log.debug('username: ' + username)
         self.log.debug('email: ' + email)
 
-        data = {}
-        data['error'] = []
+        self.data['error'] = []
         error = False
 
         security = Security(self.settings, self.request.session, username, email, password, password2)
@@ -746,27 +776,27 @@ class AskView(object):
         is_email_already_exist = security.check_email_in_database()
 
         if not is_valid_email:
-            data['error'].append('Email is not valid')
+            self.data['error'].append('Email is not valid')
             error = True
 
         if not are_passwords_identical:
-            data['error'].append('Passwords are not identical')
+            self.data['error'].append('Passwords are not identical')
             error = True
 
         if not is_pw_enough_longer:
-            data['error'].append('Password must be at least 8 characters')
+            self.data['error'].append('Password must be at least 8 characters')
             error = True
 
         if is_username_already_exist:
-            data['error'].append('Username already exist')
+            self.data['error'].append('Username already exist')
             error = True
 
         if is_email_already_exist:
-            data['error'].append('Email already exist')
+            self.data['error'].append('Email already exist')
             error = True
 
         if error:
-            return data
+            return self.data
 
         # no error, insert user in TS
         try:
@@ -774,7 +804,7 @@ class AskView(object):
             pass
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
-            data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
+            self.data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
             self.log.error(str(e))
 
         # Create user graph
@@ -782,27 +812,27 @@ class AskView(object):
             security.create_user_graph()
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
-            data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
+            self.data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
             self.log.error(str(e))
 
         # Log user
         try:
             security.log_user(self.request)
-            data['username'] = username
+            self.data['username'] = username
         except Exception as e:
-            data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
+            self.data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
             self.log.error(str(e))
 
-        return data
+        return self.data
 
     @view_config(route_name='checkuser', request_method='GET')
     def checkuser(self):
-        data = {}
-        if self.request.session['username'] != '':
-            data['username'] = self.request.session['username']
-            data['admin'] = self.request.session['admin']
 
-        return data
+        if self.request.session['username'] != '':
+            self.data['username'] = self.request.session['username']
+            self.data['admin'] = self.request.session['admin']
+
+        return self.data
 
 
     @view_config(route_name='logout', request_method='GET')
@@ -824,8 +854,8 @@ class AskView(object):
         password = body['password']
         username = ''
         email = ''
-        data = {}
-        data['error'] = []
+
+        self.data['error'] = []
         error = False
 
         if validate_email(username_email):
@@ -841,16 +871,16 @@ class AskView(object):
             email_in_ts = security.check_email_in_database()
 
             if not email_in_ts:
-                data['error'].append('email is not registered')
+                self.data['error'].append('email is not registered')
                 error = True
 
             if error:
-                return data
+                return self.data
 
             password_is_correct = security.check_email_password()
 
             if not password_is_correct:
-                data['error'].append('Password is incorrect')
+                self.data['error'].append('Password is incorrect')
                 error = True
 
             # Get the admin status
@@ -858,13 +888,13 @@ class AskView(object):
             security.set_admin(admin)
 
             if error:
-                return data
+                return self.data
 
         elif auth_type == 'username':
             username_in_ts = security.check_username_in_database()
 
             if not username_in_ts:
-                data['error'].append('username is not registered')
+                self.data['error'].append('username is not registered')
                 error = True
 
             # Get the admin status
@@ -872,28 +902,28 @@ class AskView(object):
             security.set_admin(admin)
 
             if error:
-                return data
+                return self.data
 
             password_is_correct = security.check_username_password()
 
             if not password_is_correct:
-                data['error'].append('Password is incorrect')
+                self.data['error'].append('Password is incorrect')
                 error = True
 
             if error:
-                return data
+                return self.data
 
         # User pass the authentication, log him
         try:
             security.log_user(self.request)
-            data['username'] = username
-            data['admin'] = admin
+            self.data['username'] = username
+            self.data['admin'] = admin
 
         except Exception as e:
-            data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
+            self.data['error'] = str(e)
             self.log.error(str(e))
 
-        return data
+        return self.data
 
     @view_config(route_name='get_users_infos', request_method='GET')
     def get_users_infos(self):
@@ -909,16 +939,14 @@ class AskView(object):
         sqa = SparqlQueryAuth(self.settings, self.request.session)
         ql = QueryLauncher(self.settings, self.request.session)
 
-        data = {}
-
         try:
             result = ql.process_query(sqa.get_users_infos().query)
         except Exception as e:
-            data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
+            self.data['error'] = str(e)
             self.log.error(str(e))
 
         self.log.debug(result)
 
-        data['result'] = result
+        self.data['result'] = result
 
-        return data
+        return self.data

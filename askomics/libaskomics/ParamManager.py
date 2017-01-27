@@ -20,11 +20,10 @@ class ParamManager(object):
         # self.ASKOMICS_abstractionPositionableEntityUser = "abstractionPositionableEntityUserQuery.sparql"
         #self.ASKOMICS_abstractionAttributesEntityUser = "abstractionAttributesEntityUserQuery.sparql"
         # self.ASKOMICS_abstractionCategoriesEntityUser = "abstractionCategoriesEntityUserQuery.sparql"
-        # self.ASKOMICS_initial_query = "initialQuery.sparql"
         # self.ASKOMICS_get_class_info_from_abstraction_queryFile = "getClassInfoFromAbstractionQuery.sparql"
-        self.ASKOMICS_privateQueryTemplate = 'privateQueryTemplate.rq'
-        self.ASKOMICS_publicQueryTemplate = 'publicQueryTemplate.rq'
-        self.ASKOMICS_usersQueryTemplate = 'usersQueryTemplate.rq'
+        #self.ASKOMICS_privateQueryTemplate = 'privateQueryTemplate.rq'
+        #self.ASKOMICS_publicQueryTemplate = 'publicQueryTemplate.rq'
+        #self.ASKOMICS_usersQueryTemplate = 'usersQueryTemplate.rq'
 
 
         self.ASKOMICS_prefix = {
@@ -64,7 +63,10 @@ class ParamManager(object):
         return self.ASKOMICS_ttl_directory
 
     def get_param(self, key):
-        return self.settings[key]
+        if key in self.settings:
+            return self.settings[key]
+        else:
+            return ''
 
     def is_defined(self, key):
         return key in self.settings.keys()
@@ -121,3 +123,11 @@ class ParamManager(object):
         header.append("@base <{0}> .".format(asko_prefix))
         header.append("<{0}> rdf:type owl:Ontology .".format(asko_prefix))
         return '\n'.join(header)
+
+    @staticmethod
+    def encodeToRDFURI(toencode):
+        import urllib.parse
+        obj = urllib.parse.quote(toencode)
+        obj = obj.replace(".", "_dot_")
+        obj = obj.replace("-", "_sep_")
+        return obj

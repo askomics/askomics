@@ -3,9 +3,10 @@ Classes to import data from a gff3 source files
 """
 import re
 import csv
+import uuid
+
 from collections import defaultdict
 from pkg_resources import get_distribution
-import urllib.parse
 
 from askomics.libaskomics.source_file.SourceFile import SourceFile
 from askomics.libaskomics.integration.AbstractedEntity import AbstractedEntity
@@ -26,6 +27,8 @@ class SourceFileTsv(SourceFile):
         self.preview_limit = preview_limit
 
         self.forced_column_types = ['entity']
+        self.disabled_columns = []
+        self.key_columns = [];
 
         self.category_values = defaultdict(set)
 
@@ -40,8 +43,7 @@ class SourceFileTsv(SourceFile):
             'end': 'xsd:decimal',
             'entity'  : ':',
             'entitySym'  : ':',
-            'entity_start'  : ':',
-            'entityGoterm'  : ''}
+            'entity_start'  : ':'}
 
         self.delims = {
             'numeric' : ('', ''),
@@ -54,8 +56,7 @@ class SourceFileTsv(SourceFile):
             'end' : ('', ''),
             'entity'  : (':', ''),
             'entitySym'  : (':', ''),
-            'entity_start'  : (':', ''),
-            'entityGoterm'  : ('"', '"')}
+            'entity_start'  : (':', '')}
 
     @cached_property
     def dialect(self):
@@ -64,7 +65,7 @@ class SourceFileTsv(SourceFile):
         """
         with open(self.path, 'r') as tabfile:
             # The sniffer needs to have enough data to guess, and we restrict to a list of allowed delimiters to avoid strange results
-            dialect = csv.Sniffer().sniff(tabfile.read(1024*16), delimiters=',\t ')
+            dialect = csv.Sniffer().sniff(tabfile.read(1024*16), delimiters=';,\t ')
             self.log.debug("CSV dialect in %r: %s" % (self.path, pformat_generic_object(dialect)))
             return dialect
 
@@ -150,8 +151,6 @@ class SourceFileTsv(SourceFile):
         # check if relationShip with an other local entity
         if header.find("@")>0:
             #m = re.search('@(...):', header)
-            if header.lower().find("go:term")>0:
-                return "entityGoterm"
             #maybe by value
             #if all( (val.lower().find("go:")>=0) for val in values):
             #    raise ValueError("header for go:term follow this syntax: relationName@go:term")
@@ -161,10 +160,11 @@ class SourceFileTsv(SourceFile):
         # Then, check if category
 
         #if all(re.match(r'^\w+$', val) for val in values):#check if no scape chararcter
-        if len(set(values)) < len(values) / 2:
-            return 'category'
-        elif all(self.is_decimal(val) for val in values): # Then numeric
+        if all(self.is_decimal(val) for val in values): # Then numeric
             return 'numeric'
+        elif len(set(values)) < len(values) / 2:
+            return 'category'
+
 
         # default is text
         return 'text'
@@ -210,6 +210,31 @@ class SourceFileTsv(SourceFile):
 
         self.disabled_columns = disabled_columns
 
+    def set_key_columns(self, key_columns):
+        """
+        Set all column to build unqiue ID
+
+        :param disabled_columns: a List of column ids (0 based) that should not be imported
+        """
+
+        self.key_columns = key_columns
+
+    def key_id(self,row):
+
+        retval = None
+
+        for key in self.key_columns:
+            if retval == None:
+                retval = row[int(self.key_columns[key])]
+            else:
+                retval += "_"+ row[int(self.key_columns[key])]
+
+        #by default the first element is index
+        if retval == None:
+            retval = row[0]
+
+        return retval
+
     def get_abstraction(self):
         # TODO use rdflib or other abstraction layer to create rdf
         """
@@ -232,7 +257,7 @@ class SourceFileTsv(SourceFile):
                 if key_type in ('taxon', 'ref', 'strand', 'start', 'end'):
                     uri = 'position_'+key_type
                 else:
-                    uri = urllib.parse.quote(self.headers[key])
+                    uri = self.encodeToRDFURI(self.headers[key])
                 ttl += ":" + uri + ' displaySetting:attribute "true"^^xsd:boolean .\n'
 
             if key > 0 and key not in self.disabled_columns:
@@ -240,7 +265,7 @@ class SourceFileTsv(SourceFile):
 
         # Store the startpoint status
         if self.forced_column_types[0] == 'entity_start':
-            ttl += ":" + urllib.parse.quote(ref_entity) + ' displaySetting:startPoint "true"^^xsd:boolean .\n'
+            ttl += ":" + self.encodeToRDFURI(ref_entity) + ' displaySetting:startPoint "true"^^xsd:boolean .\n'
 
         return ttl
 
@@ -255,17 +280,17 @@ class SourceFileTsv(SourceFile):
         ttl = ''
 
         if all(types in self.forced_column_types for types in ('start', 'end')): # a positionable entity have to have a start and a end
-            ttl += ":" + urllib.parse.quote(self.headers[0]) + ' displaySetting:is_positionable "true"^^xsd:boolean .\n'
+            ttl += ":" + self.encodeToRDFURI(self.headers[0]) + ' displaySetting:is_positionable "true"^^xsd:boolean .\n'
             ttl += ":is_positionable rdfs:label 'is_positionable' .\n"
             ttl += ":is_positionable rdf:type owl:ObjectProperty .\n"
 
         for header, categories in self.category_values.items():
             indent = len(header) * " " + len("displaySetting:category") * " " + 3 * " "
-            ttl += ":" + urllib.parse.quote(header+"Category") + " displaySetting:category :"
-            ttl += (" , \n" + indent + ":").join(map(urllib.parse.quote,categories)) + " .\n"
+            ttl += ":" + self.encodeToRDFURI(header+"Category") + " displaySetting:category :"
+            ttl += (" , \n" + indent + ":").join(map(self.encodeToRDFURI,categories)) + " .\n"
 
             for item in categories:
-                ttl += ":" + urllib.parse.quote(item) + " rdf:type :" + urllib.parse.quote(header) + " ;\n" + len(item) * " " + "  rdfs:label \"" + item + "\" .\n"
+                ttl += ":" + self.encodeToRDFURI(item) + " rdf:type :" + self.encodeToRDFURI(header) + " ;\n" + len(item) * " " + "  rdfs:label \"" + item + "\" .\n"
 
         return ttl
 
@@ -334,8 +359,9 @@ class SourceFileTsv(SourceFile):
 
                 # Create the entity (first column)
                 entity_label = row[0]
-                indent = (len(entity_label) + 1) * " "
-                ttl += ":" + urllib.parse.quote(entity_label) + " rdf:type :" + urllib.parse.quote(self.headers[0]) + " ;\n"
+                entity_id = self.key_id(row)
+                indent = (len(entity_id) + 1) * " "
+                ttl += ":" + self.encodeToRDFURI(entity_id) + " rdf:type :" + self.encodeToRDFURI(self.headers[0]) + " ;\n"
                 ttl += indent + " rdfs:label \"" + entity_label + "\" ;\n"
 
                 # Add data from other columns
@@ -348,16 +374,16 @@ class SourceFileTsv(SourceFile):
 
                         #OFI : manage new header with relation@type_entity
                         #relationName = ":has_" + header # manage old way
-                        relationName = ":"+urllib.parse.quote(header) # manage old way
+                        relationName = ":"+self.encodeToRDFURI(header) # manage old way
                         if current_type.startswith('entity'):
                             idx = header.find("@")
                             if ( idx > 0 ):
-                                relationName = ":"+urllib.parse.quote(header[0:idx])
+                                relationName = ":"+self.encodeToRDFURI(header[0:idx])
 
                         if current_type in ('category', 'taxon', 'ref', 'strand'):
                             # This is a category, keep track of allowed values for this column
                             self.category_values[header].add(row[i])
-                            row[i] = urllib.parse.quote(row[i])
+                            row[i] = self.encodeToRDFURI(row[i])
 
                         # Create link to value
                         if row[i]: # Empty values are just ignored
@@ -376,7 +402,7 @@ class SourceFileTsv(SourceFile):
                                 ttl += indent + " "+ relationName + " " + self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " ;\n"
 
                         if current_type == 'entitySym':
-                            ttlSym += self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " "+ relationName + " :" + urllib.parse.quote(entity_label)  + " .\n"
+                            ttlSym += self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " "+ relationName + " :" + self.encodeToRDFURI(entity_label)  + " .\n"
 
                 ttl = ttl[:-2] + "."
                 #manage symmetric relation

@@ -21,83 +21,99 @@ class SparqlQueryAuth(SparqlQueryBuilder):
         """
         Check if a username is present in users graph
         """
-        return self.build_query_for_graph({
+        return self.build_query_on_the_fly({
             'select': '?status',
-            'query': 'BIND(EXISTS {:' + username + ' rdf:type foaf:Person} AS ?status)'
-        }, self.get_param("askomics.users_graph"))
+            'query': "GRAPH <"+ self.get_param("askomics.users_graph") + "> {" +
+                      'BIND(EXISTS {:' + username + ' rdf:type foaf:Person} AS ?status)' +
+                      "}"
+        },True)
 
     def check_email_presence(self, email):
         """
         Check if an email is present in users graph
         """
-        return self.build_query_for_graph({
+        return self.build_query_on_the_fly({
             'select': '?status',
-            'query': 'BIND(EXISTS { ?uri foaf:mbox <mailto:' + email + '> } AS ?status)'
-        }, self.get_param("askomics.users_graph"))
+            'query': "GRAPH <"+ self.get_param("askomics.users_graph") + "> {" +
+                     'BIND(EXISTS { ?uri foaf:mbox <mailto:' + email + '> } AS ?status)'+
+                     "}"
+        },True)
 
     def get_password_with_email(self, email):
         """
         Check the password of a user by his email
         """
-        return self.build_query_for_graph({
+        return self.build_query_on_the_fly({
             'select': '?salt ?shapw',
-            'query': '?URIusername rdf:type foaf:Person .\n' +
+            'query': "GRAPH <"+ self.get_param("askomics.users_graph") + "> {" +
+                     '\t?URIusername rdf:type foaf:Person .\n' +
                      '\t?URIusername foaf:mbox <mailto:' + email + '> .\n' +
                      '\t?URIusername :randomsalt ?salt .\n' +
-                     '\t?URIusername :password ?shapw .'
-        }, self.get_param("askomics.users_graph"))
+                     '\t?URIusername :password ?shapw .\n'+
+                     "}"
+        },True)
 
     def get_password_with_username(self, username):
         """
         Check the password of a user by his username
         """
-        return self.build_query_for_graph({
+        return self.build_query_on_the_fly({
             'select': '?salt ?shapw',
-            'query': '?URIusername rdf:type foaf:Person .\n' +
+            'query': "GRAPH <"+ self.get_param("askomics.users_graph") + "> {" +
+                     '\t?URIusername rdf:type foaf:Person .\n' +
                      '\t?URIusername foaf:name \"' + username + '\" .\n' +
                      '\t?URIusername :randomsalt ?salt .\n' +
-                     '\t?URIusername :password ?shapw .'
-        }, self.get_param("askomics.users_graph"))
+                     '\t?URIusername :password ?shapw .\n'+
+                     "}"
+        },True)
 
     def get_number_of_users(self):
         """
         Get the number of users
         """
-        return self.build_query_for_graph({
+        return self.build_query_on_the_fly({
             'select': '(count(*) AS ?count)',
-            'query': '?s rdf:type foaf:Person .'
-        }, self.get_param("askomics.users_graph"))
+            'query': "GRAPH <"+ self.get_param("askomics.users_graph") + "> {" +
+                     '?s rdf:type foaf:Person .\n'
+                     "}"
+        },True)
 
     def get_admin_status_by_username(self, username):
         """
         get if a user is admin, by his username
         """
-        return self.build_query_for_graph({
+        return self.build_query_on_the_fly({
             'select': '?admin',
-            'query': '?URIusername rdf:type foaf:Person .\n' +
+            'query': "GRAPH <"+ self.get_param("askomics.users_graph") + "> {" +
+                     '\t?URIusername rdf:type foaf:Person .\n' +
                      '\t?URIusername foaf:name \"' + username + '\" .\n' +
-                     '\t?URIusername :isadmin ?admin .'
-        }, self.get_param("askomics.users_graph"))
+                     '\t?URIusername :isadmin ?admin .'+
+                     "}"
+        },True)
 
     def get_admin_status_by_email(self, email):
         """
         get if a user is admin, by his email
         """
-        return self.build_query_for_graph({
+        return self.build_query_on_the_fly({
             'select': '?admin',
-            'query': '?URIusername rdf:type foaf:Person .\n' +
+            'query': "GRAPH <"+ self.get_param("askomics.users_graph") + "> {" +
+                     '\n?URIusername rdf:type foaf:Person .\n' +
                      '\t?URIusername foaf:mbox <mailto:' + email + '> .\n' +
-                     '\t?URIusername :isadmin ?admin .'
-        }, self.get_param("askomics.users_graph"))
+                     '\t?URIusername :isadmin ?admin .\n'+
+                     "}"
+        },True)
 
     def get_users_infos(self):
         """
         Get users infos
         """
-        return self.build_query_for_graph({
+        return self.build_query_on_the_fly({
             'select': '?username ?email ?admin',
-            'query': '?URIusername rdf:type foaf:Person .\n' +
+            'query': "GRAPH <"+ self.get_param("askomics.users_graph") + "> {" +
+                     '\t?URIusername rdf:type foaf:Person .\n' +
                      '\t?URIusername foaf:name ?username .\n' +
                      '\t?URIusername foaf:mbox ?email .\n' +
-                     '\t?URIusername :isadmin ?admin .'
-        }, self.get_param("askomics.users_graph"))
+                     '\t?URIusername :isadmin ?admin .\n'+
+                     "}"
+        },True)

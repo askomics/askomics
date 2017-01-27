@@ -168,11 +168,12 @@ class AskomicsForceLayoutManager {
     this.vis = d3.select("#svgdiv")
                 .append("svg:svg")
                 .attr("id", "svg")
-                .attr("pointer-events", "all")
+                /*.attr("pointer-events", "all")*/
                 .attr({
                   "width": "100%",
                   "height": "100%"
                 })
+
                 .attr("viewBox", "0 0 " + this.w + " " + this.h )
                 .attr("perserveAspectRatio", "xMinYMid meet")
                 .call(d3.behavior.zoom().on("zoom", function() {
@@ -718,7 +719,7 @@ class AskomicsForceLayoutManager {
         y = listSelectedNodes[0].y;
       }
       x+=0.5;y+=0.5;
-      
+
       for (let shortcut in lShortcuts) {
         let suggestedNode;
         let uri = Object.keys(lShortcuts[shortcut].out)[0];

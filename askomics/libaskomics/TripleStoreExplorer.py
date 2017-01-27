@@ -44,7 +44,7 @@ class TripleStoreExplorer(ParamManager):
             uri = result["nodeUri"]
             label = result["nodeLabel"]
 
-            if 'private' in result['g']:
+            if 'private' in result['accesLevel']:
                 public = False
                 private = True
             else:
@@ -168,7 +168,7 @@ class TripleStoreExplorer(ParamManager):
             return req
         return ""
 
-    def build_sparql_query_from_json(self, variates, constraintes_relations, limit, send_request_to_tps):
+    def build_sparql_query_from_json(self, variates, constraintes_relations, limit, send_request_to_tps=True):
         """
         Build a sparql query from JSON constraints
         """
@@ -177,7 +177,6 @@ class TripleStoreExplorer(ParamManager):
 
         sqb = SparqlQueryBuilder(self.settings, self.session)
         query_launcher = QueryLauncher(self.settings, self.session)
-
         query = self.build_recursive_block('', constraintes_relations)
 
         # if limit != None and limit > 0:
@@ -186,9 +185,9 @@ class TripleStoreExplorer(ParamManager):
         if send_request_to_tps:
             results = query_launcher.process_query(sqb.custom_query(select, query).query)
         else:
-            pass
+            results = []
 
-        return results, query
+        return results, sqb.custom_query(select, query).query
 
 
     def build_sparql_query_from_json2(self, variates, constraintes_relations, limit, send_request_to_TPS):
@@ -202,12 +201,6 @@ class TripleStoreExplorer(ParamManager):
 
         sqb = SparqlQueryBuilder(self.settings, self.session)
         ql = QueryLauncher(self.settings, self.session)
-        # res = ql.execute_query(sqb.get_list_named_graphs().query)
-
-        # namedGraphs = []
-
-        #for indexResult in range(len(res['results']['bindings'])):
-        #    namedGraphs.append(res['results']['bindings'][indexResult]['g']['value'])
 
         req = ""
         req += "SELECT DISTINCT "+' '.join(variates)+"\n"
