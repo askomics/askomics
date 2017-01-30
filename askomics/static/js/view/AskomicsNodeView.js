@@ -39,7 +39,7 @@ class AskomicsNodeView extends AskomicsObjectView {
       let VarDisplay = mythis.node.getAttributesDisplaying();
 
       if (VarDisplay.label.length>0) {
-        
+
         mess += '<h5>Displaying attributes</h5>';
         for (let v=0 ; v < VarDisplay.label.length-1; v++ ) {
           mess += VarDisplay.label[v]+",";
@@ -146,13 +146,15 @@ class AskomicsNodeView extends AskomicsObjectView {
   }
 
 /* ===============================================================================================*/
-  buildDecimal(attribute) {
+  buildDecimal(idDecimal,attribute) {
+    let mythis = this;
+
     let labelSparqlVarId = attribute.SPARQLid;
 
     let inputValue       = "";
     let selectedOpValue  = "";
 
-    let inp = $("<table></table>");
+    let inp = $("<table></table>").addClass("table").attr("id","decimal_"+attribute.SPARQLid+"_"+idDecimal);
     if ('op_'+labelSparqlVarId in this.node.values) {
       selectedOpValue = this.node.values['op_'+labelSparqlVarId];
     }
@@ -183,23 +185,47 @@ class AskomicsNodeView extends AskomicsObjectView {
     if ( selectedOpValue=='!=') t.attr("selected", "selected");
     v.append(t);
 
+    /* operator */
     let tr = $("<tr></tr>");
     tr.append($("<td></td>").append(v));
 
-    v = $('<input type="text" class="form-control"/>').attr("id",attribute.id);
+    /* value */
+    v = $('<input></input>').attr("type","text").addClass("form-control").attr("id",attribute.id);
     v.val(inputValue);
-
     tr.append($("<td></td>").append(v));
-    inp.append(tr);
 
-    let mythis = this;
+    /* add condition */
+    /*
+    let span = $("<span></span>").attr("id",attribute.SPARQLid+"_span_decimal_add_"+idDecimal).addClass("glyphicon glyphicon-plus").attr("value","small");
+
+    span.click(function(d) {
+      $("span[id^='"+attribute.SPARQLid+"_span_decimal_add_']").hide();
+      $("span[id^='"+attribute.SPARQLid+"_span_decimal_min_']").hide();
+      mythis.buildDecimal(idDecimal+1,attribute).insertAfter($("#decimal_"+attribute.SPARQLid+"_"+idDecimal));
+    } );
+    tr.append($("<td></td>").append(span));
+    */
+    /* remove condition */
+    /*
+    if ( idDecimal > 1 ) {
+      span = $("<span></span>").attr("id",attribute.SPARQLid+"_span_decimal_min_"+idDecimal).addClass("glyphicon glyphicon-minus").attr("value","small").attr("aria-hidden","true");
+      span.click(function(d) {
+        $("span[id^='"+attribute.SPARQLid+"_span_decimal_add_"+idDecimal-1+"']").show();
+        $("span[id^='"+attribute.SPARQLid+"_span_decimal_min_"+idDecimal-1+"']").show();
+        $("#decimal_"+attribute.SPARQLid+"_"+idDecimal).remove();
+      } );
+      tr.append($("<td></td>").append(span));
+    }
+    */
+    inp.append(tr);
 
     inp.change(function(d) {
       var op = $(this).find("option:selected").text();
       var value = $(this).find('input').val();
 
+
       if (! $.isNumeric(value) ) {
-          displayModal("'"+value + "' is not a numeric value !", '', 'Close');
+      //    displayModal("'"+value + "' is not a numeric value !", '', 'Close');
           value = $(this).find('input').val(null);
           return;
       }
@@ -635,7 +661,7 @@ class AskomicsNodeView extends AskomicsObjectView {
                    .append(mythis.makeEyeIcon(attribute))
                    .append(mythis.makeNegativeMatchIcon(attribute.SPARQLid))
                    .append(mythis.makeLinkVariableIcon(attribute.SPARQLid))
-                   .append(mythis.buildDecimal(attribute))
+                   .append(mythis.buildDecimal(1,attribute))
                    .append(mythis.buildLinkVariable(attribute)));
           } else if ( attribute.basic_type == "string" ) {
             node.switchRegexpMode(attribute.SPARQLid);
