@@ -72,7 +72,7 @@ fi
 
 # lauch gulp
 echo "build javascript"
-# gulp $gulpmode
+gulp $gulpmode
 
 # build the venv
 activate_path="$path/venv/bin/activate"
