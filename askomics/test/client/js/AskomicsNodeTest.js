@@ -74,7 +74,8 @@ let geneJSON = {
   "_values":  {},
   "_isregexp":{},
   "_inverseMatch": {},
-  "_label":"Gene"
+  "_label":"Gene",
+  "additionalShortcutListDisplayVar":{}
   };
 
 describe('AskomicsNode', function(){
