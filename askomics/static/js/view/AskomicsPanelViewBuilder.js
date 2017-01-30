@@ -14,6 +14,10 @@ class AskomicsPanelViewBuilder {
     instancePanelViewBuilder = this;
   }
 
+  removeAll() {
+    instancePanelViewBuilder.lViews = {};
+  }
+
   getPanelView(obj) {
     if (obj.id in instancePanelViewBuilder.lViews) {
       return instancePanelViewBuilder.lViews[obj.id];
