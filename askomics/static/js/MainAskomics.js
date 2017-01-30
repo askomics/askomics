@@ -41,6 +41,8 @@ function resetGraph() {
   //remove all rightviews
   AskomicsObjectView.removeAll();
 
+  new AskomicsPanelViewBuilder().removeAll();
+
   //FL
   forceLayoutManager.reset() ;
   new AskomicsGraphBuilder().reset();
