@@ -11,12 +11,13 @@ class AskomicsUser {
 
     logUser() {
         // displayNavbar(true, this.username, this.admin, this.blocked);
-        location.reload();
-        // setTimeout(function() {
-        //     $('.container#content_login').hide();
-        //     $('.container#content_signup').hide();
-        //     $('.container#content_interrogation').show();
-        // }, 1000);
+        // location.reload();
+        setTimeout(function() {
+            // $('.container#content_login').hide();
+            // $('.container#content_signup').hide();
+            // $('.container#content_interrogation').show();
+            location.reload();
+        }, 1000);
     }
 
     checkUser() {

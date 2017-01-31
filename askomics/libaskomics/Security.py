@@ -1,6 +1,8 @@
 import logging, hashlib
 from validate_email import validate_email
 import random
+import smtplib
+import re
 
 from askomics.libaskomics.ParamManager import ParamManager
 from askomics.libaskomics.rdfdb.SparqlQueryAuth import SparqlQueryAuth
@@ -156,6 +158,46 @@ class Security(ParamManager):
         header_ttl = sqa.header_sparql_config(chunk)
         query_laucher.insert_data(chunk, self.settings["askomics.users_graph"], header_ttl)
 
+        emails = self.get_admins_emails()
+
+        # Send a mail to all admins
+        body = 'Hello, ' + self.username + ' just create an account.\n'
+        body += 'Log into the admin interface in order to unblock this user, or contact him '
+        body += 'at ' + self.email + '.\n\n\n'
+        body += 'Cordialy, the AskOmics server'
+
+        self.send_mails(emails, '[AskOmics] New account created', body)
+
+
+    def send_mails(self, dests, subject, text):
+        """
+        Send a mail to a list of Recipients
+        """
+
+        # Don't send mail if the smtp server is not in
+        # the config file
+        if not self.get_param('smtp.host'):
+            return
+
+
+        sender = self.get_param('smtp.host')
+
+        message = """
+        From: %s
+        To: %s
+        Subject: %s
+
+        %s
+        """ % (sender, ", ".join(dests), subject, text)
+
+        try:
+            smtp = smtplib.SMTP('localhost')
+            smtp.sendmail(sender, dests, message)
+            self.log.debug("Successfully sent email")
+        except Exception as e:
+            self.log.debug("Error: unable to send email: " + str(e))
+
+
     def create_user_graph(self):
         """
         Create a subgraph for the user. All his data will be inserted in this subgraph
@@ -168,6 +210,21 @@ class Security(ParamManager):
 
         header_ttl = sqa.header_sparql_config(ttl)
         query_laucher.insert_data(ttl, self.settings["askomics.private_graph"], header_ttl)
+
+    def get_admins_emails(self):
+        """
+        Get all admins emails
+        """
+        query_laucher = QueryLauncher(self.settings, self.session)
+        sqa = SparqlQueryAuth(self.settings, self.session)
+
+        result = query_laucher.process_query(sqa.get_admins_emails().query)
+
+        email_list = []
+        for dic in result:
+            email_list.append(re.sub(r'^mailto:', '', dic['email']))
+
+        return email_list
 
     def set_admin(self, admin):
         """

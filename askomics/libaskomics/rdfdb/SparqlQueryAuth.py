@@ -120,3 +120,16 @@ class SparqlQueryAuth(SparqlQueryBuilder):
                      '\t?URIusername :isblocked ?blocked .'
                      "}"
         }, True)
+
+    def get_admins_emails(self):
+        """
+        Get emails of all admins
+        """
+        return self.build_query_on_the_fly({
+            'select': '?email',
+            'query': "GRAPH <"+ self.get_param("askomics.users_graph") + "> {" +
+                     '\t?URIusername rdf:type foaf:Person .\n' +
+                     '\t?URIusername foaf:mbox ?email .\n' +
+                     '\t?URIusername :isadmin "true"^^xsd:boolean .\n'+
+                     "}"
+        }, True)
