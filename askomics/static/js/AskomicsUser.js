@@ -2,19 +2,21 @@
 
 class AskomicsUser {
 
-    constructor(username, admin) {
+    constructor(username, admin, blocked) {
         this.username = username ;
         this.admin = admin;
+        this.blocked = blocked;
     }
 
 
     logUser() {
-        displayNavbar(true, this.username, this.admin);
-        setTimeout(function() {
-            $('.container#content_login').hide();
-            $('.container#content_signup').hide();
-            $('.container#content_interrogation').show();
-        }, 1000);
+        // displayNavbar(true, this.username, this.admin, this.blocked);
+        location.reload();
+        // setTimeout(function() {
+        //     $('.container#content_login').hide();
+        //     $('.container#content_signup').hide();
+        //     $('.container#content_interrogation').show();
+        // }, 1000);
     }
 
     checkUser() {
@@ -28,7 +30,9 @@ class AskomicsUser {
             if (data.username) {
                 self.username = data.username;
                 self.admin = data.admin;
-                self.logUser();
+                self.blocked = data.blocked;
+                // self.logUser();
+                displayNavbar(true, self.username, self.admin, self.blocked);
             }else{
                 displayNavbar(false, '');
             }

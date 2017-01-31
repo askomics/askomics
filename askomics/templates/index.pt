@@ -194,6 +194,9 @@
             <hr/>
         </div>
 
+        <div id="content_blocked" class="container" hidden>
+        </div>
+
         <div id="content_administration" class="container" hidden>
             <hr/>
             <h3 class="header-div">Administration</h3>
@@ -305,6 +308,7 @@
                     <ul class="nav navbar-nav navbar-right">
                         <li id="interrogation" class="active"><a href="#" onclick="loadStartPoints();"><span class="glyphicon glyphicon-play"></span></a></li>
                         {{#if loged}}
+                        {{#if nonblocked}}
                         <li id="userdata" class="dropdown">
                             <li id="integration"><a href="#"><span class="glyphicon glyphicon-cloud-upload"></span></a></li>
                         </li>
@@ -316,6 +320,7 @@
                             </ul>
                           </li>
                         {{/if}}
+                        {{/if}}
                         <li id="about"><a href="#"><span class="glyphicon glyphicon-info-sign"></span></a></li>
                         <li id="help"><a href="#" onclick="AskomicsHelp.start();"><span class="glyphicon glyphicon-question-sign"></span></a></li>
                         {{#if loged}}
@@ -323,7 +328,7 @@
                         <li id="user_menu" class="dropdown">
                           <a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="glyphicon glyphicon-user"></span><span class="caret"></span></a>
                             <ul class="dropdown-menu">
-                                <li id="user_info"><a href="#"><span class="glyphicon glyphicon-cog"></span> Account managment ({{username}})</a></li>
+                                <li id="user_info"><a href="#"><span class="glyphicon glyphicon-cog"></span> Account managment (<i class='username' id='{{username}}'>{{username}}</i>)</a></li>
                             {{#if admin}}
                                 <li id="administration"><a href="#"><span class="glyphicon glyphicon-king"></span> Administration</a></li>
                             {{/if}}
@@ -573,6 +578,17 @@
                     <hr><br>
                 </div>
             </form>
+        </script>
+
+        <!-- template to display the blocked page -->
+        <script id="template-blocked" type="text/x-handlebars-template">
+          <div id="blocked_message">
+            <h4>Hello {{name}}!</h4>
+            <p>Your account is blocked, wait for an admin to unlock it.</p>
+            <p>In the meantime, you can play with the public data.</p>
+            <br />
+            <p>The AskoTeam.</p>
+          </div>
         </script>
 
 

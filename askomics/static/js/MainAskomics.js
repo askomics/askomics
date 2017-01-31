@@ -135,6 +135,10 @@ function loadNamedGraphs() {
     serviceNamedGraphs.getAll(function(namedGraphs) {
         if (namedGraphs == 'forbidden') {
           showLoginForm();
+          return;
+        }
+        if (namedGraphs == 'blocked') {
+          displayBlockedPage($('.username').attr('id'));
         }
         if (namedGraphs.length === 0) {
           disableDelButton();
@@ -198,6 +202,10 @@ function loadStatistics() {
       if (stats == 'forbidden') {
         showLoginForm();
         return;
+      }
+      if (stats == 'blocked') {
+          displayBlockedPage($('.username').attr('id'));
+          return;
       }
 
       $('#content_statistics').empty();
@@ -266,6 +274,11 @@ function deleteNamedGraph(graphs) {
         service.post(data, function(d){
           if (d == 'forbidden') {
             showLoginForm();
+            return;
+          }
+          if (d == 'blocked') {
+            displayBlockedPage($('.username').attr('id'));
+            return;
           }
         resetGraph();
         resetStats();
@@ -383,13 +396,29 @@ function setUploadForm(content,titleForm,route_overview,callback) {
   });
 }
 
-function displayNavbar(loged, username, admin) {
+function displayBlockedPage(username) {
+  console.log('-+-+- displayBlockedPage -+-+-');
+  $('#content_blocked').empty();
+  let source = $('#template-blocked').html();
+  let template = Handlebars.compile(source);
+
+  let context = {name: username};
+  let html = template(context);
+
+  hideModal();
+
+  $('.container').hide();
+  $('.container#navbar_content').show();
+  $('#content_blocked').append(html).show();
+}
+
+function displayNavbar(loged, username, admin, blocked) {
     console.log('-+-+- displayNavbar -+-+-');
     $("#navbar").empty();
     let source = $('#template-navbar').html();
     let template = Handlebars.compile(source);
 
-    let context = {name: 'AskOmics', loged: loged, username: username, admin: admin};
+    let context = {name: 'AskOmics', loged: loged, username: username, admin: admin, nonblocked: !blocked};
     let html = template(context);
 
     $("#navbar").append(html);
@@ -491,7 +520,7 @@ function displayNavbar(loged, username, admin) {
             $('#signup_success').show();
             // User is logged, show the special button
             console.log(data);
-            let user = new AskomicsUser(data.username);
+            let user = new AskomicsUser(data.username, data.admin, data.blocked);
             user.checkUser();
           }
       });
