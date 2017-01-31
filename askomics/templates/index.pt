@@ -348,12 +348,14 @@
                 <th>Username</th>
                 <th>Email</th>
                 <th>Admin</th>
+                <th>Blocked</th>
             </tr>
             {{#each users}}
             <tr>
                 <td>{{this.username}}</td>
                 <td><a href="{{this.email}}">{{this.email}}</a></td>
                 <td>{{this.admin}}</td>
+                <td>{{this.blocked}}</td>
             </tr>
             {{/each}}
           </table>

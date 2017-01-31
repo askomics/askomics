@@ -872,9 +872,10 @@ class AskView(object):
                 self.data['error'].append('Password is incorrect')
                 error = True
 
-            # Get the admin status
-            admin = security.get_admin_status_by_email()
-            security.set_admin(admin)
+            # Get the admin and blocked status
+            admin_blocked = security.get_admin_blocked_by_email()
+            security.set_admin(admin_blocked['admin'])
+            security.set_blocked(admin_blocked['blocked'])
 
             if error:
                 return self.data
@@ -886,9 +887,10 @@ class AskView(object):
                 self.data['error'].append('username is not registered')
                 error = True
 
-            # Get the admin status
-            admin = security.get_admin_status_by_username()
-            security.set_admin(admin)
+            # Get the admin and blocked status
+            admin_blocked = security.get_admin_blocked_by_username()
+            security.set_admin(admin_blocked['admin'])
+            security.set_blocked(admin_blocked['blocked'])
 
             if error:
                 return self.data
@@ -906,7 +908,8 @@ class AskView(object):
         try:
             security.log_user(self.request)
             self.data['username'] = username
-            self.data['admin'] = admin
+            self.data['admin'] = admin_blocked['admin']
+            self.data['blocked'] = admin_blocked['blocked']
 
         except Exception as e:
             self.data['error'] = str(e)
