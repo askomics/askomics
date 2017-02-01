@@ -991,7 +991,7 @@ class AskView(object):
         ql = QueryLauncher(self.settings, self.request.session)
 
         try:
-            result = ql.process_query(sqa.get_users_infos().query)
+            result = ql.process_query(sqa.get_users_infos(self.request.session['username']).query)
         except Exception as e:
             self.data['error'] = str(e)
             self.log.error(str(e))

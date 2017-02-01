@@ -106,9 +106,9 @@ class SparqlQueryAuth(SparqlQueryBuilder):
                      "}"
         }, True)
 
-    def get_users_infos(self):
+    def get_users_infos(self, me):
         """
-        Get users infos
+        Get users infos exept me
         """
         return self.build_query_on_the_fly({
             'select': '?username ?email ?admin ?blocked',
@@ -117,7 +117,8 @@ class SparqlQueryAuth(SparqlQueryBuilder):
                      '\t?URIusername foaf:name ?username .\n' +
                      '\t?URIusername foaf:mbox ?email .\n' +
                      '\t?URIusername :isadmin ?admin .\n'+
-                     '\t?URIusername :isblocked ?blocked .'
+                     '\t?URIusername :isblocked ?blocked .' +
+                     '\tFILTER NOT EXISTS { ?URIusername foaf:name "' + me + '" . }\n' +
                      "}"
         }, True)
 
