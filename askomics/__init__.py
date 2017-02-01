@@ -61,6 +61,8 @@ def main(global_config, **settings):
     config.add_route('setAdmin', '/setAdmin')
     config.add_route('delete_user', '/delete_user')
 
+    config.add_route('get_my_infos', 'get_my_infos')
+
 
     # TODO no absolute path to static files
     # TODO check what is cors (iframe redirect?)

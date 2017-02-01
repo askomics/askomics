@@ -189,9 +189,6 @@
         </div>
 
         <div id="content_user_info" class="container" hidden>
-            <hr/>
-            <h3 class="header-div">User page</h3>
-            <hr/>
         </div>
 
         <div id="content_blocked" class="container" hidden>
@@ -363,7 +360,7 @@
             <tr>
             {{/if}}
                 <td>{{this.username}}</td>
-                <td><a href="{{this.email}}">{{this.email}}</a></td>
+                <td><a href="mailto:{{this.email}}">{{this.email}}</a></td>
                 <td>
                 {{#if this.admin}}
                 <span style="color:orange" class="glyphicon glyphicon-king unset_admin" id={{this.username}}></span>
@@ -388,6 +385,43 @@
             </tr>
             {{/each}}
           </table>
+      </script>
+
+      <script id='template-user-managment' type="text/x-handlebars-template">
+       <h4>Hello {{user.username}}</h4>
+       {{#if user.blocked}}
+       <div class="alert alert-danger" role="alert">Your account is blocked, wait for an admin to unlock it</div>
+       {{/if}}
+
+       <h4>Update your infos</h4>
+       <div class='col-md-6'>
+         <div class="input-group">
+          <span class="input-group-addon" id="basic-addon1">Email</span>
+          <input type="text" class="form-control" placeholder="{{user.email}}" aria-describedby="basic-addon1">
+          <span class="input-group-btn">
+            <button class="btn btn-default" type="button">Update</button>
+          </span>
+         </div>
+        <br>
+        <div class="input-group">
+          <span class="input-group-addon" id="basic-addon1">Password</span>
+          <input type="text" class="form-control" placeholder="***************" aria-describedby="basic-addon1">
+          <span class="input-group-btn">
+            <button class="btn btn-default" type="button">Update</button>
+          </span>
+         </div>
+      </div>
+
+      <div class='col-md-12'>
+      <h4>Remove your account</h4>
+        <p>Remove your account and all your data</p>
+        <br>
+        <button type="button" class="btn btn-danger del_user" id='{{user.username}}'>Delete account</button>
+        <div class="btn-group div_confirm_del_user hidden" id='{{user.username}}' role="group">
+          <button type="button" class="btn btn-danger confirm_del_user" id='{{user.username}}'>Delete</button>
+          <button type="button" class="btn btn-default no_del_user" id='{{user.username}}'>No</button>
+        </div>
+      </div>
       </script>
 
      <script id='template-admin-shortcuts' type="text/x-handlebars-template">

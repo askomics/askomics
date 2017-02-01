@@ -927,13 +927,14 @@ class AskView(object):
                 self.data['error'].append('Password is incorrect')
                 error = True
 
+            if error:
+                return self.data
+
             # Get the admin and blocked status
             admin_blocked = security.get_admin_blocked_by_email()
             security.set_admin(admin_blocked['admin'])
             security.set_blocked(admin_blocked['blocked'])
 
-            if error:
-                return self.data
 
         elif auth_type == 'username':
             username_in_ts = security.check_username_in_database()
@@ -942,13 +943,13 @@ class AskView(object):
                 self.data['error'].append('username is not registered')
                 error = True
 
+            if error:
+                return self.data
+
             # Get the admin and blocked status
             admin_blocked = security.get_admin_blocked_by_username()
             security.set_admin(admin_blocked['admin'])
             security.set_blocked(admin_blocked['blocked'])
-
-            if error:
-                return self.data
 
             password_is_correct = security.check_username_password()
 
@@ -999,6 +1000,7 @@ class AskView(object):
         for res in result:
             res['admin'] = bool(int(res['admin']))
             res['blocked'] = bool(int(res['blocked']))
+            res['email'] = re.sub(r'^mailto:', '', res['email'])
 
         self.log.debug(result)
 
@@ -1085,8 +1087,8 @@ class AskView(object):
         Delete a user from the user graphs, and remove all his data
         """
 
-        # Denny access for non loged users or non admin users
-        if self.request.session['username'] == '' or not self.request.session['admin']:
+        # Denny access for non loged users
+        if self.request.session['username'] == '':
             return 'forbidden'
 
         # Denny for blocked users
@@ -1096,6 +1098,10 @@ class AskView(object):
         body = self.request.json_body
 
         username = body['username']
+
+        # Non admin can only delete himself
+        if self.request.session['username'] != username and not self.request.session['admin']:
+            return 'forbidden'
 
 
         sqb = SparqlQueryBuilder(self.settings, self.request.session)
@@ -1123,4 +1129,33 @@ class AskView(object):
         except Exception as e:
             return 'failed: ' + str(e)
 
+        # Is user delete himself, delog him
+        if self.request.session['username'] == username:
+            self.request.session['username'] = ''
+            self.request.session['admin'] = ''
+            self.request.session['graph'] = ''
+
         return 'success'
+
+    @view_config(route_name='get_my_infos', request_method='GET')
+    def get_my_infos(self):
+        """
+        Get all infos about a user
+        """
+
+
+        sqa = SparqlQueryAuth(self.settings, self.request.session)
+        query_laucher = QueryLauncher(self.settings, self.request.session)
+
+        try:
+            result = query_laucher.process_query(sqa.get_user_infos(self.request.session['username']).query)
+        except Exception as e:
+            return 'failed: ' + str(e)
+
+        result = result[0]
+        result['email'] = re.sub(r'^mailto:', '', result['email'])
+        result['username'] = self.request.session['username']
+        result['admin'] = bool(int(result['admin']))
+        result['blocked'] = bool(int(result['blocked']))
+
+        return result

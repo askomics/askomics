@@ -448,7 +448,7 @@ function loadUsers() {
   new ShortcutsParametersView().updateShortcuts(true);
 }
 
-function delUser(username) {
+function delUser(username, reload=false) {
   console.log('-+-+-delUser ' + username + ' -+-+-');
   // display confirmations buttons
   $('.del_user#' + username).hide();
@@ -474,11 +474,14 @@ function delUser(username) {
         displayBlockedPage($('.username').attr('id'));
         return;
       }
+      if (reload) {
+        location.reload();
+      }
       // Reload the page
       if (d == 'success') {
         loadUsers();
       }else{
-        alert(d)
+        alert(d);
       }
     });
   });
@@ -528,6 +531,24 @@ function setAdmin(username, admin) {
     }else{
       alert(d);
     }
+  });
+}
+
+function userForm() {
+  console.log('-+-+- userForm -+-+-');
+
+  let service = new RestServiceJs('get_my_infos');
+  service.getAll(function(d) {
+    console.log(d);
+    let source = $('#template-user-managment').html();
+    let template = Handlebars.compile(source);
+    let context = {user: d};
+    let html = template(context);
+    $('#content_user_info').empty();
+    $('#content_user_info').append(html);
+    $('.del_user#' + d.username).click(function() {
+      delUser(d.username, true);
+    });
   });
 }
 
@@ -697,6 +718,12 @@ function displayNavbar(loged, username, admin, blocked) {
     $('#administration').click(function() {
       loadUsers();
     });
+
+    // admin page
+    $('#user_info').click(function() {
+      userForm();
+    });
+
 
 }
 

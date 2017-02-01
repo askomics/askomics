@@ -106,7 +106,7 @@ class SparqlQueryAuth(SparqlQueryBuilder):
                      "}"
         }, True)
 
-    def get_users_infos(self, me):
+    def get_users_infos(self, username):
         """
         Get users infos exept me
         """
@@ -118,7 +118,22 @@ class SparqlQueryAuth(SparqlQueryBuilder):
                      '\t?URIusername foaf:mbox ?email .\n' +
                      '\t?URIusername :isadmin ?admin .\n'+
                      '\t?URIusername :isblocked ?blocked .' +
-                     '\tFILTER NOT EXISTS { ?URIusername foaf:name "' + me + '" . }\n' +
+                     '\tFILTER NOT EXISTS { ?URIusername foaf:name "' + username + '" . }\n' +
+                     "}"
+        }, True)
+
+    def get_user_infos(self, username):
+        """
+        Get infos about one user
+        """
+        return self.build_query_on_the_fly({
+            'select': '?username ?email ?admin ?blocked',
+            'query': "GRAPH <"+ self.get_param("askomics.users_graph") + "> {" +
+                     '\t?URIusername rdf:type foaf:Person .\n' +
+                     '\t?URIusername foaf:name "' + username + '" .\n' +
+                     '\t?URIusername foaf:mbox ?email .\n' +
+                     '\t?URIusername :isadmin ?admin .\n'+
+                     '\t?URIusername :isblocked ?blocked .' +
                      "}"
         }, True)
 
