@@ -1,4 +1,5 @@
 #! /bin/bash
+set -e
 
 ############################################
 #                                          #
@@ -72,25 +73,27 @@ fi
 
 # lauch gulp
 echo "build javascript"
-gulp $gulpmode
+pushd $path > /dev/null
+#gulp $gulpmode
+popd > /dev/null
 
 # build the venv
 activate_path="$path/venv/bin/activate"
 
 if [[ ! -f $activate_path ]]; then
     echo "building python virtual environement in $activate_path"
-    # python3 -m ensurepip
-    python3 -m venv $path/venv
+    pushd $path > /dev/null
+    virtualenv -p python3 $path/venv || (>&2 echo -e "\nproblem with virtualenv/python-dev installation !\n\n";exit 1)
     source $activate_path
-    python3 -m pip install -e .
+    $path/venv/bin/python3 -m pip install -e .
+    popd > /dev/null
 else
     echo "activate the virtual environment ..."
     source $activate_path
     
 fi
 
-
 source $activate_path
 
-echo "lauch AskOmics"
+echo "launch AskOmics:python3 $path/venv/bin/pserve $config_path $arg"
 python3 $path/venv/bin/pserve $config_path $arg
