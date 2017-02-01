@@ -57,6 +57,8 @@ def main(global_config, **settings):
 
     # Administration
     config.add_route('get_users_infos', '/get_users_infos')
+    config.add_route('lockUser', '/lockUser')
+    config.add_route('setAdmin', '/setAdmin')
 
 
     # TODO no absolute path to static files

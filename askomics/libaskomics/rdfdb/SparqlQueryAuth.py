@@ -133,3 +133,11 @@ class SparqlQueryAuth(SparqlQueryBuilder):
                      '\t?URIusername :isadmin "true"^^xsd:boolean .\n'+
                      "}"
         }, True)
+
+    def change_blocked_status(self, username):
+        """
+        change the blocked status of a user
+        """
+        return self.build_query_on_the_fly({
+            'select': ''
+            })

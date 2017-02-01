@@ -412,6 +412,81 @@ function displayBlockedPage(username) {
   $('#content_blocked').append(html).show();
 }
 
+function loadUsers() {
+  console.log('-+-+- loadUsers -+-+-');
+
+  displayModal('Please wait', '', 'Close');
+
+  let service = new RestServiceJs('get_users_infos');
+  service.getAll(function(data) {
+    $("#Users_adm").empty();
+    let source = $('#template-admin-users').html();
+    let template = Handlebars.compile(source);
+
+    let context = {users: data.result};
+    let html = template(context);
+
+    $("#Users_adm").append(html);
+    $('.lock_user').click(function() {
+      lockUser(this.id, true);
+    });
+    $('.unlock_user').click(function() {
+      lockUser(this.id, false);
+    });
+    $('.set_admin').click(function() {
+      setAdmin(this.id, true);
+    });
+    $('.unset_admin').click(function() {
+      setAdmin(this.id, false);
+    });
+    hideModal();
+  });
+
+  new ShortcutsParametersView().updateShortcuts(true);
+}
+
+function lockUser(username, lock) {
+  console.log('-+-+- lockUser -+-+-');
+  let service = new RestServiceJs('lockUser');
+  let data = {'username': username, 'lock': lock};
+  service.post(data, function(d) {
+    if (d == 'forbidden') {
+      showLoginForm();
+      return;
+    }
+    if (d == 'blocked') {
+      displayBlockedPage($('.username').attr('id'));
+      return;
+    }
+    // Reload the page
+    if (d == 'success') {
+      loadUsers();
+    }
+  });
+}
+
+
+function setAdmin(username, admin) {
+  console.log('-+-+- setAdmin -+-+-');
+  let service = new RestServiceJs('setAdmin');
+  let data = {'username': username, 'admin': admin};
+  service.post(data, function(d) {
+    if (d == 'forbidden') {
+      showLoginForm();
+      return;
+    }
+    if (d == 'blocked') {
+      displayBlockedPage($('.username').attr('id'));
+      return;
+    }
+    // Reload the page
+    if (d == 'success') {
+      loadUsers();
+    }
+  });
+}
+
+
 function displayNavbar(loged, username, admin, blocked) {
     console.log('-+-+- displayNavbar -+-+-');
     $("#navbar").empty();
@@ -575,24 +650,7 @@ function displayNavbar(loged, username, admin, blocked) {
 
     // admin page
     $('#administration').click(function() {
-      console.log('-+-+- administration -+-+-');
-
-      displayModal('Please wait', '', 'Close');
-
-      let service = new RestServiceJs('get_users_infos');
-      service.getAll(function(data) {
-        $("#Users_adm").empty();
-        let source = $('#template-admin-users').html();
-        let template = Handlebars.compile(source);
-
-        let context = {users: data.result};
-        let html = template(context);
-
-        $("#Users_adm").append(html);
-        hideModal();
-      });
-
-      new ShortcutsParametersView().updateShortcuts(true);
+      loadUsers();
     });
 
 }

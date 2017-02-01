@@ -996,8 +996,84 @@ class AskView(object):
             self.data['error'] = str(e)
             self.log.error(str(e))
 
+        for res in result:
+            res['admin'] = bool(int(res['admin']))
+            res['blocked'] = bool(int(res['blocked']))
+
         self.log.debug(result)
 
         self.data['result'] = result
 
         return self.data
+
+    @view_config(route_name='lockUser', request_method='POST')
+    def lock_user(self):
+        """
+        Change a user lock status
+        """
+
+        # Denny access for non loged users or non admin users
+        if self.request.session['username'] == '' or not self.request.session['admin']:
+            return 'forbidden'
+
+        # Denny for blocked users
+        if self.request.session['blocked']:
+            return 'blocked'
+
+        body = self.request.json_body
+
+        username = body['username']
+        new_status = body['lock']
+
+        # Convert bool to string for the triplestore
+        if new_status:
+            new_status = 'true'
+        else:
+            new_status = 'false'
+
+        sqb = SparqlQueryBuilder(self.settings, self.request.session)
+        query_laucher = QueryLauncher(self.settings, self.request.session)
+
+        try:
+            query_laucher.process_query(sqb.update_blocked_status(new_status, username).query)
+        except Exception as e:
+            return 'failed: ' + str(e)
+
+
+        return 'success'
+
+    @view_config(route_name='setAdmin', request_method='POST')
+    def set_admin(self):
+        """
+        Change a user admin status
+        """
+
+        # Denny access for non loged users or non admin users
+        if self.request.session['username'] == '' or not self.request.session['admin']:
+            return 'forbidden'
+
+        # Denny for blocked users
+        if self.request.session['blocked']:
+            return 'blocked'
+
+        body = self.request.json_body
+
+        username = body['username']
+        new_status = body['admin']
+
+        # Convert bool to string for the triplestore
+        if new_status:
+            new_status = 'true'
+        else:
+            new_status = 'false'
+
+        sqb = SparqlQueryBuilder(self.settings, self.request.session)
+        query_laucher = QueryLauncher(self.settings, self.request.session)
+
+        try:
+            query_laucher.process_query(sqb.update_admin_status(new_status, username).query)
+        except Exception as e:
+            return 'failed: ' + str(e)
+
+
+        return 'success'
