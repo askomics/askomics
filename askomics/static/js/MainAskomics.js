@@ -343,7 +343,7 @@ function setUploadForm(content,titleForm,route_overview,callback) {
         // Uncomment the following to send cross-domain cookies:
         //xhrFields: {withCredentials: true},
         url: '/up/file/',
-        maxChunkSize: 40000,
+        maxChunkSize: 400000,
         maxFileSize: 4000000000 // 4Go
     });
 

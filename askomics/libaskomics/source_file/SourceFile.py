@@ -100,6 +100,8 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         self.graph = g + ':' + self.name + '_' + self.timestamp
 
+        self.insert_metadatas(public)
+        
         content_ttl = self.get_turtle()
 
         ql = QueryLauncher(self.settings, self.session)
@@ -239,8 +241,6 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
             data['status'] = 'ok'
             data['total_triple_count'] = total_triple_count
-
-        self.insert_metadatas(public)
 
         data['expected_lines_number'] = self.get_number_of_lines()
 
