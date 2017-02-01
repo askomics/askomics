@@ -97,7 +97,7 @@ class SparqlQueryBuilder(ParamManager):
 
     def update_admin_status(self, admin, username):
         """
-        hello!
+        Change the admin status of a user!
         """
         return self.prepare_query(
             """
@@ -105,6 +105,31 @@ class SparqlQueryBuilder(ParamManager):
             DELETE { :""" + username + """ :isadmin ?admin }
             INSERT { :""" + username + """ :isadmin \"""" + admin + """\"^^xsd:boolean }
             WHERE { :""" + username + """ :isadmin ?admin }
+            """)
+
+    def get_graph_of_user(self, username):
+        """
+        Get all subgraph of a user
+        """
+        return self.prepare_query(
+            """
+            SELECT ?g
+            WHERE {
+                ?g dc:creator \"""" + username + """\"
+            }
+            """)
+
+    def delete_user(self, username):
+        """
+        Delet all info of a user
+        """
+        return self.prepare_query(
+            """
+            DELETE WHERE {
+                GRAPH <"""+self.get_param('askomics.users_graph')+"""> {
+                    :""" + username +""" ?p ?o
+                }
+            }
             """)
 
     def prepare_query(self, template, replacement={}):

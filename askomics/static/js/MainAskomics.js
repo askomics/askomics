@@ -439,10 +439,51 @@ function loadUsers() {
     $('.unset_admin').click(function() {
       setAdmin(this.id, false);
     });
+    $('.del_user').click(function() {
+      delUser(this.id);
+    });
     hideModal();
   });
 
   new ShortcutsParametersView().updateShortcuts(true);
+}
+
+function delUser(username) {
+  console.log('-+-+-delUser ' + username + ' -+-+-');
+  // display confirmations buttons
+  $('.del_user#' + username).hide();
+  $('.div_confirm_del_user#' + username).removeClass('hidden').show();
+
+  //if no, redisplay the trash
+  $('.no_del_user#' + username).click(function() {
+    $('.del_user#' + username).show();
+    $('.div_confirm_del_user#' + username).hide();
+  });
+
+  //if yes, delete user and all this data and reload the list
+  $('.confirm_del_user#' + username).click(function(e) {
+    console.log('CONFIRM DELETE USER ' + username);
+    let service = new RestServiceJs('delete_user');
+    let data = {'username': username};
+    service.post(data, function(d) {
+      if (d == 'forbidden') {
+        showLoginForm();
+        return;
+      }
+      if (d == 'blocked') {
+        displayBlockedPage($('.username').attr('id'));
+        return;
+      }
+      // Reload the page
+      if (d == 'success') {
+        loadUsers();
+      }else{
+        alert(d)
+      }
+    });
+  });
+
+
 }
 
 function lockUser(username, lock) {
@@ -461,6 +502,8 @@ function lockUser(username, lock) {
     // Reload the page
     if (d == 'success') {
       loadUsers();
+    }else{
+      alert(d);
     }
   });
 }
@@ -482,6 +525,8 @@ function setAdmin(username, admin) {
     // Reload the page
     if (d == 'success') {
       loadUsers();
+    }else{
+      alert(d);
     }
   });
 }

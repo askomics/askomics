@@ -1077,3 +1077,50 @@ class AskView(object):
 
 
         return 'success'
+
+
+    @view_config(route_name='delete_user', request_method='POST')
+    def delete_user(self):
+        """
+        Delete a user from the user graphs, and remove all his data
+        """
+
+        # Denny access for non loged users or non admin users
+        if self.request.session['username'] == '' or not self.request.session['admin']:
+            return 'forbidden'
+
+        # Denny for blocked users
+        if self.request.session['blocked']:
+            return 'blocked'
+
+        body = self.request.json_body
+
+        username = body['username']
+
+
+        sqb = SparqlQueryBuilder(self.settings, self.request.session)
+        query_laucher = QueryLauncher(self.settings, self.request.session)
+
+        # Get all graph of a user
+        res = query_laucher.process_query(sqb.get_graph_of_user(username).query)
+
+        list_graph = []
+        for graph in res:
+            list_graph.append(graph['g'])
+
+        # Drop all this graph
+        for graph in list_graph:
+            try:
+                query_laucher.process_query(sqb.get_drop_named_graph(graph).query)
+                query_laucher.process_query(sqb.get_delete_metadatas_of_graph(graph).query)
+            except Exception as e:
+                return 'failed: ' + str(e)
+
+
+        # Delete user infos
+        try:
+            query_laucher.execute_query(sqb.delete_user(username).query)
+        except Exception as e:
+            return 'failed: ' + str(e)
+
+        return 'success'

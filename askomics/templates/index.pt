@@ -377,7 +377,14 @@
                 <i style="color:green" class="fa fa-unlock lock_user" id="{{this.username}}"></i>
                 {{/if}}
                 </td>
-                <td><span style="color:red" class="glyphicon glyphicon-trash del_user" id={{this.username}}></span></td>
+                <td>
+                <span style="color:red" class="glyphicon glyphicon-trash del_user" id={{this.username}}></span>
+                {{!-- hidden confirm button --}}
+                <div class="btn-group div_confirm_del_user hidden" id='{{this.username}}' role="group">
+                  <button type="button" class="btn btn-danger btn-xs confirm_del_user" id='{{this.username}}'>Delete</button>
+                  <button type="button" class="btn btn-default btn-xs no_del_user" id='{{this.username}}'>No</button>
+                <div>
+                </td>
             </tr>
             {{/each}}
           </table>
