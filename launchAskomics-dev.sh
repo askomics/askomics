@@ -10,7 +10,7 @@ $VENV/bin/easy_install "requests==2.10.0"
 #3)
 $VENV/bin/python setup.py develop
 #4)
-$VENV/bin/pserve configs/development.virtuoso.ini
+$VENV/bin/pserve configs/development.virtuoso.ini --reload
 
 
 #Testing others TPS
