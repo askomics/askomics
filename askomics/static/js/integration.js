@@ -40,23 +40,23 @@ $(function () {
     });
 
     $("#content_integration").on('click', '.load_data_gff', function() {
-        let filename = $(this).attr('id');
-        loadSourceFileGff(filename, false);
+        let idfile = $(this).attr('id');
+        loadSourceFileGff(idfile, false);
     });
 
     $("#content_integration").on('click', '.load_data_gff_public', function() {
-        let filename = $(this).attr('id');
-        loadSourceFileGff(filename, true);
+        let idfile = $(this).attr('id');
+        loadSourceFileGff(idfile, true);
     });
 
     $("#content_integration").on('click', '.load_data_ttl', function() {
-        let filename = $(this).attr('id');
-        loadSourceFileTtl(filename, false);
+        let idfile = $(this).attr('id');
+        loadSourceFileTtl(idfile, false);
     });
 
     $("#content_integration").on('click', '.load_data_ttl_public', function() {
-        let filename = $(this).attr('id');
-        loadSourceFileTtl(filename, true);
+        let idfile = $(this).attr('id');
+        loadSourceFileTtl(idfile, true);
     });
 
     // $('.taxon-selector').change(function() {
@@ -101,6 +101,10 @@ function displayIntegrationForm(data) {
     }
 }
 
+function getIdFile(file) {
+  return file.name.split('.').join('_');
+}
+
 function displayTSVForm(file) {
     console.log('-+-+- displayTSVForm -+-+-');
     // tranform columns to rows
@@ -117,7 +121,7 @@ function displayTSVForm(file) {
     let source = $('#template-csv-form').html();
     let template = Handlebars.compile(source);
 
-    let context = {file: file, admin: admin};
+    let context = {idfile: getIdFile(file),file: file, admin: admin};
     let html = template(context);
 
     $("#content_integration").append(html);
@@ -127,6 +131,7 @@ function displayTSVForm(file) {
 function displayGffForm(file, taxons) {
     console.log('-+-+- displayGffForm -+-+-');
     let source = $('#template-gff-form').html();
+
     let template = Handlebars.compile(source);
 
     // User is admin if administration element is present in navbar
@@ -135,7 +140,7 @@ function displayGffForm(file, taxons) {
         admin = true;
     }
 
-    let context = {file: file, taxons: taxons, admin: admin};
+    let context = {idfile: getIdFile(file),file: file, taxons: taxons, admin: admin};
     let html = template(context);
 
     $("#content_integration").append(html);
@@ -152,13 +157,13 @@ function displayTtlForm(file) {
         admin = true;
     }
 
-    let context = {file: file, admin: admin};
+    let context = {idfile: getIdFile(file),file: file, admin: admin};
     let html = template(context);
 
     $('#content_integration').append(html);
 
-    $('#source-file-ttl-' + file.name).find(".preview_field").html(file.preview);
-    $('#source-file-ttl-' + file.name).find(".preview_field").show();
+    $('#source-file-ttl-' + getIdFile(file)).find(".preview_field").html(file.preview);
+    $('#source-file-ttl-' + getIdFile(file)).find(".preview_field").show();
 }
 
 function setCorrectType(file) {
@@ -175,7 +180,7 @@ function setCorrectType(file) {
     if ('column_types' in file) {
         var cols = file.column_types;
         for(let i=0; i<cols.length; i++) {
-            var selectbox = $('div#content_integration form#source-file-tsv-' + file.name + ' select.column_type:eq(' + i + ')');
+            var selectbox = $('div#content_integration form#source-file-tsv-' + getIdFile(file) + ' select.column_type:eq(' + i + ')');
             var values = selectbox.find("option").map(mapCallback);
 
             if ($.inArray(cols[i], ['start', 'end', 'numeric']) == -1) {
@@ -191,33 +196,19 @@ function setCorrectType(file) {
             }
 
             // Check what is in the db
-            checkExistingData($('div#content_integration form#source-file-tsv-' + file.name));
+            checkExistingData($('div#content_integration form#source-file-tsv-' + getIdFile(file)));
         }
     }
 
 
 }
 
-
-/**
- * FIXME: DEAD CODE - FUNCTION NEVER CALLED
- */
-function displayTableRDF(data) {
-  let info = "";//$('<div></div>');
-  for(let i=0;i<data.files.length;i++) {
-    info+="Insertion of "+ data.files[i].filename+".\n";
-  }
-  displayModal(info, '', 'Close');
-  if (data.error !== undefined ) alert(JSON.stringify(data.error));
-}
-
-
 /**
  * Get ttl representation of preview data
  */
 function previewTtl(file_elem) {
 
-    var file_name = file_elem.find('.file_name').attr('id');
+    var idfile = file_elem.find('.file_name').attr('id');
 
     // Get column types
     var col_types = file_elem.find('.column_type').map(function() {
@@ -245,7 +236,7 @@ function previewTtl(file_elem) {
     }
 
     var service = new RestServiceJs("preview_ttl");
-    var model = { 'file_name': file_name,
+    var model = { 'file_name': $("#"+idfile).attr("filename"),
                   'col_types': col_types,
                   'key_columns' : key_columns,
                   'disabled_columns': disabled_columns };
@@ -260,7 +251,6 @@ function previewTtl(file_elem) {
 }
 
 function hidePreview(file_elem) {
-    var file_name = file_elem.find('.file_name').text();
     file_elem.find(".preview_field").hide();
 }
 
@@ -291,7 +281,8 @@ function containAll(Array1,Array2){
  */
 function checkExistingData(file_elem) {
 
-    var file_name = file_elem.find('.file_name').attr('id');
+    let idfile = file_elem.find('.file_name').attr('id');
+    let file_name = $("#"+idfile).attr("filename");
 
     // Get column types
     var col_types = file_elem.find('.column_type').map(function() {
@@ -334,7 +325,7 @@ function checkExistingData(file_elem) {
     }
 
     var service = new RestServiceJs("check_existing_data");
-    var model = { 'file_name': file_name,
+    var model = { 'file_name': $("#"+idfile).attr("filename"),
                   'col_types': col_types,
                   'disabled_columns': disabled_columns,
                   'key_columns':key_columns
@@ -371,7 +362,7 @@ function checkExistingData(file_elem) {
 function loadSourceFile(file_elem, pub) {
     console.log('---> loadSourceFile');
 
-    let file_name = file_elem.find('.file_name').attr('id');
+    let idfile = file_elem.find('.file_name').attr('id');
 
     // Get column types
     let col_types = file_elem.find('.column_type').map(function() {
@@ -401,7 +392,7 @@ function loadSourceFile(file_elem, pub) {
     displayModal('Please wait', '', 'Close');
 
     var service = new RestServiceJs("load_data_into_graph");
-    var model = { 'file_name': file_name,
+    var model = { 'file_name': $("#"+idfile).attr("filename"),
                   'col_types': col_types,
                   'disabled_columns': disabled_columns,
                   'key_columns':key_columns,
@@ -472,24 +463,23 @@ function loadSourceFile(file_elem, pub) {
 /**
  * Load a GFF source_file into the triplestore
  */
-function loadSourceFileGff(filename, pub) {
-    console.log('-----> loadSourceFileGff <-----');
+function loadSourceFileGff(idfile, pub) {
+    console.log('-----> loadSourceFileGff <----- :');
     // get taxon
     let taxon = '';
 
-    let file_elem = $("#source-file-gff-" + filename);
+    let file_elem = $("#source-file-gff-" + idfile);
 
     // get the taxon in the selector or in the input field
-    if ($('#' + filename + '-selector').val() === null || $('#' + filename + '-selector').val() === undefined) {
-        taxon = $('#tax-'+filename).val();
-    }else{
-        taxon = $('#' + filename + '-selector').val();
+    taxon = $('#' + idfile + '-selector').val();
+    if ( taxon === null || taxon === undefined) {
+        taxon = $('#tax-'+idfile).val();
     }
 
     // get entities
     let entities = [];
 
-    $("#"+filename+" > label > input").each(function() {
+    $("#"+idfile+" > label > input").each(function() {
         if ($(this).is(":checked")) {
             entities.push($(this).attr('id'));
         }
@@ -498,7 +488,8 @@ function loadSourceFileGff(filename, pub) {
     displayModal('Please wait', '', 'Close');
 
     let service = new RestServiceJs("load_gff_into_graph");
-    let model = { 'file_name': filename,
+
+    let model = { 'file_name': $("#"+idfile).attr("filename"),
                   'taxon': taxon,
                   'entities': entities,
                   'public': pub  };
@@ -508,7 +499,7 @@ function loadSourceFileGff(filename, pub) {
           showLoginForm();
         }
         // Show a success message isertion is OK
-        let div_entity = $("#" + filename);
+        let div_entity = $("#" + idfile);
         let entities_string = '';
         for (var i = 0; i < entities.length; i++) {
             entities_string += '<b>' + entities[i] + '</b>';
@@ -541,15 +532,17 @@ function loadSourceFileGff(filename, pub) {
     });
 }
 
-function loadSourceFileTtl(filename, pub) {
+function loadSourceFileTtl(idfile, pub) {
     console.log('--- loadSourceFileTtl ---');
     displayModal('Please wait', '', 'Close');
 
-    let file_elem = $("#source-file-ttl-" + filename);
+    let file_elem = $("#source-file-ttl-" + idfile);
 
     let service = new RestServiceJs('load_ttl_into_graph');
-    let model = {'file_name' : filename,
-                 'public': pub};
+    let model = {
+      'file_name' : $("#"+idfile).attr("filename"),
+      'public': pub
+    };
 
     service.post(model, function(data) {
         console.log('---> ttl insert');
@@ -566,7 +559,7 @@ function loadSourceFileTtl(filename, pub) {
                               .removeClass('hidden alert-warning')
                               .addClass('show alert-danger');
         }else{
-            insert_status_elem.html('<span class="glyphicon glyphicon-ok"></span> ' + filename + ' inserted with success.')
+            insert_status_elem.html('<span class="glyphicon glyphicon-ok"></span> ' + idfile + ' inserted with success.')
                                                   .removeClass('hidden alert-danger')
                                                   .removeClass('hidden alert-warning')
                                                   .addClass('show alert-success');
