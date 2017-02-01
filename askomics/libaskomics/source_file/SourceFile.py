@@ -28,14 +28,19 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         self.timestamp = datetime.datetime.now().isoformat()
 
-        self.graph = ''
-
         self.path = path
 
         self.metadatas = {}
 
         # The name should not contain extension as dots are not allowed in rdf names
         self.name = os.path.splitext(os.path.basename(path))[0]
+
+        self.graph = 'askomics:unkown:uri:graph'
+        if 'graph' in self.session:
+            self.graph = self.session['graph']
+
+        self.graph = self.graph + ':' + self.name + '_' + self.timestamp
+
         # FIXME check name uniqueness as we remove extension (collision if uploading example.tsv and example.txt)
 
         self.log = logging.getLogger(__name__)
@@ -93,15 +98,8 @@ class SourceFile(ParamManager, HaveCachedProperties):
         :return: a dictionnary with information on the success or failure of the operation
         :rtype: Dict
         """
-
-        g = 'askomics:unkown:uri:graph'
-        if 'graph' in self.session:
-            g = self.session['graph']
-
-        self.graph = g + ':' + self.name + '_' + self.timestamp
-
         self.insert_metadatas(public)
-        
+
         content_ttl = self.get_turtle()
 
         ql = QueryLauncher(self.settings, self.session)

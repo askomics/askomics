@@ -40,17 +40,14 @@ class SourceFileTtl(SourceFile):
         formatter = HtmlFormatter(cssclass='preview_field', nowrap=True, nobackground=True)
         return highlight(ttl, TurtleLexer(), formatter) # Formated html
 
-    def persist(self, urlbase):
+    def persist(self, urlbase, public):
         """
         insert the ttl sourcefile in the TS
-        
+
         """
 
         pathttl = self.get_ttl_directory()
         shutil.copy(self.path, pathttl)
         fo = open(pathttl + '/' + os.path.basename(self.path))
-
+        self.insert_metadatas(public)
         self.load_data_from_file(fo, urlbase)
-        self.get_metadatas()
-
-
