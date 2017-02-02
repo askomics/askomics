@@ -63,6 +63,7 @@ def main(global_config, **settings):
 
     config.add_route('get_my_infos', 'get_my_infos')
     config.add_route('update_mail', 'update_mail')
+    config.add_route('update_passwd', 'update_passwd')
 
 
     # TODO no absolute path to static files

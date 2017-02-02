@@ -162,16 +162,17 @@ class SparqlQueryAuth(SparqlQueryBuilder):
             WHERE { :""" + username + """ foaf:mbox ?email }
             """)
 
-
-
-    # def update_admin_status(self, admin, username):
-    #     """
-    #     Change the admin status of a user!
-    #     """
-    #     return self.prepare_query(
-    #         """
-    #         WITH GRAPH <""" + self.get_param('askomics.users_graph') + """>
-    #         DELETE { :""" + username + """ :isadmin ?admin }
-    #         INSERT { :""" + username + """ :isadmin \"""" + admin + """\"^^xsd:boolean }
-    #         WHERE { :""" + username + """ :isadmin ?admin }
-    #         """)
+    def update_passwd(self, username, shapw, salt):
+        """
+        update the email of user
+        """
+        return self.prepare_query(
+            """
+            WITH GRAPH <""" + self.get_param('askomics.users_graph') + """>
+            DELETE { :""" + username + """ :password ?passwd .
+                     :""" + username + """ :randomsalt ?salt . }
+            INSERT { :""" + username + """ :password \"""" + shapw + """\" .
+                     :""" + username + """ :randomsalt \"""" + salt + """\" . }
+            WHERE { :""" + username + """ :password ?passwd .
+                    :""" + username + """ :randomsalt ?salt . }
+            """)

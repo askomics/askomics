@@ -1165,8 +1165,6 @@ class AskView(object):
         Chage email of a user
         """
 
-        self.data['error'] = []
-
         body = self.request.json_body
         username = body['username']
         email = body['email']
@@ -1176,13 +1174,47 @@ class AskView(object):
         security = Security(self.settings, self.request.session, username, email, '', '')
 
         if not security.check_email():
-            self.data['error'].append('Not a valid email')
+            self.data['error'] = 'Not a valid email'
             return self.data
 
         try:
             security.update_email()
         except Exception as e:
-            self.data['error'].append('error when updating mail: ' + str(e))
+            self.data['error'] = 'error when updating mail: ' + str(e)
+            return self.data
+
+        self.data['success'] = 'success'
+
+        return self.data
+
+    @view_config(route_name='update_passwd', request_method='POST')
+    def update_passwd(self):
+        """
+        Chage email of a user
+        """
+
+        body = self.request.json_body
+        username = body['username']
+        passwd = body['passwd']
+        passwd2 = body['passwd2']
+
+        security = Security(self.settings, self.request.session, username, '', passwd, passwd2)
+
+
+        # check if the passwd are identical
+        if not security.check_passwords():
+            self.data['error'] = 'Passwords are not identical'
+            return self.data
+
+        if not security.check_password_length():
+            self.data['error'] = 'Password is too small (8char min)'
+            return self.data
+
+
+        try:
+            security.update_passwd()
+        except Exception as e:
+            self.data['error'] = 'error when updating password: ' + str(e)
             return self.data
 
         self.data['success'] = 'success'

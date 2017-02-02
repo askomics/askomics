@@ -293,7 +293,7 @@
         </div><!-- /.modal -->
 
         <!-- Printing Warning message when error occurs -->
-        <div id="main_warning_display" class="insert_warning text-left alert hidden"></div>
+        <div id="main_warning_display" class="container insert_warning text-left alert hidden"></div>
 
         <!-- template for the navbar -->
         <script id='template-navbar' type="text/x-handlebars-template">
@@ -399,15 +399,28 @@
           <span class="input-group-addon" id="basic-addon1">Email</span>
           <input type="email" class="form-control new_email" id='{{user.username}}' placeholder="{{user.email}}" aria-describedby="basic-addon1">
           <span class="input-group-btn">
-            <button class="btn btn-default update_email" id='{{user.username}}' type="button">Update</button>
+            <button class="btn btn-default update_email" id='{{user.username}}' type="button">
+              <k>Update</k>
+              <i class="hidden fa fa-spinner pulse" id='spiner_mail'></i>
+              <i class="hidden fa fa-check text-success" id='tick_mail'></i>
+            </button>
           </span>
          </div>
         <br>
+
         <div class="input-group">
           <span class="input-group-addon" id="basic-addon1">Password</span>
-          <input type="text" class="form-control" placeholder="***************" aria-describedby="basic-addon1">
+          <input type="password" class="form-control new_passwd" id='{{user.username}}' placeholder="Enter a new password" aria-describedby="basic-addon1">
+         </div>
+         <div class="input-group">
+          <span class="input-group-addon" id="basic-addon1">Confirmation</span>
+          <input type="password" class="form-control new_passwd2" id='{{user.username}}' placeholder="Confirm your new password" aria-describedby="basic-addon1">
           <span class="input-group-btn">
-            <button class="btn btn-default" type="button">Update</button>
+            <button class="btn btn-default update_passwd" id='{{user.username}}' type="button">
+              Update
+              <i class="hidden fa fa-spinner pulse" id='spiner_passwd'></i>
+              <i class="hidden fa fa-check text-success" id='tick_passwd'></i>
+            </button>
           </span>
          </div>
       </div>

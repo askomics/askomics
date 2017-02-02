@@ -67,7 +67,7 @@ function managePythonErrorEvent(data) {
     return false;
   }
   //otherwise empty last message !
-  $("#main_warning_display").empty();
+  $("#main_warning_display").empty().addClass('hidden');
   return true;
 }
 
@@ -554,23 +554,80 @@ function userForm() {
     $('.update_email#' + d.username).click(function() {
       updateMail(d.username);
     });
+    $('.update_passwd#' + d.username).click(function() {
+      updatePasswd(d.username);
+    });
+  });
+}
+
+function validateEmail(email) {
+  if (email === '') {
+    return false;
+  }
+  let regexp = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
+  return regexp.test(email);
+}
+
+function updatePasswd(username) {
+  console.log('-+-+-+ updatePasswd -+-+-+');
+  $('#tick_passwd').addClass('hidden');
+  let passwd = $('.new_passwd#' + username).val();
+  let passwd2 = $('.new_passwd2#' + username).val();
+  // check if the 2 passwd are identical
+  if (passwd != passwd2) {
+    managePythonErrorEvent({'error': 'Passwords are not identical'});
+    return;
+  }
+
+  // check if passwd is not empty
+  if (passwd === '') {
+    managePythonErrorEvent({'error': 'Password is empty'});
+    return;
+  }
+
+  //if passwd are identical, send it to the python server
+  let service = new RestServiceJs('update_passwd');
+  let data = {'passwd': passwd, 'passwd2': passwd2, 'username': username};
+  // display the spinning wheel
+  $('#spiner_passwd').removeClass('hidden');
+  $('#tick_passwd').addClass('hidden');
+  // Post the service
+  service.post(data, function(d) {
+    if (!managePythonErrorEvent(d)) {
+      $('#spiner_passwd').addClass('hidden');
+      return;
+    }
+    // It's ok, remove the spinning wheel and show the tick
+    $('#spiner_passwd').addClass('hidden');
+    $('#tick_passwd').removeClass('hidden');
   });
 }
 
 function updateMail(username) {
   console.log('-+-+- updateMail -+-+-');
-  console.log($('.new_email#' + username).val());
-  // Check if input is a valid mail
-
+  $('#tick_mail').addClass('hidden');
   let email = $('.new_email#' + username).val();
 
+  // check if email is valid (to avoid a useless request to the python server)
+  if (!validateEmail(email)) {
+    managePythonErrorEvent({'error': 'not a valid email'});
+    return;
+  }
 
-  // if yes, send it to the server
+  // if email is ok, send it to the server
   let service = new RestServiceJs('update_mail');
   let data = {'username': username, 'email': email};
+  $('#spiner_mail').removeClass('hidden');
+  $('#tick_mail').addClass('hidden');
+
   service.post(data, function(d) {
-    console.log(d);
-    alert(d);
+    if (! managePythonErrorEvent(d)) {
+      $('#spiner_mail').addClass('hidden');
+      return;
+    }
+    $('#spiner_mail').addClass('hidden');
+    $('#tick_mail').removeClass('hidden');
+    $('.new_email#' + username).val('').attr("placeholder", email);
   });
 }
 

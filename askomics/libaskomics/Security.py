@@ -30,7 +30,7 @@ class Security(ParamManager):
         # see --"https://en.wikipedia.org/wiki/Salt_(cryptography)"-- for more info about salt
         alpabet = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
         self.randomsalt = ''.join(random.choice(alpabet) for i in range(20))
-        salted_pw = self.settings["askomics.salt"] + password + self.randomsalt
+        salted_pw = self.settings["askomics.salt"] + self.passwd + self.randomsalt
         self.sha256_pw = hashlib.sha256(salted_pw.encode('utf8')).hexdigest()
 
     def check_email(self):
@@ -302,9 +302,18 @@ class Security(ParamManager):
 
     def update_email(self):
         """
-
+        change the mail of a user
         """
         query_laucher = QueryLauncher(self.settings, self.session)
         sqa = SparqlQueryAuth(self.settings, self.session)
 
-        res = query_laucher.process_query(sqa.update_mail(self.username, self.email).query)
+        query_laucher.process_query(sqa.update_mail(self.username, self.email).query)
+
+    def update_passwd(self):
+        """
+        Change the password of a user, and his randomsalt
+        """
+        query_laucher = QueryLauncher(self.settings, self.session)
+        sqa = SparqlQueryAuth(self.settings, self.session)
+
+        query_laucher.process_query(sqa.update_passwd(self.username, self.sha256_pw, self.randomsalt).query)
