@@ -355,7 +355,9 @@ function setUploadForm(content,titleForm,route_overview,callback) {
     $(content).find('#fileupload').fileupload({
         // Uncomment the following to send cross-domain cookies:
         //xhrFields: {withCredentials: true},
-        url: '/up/file/'
+        url: '/up/file/',
+        maxChunkSize: 400000,
+        maxFileSize: 4000000000 // 4Go
     });
 
     // Enable iframe cross-domain access via redirect option

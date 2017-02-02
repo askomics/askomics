@@ -31,8 +31,9 @@ class FileUpload(object):
 
     @view_config(route_name='uploadform', request_method='GET', renderer="json")
     def upload(self):
+        _here = os.path.dirname(__file__)
+        template_file = _here + "/templates/upload.pt"
 
-        template_file = "askomics/templates/upload.pt"
         html = ""
         info = {}
         with open(template_file) as template:
@@ -86,6 +87,7 @@ class FileUpload(object):
     @view_config(request_method='GET', renderer="json")
     def get(self):
         p = self.request.matchdict.get('name')
+        self.log.debug(" ** USER ** => "+os.getlogin())
 
         if p:
             return self.fileinfo(p)
@@ -128,9 +130,17 @@ class FileUpload(object):
             if self.validate(result):
                 #with open( self.filepath(result['name'] + '.type'), 'w') as f:
                 #    f.write(result['type'])
-                with open(self.filepath(result['name']), 'wb') as f:
+                #concat file if exist
+                with open(self.filepath(result['name'])+"_tmp", 'wb') as f:
+                    #concat file if exist
+                    if os.path.isfile(self.filepath(result['name'])):
+                        shutil.copyfileobj(open(self.filepath(result['name']), 'rb'), f)
                     shutil.copyfileobj(field_storage.file, f)
 
+                shutil.copyfileobj(open(self.filepath(result['name'])+"_tmp","rb"),open(self.filepath(result['name']),"wb"))
+                #remove tmp
+                os.remove(self.filepath(result['name'])+"_tmp")
+                result['size'] = self.get_file_size(open(self.filepath(result['name']),"rb"))
                 result['delete_type'] = self.delete_method
                 result['delete_url'] = self.request.route_url('upload', sep='', name='') + '/' + result['name']
                 if self.delete_method != 'DELETE':
