@@ -149,3 +149,29 @@ class SparqlQueryAuth(SparqlQueryBuilder):
                      '\t?URIusername :isadmin "true"^^xsd:boolean .\n'+
                      "}"
         }, True)
+
+    def update_mail(self, username, email):
+        """
+        update the email of user
+        """
+        return self.prepare_query(
+            """
+            WITH GRAPH <""" + self.get_param('askomics.users_graph') + """>
+            DELETE { :""" + username + """ foaf:mbox ?email }
+            INSERT { :""" + username + """ foaf:mbox <mailto:""" + email + """> }
+            WHERE { :""" + username + """ foaf:mbox ?email }
+            """)
+
+
+
+    # def update_admin_status(self, admin, username):
+    #     """
+    #     Change the admin status of a user!
+    #     """
+    #     return self.prepare_query(
+    #         """
+    #         WITH GRAPH <""" + self.get_param('askomics.users_graph') + """>
+    #         DELETE { :""" + username + """ :isadmin ?admin }
+    #         INSERT { :""" + username + """ :isadmin \"""" + admin + """\"^^xsd:boolean }
+    #         WHERE { :""" + username + """ :isadmin ?admin }
+    #         """)

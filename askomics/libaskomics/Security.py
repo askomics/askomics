@@ -299,3 +299,12 @@ class Security(ParamManager):
         self.log.debug('------------------------ sha256 password -----------------------')
         self.log.debug(self.sha256_pw)
         self.log.debug('----------------------------------------------------------------')
+
+    def update_email(self):
+        """
+
+        """
+        query_laucher = QueryLauncher(self.settings, self.session)
+        sqa = SparqlQueryAuth(self.settings, self.session)
+
+        res = query_laucher.process_query(sqa.update_mail(self.username, self.email).query)

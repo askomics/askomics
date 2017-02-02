@@ -549,9 +549,28 @@ function userForm() {
     $('.del_user#' + d.username).click(function() {
       delUser(d.username, true);
     });
+    $('.update_email#' + d.username).click(function() {
+      updateMail(d.username);
+    });
   });
 }
 
+function updateMail(username) {
+  console.log('-+-+- updateMail -+-+-');
+  console.log($('.new_email#' + username).val());
+  // Check if input is a valid mail
+
+  let email = $('.new_email#' + username).val();
+
+
+  // if yes, send it to the server
+  let service = new RestServiceJs('update_mail');
+  let data = {'username': username, 'email': email};
+  service.post(data, function(d) {
+    console.log(d);
+    alert(d);
+  });
+}
 
 function displayNavbar(loged, username, admin, blocked) {
     console.log('-+-+- displayNavbar -+-+-');

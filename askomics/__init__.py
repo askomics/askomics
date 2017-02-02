@@ -62,6 +62,7 @@ def main(global_config, **settings):
     config.add_route('delete_user', '/delete_user')
 
     config.add_route('get_my_infos', 'get_my_infos')
+    config.add_route('update_mail', 'update_mail')
 
 
     # TODO no absolute path to static files

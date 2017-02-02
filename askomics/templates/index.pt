@@ -397,9 +397,9 @@
        <div class='col-md-6'>
          <div class="input-group">
           <span class="input-group-addon" id="basic-addon1">Email</span>
-          <input type="text" class="form-control" placeholder="{{user.email}}" aria-describedby="basic-addon1">
+          <input type="email" class="form-control new_email" id='{{user.username}}' placeholder="{{user.email}}" aria-describedby="basic-addon1">
           <span class="input-group-btn">
-            <button class="btn btn-default" type="button">Update</button>
+            <button class="btn btn-default update_email" id='{{user.username}}' type="button">Update</button>
           </span>
          </div>
         <br>

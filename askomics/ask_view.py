@@ -1159,3 +1159,32 @@ class AskView(object):
         result['blocked'] = bool(int(result['blocked']))
 
         return result
+    @view_config(route_name='update_mail', request_method='POST')
+    def update_mail(self):
+        """
+        Chage email of a user
+        """
+
+        self.data['error'] = []
+
+        body = self.request.json_body
+        username = body['username']
+        email = body['email']
+
+        # Check email
+
+        security = Security(self.settings, self.request.session, username, email, '', '')
+
+        if not security.check_email():
+            self.data['error'].append('Not a valid email')
+            return self.data
+
+        try:
+            security.update_email()
+        except Exception as e:
+            self.data['error'].append('error when updating mail: ' + str(e))
+            return self.data
+
+        self.data['success'] = 'success'
+
+        return self.data
