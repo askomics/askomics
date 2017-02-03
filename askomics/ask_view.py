@@ -52,6 +52,9 @@ class AskView(object):
             if 'admin' not in self.request.session.keys():
                 self.request.session['admin'] = False
 
+            if 'blocked' not in self.request.session.keys():
+                self.request.session['blocked'] = True
+
             if 'group' not in self.request.session.keys():
                 self.request.session['group'] = ''
 
@@ -119,6 +122,10 @@ class AskView(object):
         # Denny access for non loged users
         if self.request.session['username'] == '':
             return 'forbidden'
+
+        # Denny for blocked users
+        if self.request.session['blocked']:
+            return 'blocked'
 
         self.log.debug('=== stats ===')
 
@@ -227,6 +234,10 @@ class AskView(object):
         if self.request.session['username'] == '':
             return 'forbidden'
 
+        # Denny for blocked users
+        if self.request.session['blocked']:
+            return 'blocked'
+
         self.log.debug("=== DELETE ALL NAMED GRAPHS ===")
 
         try:
@@ -258,6 +269,10 @@ class AskView(object):
         if self.request.session['username'] == '':
             return 'forbidden'
 
+        # Denny for blocked users
+        if self.request.session['blocked']:
+            return 'blocked'
+
         self.log.debug("=== DELETE SELECTED GRAPHS ===")
 
         sqb = SparqlQueryBuilder(self.settings, self.request.session)
@@ -280,6 +295,10 @@ class AskView(object):
         # Denny access for non loged users
         if self.request.session['username'] == '':
             return 'forbidden'
+
+        # Denny for blocked users
+        if self.request.session['blocked']:
+            return 'blocked'
 
         self.log.debug("=== LIST OF NAMED GRAPHS ===")
 
@@ -340,6 +359,10 @@ class AskView(object):
         # Denny access for non loged users
         if self.request.session['username'] == '':
             return 'forbidden'
+
+        # Denny for blocked users
+        if self.request.session['blocked']:
+            return 'blocked'
 
         self.log.debug(" ========= Askview:source_files_overview =============")
         sfc = SourceFileConvertor(self.settings, self.request.session)
@@ -410,6 +433,10 @@ class AskView(object):
         if self.request.session['username'] == '':
             return 'forbidden'
 
+        # Denny for blocked users
+        if self.request.session['blocked']:
+            return 'blocked'
+
 
         self.log.debug("preview_ttl")
 
@@ -467,6 +494,10 @@ class AskView(object):
         if self.request.session['username'] == '':
             return 'forbidden'
 
+        # Denny for blocked users
+        if self.request.session['blocked']:
+            return 'blocked'
+
         body = self.request.json_body
         file_name = body["file_name"]
         col_types = body["col_types"]
@@ -502,6 +533,10 @@ class AskView(object):
         # Denny access for non loged users
         if self.request.session['username'] == '':
             return 'forbidden'
+
+        # Denny for blocked users
+        if self.request.session['blocked']:
+            return 'blocked'
 
         body = self.request.json_body
         file_name = body["file_name"]
@@ -542,6 +577,10 @@ class AskView(object):
         if self.request.session['username'] == '':
             return 'forbidden'
 
+        # Denny for blocked users
+        if self.request.session['blocked']:
+            return 'blocked'
+
 
         self.log.debug("== load_gff_into_graph ==")
 
@@ -580,6 +619,10 @@ class AskView(object):
         # Denny access for non loged users
         if self.request.session['username'] == '':
             return 'forbidden'
+
+        # Denny for blocked users
+        if self.request.session['blocked']:
+            return 'blocked'
 
 
         self.log.debug('*** load_ttl_into_graph ***')
@@ -624,6 +667,10 @@ class AskView(object):
         if self.request.session['username'] == '' or not self.request.session['admin'] :
             return 'forbidden'
 
+        # Denny for blocked users
+        if self.request.session['blocked']:
+            return 'blocked'
+
         self.log.debug('*** importShortcut ***')
 
         body = self.request.json_body
@@ -652,6 +699,10 @@ class AskView(object):
         # Denny access for non loged users
         if self.request.session['username'] == '' or not self.request.session['admin'] :
             return 'forbidden'
+
+        # Denny for blocked users
+        if self.request.session['blocked']:
+            return 'blocked'
 
         self.log.debug('*** importShortcut ***')
 
@@ -808,6 +859,9 @@ class AskView(object):
         try:
             security.log_user(self.request)
             self.data['username'] = username
+            admin_blocked = security.get_admin_blocked_by_username()
+            self.data['admin'] = admin_blocked['admin']
+            self.data['blocked'] = admin_blocked['blocked']
         except Exception as e:
             self.data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
             self.log.error(str(e))
@@ -820,6 +874,7 @@ class AskView(object):
         if self.request.session['username'] != '':
             self.data['username'] = self.request.session['username']
             self.data['admin'] = self.request.session['admin']
+            self.data['blocked'] = self.request.session['blocked']
 
         return self.data
 
@@ -872,12 +927,14 @@ class AskView(object):
                 self.data['error'].append('Password is incorrect')
                 error = True
 
-            # Get the admin status
-            admin = security.get_admin_status_by_email()
-            security.set_admin(admin)
-
             if error:
                 return self.data
+
+            # Get the admin and blocked status
+            admin_blocked = security.get_admin_blocked_by_email()
+            security.set_admin(admin_blocked['admin'])
+            security.set_blocked(admin_blocked['blocked'])
+
 
         elif auth_type == 'username':
             username_in_ts = security.check_username_in_database()
@@ -886,12 +943,13 @@ class AskView(object):
                 self.data['error'].append('username is not registered')
                 error = True
 
-            # Get the admin status
-            admin = security.get_admin_status_by_username()
-            security.set_admin(admin)
-
             if error:
                 return self.data
+
+            # Get the admin and blocked status
+            admin_blocked = security.get_admin_blocked_by_username()
+            security.set_admin(admin_blocked['admin'])
+            security.set_blocked(admin_blocked['blocked'])
 
             password_is_correct = security.check_username_password()
 
@@ -906,7 +964,8 @@ class AskView(object):
         try:
             security.log_user(self.request)
             self.data['username'] = username
-            self.data['admin'] = admin
+            self.data['admin'] = admin_blocked['admin']
+            self.data['blocked'] = admin_blocked['blocked']
 
         except Exception as e:
             self.data['error'] = str(e)
@@ -925,17 +984,255 @@ class AskView(object):
         if self.request.session['username'] == '' or not self.request.session['admin']:
             return 'forbidden'
 
+        # Denny for blocked users
+        if self.request.session['blocked']:
+            return 'blocked'
+
         sqa = SparqlQueryAuth(self.settings, self.request.session)
         ql = QueryLauncher(self.settings, self.request.session)
 
         try:
-            result = ql.process_query(sqa.get_users_infos().query)
+            result = ql.process_query(sqa.get_users_infos(self.request.session['username']).query)
         except Exception as e:
             self.data['error'] = str(e)
             self.log.error(str(e))
 
+        for res in result:
+            res['admin'] = bool(int(res['admin']))
+            res['blocked'] = bool(int(res['blocked']))
+            res['email'] = re.sub(r'^mailto:', '', res['email'])
+
         self.log.debug(result)
 
         self.data['result'] = result
+
+        return self.data
+
+    @view_config(route_name='lockUser', request_method='POST')
+    def lock_user(self):
+        """
+        Change a user lock status
+        """
+
+        # Denny access for non loged users or non admin users
+        if self.request.session['username'] == '' or not self.request.session['admin']:
+            return 'forbidden'
+
+        # Denny for blocked users
+        if self.request.session['blocked']:
+            return 'blocked'
+
+        body = self.request.json_body
+
+        username = body['username']
+        new_status = body['lock']
+
+        # Convert bool to string for the triplestore
+        if new_status:
+            new_status = 'true'
+        else:
+            new_status = 'false'
+
+        sqb = SparqlQueryBuilder(self.settings, self.request.session)
+        query_laucher = QueryLauncher(self.settings, self.request.session)
+
+        try:
+            query_laucher.process_query(sqb.update_blocked_status(new_status, username).query)
+        except Exception as e:
+            return 'failed: ' + str(e)
+
+
+        return 'success'
+
+    @view_config(route_name='setAdmin', request_method='POST')
+    def set_admin(self):
+        """
+        Change a user admin status
+        """
+
+        # Denny access for non loged users or non admin users
+        if self.request.session['username'] == '' or not self.request.session['admin']:
+            return 'forbidden'
+
+        # Denny for blocked users
+        if self.request.session['blocked']:
+            return 'blocked'
+
+        body = self.request.json_body
+
+        username = body['username']
+        new_status = body['admin']
+
+        # Convert bool to string for the triplestore
+        if new_status:
+            new_status = 'true'
+        else:
+            new_status = 'false'
+
+        sqb = SparqlQueryBuilder(self.settings, self.request.session)
+        query_laucher = QueryLauncher(self.settings, self.request.session)
+
+        try:
+            query_laucher.process_query(sqb.update_admin_status(new_status, username).query)
+        except Exception as e:
+            return 'failed: ' + str(e)
+
+
+        return 'success'
+
+
+    @view_config(route_name='delete_user', request_method='POST')
+    def delete_user(self):
+        """
+        Delete a user from the user graphs, and remove all his data
+        """
+
+        # Denny access for non loged users
+        if self.request.session['username'] == '':
+            return 'forbidden'
+
+        # Denny for blocked users
+        if self.request.session['blocked']:
+            return 'blocked'
+
+        body = self.request.json_body
+
+        username = body['username']
+        passwd = body['passwd']
+        confirmation = body['passwd_conf']
+
+        # Non admin can only delete himself
+        if self.request.session['username'] != username and not self.request.session['admin']:
+            return 'forbidden'
+
+        # If confirmation, check the user passwd
+        if confirmation:
+            security = Security(self.settings, self.request.session, username, '', passwd, passwd)
+            if not security.check_username_password():
+                self.data['error'] = 'Wrong password'
+                return self.data
+
+
+        sqb = SparqlQueryBuilder(self.settings, self.request.session)
+        query_laucher = QueryLauncher(self.settings, self.request.session)
+
+        # Get all graph of a user
+        res = query_laucher.process_query(sqb.get_graph_of_user(username).query)
+
+        list_graph = []
+        for graph in res:
+            list_graph.append(graph['g'])
+
+        # Drop all this graph
+        for graph in list_graph:
+            try:
+                query_laucher.process_query(sqb.get_drop_named_graph(graph).query)
+                query_laucher.process_query(sqb.get_delete_metadatas_of_graph(graph).query)
+            except Exception as e:
+                return 'failed: ' + str(e)
+
+
+        # Delete user infos
+        try:
+            query_laucher.execute_query(sqb.delete_user(username).query)
+        except Exception as e:
+            return 'failed: ' + str(e)
+
+        # Is user delete himself, delog him
+        if self.request.session['username'] == username:
+            self.request.session['username'] = ''
+            self.request.session['admin'] = ''
+            self.request.session['graph'] = ''
+
+        return 'success'
+
+    @view_config(route_name='get_my_infos', request_method='GET')
+    def get_my_infos(self):
+        """
+        Get all infos about a user
+        """
+
+
+        sqa = SparqlQueryAuth(self.settings, self.request.session)
+        query_laucher = QueryLauncher(self.settings, self.request.session)
+
+        try:
+            result = query_laucher.process_query(sqa.get_user_infos(self.request.session['username']).query)
+        except Exception as e:
+            return 'failed: ' + str(e)
+
+        result = result[0]
+        result['email'] = re.sub(r'^mailto:', '', result['email'])
+        result['username'] = self.request.session['username']
+        result['admin'] = bool(int(result['admin']))
+        result['blocked'] = bool(int(result['blocked']))
+
+        return result
+    @view_config(route_name='update_mail', request_method='POST')
+    def update_mail(self):
+        """
+        Chage email of a user
+        """
+
+        body = self.request.json_body
+        username = body['username']
+        email = body['email']
+
+        # Check email
+
+        security = Security(self.settings, self.request.session, username, email, '', '')
+
+        if not security.check_email():
+            self.data['error'] = 'Not a valid email'
+            return self.data
+
+        try:
+            security.update_email()
+        except Exception as e:
+            self.data['error'] = 'error when updating mail: ' + str(e)
+            return self.data
+
+        self.data['success'] = 'success'
+
+        return self.data
+
+    @view_config(route_name='update_passwd', request_method='POST')
+    def update_passwd(self):
+        """
+        Chage email of a user
+        """
+
+        body = self.request.json_body
+        username = body['username']
+        passwd = body['passwd']
+        passwd2 = body['passwd2']
+        current_passwd = body['current_passwd']
+
+        security1 = Security(self.settings, self.request.session, username, '', current_passwd, current_passwd)
+
+        if not security1.check_username_password():
+            self.data['error'] = 'Current password is wrong'
+            return self.data
+
+        security = Security(self.settings, self.request.session, username, '', passwd, passwd2)
+
+
+        # check if the passwd are identical
+        if not security.check_passwords():
+            self.data['error'] = 'Passwords are not identical'
+            return self.data
+
+        if not security.check_password_length():
+            self.data['error'] = 'Password is too small (8char min)'
+            return self.data
+
+
+        try:
+            security.update_passwd()
+        except Exception as e:
+            self.data['error'] = 'error when updating password: ' + str(e)
+            return self.data
+
+        self.data['success'] = 'success'
 
         return self.data

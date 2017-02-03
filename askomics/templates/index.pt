@@ -72,8 +72,8 @@
                 <div class="form-group">
                     <label for="startpoint" class="col-md-offset-2">Please select a start point for your query :</label>
                     <select id='startpoints' size='8' class="form-control col-md-offset-2"></select>
-                    <div class="col-md-offset-2">Public data are <em class='text-warning'>yellow</em> and private data are <strong class='text-primary'>blue</strong></div>
-                    <div class="col-md-offset-2">Public-private data are <strong class='text-warning'><em>yellow</em></strong></div>
+                    <div class="col-md-offset-2">Shared entities are <em class='text-warning'>yellow</em> and personal entities are <strong class='text-primary'>blue</strong></div>
+                    <div class="col-md-offset-2">Mixed entities are <strong class='text-warning'><em>yellow</em></strong></div>
                 </div>
                 <button  id="starter" class="btn btn-default col-md-offset-2" onclick="startVisualisation();">Start</button>
                 <br><br><br>
@@ -189,9 +189,9 @@
         </div>
 
         <div id="content_user_info" class="container" hidden>
-            <hr/>
-            <h3 class="header-div">User page</h3>
-            <hr/>
+        </div>
+
+        <div id="content_blocked" class="container" hidden>
         </div>
 
         <div id="content_administration" class="container" hidden>
@@ -292,8 +292,18 @@
           </div><!-- /.modal-dialog -->
         </div><!-- /.modal -->
 
-        <!-- Printing Warning message when error occurs -->
-        <div id="main_warning_display" class="insert_warning text-left alert hidden"></div>
+        <script id='template-error-message' type="text/x-handlebars-template">
+        <div id='error_div'>
+        <br><br>
+        <div class="container alert alert-dismissible alert-danger">
+          <button type="button" class="close" data-dismiss="alert">&times;</button>
+          <p id='error_message'></p>
+          <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+          <strong>Error: </strong>
+          {{message}}
+        </div>
+        </div>
+        </script>
 
         <!-- template for the navbar -->
         <script id='template-navbar' type="text/x-handlebars-template">
@@ -305,6 +315,7 @@
                     <ul class="nav navbar-nav navbar-right">
                         <li id="interrogation" class="active"><a href="#" onclick="loadStartPoints();"><span class="glyphicon glyphicon-play"></span></a></li>
                         {{#if loged}}
+                        {{#if nonblocked}}
                         <li id="userdata" class="dropdown">
                             <li id="integration"><a href="#"><span class="glyphicon glyphicon-cloud-upload"></span></a></li>
                         </li>
@@ -316,14 +327,22 @@
                             </ul>
                           </li>
                         {{/if}}
+                        {{/if}}
                         <li id="about"><a href="#"><span class="glyphicon glyphicon-info-sign"></span></a></li>
                         <li id="help"><a href="#" onclick="AskomicsHelp.start();"><span class="glyphicon glyphicon-question-sign"></span></a></li>
                         {{#if loged}}
 
                         <li id="user_menu" class="dropdown">
-                          <a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="glyphicon glyphicon-user"></span><span class="caret"></span></a>
+                          <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                          {{#if admin}}
+                            <span class="glyphicon glyphicon-king"></span>
+                          {{else}}
+                            <span class="glyphicon glyphicon-user"></span>
+                          {{/if}}
+                            <span class="caret"></span>
+                          </a>
                             <ul class="dropdown-menu">
-                                <li id="user_info"><a href="#"><span class="glyphicon glyphicon-cog"></span> Account managment ({{username}})</a></li>
+                                <li id="user_info"><a href="#"><span class="glyphicon glyphicon-cog"></span> Account managment (<i class='username' id='{{username}}'>{{username}}</i>)</a></li>
                             {{#if admin}}
                                 <li id="administration"><a href="#"><span class="glyphicon glyphicon-king"></span> Administration</a></li>
                             {{/if}}
@@ -348,15 +367,112 @@
                 <th>Username</th>
                 <th>Email</th>
                 <th>Admin</th>
+                <th>Locked</th>
+                <th>Delete account</th>
             </tr>
             {{#each users}}
+            {{#if this.blocked}}
+            <tr class="danger">
+            {{else}}
             <tr>
+            {{/if}}
                 <td>{{this.username}}</td>
-                <td><a href="{{this.email}}">{{this.email}}</a></td>
-                <td>{{this.admin}}</td>
+                <td><a href="mailto:{{this.email}}">{{this.email}}</a></td>
+                <td>
+                {{#if this.admin}}
+                <span style="color:orange" class="glyphicon glyphicon-king unset_admin" id={{this.username}}></span>
+                {{else}}
+                <span style="color:grey" class="glyphicon glyphicon-pawn set_admin" id={{this.username}}></span>
+                {{/if}}
+                <i class="hidden fa fa-spinner pulse spinner_admin" id='{{this.username}}'></i>
+                </td>
+                <td>{{#if this.blocked}}
+                <i style="color:red" class="fa fa-lock unlock_user" id="{{this.username}}"></i>
+                {{else}}
+                <i style="color:green" class="fa fa-unlock lock_user" id="{{this.username}}"></i>
+                {{/if}}
+                <i class="hidden fa fa-spinner pulse spinner_lock" id='{{this.username}}'></i>
+                </td>
+                <td>
+                <span style="color:red" class="glyphicon glyphicon-trash del_user" id={{this.username}}></span>
+                {{!-- hidden confirm button --}}
+                <div class="btn-group div_confirm_del_user hidden" id='{{this.username}}' role="group">
+                  <button type="button" class="btn btn-danger btn-xs confirm_del_user" id='{{this.username}}'>Delete</button>
+                  <button type="button" class="btn btn-default btn-xs no_del_user" id='{{this.username}}'>No</button>
+                </div>
+                <i class="hidden fa fa-spinner pulse spinner_del" id='{{this.username}}'></i>
+                </td>
             </tr>
             {{/each}}
           </table>
+      </script>
+
+      <script id='template-user-managment' type="text/x-handlebars-template">
+      <div class='col-md-6'>
+       <h4>Hello {{user.username}}</h4>
+       <hr/ >
+       {{#if user.blocked}}
+       <div class="alert alert-danger" role="alert">Your account is locked, wait for an admin to unlock it</div>
+       {{/if}}
+
+       <h4>Update your infos</h4>
+       <hr/ >
+       <h5>Email</h5>
+
+        <div class="input-group">
+          <span class="input-group-addon" id="basic-addon1"><i class="fa fa-envelope" aria-hidden="true"></i></span>
+          <input type="email" class="form-control new_email" id='{{user.username}}' placeholder="{{user.email}}" aria-describedby="basic-addon1">
+          <span class="input-group-btn">
+            <button class="btn btn-default update_email" id='{{user.username}}' type="button">
+              <k>Update</k>
+              <i class="hidden fa fa-spinner pulse" id='spiner_mail'></i>
+              <i class="hidden fa fa-check text-success" id='tick_mail'></i>
+            </button>
+          </span>
+        </div>
+
+        <h5>Password</h5>
+
+        <div class="input-group">
+          <span class="input-group-addon" id="basic-addon1"><i class="fa fa-key" aria-hidden="true"></i></span>
+          <input type="password" class="form-control current_passwd" id='{{user.username}}' placeholder="Enter your current password" aria-describedby="basic-addon1">
+        </div>
+        <div class="input-group">
+          <span class="input-group-addon" id="basic-addon1"><i class="fa fa-key" aria-hidden="true"></i></span>
+          <input type="password" class="form-control new_passwd" id='{{user.username}}' placeholder="Enter a new password" aria-describedby="basic-addon1">
+        </div>
+        <div class="input-group">
+          <span class="input-group-addon" id="basic-addon1"><i class="fa fa-key" aria-hidden="true"></i></span>
+          <input type="password" class="form-control new_passwd2" id='{{user.username}}' placeholder="Confirm your new password" aria-describedby="basic-addon1">
+          <span class="input-group-btn">
+            <button class="btn btn-default update_passwd" id='{{user.username}}' type="button">
+              Update
+              <i class="hidden fa fa-spinner pulse" id='spiner_passwd'></i>
+              <i class="hidden fa fa-check text-success" id='tick_passwd'></i>
+            </button>
+          </span>
+        </div>
+
+      <hr/ >
+      <h4>Remove your account</h4>
+      <hr/ >
+        <p>Remove your account and all your data</p>
+        <p class='text-danger'>
+          <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+          This action can't be undone!
+        </p>
+        <br>
+        <button type="button" class="btn btn-danger del_user" id='{{user.username}}'><i class="fa fa-trash" aria-hidden="true"></i> Delete account</button>
+        <div class="btn-group div_confirm_del_user hidden" id='{{user.username}}' role="group">
+          <button type="button" class="btn btn-danger confirm_del_user" id='{{user.username}}'>Delete</button>
+          <button type="button" class="btn btn-default no_del_user" id='{{user.username}}'>No</button>
+        </div>
+        <br>
+        <div class="hidden passwd2del-group input-group" id="basic-addon1">
+          <span class="input-group-addon"><i class="fa fa-key" aria-hidden="true"></i></span>
+          <input type="password" class="form-control passwd_del" id='{{user.username}}' placeholder="Enter your password" aria-describedby="basic-addon1">
+        </div>
+      </div>
       </script>
 
      <script id='template-admin-shortcuts' type="text/x-handlebars-template">
@@ -571,6 +687,17 @@
                     <hr><br>
                 </div>
             </form>
+        </script>
+
+        <!-- template to display the blocked page -->
+        <script id="template-blocked" type="text/x-handlebars-template">
+          <div id="blocked_message">
+            <h4>Hello {{name}}!</h4>
+            <p>Your account is blocked, wait for an admin to unlock it.</p>
+            <p>In the meantime, you can play with the public data.</p>
+            <br />
+            <p>The AskoTeam.</p>
+          </div>
         </script>
 
 

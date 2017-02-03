@@ -19,6 +19,11 @@ class SparqlQueryBuilder(ParamManager):
         ParamManager.__init__(self, settings, session)
         self.log = logging.getLogger(__name__)
 
+    # def build_update_on_the_fly(self, replacment, adminRequest=False):
+    #     """
+    #     build an update query
+    #     """
+
     def build_query_on_the_fly(self, replacement,adminRequest=False):
         """
         Build a query from the private or public template
@@ -76,6 +81,55 @@ class SparqlQueryBuilder(ParamManager):
         return self.prepare_query(
             """
             DELETE WHERE { GRAPH <"""+self.session['graph']+"""> { <"""+graph+"""> ?p ?o }}
+            """)
+
+    def update_blocked_status(self, blocked, username):
+        """
+        hello!
+        """
+        return self.prepare_query(
+            """
+            WITH GRAPH <""" + self.get_param('askomics.users_graph') + """>
+            DELETE { :""" + username + """ :isblocked ?blocked }
+            INSERT { :""" + username + """ :isblocked \"""" + blocked + """\"^^xsd:boolean }
+            WHERE { :""" + username + """ :isblocked ?blocked }
+            """)
+
+    def update_admin_status(self, admin, username):
+        """
+        Change the admin status of a user!
+        """
+        return self.prepare_query(
+            """
+            WITH GRAPH <""" + self.get_param('askomics.users_graph') + """>
+            DELETE { :""" + username + """ :isadmin ?admin }
+            INSERT { :""" + username + """ :isadmin \"""" + admin + """\"^^xsd:boolean }
+            WHERE { :""" + username + """ :isadmin ?admin }
+            """)
+
+    def get_graph_of_user(self, username):
+        """
+        Get all subgraph of a user
+        """
+        return self.prepare_query(
+            """
+            SELECT ?g
+            WHERE {
+                ?g dc:creator \"""" + username + """\"
+            }
+            """)
+
+    def delete_user(self, username):
+        """
+        Delet all info of a user
+        """
+        return self.prepare_query(
+            """
+            DELETE WHERE {
+                GRAPH <"""+self.get_param('askomics.users_graph')+"""> {
+                    :""" + username +""" ?p ?o
+                }
+            }
             """)
 
     def prepare_query(self, template, replacement={}):

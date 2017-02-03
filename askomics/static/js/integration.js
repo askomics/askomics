@@ -253,6 +253,11 @@ function previewTtl(file_elem) {
     service.post(model, function(data) {
         if (data == 'forbidden') {
           showLoginForm();
+          return;
+        }
+        if (data == 'blocked') {
+          displayBlockedPage();
+          return;
         }
         file_elem.find(".preview_field").html(data);
         file_elem.find(".preview_field").show();
@@ -343,6 +348,11 @@ function checkExistingData(file_elem) {
     service.post(model, function(data) {
         if (data == 'forbidden') {
           showLoginForm();
+          return;
+        }
+        if (data == 'blocked') {
+          displayBlockedPage($('.username').attr('id'));
+          return;
         }
         file_elem.find('.column_header').each(function( index ) {
             if (data.headers_status[index-1] == 'present') {
@@ -410,6 +420,11 @@ function loadSourceFile(file_elem, pub) {
     service.post(model, function(data) {
         if (data == 'forbidden') {
           showLoginForm();
+          return;
+        }
+        if (data == 'blocked') {
+          displayBlockedPage($('.username').attr('id'));
+          return;
         }
         hideModal();
         var insert_status_elem = file_elem.find(".insert_status").first();
@@ -506,6 +521,11 @@ function loadSourceFileGff(filename, pub) {
     service.post(model, function(data) {
         if (data == 'forbidden') {
           showLoginForm();
+          return;
+        }
+        if (data == 'blocked') {
+          displayBlockedPage($('.username').attr('id'));
+          return;
         }
         // Show a success message isertion is OK
         let div_entity = $("#" + filename);
@@ -555,6 +575,11 @@ function loadSourceFileTtl(filename, pub) {
         console.log('---> ttl insert');
         if (data == 'forbidden') {
           showLoginForm();
+          return;
+        }
+        if (data == 'blocked') {
+          displayBlockedPage($('.username').attr('id'));
+          return;
         }
 
         let insert_status_elem = file_elem.find(".insert_status").first();
