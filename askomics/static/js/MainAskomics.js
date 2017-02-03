@@ -57,17 +57,19 @@ function resetGraph() {
   askomicsInitialization = false;
 }
 
-function managePythonErrorEvent(data) {
+function manageErrorMessage(data) {
+  // Remove last message
+  $('#error_div').remove();
+  // If there is an error message, how it
   if (data.error) {
-    $("#main_warning_display").html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> ERROR:</strong> ' +
-                       data.error.replace(/\n/g,'<br/>'))//.replace('\\n',"&#13;")
-                      .removeClass('hidden alert-success')
-                      .removeClass('hidden alert-warning')
-                      .addClass('show alert-danger');
-    return false;
+      data.error.replace(/\n/g,'<br/>');
+      let source = $('#template-error-message').html();
+      let template = Handlebars.compile(source);
+      let context = {message: data.error};
+      let html = template(context);
+      $('body').append(html);
+      return false;
   }
-  //otherwise empty last message !
-  $("#main_warning_display").empty();
   return true;
 }
 
@@ -80,7 +82,7 @@ function loadStartPoints() {
   $("#deleteNode").hide();
 
   service.getAll(function(startPointsDict) {
-      if (! managePythonErrorEvent(startPointsDict)) return;
+      if (! manageErrorMessage(startPointsDict)) return;
 
       console.log(JSON.stringify(startPointsDict));
 
@@ -135,6 +137,10 @@ function loadNamedGraphs() {
     serviceNamedGraphs.getAll(function(namedGraphs) {
         if (namedGraphs == 'forbidden') {
           showLoginForm();
+          return;
+        }
+        if (namedGraphs == 'blocked') {
+          displayBlockedPage($('.username').attr('id'));
         }
         if (namedGraphs.length === 0) {
           disableDelButton();
@@ -198,6 +204,10 @@ function loadStatistics() {
       if (stats == 'forbidden') {
         showLoginForm();
         return;
+      }
+      if (stats == 'blocked') {
+          displayBlockedPage($('.username').attr('id'));
+          return;
       }
 
       $('#content_statistics').empty();
@@ -266,6 +276,11 @@ function deleteNamedGraph(graphs) {
         service.post(data, function(d){
           if (d == 'forbidden') {
             showLoginForm();
+            return;
+          }
+          if (d == 'blocked') {
+            displayBlockedPage($('.username').attr('id'));
+            return;
           }
         resetGraph();
         resetStats();
@@ -385,13 +400,290 @@ function setUploadForm(content,titleForm,route_overview,callback) {
   });
 }
 
-function displayNavbar(loged, username, admin) {
+function displayBlockedPage(username) {
+  console.log('-+-+- displayBlockedPage -+-+-');
+  $('#content_blocked').empty();
+  let source = $('#template-blocked').html();
+  let template = Handlebars.compile(source);
+
+  let context = {name: username};
+  let html = template(context);
+
+  hideModal();
+
+  $('.container').hide();
+  $('.container#navbar_content').show();
+  $('#content_blocked').append(html).show();
+}
+
+function loadUsers() {
+  console.log('-+-+- loadUsers -+-+-');
+
+  // displayModal('Please wait', '', 'Close');
+
+  let service = new RestServiceJs('get_users_infos');
+  service.getAll(function(data) {
+    $("#Users_adm").empty();
+    let source = $('#template-admin-users').html();
+    let template = Handlebars.compile(source);
+
+    let context = {users: data.result};
+    let html = template(context);
+
+    $("#Users_adm").append(html);
+    $('.lock_user').click(function() {
+      lockUser(this.id, true);
+    });
+    $('.unlock_user').click(function() {
+      lockUser(this.id, false);
+    });
+    $('.set_admin').click(function() {
+      setAdmin(this.id, true);
+    });
+    $('.unset_admin').click(function() {
+      setAdmin(this.id, false);
+    });
+    $('.del_user').click(function() {
+      delUser(this.id);
+    });
+    // hideModal();
+  });
+
+  new ShortcutsParametersView().updateShortcuts(true);
+}
+
+function delUser(username, reload=false, passwdconf=false) {
+  console.log('-+-+-delUser ' + username + ' -+-+-');
+  // display confirmations buttons
+  $('.del_user#' + username).hide();
+  $('.div_confirm_del_user#' + username).removeClass('hidden').show();
+
+  //if no, redisplay the trash
+  $('.no_del_user#' + username).click(function() {
+    $('.del_user#' + username).show();
+    $('.div_confirm_del_user#' + username).hide();
+    if (passwdconf) {
+      $('.passwd2del-group').addClass('hidden');
+    }
+  });
+
+  //if yes, delete user and all this data and reload the list
+  $('.confirm_del_user#' + username).click(function(e) {
+    console.log('CONFIRM DELETE USER ' + username);
+    // get the passwd if needed
+    let passwd = '';
+    if (passwdconf) {
+      passwd = $('.passwd_del#' + username).val();
+    }
+
+    let service = new RestServiceJs('delete_user');
+    let data = {'username': username, 'passwd': passwd, 'passwd_conf': passwdconf};
+    // Don't send the request to the python server if passwd is empty
+    if (passwdconf && passwd === '') {
+      manageErrorMessage({'error': 'Password is empty'});
+      return;
+    }
+
+    // Show the spinner
+    $('.spinner_del#' + username).removeClass('hidden');
+    $('.div_confirm_del_user#' + username).addClass('hidden');
+
+    service.post(data, function(d) {
+      if (!manageErrorMessage(d)) {
+        return;
+      }
+      if (d == 'forbidden') {
+        showLoginForm();
+        return;
+      }
+      if (d == 'blocked') {
+        displayBlockedPage($('.username').attr('id'));
+        return;
+      }
+      if (reload) {
+        location.reload();
+      }
+      // Reload the page
+      if (d == 'success') {
+        loadUsers();
+      }else{
+        alert(d);
+      }
+    });
+  });
+}
+
+function lockUser(username, lock) {
+  console.log('-+-+- lockUser -+-+-');
+  let service = new RestServiceJs('lockUser');
+  let data = {'username': username, 'lock': lock};
+
+    // Show the spinner
+  $('.spinner_lock#' + username).removeClass('hidden');
+  if (lock) {
+    $('.lock_user#' + username).addClass('hidden');
+  }else{
+    $('.unlock_user#' + username).addClass('hidden');
+  }
+
+  service.post(data, function(d) {
+    if (d == 'forbidden') {
+      showLoginForm();
+      return;
+    }
+    if (d == 'blocked') {
+      displayBlockedPage($('.username').attr('id'));
+      return;
+    }
+    // Reload users
+    if (d == 'success') {
+      loadUsers();
+    }else{
+      alert(d);
+    }
+  });
+}
+
+
+function setAdmin(username, admin) {
+  console.log('-+-+- setAdmin -+-+-');
+  let service = new RestServiceJs('setAdmin');
+  let data = {'username': username, 'admin': admin};
+
+  // Show the spinner
+  $('.spinner_admin#' + username).removeClass('hidden');
+  if (admin) {
+    $('.set_admin#' + username).addClass('hidden');
+  }else{
+    $('.unset_admin#' + username).addClass('hidden');
+  }
+
+  service.post(data, function(d) {
+    if (d == 'forbidden') {
+      showLoginForm();
+      return;
+    }
+    if (d == 'blocked') {
+      displayBlockedPage($('.username').attr('id'));
+      return;
+    }
+    // Reload users
+    if (d == 'success') {
+      loadUsers();
+    }else{
+      alert(d);
+    }
+  });
+}
+
+function userForm() {
+  console.log('-+-+- userForm -+-+-');
+
+  let service = new RestServiceJs('get_my_infos');
+  service.getAll(function(d) {
+    console.log(d);
+    let source = $('#template-user-managment').html();
+    let template = Handlebars.compile(source);
+    let context = {user: d};
+    let html = template(context);
+    $('#content_user_info').empty();
+    $('#content_user_info').append(html);
+    $('.del_user#' + d.username).click(function() {
+      $('.passwd2del-group').removeClass('hidden').show();
+      delUser(d.username, true, true);
+    });
+    $('.update_email#' + d.username).click(function() {
+      updateMail(d.username);
+    });
+    $('.update_passwd#' + d.username).click(function() {
+      updatePasswd(d.username);
+    });
+  });
+}
+
+function validateEmail(email) {
+  if (email === '') {
+    return false;
+  }
+  let regexp = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
+  return regexp.test(email);
+}
+
+function updatePasswd(username) {
+  console.log('-+-+-+ updatePasswd -+-+-+');
+  $('#tick_passwd').addClass('hidden');
+  let passwd = $('.new_passwd#' + username).val();
+  let passwd2 = $('.new_passwd2#' + username).val();
+  let current_passwd = $('.current_passwd#'+ username).val();
+  // check if the 2 passwd are identical
+  if (passwd != passwd2) {
+    manageErrorMessage({'error': 'Passwords are not identical'});
+    return;
+  }
+
+  // check if passwd is not empty
+  if (passwd === '' || current_passwd === '') {
+    manageErrorMessage({'error': 'Password is empty'});
+    return;
+  }
+
+  //if passwd are identical, send it to the python server
+  let service = new RestServiceJs('update_passwd');
+  let data = {'current_passwd': current_passwd, 'passwd': passwd, 'passwd2': passwd2, 'username': username};
+  // display the spinning wheel
+  $('#spiner_passwd').removeClass('hidden');
+  $('#tick_passwd').addClass('hidden');
+  // Post the service
+  service.post(data, function(d) {
+    if (!manageErrorMessage(d)) {
+      $('#spiner_passwd').addClass('hidden');
+      return;
+    }
+    // It's ok, remove the spinning wheel and show the tick
+    $('#spiner_passwd').addClass('hidden');
+    $('#tick_passwd').removeClass('hidden');
+    // empty the fields
+    $('.new_passwd#' + username).val('');
+    $('.new_passwd2#' + username).val('');
+    $('.current_passwd#' + username).val('');
+  });
+}
+
+function updateMail(username) {
+  console.log('-+-+- updateMail -+-+-');
+  $('#tick_mail').addClass('hidden');
+  let email = $('.new_email#' + username).val();
+
+  // check if email is valid (to avoid a useless request to the python server)
+  if (!validateEmail(email)) {
+    manageErrorMessage({'error': 'not a valid email'});
+    return;
+  }
+
+  // if email is ok, send it to the server
+  let service = new RestServiceJs('update_mail');
+  let data = {'username': username, 'email': email};
+  $('#spiner_mail').removeClass('hidden');
+  $('#tick_mail').addClass('hidden');
+
+  service.post(data, function(d) {
+    if (! manageErrorMessage(d)) {
+      $('#spiner_mail').addClass('hidden');
+      return;
+    }
+    $('#spiner_mail').addClass('hidden');
+    $('#tick_mail').removeClass('hidden');
+    $('.new_email#' + username).val('').attr("placeholder", email);
+  });
+}
+
+function displayNavbar(loged, username, admin, blocked) {
     console.log('-+-+- displayNavbar -+-+-');
     $("#navbar").empty();
     let source = $('#template-navbar').html();
     let template = Handlebars.compile(source);
 
-    let context = {name: 'AskOmics', loged: loged, username: username, admin: admin};
+    let context = {name: 'AskOmics', loged: loged, username: username, admin: admin, nonblocked: !blocked};
     let html = template(context);
 
     $("#navbar").append(html);
@@ -485,8 +777,8 @@ function displayNavbar(loged, username, admin) {
             $('#signup_success').show();
             // User is logged, show the special button
             console.log(data);
-            let user = new AskomicsUser(data.username);
-            user.checkUser();
+            let user = new AskomicsUser(data.username, data.admin, data.blocked);
+            user.logUser();
           }
       });
 
@@ -540,25 +832,14 @@ function displayNavbar(loged, username, admin) {
 
     // admin page
     $('#administration').click(function() {
-      console.log('-+-+- administration -+-+-');
-
-      displayModal('Please wait', '', 'Close');
-
-      let service = new RestServiceJs('get_users_infos');
-      service.getAll(function(data) {
-        $("#Users_adm").empty();
-        let source = $('#template-admin-users').html();
-        let template = Handlebars.compile(source);
-
-        let context = {users: data.result};
-        let html = template(context);
-
-        $("#Users_adm").append(html);
-        hideModal();
-      });
-
-      new ShortcutsParametersView().updateShortcuts(true);
+      loadUsers();
     });
+
+    // admin page
+    $('#user_info').click(function() {
+      userForm();
+    });
+
 
 }
 
@@ -590,4 +871,9 @@ $(function () {
         var nl2br = (text + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1' + '<br>' + '$2');
         return new Handlebars.SafeString(nl2br);
     });
+
+    // // hide error message we click on it
+    // $('#error_div').click(function() {
+    //   $("#error_div").empty().addClass('hidden');
+    // });
 });
