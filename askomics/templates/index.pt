@@ -72,8 +72,8 @@
                 <div class="form-group">
                     <label for="startpoint" class="col-md-offset-2">Please select a start point for your query :</label>
                     <select id='startpoints' size='8' class="form-control col-md-offset-2"></select>
-                    <div class="col-md-offset-2">Public data are <em class='text-warning'>yellow</em> and private data are <strong class='text-primary'>blue</strong></div>
-                    <div class="col-md-offset-2">Public-private data are <strong class='text-warning'><em>yellow</em></strong></div>
+                    <div class="col-md-offset-2">Shared entities are <em class='text-warning'>yellow</em> and personal entities are <strong class='text-primary'>blue</strong></div>
+                    <div class="col-md-offset-2">Mixed entities are <strong class='text-warning'><em>yellow</em></strong></div>
                 </div>
                 <button  id="starter" class="btn btn-default col-md-offset-2" onclick="startVisualisation();">Start</button>
                 <br><br><br>
@@ -360,7 +360,7 @@
                 <th>Username</th>
                 <th>Email</th>
                 <th>Admin</th>
-                <th>Blocked</th>
+                <th>Locked</th>
                 <th>Delete account</th>
             </tr>
             {{#each users}}
