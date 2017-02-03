@@ -402,7 +402,7 @@
        <h4>Hello {{user.username}}</h4>
        <hr/ >
        {{#if user.blocked}}
-       <div class="alert alert-danger" role="alert">Your account is blocked, wait for an admin to unlock it</div>
+       <div class="alert alert-danger" role="alert">Your account is locked, wait for an admin to unlock it</div>
        {{/if}}
 
        <h4>Update your infos</h4>
