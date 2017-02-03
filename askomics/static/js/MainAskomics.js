@@ -419,7 +419,7 @@ function displayBlockedPage(username) {
 function loadUsers() {
   console.log('-+-+- loadUsers -+-+-');
 
-  displayModal('Please wait', '', 'Close');
+  // displayModal('Please wait', '', 'Close');
 
   let service = new RestServiceJs('get_users_infos');
   service.getAll(function(data) {
@@ -446,7 +446,7 @@ function loadUsers() {
     $('.del_user').click(function() {
       delUser(this.id);
     });
-    hideModal();
+    // hideModal();
   });
 
   new ShortcutsParametersView().updateShortcuts(true);
@@ -483,6 +483,11 @@ function delUser(username, reload=false, passwdconf=false) {
       manageErrorMessage({'error': 'Password is empty'});
       return;
     }
+
+    // Show the spinner
+    $('.spinner_del#' + username).removeClass('hidden');
+    $('.div_confirm_del_user#' + username).addClass('hidden');
+
     service.post(data, function(d) {
       if (!manageErrorMessage(d)) {
         return;
@@ -512,6 +517,15 @@ function lockUser(username, lock) {
   console.log('-+-+- lockUser -+-+-');
   let service = new RestServiceJs('lockUser');
   let data = {'username': username, 'lock': lock};
+
+    // Show the spinner
+  $('.spinner_lock#' + username).removeClass('hidden');
+  if (lock) {
+    $('.lock_user#' + username).addClass('hidden');
+  }else{
+    $('.unlock_user#' + username).addClass('hidden');
+  }
+
   service.post(data, function(d) {
     if (d == 'forbidden') {
       showLoginForm();
@@ -521,7 +535,7 @@ function lockUser(username, lock) {
       displayBlockedPage($('.username').attr('id'));
       return;
     }
-    // Reload the page
+    // Reload users
     if (d == 'success') {
       loadUsers();
     }else{
@@ -535,6 +549,15 @@ function setAdmin(username, admin) {
   console.log('-+-+- setAdmin -+-+-');
   let service = new RestServiceJs('setAdmin');
   let data = {'username': username, 'admin': admin};
+
+  // Show the spinner
+  $('.spinner_admin#' + username).removeClass('hidden');
+  if (admin) {
+    $('.set_admin#' + username).addClass('hidden');
+  }else{
+    $('.unset_admin#' + username).addClass('hidden');
+  }
+
   service.post(data, function(d) {
     if (d == 'forbidden') {
       showLoginForm();
@@ -544,7 +567,7 @@ function setAdmin(username, admin) {
       displayBlockedPage($('.username').attr('id'));
       return;
     }
-    // Reload the page
+    // Reload users
     if (d == 'success') {
       loadUsers();
     }else{
