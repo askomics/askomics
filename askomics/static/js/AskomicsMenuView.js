@@ -9,11 +9,14 @@ class AskomicsMenuView {
     this.forceLayoutManager = _forceLayoutManager;
   }
 
-  buildLiView(uri,label,submenu) {
+  buildLiView(uri,label,submenu,hidden) {
 
     var icheck = $("<span/>")
         .attr("class","glyphicon glyphicon-check");
 
+    if (hidden) {
+      icheck.css("visibility","hidden");
+    }
     var a = $("<a></a>")
             .attr("href","#")
             .attr("class","small")
@@ -71,7 +74,7 @@ class AskomicsMenuView {
     $.each(lentities, function(i) {
       let node = new GraphObject({'uri' : lentities[i]});
       let nodeuri = node.uri;
-      var li = menuView.buildLiView(nodeuri,node.removePrefix(),false);
+      var li = menuView.buildLiView(nodeuri,node.removePrefix(),false,false);
 
       li.on('click', function() {
         var span = $(this).find(".glyphicon");
@@ -101,13 +104,14 @@ class AskomicsMenuView {
 
       let tab = new AskomicsUserAbstraction().getRelationsObjectsAndSubjectsWithURI(nodeuri);
       let listRelObj = tab[0];
-      
+
       $.each(listRelObj, function(objecturi) {
         let object = new GraphObject({uri:objecturi});
         $.each(listRelObj[objecturi], function(idxrel) {
           let rel = listRelObj[objecturi][idxrel];
           let linkRel = new GraphObject({uri:rel});
-          let li = menuView.buildLiView(rel,linkRel.removePrefix()+"&#8594;"+object.removePrefix(),true);
+          let li = menuView.buildLiView(rel,linkRel.removePrefix()+"&#8594;"+object.removePrefix(),true,false);
+
           li.attr("nodeuri",nodeuri)
             .on('click', function() {
               /* when this li is unavailable, we can do nothing */
@@ -140,7 +144,9 @@ class AskomicsMenuView {
     if (Object.keys(positionableEntities).length>0) {
       /* positionable object */
       let posuri = "positionable";
-      let li = menuView.buildLiView(posuri,posuri,false);
+      let li = menuView.buildLiView(posuri,posuri,false,true);
+      menuView.forceLayoutManager.offProposedUri("link",posuri);
+
       li.attr("nodeuri",posuri)
         .on('click', function() {
           var span = $(this).find(".glyphicon");
