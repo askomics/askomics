@@ -281,7 +281,7 @@ class SourceFileTsv(SourceFile):
 
         if all(types in self.forced_column_types for types in ('start', 'end')): # a positionable entity have to have a start and a end
             ttl += ":" + self.encodeToRDFURI(self.headers[0]) + ' displaySetting:is_positionable "true"^^xsd:boolean .\n'
-            ttl += ":is_positionable rdfs:label 'is_positionable' .\n"
+            ttl += ":is_positionable rdfs:label 'is_positionable'^^xsd:string .\n"
             ttl += ":is_positionable rdf:type owl:ObjectProperty .\n"
 
         for header, categories in self.category_values.items():
@@ -290,7 +290,7 @@ class SourceFileTsv(SourceFile):
             ttl += (" , \n" + indent + ":").join(map(self.encodeToRDFURI,categories)) + " .\n"
 
             for item in categories:
-                ttl += ":" + self.encodeToRDFURI(item) + " rdf:type :" + self.encodeToRDFURI(header) + " ;\n" + len(item) * " " + "  rdfs:label \"" + item + "\" .\n"
+                ttl += ":" + self.encodeToRDFURI(item) + " rdf:type :" + self.encodeToRDFURI(header) + " ;\n" + len(item) * " " + "  rdfs:label \"" + item + "\"^^xsd:string .\n"
 
         return ttl
 
@@ -362,7 +362,7 @@ class SourceFileTsv(SourceFile):
                 entity_id = self.key_id(row)
                 indent = (len(entity_id) + 1) * " "
                 ttl += ":" + self.encodeToRDFURI(entity_id) + " rdf:type :" + self.encodeToRDFURI(self.headers[0]) + " ;\n"
-                ttl += indent + " rdfs:label \"" + entity_label + "\" ;\n"
+                ttl += indent + " rdfs:label \"" + entity_label + "\"^^xsd:string ;\n"
 
                 # Add data from other columns
                 for i, header in enumerate(self.headers): # Skip the first column

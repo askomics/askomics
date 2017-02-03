@@ -704,14 +704,6 @@ function displayNavbar(loged, username, admin, blocked) {
         setUploadForm('div#content_integration',"Upload User Files","source_files_overview",displayIntegrationForm);
     });
 
-    // $("#integration_ttl").click(function() {
-    //     setUploadForm('div#content_integration_ttl',"Upload User TTL Files","insert_files_rdf",displayTableRDF);
-    // });
-
-    // $("#integration_gff").click(function() {
-    //     setUploadForm('div#content_integration_gff', 'Upload User GFF3 Files', "source_files_overview_gff", displayGffForm);
-    // });
-
     // Visual effect on active tab (Ask! / Integrate / Credits)
     $('.nav li').click(function(e) {
 

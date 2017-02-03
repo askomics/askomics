@@ -534,13 +534,13 @@
 
         <!-- template to display preview of a gff file -->
         <script id="template-gff-form" type="text/x-handlebars-template">
-            <form id="source-file-gff-{{file.name}}" class="template-source_file form-horizontal text-center">
-                <div id="{{file.name}}">
+            <form id="source-file-gff-{{idfile}}" class="template-source_file form-horizontal text-left">
+                <div id="{{idfile}}" filename="{{file.name}}">
                     <h4>GFF file: {{file.name}} </h4>
                     <h5>Select which entities you want to integrate</h5>
                     {{#each file.entities}}
-                        <label id="gff_checkbox-{{../file.name}}">
-                            <input type="checkbox" id="{{this}}"> {{this}}
+                        <label id="gff_checkbox-{{../idfile}}">
+                            <input type="checkbox" id="{{this}}" checked="checked"> {{this}}
                         </label><br>
                     {{/each}}
                     <br>
@@ -549,18 +549,18 @@
                         <select>
                             <option selected disabled hidden>choose taxon</option>
                             {{#each taxons}}
-                                <option value="{{this}}" id="{{../file.name}}-{{this}}">{{this}}</option>
+                                <option value="{{this}}" id="{{../idfile}}-{{this}}">{{this}}</option>
                             {{/each}}
                         </select>
                         <p>Or enter a new one</p>
                     {{else}}
                         <p>Enter a taxon</p>
                     {{/if}}
-                    <input type="text" name="frame" id="tax-{{file.name}}">
+                    <input type="text" name="frame" id="tax-{{idfile}}">
                     <br><br>
-                    <input type="button" id="{{file.name}}" class="btn btn-primary load_data_gff" value="Insert in private graph">
+                    <input type="button" id="{{idfile}}" class="btn btn-primary load_data_gff" value="Insert in private graph">
                     {{#if admin}}
-                    <input type="button" id="{{file.name}}" class="btn btn-warning load_data_gff_public" value="Insert in public graph" />
+                    <input type="button" id="{{idfile}}" class="btn btn-warning load_data_gff_public" value="Insert in public graph" />
                     {{/if}}
                     <br><br>
                     <p class="insert_status text-left alert hidden"></p>
@@ -573,8 +573,8 @@
 
         <!-- template to display preview of a csv file -->
         <script id="template-csv-form" type="text/x-handlebars-template">
-            <form id="source-file-tsv-{{file.name}}" class="template-source_file form-horizontal text-center">
-                <h4 class="file_name" id="{{file.name}}" >TSV file: {{ file.name }}</h4>
+            <form id="source-file-tsv-{{idfile}}" class="template-source_file form-horizontal text-center">
+                <h4 class="file_name" id="{{idfile}}" filename="{{file.name}}">TSV file: {{ file.name }}</h4>
                 <br/>
                 {{#if error}}
                     <p class="error">{{ error }}</p>
@@ -672,14 +672,14 @@
 
         <!-- template to display preview of a ttl file -->
         <script id="template-ttl-form" type="text/x-handlebars-template">
-            <form id="source-file-ttl-{{file.name}}" class="template-source_file form-horizontal text-center">
-                <div id="{{file.name}}">
+            <form id="source-file-ttl-{{idfile}}" class="template-source_file form-horizontal text-center">
+                <div id="{{idfile}}" filename="{{file.name}}">
                     <h4>TTL file: {{file.name}} </h4>
                     <h5>Preview of the first 100 lines of the file</h5>
                     <pre class='preview_field'></pre>
-                    <input type="button" id="{{file.name}}" class="btn btn-primary load_data_ttl" value="Insert in private graph">
+                    <input type="button" id="{{idfile}}" class="btn btn-primary load_data_ttl" value="Insert in private graph">
                     {{#if admin}}
-                    <input type="button" id="{{file.name}}" class="btn btn-warning load_data_ttl_public" value="Insert in public graph" />
+                    <input type="button" id="{{idfile}}" class="btn btn-warning load_data_ttl_public" value="Insert in public graph" />
                     {{/if}}
                     <br><br>
                     <p class="insert_status text-left alert hidden"></p>

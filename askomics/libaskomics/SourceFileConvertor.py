@@ -108,7 +108,7 @@ class SourceFileConvertor(ParamManager):
         :rtype: List
         """
         src_dir = self.get_source_file_directory()
-        paths = glob(src_dir + '/*.gff3')
+        paths = glob(src_dir + '/*')
 
         files = []
         for p in paths:
