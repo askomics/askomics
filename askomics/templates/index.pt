@@ -61,7 +61,7 @@
 
     </head>
 
-    <body>
+    <body >
         <nav id='navbar' class="navbar navbar-default navbar-fixed-top">
         <!-- navbar is defined in a template below -->
         </nav>
@@ -157,6 +157,9 @@
                 </div>
              </div>
             <div id="results" class="row results-div"></div>
+        </div>
+
+        <div id="content_jobsview" class="container" hidden>
         </div>
 
         <div id="content_integration" class="container" hidden>
@@ -314,6 +317,8 @@
                 <div id="collapse-menu-main" class="collapse navbar-collapse">
                     <ul class="nav navbar-nav navbar-right">
                         <li id="interrogation" class="active"><a href="#" onclick="loadStartPoints();"><span class="glyphicon glyphicon-play"></span></a></li>
+
+                        <li id="jobsview"><a href="#"><span class="glyphicon glyphicon-tasks"></span></a></li>
                         {{#if loged}}
                         {{#if nonblocked}}
                         <li id="userdata" class="dropdown">
@@ -834,6 +839,41 @@
           {{/each}}
         </table>
         </script>
+
+        <script id='template-admin-jobs' type="text/x-handlebars-template">
+             <hr/>
+             <h3 class="header-div">Jobs</h3>
+             <hr/>
+              <table class="table table-striped">
+                        <tr>
+                            <th>Job-ID</th>
+                            <th>User</th>
+                            <th>State</th>
+                            <th>Start</th>
+                            <th>End</th>
+                            <th>Duration</th>
+                            <th>NRows</th>
+                        </tr>
+                        {{#each jobs}}
+                        <tr class="{{this.classtr}}" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}" class="clickable">
+                            <td>{{this.jobid}}</td>
+                            <td>{{this.user}}</td>
+                            <td>{{this.state}}</td>
+                            <td>{{this.start}}</td>
+                            <td>{{this.end}}</td>
+                            <td>{{this.duration}}</td>
+                            <td>{{this.nr}}</td>
+                        </tr>
+                        <tr>
+                         <td colspan="7">
+                          <div id="jobview_accordion_{{@index}}" class="collapse">
+                             <h4>Printing Output</h4>
+                          </div>
+                         </td>
+                        </tr>
+                        {{/each}}
+                    </table>
+           </script>
 
     </body>
 </html>

@@ -21,6 +21,10 @@ function prepareQuery(exp, roq) {
 }
 
 function viewQueryResults() {
+
+    new AskomicsJobsViewManager().createJob();
+    if (true) return ;
+
     $("#btn-down").prop("disabled", false);
     displayModal('Please wait', '', 'Close');
 
