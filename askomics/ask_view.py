@@ -1197,6 +1197,13 @@ class AskView(object):
         username = body['username']
         passwd = body['passwd']
         passwd2 = body['passwd2']
+        current_passwd = body['current_passwd']
+
+        security1 = Security(self.settings, self.request.session, username, '', current_passwd, current_passwd)
+
+        if not security1.check_username_password():
+            self.data['error'] = 'Current password is wrong'
+            return self.data
 
         security = Security(self.settings, self.request.session, username, '', passwd, passwd2)
 

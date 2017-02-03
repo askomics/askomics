@@ -573,6 +573,7 @@ function updatePasswd(username) {
   $('#tick_passwd').addClass('hidden');
   let passwd = $('.new_passwd#' + username).val();
   let passwd2 = $('.new_passwd2#' + username).val();
+  let current_passwd = $('.current_passwd#'+ username).val();
   // check if the 2 passwd are identical
   if (passwd != passwd2) {
     managePythonErrorEvent({'error': 'Passwords are not identical'});
@@ -580,14 +581,14 @@ function updatePasswd(username) {
   }
 
   // check if passwd is not empty
-  if (passwd === '') {
+  if (passwd === '' || current_passwd === '') {
     managePythonErrorEvent({'error': 'Password is empty'});
     return;
   }
 
   //if passwd are identical, send it to the python server
   let service = new RestServiceJs('update_passwd');
-  let data = {'passwd': passwd, 'passwd2': passwd2, 'username': username};
+  let data = {'current_passwd': current_passwd, 'passwd': passwd, 'passwd2': passwd2, 'username': username};
   // display the spinning wheel
   $('#spiner_passwd').removeClass('hidden');
   $('#tick_passwd').addClass('hidden');
@@ -600,6 +601,10 @@ function updatePasswd(username) {
     // It's ok, remove the spinning wheel and show the tick
     $('#spiner_passwd').addClass('hidden');
     $('#tick_passwd').removeClass('hidden');
+    // empty the fields
+    $('.new_passwd#' + username).val('');
+    $('.new_passwd2#' + username).val('');
+    $('.current_passwd#' + username).val('');
   });
 }
 

@@ -388,15 +388,19 @@
       </script>
 
       <script id='template-user-managment' type="text/x-handlebars-template">
+      <div class='col-md-6'>
        <h4>Hello {{user.username}}</h4>
+       <hr/ >
        {{#if user.blocked}}
        <div class="alert alert-danger" role="alert">Your account is blocked, wait for an admin to unlock it</div>
        {{/if}}
 
        <h4>Update your infos</h4>
-       <div class='col-md-6'>
-         <div class="input-group">
-          <span class="input-group-addon" id="basic-addon1">Email</span>
+       <hr/ >
+       <h5>Email</h5>
+
+        <div class="input-group">
+          <span class="input-group-addon" id="basic-addon1"><i class="fa fa-envelope" aria-hidden="true"></i></span>
           <input type="email" class="form-control new_email" id='{{user.username}}' placeholder="{{user.email}}" aria-describedby="basic-addon1">
           <span class="input-group-btn">
             <button class="btn btn-default update_email" id='{{user.username}}' type="button">
@@ -405,15 +409,20 @@
               <i class="hidden fa fa-check text-success" id='tick_mail'></i>
             </button>
           </span>
-         </div>
-        <br>
+        </div>
+
+        <h5>Password</h5>
 
         <div class="input-group">
-          <span class="input-group-addon" id="basic-addon1">Password</span>
+          <span class="input-group-addon" id="basic-addon1"><i class="fa fa-key" aria-hidden="true"></i></span>
+          <input type="password" class="form-control current_passwd" id='{{user.username}}' placeholder="Enter your current password" aria-describedby="basic-addon1">
+        </div>
+        <div class="input-group">
+          <span class="input-group-addon" id="basic-addon1"><i class="fa fa-key" aria-hidden="true"></i></span>
           <input type="password" class="form-control new_passwd" id='{{user.username}}' placeholder="Enter a new password" aria-describedby="basic-addon1">
-         </div>
-         <div class="input-group">
-          <span class="input-group-addon" id="basic-addon1">Confirmation</span>
+        </div>
+        <div class="input-group">
+          <span class="input-group-addon" id="basic-addon1"><i class="fa fa-key" aria-hidden="true"></i></span>
           <input type="password" class="form-control new_passwd2" id='{{user.username}}' placeholder="Confirm your new password" aria-describedby="basic-addon1">
           <span class="input-group-btn">
             <button class="btn btn-default update_passwd" id='{{user.username}}' type="button">
@@ -422,11 +431,11 @@
               <i class="hidden fa fa-check text-success" id='tick_passwd'></i>
             </button>
           </span>
-         </div>
-      </div>
+        </div>
 
-      <div class='col-md-12'>
+      <hr/ >
       <h4>Remove your account</h4>
+      <hr/ >
         <p>Remove your account and all your data</p>
         <br>
         <button type="button" class="btn btn-danger del_user" id='{{user.username}}'>Delete account</button>
