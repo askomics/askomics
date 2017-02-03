@@ -418,13 +418,13 @@
 
         <!-- template to display preview of a gff file -->
         <script id="template-gff-form" type="text/x-handlebars-template">
-            <form id="source-file-gff-{{idfile}}" class="template-source_file form-horizontal text-center">
+            <form id="source-file-gff-{{idfile}}" class="template-source_file form-horizontal text-left">
                 <div id="{{idfile}}" filename="{{file.name}}">
                     <h4>GFF file: {{file.name}} </h4>
                     <h5>Select which entities you want to integrate</h5>
                     {{#each file.entities}}
                         <label id="gff_checkbox-{{../idfile}}">
-                            <input type="checkbox" id="{{this}}"> {{this}}
+                            <input type="checkbox" id="{{this}}" checked="checked"> {{this}}
                         </label><br>
                     {{/each}}
                     <br>

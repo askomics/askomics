@@ -131,3 +131,11 @@ class ParamManager(object):
         obj = obj.replace(".", "_dot_")
         obj = obj.replace("-", "_sep_")
         return obj
+
+    @staticmethod
+    def decodeToRDFURI(toencode):
+        import urllib.parse
+        obj = toencode.replace("_dot_",".")
+        obj = obj.replace("_sep_","-")
+        obj = urllib.parse.unquote(obj)
+        return obj
