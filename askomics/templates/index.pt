@@ -292,8 +292,18 @@
           </div><!-- /.modal-dialog -->
         </div><!-- /.modal -->
 
-        <!-- Printing Warning message when error occurs -->
-        <div id="main_warning_display" class="container insert_warning text-left alert hidden"></div>
+        <script id='template-error-message' type="text/x-handlebars-template">
+        <div id='error_div'>
+        <br><br>
+        <div class="container alert alert-dismissible alert-danger">
+          <button type="button" class="close" data-dismiss="alert">&times;</button>
+          <p id='error_message'></p>
+          <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+          <strong>Error: </strong>
+          {{message}}
+        </div>
+        </div>
+        </script>
 
         <!-- template for the navbar -->
         <script id='template-navbar' type="text/x-handlebars-template">
@@ -437,11 +447,20 @@
       <h4>Remove your account</h4>
       <hr/ >
         <p>Remove your account and all your data</p>
+        <p class='text-danger'>
+          <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+          This action can't be undone!
+        </p>
         <br>
-        <button type="button" class="btn btn-danger del_user" id='{{user.username}}'>Delete account</button>
+        <button type="button" class="btn btn-danger del_user" id='{{user.username}}'><i class="fa fa-trash" aria-hidden="true"></i> Delete account</button>
         <div class="btn-group div_confirm_del_user hidden" id='{{user.username}}' role="group">
           <button type="button" class="btn btn-danger confirm_del_user" id='{{user.username}}'>Delete</button>
           <button type="button" class="btn btn-default no_del_user" id='{{user.username}}'>No</button>
+        </div>
+        <br>
+        <div class="hidden passwd2del-group input-group" id="basic-addon1">
+          <span class="input-group-addon"><i class="fa fa-key" aria-hidden="true"></i></span>
+          <input type="password" class="form-control passwd_del" id='{{user.username}}' placeholder="Enter your password" aria-describedby="basic-addon1">
         </div>
       </div>
       </script>

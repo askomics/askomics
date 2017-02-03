@@ -57,17 +57,19 @@ function resetGraph() {
   askomicsInitialization = false;
 }
 
-function managePythonErrorEvent(data) {
+function manageErrorMessage(data) {
+  // Remove last message
+  $('#error_div').remove();
+  // If there is an error message, how it
   if (data.error) {
-    $("#main_warning_display").html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> ERROR:</strong> ' +
-                       data.error.replace(/\n/g,'<br/>'))//.replace('\\n',"&#13;")
-                      .removeClass('hidden alert-success')
-                      .removeClass('hidden alert-warning')
-                      .addClass('show alert-danger');
-    return false;
+      data.error.replace(/\n/g,'<br/>');
+      let source = $('#template-error-message').html();
+      let template = Handlebars.compile(source);
+      let context = {message: data.error};
+      let html = template(context);
+      $('body').append(html);
+      return false;
   }
-  //otherwise empty last message !
-  $("#main_warning_display").empty().addClass('hidden');
   return true;
 }
 
@@ -80,7 +82,7 @@ function loadStartPoints() {
   $("#deleteNode").hide();
 
   service.getAll(function(startPointsDict) {
-      if (! managePythonErrorEvent(startPointsDict)) return;
+      if (! manageErrorMessage(startPointsDict)) return;
 
       console.log(JSON.stringify(startPointsDict));
 
@@ -450,7 +452,7 @@ function loadUsers() {
   new ShortcutsParametersView().updateShortcuts(true);
 }
 
-function delUser(username, reload=false) {
+function delUser(username, reload=false, passwdconf=false) {
   console.log('-+-+-delUser ' + username + ' -+-+-');
   // display confirmations buttons
   $('.del_user#' + username).hide();
@@ -460,14 +462,31 @@ function delUser(username, reload=false) {
   $('.no_del_user#' + username).click(function() {
     $('.del_user#' + username).show();
     $('.div_confirm_del_user#' + username).hide();
+    if (passwdconf) {
+      $('.passwd2del-group').addClass('hidden');
+    }
   });
 
   //if yes, delete user and all this data and reload the list
   $('.confirm_del_user#' + username).click(function(e) {
     console.log('CONFIRM DELETE USER ' + username);
+    // get the passwd if needed
+    let passwd = '';
+    if (passwdconf) {
+      passwd = $('.passwd_del#' + username).val();
+    }
+
     let service = new RestServiceJs('delete_user');
-    let data = {'username': username};
+    let data = {'username': username, 'passwd': passwd, 'passwd_conf': passwdconf};
+    // Don't send the request to the python server if passwd is empty
+    if (passwdconf && passwd === '') {
+      manageErrorMessage({'error': 'Password is empty'});
+      return;
+    }
     service.post(data, function(d) {
+      if (!manageErrorMessage(d)) {
+        return;
+      }
       if (d == 'forbidden') {
         showLoginForm();
         return;
@@ -487,8 +506,6 @@ function delUser(username, reload=false) {
       }
     });
   });
-
-
 }
 
 function lockUser(username, lock) {
@@ -549,7 +566,8 @@ function userForm() {
     $('#content_user_info').empty();
     $('#content_user_info').append(html);
     $('.del_user#' + d.username).click(function() {
-      delUser(d.username, true);
+      $('.passwd2del-group').removeClass('hidden').show();
+      delUser(d.username, true, true);
     });
     $('.update_email#' + d.username).click(function() {
       updateMail(d.username);
@@ -576,13 +594,13 @@ function updatePasswd(username) {
   let current_passwd = $('.current_passwd#'+ username).val();
   // check if the 2 passwd are identical
   if (passwd != passwd2) {
-    managePythonErrorEvent({'error': 'Passwords are not identical'});
+    manageErrorMessage({'error': 'Passwords are not identical'});
     return;
   }
 
   // check if passwd is not empty
   if (passwd === '' || current_passwd === '') {
-    managePythonErrorEvent({'error': 'Password is empty'});
+    manageErrorMessage({'error': 'Password is empty'});
     return;
   }
 
@@ -594,7 +612,7 @@ function updatePasswd(username) {
   $('#tick_passwd').addClass('hidden');
   // Post the service
   service.post(data, function(d) {
-    if (!managePythonErrorEvent(d)) {
+    if (!manageErrorMessage(d)) {
       $('#spiner_passwd').addClass('hidden');
       return;
     }
@@ -615,7 +633,7 @@ function updateMail(username) {
 
   // check if email is valid (to avoid a useless request to the python server)
   if (!validateEmail(email)) {
-    managePythonErrorEvent({'error': 'not a valid email'});
+    manageErrorMessage({'error': 'not a valid email'});
     return;
   }
 
@@ -626,7 +644,7 @@ function updateMail(username) {
   $('#tick_mail').addClass('hidden');
 
   service.post(data, function(d) {
-    if (! managePythonErrorEvent(d)) {
+    if (! manageErrorMessage(d)) {
       $('#spiner_mail').addClass('hidden');
       return;
     }
@@ -838,4 +856,9 @@ $(function () {
         var nl2br = (text + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1' + '<br>' + '$2');
         return new Handlebars.SafeString(nl2br);
     });
+
+    // // hide error message we click on it
+    // $('#error_div').click(function() {
+    //   $("#error_div").empty().addClass('hidden');
+    // });
 });

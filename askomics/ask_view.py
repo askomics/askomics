@@ -1098,10 +1098,19 @@ class AskView(object):
         body = self.request.json_body
 
         username = body['username']
+        passwd = body['passwd']
+        confirmation = body['passwd_conf']
 
         # Non admin can only delete himself
         if self.request.session['username'] != username and not self.request.session['admin']:
             return 'forbidden'
+
+        # If confirmation, check the user passwd
+        if confirmation:
+            security = Security(self.settings, self.request.session, username, '', passwd, passwd)
+            if not security.check_username_password():
+                self.data['error'] = 'Wrong password'
+                return self.data
 
 
         sqb = SparqlQueryBuilder(self.settings, self.request.session)
