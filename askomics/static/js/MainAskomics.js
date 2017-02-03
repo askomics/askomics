@@ -763,7 +763,7 @@ function displayNavbar(loged, username, admin, blocked) {
             // User is logged, show the special button
             console.log(data);
             let user = new AskomicsUser(data.username, data.admin, data.blocked);
-            user.checkUser();
+            user.logUser();
           }
       });
 
