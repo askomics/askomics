@@ -8,43 +8,63 @@ let instanceAskomicsJobsViewManager ;
       if ( instanceAskomicsJobsViewManager !== undefined ) {
           return instanceAskomicsJobsViewManager;
       }
-      console.log("$$$$$$$$$$$$$ CONSTRUCTOR $$$$$$$$$$$$$$$$$$$$$$$");
 
       this.jobs = [];
-      this.jobGenId=0;
+      this.jobGenId=0   ;
+      this.npreview=500 ;
 
       instanceAskomicsJobsViewManager = this;
     }
 
     createWaitState() {
-      console.log("WAIT");
-
       let time = $.now();
       let curId = this.jobGenId++;
 
       /* Create Job in status wait */
       this.jobs.push({
           jobid    : curId ,
-          user     : 'toto',
           state    : 'wait',
-          start    : time,
+          tstart   : time,
+          start    : new Date(time).toLocaleString(),
           end      : '',
           duration : '',
           nr       : '' ,
-          classtr  : 'bg-info' //bg-primary,bg-success,bg-warning,bg-danger,bg-info
+          classtr  : 'bg-info', //bg-primary,bg-success,bg-warning,bg-danger,bg-info
+          stateToReload : JSON.stringify(new AskomicsGraphBuilder().getInternalState())
       });
+
       new AskomicsJobsViewManager().listJobs();
       return curId;
     }
 
-    changeOkState(id,ndata) {
+    changeOkState(id,data) {
+      function addZero(x, n) {
+        while (x.toString().length < n) {
+          x = "0" + x;
+        }
+        return x;
+      }
+
+      let time = $.now() ;
+
       for ( let ij in this.jobs ) {
           if (this.jobs[ij].jobid === id) {
-            this.jobs[ij].end = $.now() ;
+
+            this.jobs[ij].tend = time ;
+
+            let elp  = new Date(this.jobs[ij].tend - this.jobs[ij].tstart);
+            //let h = addZero(elp.getHours(), 2);
+            let m = addZero(elp.getMinutes(), 2);
+            let s = addZero(elp.getSeconds(), 2);
+            let ms = addZero(elp.getMilliseconds(), 3);
+
+            this.jobs[ij].end = new Date(time).toLocaleString();
             this.jobs[ij].state = "Ok";
-            this.jobs[ij].nr    = ndata;
-            this.jobs[ij].duration = JSON.stringify(this.jobs[ij].end - this.jobs[ij].start)+"ms" ;
+            this.jobs[ij].nr    = data.nrow;
+            this.jobs[ij].csv   = data.file;
+            this.jobs[ij].duration = m + " m:" + s + " s:" + ms +" ms";
             this.jobs[ij].classtr = "bg-success";
+            this.jobs[ij].datable_preview = new AskomicsResultsView(data).getPreviewResults();
           }
       }
       new AskomicsJobsViewManager().listJobs();
@@ -62,12 +82,37 @@ let instanceAskomicsJobsViewManager ;
       new AskomicsJobsViewManager().listJobs();
     }
 
+    removeJob(index) {
+
+      let service = new RestServiceJs('del_csv/');//location.href='del_csv/{{this.csv}}';
+      service.get(this.jobs[index].csv);
+      this.jobs.splice(index, 1);
+      new AskomicsJobsViewManager().listJobs();
+    }
+
+    prepareQuery() {
+        //     Get JSON to ask for a SPARQL query corresponding to the graph
+        //     and launch it according to given parameters.
+        //
+        //     :lim: LIMIT values for preview
+        console.log('+++ prepareQuery +++');
+
+        var tab = new AskomicsGraphBuilder().buildConstraintsGraph();
+        return {
+                  'variates'             : tab[0],
+                  'constraintesRelations': tab[1],
+                  'constraintesFilters'  : tab[2],
+                  'limit'                : this.npreview          // number of data preview
+               };
+    }
+
+
     createJob() {
 
       //create state view
       let curId = new AskomicsJobsViewManager().createWaitState();
       let service = new RestServiceJs("sparqlquery");
-      let jdata = prepareQuery(false, false);
+      let jdata = this.prepareQuery(false, false);
       service.post(jdata,function(data) {
         hideModal();
         if ('error' in data) {
@@ -76,13 +121,7 @@ let instanceAskomicsJobsViewManager ;
           return;
         }
 
-        new AskomicsJobsViewManager().changeOkState(curId,data.values.length);
-
-        //new AskomicsResultsView(data).displayResults();
-        //resize graph if fullscreen
-        //if ($('#icon-resize-graph').attr('value') == 'full') {
-        //  forceLayoutManager.normalsizeGraph();
-        //}
+        new AskomicsJobsViewManager().changeOkState(curId,data);
       });
       /* position on job list view */
       $("#jobsview").trigger( "click" );
@@ -92,24 +131,23 @@ let instanceAskomicsJobsViewManager ;
 
       let source = $('#template-admin-jobs').html();
       let template = Handlebars.compile(source);
-/*
-      let ljobs = [];
 
-      ljobs[0] = {
-        jobid    : '12233',
-        user     : 'toto',
-        state    : 'wait',
-        start    : '12/12/12',
-        end      : '14/12/223',
-        duration : '122233',
-        nr       : 10 ,
-        classtr  : 'bg-success' //bg-primary,bg-success,bg-warning,bg-danger,bg-info
-      };*/
-      console.log("SIZE JOBSLIST="+this.jobs.length);
       let context = {jobs: this.jobs };
       let html = template(context);
 
       $("#content_jobsview").empty();
       $("#content_jobsview").append(html);
+
+      for ( let ij in this.jobs ) {
+        if (this.jobs[ij].datable_preview !== undefined ) {
+          let r = $("#results_table_"+ij);
+          r.append(
+            $("<h3></h3>").addClass("header-div")
+                          .css("text-align","center")
+                          .html("Preview ("+Math.min(this.npreview,this.jobs[ij].nr)+" nrows)")
+                        );
+          r.append(this.jobs[ij].datable_preview);
+        }
+      }
     }
 }

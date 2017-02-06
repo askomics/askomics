@@ -48,5 +48,6 @@ class AskomicsUser {
         service.getAll(function() {
             location.reload();
         });
+
     }
 }

@@ -32,6 +32,13 @@ class SparqlQueryBuilder(ParamManager):
             if not elt in replacement:
                 raise ValueError('SparqlQueryBuilder::build_query_on_the_fly: can not build a query without "'+elt+'" index !')
 
+        if not isinstance(self.settings.listFrom, list):
+            raise ValueError('SparqlQueryBuilder::build_query_on_the_fly: Bad definition of self.listFrom "'+str(self.settings.listFrom)+'"!')
+
+        print("===================FROM$$$$$$$$$$$$$$$$$$$$$$$$$$$$=================================")
+        print(self.settings.listFrom)
+        print("===================FROM$$$$$$$$$$$$$$$$$$$$$$$$$$$$=================================")
+        
         query = ""
         query += "SELECT DISTINCT "+replacement['select']+"\n"
 
@@ -43,11 +50,11 @@ class SparqlQueryBuilder(ParamManager):
         if not self.session['admin']:
             if type(adminRequest) != bool or not adminRequest :
                 query += "FROM <>\n"
-                if (not 'from' in self.session) or (len(self.session['from'])<=0):
+                if len(self.settings.listFrom)<=0:
                     pass
                     # None solution because none graph !
                 else:
-                    for elt in self.session['from']:
+                    for elt in self.settings.listFrom:
                         query += "FROM <"+elt+">\n"
 
         query += "WHERE {"+"\n"

@@ -23,13 +23,15 @@
 
         <!-- ****************************************************************-->
         <!-- Results Table manage with jquery.dataTables  -->
-        <link href="static/css/jquery.dataTables.min.css" rel="stylesheet" >
-        <link href="static/css/buttons.dataTables.min.css" rel="stylesheet" >
+    <!--    <link href="static/css/jquery.dataTables.min.css" rel="stylesheet">-->
+        <link href="static/css/buttons.dataTables.min.css" rel="stylesheet">
+        <link href="static/css/dataTables.bootstrap.min.css" rel="stylesheet">
         <script src="static/js/third-party/jquery.dataTables.min.js"></script>
         <script src="static/js/third-party/dataTables.buttons.min.js"></script>
         <script src="static/js/third-party/buttons.flash.min.js"></script>
         <script src="static/js/third-party/jszip.min.js"></script>
         <script src="static/js/third-party/buttons.html5.min.js"></script>
+        <script src="static/js/third-party/dataTables.bootstrap.min.js"></script>
 
         <!-- ****************************************************************-->
         <!-- Color Syntaxe for RDF  -->
@@ -847,27 +849,35 @@
               <table class="table table-striped">
                         <tr>
                             <th>Job-ID</th>
-                            <th>User</th>
                             <th>State</th>
                             <th>Start</th>
                             <th>End</th>
                             <th>Duration</th>
                             <th>NRows</th>
+                            <th></th>
                         </tr>
                         {{#each jobs}}
                         <tr class="{{this.classtr}}" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}" class="clickable">
                             <td>{{this.jobid}}</td>
-                            <td>{{this.user}}</td>
                             <td>{{this.state}}</td>
                             <td>{{this.start}}</td>
                             <td>{{this.end}}</td>
                             <td>{{this.duration}}</td>
                             <td>{{this.nr}}</td>
+                            <td><span onclick="new AskomicsJobsViewManager().removeJob({{@index}});" alt="delete" class="btn btn-danger btn-xs" aria-hidden="true"></td>
                         </tr>
                         <tr>
                          <td colspan="7">
                           <div id="jobview_accordion_{{@index}}" class="collapse">
-                             <h4>Printing Output</h4>
+
+                            <div class="btn-group">
+                                <span onclick="location.href='csv/{{this.csv}}';" alt="save"  class="glyphicon glyphicon glyphicon-floppy-save" aria-hidden="true" ></span>
+                                <span onclick="startRequestSessionAskomics();forceLayoutManager.startWithQuery({{this.stateToReload}});$('#interrogation').trigger( 'click' );"
+                                      alt="reload" class="glyphicon glyphicon-repeat" aria-hidden="true"></span>
+                            </div>
+                            <hr/>
+                            <div id="results_table_{{@index}}">
+                            </div>
                           </div>
                          </td>
                         </tr>

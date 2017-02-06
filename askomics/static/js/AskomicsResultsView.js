@@ -42,6 +42,28 @@ class AskomicsResultsView {
     }
   }
 
+  getPreviewResults() {
+
+    /* new presentation by entity */
+    let table = $('<table></table>')
+                  .addClass('table')
+                  .addClass('table-bordered')
+                  .addClass('table-results');
+
+    this.setActivesAttributes();
+    table.append(this.build_simple_subheader_results(new AskomicsGraphBuilder().nodes()))
+         .append(this.build_body_results(new AskomicsGraphBuilder().nodes()));
+
+
+    table.DataTable( {
+       "paging"     : true,
+       "ordering"   : true,
+       "info"       : true
+      } );
+
+      return table;
+  }
+
   displayResults() {
       this.is_valid();
       // to clear and print new results

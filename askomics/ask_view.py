@@ -46,7 +46,9 @@ class AskView(object):
         self.log = logging.getLogger(__name__)
         self.request = request
         self.settings = request.registry.settings
-
+        print("==============================================================")
+        print(self.request.session)
+        print("==============================================================")
         try:
 
             if 'admin' not in self.request.session.keys():
@@ -58,27 +60,8 @@ class AskView(object):
             if 'group' not in self.request.session.keys():
                 self.request.session['group'] = ''
 
-            self.request.session['from'] = []
             if 'username' not in self.request.session.keys():
                 self.request.session['username'] = ''
-            else:
-                #finding all private graph graph
-                sqg = SparqlQueryGraph(self.settings, self.request.session)
-                ql = QueryLauncher(self.settings, self.request.session)
-                results = ql.process_query(sqg.get_private_graphs().query)
-
-                for elt in results:
-                    self.request.session['from'].append(elt['g'])
-
-                # self.request.session = {}
-
-            #finding all public graph
-            sqg = SparqlQueryGraph(self.settings, self.request.session)
-            ql = QueryLauncher(self.settings, self.request.session)
-            results = ql.process_query(sqg.get_public_graphs().query)
-
-            for elt in results:
-                self.request.session['from'].append(elt['g'])
 
         except Exception as e:
                 traceback.print_exc(file=sys.stdout)
@@ -90,6 +73,26 @@ class AskView(object):
             return True
         return False
 
+    def setGraphUser(self,body):
+        if 'listFrom' in body :
+            self.settings['listFrom'] = body['listFrom']
+        else:
+            self.settings['listFrom'] = []
+            #finding all private graph graph
+            sqg = SparqlQueryGraph(self.settings, self.request.session)
+            ql = QueryLauncher(self.settings, self.request.session)
+
+            results = ql.process_query(sqg.get_private_graphs().query)
+            for elt in results:
+                self.settings['listFrom'].append(elt['g'])
+
+            #finding all public graph
+            results = ql.process_query(sqg.get_public_graphs().query)
+            for elt in results:
+                self.settings['listFrom'].append(elt['g'])
+
+            self.data['listFrom'] = self.settings['listFrom']
+
     @view_config(route_name='start_point', request_method='GET')
     def start_points(self):
         """ Get the nodes being query starters """
@@ -97,6 +100,8 @@ class AskView(object):
 
         if self.check_error() :
             return self.data
+
+        self.setGraphUser([])
 
         tse = TripleStoreExplorer(self.settings, self.request.session)
         nodes = tse.get_start_points()
@@ -737,18 +742,22 @@ class AskView(object):
     def get_value(self):
         """ Build a request from a json whith the following contents :variates,constraintesRelations,constraintesFilters"""
         self.log.debug("== Attribute Value ==")
-
+        body=self.request.json_body
+        
+        self.setGraphUser(body)
         tse = TripleStoreExplorer(self.settings, self.request.session)
-        body = self.request.json_body
+
         try:
-            results,query = tse.build_sparql_query_from_json(body["variates"],body["constraintesRelations"],body["limit"],True)
-
+            results,query = tse.build_sparql_query_from_json(body["variates"],body["constraintesRelations"],-1,True)
+            #body["limit"]
             # Remove prefixes in the results table
-            self.data['values'] = results
+            l = int(body["limit"]) + 1
+            if l < len(results):
+                self.data['values'] = results[1:l+1]
+            else:
+                self.data['values'] = results
 
-            if not body['export']:
-                return self.data
-
+            self.data['nrow'] = len(results)
 
             # Provide results file
             ql = QueryLauncher(self.settings, self.request.session)
@@ -784,13 +793,34 @@ class AskView(object):
         return self.data
 
     @view_config(route_name='ttl', request_method='GET')
-    def upload(self):
+    def uploadTtl(self):
 
+        pm = ParamManager(self.settings, self.request.session)
         response = FileResponse(
-            'askomics/ttl/'+self.request.matchdict['name'],
+            pm.getRdfDirectory()+self.request.matchdict['name'],
             content_type='text/turtle'
             )
         return response
+
+    @view_config(route_name='csv', request_method='GET')
+    def uploadCsv(self):
+
+        pm = ParamManager(self.settings, self.request.session)
+
+        response = FileResponse(
+            pm.getResultsCsvDirectory()+self.request.matchdict['name'],
+            content_type='text/csv'
+            )
+        return response
+
+
+    @view_config(route_name='del_csv', request_method='GET')
+    def deletCsv(self):
+
+        pm = ParamManager(self.settings, self.request.session)
+        os.remove(pm.getResultsCsvDirectory()+self.request.matchdict['name']),
+
+
 
     @view_config(route_name='signup', request_method='POST')
     def signup(self):
@@ -888,11 +918,13 @@ class AskView(object):
         self.request.session['username'] = ''
         self.request.session['admin'] = ''
         self.request.session['graph'] = ''
+        self.request.session = {}
 
         return
 
     @view_config(route_name='login', request_method='POST')
     def login(self):
+
         body = self.request.json_body
         username_email = body['username_email']
         password = body['password']
