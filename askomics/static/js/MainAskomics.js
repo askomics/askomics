@@ -58,6 +58,7 @@ function resetGraph() {
 }
 
 function manageErrorMessage(data) {
+  console.log("manageErrorMessage");
   // Remove last message
   $('#error_div').remove();
   // If there is an error message, how it
@@ -776,7 +777,6 @@ function displayNavbar(loged, username, admin, blocked) {
             $('#signup_success').append('Account successfully created!');
             $('#signup_success').show();
             // User is logged, show the special button
-            console.log(data);
             let user = new AskomicsUser(data.username, data.admin, data.blocked);
             user.logUser();
           }

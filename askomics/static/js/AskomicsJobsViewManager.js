@@ -11,7 +11,7 @@ let instanceAskomicsJobsViewManager ;
 
       this.jobs = [];
       this.jobGenId=0   ;
-      this.npreview=500 ;
+      this.npreview=500 ; /* max data to transfert to IHM */
 
       instanceAskomicsJobsViewManager = this;
     }
@@ -64,7 +64,7 @@ let instanceAskomicsJobsViewManager ;
             this.jobs[ij].csv   = data.file;
             this.jobs[ij].duration = m + " m:" + s + " s:" + ms +" ms";
             this.jobs[ij].classtr = "bg-success";
-            this.jobs[ij].datable_preview = new AskomicsResultsView(data).getPreviewResults();
+            this.jobs[ij].datable_preview = new AskomicsResultsView(data).getPreviewResults(this.jobs[ij].stateToReload);
           }
       }
       new AskomicsJobsViewManager().listJobs();
@@ -106,9 +106,7 @@ let instanceAskomicsJobsViewManager ;
                };
     }
 
-
     createJob() {
-
       //create state view
       let curId = new AskomicsJobsViewManager().createWaitState();
       let service = new RestServiceJs("sparqlquery");
@@ -142,11 +140,15 @@ let instanceAskomicsJobsViewManager ;
         if (this.jobs[ij].datable_preview !== undefined ) {
           let r = $("#results_table_"+ij);
           r.append(
+
             $("<h3></h3>").addClass("header-div")
                           .css("text-align","center")
                           .html("Preview ("+Math.min(this.npreview,this.jobs[ij].nr)+" nrows)")
                         );
+
           r.append(this.jobs[ij].datable_preview);
+          //$("#results").empty();
+          //$("#results").append(this.jobs[ij].datable_preview);
         }
       }
     }

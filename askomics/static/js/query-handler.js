@@ -16,14 +16,14 @@ function prepareQuery(exp, roq) {
               'variates'             : tab[0],
               'constraintesRelations': tab[1],
               'constraintesFilters'  : tab[2],
-              'limit'                : -1
+              'limit'                : 500
            };
 }
 
 function viewQueryResults() {
 
-    new AskomicsJobsViewManager().createJob();
-    if (true) return ;
+    //new AskomicsJobsViewManager().createJob();
+    //if (true) return ;
 
     $("#btn-down").prop("disabled", false);
     displayModal('Please wait', '', 'Close');

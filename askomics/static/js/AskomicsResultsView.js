@@ -42,25 +42,40 @@ class AskomicsResultsView {
     }
   }
 
-  getPreviewResults() {
+  getPreviewResults(dump) {
+    //TODO : manage new AskomicsGraph
+    //let struct = JSON.parse(dump);
 
     /* new presentation by entity */
     let table = $('<table></table>')
                   .addClass('table')
+                  .addClass('table-striped')
                   .addClass('table-bordered')
-                  .addClass('table-results');
+                  .addClass('table-condensed')
+                  .css("overflow","scroll")
+                  .css("height","80px")
+                  .css("width","100%")
+                  .css("overflow-y","auto");
 
     this.setActivesAttributes();
     table.append(this.build_simple_subheader_results(new AskomicsGraphBuilder().nodes()))
          .append(this.build_body_results(new AskomicsGraphBuilder().nodes()));
 
-
+/*
     table.DataTable( {
        "paging"     : true,
        "ordering"   : true,
-       "info"       : true
+       "info"       : true,
+       //"scrollY"    : true,
+    //   "scrollY":        "200px",
+    //   "scrollCollapse": true,
+       dom: 'Bfrtip',
+        buttons: [
+            'copy', 'csv', 'excel'
+        ]
+//       "scrollY"    : true
       } );
-
+*/
       return table;
   }
 
@@ -82,9 +97,10 @@ class AskomicsResultsView {
 
       /* new presentation by entity */
       let table = $('<table></table>')
-                    .addClass('table')
+                    .addClass('table-striped')
                     .addClass('table-bordered')
-                    .addClass('table-results');
+                    .addClass('table-condensed') ;
+                //    .addClass('table-results');
 
       $("#results")
         //.append($('<table></table>').append(this.build_simple_header_results()))
@@ -203,10 +219,8 @@ class AskomicsResultsView {
       let node = nodeList[i];
       if ( ! node.actif ) continue;
       for (let sparqlid in this.activesAttributes[node.id]) {
-        console.log(sparqlid+"="+this.activesAttributesLabel[node.id][sparqlid]);
         row.append($('<th></th>')
-           .addClass("success")
-           .addClass("table-bordered").html(this.activesAttributesLabel[node.id][sparqlid]+node.getLabelIndex()));
+           .html(this.activesAttributesLabel[node.id][sparqlid]+node.getLabelIndex()));
       }
     }
     head.append(row);
@@ -292,7 +306,10 @@ class AskomicsResultsView {
     this.is_valid();
     this.is_activedAttribute();
 
-    let body = $('<tbody></tbody');
+    let body = $('<tbody></tbody')
+                .css("overflow-y","auto")
+                .css("height","100px");
+                
     for (let i=0;i<this.data.values.length;i++ ) {
       let row = $('<tr></tr>');
       for (let j=0;j<nodeList.length;j++ ) {
@@ -301,6 +318,7 @@ class AskomicsResultsView {
         for (let sparqlId in this.activesAttributes[node.id]) {
           let headerName = this.activesAttributes[node.id][sparqlId];
           let val = this.data.values[i][this.activesAttributes[node.id][sparqlId]];
+
           if ( headerName in this.activesAttributesUrl[node.id] ) {
             let valWithPrefix = new AskomicsUserAbstraction().shortRDF(val);
             let url = this.activesAttributesUrl[node.id][headerName].replace("%s",this.data.values[i][this.activesAttributes[node.id][sparqlId]]);

@@ -744,10 +744,10 @@ class AskView(object):
         self.log.debug("== Attribute Value ==")
         body=self.request.json_body
         
-        self.setGraphUser(body)
-        tse = TripleStoreExplorer(self.settings, self.request.session)
-
         try:
+            self.setGraphUser(body)
+            tse = TripleStoreExplorer(self.settings, self.request.session)
+
             results,query = tse.build_sparql_query_from_json(body["variates"],body["constraintesRelations"],-1,True)
             #body["limit"]
             # Remove prefixes in the results table
