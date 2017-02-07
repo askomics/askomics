@@ -35,16 +35,12 @@ class SparqlQueryBuilder(ParamManager):
         if not isinstance(self.settings.listFrom, list):
             raise ValueError('SparqlQueryBuilder::build_query_on_the_fly: Bad definition of self.listFrom "'+str(self.settings.listFrom)+'"!')
 
-        print("===================FROM$$$$$$$$$$$$$$$$$$$$$$$$$$$$=================================")
-        print(self.settings.listFrom)
-        print("===================FROM$$$$$$$$$$$$$$$$$$$$$$$$$$$$=================================")
-        
         query = ""
         query += "SELECT DISTINCT "+replacement['select']+"\n"
 
         #security test
         if not 'admin' in self.session or type(self.session['admin']) != bool :
-            self.session['admin'] = bool
+            self.session['admin'] = False
 
         # ADM can query on all database !
         if not self.session['admin']:
@@ -56,6 +52,7 @@ class SparqlQueryBuilder(ParamManager):
                 else:
                     for elt in self.settings.listFrom:
                         query += "FROM <"+elt+">\n"
+
 
         query += "WHERE {"+"\n"
         query += replacement['query']+"\n"
