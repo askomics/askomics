@@ -6,6 +6,8 @@
 
  AskOmics is a visual SPARQL query interface supporting both intuitive data integration and querying while shielding the user from most of the technical difficulties underlying RDF and SPARQL
 
+![Askomics Homepage](static/askomics_home.png)
+
 ## Run AskOmics
 
 AskOmics is available under two supports : Docker and VM Virtualbox.
@@ -14,11 +16,15 @@ AskOmics is available under two supports : Docker and VM Virtualbox.
 
 Run Virtuoso using the tenforce/virtuoso docker image.
 
-`docker run docker run -d --name virtuoso -p 8890:8890 -p 1111:1111  -e VIRT_Parameters_DirsAllowed="/data,/data/dumps,., /usr/local/virtuoso-opensource/share/virtuoso/vad" -e VIRT_Parameters_TN_MAX_memory=4000000000 -e VIRT_SPARQL_ResultSetMaxRows=100000 -e VIRT_SPARQL_MaxQueryCostEstimationTime=300 -e VIRT_SPARQL_MaxQueryExecutionTime=300 -e VIRT_SPARQL_MaxDataSourceSize=1000000000 -e VIRT_Flags_TN_MAX_memory=4000000000 -e DBA_PASSWORD=dba -e SPARQL_UPDATE=true -e DEFAULT_GRAPH=http://localhost:8890/DAV --net="host" -t tenforce/virtuoso`
+```
+docker run docker run -d --name virtuoso -p 8890:8890 -p 1111:1111  -e VIRT_Parameters_DirsAllowed="/data,/data/dumps,., /usr/local/virtuoso-opensource/share/virtuoso/vad" -e VIRT_Parameters_TN_MAX_memory=4000000000 -e VIRT_SPARQL_ResultSetMaxRows=100000 -e VIRT_SPARQL_MaxQueryCostEstimationTime=300 -e VIRT_SPARQL_MaxQueryExecutionTime=300 -e VIRT_SPARQL_MaxDataSourceSize=1000000000 -e VIRT_Flags_TN_MAX_memory=4000000000 -e DBA_PASSWORD=dba -e SPARQL_UPDATE=true -e DEFAULT_GRAPH=http://localhost:8890/DAV --net="host" -t tenforce/virtuoso
+```
 
 Run AskOmics using the askomics/askomics docker image
 
-`docker run -d --net="host" -p 6543:6543 -t askomics/askomics virtuoso prod`
+```
+docker run -d --net="host" -p 6543:6543 -t askomics/askomics virtuoso prod
+```
 
 ### AskOmics on Windows using Virtualbox
 
@@ -78,14 +84,13 @@ AskOmics also uses the following bundled libraries:
 
 Check the Dockerfile to see dependancies
 
-```
 
 #### Installation with Docker
-
 
 ```
 $ ./startService.sh <triplestore> <mode>
 ```
+
 with:
 
 + triplestore: fuseki or virtuoso
@@ -99,6 +104,7 @@ with:
 ```
 $ ./startAskomics <triplestore> <mode>
 ```
+
 with:
 
 + triplestore: fuseki or virtuoso
@@ -111,6 +117,7 @@ If you want to develop AskOmics, run:
 ```
 $ gulp --dev --reload
 ```
+
 It will reload javascript files when a file is modified.
 
 
@@ -123,6 +130,7 @@ AskOmics comes with some unit and functional tests.
 ```
 $ ./testAskomics.sh
 ```
+
 Python test work only with Virtuoso
 
 #### Javascript tests
