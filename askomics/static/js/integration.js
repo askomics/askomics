@@ -83,11 +83,8 @@ function cols2rows(items) {
 }
 
 function displayIntegrationForm(data) {
-    console.log('--- displayIntegrationForm ---');
-    console.log(JSON.stringify(data));
     $("#content_integration").empty();
     for (var i = data.files.length - 1; i >= 0; i--) {
-        console.log(JSON.stringify(data.files[i]));
         switch (data.files[i].type) {
             case 'tsv':
                 displayTSVForm(data.files[i]);
