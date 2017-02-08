@@ -576,7 +576,7 @@ function loadSourceFileTtl(idfile, pub) {
 
         let insert_status_elem = file_elem.find(".insert_status").first();
         let insert_warning_elem = file_elem.find(".insert_warning").first();
-        alert("2");
+
         if (data.error) {
             insert_status_elem.html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> ERROR:</strong> ' + JSON.stringify(data.error))
                               .removeClass('hidden alert-success')
