@@ -1,5 +1,5 @@
 FROM debian:jessie
-MAINTAINER Olivier Filangi "olivier.filangi@rennes.inra.fr"
+MAINTAINER Olivier Filangi "olivier.filangi@inra.fr"
 
 # Prerequisites
 #----------------------------------------------------------------------------------------
