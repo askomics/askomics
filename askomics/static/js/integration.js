@@ -87,6 +87,7 @@ function displayIntegrationForm(data) {
     console.log(JSON.stringify(data));
     $("#content_integration").empty();
     for (var i = data.files.length - 1; i >= 0; i--) {
+        console.log(JSON.stringify(data.files[i]));
         switch (data.files[i].type) {
             case 'tsv':
                 displayTSVForm(data.files[i]);
@@ -421,12 +422,11 @@ function loadSourceFile(file_elem, pub) {
         var insert_status_elem = file_elem.find(".insert_status").first();
         var insert_warning_elem = file_elem.find(".insert_warning").first();
         if (data.status != "ok") {
-           console.log(data.error);
+            console.log(data.error);
             insert_warning_elem.append($('<span class="glyphicon glyphicon glyphicon-exclamation-sign"></span>')).
                                append($('<p></p>').html(data.error));
-
             if ('url' in data) {
-                insert_warning_elem.append("<br>You can view the ttl file here: <a href=\""+data.url+"\">"+data.url+"</a>");
+                insert_warning_elem.append("<br>ttl file are available here: <a href=\""+data.url+"\">"+data.url+"</a>");
             }
             insert_status_elem.removeClass('hidden alert-success')
                               .addClass('show alert-danger');
@@ -535,7 +535,7 @@ function loadSourceFileGff(idfile, pub) {
         let insert_warning_elem = file_elem.find(".insert_warning").first();
 
         //TODO: check if insertion is ok and then, display the success message or a warning message
-
+        alert("1");
         if (data.error) {
             insert_status_elem.html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> ERROR:</strong> ' + JSON.stringify(data.error))
                               .removeClass('hidden alert-success')
@@ -577,7 +577,7 @@ function loadSourceFileTtl(idfile, pub) {
 
         let insert_status_elem = file_elem.find(".insert_status").first();
         let insert_warning_elem = file_elem.find(".insert_warning").first();
-
+        alert("2");
         if (data.error) {
             insert_status_elem.html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> ERROR:</strong> ' + JSON.stringify(data.error))
                               .removeClass('hidden alert-success')

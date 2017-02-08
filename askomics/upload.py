@@ -1,3 +1,4 @@
+from askomics.libaskomics.ParamManager import ParamManager
 from pyramid.view import view_config, view_defaults
 from pyramid.response import Response
 
@@ -13,32 +14,34 @@ class FileUpload(object):
         request.response.headers['Access-Control-Allow-Origin'] = '*'
         request.response.headers['Access-Control-Allow-Methods'] = 'OPTIONS, HEAD, GET, POST, PUT, DELETE'
 
-        self.dir_string = '__' + self.request.session['username'] + '__'
-
+        #self.dir_string = '__' + self.request.session['username'] + '__'
         # Set the tmp dir
-        if 'upload_directory' not in request.session.keys() or self.dir_string not in request.session['upload_directory'] or not os.path.isdir(request.session['upload_directory']):
-            request.session['upload_directory'] = tempfile.mkdtemp(suffix='_tmp', prefix='__' + self.request.session['username'] + '__')
+        #if 'upload_directory' not in request.session.keys() or self.dir_string not in request.session['upload_directory'] or not os.path.isdir(request.session['upload_directory']):
+        #    request.session['upload_directory'] = tempfile.mkdtemp(suffix='_tmp', prefix='__' + self.request.session['username'] + '__')
 
-        self.upload_dir = request.session['upload_directory']
+        self.settings = request.registry.settings
+
+        pm = ParamManager(self.settings, self.request.session)
+        self.upload_dir = pm.getUploadDirectory()
+        #self.upload_dir = request.session['upload_directory']
         self.log = logging.getLogger(__name__)
-
         self.log.debug("upload_directory => "+self.upload_dir)
-        settings = request.registry.settings
-        self.allowed_types = settings["askomics.allowed_file_types"]
-        self.delete_method = settings["askomics.delete_method"]
-        self.min_size = int(settings["askomics.upload_min_size"])
-        self.max_size = int(settings["askomics.upload_max_size"])
+
+        self.allowed_types = self.settings["askomics.allowed_file_types"]
+        self.delete_method = self.settings["askomics.delete_method"]
+        self.min_size = int(self.settings["askomics.upload_min_size"])
+        self.max_size = int(self.settings["askomics.upload_max_size"])
 
     @view_config(route_name='uploadform', request_method='GET', renderer="json")
     def upload(self):
         _here = os.path.dirname(__file__)
         template_file = _here + "/templates/upload.pt"
-
         html = ""
         info = {}
         with open(template_file) as template:
             html = template.readlines()
         info["html"] = '\n'.join(html)
+
         return info
 
     def filepath(self, name):

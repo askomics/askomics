@@ -37,18 +37,31 @@ class SparqlQueryBuilder(ParamManager):
 
         #security test
         if not 'admin' in self.session or type(self.session['admin']) != bool :
-            self.session['admin'] = bool
+            self.session['admin'] = False
 
         # ADM can query on all database !
         if not self.session['admin']:
             if type(adminRequest) != bool or not adminRequest :
+                if 'graph' not in self.settings:
+                    raise ValueError('SparqlQueryBuilder::build_query_on_the_fly: bad initialization of settings["graph"]!')
+
+                if 'public' not in self.settings['graph']:
+                    raise ValueError('SparqlQueryBuilder::build_query_on_the_fly: bad initialization of settings["graph"]["public"]!')
+
+                if 'private' not in self.settings['graph']:
+                    raise ValueError('SparqlQueryBuilder::build_query_on_the_fly: bad initialization of settings["graph"]["private"]!')
+
+                listFrom = self.settings['graph']['public'] + self.settings['graph']['private']
                 query += "FROM <>\n"
-                if (not 'from' in self.session) or (len(self.session['from'])<=0):
+                self.log.debug(" === Graphs Available === ")
+                self.log.debug(listFrom)
+                if len(listFrom)<=0:
                     pass
                     # None solution because none graph !
                 else:
-                    for elt in self.session['from']:
+                    for elt in listFrom:
                         query += "FROM <"+elt+">\n"
+
 
         query += "WHERE {"+"\n"
         query += replacement['query']+"\n"

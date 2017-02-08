@@ -65,11 +65,11 @@ let instanceGraphBuilder ;
       for (let i=0;i<this.nodes().length;i++) {
         let output = "";
         for (let property in this.nodes()[i]) {
-          console.log("prop:"+property);
-          console.log(typeof(this.nodes()[i][property]));
+      //    console.log("prop:"+property);
+      //    console.log(typeof(this.nodes()[i][property]));
           output += property + ': ' + JSON.stringify(this.nodes()[i][property])+'; ';
         }
-        console.log(output);
+        //console.log(output);
         nodes.push([this.nodes()[i].constructor.name,this.nodes()[i]]);
       }
       for (let i=0;i<this.links().length;i++) {

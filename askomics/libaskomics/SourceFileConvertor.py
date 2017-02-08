@@ -29,7 +29,7 @@ class SourceFileConvertor(ParamManager):
         :return: List of the file to convert paths
         :rtype: List
         """
-        src_dir = self.get_source_file_directory()
+        src_dir = self.getUploadDirectory()
         paths = glob(src_dir + '/*')
 
         files = []
@@ -59,7 +59,7 @@ class SourceFileConvertor(ParamManager):
         :return: List of the file to convert paths
         :rtype: List
         """
-        src_dir = self.get_source_file_directory()
+        src_dir = self.getRdfDirectory()
         paths = glob(src_dir + '/*[.ttl,.rdf]')
 
         files = []
@@ -107,7 +107,7 @@ class SourceFileConvertor(ParamManager):
         :return: List of the file to convert paths
         :rtype: List
         """
-        src_dir = self.get_source_file_directory()
+        src_dir = self.getUploadDirectory()
         paths = glob(src_dir + '/*')
 
         files = []

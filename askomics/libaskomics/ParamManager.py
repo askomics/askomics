@@ -2,6 +2,7 @@ import os.path
 import re
 import requests
 import json
+import tempfile
 
 class ParamManager(object):
     """
@@ -11,20 +12,6 @@ class ParamManager(object):
         # User parameters
         self.settings = settings
         self.session = session
-
-        # Dev SPARQL files template
-        # Template file are no longer used
-        # FIXME use a dict to store settings
-        # self.ASKOMICS_abstractionRelationUser = "abstractionRelationUserQuery.sparql"
-        # self.ASKOMICS_abstractionEntityUser = "abstractionEntityUserQuery.sparql"
-        # self.ASKOMICS_abstractionPositionableEntityUser = "abstractionPositionableEntityUserQuery.sparql"
-        #self.ASKOMICS_abstractionAttributesEntityUser = "abstractionAttributesEntityUserQuery.sparql"
-        # self.ASKOMICS_abstractionCategoriesEntityUser = "abstractionCategoriesEntityUserQuery.sparql"
-        # self.ASKOMICS_get_class_info_from_abstraction_queryFile = "getClassInfoFromAbstractionQuery.sparql"
-        #self.ASKOMICS_privateQueryTemplate = 'privateQueryTemplate.rq'
-        #self.ASKOMICS_publicQueryTemplate = 'publicQueryTemplate.rq'
-        #self.ASKOMICS_usersQueryTemplate = 'usersQueryTemplate.rq'
-
 
         self.ASKOMICS_prefix = {
                                 "": self.get_param("askomics.prefix"),
@@ -38,29 +25,33 @@ class ParamManager(object):
                                 "dc": """http://purl.org/dc/elements/1.1/"""
                                 }
 
-        self.ASKOMICS_sparql_queries_dir = 'askomics/sparql/'
+        self.userfilesdir='askomics/static/results/'
+        if not 'user.files.dir' in self.settings:
+            self.log.warning(" ******* 'user.files.dir' is not defined ! ********* \n Csv are saved in "+self.userfilesdir)
+        else:
+            self.userfilesdir=self.settings['user.files.dir']+"/"
+
         self.ASKOMICS_html_template      = 'askomics/templates/integration.pt'
-        self.ASKOMICS_ttl_directory      = 'askomics/ttl/' + self.session['username'] + '/'
 
-    def get_template_sparql(self, sparql_file):
-        sparql_template = self.ASKOMICS_sparql_queries_dir + sparql_file
-        return sparql_template
+    def get_user_directory(self,typ):
+        mdir = self.userfilesdir+typ+"/"+self.session['username'] + '/'
+        if not os.path.isdir(mdir):
+            os.makedirs(mdir)
 
-    def get_source_file_directory(self):
+        return mdir
 
-        if 'upload_directory' not in self.session.keys():
-            raise RuntimeError("Missing config key 'upload_directory'")
+    def getUploadDirectory(self):
+        dir_string = '__' + self.session['username'] + '__'
+        if 'upload_directory' not in self.session.keys() or dir_string not in self.session['upload_directory'] or not os.path.isdir(self.session['upload_directory']):
+            self.session['upload_directory'] = tempfile.mkdtemp(suffix='_tmp', prefix='__' + self.session['username'] + '__')
 
-        return self.session["upload_directory"]
+        return self.session['upload_directory']
 
-    def get_user_data_file(self, filename):
+    def getResultsCsvDirectory(self):
+        return self.get_user_directory("csv")
 
-        return self.get_source_file_directory() + "/" + filename
-
-    def get_ttl_directory(self):
-        if not os.path.isdir(self.ASKOMICS_ttl_directory):
-            os.makedirs(self.ASKOMICS_ttl_directory)
-        return self.ASKOMICS_ttl_directory
+    def getRdfDirectory(self):
+        return self.get_user_directory("rdf")
 
     def get_param(self, key):
         if key in self.settings:

@@ -52,7 +52,7 @@ pre {
 }
 
 .div-details {
-    max-height: 300px;
+    max-height: 600px;
     overflow-y: auto;
 }
 
@@ -79,11 +79,11 @@ pre {
 }
 
 #queryBuilder {
-    max-height: 400px;
+    max-height: 600px;
 }
 
 #svgdiv {
-    /*max-height: 380px;*/
+    /*max-height: 600px;*/
     background: Gainsboro;
     border: 1px solid;
 }

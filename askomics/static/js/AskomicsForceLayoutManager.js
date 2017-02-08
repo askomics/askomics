@@ -4,19 +4,20 @@ class AskomicsForceLayoutManager {
 
   constructor() {
     this.w        = $("#svgdiv").width();
-    this.h        = 350 ;
+    this.h        = 500 ;
     this.maxh     = 700 ;
     this.curx     = 0   ;
     this.cury     = 0   ;
     this.charge   = -700 ;
     this.distance = 175 ;
     this.friction = 0.7 ;
-    /* To manage information about menu propositional view */
-    this.menuView = new AskomicsMenuView(this);
-    /* To manage information about File menu */
-    this.menuFile = new AskomicsMenuFile(this);
 
-    this.menuShortcuts = new AskomicsMenuShortcuts(this);
+    this.menus = [] ;
+
+    this.menus.push(new AskomicsMenu(this,"menuFile","buttonViewFile","viewMenuFile",fileFuncMenu));
+    this.menus.push(new AskomicsMenu(this,"menuView","buttonViewListNodesAndLinks","viewListNodesAndLinks",entitiesAndRelationsFuncMenu));
+    this.menus.push(new AskomicsMenu(this,"menuShortcuts","buttonViewListShortcuts","viewListShortcuts",shortcutsFuncMenu));
+    this.menus.push(new AskomicsMenu(this,"menuShortcuts","buttonViewListGraph","viewListGraph",graphFuncMenu));
 
     this.optionsView = {
       attributesFiltering  : true,
@@ -209,7 +210,7 @@ class AskomicsForceLayoutManager {
 
       // If enter is pressed, launch the query
       if (e.keyCode == 13 && $('#queryBuilder').is(':visible') && !this.enterPressed) {
-        viewQueryResults();
+        new AskomicsJobsViewManager().createJob();
         currentFL.enterPressed = true;
       }
     });
@@ -271,8 +272,7 @@ class AskomicsForceLayoutManager {
 
   fullsizeGraph() {
     $('#viewDetails').hide();
-    $('#results').hide();
-    $('#graph').attr('class', 'col-md-12');
+    $('#PanelQuery').attr('class', 'col-md-12');
 
     $("#svg").attr("viewBox", this.curx +" " + this.cury +" " + $("#content_interrogation").width() + " " + this.maxh);
     $("#svg").attr('height', this.maxh);
@@ -285,8 +285,7 @@ class AskomicsForceLayoutManager {
 
   normalsizeGraph() {
     $('#viewDetails').show();
-    $('#results').show();
-    $('#graph').attr('class', 'col-md-6');
+    $('#PanelQuery').attr('class', 'col-md-7');
     $("#svg").attr("viewBox", this.curx +" " + this.cury +" " + this.w + " " + this.h);
     $("#svg").attr('height', this.h);
     $("#svg").attr('width', this.w);
@@ -297,8 +296,7 @@ class AskomicsForceLayoutManager {
   }
 
   fullsizeRightview() {
-    $('#graph').hide();
-    $('#results').hide();
+    $('#PanelQuery').hide();
     $('#viewDetails').attr('class', 'col-md-12');
     $('.div-details').attr('class', 'div-details-max');
 
@@ -308,9 +306,8 @@ class AskomicsForceLayoutManager {
   }
 
   normalsizeRightview() {
-    $('#graph').show();
-    $('#results').show();
-    $('#viewDetails').attr('class', 'col-md-6');
+    $('#PanelQuery').show();
+    $('#viewDetails').attr('class', 'col-md-5');
     $('.div-details-max').attr('class', 'div-details');
 
     //change icon
@@ -343,9 +340,8 @@ class AskomicsForceLayoutManager {
     new AskomicsUserAbstraction().loadUserAbstraction();
     startPoint = new AskomicsUserAbstraction().buildBaseNode(startPoint.uri);
     /* initialize menus */
-    this.menuView.start();
-    this.menuShortcuts.start();
-    this.menuFile.start();
+    for (let im=0;im<this.menus.length;im++) { this.menus[im].start(); }
+
 
     startPoint = new AskomicsUserAbstraction().buildBaseNode(startPoint.uri);
 
@@ -371,9 +367,7 @@ class AskomicsForceLayoutManager {
     d3.select("g").selectAll("*").remove();
     new AskomicsUserAbstraction().loadUserAbstraction();
     /* initialize menus */
-    this.menuView.start();
-    this.menuShortcuts.start();
-    this.menuFile.start();
+    for (let im=0;im<this.menus.length;im++) { this.menus[im].start(); }
 
     this.nodes.splice(0, this.nodes.length);
     this.links.splice(0, this.links.length);
@@ -410,11 +404,7 @@ class AskomicsForceLayoutManager {
 
   reset() {
     //reset view menu
-    this.menuView.reset();
-    this.menuShortcuts.reset();
-
-    //unbind files menu
-    this.menuFile.unbindDownloadButtons();
+    for (let im=0;im<this.menus.length;im++) { this.menus[im].reset(); }
 
     //unbind fullscreen buttons
     this.unbindFullscreenButtons();

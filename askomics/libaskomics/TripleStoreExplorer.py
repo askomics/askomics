@@ -67,19 +67,16 @@ class TripleStoreExplorer(ParamManager):
 
         self.log.debug(" =========== TripleStoreExplorer:getUserAbstraction ===========")
 
-        nodes_startpoint = self.get_start_points()
-        # add start node at first
-        for node in nodes_startpoint:
-            list_entities[node['uri']] = 0
+        sqg = SparqlQueryGraph(self.settings, self.session)
+        ql = QueryLauncher(self.settings, self.session)
+        results = ql.process_query(sqg.get_entities_availables().query)
+
+        for elt in results:
+            list_entities[elt['uri']] = 0
 
         # sqb = SparqlQueryBuilder(self.settings, self.session)
         sqg = SparqlQueryGraph(self.settings, self.session)
         ql = QueryLauncher(self.settings, self.session)
-
-        # sparql_template = self.get_template_sparql(self.ASKOMICS_abstractionRelationUser)
-        # query = sqb.load_from_file(sparql_template, { 'OwlProperty' : 'owl:ObjectProperty'}).query
-        # results = ql.process_query(query)
-
         results = ql.process_query(sqg.get_abstraction_relation('owl:ObjectProperty').query)
 
         data['relations'] = results
@@ -90,10 +87,6 @@ class TripleStoreExplorer(ParamManager):
             if not elt['subject'] in list_entities:
                 list_entities[elt['subject']] = 0
 
-        #sparql_template = self.get_template_sparql(self.ASKOMICS_abstractionRelationUser)
-        #query = sqb.load_from_file(sparql_template, { 'OwlProperty' : 'owl:SymmetricProperty'}).query
-        #results = ql.process_query(query)
-
         #data['relationsSym'] = results
 
         #for elt in results:
@@ -103,33 +96,18 @@ class TripleStoreExplorer(ParamManager):
         #        list_entities[elt['subject']]=0
 
         filter_entities = ' '.join(["<"+s+">" for s in list_entities.keys()])
-        # sparql_template = self.get_template_sparql(self.ASKOMICS_abstractionEntityUser)
-        # query = sqb.load_from_file(sparql_template, {"entities" : filter_entities }).query
-        # results = ql.process_query(query)
 
         results = ql.process_query(sqg.get_abstraction_entity(filter_entities).query)
 
         data['entities'] = results
 
-        # sparql_template = self.get_template_sparql(self.ASKOMICS_abstractionAttributesEntityUser)
-        # query = sqb.load_from_file(sparql_template, {"entities" : filter_entities }).query
-        # results = ql.process_query(query)
-
         results = ql.process_query(sqg.get_abstraction_attribute_entity(filter_entities).query)
 
         data['attributes'] = results
 
-        # sparql_template = self.get_template_sparql(self.ASKOMICS_abstractionCategoriesEntityUser)
-        # query = sqb.load_from_file(sparql_template, {"entities" : filter_entities }).query
-        # results = ql.process_query(query)
-
         results = ql.process_query(sqg.get_abstraction_category_entity(filter_entities).query)
 
         data['categories'] = results
-
-        # sparql_template = self.get_template_sparql(self.ASKOMICS_abstractionPositionableEntityUser)
-        # query = sqb.load_from_file(sparql_template, {}).query
-        # results = ql.process_query(query)
 
         results = ql.process_query(sqg.get_abstraction_positionable_entity().query)
 
@@ -168,7 +146,7 @@ class TripleStoreExplorer(ParamManager):
             return req
         return ""
 
-    def build_sparql_query_from_json(self, variates, constraintes_relations, limit, send_request_to_tps=True):
+    def build_sparql_query_from_json(self, variates, constraintes_relations,limit, send_request_to_tps=True):
         """
         Build a sparql query from JSON constraints
         """

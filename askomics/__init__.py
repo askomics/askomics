@@ -40,6 +40,8 @@ def main(global_config, **settings):
     config.add_route('check_existing_data', '/check_existing_data')
     config.add_route('positionable_attr', '/positionable_attr')
     config.add_route('ttl', '/ttl/{name:.*}')
+    config.add_route('csv', '/csv/{name:.*}')
+    config.add_route('del_csv', '/del_csv/{name:.*}')
     config.add_route('importShortcut', '/importShortcut')
     config.add_route('deleteShortcut', '/deleteShortcut')
 

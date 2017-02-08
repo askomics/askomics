@@ -169,11 +169,15 @@ class QueryLauncher(ParamManager):
         return results
 
     def format_results_csv(self, table):
-        if not os.path.isdir("askomics/static/results"):
-            os.mkdir('askomics/static/results')
-        with tempfile.NamedTemporaryFile(dir="askomics/static/results/", prefix="data_"+str(time.time()).replace('.', ''), suffix=".csv", mode="w+t", delete=False) as fp:
+
+        dircsv = self.getResultsCsvDirectory()
+        if not os.path.isdir(dircsv):
+            os.mkdir(dircsv)
+
+        with tempfile.NamedTemporaryFile(dir=dircsv, prefix="data_"+str(time.time()).replace('.', ''), suffix=".csv", mode="w+t", delete=False) as fp:
             fp.write(table)
-        return "/static/results/"+os.path.basename(fp.name)
+
+        return os.path.basename(fp.name)
 
     # TODO see if we can make a rollback in case of malformed data
     def load_data(self, url, graphName):

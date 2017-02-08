@@ -45,6 +45,18 @@ class SparqlQueryGraph(SparqlQueryBuilder):
                       "}."
         },True)
 
+    def get_entities_availables(self):
+        """
+        Get the list of entities
+        """
+        self.log.debug('---> get_public_graphs')
+        return self.build_query_on_the_fly({
+            'select': '?g ?uri',
+            'query': 'GRAPH ?g {\n'+
+                     '?uri rdf:type owl:Class.\n'+
+                     "} { ?g dc:creator ?d.} \n"
+        })
+
     def get_public_graphs(self):
         """
         Get the list of public named graph
@@ -110,15 +122,15 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         Get all attributes of an entity
         """
         return self.build_query_on_the_fly({
-            'select': '?entity ?attribute ?labelAttribute ?typeAttribute',
-            'query': '?entity rdf:type owl:Class .\n' +
+            'select': '?g ?entity ?attribute ?labelAttribute ?typeAttribute',
+            'query': 'GRAPH ?g { ?entity rdf:type owl:Class .\n' +
                      '\t?attribute displaySetting:attribute "true"^^xsd:boolean .\n\n' +
                      '\t?attribute rdf:type owl:DatatypeProperty ;\n' +
                      '\t           rdfs:label ?labelAttribute ;\n' +
                      '\t           rdfs:domain ?entity ;\n' +
                      '\t           rdfs:range ?typeAttribute .\n\n' +
                      '\tVALUES ?entity { ' + entities + ' }\n' +
-                     '\tVALUES ?typeAttribute { xsd:decimal xsd:string }'
+                     '\tVALUES ?typeAttribute { xsd:decimal xsd:string } } { ?g dc:creator ?d.}'
         })
 
     def get_abstraction_relation(self, prop):
@@ -126,12 +138,10 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         Get the relation of an entity
         """
         return self.build_query_on_the_fly({
-            'select': '?subject ?relation ?object',
-            'query': '?relation rdf:type ' + prop + ' ;\n' +
+            'select': '?g ?subject ?relation ?object',
+            'query': 'GRAPH ?g { ?relation rdf:type ' + prop + ' ;\n' +
                      '\t          rdfs:domain ?subject ;\n' +
-                     '\t          rdfs:range ?object .\n' +
-                     '\t?subject rdf:type owl:Class .\n' +
-                     '\t?object rdf:type owl:Class\n'
+                     '\t          rdfs:range ?object .\n} { ?g dc:creator ?d.}'
             })
 
 
@@ -140,10 +150,10 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         Get theproperty of an entity
         """
         return self.build_query_on_the_fly({
-            'select': '?entity ?property ?value',
-            'query': '?entity ?property ?value .\n' +
+            'select': '?g ?entity ?property ?value',
+            'query': 'GRAPH ?g { ?entity ?property ?value .\n' +
                      '\t?entity rdf:type owl:Class .\n' +
-                     '\tVALUES ?entity { ' + entities + ' }'
+                     '\tVALUES ?entity { ' + entities + ' } } { ?g dc:creator ?d.}'
             })
 
     def get_abstraction_positionable_entity(self):
@@ -161,14 +171,14 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         Get the category of an entity
         """
         return self.build_query_on_the_fly({
-            'select': '?entity ?category ?labelCategory ?typeCategory',
-            'query': '?entity rdf:type owl:Class .\n' +
+            'select': '?g ?entity ?category ?labelCategory ?typeCategory',
+            'query': 'GRAPH ?g { ?entity rdf:type owl:Class .\n' +
                      '\t?typeCategory displaySetting:category [] .\n' +
                      '\t?category rdf:type owl:ObjectProperty ;\n' +
                      '\t            rdfs:label ?labelCategory ;\n' +
                      '\t            rdfs:domain ?entity;\n' +
                      '\t            rdfs:range ?typeCategory\n' +
-                     '\tVALUES ?entity { ' + entities + ' }'
+                     '\tVALUES ?entity { ' + entities + ' } }'
             })
 
     def get_class_info_from_abstraction(self, node_class):
