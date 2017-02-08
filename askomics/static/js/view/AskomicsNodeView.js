@@ -80,9 +80,11 @@ class AskomicsNodeView extends AskomicsObjectView {
     //console.log(JSON.stringify(nameDiv));
     var service = new RestServiceJs("sparqlquery");
     var model = {
-      'variates': tab[0],
+      'variates'             : tab[0],
       'constraintesRelations': tab[1],
-      'limit' :-1,
+      'limit'                :-1,
+      'nofile'               : true,
+      'removeGraph'          : new AskomicsUserAbstraction().listUnactivedGraph(),
       'export':false,
     };
 
@@ -93,6 +95,7 @@ class AskomicsNodeView extends AskomicsObjectView {
         if (labelSparqlVarId in mythis.node.values) {
           selectedValue = mythis.node.values[labelSparqlVarId];
         }
+
         /* bubble sort */
         let isNotSort = true;
         while ( isNotSort) {

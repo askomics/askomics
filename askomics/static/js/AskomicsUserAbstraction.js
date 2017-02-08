@@ -65,13 +65,14 @@ class AskomicsUserAbstraction {
         if ( this.isDesactivedGraph(g) ) continue;
         if ( uriEntity in this.attributesEntityList[g] ) {
           for (let att in this.attributesEntityList[g][uriEntity]) {
-            if (!(att in listAtt )) {
-              listAtt[this.attributesEntityList[g][uriEntity][att]]=0;
+            let uriAtt = this.attributesEntityList[g][uriEntity][att].uri;
+            if (!(uriAtt in listAtt )) {
+              listAtt[uriAtt]=this.attributesEntityList[g][uriEntity][att];
             }
           }
         }
       }
-      return JSON.parse(JSON.stringify(Object.keys(listAtt)));
+      return JSON.parse(JSON.stringify(Object.values(listAtt)));
     }
 
     getPositionableEntities() {
@@ -324,12 +325,18 @@ class AskomicsUserAbstraction {
 
     /* return a list of attributes according a uri node */
     getAttributesWithURI(UriSelectedNode) {
+      let listAtt = {};
       for (let g in this.attributesEntityList ) {
         if ( this.isDesactivedGraph(g) ) continue;
         if ( UriSelectedNode in this.attributesEntityList[g] )
-          return this.attributesEntityList[g][UriSelectedNode];
+          for (let att in this.attributesEntityList[g][UriSelectedNode])  {
+            let uriAtt =this.attributesEntityList[g][UriSelectedNode][att].uri;
+            if ( ! (uriAtt in listAtt) ) {
+              listAtt[uriAtt] = this.attributesEntityList[g][UriSelectedNode][att];
+            }
+          }
       }
-      return [];
+      return Object.values(listAtt);
     }
 
     isPositionable(Uri) {
@@ -351,9 +358,10 @@ class AskomicsUserAbstraction {
       for (let g in this.attributesEntityList ) {
         if ( this.isDesactivedGraph(g) ) continue;
         if ( URINode in this.attributesEntityList[g] ) {
-          for (let uriAtt in this.attributesEntityList[g][URINode]) {
+          for (let att in this.attributesEntityList[g][URINode]) {
+            let uriAtt = this.attributesEntityList[g][URINode][att].uri;
             if ( ! (uriAtt in v) ) {
-              v[uriAtt] = this.attributesEntityList[g][URINode][uriAtt];
+              v[uriAtt] = this.attributesEntityList[g][URINode][att];
             }
           }
         }
