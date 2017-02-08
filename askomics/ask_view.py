@@ -46,9 +46,9 @@ class AskView(object):
         self.log = logging.getLogger(__name__)
         self.request = request
         self.settings = request.registry.settings
-        print("==============================================================")
-        print(self.request.session)
-        print("==============================================================")
+        self.log.debug("==============================================================")
+        self.log.debug(self.request.session)
+        self.log.debug("==============================================================")
         try:
 
             if 'admin' not in self.request.session.keys():
@@ -73,25 +73,28 @@ class AskView(object):
             return True
         return False
 
-    def setGraphUser(self,body):
-        if 'listFrom' in body :
-            self.settings['listFrom'] = body['listFrom']
-        else:
-            self.settings['listFrom'] = []
-            #finding all private graph graph
-            sqg = SparqlQueryGraph(self.settings, self.request.session)
-            ql = QueryLauncher(self.settings, self.request.session)
+    def setGraphUser(self,removeGraph=[]):
 
-            results = ql.process_query(sqg.get_private_graphs().query)
-            for elt in results:
-                self.settings['listFrom'].append(elt['g'])
+        self.settings['graph'] = {}
 
-            #finding all public graph
-            results = ql.process_query(sqg.get_public_graphs().query)
-            for elt in results:
-                self.settings['listFrom'].append(elt['g'])
+        #finding all private graph graph
+        sqg = SparqlQueryGraph(self.settings, self.request.session)
+        ql = QueryLauncher(self.settings, self.request.session)
 
-            self.data['listFrom'] = self.settings['listFrom']
+        results = ql.process_query(sqg.get_private_graphs().query)
+        self.settings['graph']['private'] = []
+        for elt in results:
+            if elt['g'] in removeGraph:
+                continue
+            self.settings['graph']['private'].append(elt['g'])
+
+        #finding all public graph
+        results = ql.process_query(sqg.get_public_graphs().query)
+        self.settings['graph']['public'] = []
+        for elt in results:
+            if elt['g'] in removeGraph:
+                continue
+            self.settings['graph']['public'].append(elt['g'])
 
     @view_config(route_name='start_point', request_method='GET')
     def start_points(self):
@@ -100,8 +103,6 @@ class AskView(object):
 
         if self.check_error() :
             return self.data
-
-        self.setGraphUser([])
 
         tse = TripleStoreExplorer(self.settings, self.request.session)
         nodes = tse.get_start_points()
@@ -369,6 +370,8 @@ class AskView(object):
         if self.request.session['blocked']:
             return 'blocked'
 
+        self.setGraphUser()
+        
         self.log.debug(" ========= Askview:source_files_overview =============")
         sfc = SourceFileConvertor(self.settings, self.request.session)
 
@@ -658,6 +661,11 @@ class AskView(object):
         """ Get the user asbtraction to manage relation inside javascript """
         self.log.debug("== getUserAbstraction ==")
 
+        self.setGraphUser()
+        self.data['graph'] = self.settings['graph']
+        print("====================================================")
+        self.log.debug(self.settings['graph'])
+
         tse = TripleStoreExplorer(self.settings, self.request.session)
         self.data.update(tse.getUserAbstraction())
 
@@ -685,7 +693,6 @@ class AskView(object):
 
         try:
             sparqlHeader += body["prefix"]+"\n"
-            self.request.session['graph']
             ql.insert_data(body["shortcut_def"],'askomics:graph:shortcut',sparqlHeader);
         except Exception as e:
             #exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -743,12 +750,12 @@ class AskView(object):
         """ Build a request from a json whith the following contents :variates,constraintesRelations,constraintesFilters"""
         self.log.debug("== Attribute Value ==")
         body=self.request.json_body
-        
+
         try:
-            self.setGraphUser(body)
+            self.setGraphUser(body["removeGraph"])
             tse = TripleStoreExplorer(self.settings, self.request.session)
 
-            results,query = tse.build_sparql_query_from_json(body["variates"],body["constraintesRelations"],-1,True)
+            results,query = tse.build_sparql_query_from_json(body["variates"],body["constraintesRelations"],True)
             #body["limit"]
             # Remove prefixes in the results table
             l = int(body["limit"]) + 1

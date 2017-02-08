@@ -84,7 +84,6 @@ var shortcutsFuncMenu = function(menu) {
     var a = $("<a></a>")
             .attr("href","#")
             .attr("class","small")
-            .attr("data-value","option1")
             .attr("tabIndex","-1") ;
     if (submenu) {
       a.html($("<i></i>").append(label+"\t")).append(icheck);
@@ -157,7 +156,6 @@ var entitiesAndRelationsFuncMenu = function(menu) {
     var a = $("<a></a>")
             .attr("href","#")
             .attr("class","small")
-            .attr("data-value","option1")
             .attr("tabIndex","-1") ;
     if (submenu) {
       a.html($("<i></i>").append(label+"\t")).append(icheck);
@@ -173,7 +171,7 @@ var entitiesAndRelationsFuncMenu = function(menu) {
   };
   var menuView = menu;
   // <li><a href="#" class="small" data-value="option1" tabIndex="-1"><input type="checkbox"/>&nbsp;Option 1</a></li>
-  let lentities = new AskomicsUserAbstraction().getEntities();
+  let lentities = Object.keys(new AskomicsUserAbstraction().getEntities());
 
   $.each(lentities, function(i) {
 
@@ -216,7 +214,7 @@ var entitiesAndRelationsFuncMenu = function(menu) {
       $.each(listRelObj[objecturi], function(idxrel) {
         let rel = listRelObj[objecturi][idxrel];
         let linkRel = new GraphObject({uri:rel});
-        let li = menuView.buildLiView(rel,linkRel.removePrefix()+"&#8594;"+object.removePrefix(),true,false);
+        let li = buildLiView(rel,linkRel.removePrefix()+"&#8594;"+object.removePrefix(),true,false);
 
         li.attr("nodeuri",nodeuri)
           .on('click', function() {
@@ -250,7 +248,7 @@ var entitiesAndRelationsFuncMenu = function(menu) {
   if (Object.keys(positionableEntities).length>0) {
     /* positionable object */
     let posuri = "positionable";
-    let li = menuView.buildLiView(posuri,posuri,false,true);
+    let li = buildLiView(posuri,posuri,false,true);
     menuView.flm.offProposedUri("link",posuri);
 
     li.attr("nodeuri",posuri)
@@ -283,4 +281,50 @@ var entitiesAndRelationsFuncMenu = function(menu) {
 /**/
 /**/
 var graphFuncMenu = function(menu) {
+  var buildLiView = function (uri,label,submenu) {
+
+    var icheck = $("<span/>")
+        .attr("class","glyphicon glyphicon-check");
+
+    var a = $("<a></a>")
+            .attr("href","#")
+            .attr("class","small")
+            .attr("tabIndex","-1") ;
+    if (submenu) {
+      a.html($("<i></i>").append(label+"\t")).append(icheck);
+    } else {
+      a.html($("<b></b>").append(label+"\t")).append(icheck);
+    }
+    var li = $("<li></li>");
+    li.attr("uri",uri);
+    li.css("display","table-cell");
+    li.css("vertical-align","middle");
+    li.append(a);
+    return li;
+  };
+
+  let listGraph = new AskomicsUserAbstraction().listGraphAvailable();
+
+  $.each(listGraph, function(g) {
+    let graph = g;
+    let li = buildLiView(graph,graph,true);
+    li.on('click',function() {
+        var span = $(this).find(".glyphicon");
+        var cur_uri = $(this).attr("uri");
+        if ( span.css("visibility") == "visible" ) {
+          span.css("visibility","hidden");
+          new AskomicsUserAbstraction().unactiveGraph(cur_uri);
+        } else {
+          span.css("visibility","visible");
+          new AskomicsUserAbstraction().activeGraph(cur_uri);
+        }
+        /* remove old suggestion */
+        menu.flm.removeSuggestions();
+        /* insert new suggestion */
+        menu.flm.insertSuggestions();
+        /* regenerate the graph */
+        menu.flm.update();
+      });
+    $("#"+menu.listObjectMenu).append(li).append($("<li></li>"));
+  });
 };

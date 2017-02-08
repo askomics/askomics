@@ -206,10 +206,10 @@ class Security(ParamManager):
         query_laucher = QueryLauncher(self.settings, self.session)
         sqa = SparqlQueryAuth(self.settings, self.session)
 
-        ttl = '<' + self.settings['askomics.private_graph'] + ':' + self.username + '> rdfg:subGraphOf <' + self.settings['askomics.private_graph'] + '>'
+        ttl = '<' + self.settings['askomics.graph'] + ':' + self.username + '> rdfg:subGraphOf <' + self.settings['askomics.graph'] + '>'
 
         header_ttl = sqa.header_sparql_config(ttl)
-        query_laucher.insert_data(ttl, self.settings["askomics.private_graph"], header_ttl)
+        query_laucher.insert_data(ttl, self.settings["askomics.graph"], header_ttl)
 
     def get_admins_emails(self):
         """
@@ -290,7 +290,7 @@ class Security(ParamManager):
         session['username'] = self.username
         session['admin'] = self.admin
         session['blocked'] = self.blocked
-        session['graph'] = self.settings['askomics.private_graph'] + ':' + self.username
+        session['graph'] = self.settings['askomics.graph'] + ':' + self.username
 
     def print_sha256_pw(self):
         """

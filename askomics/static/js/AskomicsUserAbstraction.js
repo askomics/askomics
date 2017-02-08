@@ -8,24 +8,24 @@
 let instanceUserAbstraction ;
 
 class AskomicsUserAbstraction {
-   constructor() {
-    /* Implement a Singleton */
-    if ( instanceUserAbstraction !== undefined ) {
-       return instanceUserAbstraction;
-    }
-    this.prefix = {};
+    constructor() {
+      /* Implement a Singleton */
+      if ( instanceUserAbstraction !== undefined ) {
+        return instanceUserAbstraction;
+      }
+      this.prefix = {};
       /* Ontology is save locally to avoid request with TPS  */
       /* --------------------------------------------------- */
       this.tripletSubjectRelationObject = [];
-      this.entityInformationList = {}; /*   entityInformationList[uri1][rel] = uri2 ; */
-      this.attributesEntityList = {};  /*   attributesEntityList[uri1] = [ att1, att2,... ] */
-
+      this.entityInformationList = {}; /*   entityInformationList[g][uri1][rel] = uri2 ; */
+      this.attributesEntityList = {};  /*   attributesEntityList[g][uri1] = [ att1, att2,... ] */
+      this.desactived_graph = {};
       /* uri ->W get information about ref, taxon, start, end */
       this.entityPositionableInformationList = {}; /* entityPositionableInformationList[uri1] = { taxon, ref, start, end } */
       this.attributesOrderDisplay = {} ;           /* manage a order list by URInode */
 
-    instanceUserAbstraction = this;
-    return instanceUserAbstraction;
+      instanceUserAbstraction = this;
+      return instanceUserAbstraction;
     }
 
     longRDF(litteral) {
@@ -47,14 +47,31 @@ class AskomicsUserAbstraction {
     }
 
     getEntities() {
-      return JSON.parse(JSON.stringify(Object.keys(this.entityInformationList))) ;
+      let listE = {} ;
+      for (let g in this.entityInformationList ) {
+        if ( this.isDesactivedGraph(g) ) continue;
+        for (let e in this.entityInformationList[g]) {
+          if (! (e in listE ) ) {
+            listE[e]=0;
+          }
+        }
+      }
+      return JSON.parse(JSON.stringify(listE)) ;
     }
 
     getAttributesEntity(uriEntity) {
-      if ( uriEntity in this.attributesEntityList )
-        return JSON.parse(JSON.stringify(this.attributesEntityList[uriEntity])) ;
-
-      return [];
+      let listAtt = {};
+      for (let g in this.attributesEntityList ) {
+        if ( this.isDesactivedGraph(g) ) continue;
+        if ( uriEntity in this.attributesEntityList[g] ) {
+          for (let att in this.attributesEntityList[g][uriEntity]) {
+            if (!(att in listAtt )) {
+              listAtt[this.attributesEntityList[g][uriEntity][att]]=0;
+            }
+          }
+        }
+      }
+      return JSON.parse(JSON.stringify(Object.keys(listAtt)));
     }
 
     getPositionableEntities() {
@@ -113,7 +130,6 @@ class AskomicsUserAbstraction {
       var service = new RestServiceJs("userAbstraction");
 
       service.getsync(function(resultListTripletSubjectRelationObject ) {
-      console.log("========================= ABSTRACTION =====================================================================");
 
       /* All relation are stored in tripletSubjectRelationObject */
       instanceUserAbstraction.tripletSubjectRelationObject = resultListTripletSubjectRelationObject.relations;
@@ -126,35 +142,48 @@ class AskomicsUserAbstraction {
       /* All information about an entity available in TPS are stored in entityInformationList */
       for (let entry in resultListTripletSubjectRelationObject.entities){
         console.log("ENTITY:"+JSON.stringify(resultListTripletSubjectRelationObject.entities[entry]));
+        let graph = resultListTripletSubjectRelationObject.entities[entry].g;
         let uri = resultListTripletSubjectRelationObject.entities[entry].entity;
         let rel = resultListTripletSubjectRelationObject.entities[entry].property;
         let val = resultListTripletSubjectRelationObject.entities[entry].value;
 
-        if ( ! (uri in instanceUserAbstraction.entityInformationList) ) {
-            instanceUserAbstraction.entityInformationList[uri] = {};
+        if ( ! (graph in instanceUserAbstraction.entityInformationList) ) {
+          instanceUserAbstraction.entityInformationList[graph] = {} ;
         }
-        instanceUserAbstraction.entityInformationList[uri][rel] = val;
+        if ( ! (uri in instanceUserAbstraction.entityInformationList[graph]) ) {
+          instanceUserAbstraction.entityInformationList[graph][uri] = {};
+        }
+        instanceUserAbstraction.entityInformationList[graph][uri][rel] = val;
+
       }
       console.log("entityInformationList:"+JSON.stringify(instanceUserAbstraction.entityInformationList));
 
 	    for (let entry2 in resultListTripletSubjectRelationObject.attributes){
         console.log("ATTRIBUTE:"+JSON.stringify(resultListTripletSubjectRelationObject.attributes[entry2]));
+        let graph = resultListTripletSubjectRelationObject.attributes[entry2].g;
         let uri2 = resultListTripletSubjectRelationObject.attributes[entry2].entity;
         let attribute = {};
+
         attribute.uri   = resultListTripletSubjectRelationObject.attributes[entry2].attribute;
         attribute.label = resultListTripletSubjectRelationObject.attributes[entry2].labelAttribute;
         attribute.type  = resultListTripletSubjectRelationObject.attributes[entry2].typeAttribute;
         attribute.basic_type  = AskomicsUserAbstraction.getTypeAttribute(resultListTripletSubjectRelationObject.attributes[entry2].typeAttribute);
 
-          if ( ! (uri2 in instanceUserAbstraction.attributesEntityList) ) {
-              instanceUserAbstraction.attributesEntityList[uri2] = [];
-          }
 
-          instanceUserAbstraction.attributesEntityList[uri2].push(attribute);
+        if ( ! (graph in instanceUserAbstraction.attributesEntityList) ) {
+            instanceUserAbstraction.attributesEntityList[graph] = [];
         }
+
+        if ( ! (uri2 in instanceUserAbstraction.attributesEntityList[graph]) ) {
+            instanceUserAbstraction.attributesEntityList[graph][uri2] = [];
+        }
+        instanceUserAbstraction.attributesEntityList[graph][uri2].push(attribute);
+
+      }
 
         for (let entry3 in resultListTripletSubjectRelationObject.categories){
           console.log("CATEGORY:"+JSON.stringify(resultListTripletSubjectRelationObject.categories[entry3]));
+          let graph = resultListTripletSubjectRelationObject.categories[entry3].g;
           let uri3 = resultListTripletSubjectRelationObject.categories[entry3].entity;
           let attribute = {};
           attribute.uri   = resultListTripletSubjectRelationObject.categories[entry3].category;
@@ -162,11 +191,15 @@ class AskomicsUserAbstraction {
           attribute.type  = resultListTripletSubjectRelationObject.categories[entry3].typeCategory;
           attribute.basic_type  = 'category';
 
-          if ( ! (uri3 in instanceUserAbstraction.attributesEntityList) ) {
-              instanceUserAbstraction.attributesEntityList[uri3] = [];
+          if ( ! (graph in instanceUserAbstraction.attributesEntityList) ) {
+              instanceUserAbstraction.attributesEntityList[graph] = [];
           }
 
-          instanceUserAbstraction.attributesEntityList[uri3].push(attribute);
+          if ( ! (uri3 in instanceUserAbstraction.attributesEntityList[graph]) ) {
+              instanceUserAbstraction.attributesEntityList[graph][uri3] = [];
+          }
+
+          instanceUserAbstraction.attributesEntityList[graph][uri3].push(attribute);
         }
 
         for (var entry4 in resultListTripletSubjectRelationObject.positionable){
@@ -206,41 +239,24 @@ class AskomicsUserAbstraction {
       return this.getGenAttrib(this.entityInformationList,uriEntity,attrib);
     }
 
-    getAttribRelation(uri,attrib) {
-      return this.getGenAttrib(this.relationInformationList,uri,attrib);
-    }
-
-    getAttribAttributes(uri,attrib) {
-      return this.getGenAttrib(this.attributesInformationList,uri,attrib);
-    }
-
     /* Get value of an attribut with RDF format like rdfs:label */
     getGenAttrib(diction,uriEntity,attrib) {
+
       let nattrib = attrib ;
 
-      if (!(uriEntity in diction)) {
-        /*
-        console.log(JSON.stringify(uriEntity) + " is not referenced in the user abstraction !");
-        console.log("Entities referenced:");
-        for (let uri in diction ) {
-          console.log(uri);
-        }
-        */
-        return "";
-      }
+      for (let graph in diction) {
+        if ( this.isDesactivedGraph(graph) ) continue;
 
-      if (!(nattrib in diction[uriEntity])) {
-        /*
-        console.log(JSON.stringify(uriEntity) + '['+JSON.stringify(nattrib)+']' + " (attribute) is not referenced in the user abstraction !");
-        console.log("Attributes referenced for uri["+uriEntity+"]:");
-        for (let uri in diction[uriEntity] ) {
-          console.log(uri);
+        if (!(uriEntity in diction[graph])) {
+          continue;
         }
-        */
-        return "";
-      }
 
-      return diction[uriEntity][nattrib];
+        if (!(nattrib in diction[graph][uriEntity])) {
+          continue;
+        }
+        return diction[graph][uriEntity][nattrib];
+      }
+      return "";
     }
 
     /* build node from user abstraction infomation */
@@ -262,32 +278,57 @@ class AskomicsUserAbstraction {
 
     getRelationsObjectsAndSubjectsWithURI(UriSelectedNode) {
 
-      var objectsTarget = {} ;
-      var subjectsTarget = {} ;
+      let objectsTarget = {} ;
+      let subjectsTarget = {} ;
+
+      let lentities = this.getEntities();
 
       for (let i in this.tripletSubjectRelationObject) {
+        if (this.isDesactivedGraph(this.tripletSubjectRelationObject[i].g) ) continue;
+
         if ( this.tripletSubjectRelationObject[i].object == UriSelectedNode ) {
+          /* check if graph is not removed */
+          if ( !(this.tripletSubjectRelationObject[i].subject in lentities) ) continue;
+
           if (! (this.tripletSubjectRelationObject[i].subject in subjectsTarget) ) {
-            subjectsTarget[this.tripletSubjectRelationObject[i].subject] = [];
+            subjectsTarget[this.tripletSubjectRelationObject[i].subject] = {};
           }
-          subjectsTarget[this.tripletSubjectRelationObject[i].subject].push(this.tripletSubjectRelationObject[i].relation);
+          if ( ! (this.tripletSubjectRelationObject[i].relation in subjectsTarget[this.tripletSubjectRelationObject[i].subject] ) )
+            {
+              subjectsTarget[this.tripletSubjectRelationObject[i].subject][this.tripletSubjectRelationObject[i].relation]=0;
+            }
         }
         if ( this.tripletSubjectRelationObject[i].subject == UriSelectedNode ) {
+          /* check if graph is not removed */
+          if ( !(this.tripletSubjectRelationObject[i].object in lentities) ) continue;
+
           if (! (this.tripletSubjectRelationObject[i].object in objectsTarget) ) {
-            objectsTarget[this.tripletSubjectRelationObject[i].object] = [];
+            objectsTarget[this.tripletSubjectRelationObject[i].object] = {};
           }
-          objectsTarget[this.tripletSubjectRelationObject[i].object].push(this.tripletSubjectRelationObject[i].relation);
+
+          if ( ! (this.tripletSubjectRelationObject[i].relation in objectsTarget[this.tripletSubjectRelationObject[i].object] ) )
+            {
+              objectsTarget[this.tripletSubjectRelationObject[i].object][this.tripletSubjectRelationObject[i].relation]=0;
+            }
         }
       }
-      // TODO: Manage Doublons and remove it....
+      for ( let i in objectsTarget ) {
+        objectsTarget[i] = Object.keys(objectsTarget[i]);
+      }
+      for ( let i in subjectsTarget ) {
+        subjectsTarget[i] = Object.keys(subjectsTarget[i]);
+      }
 
       return [objectsTarget, subjectsTarget];
     }
 
     /* return a list of attributes according a uri node */
     getAttributesWithURI(UriSelectedNode) {
-      if ( UriSelectedNode in this.attributesEntityList )
-        return this.attributesEntityList[UriSelectedNode];
+      for (let g in this.attributesEntityList ) {
+        if ( this.isDesactivedGraph(g) ) continue;
+        if ( UriSelectedNode in this.attributesEntityList[g] )
+          return this.attributesEntityList[g][UriSelectedNode];
+      }
       return [];
     }
 
@@ -305,15 +346,46 @@ class AskomicsUserAbstraction {
         return this.attributesOrderDisplay[URINode];
       }
       /* by default */
-      let v = [];
-      v.push( { 'uri': URINode , 'basic_type' : 'string' , 'actif' : false });
-      if ( URINode in this.attributesEntityList ) {
-        v = v.concat(this.attributesEntityList[URINode].slice());
+      let v = {};
+      //v[URINode] = { 'uri': URINode , 'basic_type' : 'string' , 'actif' : false };
+      for (let g in this.attributesEntityList ) {
+        if ( this.isDesactivedGraph(g) ) continue;
+        if ( URINode in this.attributesEntityList[g] ) {
+          for (let uriAtt in this.attributesEntityList[g][URINode]) {
+            if ( ! (uriAtt in v) ) {
+              v[uriAtt] = this.attributesEntityList[g][URINode][uriAtt];
+            }
+          }
+        }
       }
-/*
-      for (let i in this.attributesEntityList[URINode] ) {
-          v.push(this.attributesEntityList[URINode][i]);
-      }*/
-      return v;
+      return [{ 'uri': URINode , 'basic_type' : 'string' , 'actif' : false }].concat(Object.values(v));
+
+    }
+
+    unactiveGraph(graph) {
+      console.log("unactiv :"+graph);
+      this.desactived_graph[graph] = 0;
+    }
+    activeGraph(graph) {
+      console.log("activ :"+graph);
+      delete this.desactived_graph[graph];
+    }
+    isDesactivedGraph(graph) {
+      return (graph in this.desactived_graph);
+    }
+
+    listUnactivedGraph() {
+      return JSON.parse(JSON.stringify(Object.keys(this.desactived_graph)));
+    }
+
+    listGraphAvailable() {
+      let listG = {} ;
+      for (let g in this.entityInformationList) {
+        if (! (g in listG ) ) listG[g] = 0;
+      }
+      for (let g in this.attributesEntityList) {
+        if (! (g in listG ) ) listG[g] = 0;
+      }
+      return JSON.parse(JSON.stringify(listG));
     }
   }

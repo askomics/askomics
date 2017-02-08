@@ -32,9 +32,6 @@ class SparqlQueryBuilder(ParamManager):
             if not elt in replacement:
                 raise ValueError('SparqlQueryBuilder::build_query_on_the_fly: can not build a query without "'+elt+'" index !')
 
-        if not isinstance(self.settings.listFrom, list):
-            raise ValueError('SparqlQueryBuilder::build_query_on_the_fly: Bad definition of self.listFrom "'+str(self.settings.listFrom)+'"!')
-
         query = ""
         query += "SELECT DISTINCT "+replacement['select']+"\n"
 
@@ -45,12 +42,24 @@ class SparqlQueryBuilder(ParamManager):
         # ADM can query on all database !
         if not self.session['admin']:
             if type(adminRequest) != bool or not adminRequest :
+                if 'graph' not in self.settings:
+                    raise ValueError('SparqlQueryBuilder::build_query_on_the_fly: bad initialization of settings["graph"]!')
+
+                if 'public' not in self.settings['graph']:
+                    raise ValueError('SparqlQueryBuilder::build_query_on_the_fly: bad initialization of settings["graph"]["public"]!')
+
+                if 'private' not in self.settings['graph']:
+                    raise ValueError('SparqlQueryBuilder::build_query_on_the_fly: bad initialization of settings["graph"]["private"]!')
+
+                listFrom = self.settings['graph']['public'] + self.settings['graph']['private']
                 query += "FROM <>\n"
-                if len(self.settings.listFrom)<=0:
+                self.log.debug(" === Graphs Available === ")
+                self.log.debug(listFrom)
+                if len(listFrom)<=0:
                     pass
                     # None solution because none graph !
                 else:
-                    for elt in self.settings.listFrom:
+                    for elt in listFrom:
                         query += "FROM <"+elt+">\n"
 
 

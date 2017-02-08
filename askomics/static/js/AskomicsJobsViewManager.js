@@ -102,6 +102,7 @@ let instanceAskomicsJobsViewManager ;
                   'variates'             : tab[0],
                   'constraintesRelations': tab[1],
                   'constraintesFilters'  : tab[2],
+                  'removeGraph'          : new AskomicsUserAbstraction().listUnactivedGraph(),
                   'limit'                : this.npreview          // number of data preview
                };
     }

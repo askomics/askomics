@@ -309,12 +309,13 @@ class AskomicsResultsView {
     let body = $('<tbody></tbody')
                 .css("overflow-y","auto")
                 .css("height","100px");
-                
+
     for (let i=0;i<this.data.values.length;i++ ) {
       let row = $('<tr></tr>');
       for (let j=0;j<nodeList.length;j++ ) {
         let node = nodeList[j];
         if ( ! node.actif ) continue;
+
         for (let sparqlId in this.activesAttributes[node.id]) {
           let headerName = this.activesAttributes[node.id][sparqlId];
           let val = this.data.values[i][this.activesAttributes[node.id][sparqlId]];
