@@ -290,7 +290,8 @@ class SourceFileTsv(SourceFile):
             ttl += (" , \n" + indent + ":").join(map(self.encodeToRDFURI,categories)) + " .\n"
 
             for item in categories:
-                ttl += ":" + self.encodeToRDFURI(item) + " rdf:type :" + self.encodeToRDFURI(header) + " ;\n" + len(item) * " " + "  rdfs:label \"" + item + "\"^^xsd:string .\n"
+                if item.strip() != "":
+                    ttl += ":" + self.encodeToRDFURI(item) + " rdf:type :" + self.encodeToRDFURI(header) + " ;\n" + len(item) * " " + "  rdfs:label \"" + item + "\"^^xsd:string .\n"
 
         return ttl
 
