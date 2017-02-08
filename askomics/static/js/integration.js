@@ -535,7 +535,6 @@ function loadSourceFileGff(idfile, pub) {
         let insert_warning_elem = file_elem.find(".insert_warning").first();
 
         //TODO: check if insertion is ok and then, display the success message or a warning message
-        alert("1");
         if (data.error) {
             insert_status_elem.html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> ERROR:</strong> ' + JSON.stringify(data.error))
                               .removeClass('hidden alert-success')
