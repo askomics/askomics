@@ -752,7 +752,10 @@ class AskView(object):
         body=self.request.json_body
 
         try:
-            self.setGraphUser(body["removeGraph"])
+            lRemove = []
+            if "removeGraph" in body:
+                lRemove = body["removeGraph"]
+            self.setGraphUser(lRemove)
             tse = TripleStoreExplorer(self.settings, self.request.session)
 
             results,query = tse.build_sparql_query_from_json(body["variates"],body["constraintesRelations"],True)
@@ -790,7 +793,7 @@ class AskView(object):
             tse = TripleStoreExplorer(self.settings, self.request.session)
 
             body = self.request.json_body
-            results,query = tse.build_sparql_query_from_json(body["variates"],body["constraintesRelations"],body["limit"],False)
+            results,query = tse.build_sparql_query_from_json(body["variates"],body["constraintesRelations"],False)
 
             self.data['query'] = query
         except Exception as e:

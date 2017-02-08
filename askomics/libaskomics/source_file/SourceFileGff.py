@@ -37,6 +37,8 @@ class SourceFileGff(SourceFile):
 
         self.timestamp = datetime.datetime.now().isoformat()
 
+        self.getLabelFromUri = {}
+
 
     def get_entities(self):
         """
@@ -87,11 +89,22 @@ class SourceFileGff(SourceFile):
         if self.taxon != '' :
             taxon_entity = ':' + self.encodeToRDFURI(self.taxon.strip())
 
+        self.getLabelFromUri[taxon_entity] = self.taxon.strip()
+        self.getLabelFromUri[':plus'] = 'plus'
+        self.getLabelFromUri[':minus'] = 'minus'
+        self.getLabelFromUri[':none'] = ''
+
+
         for rec in GFF.parse(handle, limit_info=limit, target_lines=1):
-            ref_entity = self.encodeToRDFURI(str(rec.id))
+            ref_entity = taxon_entity+'_ref_'+self.encodeToRDFURI(str(rec.id))
+            if ref_entity not in self.getLabelFromUri:
+                self.getLabelFromUri[ref_entity] = str(rec.id)
+
             for feat in rec.features:
                 # if there is no ID field, take the entity type as id
                 type_entity = self.encodeToRDFURI(feat.type)
+                if type_entity not in self.getLabelFromUri:
+                    self.getLabelFromUri[type_entity] = str(feat.type)
                 build_entity_id = False
 
 
@@ -111,6 +124,9 @@ class SourceFileGff(SourceFile):
                     id_entity = self.encodeToRDFURI(id_entity)
                     build_entity_id = True
 
+                if id_entity not in self.getLabelFromUri:
+                    self.getLabelFromUri[id_entity] = str(feat.id)
+
                 #print (id_entity)
                 start_entity = int(feat.location.start)
                 end_entity = int(feat.location.end)
@@ -125,7 +141,7 @@ class SourceFileGff(SourceFile):
                 attribute_dict = {
                     'rdf:type':  [ ':'+ type_entity ] ,
                     ':position_taxon':  [ taxon_entity ] ,
-                    ':position_ref':   [ ':'+ ref_entity ] ,
+                    ':position_ref':   [ ref_entity ] ,
                     ':position_start': [ start_entity ] ,
                     ':position_end':  [ end_entity ]  ,
                     ':position_strand': [ strand_entity ]
@@ -304,7 +320,7 @@ class SourceFileGff(SourceFile):
                             ttl += indent + 'rdfs:label \"' + attr + '\"^^xsd:string ;\n'
                             ttl += indent + 'rdfs:domain ' + ':'+ entity + " ;\n"
                             ttl += indent + 'rdfs:range xsd:string .\n\n'
-
+        #print(ttl)
         return ttl
 
     def get_domain_knowledge(self):
@@ -328,10 +344,10 @@ class SourceFileGff(SourceFile):
                     if category == 'position_taxon' and self.taxon == '':
                         continue
                     for cat in cat_list:
-                        ttl += ':' + str(category.replace('position_', '')) + 'Category displaySetting:category ' + ':' + self.encodeToRDFURI(str(cat)) + ' .\n'
-                        ttl += ':' + self.encodeToRDFURI(str(cat)) + ' rdf:type :' + str(category.replace('position_', '')) + ' ;\n'
+                        ttl += ':' + str(category.replace('position_', '')) + 'Category displaySetting:category ' + str(cat) + ' .\n'
+                        ttl += str(cat) + ' rdf:type :' + str(category.replace('position_', '')) + ' ;\n'
                         indent = len(str(cat)) * ' ' + ' '
-                        ttl += indent + 'rdfs:label \"' + str(cat.replace(':', '')) + '\"^^xsd:string .\n'
+                        ttl += indent + 'rdfs:label \"' + self.getLabelFromUri[cat] + '\"^^xsd:string .\n'
 
             ttl += '\n'
         #print(ttl)
