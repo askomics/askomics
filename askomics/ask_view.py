@@ -371,7 +371,7 @@ class AskView(object):
             return 'blocked'
 
         self.setGraphUser()
-        
+
         self.log.debug(" ========= Askview:source_files_overview =============")
         sfc = SourceFileConvertor(self.settings, self.request.session)
 
@@ -759,7 +759,7 @@ class AskView(object):
             #body["limit"]
             # Remove prefixes in the results table
             l = int(body["limit"]) + 1
-            if l < len(results):
+            if body["limit"]!=-1 and l < len(results):
                 self.data['values'] = results[1:l+1]
             else:
                 self.data['values'] = results
@@ -767,9 +767,10 @@ class AskView(object):
             self.data['nrow'] = len(results)
 
             # Provide results file
-            ql = QueryLauncher(self.settings, self.request.session)
-            rb = ResultsBuilder(self.settings, self.request.session)
-            self.data['file'] = ql.format_results_csv(rb.build_csv_table(results))
+            if (not 'nofile' in body) or body['nofile']:
+                ql = QueryLauncher(self.settings, self.request.session)
+                rb = ResultsBuilder(self.settings, self.request.session)
+                self.data['file'] = ql.format_results_csv(rb.build_csv_table(results))
         except Exception as e:
             #exc_type, exc_value, exc_traceback = sys.exc_info()
             #traceback.print_exc(limit=8)
