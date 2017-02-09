@@ -217,7 +217,7 @@ class SourceFileGff(SourceFile):
 
                 if not buildLater :
                     entity = {id_entity: attribute_dict}
-                    ttl += self.get_content_ttl(entity)
+                    yield self.get_content_ttl(entity)
                 else:
                     toBuild.append([id_entity,attribute_dict])
 
@@ -239,9 +239,8 @@ class SourceFileGff(SourceFile):
                             self.abstraction_dict[type_entity]['normal_attr'].append(DomAndRange)
                         del attribute_dict[qualifier_key]
                         entity = {id_entity: attribute_dict}
-                        ttl += self.get_content_ttl(entity)
+                        yield self.get_content_ttl(entity)
 
-        yield ttl
         handle.close()
 
     def get_content_ttl(self, entity):
@@ -267,7 +266,6 @@ class SourceFileGff(SourceFile):
         ttl += '\n'
 
         ttl = rreplace(ttl, ';', '.', 1)
-        #print(ttl)
         return ttl
 
     def get_abstraction(self):
