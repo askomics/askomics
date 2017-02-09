@@ -110,6 +110,7 @@ class SourceFileGff(SourceFile):
 
                 if feat.id != '':
                     id_entity = self.encodeToRDFURI(feat.id)
+                    self.getLabelFromUri[id_entity] = str(feat.id)
                 else:
                     if not type_entity in icount:
                         icount[type_entity]=0
@@ -123,11 +124,8 @@ class SourceFileGff(SourceFile):
 
                     id_entity = self.encodeToRDFURI(id_entity)
                     build_entity_id = True
+                    self.getLabelFromUri[id_entity] = str(feat.type) + "_" + str(icount[type_entity])
 
-                if id_entity not in self.getLabelFromUri:
-                    self.getLabelFromUri[id_entity] = str(feat.id)
-
-                #print (id_entity)
                 start_entity = int(feat.location.start)
                 end_entity = int(feat.location.end)
 
@@ -144,7 +142,8 @@ class SourceFileGff(SourceFile):
                     ':position_ref':   [ ref_entity ] ,
                     ':position_start': [ start_entity ] ,
                     ':position_end':  [ end_entity ]  ,
-                    ':position_strand': [ strand_entity ]
+                    ':position_strand': [ strand_entity ],
+                    'rdfs:label' : ['\"'+self.getLabelFromUri[id_entity]+'\"^^xsd:string']
                 }
 
                 # Abstraction
@@ -176,8 +175,10 @@ class SourceFileGff(SourceFile):
                     attribute_dict[':'+keyuri] = []
                     for val in qualifier_value:
                         valuri = self.encodeToRDFURI(val)
-
-                        if qualifier_key == 'ID':
+                        # if there are, it's the label !
+                        if qualifier_key == 'Name':
+                            attribute_dict['rdfs:label'] = [ '\"'+ str(val) +'\"^^xsd:string']
+                        elif qualifier_key == 'ID':
                             if (valuri not in type_entities) and type_entity != '':
                                 type_entities[valuri] = type_entity
 
@@ -213,11 +214,9 @@ class SourceFileGff(SourceFile):
 
                     lEntities[str(attribute_dict)]="0"
 
-                attribute_dict['rdfs:label'] = ['\"'+self.decodeToRDFURI(id_entity)+'\"^^xsd:string']
-
                 if not buildLater :
                     entity = {id_entity: attribute_dict}
-                    ttl += self.get_content_ttl(entity)
+                    yield self.get_content_ttl(entity)
                 else:
                     toBuild.append([id_entity,attribute_dict])
 
@@ -239,9 +238,8 @@ class SourceFileGff(SourceFile):
                             self.abstraction_dict[type_entity]['normal_attr'].append(DomAndRange)
                         del attribute_dict[qualifier_key]
                         entity = {id_entity: attribute_dict}
-                        ttl += self.get_content_ttl(entity)
+                        yield self.get_content_ttl(entity)
 
-        yield ttl
         handle.close()
 
     def get_content_ttl(self, entity):
@@ -267,7 +265,6 @@ class SourceFileGff(SourceFile):
         ttl += '\n'
 
         ttl = rreplace(ttl, ';', '.', 1)
-        #print(ttl)
         return ttl
 
     def get_abstraction(self):

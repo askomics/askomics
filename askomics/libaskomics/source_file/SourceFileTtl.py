@@ -49,5 +49,6 @@ class SourceFileTtl(SourceFile):
         pathttl = self.getRdfDirectory()
         shutil.copy(self.path, pathttl)
         fo = open(pathttl + '/' + os.path.basename(self.path))
-        self.insert_metadatas(public)
+
         self.load_data_from_file(fo, urlbase)
+        self.insert_metadatas(public)

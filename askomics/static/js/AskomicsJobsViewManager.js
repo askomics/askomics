@@ -11,7 +11,7 @@ let instanceAskomicsJobsViewManager ;
 
       this.jobs = [];
       this.jobGenId=0   ;
-      this.npreview=500 ; /* max data to transfert to IHM */
+      this.npreview=30 ; /* max data to transfert to IHM */
 
       instanceAskomicsJobsViewManager = this;
     }

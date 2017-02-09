@@ -64,6 +64,8 @@ class ParamManager(object):
 
     def updateListPrefix(self,listPrefix):
         self.log.info("updateListPrefix")
+        listPrefix = list(set(listPrefix))
+
         lPrefix = {}
         url = "http://prefix.cc/"
         ext = ".file.json"
