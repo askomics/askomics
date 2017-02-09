@@ -84,6 +84,7 @@ function cols2rows(items) {
 
 function displayIntegrationForm(data) {
     $("#content_integration").empty();
+    if ( data.files === undefined ) return ;
     for (var i = data.files.length - 1; i >= 0; i--) {
         switch (data.files[i].type) {
             case 'tsv':
