@@ -98,7 +98,6 @@ class SourceFile(ParamManager, HaveCachedProperties):
         :return: a dictionnary with information on the success or failure of the operation
         :rtype: Dict
         """
-        self.insert_metadatas(public)
 
         content_ttl = self.get_turtle()
 
@@ -241,6 +240,8 @@ class SourceFile(ParamManager, HaveCachedProperties):
             data['total_triple_count'] = total_triple_count
 
         data['expected_lines_number'] = self.get_number_of_lines()
+
+        self.insert_metadatas(public)
 
         return data
 
