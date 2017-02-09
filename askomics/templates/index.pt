@@ -104,6 +104,11 @@
                         </a></li>
                       </ul>
 
+                      <button id="buttonViewListGraph" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      Graph<span class="caret"></span>
+                      </button>
+                      <ul id="viewListGraph" class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+                      </ul>
 
                       <button id="buttonViewListNodesAndLinks" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                       View<span class="caret"></span>
@@ -116,11 +121,7 @@
                       </button>
                       <ul id="viewListShortcuts" class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
                       </ul>
-                      <button id="buttonViewListGraph" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                      Graph<span class="caret"></span>
-                      </button>
-                      <ul id="viewListGraph" class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
-                      </ul>
+
                     </div>
                     <div class="btn-group pull-right">
                         <button type="button" class="btn btn-warning" onclick="resetGraph()">Reset</button>
