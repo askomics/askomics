@@ -50,7 +50,6 @@
         <link href="static/css/askomics.css" rel="stylesheet" type="text/css">
 
     </head>
-
     <body >
         <nav id='navbar' class="navbar navbar-default navbar-fixed-top">
         <!-- navbar is defined in a template below -->
@@ -65,7 +64,7 @@
                     <div class="col-md-offset-2">Shared entities are <em class='text-warning'>yellow</em> and personal entities are <strong class='text-primary'>blue</strong></div>
                     <div class="col-md-offset-2">Mixed entities are <strong class='text-warning'><em>yellow</em></strong></div>
                 </div>
-                <button  id="starter" class="btn btn-default col-md-offset-2" onclick="startVisualisation();">Start</button>
+                <button  id="starter" class="btn btn-default col-md-offset-2" onclick="__ihm.startSession();">Start</button>
                 <br><br><br>
                 <div class="col-md-offset-2"><p>Or upload an AskOmics file</p>
                     <div class="uploadBtn btn btn-default">
@@ -124,7 +123,7 @@
 
                     </div>
                     <div class="btn-group pull-right">
-                        <button type="button" class="btn btn-warning" onclick="resetGraph()">Reset</button>
+                        <button type="button" class="btn btn-warning" onclick="__ihm.stopSession()">Reset</button>
                     </div>
                     </h3>
                     <hr/>
@@ -178,11 +177,11 @@
             <form class="form-horizontal">
                 <fieldset>
                     <label>Choose which datasets you want to delete</label>
-                    <span class="glyphicon glyphicon-erase display" onclick="unselectGraphs()"></span>
-                    <select multiple="multiple" id="dropNamedGraphSelected" class="form-control" onchange='manageDelGraphButton()'></select>
+                    <span class="glyphicon glyphicon-erase display" onclick="__ihm.unselectGraphs()"></span>
+                    <select multiple="multiple" id="dropNamedGraphSelected" class="form-control" onchange='__ihm.manageDelGraphButton()'></select>
                 </fieldset>
-                <div id="btn-del-graph" class="btn-group"><button id="btn-empty-graph" class="btn btn-primary" onclick="deleteNamedGraph($('#dropNamedGraphSelected').val())" type="button" id="dropNamedGraphButton">Delete</button></div>
-                <div id="btn-del" class="btn-group"><button id="btn-empty" onclick="emptyDatabase('confirm')" class="btn btn-danger">Delete all</button></div>
+                <div id="btn-del-graph" class="btn-group"><button id="btn-empty-graph" class="btn btn-primary" onclick="__ihm.deleteNamedGraph($('#dropNamedGraphSelected').val())" type="button" id="dropNamedGraphButton">Delete</button></div>
+                <div id="btn-del" class="btn-group"><button id="btn-empty" onclick="__ihm.emptyDatabase('confirm')" class="btn btn-danger">Delete all</button></div>
             </form>
         </div>
 
@@ -325,8 +324,8 @@
                         <li id="admin" class="dropdown">
                           <a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="glyphicon glyphicon-cog"></span><span class="caret"></span></a>
                             <ul class="dropdown-menu">
-                              <li id="datasets" onclick="loadNamedGraphs()"><a href="#">Datasets</a></li>
-                              <li id="statistics" onclick="loadStatistics()"><a href="#">Statistics</a></li>
+                              <li id="datasets" onclick="__ihm.loadNamedGraphs()"><a href="#">Datasets</a></li>
+                              <li id="statistics" onclick="__ihm.loadStatistics()"><a href="#">Statistics</a></li>
                             </ul>
                           </li>
                         {{/if}}
@@ -880,6 +879,8 @@
                         {{/each}}
                     </table>
            </script>
-
     </body>
+    <script>
+        new IHMLocal().start();
+    </script>
 </html>
