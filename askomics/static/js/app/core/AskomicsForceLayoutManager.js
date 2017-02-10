@@ -2,17 +2,24 @@
 
 class AskomicsForceLayoutManager {
 
-  constructor() {
-    let currentFL = this;
+  constructor(svgdiv_id) {
 
-    this.w        = $("#svgdiv").width();
-    this.h        = 500 ;
+    this.svgdivid = svgdiv_id;
+    this.svgdiv = $("#"+svgdiv_id) ;
+
+    this.w        = 650;
+    this.h        = 600 ;
     this.maxh     = 700 ;
     this.curx     = 0   ;
     this.cury     = 0   ;
     this.charge   = -700 ;
     this.distance = 175 ;
     this.friction = 0.7 ;
+
+    /* filter to hide and show proposition node and links */
+    this._hideProposedUriNode    = [] ;
+    this._hideProposedUriLink    = [] ;
+    this._hideProposedUriShortcuts  = [] ;
 
     this.menus = {} ;
 
@@ -21,8 +28,57 @@ class AskomicsForceLayoutManager {
     this.menus.menuView = new AskomicsMenu(this,"menuView","buttonViewListNodesAndLinks","viewListNodesAndLinks",entitiesAndRelationsFuncMenu);
     this.menus.menuShortcuts = new AskomicsMenu(this,"menuShortcuts","buttonViewListShortcuts","viewListShortcuts",shortcutsFuncMenu);
 
+    this.ctrlPressed = false ;
+    this.selectNodes = []    ;
+    this.selectLink  = ''    ;
+    this.enterPressed = false;
+
+
+    let currentFL = this;
+    /* Definition of an event when CTRL key is actif to select several node */
+    /* Definition of an event when a special key is pressed */
+    this.svgdiv.keydown(function (e) {
+      // if ctrl is pressed, select several node
+      if (e.keyCode == 17) {
+        currentFL.ctrlPressed = true ;
+      }
+
+      // If enter is pressed, launch the query
+      if (e.keyCode == 13 && $('#queryBuilder').is(':visible') && !this.enterPressed) {
+        new AskomicsJobsViewManager().createJob();
+        currentFL.enterPressed = true;
+      }
+    });
+
+    this.svgdiv.keyup(function (e) {
+        currentFL.ctrlPressed = false;
+
+        if (e.keyCode == 13){
+          currentFL.enterPressed = false;
+        }
+    });
+  }
+
+  reset() {
+    this.svgdiv.off();
+
+    this._hideProposedUriNode    = [] ;
+    this._hideProposedUriLink    = [] ;
+    this._hideProposedUriShortcuts  = [] ;
+
+    for (let m in this.menus) {
+      this.menus[m].reset();
+      delete this.menus[m];
+    }
+    this.menus = [];
+
+    this.svgdiv.empty();
+  }
+
+  init() {
+    let currentFL = this;
     /* slide up when clicking in svgarea */
-    $("#svgdiv").on('click', function(d) {
+    this.svgdiv.on('click', function(d) {
       for (let m in currentFL.menus) {
         currentFL.menus[m].slideUp();
       }
@@ -43,7 +99,7 @@ class AskomicsForceLayoutManager {
     let TitleFilterRelationName = "Relations name" ;
 
     $.contextMenu({
-            selector: '#svgdiv',
+            selector: '#'+this.svgdivid,
             items: {
                 "rmenu-save-query"   : {
                   name: $("#dwl-query").text(),
@@ -111,7 +167,7 @@ class AskomicsForceLayoutManager {
                 "rmenu-reset"   : {
                   name: "Reset",
                   callback: function(){
-                    resetGraph();
+                    __ihm.stopSession();
                   }
                 },
                 "rmenu-quit"   : {
@@ -142,94 +198,6 @@ class AskomicsForceLayoutManager {
                   }
             }
         });
-
-    $('#full-screen-graph').click(function() {
-      if ($('#icon-resize-graph').attr('value') == 'small') {
-        currentFL.fullsizeGraph();
-        return;
-      }
-
-      if ($('#icon-resize-graph').attr('value') == 'full') {
-        currentFL.normalsizeGraph();
-        return;
-      }
-    });
-
-    $('#full-screen-attr').click(function() {
-      if ($('#icon-resize-attr').attr('value') == 'small') {
-        currentFL.fullsizeRightview();
-        return;
-      }
-
-      if ($('#icon-resize-attr').attr('value') == 'full') {
-        currentFL.normalsizeRightview();
-        return;
-      }
-    });
-
-    /* filter to hide and show proposition node and links */
-    this._hideProposedUriNode    = [] ;
-    this._hideProposedUriLink    = [] ;
-    this._hideProposedUriShortcuts    = [] ;
-
-
-    this.vis = d3.select("#svgdiv")
-                .append("svg:svg")
-                .attr("id", "svg")
-                /*.attr("pointer-events", "all")*/
-                .attr({
-                  "width": "100%",
-                  "height": "100%"
-                })
-
-                .attr("viewBox", "0 0 " + this.w + " " + this.h )
-                .attr("perserveAspectRatio", "xMinYMid meet")
-                .call(d3.behavior.zoom().on("zoom", function() {
-                  let velocity = 1/10;
-                  let scale =  Math.pow(d3.event.scale,velocity);
-
-                  let translateY = (currentFL.h - (currentFL.h * scale))/2;
-                  let translateX = (currentFL.w - (currentFL.w * scale))/2;
-
-                  currentFL.vis.attr("transform","translate(" + [translateX,translateY] + ")" + " scale(" +scale+ ")");
-
-                  //  currentFL.vis.attr("transform","translate(" + d3.event.translate + ")" + " scale(" +scale+ ")");
-                }))
-                .append('svg:g');
-
-    this.force = d3.layout.force();
-
-    this.nodes = this.force.nodes();
-    this.links = this.force.links();
-
-    this.ctrlPressed = false ;
-    this.selectNodes = []    ;
-    this.selectLink  = ''    ;
-    this.enterPressed = false;
-
-    /* Definition of an event when CTRL key is actif to select several node */
-    /* Definition of an event when a special key is pressed */
-    $(document).keydown(function (e) {
-      // if ctrl is pressed, select several node
-      if (e.keyCode == 17) {
-        currentFL.ctrlPressed = true ;
-      }
-
-      // If enter is pressed, launch the query
-      if (e.keyCode == 13 && $('#queryBuilder').is(':visible') && !this.enterPressed) {
-        new AskomicsJobsViewManager().createJob();
-        currentFL.enterPressed = true;
-      }
-    });
-
-    $(document).keyup(function (e) {
-        currentFL.ctrlPressed = false;
-
-        if (e.keyCode == 13){
-          currentFL.enterPressed = false;
-        }
-    });
-
   }
 
   getArrayForProposedUri(type) {
@@ -277,56 +245,6 @@ class AskomicsForceLayoutManager {
     return true;
   }
 
-  fullsizeGraph() {
-    $('#viewDetails').hide();
-    $('#PanelQuery').attr('class', 'col-md-12');
-
-    $("#svg").attr("viewBox", this.curx +" " + this.cury +" " + $("#content_interrogation").width() + " " + this.maxh);
-    $("#svg").attr('height', this.maxh);
-    $("#svg").attr('width', $("#content_interrogation").width());
-
-    //change icon
-    $('#icon-resize-graph').attr('class', 'glyphicon glyphicon-resize-small');
-    $('#icon-resize-graph').attr('value', 'full');
-  }
-
-  normalsizeGraph() {
-    $('#viewDetails').show();
-    $('#PanelQuery').attr('class', 'col-md-7');
-    $("#svg").attr("viewBox", this.curx +" " + this.cury +" " + this.w + " " + this.h);
-    $("#svg").attr('height', this.h);
-    $("#svg").attr('width', this.w);
-
-    //change icon
-    $('#icon-resize-graph').attr('class', 'glyphicon glyphicon-resize-full');
-    $('#icon-resize-graph').attr('value', 'small');
-  }
-
-  fullsizeRightview() {
-    $('#PanelQuery').hide();
-    $('#viewDetails').attr('class', 'col-md-12');
-    $('.div-details').attr('class', 'div-details-max');
-
-    //change icon
-    $('#icon-resize-attr').attr('class', 'glyphicon glyphicon-resize-small');
-    $('#icon-resize-attr').attr('value', 'full');
-  }
-
-  normalsizeRightview() {
-    $('#PanelQuery').show();
-    $('#viewDetails').attr('class', 'col-md-5');
-    $('.div-details-max').attr('class', 'div-details');
-
-    //change icon
-    $('#icon-resize-attr').attr('class', 'glyphicon glyphicon-resize-full');
-    $('#icon-resize-attr').attr('value', 'small');
-  }
-
-  unbindFullscreenButtons() {
-    $('#full-screen-graph').unbind();
-    $('#full-screen-attr').unbind();
-  }
-
   colorSelectdObject(prefix,id) {
     $(prefix+id).css("stroke", "firebrick");
   }
@@ -341,6 +259,38 @@ class AskomicsForceLayoutManager {
   }
 
   start() {
+    console.log("========== start session ForceLayoutManager ==============");
+    console.log("D3.JS version:"+d3.version);
+
+    let currentFL = this;
+
+    d3.select("#"+this.svgdivid).select("svg").remove();
+
+    this.vis = d3.select("#svgdiv")
+                .append("svg:svg")
+                /*.attr("pointer-events", "all")*/
+                .attr("width","100%")
+                .attr("height","100%")
+                .attr("viewBox", "0 0 " + this.w  + " " + this.h )
+                .attr("perserveAspectRatio", "xMinYMid meet")
+                .call(d3.behavior.zoom().on("zoom", function() {
+                  let velocity = 1/10;
+                  let scale =  Math.pow(d3.event.scale,velocity);
+
+                  let translateY = (currentFL.h - (currentFL.h * scale))/2;
+                  let translateX = (currentFL.w - (currentFL.w * scale))/2;
+
+                  currentFL.vis.attr("transform","translate(" + [translateX,translateY] + ")" + " scale(" +scale+ ")");
+
+                  //  currentFL.vis.attr("transform","translate(" + d3.event.translate + ")" + " scale(" +scale+ ")");
+                }))
+                .append('svg:g');
+
+    this.force = d3.layout.force();
+
+    this.nodes = this.force.nodes();
+    this.links = this.force.links();
+
     /* Get information about start point to bgin query */
     let startPoint = $('#startpoints').find(":selected").data("value");
     /* load abstraction */
@@ -367,7 +317,6 @@ class AskomicsForceLayoutManager {
     /* build graph */
     this.update();
     this.colorSelectdObject("#node_",startPoint.id);
-
   }
 
   startWithQuery(dump) {
@@ -407,14 +356,6 @@ class AskomicsForceLayoutManager {
     this.insertSuggestions();
     this.update();
     this.colorSelectdObject("#node_",lastn.id);
-  }
-
-  reset() {
-    //reset view menu
-    for (let m in this.menus)  { this.menus[m].reset(); }
-
-    //unbind fullscreen buttons
-    this.unbindFullscreenButtons();
   }
 
   updateInstanciateLinks(links) {
@@ -752,7 +693,6 @@ class AskomicsForceLayoutManager {
 
         let link = AskomicsObjectBuilder.instanceLink(linkbase,source,target);
 
-        console.log(JSON.stringify(lShortcuts[shortcut]));
         link.sparql  = lShortcuts[shortcut].sparql_string ;
         link.prefix  = lShortcuts[shortcut].prefix_string ;
         link.shortcut_output_var  = lShortcuts[shortcut].output_var ;

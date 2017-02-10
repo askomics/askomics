@@ -17,7 +17,7 @@ class AskomicsPositionableLinkView extends AskomicsObjectView {
     help_str += 'This relations are explained on the following figure:';
     $('#help_figure').attr('src', '/static/images/positionable.png').attr('alt', 'positionable').css('width', '650px');
     $('#help_figure').removeClass( "hidden" );
-    displayModal(help_title, help_str, 'ok');
+    __ihm.displayModal(help_title, help_str, 'ok');
   }
 
   changeType(type) {

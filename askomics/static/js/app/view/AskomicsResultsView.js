@@ -61,72 +61,9 @@ class AskomicsResultsView {
     table.append(this.build_simple_subheader_results(new AskomicsGraphBuilder().nodes()))
          .append(this.build_body_results(new AskomicsGraphBuilder().nodes()));
 
-/*
-    table.DataTable( {
-       "paging"     : true,
-       "ordering"   : true,
-       "info"       : true,
-       //"scrollY"    : true,
-    //   "scrollY":        "200px",
-    //   "scrollCollapse": true,
-       dom: 'Bfrtip',
-        buttons: [
-            'copy', 'csv', 'excel'
-        ]
-//       "scrollY"    : true
-      } );
-*/
       return table;
   }
 
-  displayResults() {
-      this.is_valid();
-      // to clear and print new results
-      $("#results").empty();
-      //.css("overflow","scroll")
-      //.css("height","80px")
-      //.css("width","100%")
-      //.css("overflow","auto");
-
-      this.setActivesAttributes();
-
-      if (this.data.values.length <= 0) {
-        $("#results").append("No results have been found for this query.");
-        return ;
-      }
-
-      /* new presentation by entity */
-      let table = $('<table></table>')
-                    .addClass('table-striped')
-                    .addClass('table-bordered')
-                    .addClass('table-condensed') ;
-                //    .addClass('table-results');
-
-      $("#results")
-        //.append($('<table></table>').append(this.build_simple_header_results()))
-        .append(table.append(this.build_simple_subheader_results(new AskomicsGraphBuilder().nodes()))
-                    .append(this.build_body_results(new AskomicsGraphBuilder().nodes()))
-        );
-/*
-        $("#results")
-          .append(table.append(this.build_simple_header_results())
-          .append(this.build_simple_subheader_results(new AskomicsGraphBuilder().nodes()))
-          .append(this.build_body_results(new AskomicsGraphBuilder().nodes())));
-*/
-
-
-//https://datatables.net/extensions/buttons/examples/initialisation/export.html
-      table.DataTable( {
-       "paging"     : true,
-       "ordering"   : true,
-       "info"       : true,
-       dom: 'Bfrtip',
-        buttons: [
-            'copy', 'csv', 'excel'
-        ]
-   } );
-
-  }
 
   build_simple_header_results() {
     let head = $('<thead></thead>');

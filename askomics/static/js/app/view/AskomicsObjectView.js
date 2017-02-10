@@ -120,7 +120,7 @@ class AskomicsObjectView {
     $("div[id*='"+ AskomicsObjectView_prefix +"']" ).hide();
   }
 
-  static defineClickMenu() {
+  static start() {
     let mythis = this;
     // Switch between close and open eye icon for unselected
     $("#showNode").click(function() {
@@ -128,7 +128,7 @@ class AskomicsObjectView {
         if (new AskomicsGraphBuilder().nodes().length <= 1) {
           let help_title = "Information";
           let help_str   = "Askomics can not disable a single node.";
-          displayModal(help_title, help_str, 'ok');
+          __ihm.displayModal(help_title, help_str, 'ok');
           return;
         }
         let countActif = 0;
@@ -138,7 +138,7 @@ class AskomicsObjectView {
         if (countActif <= 1) {
           let help_title = "Information";
           let help_str   = "Askomics can not disable all nodes.";
-          displayModal(help_title, help_str, 'ok');
+          __ihm.displayModal(help_title, help_str, 'ok');
           return;
         }
 
@@ -166,7 +166,7 @@ class AskomicsObjectView {
           if (node.id == new AskomicsGraphBuilder().nodes()[0].id) {
               let help_title = "Information";
               let help_str   = "Askomics can not delete the start node. Use the reset button to begin a new query!";
-              displayModal(help_title, help_str, 'ok');
+              __ihm.displayModal(help_title, help_str, 'ok');
               return;
           }
 

@@ -113,7 +113,6 @@ let instanceAskomicsJobsViewManager ;
       let service = new RestServiceJs("sparqlquery");
       let jdata = this.prepareQuery(false, false);
       service.post(jdata,function(data) {
-        hideModal();
         if ('error' in data) {
           //alert(data.error);
           new AskomicsJobsViewManager().changeKoState(curId,data.error);
@@ -148,8 +147,6 @@ let instanceAskomicsJobsViewManager ;
                         );
 
           r.append(this.jobs[ij].datable_preview);
-          //$("#results").empty();
-          //$("#results").append(this.jobs[ij].datable_preview);
         }
       }
     }
