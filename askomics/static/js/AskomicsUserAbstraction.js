@@ -135,14 +135,14 @@ class AskomicsUserAbstraction {
       /* All relation are stored in tripletSubjectRelationObject */
       instanceUserAbstraction.tripletSubjectRelationObject = resultListTripletSubjectRelationObject.relations;
       /* == External Service can add external relation == */
-      console.log("RELATIONS::"+JSON.stringify(instanceUserAbstraction.tripletSubjectRelationObject));
+      //console.log("RELATIONS::"+JSON.stringify(instanceUserAbstraction.tripletSubjectRelationObject));
 
       instanceUserAbstraction.entityInformationList = {};
       instanceUserAbstraction.entityPositionableInformationList = {};
       instanceUserAbstraction.attributesEntityList = {};
       /* All information about an entity available in TPS are stored in entityInformationList */
       for (let entry in resultListTripletSubjectRelationObject.entities){
-        console.log("ENTITY:"+JSON.stringify(resultListTripletSubjectRelationObject.entities[entry]));
+        //console.log("ENTITY:"+JSON.stringify(resultListTripletSubjectRelationObject.entities[entry]));
         let graph = resultListTripletSubjectRelationObject.entities[entry].g;
         let uri = resultListTripletSubjectRelationObject.entities[entry].entity;
         let rel = resultListTripletSubjectRelationObject.entities[entry].property;
@@ -157,10 +157,10 @@ class AskomicsUserAbstraction {
         instanceUserAbstraction.entityInformationList[graph][uri][rel] = val;
 
       }
-      console.log("entityInformationList:"+JSON.stringify(instanceUserAbstraction.entityInformationList));
+      //console.log("entityInformationList:"+JSON.stringify(instanceUserAbstraction.entityInformationList));
 
 	    for (let entry2 in resultListTripletSubjectRelationObject.attributes){
-        console.log("ATTRIBUTE:"+JSON.stringify(resultListTripletSubjectRelationObject.attributes[entry2]));
+        //console.log("ATTRIBUTE:"+JSON.stringify(resultListTripletSubjectRelationObject.attributes[entry2]));
         let graph = resultListTripletSubjectRelationObject.attributes[entry2].g;
         let uri2 = resultListTripletSubjectRelationObject.attributes[entry2].entity;
         let attribute = {};
@@ -183,7 +183,7 @@ class AskomicsUserAbstraction {
       }
 
         for (let entry3 in resultListTripletSubjectRelationObject.categories){
-          console.log("CATEGORY:"+JSON.stringify(resultListTripletSubjectRelationObject.categories[entry3]));
+          //console.log("CATEGORY:"+JSON.stringify(resultListTripletSubjectRelationObject.categories[entry3]));
           let graph = resultListTripletSubjectRelationObject.categories[entry3].g;
           let uri3 = resultListTripletSubjectRelationObject.categories[entry3].entity;
           let attribute = {};
@@ -204,7 +204,7 @@ class AskomicsUserAbstraction {
         }
 
         for (var entry4 in resultListTripletSubjectRelationObject.positionable){
-          console.log('POSITIONABLE:'+JSON.stringify(resultListTripletSubjectRelationObject.positionable[entry4]));
+          //console.log('POSITIONABLE:'+JSON.stringify(resultListTripletSubjectRelationObject.positionable[entry4]));
           var uri4 = resultListTripletSubjectRelationObject.positionable[entry4].entity;
           if ( ! (uri4 in instanceUserAbstraction.entityPositionableInformationList) ) {
               instanceUserAbstraction.entityPositionableInformationList[uri4] = {};
@@ -212,8 +212,8 @@ class AskomicsUserAbstraction {
             throw new Error("URI:"+uri4+" have several taxon,ref, start, end labels... "+JSON.stringify(instanceUserAbstraction.entityPositionableInformationList[uri4]));
           }
         }
-        console.log("=================== attributesEntityList =========================");
-        console.log(JSON.stringify(instanceUserAbstraction.attributesEntityList));
+        //console.log("=================== attributesEntityList =========================");
+        //console.log(JSON.stringify(instanceUserAbstraction.attributesEntityList));
       });
     }
 
@@ -226,7 +226,7 @@ class AskomicsUserAbstraction {
           type: 'GET',
           url: 'http://prefix.cc/'+ns.trim()+'.file.json',
           success: function( result_json ) {
-            console.log("new prefix:"+ns+"==>"+result_json[ns]);
+            //console.log("new prefix:"+ns+"==>"+result_json[ns]);
             instanceUserAbstraction.prefix[ns] = result_json[ns];
           },
           error: function(req, status, ex) {},
