@@ -860,7 +860,7 @@
                             <td>{{this.end}}</td>
                             <td>{{this.duration}}</td>
                             <td>{{this.nr}}</td>
-                            <td><span onclick="new AskomicsJobsViewManager().removeJob({{@index}});" alt="delete" class="btn btn-danger btn-xs" aria-hidden="true"></td>
+                            <td><span onclick="new AskomicsJobsViewManager().removeJob({{@index}});" alt="delete" class="glyphicon glyphicon-remove" aria-hidden="true"></td>
                         </tr>
                         <tr>
                          <td colspan="7">

@@ -3,6 +3,8 @@
 class AskomicsForceLayoutManager {
 
   constructor() {
+    let currentFL = this;
+
     this.w        = $("#svgdiv").width();
     this.h        = 500 ;
     this.maxh     = 700 ;
@@ -12,19 +14,24 @@ class AskomicsForceLayoutManager {
     this.distance = 175 ;
     this.friction = 0.7 ;
 
-    this.menus = [] ;
+    this.menus = {} ;
 
-    this.menus.push(new AskomicsMenu(this,"menuFile","buttonViewFile","viewMenuFile",fileFuncMenu));
-    this.menus.push(new AskomicsMenu(this,"menuView","buttonViewListNodesAndLinks","viewListNodesAndLinks",entitiesAndRelationsFuncMenu));
-    this.menus.push(new AskomicsMenu(this,"menuShortcuts","buttonViewListShortcuts","viewListShortcuts",shortcutsFuncMenu));
-    this.menus.push(new AskomicsMenu(this,"menuShortcuts","buttonViewListGraph","viewListGraph",graphFuncMenu));
+    this.menus.menuFile = new AskomicsMenu(this,"menuFile","buttonViewFile","viewMenuFile",fileFuncMenu,false);
+    this.menus.menuGraph = new AskomicsMenu(this,"menuGraph","buttonViewListGraph","viewListGraph",graphFuncMenu);
+    this.menus.menuView = new AskomicsMenu(this,"menuView","buttonViewListNodesAndLinks","viewListNodesAndLinks",entitiesAndRelationsFuncMenu);
+    this.menus.menuShortcuts = new AskomicsMenu(this,"menuShortcuts","buttonViewListShortcuts","viewListShortcuts",shortcutsFuncMenu);
+
+    /* slide up when clicking in svgarea */
+    $("#svgdiv").on('click', function(d) {
+      for (let m in currentFL.menus) {
+        currentFL.menus[m].slideUp();
+      }
+    });
 
     this.optionsView = {
       attributesFiltering  : true,
       relationsName        : true
     };
-
-    let currentFL = this;
 
     /*************************************************/
     /* Context Menu definition inside SVG Div        */
@@ -340,7 +347,7 @@ class AskomicsForceLayoutManager {
     new AskomicsUserAbstraction().loadUserAbstraction();
     startPoint = new AskomicsUserAbstraction().buildBaseNode(startPoint.uri);
     /* initialize menus */
-    for (let im=0;im<this.menus.length;im++) { this.menus[im].start(); }
+    for (let m in this.menus) { this.menus[m].start(); }
 
 
     startPoint = new AskomicsUserAbstraction().buildBaseNode(startPoint.uri);
@@ -367,7 +374,7 @@ class AskomicsForceLayoutManager {
     d3.select("g").selectAll("*").remove();
     new AskomicsUserAbstraction().loadUserAbstraction();
     /* initialize menus */
-    for (let im=0;im<this.menus.length;im++) { this.menus[im].start(); }
+    for (let m in this.menus)  { this.menus[m].start(); }
 
     this.nodes.splice(0, this.nodes.length);
     this.links.splice(0, this.links.length);
@@ -404,7 +411,7 @@ class AskomicsForceLayoutManager {
 
   reset() {
     //reset view menu
-    for (let im=0;im<this.menus.length;im++) { this.menus[im].reset(); }
+    for (let m in this.menus)  { this.menus[m].reset(); }
 
     //unbind fullscreen buttons
     this.unbindFullscreenButtons();

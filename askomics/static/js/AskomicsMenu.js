@@ -5,30 +5,33 @@
 */
 class AskomicsMenu {
 
-  constructor (forceLayoutManager,nameMenu,buttonMenu,listObjectMenu,functFillMenu) {
+  constructor (forceLayoutManager,nameMenu,buttonMenu,listObjectMenu,functFillMenu,removeWhenReset=true) {
     this.flm = forceLayoutManager;
     this.name = nameMenu;
     this.buttonMenu = buttonMenu;
     this.listObjectMenu = listObjectMenu ;
     this.func = functFillMenu ;
+    this.removeWhenReset = removeWhenReset ;
   }
 
   reset() {
     let menu = this ;
     // Remove onclick
     $("#"+menu.buttonMenu).unbind();
-    $("#"+menu.listObjectMenu).empty();
+    if (menu.removeWhenReset)
+      $("#"+menu.listObjectMenu).empty();
   }
 
   start() {
     let menu = this ;
+    $("#"+menu.buttonMenu).prop('disabled', false);
     $("#"+menu.buttonMenu)
     .on('mousedown', function(event) {
       if ( $("#"+menu.listObjectMenu).is(':visible') ) {
         $("#"+menu.listObjectMenu).slideUp();
       }
       else {
-        $("#menuGraph").find("ul").slideUp();
+        menu.slideUp();
         $("#"+menu.listObjectMenu).slideDown();
       }
       event.stopPropagation();
@@ -36,6 +39,10 @@ class AskomicsMenu {
     menu.func(menu);
     //hide by default
     $("#"+menu.listObjectMenu).hide();
+  }
+
+  slideUp() {
+    $("#menuGraph").find("ul").slideUp();
   }
 }
 
@@ -136,6 +143,11 @@ var shortcutsFuncMenu = function(menu) {
     $("#"+menu.listObjectMenu).append($("<li></li>").attr("class","divider"));
     /* next entity */
   });
+
+  /* remove button if no shortcuts */
+  if ( Object.keys(lshortcuts).length <= 0 ) {
+    $("#"+menu.buttonMenu).prop('disabled', true);
+  }
 
 };
 /**************************************************************************/
