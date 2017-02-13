@@ -61,7 +61,7 @@ var fileFuncMenu = function(menu) {
 
   $("#dwl-query-sparql").on('click', function(d) {
     var service = new RestServiceJs("getSparqlQueryInTextFormat");
-    var jdata = prepareQuery(false,0, false);
+    var jdata = new AskomicsJobsViewManager().prepareQuery();
     var date = new Date().getTime();
     var current = this;
     var query = "" ;
