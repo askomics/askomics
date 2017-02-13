@@ -329,6 +329,10 @@ var graphFuncMenu = function(menu) {
           span.css("visibility","visible");
           __ihm.getAbstraction().activeGraph(cur_uri);
         }
+        /* update menu view with relations and objects availables */
+        __ihm.menus.menuView.reset();
+        __ihm.menus.menuView.start();
+
         /* remove old suggestion */
         __ihm.getSVGLayout().removeSuggestions();
         /* insert new suggestion */
