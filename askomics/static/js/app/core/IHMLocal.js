@@ -328,7 +328,7 @@ class IHMLocal {
               __ihm.enableDelButton();
             }
             for (let graphName in namedGraphs){
-                select.append($("<option></option>").attr("value", namedGraphs[graphName])
+                select.append($("<option></option>").attr("value", namedGraphs[graphName].g)
                                                     .append(__ihm.formatGraphName(namedGraphs[graphName])));
             }
         });
@@ -357,13 +357,13 @@ class IHMLocal {
       $('#btn-empty').prop('disabled', false);
     }
 
-    formatGraphName(name) {
+    formatGraphName(graph) {
       /*
       Transform the name of the graph into a readable string
       */
-      let date = name.substr(name.lastIndexOf('/') + 1);
-      let new_name = name.substr(0,name.lastIndexOf('/'));
-      return new_name+" ("+date+")";
+      let date = graph.g.substr(graph.g.lastIndexOf('_') + 1);
+      let new_name = graph.g.substr(0,graph.g.lastIndexOf('_'));
+      return new_name+" (<strong>date="+date+", ntriplets="+graph.count+"</strong>)";
     }
 
     showLoginForm() {

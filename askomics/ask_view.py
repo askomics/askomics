@@ -316,7 +316,10 @@ class AskView(object):
         namedGraphs = []
 
         for indexResult in range(len(res['results']['bindings'])):
-            namedGraphs.append(res['results']['bindings'][indexResult]['g']['value'])
+            namedGraphs.append({
+            'g' : res['results']['bindings'][indexResult]['g']['value'],
+            'count' : res['results']['bindings'][indexResult]['co']['value']
+            })
 
         return namedGraphs
 

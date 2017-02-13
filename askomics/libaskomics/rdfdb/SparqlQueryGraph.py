@@ -77,7 +77,7 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         """
         self.log.debug('---> get_private_graphs')
         return self.build_query_on_the_fly({
-            'select': '?g',
+            'select': '?g (count(*) as ?co)',
             'query': 'GRAPH ?g {\n'+
                  '?s ?p ?o.\n'+
                  "}\n"+
