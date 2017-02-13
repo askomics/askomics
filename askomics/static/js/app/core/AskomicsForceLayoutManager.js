@@ -119,12 +119,6 @@ class AskomicsForceLayoutManager {
                   callback: function(){
                     __ihm.stopSession();
                   }
-                },
-                "rmenu-quit"   : {
-                  name: "Quit",
-                  callback: function(key, options) {
-                    $("#dwl-query-sparql")[0].click();
-                  }
                 }
               },
               events: {
