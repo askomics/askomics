@@ -3,11 +3,18 @@
 class AskomicsUser {
 
     constructor(username, admin, blocked) {
-        this.username = username ;
-        this.admin = admin;
-        this.blocked = blocked;
+        this.username = username===undefined?"":username ;
+        this.admin    = admin===undefined?false:admin;
+        this.blocked  = blocked===undefined?true:blocked;
     }
 
+    isAdmin() {
+        return this.admin;
+    }
+
+    isBlocked() {
+        return this.blocked;
+    }
 
     logUser() {
         // displayNavbar(true, this.username, this.admin, this.blocked);

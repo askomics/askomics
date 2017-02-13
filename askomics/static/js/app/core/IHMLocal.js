@@ -6,6 +6,10 @@ let __ihm ;
 
 class IHMLocal {
     constructor() {
+
+      this.chunkSize        =      400000 ;
+      this.sizeFileMaxAdmin =  4000000000 ; // 4Go
+      this.sizeFileMaxUser  =     4000000 ; // 4 Mo
       /* Implement a Singleton */
       if ( __ihm !== undefined ) {
           return __ihm;
@@ -496,7 +500,10 @@ class IHMLocal {
     setUploadForm(content,titleForm,route_overview,callback) {
       var service = new RestServiceJs("up/");
       service.getAll(function(formHtmlforUploadFiles) {
+        let sizeFileMax = __ihm.user.isAdmin()?__ihm.sizeFileMaxAdmin:__ihm.sizeFileMaxUser;
+
         formHtmlforUploadFiles.html = formHtmlforUploadFiles.html.replace("___TITLE_UPLOAD___",titleForm);
+        formHtmlforUploadFiles.html = formHtmlforUploadFiles.html.replace("___SIZE_UPLOAD____",(sizeFileMax/(1000*1000))+" Mo");
 
         $(content).html(formHtmlforUploadFiles.html);
         /*
@@ -509,8 +516,8 @@ class IHMLocal {
             // Uncomment the following to send cross-domain cookies:
             //xhrFields: {withCredentials: true},
             url: '/up/file/',
-            maxChunkSize: 400000,
-            maxFileSize: 4000000000 // 4Go
+            maxChunkSize: this.chunkSize,
+            maxFileSize: sizeFileMax
         });
 
         // Enable iframe cross-domain access via redirect option
