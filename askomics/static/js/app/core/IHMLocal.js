@@ -44,23 +44,6 @@ class IHMLocal {
           return;
         }
       });
-    }
-
-    init() {
-      this.forceLayoutManager = new AskomicsForceLayoutManager("svgdiv");
-      this.user               = new AskomicsUser('');
-      this.userAbstraction    = new AskomicsUserAbstraction();
-
-      //TODO: Manage all view in a array with a generic way
-      this.shortcutsView      = new  ShortcutsParametersView();
-    }
-
-    start() {
-      $("#init").show();
-      $("#queryBuilder").hide();
-
-      this.user.checkUser();
-      this.loadStartPoints();
 
       // Loading a sparql query file
       $(".uploadBtn").change( function(event) {
@@ -75,24 +58,73 @@ class IHMLocal {
       });
     }
 
-    startSession(contents) {
-        //Following code is automatically executed at start or is triggered by the action of the user
-        /* To manage the D3.js Force Layout  */
-        new AskomicsUserAbstraction().loadUserAbstraction();
+    init() {
+      this.forceLayoutManager      = new AskomicsForceLayoutManager("svgdiv") ;
+      this.graphBuilder            = new AskomicsGraphBuilder()               ;
+      this.user                    = new AskomicsUser('')                     ;
+      this.localUserAbstraction    = new AskomicsUserAbstraction()            ;
 
+      //TODO: Manage all view in a array with a generic way
+      this.shortcutsView      = new  ShortcutsParametersView();
+
+      this.menus = {} ;
+
+      this.menus.menuFile = new AskomicsMenu("menuFile","buttonViewFile","viewMenuFile",fileFuncMenu,false);
+      this.menus.menuGraph = new AskomicsMenu("menuGraph","buttonViewListGraph","viewListGraph",graphFuncMenu);
+      this.menus.menuView = new AskomicsMenu("menuView","buttonViewListNodesAndLinks","viewListNodesAndLinks",entitiesAndRelationsFuncMenu);
+      this.menus.menuShortcuts = new AskomicsMenu("menuShortcuts","buttonViewListShortcuts","viewListShortcuts",shortcutsFuncMenu);
+
+    }
+
+    getAbstraction() {
+      return this.localUserAbstraction;
+    }
+
+    getGraphBuilder() {
+      return this.graphBuilder;
+    }
+
+    getSVGLayout() {
+      return this.forceLayoutManager;
+    }
+
+    start() {
+      $("#init").show();
+      $("#queryBuilder").hide();
+
+      this.user.checkUser();
+      this.loadStartPoints();
+    }
+
+    startSession(contents) {
+
+        //Following code is automatically executed at start or is triggered by the action of the user
         $("#init").hide();
         $("#queryBuilder").show();
 
-        __ihm.forceLayoutManager.init();
+        /* load local abtraction  */
+        this.localUserAbstraction.loadUserAbstraction();
+
+        /* initializing SVG graph */
+        __ihm.getSVGLayout().init();
+
+        /* initialize menus */
+        for (let m in this.menus) { this.menus[m].start(); }
+        /* slide up when clicking in svgarea */
+        $("#svgdiv").on('click', function(d) {
+          for (let m in __ihm.menus) {
+            __ihm.menus[m].slideUp();
+          }
+        });
 
         AskomicsObjectView.start();
         if ( contents === undefined ) {
           /* Get information about start point to bgin query */
           let startPoint = $('#startpoints').find(":selected").data("value");
           console.log("startpoint:"+JSON.stringify(startPoint));
-          __ihm.forceLayoutManager.start(startPoint);
+          __ihm.getSVGLayout().start(startPoint);
         } else {
-          __ihm.forceLayoutManager.startWithQuery(contents);
+          __ihm.getSVGLayout().startWithQuery(contents);
         }
     }
 
@@ -100,18 +132,25 @@ class IHMLocal {
 
       // hide graph
       $("#queryBuilder").hide();
-      __ihm.forceLayoutManager.reset();
+      __ihm.getSVGLayout().reset();
 
       //remove all rightviews
       AskomicsObjectView.removeAll();
       new AskomicsPanelViewBuilder().removeAll();
 
       //FL
-      this.forceLayoutManager.reset() ;
-      new AskomicsGraphBuilder().reset();
+      this.getSVGLayout().reset() ;
+      this.graphBuilder.reset();
 
       //unbind fullscreen buttons
       this.unbindFullscreenButtons();
+
+      // removes menus
+      for (let m in this.menus) {
+        this.menus[m].reset();
+      //  delete this.menus[m];
+      //  this.menus = [];
+      }
 
       // show the start point selector
       $("#init").show();
@@ -240,9 +279,6 @@ class IHMLocal {
 
 
     loadNamedGraphs() {
-
-        this.userAbstraction.loadUserAbstraction();
-
         var select = $('#dropNamedGraphSelected');
         select.empty();
         __ihm.manageDelGraphButton();

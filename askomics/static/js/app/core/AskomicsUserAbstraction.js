@@ -5,14 +5,8 @@
   Manage Abstraction storing in the TPS.
 */
 
-let instanceUserAbstraction ;
-
 class AskomicsUserAbstraction {
     constructor() {
-      /* Implement a Singleton */
-      if ( instanceUserAbstraction !== undefined ) {
-        return instanceUserAbstraction;
-      }
       this.prefix = {};
       /* Ontology is save locally to avoid request with TPS  */
       /* --------------------------------------------------- */
@@ -23,9 +17,6 @@ class AskomicsUserAbstraction {
       /* uri ->W get information about ref, taxon, start, end */
       this.entityPositionableInformationList = {}; /* entityPositionableInformationList[uri1] = { taxon, ref, start, end } */
       this.attributesOrderDisplay = {} ;           /* manage a order list by URInode */
-
-      instanceUserAbstraction = this;
-      return instanceUserAbstraction;
     }
 
     longRDF(litteral) {
@@ -79,43 +70,43 @@ class AskomicsUserAbstraction {
       return JSON.parse(JSON.stringify(this.entityPositionableInformationList)) ;
     }
 
-    static getTypeAttribute(attributeForUritype) {
+    getTypeAttribute(attributeForUritype) {
 
-      if ( attributeForUritype.indexOf(new AskomicsUserAbstraction().getPrefix("xsd")) === -1 ) {
+      if ( attributeForUritype.indexOf(this.getPrefix("xsd")) === -1 ) {
           return "category";
       }
 
-      if (attributeForUritype === new AskomicsUserAbstraction().longRDF("xsd:decimal")) {
+      if (attributeForUritype === this.longRDF("xsd:decimal")) {
         return "decimal";
       }
-      if (attributeForUritype === new AskomicsUserAbstraction().longRDF("xsd:string")) {
+      if (attributeForUritype === this.longRDF("xsd:string")) {
         return "string";
       }
-      if (attributeForUritype === new AskomicsUserAbstraction().longRDF("xsd:boolean")) {
+      if (attributeForUritype === this.longRDF("xsd:boolean")) {
         return "string";
       }
-      if (attributeForUritype === new AskomicsUserAbstraction().longRDF("xsd:nonNegativeInteger")) {
+      if (attributeForUritype === this.longRDF("xsd:nonNegativeInteger")) {
         return "decimal";
       }
-      if (attributeForUritype === new AskomicsUserAbstraction().longRDF("xsd:integer")) {
+      if (attributeForUritype === this.longRDF("xsd:integer")) {
         return "decimal";
       }
-      if (attributeForUritype === new AskomicsUserAbstraction().longRDF("xsd:float")) {
+      if (attributeForUritype === this.longRDF("xsd:float")) {
         return "decimal";
       }
-      if (attributeForUritype === new AskomicsUserAbstraction().longRDF("xsd:int")) {
+      if (attributeForUritype === this.longRDF("xsd:int")) {
         return "decimal";
       }
-      if (attributeForUritype === new AskomicsUserAbstraction().longRDF("xsd:long")) {
+      if (attributeForUritype === this.longRDF("xsd:long")) {
         return "decimal";
       }
-      if (attributeForUritype === new AskomicsUserAbstraction().longRDF("xsd:short")) {
+      if (attributeForUritype === this.longRDF("xsd:short")) {
         return "decimal";
       }
-      if (attributeForUritype === new AskomicsUserAbstraction().longRDF("xsd:byte")) {
+      if (attributeForUritype === this.longRDF("xsd:byte")) {
         return "decimal";
       }
-      if (attributeForUritype === new AskomicsUserAbstraction().longRDF("xsd:language")) {
+      if (attributeForUritype === this.longRDF("xsd:language")) {
         return "string";
       }
       return attributeForUritype;
@@ -126,11 +117,18 @@ class AskomicsUserAbstraction {
     */
     /* Request information in the model layer */
     //this.updateOntology();
-    loadUserAbstraction() {
+    loadUserAbstraction(urlService) {
 
+      let data = { };
+
+      if ( urlService !== undefined ) {
+        data.service= urlService ;
+      }
       var service = new RestServiceJs("userAbstraction");
 
-      service.getsync(function(resultListTripletSubjectRelationObject ) {
+      let instanceUserAbstraction = this;
+
+      service.postsync(data,function(resultListTripletSubjectRelationObject ) {
 
       /* All relation are stored in tripletSubjectRelationObject */
       instanceUserAbstraction.tripletSubjectRelationObject = resultListTripletSubjectRelationObject.relations;
@@ -168,7 +166,7 @@ class AskomicsUserAbstraction {
         attribute.uri   = resultListTripletSubjectRelationObject.attributes[entry2].attribute;
         attribute.label = resultListTripletSubjectRelationObject.attributes[entry2].labelAttribute;
         attribute.type  = resultListTripletSubjectRelationObject.attributes[entry2].typeAttribute;
-        attribute.basic_type  = AskomicsUserAbstraction.getTypeAttribute(resultListTripletSubjectRelationObject.attributes[entry2].typeAttribute);
+        attribute.basic_type  = instanceUserAbstraction.getTypeAttribute(resultListTripletSubjectRelationObject.attributes[entry2].typeAttribute);
 
 
         if ( ! (graph in instanceUserAbstraction.attributesEntityList) ) {
@@ -218,6 +216,7 @@ class AskomicsUserAbstraction {
     }
 
     getPrefix(ns) {
+      let instanceUserAbstraction = this;
       if (! (ns in this.prefix)) {
         //get info in prefix.cc
         //
@@ -264,7 +263,7 @@ class AskomicsUserAbstraction {
     buildBaseNode(uriEntity) {
       var node = {
         uri   : uriEntity,
-        label : this.getAttribEntity(uriEntity,new AskomicsUserAbstraction().longRDF('rdfs:label'))
+        label : this.getAttribEntity(uriEntity,this.longRDF('rdfs:label'))
       } ;
       return node;
     }

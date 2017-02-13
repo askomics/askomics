@@ -656,18 +656,23 @@ class AskView(object):
         return self.data
 
 
-    @view_config(route_name='getUserAbstraction', request_method='GET')
+    @view_config(route_name='getUserAbstraction', request_method='POST')
     def getUserAbstraction(self):
         """ Get the user asbtraction to manage relation inside javascript """
         self.log.debug("== getUserAbstraction ==")
+        body = self.request.json_body
 
         self.setGraphUser()
         self.data['graph'] = self.settings['graph']
         print("====================================================")
         self.log.debug(self.settings['graph'])
 
+        service = ''
+        if 'service' in body :
+            service = body['service']
+
         tse = TripleStoreExplorer(self.settings, self.request.session)
-        self.data.update(tse.getUserAbstraction())
+        self.data.update(tse.getUserAbstraction(service))
 
         return self.data
 

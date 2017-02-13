@@ -42,9 +42,9 @@ class AskomicsPositionableLinkView extends AskomicsObjectView {
     }
 
     // reload graph (it will recreate the link)
-    forceLayoutManager.update();
+    __ihm.getSVGLayout().update();
     //select the link
-    forceLayoutManager.setSelectLink(this.link);
+    __ihm.getSVGLayout().setSelectLink(this.link);
   }
 
   reverseDir() {
@@ -69,9 +69,9 @@ class AskomicsPositionableLinkView extends AskomicsObjectView {
     this.create();
 
     // reload graph (it will recreate the link)
-    forceLayoutManager.update();
+    __ihm.getSVGLayout().update();
     //select the link
-    forceLayoutManager.setSelectLink(this.link);
+    __ihm.getSVGLayout().setSelectLink(this.link);
   }
 
   changeStrict(strict) {

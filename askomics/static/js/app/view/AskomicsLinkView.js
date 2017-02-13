@@ -44,7 +44,7 @@ class AskomicsLinkView extends AskomicsObjectView {
 
     inpNeg.click(function(d) {
       let linkid = $(this).attr('linkid');
-      let link = new AskomicsGraphBuilder().getInstanciedLink(linkid);
+      let link = __ihm.getGraphBuilder().getInstanciedLink(linkid);
       if ($(this).is(':checked')) {
         link.negative = true;
       } else {
@@ -69,7 +69,7 @@ class AskomicsLinkView extends AskomicsObjectView {
 
     inpTrans.click(function(d) {
       let linkid = $(this).attr('linkid');
-      let link = new AskomicsGraphBuilder().getInstanciedLink(linkid);
+      let link = __ihm.getGraphBuilder().getInstanciedLink(linkid);
       if ($(this).is(':checked')) {
         link.transitive = true;
       } else {

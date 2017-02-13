@@ -55,7 +55,7 @@ class TripleStoreExplorer(ParamManager):
 
         return nodes
 
-    def getUserAbstraction(self):
+    def getUserAbstraction(self,service):
         """
         Get the user abstraction (relation and entity as subject and object)
 

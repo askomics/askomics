@@ -1,7 +1,6 @@
 /*jshint esversion: 6 */
 let instanceAskomicsJobsViewManager ;
 
-/* constructeur de AskomicsGraphBuilder */
   class AskomicsJobsViewManager {
     constructor() {
       /* Implement a Singleton */
@@ -30,7 +29,7 @@ let instanceAskomicsJobsViewManager ;
           duration : '',
           nr       : '' ,
           classtr  : 'bg-info', //bg-primary,bg-success,bg-warning,bg-danger,bg-info
-          stateToReload : JSON.stringify(new AskomicsGraphBuilder().getInternalState())
+          stateToReload : JSON.stringify(__ihm.getGraphBuilder().getInternalState())
       });
 
       new AskomicsJobsViewManager().listJobs();
@@ -97,12 +96,12 @@ let instanceAskomicsJobsViewManager ;
         //     :lim: LIMIT values for preview
         console.log('+++ prepareQuery +++');
 
-        var tab = new AskomicsGraphBuilder().buildConstraintsGraph();
+        var tab = __ihm.getGraphBuilder().buildConstraintsGraph();
         return {
                   'variates'             : tab[0],
                   'constraintesRelations': tab[1],
                   'constraintesFilters'  : tab[2],
-                  'removeGraph'          : new AskomicsUserAbstraction().listUnactivedGraph(),
+                  'removeGraph'          : __ihm.getAbstraction().listUnactivedGraph(),
                   'limit'                : this.npreview          // number of data preview
                };
     }

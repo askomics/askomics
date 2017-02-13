@@ -84,7 +84,7 @@ class AskomicsNodeView extends AskomicsObjectView {
       'constraintesRelations': tab[1],
       'limit'                :-1,
       'nofile'               : true,
-      'removeGraph'          : new AskomicsUserAbstraction().listUnactivedGraph(),
+      'removeGraph'          : __ihm.getAbstraction().listUnactivedGraph(),
       'export':false,
     };
 
@@ -305,8 +305,8 @@ class AskomicsNodeView extends AskomicsObjectView {
         }
         /* set up the list with possible entities to link */
 
-        for ( let n of new AskomicsGraphBuilder().nodes() ) {
-          let attributes = new AskomicsUserAbstraction().getAttributesWithURI(n.uri);
+        for ( let n of __ihm.getGraphBuilder().nodes() ) {
+          let attributes = __ihm.getAbstraction().getAttributesWithURI(n.uri);
           let firstPrintForThisNode = true;
           /* Manage Link node id  */
           if ( (n.id != curAtt.id) ) {
@@ -365,7 +365,7 @@ class AskomicsNodeView extends AskomicsObjectView {
         if ( nodeAttLink === undefined )
           return ;
 
-        let node2 = new AskomicsGraphBuilder().getInstanciedNode(nodeAttLink);
+        let node2 = __ihm.getGraphBuilder().getInstanciedNode(nodeAttLink);
 
         if ( type == "category" ) {
           mythis.node.setFilterLinkVariable('URICat'+sparlidCurrentAtt,node2,'URICat'+attLink);
@@ -632,7 +632,7 @@ class AskomicsNodeView extends AskomicsObjectView {
              .append(mythis.buildString(node.SPARQLid))
              .append(mythis.buildLinkVariable(node)));
 
-      var attributes = new AskomicsUserAbstraction().getAttributesWithURI(node.uri);
+      var attributes = __ihm.getAbstraction().getAttributesWithURI(node.uri);
 
       $.each(attributes, function(i) {
           let attribute = node.getAttributeOrCategoryForNode(attributes[i]);
