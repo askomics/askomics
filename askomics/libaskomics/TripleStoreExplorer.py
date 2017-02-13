@@ -41,6 +41,7 @@ class TripleStoreExplorer(ParamManager):
         results = ql.process_query(sqg.get_start_point().query)
 
         for result in results:
+            g  = result["g"]
             uri = result["nodeUri"]
             label = result["nodeLabel"]
 
@@ -51,7 +52,7 @@ class TripleStoreExplorer(ParamManager):
                 public = True
                 private = False
 
-            nodes.append({'uri': uri, 'label': label, 'public': public, 'private': private})
+            nodes.append({'g': g, 'uri': uri, 'label': label, 'public': public, 'private': private})
 
         return nodes
 

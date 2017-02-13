@@ -18,6 +18,7 @@ class IHMLocal {
       __ihm = this;
 
       this.init();
+      this.startPointsByGraph = {} ;
 
       // A helper for handlebars
       Handlebars.registerHelper('nl2br', function(text) {
@@ -125,7 +126,7 @@ class IHMLocal {
         if ( contents === undefined ) {
           /* Get information about start point to bgin query */
           let startPoint = $('#startpoints').find(":selected").data("value");
-          console.log("startpoint:"+JSON.stringify(startPoint));
+
           __ihm.getSVGLayout().start(startPoint);
         } else {
           __ihm.getSVGLayout().startWithQuery(contents);
@@ -213,7 +214,7 @@ class IHMLocal {
     }
 
     manageErrorMessage(data) {
-      console.log("manageErrorMessage");
+      console.log("manageErrorMessage - error inside => "+JSON.stringify('error' in data));
       // Remove last message
       $('#error_div').remove();
       // If there is an error message, how it
@@ -240,38 +241,62 @@ class IHMLocal {
       service.getAll(function(startPointsDict) {
           if (! __ihm.manageErrorMessage(startPointsDict)) return;
 
-          console.log(JSON.stringify(startPointsDict));
-
           $("#startpoints").empty();
+          $('#graph_startpoints').empty();
+
+          for (let g in __ihm.startPointsByGraph ) {
+            delete __ihm.startPointsByGraph[g];
+          }
+          __ihm.startPointsByGraph = {} ;
 
           $.each(startPointsDict.nodes, function(key, value) {
+            let textGraph;
 
-            let text;
-
-            if (value.public && value.private) {
-              text = $('<em></em>').append($('<strong></strong>').attr('class', 'text-warning')
-                                   .append($('<i></i>').attr('class', 'fa fa-globe text-warning'))
-                                   .append(' ')
-                                   .append($('<i></i>').attr('class', 'fa fa-lock text-primary'))
-                                   .append(' ' + value.label));
-            }
-
-            if (value.public && !value.private) {
-              text = $('<em></em>').attr('class', 'text-warning')
+            if (value.public) {
+              textGraph = $('<em></em>').attr('class', 'text-warning')
                                    .append($('<i></i>').attr('class', 'fa fa-globe'))
-                                   .append(' ' + value.label);
-            }
-
-            if (!value.public && value.private) {
-              text = $('<strong></strong>').attr('class', 'text-primary')
+                                   .append(' ' + value.g);
+            } else if (value.private) {
+              textGraph = $('<em></em>').attr('class', 'text-primary')
                                    .append($('<i></i>').attr('class', 'fa fa-lock'))
-                                   .append(' ' + value.label);
+                                   .append(' ' + value.g);
+            } else {
+               throw "unknwon access ";
             }
 
-            $('#startpoints').append($('<option></option>').attr('data-value', JSON.stringify(value))
-                                                             .append(text));
+            if ( ! (value.g in __ihm.startPointsByGraph) ) {
+                  $('#graph_startpoints').append(
+                      $('<option></option>')
+                                      .attr('data-value', JSON.stringify(value.g))
+                                      .click(function(){
+                                        $('#startpoints').empty();
+                                        for (let idxOption in __ihm.startPointsByGraph[value.g] ) {
+                                          let val = __ihm.startPointsByGraph[value.g][idxOption];
+                                          let text = "";
+                                          if (val.public) {
+                                            text = $('<em></em>').attr('class', 'text-warning')
+                                                                 .append($('<i></i>').attr('class', 'fa fa-globe'))
+                                                                 .append(' ' + val.label);
+                                          } else if (val.private) {
+                                            text = $('<em></em>').attr('class', 'text-primary')
+                                                                 .append($('<i></i>').attr('class', 'fa fa-lock'))
+                                                                 .append(' ' + val.label);
+                                          }  else {
+                                             throw "unknwon access ";
+                                          }
 
+                                          $('#startpoints').append($('<option></option>')
+                                                                        .attr('data-value', JSON.stringify(val))
+                                                                        .append(text));
+                                        }
+                                      })
+                                      .append(textGraph));
+                  __ihm.startPointsByGraph[value.g]=[];
+            }
+            __ihm.startPointsByGraph[value.g].push( value );
           });
+          $('#graph_startpoints').find(":selected").click();
+
           $("#starter").prop("disabled", true);
           $("#startpoints").click(function(){
               if ($("#starter").prop("disabled")) {

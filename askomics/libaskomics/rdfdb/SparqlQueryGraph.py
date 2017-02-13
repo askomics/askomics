@@ -33,8 +33,9 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         """
         self.log.debug('---> get_start_point')
         return self.build_query_on_the_fly({
-            'select': '?nodeUri ?nodeLabel ?accesLevel',
+            'select': '?g ?nodeUri ?nodeLabel ?accesLevel',
             'query': 'GRAPH ?g {\n'+
+                     '\t?nodeUri rdf:type owl:Class.\n'+
                      '\t?nodeUri displaySetting:startPoint "true"^^xsd:boolean .\n' +
                      '\t?nodeUri rdfs:label ?nodeLabel.\n'+
                      "}\n"+
