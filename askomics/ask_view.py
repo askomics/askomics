@@ -555,20 +555,25 @@ class AskView(object):
 
         # Allow data integration in public graph only if user is an admin
         if public and not self.request.session['admin']:
-            self.log.debug('/!\\ --> NOT ALLOWED TO INSERT IN PUBLIC GRAPH <-- /!\\')
-            public = False
+            self.data['error'] = ('/!\\ --> NOT ALLOWED TO INSERT IN PUBLIC GRAPH <-- /!\\')
+            return self.data
+
+        sfc = SourceFileConvertor(self.settings, self.request.session)
+        src_file = sfc.get_source_file(file_name)
+        src_file.set_forced_column_types(col_types)
+        src_file.set_disabled_columns(disabled_columns)
+        src_file.set_key_columns(key_columns)
 
         try:
-            sfc = SourceFileConvertor(self.settings, self.request.session)
-
-            src_file = sfc.get_source_file(file_name)
-            src_file.set_forced_column_types(col_types)
-            src_file.set_disabled_columns(disabled_columns)
-            src_file.set_key_columns(key_columns)
-
             method = 'load'
             self.data = src_file.persist(self.request.host_url, method, public)
         except Exception as e:
+            #rollback
+            sqb = SparqlQueryBuilder(self.settings, self.request.session)
+            query_laucher = QueryLauncher(self.settings, self.request.session)
+            query_laucher.execute_query(sqb.get_drop_named_graph(src_file.graph).query)
+            query_laucher.execute_query(sqb.get_delete_metadatas_of_graph(src_file.graph).query)
+
             traceback.print_exc(file=sys.stdout)
             self.data['error'] = 'Probleme with user data file ?</br>'+str(e)
             self.log.error(str(e))
@@ -612,6 +617,12 @@ class AskView(object):
             self.log.debug('--> Parsing GFF')
             src_file_gff.persist(self.request.host_url, method, public)
         except Exception as e:
+            #rollback
+            sqb = SparqlQueryBuilder(self.settings, self.request.session)
+            query_laucher = QueryLauncher(self.settings, self.request.session)
+            query_laucher.execute_query(sqb.get_drop_named_graph(src_file_gff.graph).query)
+            query_laucher.execute_query(sqb.get_delete_metadatas_of_graph(src_file_gff.graph).query)
+
             traceback.print_exc(file=sys.stdout)
             self.data['error'] = 'Problem when integration of '+file_name+'.</br>'+str(e)
             self.log.error(str(e))
@@ -650,6 +661,12 @@ class AskView(object):
         try:
             src_file_ttl.persist(self.request.host_url, public)
         except Exception as e:
+            #rollback
+            sqb = SparqlQueryBuilder(self.settings, self.request.session)
+            query_laucher = QueryLauncher(self.settings, self.request.session)
+            query_laucher.execute_query(sqb.get_drop_named_graph(src_file_ttl.graph).query)
+            query_laucher.execute_query(sqb.get_delete_metadatas_of_graph(src_file_ttl.graph).query)
+
             self.data['error'] = 'Problem when integration of ' + file_name + '</br>' + str(e)
             self.log.error('ERROR: ' + str(e))
 
@@ -1174,8 +1191,8 @@ class AskView(object):
         # Drop all this graph
         for graph in list_graph:
             try:
-                query_laucher.process_query(sqb.get_drop_named_graph(graph).query)
-                query_laucher.process_query(sqb.get_delete_metadatas_of_graph(graph).query)
+                query_laucher.execute_query(sqb.get_drop_named_graph(graph).query)
+                query_laucher.execute_query(sqb.get_delete_metadatas_of_graph(graph).query)
             except Exception as e:
                 return 'failed: ' + str(e)
 
