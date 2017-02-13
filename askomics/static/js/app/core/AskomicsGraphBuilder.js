@@ -10,7 +10,7 @@ const classesMapping = {
 /* constructeur de AskomicsGraphBuilder */
   class AskomicsGraphBuilder {
     constructor() {
-      this.AskomicsGraphBuilderVersion = 1.1 ;
+      this.AskomicsGraphBuilderVersion = 1.2 ;
       this.reset();
     }
 

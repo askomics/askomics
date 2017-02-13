@@ -146,11 +146,9 @@ class AskomicsForceLayoutManager {
         /* Definition of an event when CTRL key is actif to select several node */
         /* Definition of an event when a special key is pressed */
         $(document).keydown(function (e) {
-          console.log("keydown");
           // if ctrl is pressed, select several node
           if (e.keyCode == 17) {
             currentFL.ctrlPressed = true ;
-            console.log("TRUE");
           }
 
           // If enter is pressed, launch the query
@@ -161,7 +159,6 @@ class AskomicsForceLayoutManager {
         });
 
         $(document).keyup(function (e) {
-          console.log("keyup");
             currentFL.ctrlPressed = false;
         });
   }
@@ -428,7 +425,7 @@ class AskomicsForceLayoutManager {
       } else if (this.selectNodes.length === 1 ) {
         this.insertSuggestionsWithNewNode(suggestedList,this.selectNodes[0]);
       } else if (this.selectNodes.length === 2) {
-        this.insertSuggestionsWithTwoNodesInstancied(suggestedList,this.selectNodes[0],this.selectNodes[1]);
+        this.insertSuggestionsWithTwoNodesInstancied(this.selectNodes[0],this.selectNodes[1]);
       }
       //shortcuts
       this.insertSuggestionsShortcuts(suggestedList,this.selectNodes);
