@@ -78,6 +78,8 @@ class IHMLocal {
     startSession(contents) {
         //Following code is automatically executed at start or is triggered by the action of the user
         /* To manage the D3.js Force Layout  */
+        new AskomicsUserAbstraction().loadUserAbstraction();
+
         $("#init").hide();
         $("#queryBuilder").show();
 
@@ -85,7 +87,10 @@ class IHMLocal {
 
         AskomicsObjectView.start();
         if ( contents === undefined ) {
-          __ihm.forceLayoutManager.start();
+          /* Get information about start point to bgin query */
+          let startPoint = $('#startpoints').find(":selected").data("value");
+          console.log("startpoint:"+JSON.stringify(startPoint));
+          __ihm.forceLayoutManager.start(startPoint);
         } else {
           __ihm.forceLayoutManager.startWithQuery(contents);
         }

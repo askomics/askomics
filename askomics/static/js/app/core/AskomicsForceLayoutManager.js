@@ -4,19 +4,36 @@ class AskomicsForceLayoutManager {
 
   constructor(svgdiv_id) {
 
-    this.svgdivid = svgdiv_id;
-    this.svgdiv = $("#"+svgdiv_id) ;
+    /* constantes */
+    /* ---------- */
 
-    this.w        = 650;
-    this.h        = 600 ;
-    this.maxh     = 700 ;
-    this.curx     = 0   ;
-    this.cury     = 0   ;
-    this.charge   = -700 ;
+	  this.charge   = -700 ;
     this.distance = 175 ;
     this.friction = 0.7 ;
+    this.w        = 650;
+    this.h        = 600 ;
 
-    /* filter to hide and show proposition node and links */
+    this.svgdivid = svgdiv_id;
+    this.svgdiv = $("#"+svgdiv_id) ;
+    this.init();
+  }
+
+  reset() {
+    this.svgdiv.off();
+
+    for (let m in this.menus) {
+      this.menus[m].reset();
+      delete this.menus[m];
+    }
+    this.menus = [];
+
+    this.svgdiv.empty();
+
+    this.init();
+  }
+
+  init() {
+
     this._hideProposedUriNode    = [] ;
     this._hideProposedUriLink    = [] ;
     this._hideProposedUriShortcuts  = [] ;
@@ -33,49 +50,6 @@ class AskomicsForceLayoutManager {
     this.selectLink  = ''    ;
     this.enterPressed = false;
 
-
-    let currentFL = this;
-    /* Definition of an event when CTRL key is actif to select several node */
-    /* Definition of an event when a special key is pressed */
-    this.svgdiv.keydown(function (e) {
-      // if ctrl is pressed, select several node
-      if (e.keyCode == 17) {
-        currentFL.ctrlPressed = true ;
-      }
-
-      // If enter is pressed, launch the query
-      if (e.keyCode == 13 && $('#queryBuilder').is(':visible') && !this.enterPressed) {
-        new AskomicsJobsViewManager().createJob();
-        currentFL.enterPressed = true;
-      }
-    });
-
-    this.svgdiv.keyup(function (e) {
-        currentFL.ctrlPressed = false;
-
-        if (e.keyCode == 13){
-          currentFL.enterPressed = false;
-        }
-    });
-  }
-
-  reset() {
-    this.svgdiv.off();
-
-    this._hideProposedUriNode    = [] ;
-    this._hideProposedUriLink    = [] ;
-    this._hideProposedUriShortcuts  = [] ;
-
-    for (let m in this.menus) {
-      this.menus[m].reset();
-      delete this.menus[m];
-    }
-    this.menus = [];
-
-    this.svgdiv.empty();
-  }
-
-  init() {
     let currentFL = this;
     /* slide up when clicking in svgarea */
     this.svgdiv.on('click', function(d) {
@@ -198,6 +172,29 @@ class AskomicsForceLayoutManager {
                   }
             }
         });
+
+        /* Definition of an event when CTRL key is actif to select several node */
+        /* Definition of an event when a special key is pressed */
+        this.svgdiv.keydown(function (e) {
+          // if ctrl is pressed, select several node
+          if (e.keyCode == 17) {
+            currentFL.ctrlPressed = true ;
+          }
+
+          // If enter is pressed, launch the query
+          if (e.keyCode == 13 && $('#queryBuilder').is(':visible') && !this.enterPressed) {
+            new AskomicsJobsViewManager().createJob();
+            currentFL.enterPressed = true;
+          }
+        });
+
+        this.svgdiv.keyup(function (e) {
+            currentFL.ctrlPressed = false;
+
+            if (e.keyCode == 13){
+              currentFL.enterPressed = false;
+            }
+        });
   }
 
   getArrayForProposedUri(type) {
@@ -258,7 +255,7 @@ class AskomicsForceLayoutManager {
     });
   }
 
-  start() {
+  initSvg() {
     console.log("========== start session ForceLayoutManager ==============");
     console.log("D3.JS version:"+d3.version);
 
@@ -290,11 +287,12 @@ class AskomicsForceLayoutManager {
 
     this.nodes = this.force.nodes();
     this.links = this.force.links();
+  }
 
-    /* Get information about start point to bgin query */
-    let startPoint = $('#startpoints').find(":selected").data("value");
+
+  start(startPoint) {
+    this.initSvg();
     /* load abstraction */
-    new AskomicsUserAbstraction().loadUserAbstraction();
     startPoint = new AskomicsUserAbstraction().buildBaseNode(startPoint.uri);
     /* initialize menus */
     for (let m in this.menus) { this.menus[m].start(); }
@@ -320,8 +318,7 @@ class AskomicsForceLayoutManager {
   }
 
   startWithQuery(dump) {
-    d3.select("g").selectAll("*").remove();
-    new AskomicsUserAbstraction().loadUserAbstraction();
+    this.initSvg();
     /* initialize menus */
     for (let m in this.menus)  { this.menus[m].start(); }
 
