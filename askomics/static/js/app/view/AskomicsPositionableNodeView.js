@@ -12,6 +12,6 @@ class AskomicsPositionableNodeView extends AskomicsNodeView {
     let help_str = this.node.label+' is a positionable node. You can click on the positionable link to change the query.';
     help_str += ' Choose which attributes you want to see on the right panel.';
     help_str += ' Filter this attributes by choosing values';
-    displayModal(help_title, help_str, 'ok');
+    __ihm.displayModal(help_title, help_str, 'ok');
   }
 }

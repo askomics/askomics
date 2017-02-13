@@ -5,30 +5,32 @@
 */
 class AskomicsMenu {
 
-  constructor (forceLayoutManager,nameMenu,buttonMenu,listObjectMenu,functFillMenu) {
-    this.flm = forceLayoutManager;
+  constructor (nameMenu,buttonMenu,listObjectMenu,functFillMenu,removeWhenReset=true) {
     this.name = nameMenu;
     this.buttonMenu = buttonMenu;
     this.listObjectMenu = listObjectMenu ;
     this.func = functFillMenu ;
+    this.removeWhenReset = removeWhenReset ;
   }
 
   reset() {
     let menu = this ;
     // Remove onclick
     $("#"+menu.buttonMenu).unbind();
-    $("#"+menu.listObjectMenu).empty();
+    if (menu.removeWhenReset)
+      $("#"+menu.listObjectMenu).empty();
   }
 
   start() {
     let menu = this ;
+    $("#"+menu.buttonMenu).prop('disabled', false);
     $("#"+menu.buttonMenu)
     .on('mousedown', function(event) {
       if ( $("#"+menu.listObjectMenu).is(':visible') ) {
         $("#"+menu.listObjectMenu).slideUp();
       }
       else {
-        $("#menuGraph").find("ul").slideUp();
+        menu.slideUp();
         $("#"+menu.listObjectMenu).slideDown();
       }
       event.stopPropagation();
@@ -36,6 +38,10 @@ class AskomicsMenu {
     menu.func(menu);
     //hide by default
     $("#"+menu.listObjectMenu).hide();
+  }
+
+  slideUp() {
+    $("#menuGraph").find("ul").slideUp();
   }
 }
 
@@ -49,13 +55,13 @@ var fileFuncMenu = function(menu) {
   //$("#uploadedQuery")
   $("#dwl-query").on('click', function(d) {
     var date = new Date().getTime();
-    $(this).attr("href", "data:application/octet-stream," + encodeURIComponent(new AskomicsGraphBuilder().getInternalState())).attr("download", "query-" + date + ".json");
+    $(this).attr("href", "data:application/octet-stream," + encodeURIComponent(__ihm.getGraphBuilder().getInternalState())).attr("download", "query-" + date + ".json");
   });
 
 
   $("#dwl-query-sparql").on('click', function(d) {
     var service = new RestServiceJs("getSparqlQueryInTextFormat");
-    var jdata = prepareQuery(false,0, false);
+    var jdata = new AskomicsJobsViewManager().prepareQuery();
     var date = new Date().getTime();
     var current = this;
     var query = "" ;
@@ -113,29 +119,34 @@ var shortcutsFuncMenu = function(menu) {
   //console.log(JSON.stringify(lshortcuts));
   $.each(lshortcuts, function(i) {
     var li = buildLiView(i,lshortcuts[i].label,false);
-    menu.flm.offProposedUri("shortcuts",i);
+    __ihm.getSVGLayout().offProposedUri("shortcuts",i);
 
     li.on('click', function() {
       var span = $(this).find(".glyphicon");
       var cur_uri = $(this).attr("uri");
       if ( span.css("visibility") == "visible" ) {
         span.css("visibility","hidden");
-        menu.flm.offProposedUri("shortcuts",cur_uri);
+        __ihm.getSVGLayout().offProposedUri("shortcuts",cur_uri);
       } else {
         span.css("visibility","visible");
-        menu.flm.onProposedUri("shortcuts",cur_uri);
+        __ihm.getSVGLayout().onProposedUri("shortcuts",cur_uri);
       }
       // remove old suggestion
-      menu.flm.removeSuggestions();
+      __ihm.getSVGLayout().removeSuggestions();
       // insert new suggestion
-      menu.flm.insertSuggestions();
+      __ihm.getSVGLayout().insertSuggestions();
       // regenerate the graph
-      menu.flm.update();
+      __ihm.getSVGLayout().update();
     });
     $("#"+menu.listObjectMenu).append(li);
     $("#"+menu.listObjectMenu).append($("<li></li>").attr("class","divider"));
     /* next entity */
   });
+
+  /* remove button if no shortcuts */
+  if ( Object.keys(lshortcuts).length <= 0 ) {
+    $("#"+menu.buttonMenu).prop('disabled', true);
+  }
 
 };
 /**************************************************************************/
@@ -171,7 +182,7 @@ var entitiesAndRelationsFuncMenu = function(menu) {
   };
   var menuView = menu;
   // <li><a href="#" class="small" data-value="option1" tabIndex="-1"><input type="checkbox"/>&nbsp;Option 1</a></li>
-  let lentities = Object.keys(new AskomicsUserAbstraction().getEntities());
+  let lentities = Object.keys(__ihm.getAbstraction().getEntities());
 
   $.each(lentities, function(i) {
 
@@ -184,21 +195,21 @@ var entitiesAndRelationsFuncMenu = function(menu) {
       var cur_uri = $(this).attr("uri");
       if ( span.css("visibility") == "visible" ) {
         span.css("visibility","hidden");
-        menuView.flm.offProposedUri("node",cur_uri);
+        __ihm.getSVGLayout().offProposedUri("node",cur_uri);
         // disable all predicate associated with this node
         $(this).parent().parent().find("li[nodeuri='"+cur_uri+"']").attr("class","disabled");
       } else {
         span.css("visibility","visible");
-        menuView.flm.onProposedUri("node",cur_uri);
+        __ihm.getSVGLayout().onProposedUri("node",cur_uri);
         // enable all predicate associated with this node
         $(this).parent().parent().find("li[nodeuri='"+cur_uri+"']").removeAttr("class");
       }
       // remove old suggestion
-      menuView.flm.removeSuggestions();
+      __ihm.getSVGLayout().removeSuggestions();
       // insert new suggestion
-      menuView.flm.insertSuggestions();
+      __ihm.getSVGLayout().insertSuggestions();
       // regenerate the graph
-      menuView.flm.update();
+      __ihm.getSVGLayout().update();
     });
 
     $("#"+menuView.listObjectMenu).append(li);
@@ -206,7 +217,7 @@ var entitiesAndRelationsFuncMenu = function(menu) {
     /* Adding filter on relations  */
     /* --------------------------- */
 
-    let tab = new AskomicsUserAbstraction().getRelationsObjectsAndSubjectsWithURI(nodeuri);
+    let tab = __ihm.getAbstraction().getRelationsObjectsAndSubjectsWithURI(nodeuri);
     let listRelObj = tab[0];
 
     $.each(listRelObj, function(objecturi) {
@@ -225,17 +236,17 @@ var entitiesAndRelationsFuncMenu = function(menu) {
             var cur_uri = $(this).attr("uri");
             if ( span.css("visibility") == "visible" ) {
              span.css("visibility","hidden");
-             menuView.flm.offProposedUri("link",cur_uri);
+             __ihm.getSVGLayout().offProposedUri("link",cur_uri);
             } else {
              span.css("visibility","visible");
-             menuView.flm.onProposedUri("link",cur_uri);
+             __ihm.getSVGLayout().onProposedUri("link",cur_uri);
            }
            /* remove old suggestion */
-           menuView.flm.removeSuggestions();
+           __ihm.getSVGLayout().removeSuggestions();
            /* insert new suggestion */
-           menuView.flm.insertSuggestions();
+           __ihm.getSVGLayout().insertSuggestions();
            /* regenerate the graph */
-           menuView.flm.update();
+           __ihm.getSVGLayout().update();
         });
         $("#"+menuView.listObjectMenu).append(li);
       });
@@ -244,12 +255,12 @@ var entitiesAndRelationsFuncMenu = function(menu) {
     /* next entity */
   });
 
-  let positionableEntities = new AskomicsUserAbstraction().getPositionableEntities();
+  let positionableEntities = __ihm.getAbstraction().getPositionableEntities();
   if (Object.keys(positionableEntities).length>0) {
     /* positionable object */
     let posuri = "positionable";
     let li = buildLiView(posuri,posuri,false,true);
-    menuView.flm.offProposedUri("link",posuri);
+    __ihm.getSVGLayout().offProposedUri("link",posuri);
 
     li.attr("nodeuri",posuri)
       .on('click', function() {
@@ -257,17 +268,17 @@ var entitiesAndRelationsFuncMenu = function(menu) {
         var cur_uri = $(this).attr("uri");
         if ( span.css("visibility") == "visible" ) {
           span.css("visibility","hidden");
-          menuView.flm.offProposedUri("link",cur_uri);
+          __ihm.getSVGLayout().offProposedUri("link",cur_uri);
         } else {
           span.css("visibility","visible");
-          menuView.flm.onProposedUri("link",cur_uri);
+          __ihm.getSVGLayout().onProposedUri("link",cur_uri);
         }
         /* remove old suggestion */
-        menuView.flm.removeSuggestions();
+        __ihm.getSVGLayout().removeSuggestions();
         /* insert new suggestion */
-        menuView.flm.insertSuggestions();
+        __ihm.getSVGLayout().insertSuggestions();
         /* regenerate the graph */
-        menuView.flm.update();
+        __ihm.getSVGLayout().update();
       });
       $("#"+menuView.listObjectMenu).append(li);
       //$("#viewListNodesAndLinks").append($("<li></li>").attr("class","divider"));
@@ -303,7 +314,7 @@ var graphFuncMenu = function(menu) {
     return li;
   };
 
-  let listGraph = new AskomicsUserAbstraction().listGraphAvailable();
+  let listGraph = __ihm.getAbstraction().listGraphAvailable();
 
   $.each(listGraph, function(g) {
     let graph = g;
@@ -313,17 +324,21 @@ var graphFuncMenu = function(menu) {
         var cur_uri = $(this).attr("uri");
         if ( span.css("visibility") == "visible" ) {
           span.css("visibility","hidden");
-          new AskomicsUserAbstraction().unactiveGraph(cur_uri);
+          __ihm.getAbstraction().unactiveGraph(cur_uri);
         } else {
           span.css("visibility","visible");
-          new AskomicsUserAbstraction().activeGraph(cur_uri);
+          __ihm.getAbstraction().activeGraph(cur_uri);
         }
+        /* update menu view with relations and objects availables */
+        __ihm.menus.menuView.reset();
+        __ihm.menus.menuView.start();
+
         /* remove old suggestion */
-        menu.flm.removeSuggestions();
+        __ihm.getSVGLayout().removeSuggestions();
         /* insert new suggestion */
-        menu.flm.insertSuggestions();
+        __ihm.getSVGLayout().insertSuggestions();
         /* regenerate the graph */
-        menu.flm.update();
+        __ihm.getSVGLayout().update();
       });
     $("#"+menu.listObjectMenu).append(li).append($("<li></li>"));
   });

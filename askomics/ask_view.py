@@ -144,46 +144,46 @@ class AskView(object):
         private_stats = {}
 
         # Number of triples
-        results_pub = qlaucher.process_query(sqs.get_number_of_triples().query)
-        results_priv = qlaucher.process_query(sqs.get_number_of_triples().query)
+        results_pub = qlaucher.process_query(sqs.get_number_of_triples('public').query)
+        results_priv = qlaucher.process_query(sqs.get_number_of_triples('private').query)
 
         public_stats['ntriples'] = results_pub[0]['number']
         private_stats['ntriples'] = results_priv[0]['number']
 
         # Number of entities
-        results_pub = qlaucher.process_query(sqs.get_number_of_entities().query)
-        results_priv = qlaucher.process_query(sqs.get_number_of_entities().query)
+        results_pub = qlaucher.process_query(sqs.get_number_of_entities('public').query)
+        results_priv = qlaucher.process_query(sqs.get_number_of_entities('private').query)
 
         public_stats['nentities'] = results_pub[0]['number']
         private_stats['nentities'] = results_priv[0]['number']
 
         # Number of classes
-        results_pub = qlaucher.process_query(sqs.get_number_of_classes().query)
-        results_priv = qlaucher.process_query(sqs.get_number_of_classes().query)
+        results_pub = qlaucher.process_query(sqs.get_number_of_classes('public').query)
+        results_priv = qlaucher.process_query(sqs.get_number_of_classes('private').query)
 
         public_stats['nclasses'] = results_pub[0]['number']
         private_stats['nclasses'] = results_priv[0]['number']
 
         # Number of graphs
-        results_pub = qlaucher.process_query(sqs.get_number_of_subgraph().query)
-        results_priv = qlaucher.process_query(sqs.get_number_of_subgraph().query)
+        results_pub = qlaucher.process_query(sqs.get_number_of_subgraph('public').query)
+        results_priv = qlaucher.process_query(sqs.get_number_of_subgraph('private').query)
 
         public_stats['ngraphs'] = results_pub[0]['number']
         private_stats['ngraphs'] = results_priv[0]['number']
 
         # Graphs info
-        results_pub = qlaucher.process_query(sqs.get_subgraph_infos().query)
-        results_priv = qlaucher.process_query(sqs.get_subgraph_infos().query)
+        results_pub = qlaucher.process_query(sqs.get_subgraph_infos('public').query)
+        results_priv = qlaucher.process_query(sqs.get_subgraph_infos('private').query)
 
         public_stats['graphs'] = results_pub
         private_stats['graphs'] = results_priv
 
         # Classes and relations
-        results_pub = qlaucher.process_query(sqs.get_rel_of_classes().query)
-        results_priv = qlaucher.process_query(sqs.get_rel_of_classes().query)
+        results_pub = qlaucher.process_query(sqs.get_rel_of_classes('public').query)
+        results_priv = qlaucher.process_query(sqs.get_rel_of_classes('private').query)
 
-        # public_stats['class_rel'] = results_pub
-        # private_stats['class_rel'] = results_priv
+        public_stats['class_rel'] = results_pub
+        private_stats['class_rel'] = results_priv
 
         tmp = {}
 
@@ -204,8 +204,8 @@ class AskView(object):
         private_stats['class_rel'] = tmp
 
         # class and attributes
-        results_pub = qlaucher.process_query(sqs.get_attr_of_classes().query)
-        results_priv = qlaucher.process_query(sqs.get_attr_of_classes().query)
+        results_pub = qlaucher.process_query(sqs.get_attr_of_classes('public').query)
+        results_priv = qlaucher.process_query(sqs.get_attr_of_classes('private').query)
 
         tmp = {}
 
@@ -316,7 +316,10 @@ class AskView(object):
         namedGraphs = []
 
         for indexResult in range(len(res['results']['bindings'])):
-            namedGraphs.append(res['results']['bindings'][indexResult]['g']['value'])
+            namedGraphs.append({
+            'g' : res['results']['bindings'][indexResult]['g']['value'],
+            'count' : res['results']['bindings'][indexResult]['co']['value']
+            })
 
         return namedGraphs
 
@@ -555,20 +558,25 @@ class AskView(object):
 
         # Allow data integration in public graph only if user is an admin
         if public and not self.request.session['admin']:
-            self.log.debug('/!\\ --> NOT ALLOWED TO INSERT IN PUBLIC GRAPH <-- /!\\')
-            public = False
+            self.data['error'] = ('/!\\ --> NOT ALLOWED TO INSERT IN PUBLIC GRAPH <-- /!\\')
+            return self.data
+
+        sfc = SourceFileConvertor(self.settings, self.request.session)
+        src_file = sfc.get_source_file(file_name)
+        src_file.set_forced_column_types(col_types)
+        src_file.set_disabled_columns(disabled_columns)
+        src_file.set_key_columns(key_columns)
 
         try:
-            sfc = SourceFileConvertor(self.settings, self.request.session)
-
-            src_file = sfc.get_source_file(file_name)
-            src_file.set_forced_column_types(col_types)
-            src_file.set_disabled_columns(disabled_columns)
-            src_file.set_key_columns(key_columns)
-
             method = 'load'
             self.data = src_file.persist(self.request.host_url, method, public)
         except Exception as e:
+            #rollback
+            sqb = SparqlQueryBuilder(self.settings, self.request.session)
+            query_laucher = QueryLauncher(self.settings, self.request.session)
+            query_laucher.execute_query(sqb.get_drop_named_graph(src_file.graph).query)
+            query_laucher.execute_query(sqb.get_delete_metadatas_of_graph(src_file.graph).query)
+
             traceback.print_exc(file=sys.stdout)
             self.data['error'] = 'Probleme with user data file ?</br>'+str(e)
             self.log.error(str(e))
@@ -612,6 +620,12 @@ class AskView(object):
             self.log.debug('--> Parsing GFF')
             src_file_gff.persist(self.request.host_url, method, public)
         except Exception as e:
+            #rollback
+            sqb = SparqlQueryBuilder(self.settings, self.request.session)
+            query_laucher = QueryLauncher(self.settings, self.request.session)
+            query_laucher.execute_query(sqb.get_drop_named_graph(src_file_gff.graph).query)
+            query_laucher.execute_query(sqb.get_delete_metadatas_of_graph(src_file_gff.graph).query)
+
             traceback.print_exc(file=sys.stdout)
             self.data['error'] = 'Problem when integration of '+file_name+'.</br>'+str(e)
             self.log.error(str(e))
@@ -650,24 +664,35 @@ class AskView(object):
         try:
             src_file_ttl.persist(self.request.host_url, public)
         except Exception as e:
+            #rollback
+            sqb = SparqlQueryBuilder(self.settings, self.request.session)
+            query_laucher = QueryLauncher(self.settings, self.request.session)
+            query_laucher.execute_query(sqb.get_drop_named_graph(src_file_ttl.graph).query)
+            query_laucher.execute_query(sqb.get_delete_metadatas_of_graph(src_file_ttl.graph).query)
+
             self.data['error'] = 'Problem when integration of ' + file_name + '</br>' + str(e)
             self.log.error('ERROR: ' + str(e))
 
         return self.data
 
 
-    @view_config(route_name='getUserAbstraction', request_method='GET')
+    @view_config(route_name='getUserAbstraction', request_method='POST')
     def getUserAbstraction(self):
         """ Get the user asbtraction to manage relation inside javascript """
         self.log.debug("== getUserAbstraction ==")
+        body = self.request.json_body
 
         self.setGraphUser()
         self.data['graph'] = self.settings['graph']
         print("====================================================")
         self.log.debug(self.settings['graph'])
 
+        service = ''
+        if 'service' in body :
+            service = body['service']
+
         tse = TripleStoreExplorer(self.settings, self.request.session)
-        self.data.update(tse.getUserAbstraction())
+        self.data.update(tse.getUserAbstraction(service))
 
         return self.data
 
@@ -1169,8 +1194,8 @@ class AskView(object):
         # Drop all this graph
         for graph in list_graph:
             try:
-                query_laucher.process_query(sqb.get_drop_named_graph(graph).query)
-                query_laucher.process_query(sqb.get_delete_metadatas_of_graph(graph).query)
+                query_laucher.execute_query(sqb.get_drop_named_graph(graph).query)
+                query_laucher.execute_query(sqb.get_delete_metadatas_of_graph(graph).query)
             except Exception as e:
                 return 'failed: ' + str(e)
 

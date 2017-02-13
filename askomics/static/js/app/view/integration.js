@@ -230,7 +230,7 @@ function previewTtl(file_elem) {
     });
 
     if ( key_columns.length <= 0 ) {
-        displayModal('Select one column to define a unique key', '', 'Close');
+        __ihm.displayModal('Select one column to define a unique key', '', 'Close');
         return;
     }
 
@@ -242,11 +242,11 @@ function previewTtl(file_elem) {
 
     service.post(model, function(data) {
         if (data == 'forbidden') {
-          showLoginForm();
+          __ihm.showLoginForm();
           return;
         }
         if (data == 'blocked') {
-          displayBlockedPage();
+          __ihm.displayBlockedPage();
           return;
         }
         file_elem.find(".preview_field").html(data);
@@ -324,7 +324,7 @@ function checkExistingData(file_elem) {
     });
 
     if ( key_columns.length <= 0 ) {
-        displayModal('Select one column to define a unique key', '', 'Close');
+        __ihm.displayModal('Select one column to define a unique key', '', 'Close');
         return;
     }
 
@@ -394,11 +394,11 @@ function loadSourceFile(file_elem, pub) {
     });
 
     if ( key_columns.length <= 0 ) {
-        displayModal('Select one column to define a unique key', '', 'Close');
+        __ihm.displayModal('Select one column to define a unique key', '', 'Close');
         return;
     }
 
-    displayModal('Please wait', '', 'Close');
+    __ihm.displayModal('Please wait', '', 'Close');
 
     var service = new RestServiceJs("load_data_into_graph");
     var model = { 'file_name': $("#"+idfile).attr("filename"),
@@ -416,7 +416,7 @@ function loadSourceFile(file_elem, pub) {
           displayBlockedPage($('.username').attr('id'));
           return;
         }
-        hideModal();
+        __ihm.hideModal();
         var insert_status_elem = file_elem.find(".insert_status").first();
         var insert_warning_elem = file_elem.find(".insert_warning").first();
         if (data.status != "ok") {
@@ -465,12 +465,7 @@ function loadSourceFile(file_elem, pub) {
         });
     });
 
-    // when user upload a file, reset the stats and clear the results table
-    // (it no longer reflects reality)
-    if (!$('#results').is(':empty')){
-        $("#results").empty();
-    }
-    resetStats();
+    __ihm.resetStats();
 }
 
 /**
@@ -498,7 +493,7 @@ function loadSourceFileGff(idfile, pub) {
         }
     });
 
-    displayModal('Please wait', '', 'Close');
+    __ihm.displayModal('Please wait', '', 'Close');
 
     let service = new RestServiceJs("load_gff_into_graph");
 
@@ -545,13 +540,13 @@ function loadSourceFileGff(idfile, pub) {
                                                   .addClass('show alert-success');
         }
 
-        hideModal();
+        __ihm.hideModal();
     });
 }
 
 function loadSourceFileTtl(idfile, pub) {
     console.log('--- loadSourceFileTtl ---');
-    displayModal('Please wait', '', 'Close');
+    __ihm.displayModal('Please wait', '', 'Close');
 
     let file_elem = $("#source-file-ttl-" + idfile);
 
@@ -586,6 +581,6 @@ function loadSourceFileTtl(idfile, pub) {
                                                   .removeClass('hidden alert-warning')
                                                   .addClass('show alert-success');
         }
-        hideModal();
+        __ihm.hideModal();
     });
 }

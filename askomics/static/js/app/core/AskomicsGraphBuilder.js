@@ -1,6 +1,5 @@
 /*jshint esversion: 6 */
 const classesMapping = {
-  'GraphNode': GraphNode,
   'AskomicsPositionableNode': AskomicsPositionableNode,
   'AskomicsNode': AskomicsNode,
   'GraphLink': GraphLink,
@@ -8,20 +7,11 @@ const classesMapping = {
   'AskomicsPositionableLink': AskomicsPositionableLink
 };
 
-let instanceGraphBuilder ;
-
 /* constructeur de AskomicsGraphBuilder */
   class AskomicsGraphBuilder {
     constructor() {
-
-      /* Implement a Singleton */
-      if ( instanceGraphBuilder !== undefined ) {
-          return instanceGraphBuilder;
-      }
-
-      this.AskomicsGraphBuilderVersion = 1.1 ;
+      this.AskomicsGraphBuilderVersion = 1.2 ;
       this.reset();
-      instanceGraphBuilder = this;
     }
 
     reset() {
