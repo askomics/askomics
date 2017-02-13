@@ -28,24 +28,24 @@ class IHMLocal {
 
       $('#full-screen-graph').click(function() {
         if ($('#icon-resize-graph').attr('value') == 'small') {
-          currentFL.fullsizeGraph();
+          __ihm.fullsizeGraph();
           return;
         }
 
         if ($('#icon-resize-graph').attr('value') == 'full') {
-          currentFL.normalsizeGraph();
+          __ihm.normalsizeGraph();
           return;
         }
       });
 
       $('#full-screen-attr').click(function() {
         if ($('#icon-resize-attr').attr('value') == 'small') {
-          currentFL.fullsizeRightview();
+          __ihm.fullsizeRightview();
           return;
         }
 
         if ($('#icon-resize-attr').attr('value') == 'full') {
-          currentFL.normalsizeRightview();
+          __ihm.normalsizeRightview();
           return;
         }
       });
