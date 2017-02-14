@@ -310,7 +310,6 @@ class AskomicsNodeView extends AskomicsObjectView {
           let firstPrintForThisNode = true;
           /* Manage Link node id  */
           if ( (n.id != curAtt.id) ) {
-            console.log(n.id);
             inp.append($('<option></option>').prop('disabled', true).html("<b><i> --- "+ n.formatInHtmlLabelEntity()+" --- </i></b>"));
             firstPrintForThisNode = false;
             //ID Label is a string
@@ -329,10 +328,8 @@ class AskomicsNodeView extends AskomicsObjectView {
           /* Manage Attributes */
           for (let a of attributes ) {
             let att = n.getAttributeOrCategoryForNode(a);
-            console.log(JSON.stringify(att));
             /* we can not link the attribute with himself */
             if ( att.id == curAtt.id ) continue ;
-            console.log(att.label+"=>"+att.basic_type+"<>"+curAtt.basic_type);
             if ( 'type' in curAtt) {
               /* we can not link attributes with diffente type */
               if ( att.basic_type != curAtt.basic_type ) continue;
@@ -535,7 +532,6 @@ class AskomicsNodeView extends AskomicsObjectView {
           if (icon.hasClass('fa-plus')) {
               icon.removeClass('fa-plus');
               icon.addClass('fa-search-minus');
-              console.log(sparqlid);
               mythis.node.inverseMatch[sparqlid] = 'inverseWithNoRelation';
           } /*
           else if ( icon.hasClass('fa-minus') ) {
