@@ -74,6 +74,10 @@ pre {
     float: left;
 }
 
+#graph_startpoints {
+    width: 30%;
+}
+
 #startpoints {
     width: 30%;
 }
