@@ -224,7 +224,50 @@
           This path can then be transformed into a SPARQL query that can be
           executed on the original dataset.
          </p>
+         <br/>
+
+         <hr/>
+         <h3 class="header-div">AskOmics Data repositories</h3>
+         <hr/>
+
+          <a target="_blank" href="https://bipaa.genouest.org/is/">
+            <img src="static/images/logos/Logo-BIPAA-horiz-trans.png" height="72" alt="logo BIPAA"/>
+          </a>
+          <a target="_blank" href="https://bbip.genouest.org/is/">
+            <img src="static/images/logos/Logo-BBIP-horiz-trans.png" height="72" alt="logo BBIP"/>
+          </a>
+          <!--<img target="_blank" src="static/images/logos/Logo-GOGEPP.png" height="42" alt="logo genouest"/>-->
+
+          <br/>
+
           <hr/>
+          <h3 class="header-div">Partnerships</h3>
+          <hr/>
+          <p>
+            AskOmics is a collaborative project supporting with a strong scientific partnerships with:
+          </p>
+            <a target="_blank" href="http://www6.rennes.inra.fr/igepp_eng/">
+
+             <strong>Institute for Genetics, Environment and Plant Protection – Igepp Unit</strong>
+             <img target="_blank" src="static/images/logos/Logo_Tutelles_Igepp.jpg" height="72" alt="logo IGEPP"/>
+
+          <hr/>
+          <br/>
+           <a target="_blank" href="http://www.irisa.fr/dyliss/">
+
+            <strong>Dyliss  - DYnamics, Logics and Inference for biological Systems and Sequences</strong>
+            <img target="_blank" src="static/images/logos/dyliss_logo_couleur_15pourcent.png" height="72" alt="logo IGEPP"/>
+
+          </a>
+          <hr/>
+          <br/>
+
+          <a target="_blank" href="https://www.genouest.org/">
+            <strong>GenOuest BioInformatics Platform</strong>
+            <img src="static/images/logos/logoGO.png" height="72" alt="logo GenOuest"/>
+          </a>
+
+
         </div>
 
         <!-- Login form -->
