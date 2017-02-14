@@ -47,7 +47,7 @@ class AskomicsObjectView {
 
     $("#showNode").unbind();
     $("#deleteNode").unbind();
-    $('#helpNode').unbind();
+  //  $('#helpNode').unbind();
   }
 
   show() {
@@ -193,7 +193,7 @@ class AskomicsObjectView {
         throw "Unknown type of this Graph Object:"+type;
       }
     });
-
+/*
     $('#helpNode').click(function() {
       var id = $("#objectName").attr("objid");
       var type = $("#objectName").attr("type");
@@ -210,5 +210,6 @@ class AskomicsObjectView {
       if ( elem !== undefined )
         elem.getPanelView().display_help();
     });
+*/
   }
 }
