@@ -255,11 +255,11 @@ class IHMLocal {
             if (value.public) {
               textGraph = $('<em></em>').attr('class', 'text-warning')
                                    .append($('<i></i>').attr('class', 'fa fa-globe'))
-                                   .append(' ' + value.g);
+                                   .append(' ' + __ihm.graphname(value.g).name);
             } else if (value.private) {
               textGraph = $('<em></em>').attr('class', 'text-primary')
                                    .append($('<i></i>').attr('class', 'fa fa-lock'))
-                                   .append(' ' + value.g);
+                                   .append(' ' + __ihm.graphname(value.g).name);
             } else {
                throw "unknwon access ";
             }
@@ -357,13 +357,18 @@ class IHMLocal {
       $('#btn-empty').prop('disabled', false);
     }
 
+    graphname(graphn) {
+      let date = graphn.substr(graphn.lastIndexOf('_') + 1);
+      let new_name = graphn.substr(0,graphn.lastIndexOf('_'));
+      return { 'date' : date , 'name' : new_name } ;
+    }
+
     formatGraphName(graph) {
       /*
       Transform the name of the graph into a readable string
       */
-      let date = graph.g.substr(graph.g.lastIndexOf('_') + 1);
-      let new_name = graph.g.substr(0,graph.g.lastIndexOf('_'));
-      return new_name+" (<strong>date="+date+", ntriplets="+graph.count+"</strong>)";
+      let ret = __ihm.graphname(graph.g);
+      return "<em>"+ret.name+"</em> (<strong>date="+ret.date+", ntriplets="+graph.count+"</strong>)";
     }
 
     showLoginForm() {
