@@ -316,7 +316,7 @@ class AskomicsNode extends GraphNode {
   }
 
   setFilterLinkVariable(SPARQLid1,node2,SPARQLid2) {
-    this.setFilterAttributes(SPARQLid1,SPARQLid2,'FILTER ( ?'+SPARQLid1+'=?'+SPARQLid2+')');
+    this.setFilterAttributes(SPARQLid1,SPARQLid2,'FILTER (?'+SPARQLid1+'=?'+SPARQLid2+')');
     if (! (SPARQLid1 in this.linkvar) ) {
       this.linkvar[SPARQLid1] = {};
       this.linkvar[SPARQLid1].cpt = 0;       /* counter about this attribute */
@@ -344,7 +344,7 @@ class AskomicsNode extends GraphNode {
     this.setFilterAttributes(SPARQLid1,"","");
 
     this.linkvar[SPARQLid1].cpt--;
-    let n = new AskomicsGraphBuilder().nodes(this.linkvar[SPARQLid1].nodelink);
+    let n = __ihm.getGraphBuilder().nodes(this.linkvar[SPARQLid1].nodelink);
     n.linkvar[SPARQLid2].cpt--;
 
     if ( this.linkvar[SPARQLid1].cpt <= 0 ) delete this.linkvar[SPARQLid1];
