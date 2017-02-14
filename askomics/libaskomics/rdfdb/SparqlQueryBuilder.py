@@ -52,7 +52,7 @@ class SparqlQueryBuilder(ParamManager):
                     raise ValueError('SparqlQueryBuilder::build_query_on_the_fly: bad initialization of settings["graph"]["private"]!')
 
                 listFrom = self.settings['graph']['public'] + self.settings['graph']['private']
-                query += "FROM <>\n"
+                # query += "FROM <>\n"
                 self.log.debug(" === Graphs Available === ")
                 self.log.debug(listFrom)
                 if len(listFrom)<=0:

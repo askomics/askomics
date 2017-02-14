@@ -329,12 +329,14 @@ class AskView(object):
 
         body = self.request.json_body
 
+        self.setGraphUser()
+
         sqg = SparqlQueryGraph(self.settings, self.request.session)
         ql = QueryLauncher(self.settings, self.request.session)
 
         # Check if the two entity are positionable
         positionable1 = ql.process_query(sqg.get_if_positionable(body['node']).query)
-        positionable2 = ql.process_query(sqg.get_if_positionable(body['node']).query)
+        positionable2 = ql.process_query(sqg.get_if_positionable(body['second_node']).query)
 
         if positionable1 == 0 or positionable2 == 0:
             self.data['error'] = 'Entities are not positionable nodes !'
@@ -553,6 +555,10 @@ class AskView(object):
         key_columns = body["key_columns"]
         public = body['public']
 
+        method = 'load'
+        if 'method' in body:
+            method = body['method']
+
         # Allow data integration in public graph only if user is an admin
         if public and not self.request.session['admin']:
             self.log.debug('/!\\ --> NOT ALLOWED TO INSERT IN PUBLIC GRAPH <-- /!\\')
@@ -566,7 +572,6 @@ class AskView(object):
             src_file.set_disabled_columns(disabled_columns)
             src_file.set_key_columns(key_columns)
 
-            method = 'load'
             self.data = src_file.persist(self.request.host_url, method, public)
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
@@ -599,6 +604,10 @@ class AskView(object):
         entities = body['entities']
         public = body['public']
 
+        method = 'load'
+        if 'method' in body:
+            method = body['method']
+
         # Allow data integration in public graph only if user is an admin
         if public and not self.request.session['admin']:
             self.log.debug('/!\\ --> NOT ALLOWED TO INSERT IN PUBLIC GRAPH <-- /!\\')
@@ -607,15 +616,15 @@ class AskView(object):
         sfc = SourceFileConvertor(self.settings, self.request.session)
         src_file_gff = sfc.get_source_file_gff(file_name, taxon, entities)
 
-        method = 'load'
         try:
             self.log.debug('--> Parsing GFF')
-            src_file_gff.persist(self.request.host_url, method, public)
+            src_file_gff.persist(self.request.host_url, 'noload', public)
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
             self.data['error'] = 'Problem when integration of '+file_name+'.</br>'+str(e)
             self.log.error(str(e))
 
+        self.data['status'] = 'ok'
         return self.data
 
     @view_config(route_name='load_ttl_into_graph', request_method='POST')
@@ -638,6 +647,9 @@ class AskView(object):
         body = self.request.json_body
         file_name = body['file_name']
         public = body['public']
+        method = 'load'
+        if 'method' in body:
+            method = body['method']
 
         # Allow data integration in public graph only if user is an admin
         if public and not self.request.session['admin']:
@@ -648,11 +660,12 @@ class AskView(object):
         src_file_ttl = sfc.get_source_file(file_name)
 
         try:
-            src_file_ttl.persist(self.request.host_url, public)
+            src_file_ttl.persist(self.request.host_url, public, method)
         except Exception as e:
             self.data['error'] = 'Problem when integration of ' + file_name + '</br>' + str(e)
             self.log.error('ERROR: ' + str(e))
 
+        self.data['status'] = 'ok'
         return self.data
 
 
@@ -789,6 +802,9 @@ class AskView(object):
     def getSparqlQueryInTextFormat(self):
         """ Build a request from a json whith the following contents :variates,constraintesRelations,constraintesFilters"""
         self.log.debug("== Attribute Value ==")
+
+        self.setGraphUser()
+
         try:
             tse = TripleStoreExplorer(self.settings, self.request.session)
 
