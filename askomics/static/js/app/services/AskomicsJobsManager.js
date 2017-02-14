@@ -87,6 +87,7 @@ let instanceAskomicsJobsViewManager ;
       service.get(this.jobs[index].csv);
       this.jobs.splice(index, 1);
       new AskomicsJobsViewManager().listJobs();
+      if (this.jobs.length<=0) $("#interrogation").trigger( "click" );
     }
 
     prepareQuery() {
