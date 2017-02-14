@@ -19,7 +19,14 @@ class ResultsBuilder(ParamManager):
     def gen_csv_table(self, results, sep='\t'):
         """  """
         if len(results)>0:
+
             sparql_variables = results[0].keys()
+            #prevent no value 
+            for var in sparql_variables:
+                for result in results:
+                    if var not in result:
+                        result[var]=''
+
             yield sep.join(sparql_variables)
             yield from ( sep.join(result[var] for var in sparql_variables)
                         for result in results)
