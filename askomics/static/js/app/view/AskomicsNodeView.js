@@ -534,13 +534,14 @@ class AskomicsNodeView extends AskomicsObjectView {
           if (icon.hasClass('fa-plus')) {
               icon.removeClass('fa-plus');
               icon.addClass('fa-search-minus');
+              console.log(sparqlid);
               mythis.node.inverseMatch[sparqlid] = 'inverseWithNoRelation';
-          }
+          } /*
           else if ( icon.hasClass('fa-minus') ) {
                 icon.removeClass('fa-minus');
                 icon.addClass('fa-search-minus');
                 mythis.node.inverseMatch[sparqlid] = 'inverseWithNoRelation';
-          } else {
+          } */ else {
               icon.removeClass('fa-search-minus');
               icon.addClass('fa-plus');
               delete mythis.node.inverseMatch[sparqlid] ;
