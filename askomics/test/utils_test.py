@@ -1,7 +1,10 @@
+"""Contain UtilsTest"""
+
 import unittest
 from askomics.libaskomics.utils import *
 
 class UtilsTest(unittest.TestCase):
+    """Contain all test for utils.py"""
 
     @staticmethod
     def test_property():
