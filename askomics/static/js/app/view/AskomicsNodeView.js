@@ -379,24 +379,21 @@ class AskomicsNodeView extends AskomicsObjectView {
 
     haveSelectionUserValue(currentIcon) {
       //filter on node.values does not work (event change is not call if user click just after to fill input box)
-      let hasSelection = false ;
+
       let lv = $(currentIcon).parent().find('input');
 
-      if ( lv.length>0) if (typeof(lv.val()) == "string" ) return  (lv.val() !== "") ;
-      //console.log($(currentIcon).parent().find('select').length);
-      /* category case */
-      lv = $(currentIcon).parent().find('select:not([linkvar])').find(":selected");
+      if ( lv.length>0 && lv.is(":visible")) if (typeof(lv.val()) == "string" ) return  (lv.val() !== "") ;
 
-      if ( lv.length > 0 ) return true;
+      /* category case */
+      lv = $(currentIcon).parent().find('select:not([linkvar])');
+
+      if ( lv.find(":selected").length > 0 && lv.is(":visible") ) return true;
 
       /* link var case */
-      lv = $(currentIcon).parent().find('select[linkvar]').find(":selected");
+      lv = $(currentIcon).parent().find('select[linkvar]');
+      if ( lv.find(":selected").index() > 0 && lv.is(":visible") ) return true;
 
-      if ( lv.length > 1 ) return true;
-        // by default a first value with ="Link with an attribute node..."
-        //if ( lv.length > 0 ) hasSelection = true;
-
-      return hasSelection;
+      return false;
     }
 
     // dedicated to String entry
