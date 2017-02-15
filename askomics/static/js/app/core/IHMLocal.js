@@ -9,7 +9,7 @@ class IHMLocal {
 
       this.chunkSize        =      400000 ;
       this.sizeFileMaxAdmin =  4000000000 ; // 4Go
-      this.sizeFileMaxUser  =     4000000 ; // 4 Mo
+      this.sizeFileMaxUser  =     10000000 ; // 10 Mo
       /* Implement a Singleton */
       if ( __ihm !== undefined ) {
           return __ihm;
@@ -546,7 +546,7 @@ class IHMLocal {
             // Uncomment the following to send cross-domain cookies:
             //xhrFields: {withCredentials: true},
             url: '/up/file/',
-            maxChunkSize: this.chunkSize,
+            maxChunkSize: __ihm.chunkSize,
             maxFileSize: sizeFileMax
         });
 
