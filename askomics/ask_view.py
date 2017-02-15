@@ -253,10 +253,10 @@ class AskView(object):
             named_graphs = self.get_list_private_graphs()
 
             for graph in named_graphs:
-                self.log.debug("--- DELETE GRAPH : %s", graph)
-                ql.execute_query(sqb.get_drop_named_graph(graph).query)
+                self.log.debug("--- DELETE GRAPH : %s", graph['g'])
+                ql.execute_query(sqb.get_drop_named_graph(graph['g']).query)
                 #delete metadatas
-                ql.execute_query(sqb.get_delete_metadatas_of_graph(graph).query)
+                ql.execute_query(sqb.get_delete_metadatas_of_graph(graph['g']).query)
 
         except Exception as e:
             traceback.print_exc(file=sys.stdout)

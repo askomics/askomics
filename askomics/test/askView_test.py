@@ -69,8 +69,8 @@ class AskViewTests(unittest.TestCase):
         self.tps.clean_up()
 
         # load a test
-        self.tps.load_people()
-        self.tps.load_instruments()
+        timestamp_people = self.tps.load_people()
+        timestamp_instruments = self.tps.load_instruments()
         data = self.askview.start_points()
         # empty tps
         self.tps.clean_up()
@@ -80,22 +80,28 @@ class AskViewTests(unittest.TestCase):
             'nodes': {
                 'http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Instruments':
                 {
+                    'g':
+                    'urn:sparql:test_askomics:jdoe:instruments_' + timestamp_instruments,
+                    'public': False,
                     'uri':
                     'http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Instruments',
-                    'label': 'Instruments',
                     'private': True,
-                    'public': False
+                    'label': 'Instruments'
                 },
                 'http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#People':
                 {
+                    'g':
+                    'urn:sparql:test_askomics:jdoe:people_' + timestamp_people,
+                    'public': False,
                     'uri':
                     'http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#People',
-                    'label': 'People',
                     'private': True,
-                    'public': False
+                    'label': 'People'
                 }
             }
         }
+
+        print(data)
 
         assert len(data["nodes"]) == 2
         assert data == expected_result
@@ -145,7 +151,7 @@ class AskViewTests(unittest.TestCase):
 
         # load a test
         timestamp_people = self.tps.load_people() # need the timestamp of people to delete it
-        self.tps.load_instruments()
+        timestamp_instruments = self.tps.load_instruments()
 
         # Delete only the people graph
         self.request.json_body = {
@@ -160,8 +166,7 @@ class AskViewTests(unittest.TestCase):
         askview2 = AskView(self.request)
         askview2.settings = self.settings
         data = askview2.start_points()
-        print('--- data ---')
-        print(data)
+
         assert len(data["nodes"]) == 1
 
         # test if startpoint return only instruments
@@ -169,12 +174,14 @@ class AskViewTests(unittest.TestCase):
             'nodes': {
                 'http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Instruments':
                 {
+                    'private': True,
+                    'g':
+                    'urn:sparql:test_askomics:jdoe:instruments_' + timestamp_instruments,
                     'uri':
                     'http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Instruments',
                     'label': 'Instruments',
-                    'private': True,
                     'public': False
-                },
+                }
             }
         }
 
@@ -196,7 +203,10 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.get_list_private_graphs()
 
-        assert data == ['urn:sparql:test_askomics:jdoe:people_' + timestamp_people, 'urn:sparql:test_askomics:jdoe:instruments_' + timestamp_instrument]
+        assert len(data) == 2
+        assert isinstance(data, list)
+        assert {'g': 'urn:sparql:test_askomics:jdoe:people_' + timestamp_people, 'count': '72'} in data
+        assert {'g': 'urn:sparql:test_askomics:jdoe:instruments_' + timestamp_instrument, 'count': '65'} in data
 
 
     def test_positionable_attr(self):
@@ -329,6 +339,8 @@ class AskViewTests(unittest.TestCase):
         # load a test
         self.tps.load_people()
         self.tps.load_instruments()
+
+        self.request.json_body = {}
 
         data = self.askview.getUserAbstraction()
 
