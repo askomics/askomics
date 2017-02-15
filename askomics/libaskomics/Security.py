@@ -33,6 +33,14 @@ class Security(ParamManager):
         salted_pw = self.settings["askomics.salt"] + self.passwd + self.randomsalt
         self.sha256_pw = hashlib.sha256(salted_pw.encode('utf8')).hexdigest()
 
+    def get_sha256_pw(self):
+        """Get the hashed-salted password
+
+        :returns: the hashed-salted password
+        :rtype: string
+        """
+        return self.sha256_pw
+
     def check_email(self):
         """
         Return true if email is a valid one
@@ -291,14 +299,6 @@ class Security(ParamManager):
         session['admin'] = self.admin
         session['blocked'] = self.blocked
         session['graph'] = self.settings['askomics.graph'] + ':' + self.username
-
-    def print_sha256_pw(self):
-        """
-        Just print the hashed password
-        """
-        self.log.debug('------------------------ sha256 password -----------------------')
-        self.log.debug(self.sha256_pw)
-        self.log.debug('----------------------------------------------------------------')
 
     def update_email(self):
         """

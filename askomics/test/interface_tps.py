@@ -2,6 +2,7 @@
 
 from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
 from askomics.libaskomics.rdfdb.SparqlQueryGraph import SparqlQueryGraph
+from askomics.libaskomics.rdfdb.SparqlQueryAuth import SparqlQueryAuth
 from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
 from askomics.libaskomics.SourceFileConvertor import SourceFileConvertor
 
@@ -178,6 +179,10 @@ class InterfaceTPS(object):
         # Delete users
         self.delete_users()
 
+        # Delete askomics graph
+        self.delete_askograph()
+
+
     def delete_users(self):
         """Delete the test users graph"""
 
@@ -185,3 +190,135 @@ class InterfaceTPS(object):
         query_laucher = QueryLauncher(self.settings, self.request.session)
 
         query_laucher.execute_query(sqb.get_drop_named_graph('urn:sparql:test_askomics:users').query)
+
+    def delete_askograph(self):
+        """Delete the askomics graph"""
+
+        sqb = SparqlQueryGraph(self.settings, self.request.session)
+        query_laucher = QueryLauncher(self.settings, self.request.session)
+
+        query_laucher.execute_query(sqb.get_drop_named_graph('urn:sparql:test_askomics').query)
+
+
+    def add_jdoe_in_users(self):
+        """Insert a John Doe User
+
+        username is jdoe
+        mail is jdoe@example.com
+        password is iamjohndoe
+        not admin and not blocked
+        """
+
+        query_laucher = QueryLauncher(self.settings, self.request.session)
+        sqa = SparqlQueryAuth(self.settings, self.request.session)
+        chunk = ':jdoe rdf:type foaf:Person ;\n'
+        indent = len('jdoe') * ' ' + ' '
+        chunk += indent + 'foaf:name \"jdoe\" ;\n'
+        chunk += indent + ':password \"23df582b51c3482b677c8eac54872b8bd0a49bfadc853628b8b8bd4806147b54\" ;\n' #iamjohndoe
+        chunk += indent + 'foaf:mbox <mailto:jdoe@example.com> ;\n'
+        chunk += indent + ':isadmin \"false\"^^xsd:boolean ;\n'
+        chunk += indent + ':isblocked \"false\"^^xsd:boolean ;\n'
+        chunk += indent + ':randomsalt \"00000000000000000000\" .\n'
+
+        header_ttl = sqa.header_sparql_config(chunk)
+        query_laucher.insert_data(chunk, 'urn:sparql:test_askomics:users', header_ttl)
+
+    def add_jsmith_in_users(self):
+        """Insert a Jane Smith User
+
+        username is jsmith
+        mail is jsmith@example.com
+        password is iamjanesmith
+        not admin and not blocked
+        """
+
+        query_laucher = QueryLauncher(self.settings, self.request.session)
+        sqa = SparqlQueryAuth(self.settings, self.request.session)
+        chunk = ':jsmith rdf:type foaf:Person ;\n'
+        indent = len('jsmith') * ' ' + ' '
+        chunk += indent + 'foaf:name \"jsmith\" ;\n'
+        chunk += indent + ':password \"db64872417dcc1488a72b034cbe75268f52eb2486807af096dd2f4c620694efc\" ;\n' #iamjanesmith
+        chunk += indent + 'foaf:mbox <mailto:jsmith@example.com> ;\n'
+        chunk += indent + ':isadmin \"false\"^^xsd:boolean ;\n'
+        chunk += indent + ':isblocked \"false\"^^xsd:boolean ;\n'
+        chunk += indent + ':randomsalt \"00000000000000000000\" .\n'
+
+        header_ttl = sqa.header_sparql_config(chunk)
+        query_laucher.insert_data(chunk, 'urn:sparql:test_askomics:users', header_ttl)
+
+    def add_admin_in_users(self):
+        """Insert an admin User
+
+        username is admin
+        mail is admin@example.com
+        password is iamadmin
+        admin and not blocked
+        """
+
+        query_laucher = QueryLauncher(self.settings, self.request.session)
+        sqa = SparqlQueryAuth(self.settings, self.request.session)
+        chunk = ':admin rdf:type foaf:Person ;\n'
+        indent = len('admin') * ' ' + ' '
+        chunk += indent + 'foaf:name \"admin\" ;\n'
+        chunk += indent + ':password \"682cf6a90d94758bdedcf854e8d784e3d5d360a36cd65a2c49eaff214998c23a\" ;\n' #iamadmin
+        chunk += indent + 'foaf:mbox <mailto:admin@example.com> ;\n'
+        chunk += indent + ':isadmin \"true\"^^xsd:boolean ;\n'
+        chunk += indent + ':isblocked \"false\"^^xsd:boolean ;\n'
+        chunk += indent + ':randomsalt \"00000000000000000000\" .\n'
+
+        header_ttl = sqa.header_sparql_config(chunk)
+        query_laucher.insert_data(chunk, 'urn:sparql:test_askomics:users', header_ttl)
+
+    def add_another_admin_in_users(self):
+        """Insert an admin User
+
+        username is otheradmin
+        mail is otheradmin@example.com
+        password is iamadmin
+        admin and not blocked
+        """
+
+        query_laucher = QueryLauncher(self.settings, self.request.session)
+        sqa = SparqlQueryAuth(self.settings, self.request.session)
+        chunk = ':otheradmin rdf:type foaf:Person ;\n'
+        indent = len('otheradmin') * ' ' + ' '
+        chunk += indent + 'foaf:name \"otheradmin\" ;\n'
+        chunk += indent + ':password \"682cf6a90d94758bdedcf854e8d784e3d5d360a36cd65a2c49eaff214998c23a\" ;\n' #iamadmin
+        chunk += indent + 'foaf:mbox <mailto:otheradmin@example.com> ;\n'
+        chunk += indent + ':isadmin \"true\"^^xsd:boolean ;\n'
+        chunk += indent + ':isblocked \"false\"^^xsd:boolean ;\n'
+        chunk += indent + ':randomsalt \"00000000000000000000\" .\n'
+
+        header_ttl = sqa.header_sparql_config(chunk)
+        query_laucher.insert_data(chunk, 'urn:sparql:test_askomics:users', header_ttl)
+
+    def test_triple_presence(self, graph, triple):
+        """Test the presence of a triple in the triplestore
+
+        get if a triple is present in a specific graph of the triplestore
+        :param graph: the named graph
+        :type graph: string
+        :param triple: the triple to test
+        :type triple: string
+        :returns: Result of the test
+        :rtype: bool
+        """
+
+        sqb = SparqlQueryGraph(self.settings, self.request.session)
+        query_laucher = QueryLauncher(self.settings, self.request.session)
+
+
+        query = sqb.prepare_query("""
+            SELECT count(*) AS ?count
+            WHERE {
+                GRAPH <""" + graph + """> {
+                    """ + triple + """ .
+                }
+            }
+            """)
+
+        res = query_laucher.execute_query(query.query)
+
+        print(bool(int(res['results']['bindings'][0]['count']['value'])))
+
+        return bool(int(res['results']['bindings'][0]['count']['value']))
