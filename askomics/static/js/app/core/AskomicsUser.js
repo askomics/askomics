@@ -3,11 +3,18 @@
 class AskomicsUser {
 
     constructor(username, admin, blocked) {
-        this.username = username ;
-        this.admin = admin;
-        this.blocked = blocked;
+        this.username = username===undefined?"":username ;
+        this.admin    = admin===undefined?false:admin;
+        this.blocked  = blocked===undefined?true:blocked;
     }
 
+    isAdmin() {
+        return this.admin;
+    }
+
+    isBlocked() {
+        return this.blocked;
+    }
 
     logUser() {
         // displayNavbar(true, this.username, this.admin, this.blocked);
@@ -24,18 +31,18 @@ class AskomicsUser {
         let service = new RestServiceJs("checkuser");
         let self = this;
 
-        // displayModal('Please wait', '', 'Close');
+        // __ihm.displayModal('Please wait', '', 'Close');
 
         service.getAll(function(data) {
-            // hideModal();
+            // __ihm.hideModal();
             if (data.username) {
                 self.username = data.username;
                 self.admin = data.admin;
                 self.blocked = data.blocked;
                 // self.logUser();
-                displayNavbar(true, self.username, self.admin, self.blocked);
+                __ihm.displayNavbar(true, self.username, self.admin, self.blocked);
             }else{
-                displayNavbar(false, '');
+                __ihm.displayNavbar(false, '');
             }
         });
     }
@@ -43,7 +50,7 @@ class AskomicsUser {
     logout() {
         let service = new RestServiceJs('logout');
 
-        displayModal('Please wait', '', 'Close');
+        __ihm.displayModal('Please wait', '', 'Close');
 
         service.getAll(function() {
             location.reload();

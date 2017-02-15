@@ -91,7 +91,7 @@ class AskomicsObjectView {
                   if ( l.length === 0 ) {
                     throw "Devel Error :: Attribute list have to defined a urinode !!";
                   }
-                  new AskomicsUserAbstraction().setOrderAttributesList(l.first().attr("urinode"),orderAttributes);
+                  __ihm.getAbstraction().setOrderAttributesList(l.first().attr("urinode"),orderAttributes);
                 }
               });
 
@@ -120,29 +120,29 @@ class AskomicsObjectView {
     $("div[id*='"+ AskomicsObjectView_prefix +"']" ).hide();
   }
 
-  static defineClickMenu() {
+  static start() {
     let mythis = this;
     // Switch between close and open eye icon for unselected
     $("#showNode").click(function() {
         var id = $("#objectName").attr("objid");
-        if (new AskomicsGraphBuilder().nodes().length <= 1) {
+        if (__ihm.getGraphBuilder().nodes().length <= 1) {
           let help_title = "Information";
           let help_str   = "Askomics can not disable a single node.";
-          displayModal(help_title, help_str, 'ok');
+          __ihm.displayModal(help_title, help_str, 'ok');
           return;
         }
         let countActif = 0;
-        for(let i=0;i<new AskomicsGraphBuilder().nodes().length;i++) {
-          if ( new AskomicsGraphBuilder().nodes()[i].actif) countActif++ ;
+        for(let i=0;i<__ihm.getGraphBuilder().nodes().length;i++) {
+          if ( __ihm.getGraphBuilder().nodes()[i].actif) countActif++ ;
         }
         if (countActif <= 1) {
           let help_title = "Information";
           let help_str   = "Askomics can not disable all nodes.";
-          displayModal(help_title, help_str, 'ok');
+          __ihm.displayModal(help_title, help_str, 'ok');
           return;
         }
 
-        var node = new AskomicsGraphBuilder().getInstanciedNode(id);
+        var node = __ihm.getGraphBuilder().getInstanciedNode(id);
         if ( node ) {
           node.switchActiveNode();
 
@@ -162,30 +162,30 @@ class AskomicsObjectView {
         let id = $("#objectName").attr("objid");
         let type = $("#objectName").attr("type");
         if ( type == "node" ) {
-          let node = new AskomicsGraphBuilder().getInstanciedNode(id);
-          if (node.id == new AskomicsGraphBuilder().nodes()[0].id) {
+          let node = __ihm.getGraphBuilder().getInstanciedNode(id);
+          if (node.id == __ihm.getGraphBuilder().nodes()[0].id) {
               let help_title = "Information";
               let help_str   = "Askomics can not delete the start node. Use the reset button to begin a new query!";
-              displayModal(help_title, help_str, 'ok');
+              __ihm.displayModal(help_title, help_str, 'ok');
               return;
           }
 
-          let listLinksRemoved = new AskomicsGraphBuilder().removeInstanciedNode(node);
-          forceLayoutManager.removeSuggestions();
-          forceLayoutManager.update();
+          let listLinksRemoved = __ihm.getGraphBuilder().removeInstanciedNode(node);
+          __ihm.getSVGLayout().removeSuggestions();
+          __ihm.getSVGLayout().update();
           node.getPanelView().remove();
           for (let l of listLinksRemoved) {
             l.getPanelView().remove();
-            forceLayoutManager.removeLinkSvgInformation(l);
+            __ihm.getSVGLayout().removeLinkSvgInformation(l);
           }
       } else if ( type == "link") {
-        let link = new AskomicsGraphBuilder().getInstanciedLink(id);
+        let link = __ihm.getGraphBuilder().getInstanciedLink(id);
 
-        let removenode = new AskomicsGraphBuilder().removeInstanciedLink(link);
-        forceLayoutManager.removeSuggestions();
-        forceLayoutManager.update();
+        let removenode = __ihm.getGraphBuilder().removeInstanciedLink(link);
+        __ihm.getSVGLayout().removeSuggestions();
+        __ihm.getSVGLayout().update();
         link.getPanelView().remove();
-        forceLayoutManager.removeLinkSvgInformation(link);
+        __ihm.getSVGLayout().removeLinkSvgInformation(link);
         if ( removenode ) {
           removenode.getPanelView().remove();
         }
@@ -201,9 +201,9 @@ class AskomicsObjectView {
       let elem ;
 
       if ( type == "node") {
-        elem = new AskomicsGraphBuilder().getInstanciedNode(id);
+        elem = __ihm.getGraphBuilder().getInstanciedNode(id);
       } else if ( type == "link") {
-        elem = new AskomicsGraphBuilder().getInstanciedLink(id);
+        elem = __ihm.getGraphBuilder().getInstanciedLink(id);
       } else {
         throw "AskomisObjectView::help  ==> unkown type:"+type;
       }

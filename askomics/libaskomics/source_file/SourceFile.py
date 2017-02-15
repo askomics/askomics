@@ -1,6 +1,7 @@
 """
 Classes to import data from source files
 """
+import os
 import logging
 import os.path
 import tempfile
@@ -65,7 +66,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
         ttl += '<' + self.graph + '> foaf:Group "' +  self.session['group']  + '" .\n'
         ttl += '<' + self.graph + '> prov:wasDerivedFrom "' + self.name + '" .\n'
         ttl += '<' + self.graph + '> dc:hasVersion "' + get_distribution('Askomics').version + '" .\n'
-        #ttl += '<' + self.graph + '> prov:describesService "' + self.get_param('askomics.triplestore') + '" .\n'
+        ttl += '<' + self.graph + '> prov:describesService "' + os.uname()[1] + '" .\n'
 
         sparql_header = sqb.header_sparql_config('')
 
@@ -104,6 +105,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
         :return: a dictionnary with information on the success or failure of the operation
         :rtype: Dict
         """
+        self.insert_metadatas(public)
 
         content_ttl = self.get_turtle()
 
@@ -122,6 +124,9 @@ class SourceFile(ParamManager, HaveCachedProperties):
             for triple in content_ttl:
                 chunk += triple + '\n'
                 triple_count += 1
+
+                #with open('/tmp/DEBUGTTL'+str(triple_count), 'w') as fff:
+                #    fff.write(chunk);
 
                 if triple_count > int(self.settings['askomics.max_content_size_to_update_database']):
                     # Temp file must be accessed by http so we place it in askomics/ttl/ dir
@@ -241,8 +246,6 @@ class SourceFile(ParamManager, HaveCachedProperties):
             data['total_triple_count'] = total_triple_count
 
         data['expected_lines_number'] = self.get_number_of_lines()
-
-        self.insert_metadatas(public)
 
         return data
 

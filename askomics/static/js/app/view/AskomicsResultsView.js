@@ -23,10 +23,9 @@ class AskomicsResultsView {
     this.activesAttributes      = {} ;
     this.activesAttributesLabel = {} ;
     this.activesAttributesUrl   = {} ;
-    let graphBuilder = new AskomicsGraphBuilder();
 
-    for (let i=0;i<graphBuilder.nodes().length;i++ ) {
-      let node = graphBuilder.nodes()[i];
+    for (let i=0;i<__ihm.getGraphBuilder().nodes().length;i++ ) {
+      let node = __ihm.getGraphBuilder().nodes()[i];
       if ( ! node.actif ) continue;
       let attr_disp = node.getAttributesDisplaying();
       this.activesAttributes[node.id] = attr_disp.id;
@@ -58,75 +57,12 @@ class AskomicsResultsView {
                   .css("overflow-y","auto");
 
     this.setActivesAttributes();
-    table.append(this.build_simple_subheader_results(new AskomicsGraphBuilder().nodes()))
-         .append(this.build_body_results(new AskomicsGraphBuilder().nodes()));
+    table.append(this.build_simple_subheader_results(__ihm.getGraphBuilder().nodes()))
+         .append(this.build_body_results(__ihm.getGraphBuilder().nodes()));
 
-/*
-    table.DataTable( {
-       "paging"     : true,
-       "ordering"   : true,
-       "info"       : true,
-       //"scrollY"    : true,
-    //   "scrollY":        "200px",
-    //   "scrollCollapse": true,
-       dom: 'Bfrtip',
-        buttons: [
-            'copy', 'csv', 'excel'
-        ]
-//       "scrollY"    : true
-      } );
-*/
       return table;
   }
 
-  displayResults() {
-      this.is_valid();
-      // to clear and print new results
-      $("#results").empty();
-      //.css("overflow","scroll")
-      //.css("height","80px")
-      //.css("width","100%")
-      //.css("overflow","auto");
-
-      this.setActivesAttributes();
-
-      if (this.data.values.length <= 0) {
-        $("#results").append("No results have been found for this query.");
-        return ;
-      }
-
-      /* new presentation by entity */
-      let table = $('<table></table>')
-                    .addClass('table-striped')
-                    .addClass('table-bordered')
-                    .addClass('table-condensed') ;
-                //    .addClass('table-results');
-
-      $("#results")
-        //.append($('<table></table>').append(this.build_simple_header_results()))
-        .append(table.append(this.build_simple_subheader_results(new AskomicsGraphBuilder().nodes()))
-                    .append(this.build_body_results(new AskomicsGraphBuilder().nodes()))
-        );
-/*
-        $("#results")
-          .append(table.append(this.build_simple_header_results())
-          .append(this.build_simple_subheader_results(new AskomicsGraphBuilder().nodes()))
-          .append(this.build_body_results(new AskomicsGraphBuilder().nodes())));
-*/
-
-
-//https://datatables.net/extensions/buttons/examples/initialisation/export.html
-      table.DataTable( {
-       "paging"     : true,
-       "ordering"   : true,
-       "info"       : true,
-       dom: 'Bfrtip',
-        buttons: [
-            'copy', 'csv', 'excel'
-        ]
-   } );
-
-  }
 
   build_simple_header_results() {
     let head = $('<thead></thead>');
@@ -136,8 +72,8 @@ class AskomicsResultsView {
     this.is_activedAttribute();
 
     /* set Entity Header */
-    for (let i=0;i<new AskomicsGraphBuilder().nodes().length;i++ ) {
-      let node = new AskomicsGraphBuilder().nodes()[i];
+    for (let i=0;i<__ihm.getGraphBuilder().nodes().length;i++ ) {
+      let node = __ihm.getGraphBuilder().nodes()[i];
       if ( ! node.actif ) continue;
 
       let nAttributes = this.activesAttributes[node.id].length;
@@ -162,8 +98,8 @@ class AskomicsResultsView {
     this.is_activedAttribute();
 
     /* set Entity Header */
-    for (let i=0;i<new AskomicsGraphBuilder().nodes().length;i++ ) {
-      let node = new AskomicsGraphBuilder().nodes()[i];
+    for (let i=0;i<__ihm.getGraphBuilder().nodes().length;i++ ) {
+      let node = __ihm.getGraphBuilder().nodes()[i];
       if ( ! node.actif ) continue;
 
       let nAttributes = this.activesAttributes[node.id].length;
@@ -195,7 +131,7 @@ class AskomicsResultsView {
            $(".entityHeaderResults").each(function( index ) {
              nodeList.push($(this).attr("id"));
            });
-           let lNodes = new AskomicsGraphBuilder().nodes(nodeList,'id');
+           let lNodes = __ihm.getGraphBuilder().nodes(nodeList,'id');
            $(this).parent().parent().find("thead:eq(1)").remove();
            $(this).parent().parent().find("tbody").remove();
 
@@ -271,7 +207,7 @@ class AskomicsResultsView {
            $(".entityHeaderResults").each(function( index ) {
              nodeList.push($(this).attr("id"));
            });
-           let lNodes = new AskomicsGraphBuilder().nodes(nodeList,'id');
+           let lNodes = __ihm.getGraphBuilder().nodes(nodeList,'id');
 
            let attList = [];
            $(".attributesHeaderResults").each(function( index ) {
@@ -321,7 +257,7 @@ class AskomicsResultsView {
           let val = this.data.values[i][this.activesAttributes[node.id][sparqlId]];
 
           if ( headerName in this.activesAttributesUrl[node.id] ) {
-            let valWithPrefix = new AskomicsUserAbstraction().shortRDF(val);
+            let valWithPrefix = __ihm.getAbstraction().shortRDF(val);
             let url = this.activesAttributesUrl[node.id][headerName].replace("%s",this.data.values[i][this.activesAttributes[node.id][sparqlId]]);
             row.append($('<td></td>').html($('<a></a>').attr('href',url).attr('target','_blank').text(valWithPrefix)));
           } else {

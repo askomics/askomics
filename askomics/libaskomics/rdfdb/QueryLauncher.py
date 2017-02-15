@@ -67,7 +67,7 @@ class QueryLauncher(ParamManager):
             self.opener = urllib.request.build_opener(*handlers)
             urllib.request.install_opener(self.opener)
 
-    def execute_query(self, query, log_raw_results=True):
+    def execute_query(self, query, log_raw_results=True, externalService=None):
         """Params:
             - libaskomics.rdfdb.SparqlQuery
             - log_raw_results: if True the raw json response is logged. Set to False
@@ -87,30 +87,36 @@ class QueryLauncher(ParamManager):
             #                      if not line.startswith('PREFIX '))
             self.log.debug("----------- QUERY --------------\n%s", query_log)
 
-        urlupdate = None
-        if self.is_defined("askomics.updatepoint"):
-            urlupdate = self.get_param("askomics.updatepoint")
-        time0 = time.time()
-        if self.is_defined("askomics.endpoint"):
-            data_endpoint = SPARQLWrapper(self.get_param("askomics.endpoint"), urlupdate)
+        if externalService == None :
+            urlupdate = None
+            if self.is_defined("askomics.updatepoint"):
+                urlupdate = self.get_param("askomics.updatepoint")
+            time0 = time.time()
+            if self.is_defined("askomics.endpoint"):
+                data_endpoint = SPARQLWrapper(self.get_param("askomics.endpoint"), urlupdate)
+            else:
+                print(self.settings)
+                raise ValueError("askomics.endpoint")
+
+            if self.is_defined("askomics.endpoint.username") and self.is_defined("askomics.endpoint.passwd"):
+                user = self.get_param("askomics.endpoint.username")
+                passwd = self.get_param("askomics.endpoint.passwd")
+                data_endpoint.setCredentials(user, passwd)
+            elif self.is_defined("askomics.endpoint.username"):
+                raise ValueError("askomics.endpoint.username")
+            elif self.is_defined("askomics.endpoint.passwd"):
+                raise ValueError("askomics.endpoint.passwd")
+
+            if self.is_defined("askomics.endpoint.auth"):
+                data_endpoint.setHTTPAuth(self.get_param("askomics.endpoint.auth")) # Basic or Digest
         else:
-            print(self.settings)
-            raise ValueError("askomics.endpoint")
-
-        if self.is_defined("askomics.endpoint.username") and self.is_defined("askomics.endpoint.passwd"):
-            user = self.get_param("askomics.endpoint.username")
-            passwd = self.get_param("askomics.endpoint.passwd")
-            data_endpoint.setCredentials(user, passwd)
-        elif self.is_defined("askomics.endpoint.username"):
-            raise ValueError("askomics.endpoint.username")
-        elif self.is_defined("askomics.endpoint.passwd"):
-            raise ValueError("askomics.endpoint.passwd")
-
-        if self.is_defined("askomics.endpoint.auth"):
-            data_endpoint.setHTTPAuth(self.get_param("askomics.endpoint.auth")) # Basic or Digest
+            data_endpoint = externalService
 
         data_endpoint.setQuery(query)
         data_endpoint.method = 'POST'
+
+        if externalService != None and data_endpoint.isSparqlUpdateRequest():
+            raise ValueError("Can not update a remote endpoint with url:"+str(externalService))
 
         if data_endpoint.isSparqlUpdateRequest():
             data_endpoint.setMethod('POST')

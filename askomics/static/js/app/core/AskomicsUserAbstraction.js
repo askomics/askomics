@@ -5,14 +5,8 @@
   Manage Abstraction storing in the TPS.
 */
 
-let instanceUserAbstraction ;
-
 class AskomicsUserAbstraction {
     constructor() {
-      /* Implement a Singleton */
-      if ( instanceUserAbstraction !== undefined ) {
-        return instanceUserAbstraction;
-      }
       this.prefix = {};
       /* Ontology is save locally to avoid request with TPS  */
       /* --------------------------------------------------- */
@@ -23,9 +17,6 @@ class AskomicsUserAbstraction {
       /* uri ->W get information about ref, taxon, start, end */
       this.entityPositionableInformationList = {}; /* entityPositionableInformationList[uri1] = { taxon, ref, start, end } */
       this.attributesOrderDisplay = {} ;           /* manage a order list by URInode */
-
-      instanceUserAbstraction = this;
-      return instanceUserAbstraction;
     }
 
     longRDF(litteral) {
@@ -79,43 +70,43 @@ class AskomicsUserAbstraction {
       return JSON.parse(JSON.stringify(this.entityPositionableInformationList)) ;
     }
 
-    static getTypeAttribute(attributeForUritype) {
+    getTypeAttribute(attributeForUritype) {
 
-      if ( attributeForUritype.indexOf(new AskomicsUserAbstraction().getPrefix("xsd")) === -1 ) {
+      if ( attributeForUritype.indexOf(this.getPrefix("xsd")) === -1 ) {
           return "category";
       }
 
-      if (attributeForUritype === new AskomicsUserAbstraction().longRDF("xsd:decimal")) {
+      if (attributeForUritype === this.longRDF("xsd:decimal")) {
         return "decimal";
       }
-      if (attributeForUritype === new AskomicsUserAbstraction().longRDF("xsd:string")) {
+      if (attributeForUritype === this.longRDF("xsd:string")) {
         return "string";
       }
-      if (attributeForUritype === new AskomicsUserAbstraction().longRDF("xsd:boolean")) {
+      if (attributeForUritype === this.longRDF("xsd:boolean")) {
         return "string";
       }
-      if (attributeForUritype === new AskomicsUserAbstraction().longRDF("xsd:nonNegativeInteger")) {
+      if (attributeForUritype === this.longRDF("xsd:nonNegativeInteger")) {
         return "decimal";
       }
-      if (attributeForUritype === new AskomicsUserAbstraction().longRDF("xsd:integer")) {
+      if (attributeForUritype === this.longRDF("xsd:integer")) {
         return "decimal";
       }
-      if (attributeForUritype === new AskomicsUserAbstraction().longRDF("xsd:float")) {
+      if (attributeForUritype === this.longRDF("xsd:float")) {
         return "decimal";
       }
-      if (attributeForUritype === new AskomicsUserAbstraction().longRDF("xsd:int")) {
+      if (attributeForUritype === this.longRDF("xsd:int")) {
         return "decimal";
       }
-      if (attributeForUritype === new AskomicsUserAbstraction().longRDF("xsd:long")) {
+      if (attributeForUritype === this.longRDF("xsd:long")) {
         return "decimal";
       }
-      if (attributeForUritype === new AskomicsUserAbstraction().longRDF("xsd:short")) {
+      if (attributeForUritype === this.longRDF("xsd:short")) {
         return "decimal";
       }
-      if (attributeForUritype === new AskomicsUserAbstraction().longRDF("xsd:byte")) {
+      if (attributeForUritype === this.longRDF("xsd:byte")) {
         return "decimal";
       }
-      if (attributeForUritype === new AskomicsUserAbstraction().longRDF("xsd:language")) {
+      if (attributeForUritype === this.longRDF("xsd:language")) {
         return "string";
       }
       return attributeForUritype;
@@ -126,23 +117,30 @@ class AskomicsUserAbstraction {
     */
     /* Request information in the model layer */
     //this.updateOntology();
-    loadUserAbstraction() {
+    loadUserAbstraction(urlService) {
 
+      let data = { };
+
+      if ( urlService !== undefined ) {
+        data.service= urlService ;
+      }
       var service = new RestServiceJs("userAbstraction");
 
-      service.getsync(function(resultListTripletSubjectRelationObject ) {
+      let instanceUserAbstraction = this;
+
+      service.postsync(data,function(resultListTripletSubjectRelationObject ) {
 
       /* All relation are stored in tripletSubjectRelationObject */
       instanceUserAbstraction.tripletSubjectRelationObject = resultListTripletSubjectRelationObject.relations;
       /* == External Service can add external relation == */
-      console.log("RELATIONS::"+JSON.stringify(instanceUserAbstraction.tripletSubjectRelationObject));
+      //console.log("RELATIONS::"+JSON.stringify(instanceUserAbstraction.tripletSubjectRelationObject));
 
       instanceUserAbstraction.entityInformationList = {};
       instanceUserAbstraction.entityPositionableInformationList = {};
       instanceUserAbstraction.attributesEntityList = {};
       /* All information about an entity available in TPS are stored in entityInformationList */
       for (let entry in resultListTripletSubjectRelationObject.entities){
-        console.log("ENTITY:"+JSON.stringify(resultListTripletSubjectRelationObject.entities[entry]));
+        //console.log("ENTITY:"+JSON.stringify(resultListTripletSubjectRelationObject.entities[entry]));
         let graph = resultListTripletSubjectRelationObject.entities[entry].g;
         let uri = resultListTripletSubjectRelationObject.entities[entry].entity;
         let rel = resultListTripletSubjectRelationObject.entities[entry].property;
@@ -157,10 +155,10 @@ class AskomicsUserAbstraction {
         instanceUserAbstraction.entityInformationList[graph][uri][rel] = val;
 
       }
-      console.log("entityInformationList:"+JSON.stringify(instanceUserAbstraction.entityInformationList));
+      //console.log("entityInformationList:"+JSON.stringify(instanceUserAbstraction.entityInformationList));
 
 	    for (let entry2 in resultListTripletSubjectRelationObject.attributes){
-        console.log("ATTRIBUTE:"+JSON.stringify(resultListTripletSubjectRelationObject.attributes[entry2]));
+        //console.log("ATTRIBUTE:"+JSON.stringify(resultListTripletSubjectRelationObject.attributes[entry2]));
         let graph = resultListTripletSubjectRelationObject.attributes[entry2].g;
         let uri2 = resultListTripletSubjectRelationObject.attributes[entry2].entity;
         let attribute = {};
@@ -168,7 +166,7 @@ class AskomicsUserAbstraction {
         attribute.uri   = resultListTripletSubjectRelationObject.attributes[entry2].attribute;
         attribute.label = resultListTripletSubjectRelationObject.attributes[entry2].labelAttribute;
         attribute.type  = resultListTripletSubjectRelationObject.attributes[entry2].typeAttribute;
-        attribute.basic_type  = AskomicsUserAbstraction.getTypeAttribute(resultListTripletSubjectRelationObject.attributes[entry2].typeAttribute);
+        attribute.basic_type  = instanceUserAbstraction.getTypeAttribute(resultListTripletSubjectRelationObject.attributes[entry2].typeAttribute);
 
 
         if ( ! (graph in instanceUserAbstraction.attributesEntityList) ) {
@@ -183,7 +181,7 @@ class AskomicsUserAbstraction {
       }
 
         for (let entry3 in resultListTripletSubjectRelationObject.categories){
-          console.log("CATEGORY:"+JSON.stringify(resultListTripletSubjectRelationObject.categories[entry3]));
+          //console.log("CATEGORY:"+JSON.stringify(resultListTripletSubjectRelationObject.categories[entry3]));
           let graph = resultListTripletSubjectRelationObject.categories[entry3].g;
           let uri3 = resultListTripletSubjectRelationObject.categories[entry3].entity;
           let attribute = {};
@@ -204,7 +202,7 @@ class AskomicsUserAbstraction {
         }
 
         for (var entry4 in resultListTripletSubjectRelationObject.positionable){
-          console.log('POSITIONABLE:'+JSON.stringify(resultListTripletSubjectRelationObject.positionable[entry4]));
+          //console.log('POSITIONABLE:'+JSON.stringify(resultListTripletSubjectRelationObject.positionable[entry4]));
           var uri4 = resultListTripletSubjectRelationObject.positionable[entry4].entity;
           if ( ! (uri4 in instanceUserAbstraction.entityPositionableInformationList) ) {
               instanceUserAbstraction.entityPositionableInformationList[uri4] = {};
@@ -212,12 +210,13 @@ class AskomicsUserAbstraction {
             throw new Error("URI:"+uri4+" have several taxon,ref, start, end labels... "+JSON.stringify(instanceUserAbstraction.entityPositionableInformationList[uri4]));
           }
         }
-        console.log("=================== attributesEntityList =========================");
-        console.log(JSON.stringify(instanceUserAbstraction.attributesEntityList));
+        //console.log("=================== attributesEntityList =========================");
+        //console.log(JSON.stringify(instanceUserAbstraction.attributesEntityList));
       });
     }
 
     getPrefix(ns) {
+      let instanceUserAbstraction = this;
       if (! (ns in this.prefix)) {
         //get info in prefix.cc
         //
@@ -226,7 +225,7 @@ class AskomicsUserAbstraction {
           type: 'GET',
           url: 'http://prefix.cc/'+ns.trim()+'.file.json',
           success: function( result_json ) {
-            console.log("new prefix:"+ns+"==>"+result_json[ns]);
+            //console.log("new prefix:"+ns+"==>"+result_json[ns]);
             instanceUserAbstraction.prefix[ns] = result_json[ns];
           },
           error: function(req, status, ex) {},
@@ -264,7 +263,7 @@ class AskomicsUserAbstraction {
     buildBaseNode(uriEntity) {
       var node = {
         uri   : uriEntity,
-        label : this.getAttribEntity(uriEntity,new AskomicsUserAbstraction().longRDF('rdfs:label'))
+        label : this.getAttribEntity(uriEntity,this.longRDF('rdfs:label'))
       } ;
       return node;
     }

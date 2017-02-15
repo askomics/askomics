@@ -48,7 +48,7 @@ class AskomicsNodeView extends AskomicsObjectView {
       }
 
 
-      displayModalHtml(title, mess ,'Close');
+      __ihm.displayModalHtml(title, mess ,'Close');
       return false;
     });
   }
@@ -58,7 +58,7 @@ class AskomicsNodeView extends AskomicsObjectView {
     let help_str = ' Choose which attributes you want to see on the right panel.';
     help_str += ' Filter this attributes by choosing values';
     $('#help_figure').addClass( "hidden" );
-    displayModal(help_title, help_str, 'ok');
+    __ihm.displayModal(help_title, help_str, 'ok');
   }
 
   updateNodeView() {
@@ -72,7 +72,7 @@ class AskomicsNodeView extends AskomicsObjectView {
     let URISparqlVarId   = "URICat"+labelSparqlVarId;
     let inp = $("<select/>").addClass("form-control").attr("multiple","multiple");
 
-    displayModal('Please wait', '', 'Close');
+    __ihm.displayModal('Please wait', '', 'Close');
     var tab = this.node.buildConstraintsGraphForCategory(attribute.id);
 
     inp.attr("list", "opt_" + labelSparqlVarId)
@@ -84,7 +84,7 @@ class AskomicsNodeView extends AskomicsObjectView {
       'constraintesRelations': tab[1],
       'limit'                :-1,
       'nofile'               : true,
-      'removeGraph'          : new AskomicsUserAbstraction().listUnactivedGraph(),
+      'removeGraph'          : __ihm.getAbstraction().listUnactivedGraph(),
       'export':false,
     };
 
@@ -125,7 +125,7 @@ class AskomicsNodeView extends AskomicsObjectView {
         } else if (d.values.length == 1) {
           inp.append($("<option></option>").attr("value", d.values[0][URISparqlVarId]).append(d.values[0][labelSparqlVarId]));
         }
-        hideModal();
+        __ihm.hideModal();
     });
 
     inp.change(function(d) {
@@ -228,7 +228,7 @@ class AskomicsNodeView extends AskomicsObjectView {
 
 
       if (! $.isNumeric(value) ) {
-      //    displayModal("'"+value + "' is not a numeric value !", '', 'Close');
+      //    __ihm.displayModal("'"+value + "' is not a numeric value !", '', 'Close');
           value = $(this).find('input').val(null);
           return;
       }
@@ -305,8 +305,8 @@ class AskomicsNodeView extends AskomicsObjectView {
         }
         /* set up the list with possible entities to link */
 
-        for ( let n of new AskomicsGraphBuilder().nodes() ) {
-          let attributes = new AskomicsUserAbstraction().getAttributesWithURI(n.uri);
+        for ( let n of __ihm.getGraphBuilder().nodes() ) {
+          let attributes = __ihm.getAbstraction().getAttributesWithURI(n.uri);
           let firstPrintForThisNode = true;
           /* Manage Link node id  */
           if ( (n.id != curAtt.id) ) {
@@ -365,7 +365,7 @@ class AskomicsNodeView extends AskomicsObjectView {
         if ( nodeAttLink === undefined )
           return ;
 
-        let node2 = new AskomicsGraphBuilder().getInstanciedNode(nodeAttLink);
+        let node2 = __ihm.getGraphBuilder().getInstanciedNode(nodeAttLink);
 
         if ( type == "category" ) {
           mythis.node.setFilterLinkVariable('URICat'+sparlidCurrentAtt,node2,'URICat'+attLink);
@@ -481,7 +481,7 @@ class AskomicsNodeView extends AskomicsObjectView {
           icon.addClass('fa-question-circle');
           mythis.clean_box_attribute($(this).parent().parent());
           //if ( !(sparqlid in node.values) || ( node.values[sparqlid] === "" ) )
-          //  displayModal("Warning", "Optional results with a selection disable the current filter !", 'ok');
+          //  __ihm.displayModal("Warning", "Optional results with a selection disable the current filter !", 'ok');
           //clean the selction
           $(this).parent().find('.fa-eraser').trigger('click');
           mythis.node.setActiveAttribute(sparqlid,true,true);
@@ -632,7 +632,7 @@ class AskomicsNodeView extends AskomicsObjectView {
              .append(mythis.buildString(node.SPARQLid))
              .append(mythis.buildLinkVariable(node)));
 
-      var attributes = new AskomicsUserAbstraction().getAttributesWithURI(node.uri);
+      var attributes = __ihm.getAbstraction().getAttributesWithURI(node.uri);
 
       $.each(attributes, function(i) {
           let attribute = node.getAttributeOrCategoryForNode(attributes[i]);

@@ -6,7 +6,7 @@ class AskomicsObjectBuilder {
   }
 
   static instanceNode(node,x,y) {
-    if ( new AskomicsUserAbstraction().isPositionable(node.uri) ) {
+    if ( __ihm.getAbstraction().isPositionable(node.uri) ) {
       return new AskomicsPositionableNode(node,x,y);
     } else {
       return new AskomicsNode(node,x,y);

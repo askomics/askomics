@@ -18,7 +18,7 @@ class AskomicsLinkView extends AskomicsObjectView {
     let help_str = 'There is a relation between '+this.link.source.label+' and '+this.link.target.label+'.';
     help_str += ' This mean that attribute '+this.link.target.label+' of '+this.link.source.label+' is an entity.';
     $('#help_figure').addClass( "hidden" );
-    displayModal(help_title, help_str, 'ok');
+    __ihm.displayModal(help_title, help_str, 'ok');
   }
 
   getTextColorLabel() {
@@ -44,7 +44,7 @@ class AskomicsLinkView extends AskomicsObjectView {
 
     inpNeg.click(function(d) {
       let linkid = $(this).attr('linkid');
-      let link = new AskomicsGraphBuilder().getInstanciedLink(linkid);
+      let link = __ihm.getGraphBuilder().getInstanciedLink(linkid);
       if ($(this).is(':checked')) {
         link.negative = true;
       } else {
@@ -69,7 +69,7 @@ class AskomicsLinkView extends AskomicsObjectView {
 
     inpTrans.click(function(d) {
       let linkid = $(this).attr('linkid');
-      let link = new AskomicsGraphBuilder().getInstanciedLink(linkid);
+      let link = __ihm.getGraphBuilder().getInstanciedLink(linkid);
       if ($(this).is(':checked')) {
         link.transitive = true;
       } else {

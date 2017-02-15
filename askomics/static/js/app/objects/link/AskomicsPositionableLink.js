@@ -24,11 +24,9 @@ class AskomicsPositionableLink extends AskomicsLink {
                   'second_node': this.target.uri,
                   'link': this };
 
-    displayModal('Please wait', '', 'Close');
+    __ihm.displayModal('Please wait', '', 'Close');
     service.post(model, function(data) {
-        if (data.error) {
-          throw new Error(data.error);
-        }
+        if (! __ihm.manageErrorMessage(data)) return;
 
         model.link.position_taxon = data.results.position_taxon;
         model.link.position_ref = data.results.position_ref;
@@ -36,7 +34,7 @@ class AskomicsPositionableLink extends AskomicsLink {
 
         model.link.same_tax = data.results.position_taxon?true:false;
         model.link.same_ref = data.results.position_ref?true:false;
-        hideModal();
+        __ihm.hideModal();
     });
   }
 
@@ -133,10 +131,8 @@ class AskomicsPositionableLink extends AskomicsLink {
           break;
 
       case 'near':
-        alert('sorry, near query is not implemanted yet !');
-        hideModal();
-        exit();
-          break;
+        console.log('sorry, near query is not implemanted yet !');
+        return;
 
       default:
         throw new Error("buildPositionableConstraintsGraph: unkown type: "+this.type);
