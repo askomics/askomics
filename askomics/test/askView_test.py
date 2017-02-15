@@ -1,3 +1,5 @@
+"""Contain the AskViewTests class"""
+
 import unittest
 import os
 import tempfile
@@ -15,15 +17,18 @@ from askomics.ask_view import AskView
 from interface_tps import InterfaceTPS
 
 class AskViewTests(unittest.TestCase):
-    """
-    This class contain method for testing the ask_view.py file
+    """Test for Askview
+    
+    Contain all the tests for the askView class
     """
 
     def setUp(self):
+        """Set up the configuration to access the triplestore
+        
+        Use the config file test.virtuoso.ini to not interfere with
+        production data
         """
-        set up the config to acces the TS. This use the config file test.virtuoso.ini
-        user is jdoe
-        """
+
         self.settings = get_appsettings('configs/test.virtuoso.ini', name='main')
         self.request = testing.DummyRequest()
 
@@ -55,11 +60,10 @@ class AskViewTests(unittest.TestCase):
         self.askview = AskView(self.request)
         self.askview.settings = self.settings
 
-        self.exp_res = ExpectedResults()
-
     def test_start_points(self):
-        """
-        Insert people and instruments and test if we get the right start points
+        """Test the start_points method
+        
+        Insert 2 datasets and test the start points
         """
 
         self.tps.clean_up()
@@ -104,8 +108,10 @@ class AskViewTests(unittest.TestCase):
 
 
     def test_empty_database(self):
-        """
-        insert data, and delete themn and test if data are deleted
+        """Test the empty_database method
+        
+        Insert data and test empty_database. Also test if
+        start point return no results after deletion
         """
         
         # empty tps
@@ -128,8 +134,10 @@ class AskViewTests(unittest.TestCase):
 
 
     def test_delete_graph(self):
-        """
-        insert 2 dataset, delete one and check if there is only one left
+        """Test delete_graph method
+        
+        Insert 2 datasets, and test delete_graph on one. Also test if
+        start point return only one datasets
         """
 
         # empty tps
@@ -173,7 +181,8 @@ class AskViewTests(unittest.TestCase):
         assert data == expected_result
 
     def test_get_list_private_graph(self):
-        """
+        """Test get_list_private_graph method
+
         insert 1 dataset and one public dataset and check which is private
         """
 
@@ -191,7 +200,8 @@ class AskViewTests(unittest.TestCase):
 
 
     def test_positionable_attr(self):
-        """
+        """test positionable_attr method
+
         insert positionnable data and test it
         """
         self.tps.clean_up()
@@ -209,15 +219,12 @@ class AskViewTests(unittest.TestCase):
         }
 
         data = self.askview.positionable_attr()
-        print('--- data ---')
-        print(data)
 
         assert data == expected_result
 
     def test_source_files_overview(self):
-        """
-        Test get_source_file_overview. the expected result is defined in the class ExpectedResults
-        """
+        """Test source_files_overview method"""
+
         self.tps.clean_up()
 
         data = self.askview.source_files_overview()
@@ -225,9 +232,7 @@ class AskViewTests(unittest.TestCase):
 
 
     def test_preview_ttl(self):
-        """
-
-        """
+        """Test preview_ttl method"""
         self.tps.clean_up()
 
         self.request.json_body = {
@@ -245,17 +250,18 @@ class AskViewTests(unittest.TestCase):
         assert len(data) == 20863
 
     def test_check_existing_data(self):
-        """
-
-        """
+        """Test check_existing_data"""
 
         #FIXME: I think this method is no longer used in askomics
+        pass
 
 
     def test_load_data_into_graph(self):
+        """Test load_data_into_graph method
+        
+        Load the file people.tsv and test the results
         """
 
-        """
         self.tps.clean_up()
 
         self.request.json_body = {
@@ -276,9 +282,11 @@ class AskViewTests(unittest.TestCase):
         
 
     def test_load_gff_into_graph(self):
+        """Test load_gff_into_graph method
+        
+        Load the file small_data.gff3 and test the results
         """
 
-        """
         self.tps.clean_up()
 
         self.request.json_body = {
@@ -295,9 +303,11 @@ class AskViewTests(unittest.TestCase):
 
 
     def test_load_ttl_into_graph(self):
+        """Test load_gff_into_graph method
+        
+        Load the file turtle_data.ttl and test the results
         """
 
-        """
         self.tps.clean_up()
 
         self.request.json_body = {
@@ -311,17 +321,16 @@ class AskViewTests(unittest.TestCase):
         assert data == {'status': 'ok'}#FIXME: this test don't work with load
 
 
-    def test_getUserAbstraction(self):
-        """
+    def test_get_user_abstraction(self):
+        """Test getUser_Abstraction"""
 
-        """
         self.tps.clean_up()
 
         # load a test
         self.tps.load_people()
         self.tps.load_instruments()
 
-        data = self.askview.getUserAbstraction();
+        data = self.askview.getUserAbstraction()
 
         assert len(data) == 6 #FIXME hard to compare wih expected result cause there is a timestamp
 
@@ -339,8 +348,9 @@ class AskViewTests(unittest.TestCase):
         pass
 
     def test_get_value(self):
-        """
-
+        """test get_value method
+        
+        Load a test and test get_value
         """
         self.tps.clean_up()
 
@@ -378,15 +388,13 @@ class AskViewTests(unittest.TestCase):
             'nrow': 6
         }
 
-    def test_getSparqlQueryInTextFormat(self):
-        """
-
-        """
+    def test_get_sparql_query_text(self):
+        """Test get_sparql_query_in_text_format method"""
 
         self.tps.clean_up()
 
         # load a test
-        timestamp = self.tps.load_people()
+        self.tps.load_people()
 
         self.request.json_body = {
             'export': False,
@@ -403,32 +411,28 @@ class AskViewTests(unittest.TestCase):
 
         assert len(str(data)) == 777
 
-    def test_uploadTtl(self):
-        """
+    def test_upload_ttl(self):
+        """Test uploadTtl method"""
 
-        """
-
+        #TODO: 
         pass
 
 
-    def test_uploadCsv(self):
-        """
+    def test_upload_csv(self):
+        """Test uploadCsv method"""
 
-        """
-
+        #TODO: 
         pass
 
-    def test_deletCsv(self):
-        """
+    def test_delet_csv(self):
+        """Test deletCsv method"""
 
-        """
-
+        #TODO: 
         pass
 
     def test_signup(self):
-        """
+        """Test signup method"""
 
-        """
         self.tps.clean_up()
 
         self.request.json_body = {
@@ -440,36 +444,21 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.signup()
 
-        # Delete imediatly the user, else the test wont pass next time (user already exist)
-
-        self.request.json_body = {
-            'username': 'jdoe',
-            'passwd': 'iamjohndoe',
-            'passwd_conf': 'iamjohndoe'
-        }
-
-        self.askview.delete_user()
-
         assert data == {'error': [], 'blocked': False, 'admin': True, 'username': 'jdoe'}
 
     def test_checkuser(self):
-        """
+        """Test checkuser method"""
 
-        """
         self.tps.clean_up()
 
         data = self.askview.checkuser()
 
-        print(data)
-
         assert data == {'admin': False, 'username': 'jdoe', 'blocked': False}
 
 
-
     def test_logout(self):
-        """
+        """Test logout method"""
 
-        """
         self.tps.clean_up()
 
         self.askview.logout()
@@ -478,9 +467,8 @@ class AskViewTests(unittest.TestCase):
 
 
     def test_login(self):
-        """
+        """Test login method"""
 
-        """
         self.tps.clean_up()
 
         #first, create a user
@@ -504,28 +492,14 @@ class AskViewTests(unittest.TestCase):
         
         data = self.askview.login()
 
-        # Finaly, delete the user
-        self.request.json_body = {
-            'username': 'jdoe',
-            'passwd': 'iamjohndoe',
-            'passwd_conf': 'iamjohndoe'
-        }
-
-        self.askview.delete_user()
-
         assert data == {'blocked': False, 'admin': True, 'error': [], 'username': 'jdoe'}
 
-
-
     def test_get_users_infos(self):
-        """
+        """Test get_users_infos"""
 
-        """
         self.tps.clean_up()
 
         data = self.askview.get_users_infos()
-
-        
 
         # first test with non admin
         assert data == 'forbidden'
@@ -534,8 +508,6 @@ class AskViewTests(unittest.TestCase):
         self.request.session['admin'] = True
 
         data = self.askview.get_users_infos()
-
-        print(data)
 
         assert data == {'result': []} #result is empty cause there is no user
 
@@ -551,23 +523,11 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.get_users_infos()
 
-        # del the user
-        self.request.json_body = {
-            'username': 'jdoe',
-            'passwd': 'iamjohndoe',
-            'passwd_conf': 'iamjohndoe'
-        }
-
-        self.askview.delete_user()
-
-        print(data)
-
         assert data == {'result': [], 'error': [], 'admin': True, 'blocked': False, 'username': 'jdoe'}
 
     def test_lock_user(self):
-        """
+        """Test lock_user method"""
 
-        """
         self.tps.clean_up()
 
         self.request.json_body = {
@@ -585,15 +545,12 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.lock_user()
 
-        # first test with non admin
         assert data == 'success'
 
 
-
     def test_set_admin(self):
-        """
+        """Test set_admin_method"""
 
-        """
         self.tps.clean_up()
 
         self.request.json_body = {
@@ -611,15 +568,12 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.set_admin()
 
-        # first test with non admin
         assert data == 'success'
 
     def test_delete_user(self):
-        """
+        """Test delete_user method"""
 
-        """
         self.tps.clean_up()
-
 
         # Insert a user
         self.request.json_body = {
@@ -642,15 +596,12 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.delete_user()
 
-
         assert data == 'success'
 
 
-
     def test_get_my_infos(self):
-        """
+        """Test get_my_infos"""
 
-        """
         self.tps.clean_up()
 
         # First, insert me
@@ -666,22 +617,11 @@ class AskViewTests(unittest.TestCase):
         # get my infos
         data = self.askview.get_my_infos()
 
-
-        # and delete me
-        self.request.json_body = {
-            'username': 'jdoe',
-            'passwd': 'iamjohndoe',
-            'passwd_conf': 'iamjohndoe'
-        }
-
-        self.askview.delete_user()
-
         assert data == {'email': 'jdoe@example.com', 'username': 'jdoe', 'admin': True, 'blocked': False}
 
     def test_update_mail(self):
-        """
+        """Test update_mail"""
 
-        """
         self.tps.clean_up()
 
         # First, insert me
@@ -694,6 +634,7 @@ class AskViewTests(unittest.TestCase):
 
         self.askview.signup()
 
+        # And change my email
         self.request.json_body = {
             'username': 'jdoe',
             'email': 'mynewmail@example.com'
@@ -701,19 +642,11 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.update_mail()
 
-        # and delete me
-        self.request.json_body = {
-            'username': 'jdoe',
-            'passwd': 'iamjohndoe',
-            'passwd_conf': 'iamjohndoe'
-        }
-
         assert data == {'username': 'jdoe', 'error': [], 'success': 'success', 'blocked': False, 'admin': True}
 
     def test_update_passwd(self):
-        """
+        """Test update_passwd method"""
 
-        """
         self.tps.clean_up()
 
         # First, insert me
@@ -726,6 +659,7 @@ class AskViewTests(unittest.TestCase):
 
         self.askview.signup()
 
+        # And update my password
         self.request.json_body = {
             'username': 'jdoe',
             'current_passwd': 'iamjohndoe',
@@ -734,14 +668,5 @@ class AskViewTests(unittest.TestCase):
         }
 
         data = self.askview.update_passwd()
-
-        # and delete me
-        self.request.json_body = {
-            'username': 'jdoe',
-            'passwd': 'mynewpassword',
-            'passwd_conf': 'mynewpassword'
-        }
-
-        self.askview.delete_user()
 
         assert data == {'error': [], 'admin': True, 'blocked': False, 'username': 'jdoe', 'success': 'success'}
