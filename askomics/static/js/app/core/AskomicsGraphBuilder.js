@@ -30,8 +30,7 @@ const classesMapping = {
       if ( selectedOrderList === undefined )
         return this._instanciedNodeGraph;
 
-      if ( kindparam === undefined ) throw "AskomicsGraphBuilder :: nodes -> Define kindparam when use selectedOrderList param";
-
+      if ( kindparam === undefined ) throw "AskomicsGraphBuilder::nodes -> Define kindparam when use selectedOrderList param";
       let nodeL = [];
       for (let i in selectedOrderList ) {
           for (let j in this._instanciedNodeGraph) {
@@ -40,8 +39,8 @@ const classesMapping = {
               break;
             }
           }
-        }
-        return nodeL;
+      }
+      return nodeL;
     }
 
     links() {

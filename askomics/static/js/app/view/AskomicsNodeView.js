@@ -304,7 +304,6 @@ class AskomicsNodeView extends AskomicsObjectView {
           sparqlIdSelected = mythis.node.values[curAtt.SPARQLid];
         }
         /* set up the list with possible entities to link */
-
         for ( let n of __ihm.getGraphBuilder().nodes() ) {
           let attributes = __ihm.getAbstraction().getAttributesWithURI(n.uri);
           let firstPrintForThisNode = true;
@@ -382,14 +381,21 @@ class AskomicsNodeView extends AskomicsObjectView {
       //filter on node.values does not work (event change is not call if user click just after to fill input box)
       let hasSelection = false ;
       let lv = $(currentIcon).parent().find('input');
-      if ( lv.length>0) if (typeof(lv.val()) == "string" ) hasSelection =  (lv.val() !== "") ;
+
+      if ( lv.length>0) if (typeof(lv.val()) == "string" ) return  (lv.val() !== "") ;
       //console.log($(currentIcon).parent().find('select').length);
-      if ( !hasSelection ) {
-        lv = $(currentIcon).parent().find('select').find(":selected");
-        if ( lv.length > 1 ) return true;
+      /* category case */
+      lv = $(currentIcon).parent().find('select:not([linkvar])').find(":selected");
+
+      if ( lv.length > 0 ) return true;
+
+      /* link var case */
+      lv = $(currentIcon).parent().find('select[linkvar]').find(":selected");
+
+      if ( lv.length > 1 ) return true;
         // by default a first value with ="Link with an attribute node..."
         //if ( lv.length > 0 ) hasSelection = true;
-      }
+
       return hasSelection;
     }
 
@@ -477,12 +483,15 @@ class AskomicsNodeView extends AskomicsObjectView {
         else if ( icon.hasClass('fa-eye') ) {
           icon.removeClass('fa-eye');
           icon.addClass('fa-question-circle');
+
           mythis.clean_box_attribute($(this).parent().parent());
           //if ( !(sparqlid in node.values) || ( node.values[sparqlid] === "" ) )
           //  __ihm.displayModal("Warning", "Optional results with a selection disable the current filter !", 'ok');
           //clean the selction
           $(this).parent().find('.fa-eraser').trigger('click');
+
           mythis.node.setActiveAttribute(sparqlid,true,true);
+
           $(this).parent().find("select").hide();
           $(this).parent().find("input").hide();
           $(this).parent().find(".fa").hide();
@@ -574,6 +583,11 @@ class AskomicsNodeView extends AskomicsObjectView {
             $(this).parent().find('input[linkvar!="true"]').show();
             $(this).parent().find('select[linkvar!="true"]').show();
             $(this).parent().find('select[linkvar="true"]').hide();
+            /* unselect element */
+            $(this).parent().find('select[linkvar="true"]').val(
+              $(this).parent().find('select[linkvar="true"] option:first').val()
+            );
+
             mythis.node.removeFilterLinkVariable(sparqlid);
             mythis.updateNodeView();
           }
@@ -592,10 +606,12 @@ class AskomicsNodeView extends AskomicsObjectView {
 
    let classIcon   = "makeLinkVariableIcon";
    let defaultIcon = "fa-chain-broken";
+
    this.clean_icon(div_attribute,classIcon,defaultIcon);
 
    classIcon    = "makeNegativeMatchIcon";
    defaultIcon  = "fa-plus";
+
    this.clean_icon(div_attribute,classIcon,defaultIcon);
 
    this.makeRemoveIcon();

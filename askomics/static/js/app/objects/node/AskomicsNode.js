@@ -344,11 +344,16 @@ class AskomicsNode extends GraphNode {
     this.setFilterAttributes(SPARQLid1,"","");
 
     this.linkvar[SPARQLid1].cpt--;
-    let n = __ihm.getGraphBuilder().nodes(this.linkvar[SPARQLid1].nodelink);
-    n.linkvar[SPARQLid2].cpt--;
+    
+    let n = __ihm.getGraphBuilder().nodes([this.linkvar[SPARQLid1].nodelink],'id');
+    if (n.length<=0) {
+      cnsole.log("AskomicsNode::removeFilterLinkVariable can not find linkvar node:"+this.linkvar[SPARQLid1].nodelink);
+      return ;
+    }
+    n[0].linkvar[SPARQLid2].cpt--;
 
     if ( this.linkvar[SPARQLid1].cpt <= 0 ) delete this.linkvar[SPARQLid1];
-    if ( n.linkvar[SPARQLid2].cpt <= 0 ) delete n.linkvar[SPARQLid2];
+    if ( n[0].linkvar[SPARQLid2].cpt <= 0 ) delete n[0].linkvar[SPARQLid2];
   }
 
   getAttributesDisplaying() {
