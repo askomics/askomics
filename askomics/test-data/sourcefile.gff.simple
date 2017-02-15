@@ -1,4 +1,0 @@
-##gff-version   3
-##sequence-region   1 1 1000
-1	tair	gene	10	100	.	+	.	ID=gene:g1;Name=G1;biotype=protein_coding;description=Gene 1;gene_id=G1
-1	tair	transcript	10	100	.	+	.	ID=transcript:t1;Parent=gene:g1;Name=T1;biotype=protein_coding;transcript_id=T1
