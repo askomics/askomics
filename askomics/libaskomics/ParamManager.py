@@ -3,12 +3,14 @@ import re
 import requests
 import json
 import tempfile
+import logging
 
 class ParamManager(object):
     """
         Manage static file and template sparql queries
     """
     def __init__(self, settings, session):
+        self.log = logging.getLogger(__name__)
         # User parameters
         self.settings = settings
         self.session = session
@@ -45,6 +47,8 @@ class ParamManager(object):
         if 'upload_directory' not in self.session.keys() or dir_string not in self.session['upload_directory'] or not os.path.isdir(self.session['upload_directory']):
             self.session['upload_directory'] = tempfile.mkdtemp(suffix='_tmp', prefix='__' + self.session['username'] + '__')
 
+        self.log.debug('--- upload dir ---')
+        self.log.debug(self.session['upload_directory'])
         return self.session['upload_directory']
 
     def getResultsCsvDirectory(self):
@@ -120,15 +124,19 @@ class ParamManager(object):
     @staticmethod
     def encodeToRDFURI(toencode):
         import urllib.parse
-        obj = urllib.parse.quote(toencode)
-        obj = obj.replace(".", "_dot_")
+        obj = toencode.replace(".", "_dot_")
         obj = obj.replace("-", "_sep_")
+        obj = obj.replace(':', '_col_')
+        obj = urllib.parse.quote(obj)
+
         return obj
 
     @staticmethod
     def decodeToRDFURI(toencode):
         import urllib.parse
-        obj = toencode.replace("_dot_",".")
-        obj = obj.replace("_sep_","-")
-        obj = urllib.parse.unquote(obj)
+        obj = urllib.parse.unquote(toencode)
+        obj = obj.replace("_dot_", ".")
+        obj = obj.replace("_sep_", "-")
+        obj = obj.replace("_col_", ":")
+
         return obj

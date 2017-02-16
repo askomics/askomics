@@ -72,6 +72,12 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         query_laucher.insert_data(ttl, self.graph, sparql_header)
 
+    def get_timestamp(self):
+        """
+        return the timestamp (use in the tests)
+        """
+        return self.timestamp
+
     @cached_property
     def existing_relations(self):
         """
@@ -179,9 +185,6 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
             sqb = SparqlQueryBuilder(self.settings, self.session)
 
-
-            graphName = self.graph + ':' + self.name + '_' + self.timestamp
-
             triple_count = 0
             chunk = ""
             for triple in content_ttl:
@@ -195,7 +198,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
                     self.log.debug("Inserting ttl chunk %s" % (chunk_count))
                     try:
                         header_ttl = sqb.header_sparql_config(chunk)
-                        queryResults = ql.insert_data(chunk, graphName, header_ttl)
+                        queryResults = ql.insert_data(chunk, self.graph, header_ttl)
                     except Exception as e:
                         return self._format_exception(e)
 
@@ -210,7 +213,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
                 try:
                     header_ttl = sqb.header_sparql_config(chunk)
-                    queryResults = ql.insert_data(chunk, graphName, header_ttl)
+                    queryResults = ql.insert_data(chunk, self.graph, header_ttl)
                 except Exception as e:
                     return self._format_exception(e)
 
@@ -228,14 +231,12 @@ class SourceFile(ParamManager, HaveCachedProperties):
             self.log.debug("Inserting ttl abstraction")
             try:
                 header_ttl = sqb.header_sparql_config(chunk)
-                ql.insert_data(chunk, graphName, header_ttl)
+                ql.insert_data(chunk, self.graph, header_ttl)
             except Exception as e:
                 return self._format_exception(e)
 
-            ttlNamedGraph = "<" + graphName + "> " + "rdfg:subGraphOf" + " <" + self.graph + "> ."
-            self.metadatas['graphName'] = graphName
+            self.metadatas['graphName'] = self.graph
             sparqlHeader = sqb.header_sparql_config("")
-            ql.insert_data(ttlNamedGraph, self.graph, sparqlHeader)
 
             data = {}
 

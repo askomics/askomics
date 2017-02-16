@@ -168,7 +168,7 @@ class TripleStoreExplorer(ParamManager):
 
         return results, sqb.custom_query(select, query).query
 
-
+    #FIXME: DEAD CODE ??
     def build_sparql_query_from_json2(self, variates, constraintes_relations, limit, send_request_to_TPS):
         """
         build a sparql query from json

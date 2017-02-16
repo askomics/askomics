@@ -1,0 +1,164 @@
+@prefix : <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdfg: <http://www.w3.org/2004/03/trix/rdfg-1/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix displaySetting: <http://www.irisa.fr/dyliss/rdfVisualization/display> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@base <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#> .
+<http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#> rdf:type owl:Ontology .
+
+#############
+#  Content  #
+#############
+
+:AT3G10490 rdf:type :transcript ;
+           rdfs:label "AT3G10490" ;
+           :position_taxon :Arabidopsis_thaliana ;
+           :featureName "ANAC052" ;
+           :position_ref :At3 ;
+           :position_start 3267835 ;
+           :position_end 3270883 ;
+           :featureType :gene ;
+           :position_strand :plus ;
+           :biotype :protein_coding ;
+
+:AT3G13660 rdf:type :transcript ;
+           rdfs:label "AT3G13660" ;
+           :position_taxon :Arabidopsis_thaliana ;
+           :featureName "DIR22" ;
+           :position_ref :At3 ;
+           :position_start 4464908 ;
+           :position_end 4465586 ;
+           :featureType :gene ;
+           :position_strand :plus ;
+           :biotype :protein_coding ;
+
+:AT3G51470 rdf:type :transcript ;
+           rdfs:label "AT3G51470" ;
+           :position_taxon :Arabidopsis_thaliana ;
+           :featureName "na" ;
+           :position_ref :At3 ;
+           :position_start 19097787 ;
+           :position_end 19099275 ;
+           :featureType :gene ;
+           :position_strand :minus ;
+           :biotype :protein_coding ;
+
+:AT3G10460 rdf:type :transcript ;
+           rdfs:label "AT3G10460" ;
+           :position_taxon :Arabidopsis_thaliana ;
+           :featureName "na" ;
+           :position_ref :At3 ;
+           :position_start 3255800 ;
+           :position_end 3256439 ;
+           :featureType :gene ;
+           :position_strand :plus ;
+           :biotype :protein_coding ;
+
+#################
+#  Abstraction  #
+#################
+
+:transcript rdf:type owl:Class ;
+            rdfs:label "transcript" .
+
+:position_taxon displaySetting:attribute "true"^^xsd:boolean .
+:position_taxon rdf:type owl:ObjectProperty ;
+                rdfs:label "taxon" ;
+                rdfs:domain :transcript ;
+                rdfs:range :taxonCategory .
+
+:featureName displaySetting:attribute "true"^^xsd:boolean .
+:featureName rdf:type owl:DatatypeProperty ;
+             rdfs:label "featureName" ;
+             rdfs:domain :transcript ;
+             rdfs:range xsd:string .
+
+:position_ref displaySetting:attribute "true"^^xsd:boolean .
+:position_ref rdf:type owl:ObjectProperty ;
+              rdfs:label "chromosomeName" ;
+              rdfs:domain :transcript ;
+              rdfs:range :chromosomeNameCategory .
+
+:position_start displaySetting:attribute "true"^^xsd:boolean .
+:position_start rdf:type owl:DatatypeProperty ;
+                rdfs:label "start" ;
+                rdfs:domain :transcript ;
+                rdfs:range xsd:decimal .
+
+:position_end displaySetting:attribute "true"^^xsd:boolean .
+:position_end rdf:type owl:DatatypeProperty ;
+              rdfs:label "end" ;
+              rdfs:domain :transcript ;
+              rdfs:range xsd:decimal .
+
+:featureType displaySetting:attribute "true"^^xsd:boolean .
+:featureType rdf:type owl:ObjectProperty ;
+             rdfs:label "featureType" ;
+             rdfs:domain :transcript ;
+             rdfs:range :featureTypeCategory .
+
+:position_strand displaySetting:attribute "true"^^xsd:boolean .
+:position_strand rdf:type owl:ObjectProperty ;
+                 rdfs:label "strand" ;
+                 rdfs:domain :transcript ;
+                 rdfs:range :strandCategory .
+
+:biotype displaySetting:attribute "true"^^xsd:boolean .
+:biotype rdf:type owl:ObjectProperty ;
+         rdfs:label "biotype" ;
+         rdfs:domain :transcript ;
+         rdfs:range :biotypeCategory .
+
+:transcript displaySetting:startPoint "true"^^xsd:boolean .
+
+
+######################
+#  Domain knowledge  #
+######################
+
+:transcript displaySetting:is_positionable "true"^^xsd:boolean .
+:is_positionable rdfs:label 'is_positionable' .
+:is_positionable rdf:type owl:ObjectProperty .
+:biotypeCategory displaySetting:category :protein_coding , 
+                                 :transposable_element , 
+                                 :ncRNA , 
+                                 :miRNA .
+:protein_coding rdf:type :biotype ;
+                rdfs:label "protein_coding" .
+:transposable_element rdf:type :biotype ;
+                      rdfs:label "transposable_element" .
+:ncRNA rdf:type :biotype ;
+       rdfs:label "ncRNA" .
+:miRNA rdf:type :biotype ;
+       rdfs:label "miRNA" .
+:featureTypeCategory displaySetting:category :miRNA_gene , 
+                                     :ncRNA_gene , 
+                                     :gene .
+:miRNA_gene rdf:type :featureType ;
+            rdfs:label "miRNA_gene" .
+:ncRNA_gene rdf:type :featureType ;
+            rdfs:label "ncRNA_gene" .
+:gene rdf:type :featureType ;
+      rdfs:label "gene" .
+:strandCategory displaySetting:category :plus , 
+                                :minus .
+:plus rdf:type :strand ;
+      rdfs:label "plus" .
+:minus rdf:type :strand ;
+       rdfs:label "minus" .
+:taxonCategory displaySetting:category :Arabidopsis_thaliana .
+:Arabidopsis_thaliana rdf:type :taxon ;
+                      rdfs:label "Arabidopsis_thaliana" .
+:chromosomeNameCategory displaySetting:category :At5 , 
+                                        :At1 , 
+                                        :At3 .
+:At5 rdf:type :chromosomeName ;
+     rdfs:label "At5" .
+:At1 rdf:type :chromosomeName ;
+     rdfs:label "At1" .
+:At3 rdf:type :chromosomeName ;
+     rdfs:label "At3" .
