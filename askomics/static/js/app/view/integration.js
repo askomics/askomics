@@ -10,7 +10,9 @@ $(function () {
         if (block.find('.preview_field').is(':visible')) {
             previewTtl(block);
         }
-        checkExistingData(block);
+        let lMessages = [];
+        checkExistingData(block,lMessages);
+        __ihm.managelistErrorsMessage(lMessages);
     });
 
     $("#content_integration").on('change', '.column_type', function(event) {
@@ -18,7 +20,9 @@ $(function () {
         if (block.find('.preview_field').is(':visible')) {
             previewTtl(block);
         }
-        checkExistingData(block);
+        let lMessages = [];
+        checkExistingData(block,lMessages);
+        __ihm.managelistErrorsMessage(lMessages);
     });
 
     $("#content_integration").on('click', '.preview_button', function(event) {
@@ -177,6 +181,7 @@ function setCorrectType(file) {
     }
 
     if ('column_types' in file) {
+        let listErrors = [];
         var cols = file.column_types;
         for(let i=0; i<cols.length; i++) {
             var selectbox = $('div#content_integration form#source-file-tsv-' + getIdFile(file) + ' select.column_type:eq(' + i + ')');
@@ -195,8 +200,9 @@ function setCorrectType(file) {
             }
 
             // Check what is in the db
-            checkExistingData($('div#content_integration form#source-file-tsv-' + getIdFile(file)));
+            checkExistingData($('div#content_integration form#source-file-tsv-' + getIdFile(file)),listErrors);
         }
+        __ihm.managelistErrorsMessage(listErrors);
     }
 
 
@@ -283,7 +289,7 @@ function containAll(Array1,Array2){
 /**
  * Compare the user data and what is already in the triple store
  */
-function checkExistingData(file_elem) {
+function checkExistingData(file_elem,listMessageWarning) {
 
     let idfile = file_elem.find('.file_name').attr('id');
     let file_name = $("#"+idfile).attr("filename");
@@ -294,17 +300,19 @@ function checkExistingData(file_elem) {
     }).get();
 
     // check if all positionable attributes are set
-    var warning_elem = file_elem.find(".warning-message").first();
-
+    //var warning_elem = file_elem.find(".warning-message").first();
     if (containAll(col_types,['start', 'end'])) {//positionable entity with all attributes
-        warning_elem.html("").removeClass("show").addClass("hidden");
+        //warning_elem.html("").removeClass("show").addClass("hidden");
     }else{
         if (containAny(col_types,['start', 'end', 'ref', 'taxon'])) { //positionable entity with missing attributes
-            warning_elem.html('<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> Missing positionable attributes for '+file_name)
-                                .removeClass('hidden')
-                              .addClass("show alert alert-danger");
+          let data ={} ;
+          listMessageWarning.push('Missing positionable attributes for '+file_name);
+          //  warning_elem.html('<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> Missing positionable attributes for '+file_name)
+          //                      .removeClass('hidden')
+          //                    .addClass("show alert alert-danger");
         }else{ //not a positionable entity
-            warning_elem.html("").removeClass("show").addClass("hidden");
+
+          //  warning_elem.html("").removeClass("show").addClass("hidden");
         }
     }
 
@@ -344,9 +352,10 @@ function checkExistingData(file_elem) {
           displayBlockedPage($('.username').attr('id'));
           return;
         }
-
-        if (! __ihm.manageErrorMessage(data)) return ;
-
+        if ( 'error' in data ) {
+          listMessageWarning.push(data.error);
+          return;
+        }
         file_elem.find('.column_header').each(function( index ) {
             if (data.headers_status[index-1] == 'present') {
                 $(this).find("#relation_present").first().show();
@@ -359,8 +368,7 @@ function checkExistingData(file_elem) {
         });
 
         if (data.missing_headers.length > 0) {
-            data.error = "<strong>The following columns are missing:</strong> " + data.missing_headers.join(', ');
-            __ihm.manageErrorMessage(data);
+            listMessageWarning.push("<strong>The following columns are missing:</strong> " + data.missing_headers.join(', '));
         }
     });
 }
@@ -417,23 +425,10 @@ function loadSourceFile(file_elem, pub) {
           return;
         }
         __ihm.hideModal();
+        console.log(JSON.stringify(data));
         var insert_status_elem = file_elem.find(".insert_status").first();
         if (data.status != "ok") {
             __ihm.manageErrorMessage(data);
-/*
-            console.log(data.error);
-            insert_warning_elem.append($('<span class="glyphicon glyphicon glyphicon-exclamation-sign"></span>')).
-                               append($('<p></p>')
-                               .html(data.error)).show();
-
-            let test = file_elem.find(".warning-message");
-            test.append($("<p></p>").html("Hello World"));
-            if ('url' in data) {
-                insert_warning_elem.append("<br>ttl file are available here: <a href=\""+data.url+"\">"+data.url+"</a>").show();
-            }
-            insert_status_elem.removeClass('alert-success')
-                              .addClass('alert-danger')
-                              .show();*/
         }
         else {
             if($.inArray('entitySym', col_types) != -1) {
@@ -468,7 +463,9 @@ function loadSourceFile(file_elem, pub) {
 
         // Check what is in the db now
         $('.template-source_file').each(function( index ) {
-            checkExistingData(file_elem);
+            let lMessages = [];
+            checkExistingData(file_elem,lMessages);
+            __ihm.managelistErrorsMessage(lMessages);
         });
     });
 

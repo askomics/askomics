@@ -230,6 +230,21 @@ class IHMLocal {
       return true;
     }
 
+    managelistErrorsMessage(listE) {
+      console.log("managelistErrorsMessage - error inside => "+JSON.stringify(listE));
+      // Remove last message
+      $('#error_div').remove();
+      // If there is an error message, how it
+      for(let l in listE) {
+          listE[l].replace(/\n/g,'<br/>');
+          let source = $('#template-error-message').html();
+          let template = Handlebars.compile(source);
+          let context = {message: listE[l]};
+          let html = template(context);
+          $('body').append(html);
+      }
+    }
+
     loadStartPoints() {
       console.log('---> loadStartPoints');
 
