@@ -59,10 +59,10 @@
         <div id="content_interrogation" class="container">
             <div id="init" class="row">
                 <div class="form-group">
-                    <label for="graph_startpoints" class="col-md-offset-2">Select a graph :</label>
-                    <select id='graph_startpoints' size='1' class="form-control col-md-offset-2"></select>
-                    <label for="startpoint" class="col-md-offset-2">Select a start point to start a session :</label>
-                    <select id='startpoints' size='8' class="form-control col-md-offset-2"></select>
+                    <label for="graph_startpoints" class=" startpoint col-md-offset-2">Select a graph :</label>
+                    <select id='graph_startpoints' size='1' class=" startpoint form-control col-md-offset-2"></select>
+                    <label for="startpoints" class=" startpoint col-md-offset-2">Select a start point to start a session :</label>
+                    <select id='startpoints' size='8' class=" startpoint form-control col-md-offset-2"></select>
                     <div class="col-md-offset-2">Shared entities are <em class='text-warning'>yellow</em> and personal entities are <strong class='text-primary'>blue</strong></div>
                 </div>
                 <button  id="starter" class="btn btn-default col-md-offset-2" onclick="__ihm.startSession();">Start</button>
