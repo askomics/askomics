@@ -10,9 +10,7 @@ $(function () {
         if (block.find('.preview_field').is(':visible')) {
             previewTtl(block);
         }
-        let lMessages = [];
-        checkExistingData(block,lMessages);
-        __ihm.managelistErrorsMessage(lMessages);
+        checkExistingData(block);
     });
 
     $("#content_integration").on('change', '.column_type', function(event) {
@@ -20,9 +18,7 @@ $(function () {
         if (block.find('.preview_field').is(':visible')) {
             previewTtl(block);
         }
-        let lMessages = [];
-        checkExistingData(block,lMessages);
-        __ihm.managelistErrorsMessage(lMessages);
+        checkExistingData(block);
     });
 
     $("#content_integration").on('click', '.preview_button', function(event) {
@@ -181,7 +177,6 @@ function setCorrectType(file) {
     }
 
     if ('column_types' in file) {
-        let listErrors = [];
         var cols = file.column_types;
         for(let i=0; i<cols.length; i++) {
             var selectbox = $('div#content_integration form#source-file-tsv-' + getIdFile(file) + ' select.column_type:eq(' + i + ')');
@@ -200,9 +195,8 @@ function setCorrectType(file) {
             }
 
             // Check what is in the db
-            checkExistingData($('div#content_integration form#source-file-tsv-' + getIdFile(file)),listErrors);
+            checkExistingData($('div#content_integration form#source-file-tsv-' + getIdFile(file)));
         }
-        __ihm.managelistErrorsMessage(listErrors);
     }
 
 
@@ -289,7 +283,7 @@ function containAll(Array1,Array2){
 /**
  * Compare the user data and what is already in the triple store
  */
-function checkExistingData(file_elem,listMessageWarning) {
+function checkExistingData(file_elem) {
 
     let idfile = file_elem.find('.file_name').attr('id');
     let file_name = $("#"+idfile).attr("filename");
@@ -300,19 +294,17 @@ function checkExistingData(file_elem,listMessageWarning) {
     }).get();
 
     // check if all positionable attributes are set
-    //var warning_elem = file_elem.find(".warning-message").first();
+    var warning_elem = file_elem.find(".warning-message").first();
+
     if (containAll(col_types,['start', 'end'])) {//positionable entity with all attributes
-        //warning_elem.html("").removeClass("show").addClass("hidden");
+        warning_elem.html("").removeClass("show").addClass("hidden");
     }else{
         if (containAny(col_types,['start', 'end', 'ref', 'taxon'])) { //positionable entity with missing attributes
-          let data ={} ;
-          listMessageWarning.push('Missing positionable attributes for '+file_name);
-          //  warning_elem.html('<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> Missing positionable attributes for '+file_name)
-          //                      .removeClass('hidden')
-          //                    .addClass("show alert alert-danger");
+            warning_elem.html('<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> Missing positionable attributes for '+file_name)
+                                .removeClass('hidden')
+                              .addClass("show alert alert-danger");
         }else{ //not a positionable entity
-
-          //  warning_elem.html("").removeClass("show").addClass("hidden");
+            warning_elem.html("").removeClass("show").addClass("hidden");
         }
     }
 
@@ -352,10 +344,6 @@ function checkExistingData(file_elem,listMessageWarning) {
           displayBlockedPage($('.username').attr('id'));
           return;
         }
-        if ( 'error' in data ) {
-          listMessageWarning.push(data.error);
-          return;
-        }
         file_elem.find('.column_header').each(function( index ) {
             if (data.headers_status[index-1] == 'present') {
                 $(this).find("#relation_present").first().show();
@@ -367,8 +355,12 @@ function checkExistingData(file_elem,listMessageWarning) {
             }
         });
 
+        var insert_warning_elem = file_elem.find(".insert_warning").first();
         if (data.missing_headers.length > 0) {
-            listMessageWarning.push("<strong>The following columns are missing:</strong> " + data.missing_headers.join(', '));
+            insert_warning_elem.html("<strong>The following columns are missing:</strong> " + data.missing_headers.join(', '))
+                              .removeClass("hidden alert-success")
+                              .removeClass("hidden alert-danger")
+                              .addClass("show alert-warning");
         }
     });
 }
@@ -425,19 +417,25 @@ function loadSourceFile(file_elem, pub) {
           return;
         }
         __ihm.hideModal();
-        console.log(JSON.stringify(data));
         var insert_status_elem = file_elem.find(".insert_status").first();
+        var insert_warning_elem = file_elem.find(".insert_warning").first();
         if (data.status != "ok") {
-            __ihm.manageErrorMessage(data);
+            console.log(data.error);
+            insert_warning_elem.append($('<span class="glyphicon glyphicon glyphicon-exclamation-sign"></span>')).
+                               append($('<p></p>').html(data.error));
+            if ('url' in data) {
+                insert_warning_elem.append("<br>ttl file are available here: <a href=\""+data.url+"\">"+data.url+"</a>");
+            }
+            insert_status_elem.removeClass('hidden alert-success')
+                              .addClass('show alert-danger');
         }
         else {
             if($.inArray('entitySym', col_types) != -1) {
                 if (data.expected_lines_number*2 == data.total_triple_count) {
                     insert_status_elem.html('<strong><span class="glyphicon glyphicon-ok"></span> Success:</strong> inserted '+ data.total_triple_count + " lines of "+(data.expected_lines_number*2))
-                                      .removeClass('alert-danger')
-                                      .removeClass('alert-warning')
-                                      .addClass('alert-success')
-                                      .show();
+                                      .removeClass('hidden alert-danger')
+                                      .removeClass('hidden alert-warning')
+                                      .addClass('show alert-success');
 
                 }else{
                     insert_status_elem.html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> Warning:</strong> inserted '+ data.total_triple_count*2 + " lines of "+data.expected_lines_number)
@@ -463,9 +461,7 @@ function loadSourceFile(file_elem, pub) {
 
         // Check what is in the db now
         $('.template-source_file').each(function( index ) {
-            let lMessages = [];
-            checkExistingData(file_elem,lMessages);
-            __ihm.managelistErrorsMessage(lMessages);
+            checkExistingData(file_elem);
         });
     });
 
@@ -529,9 +525,14 @@ function loadSourceFileGff(idfile, pub) {
         }
 
         let insert_status_elem = file_elem.find(".insert_status").first();
+        let insert_warning_elem = file_elem.find(".insert_warning").first();
 
+        //TODO: check if insertion is ok and then, display the success message or a warning message
         if (data.error) {
-            __ihm.manageErrorMessage(data);
+            insert_status_elem.html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> ERROR:</strong> ' + JSON.stringify(data.error))
+                              .removeClass('hidden alert-success')
+                              .removeClass('hidden alert-warning')
+                              .addClass('show alert-danger');
         }else{
             insert_status_elem.html('<span class="glyphicon glyphicon-ok"></span> ' + entities_string + ' inserted with success.')
                                                   .removeClass('hidden alert-danger')
@@ -567,9 +568,13 @@ function loadSourceFileTtl(idfile, pub) {
         }
 
         let insert_status_elem = file_elem.find(".insert_status").first();
+        let insert_warning_elem = file_elem.find(".insert_warning").first();
 
         if (data.error) {
-            __ihm.manageErrorMessage(data);
+            insert_status_elem.html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> ERROR:</strong> ' + JSON.stringify(data.error))
+                              .removeClass('hidden alert-success')
+                              .removeClass('hidden alert-warning')
+                              .addClass('show alert-danger');
         }else{
             insert_status_elem.html('<span class="glyphicon glyphicon-ok"></span> ' + idfile + ' inserted with success.')
                                                   .removeClass('hidden alert-danger')

@@ -611,6 +611,7 @@
                     {{/if}}
                     <br><br>
                     <p class="insert_status text-left alert hidden"></p>
+                    <p class="insert_warning text-left alert hidden"></p>
                     <hr><br>
                 </div>
             </form>
@@ -708,6 +709,8 @@
                         </div>
                     </div>
                     <p class="insert_status text-left alert hidden"></p>
+                    <p class="insert_warning text-left alert hidden"></p>
+                    <div class="warning-message hidden"></div>
                 {{/if}}
             </form>
             <hr />
@@ -727,6 +730,7 @@
                     {{/if}}
                     <br><br>
                     <p class="insert_status text-left alert hidden"></p>
+                    <p class="insert_warning text-left alert hidden"></p>
                     <hr><br>
                 </div>
             </form>
