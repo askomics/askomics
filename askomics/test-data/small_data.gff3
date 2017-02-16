@@ -1,0 +1,23 @@
+##gff-version   3
+##sequence-region   1 1 30427671
+#!genome-build TAIR TAIR10
+#!genome-version TAIR10
+#!genome-date 2010-09
+#!genome-build-accession GCA_000001735.1
+#!genebuild-last-updated 2010-09
+1	tair	gene	3631	5899	.	+	.	ID=gene:AT1G01010;Name=NAC001;biotype=protein_coding;description=NAC domain-containing protein 1 [Source:UniProtKB/Swiss-Prot%3BAcc:Q0WV96];gene_id=AT1G01010;logic_name=tair
+1	tair	transcript	3631	5899	.	+	.	ID=transcript:AT1G01010.1;Parent=gene:AT1G01010;Name=ANAC001;biotype=protein_coding;transcript_id=AT1G01010.1
+1	tair	five_prime_UTR	3631	3759	.	+	.	Parent=transcript:AT1G01010.1
+1	tair	exon	3631	3913	.	+	.	Parent=transcript:AT1G01010.1;Name=AT1G01010.1.exon1;constitutive=1;ensembl_end_phase=1;ensembl_phase=-1;exon_id=AT1G01010.1.exon1;rank=1
+1	tair	CDS	3760	3913	.	+	0	ID=CDS:AT1G01010.1;Parent=transcript:AT1G01010.1;protein_id=AT1G01010.1
+1	tair	exon	3996	4276	.	+	.	Parent=transcript:AT1G01010.1;Name=AT1G01010.1.exon2;constitutive=1;ensembl_end_phase=0;ensembl_phase=1;exon_id=AT1G01010.1.exon2;rank=2
+1	tair	CDS	3996	4276	.	+	2	ID=CDS:AT1G01010.1;Parent=transcript:AT1G01010.1;protein_id=AT1G01010.1
+1	tair	exon	4486	4605	.	+	.	Parent=transcript:AT1G01010.1;Name=AT1G01010.1.exon3;constitutive=1;ensembl_end_phase=0;ensembl_phase=0;exon_id=AT1G01010.1.exon3;rank=3
+1	tair	CDS	4486	4605	.	+	0	ID=CDS:AT1G01010.1;Parent=transcript:AT1G01010.1;protein_id=AT1G01010.1
+1	tair	exon	4706	5095	.	+	.	Parent=transcript:AT1G01010.1;Name=AT1G01010.1.exon4;constitutive=1;ensembl_end_phase=0;ensembl_phase=0;exon_id=AT1G01010.1.exon4;rank=4
+1	tair	CDS	4706	5095	.	+	0	ID=CDS:AT1G01010.1;Parent=transcript:AT1G01010.1;protein_id=AT1G01010.1
+1	tair	exon	5174	5326	.	+	.	Parent=transcript:AT1G01010.1;Name=AT1G01010.1.exon5;constitutive=1;ensembl_end_phase=0;ensembl_phase=0;exon_id=AT1G01010.1.exon5;rank=5
+1	tair	CDS	5174	5326	.	+	0	ID=CDS:AT1G01010.1;Parent=transcript:AT1G01010.1;protein_id=AT1G01010.1
+1	tair	CDS	5439	5630	.	+	0	ID=CDS:AT1G01010.1;Parent=transcript:AT1G01010.1;protein_id=AT1G01010.1
+1	tair	exon	5439	5899	.	+	.	Parent=transcript:AT1G01010.1;Name=AT1G01010.1.exon6;constitutive=1;ensembl_end_phase=-1;ensembl_phase=0;exon_id=AT1G01010.1.exon6;rank=6
+1	tair	three_prime_UTR	5631	5899	.	+	.	Parent=transcript:AT1G01010.1
