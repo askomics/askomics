@@ -225,9 +225,9 @@ class SourceFileTsv(SourceFile):
 
         for key in self.key_columns:
             if retval == None:
-                retval = row[int(self.key_columns[key])]
+                retval = row[int(key)]
             else:
-                retval += "_"+ row[int(self.key_columns[key])]
+                retval += "_"+ row[int(key)]
 
         #by default the first element is index
         if retval == None:
