@@ -39,5 +39,5 @@ script:
   - python setup.py nosetests
 # - gulp test
 #  - coveralls-lcov -v -n coverage/frontend.lcov > coverage.json
-after_success:
-  coveralls --merge=coverage.json
+#after_success:
+#  coveralls --merge=coverage.json
