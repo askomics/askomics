@@ -18,13 +18,13 @@ from interface_tps import InterfaceTPS
 
 class AskViewTests(unittest.TestCase):
     """Test for Askview
-    
+
     Contain all the tests for the askView class
     """
 
     def setUp(self):
         """Set up the configuration to access the triplestore
-        
+
         Use the config file test.virtuoso.ini to not interfere with
         production data
         """
@@ -60,9 +60,12 @@ class AskViewTests(unittest.TestCase):
         self.askview = AskView(self.request)
         self.askview.settings = self.settings
 
+    def getKeyNode(self,node):
+        return node['uri']
+
     def test_start_points(self):
         """Test the start_points method
-        
+
         Insert 2 datasets and test the start points
         """
 
@@ -77,8 +80,7 @@ class AskViewTests(unittest.TestCase):
 
 
         expected_result = {
-            'nodes': {
-                'http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Instruments':
+            'nodes': [
                 {
                     'g':
                     'urn:sparql:test_askomics:jdoe:instruments_' + timestamp_instruments,
@@ -88,7 +90,6 @@ class AskViewTests(unittest.TestCase):
                     'private': True,
                     'label': 'Instruments'
                 },
-                'http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#People':
                 {
                     'g':
                     'urn:sparql:test_askomics:jdoe:people_' + timestamp_people,
@@ -98,14 +99,15 @@ class AskViewTests(unittest.TestCase):
                     'private': True,
                     'label': 'People'
                 }
-            }
+            ]
         }
 
         print(data)
 
         assert len(data["nodes"]) == 2
-        assert data == expected_result
-
+        data["nodes"] = sorted(data["nodes"],key=self.getKeyNode)
+        expected_result["nodes"] = sorted(expected_result["nodes"],key=self.getKeyNode)
+        assert expected_result["nodes"]==data["nodes"]
 
     def test_statistics(self):
 
@@ -115,11 +117,11 @@ class AskViewTests(unittest.TestCase):
 
     def test_empty_database(self):
         """Test the empty_database method
-        
+
         Insert data and test empty_database. Also test if
         start point return no results after deletion
         """
-        
+
         # empty tps
         self.tps.clean_up()
 
@@ -136,12 +138,12 @@ class AskViewTests(unittest.TestCase):
         askview2.settings = self.settings
         data = askview2.start_points()
 
-        assert data == {'nodes': {}}
+        assert data == {'nodes': []}
 
 
     def test_delete_graph(self):
         """Test delete_graph method
-        
+
         Insert 2 datasets, and test delete_graph on one. Also test if
         start point return only one datasets
         """
@@ -171,8 +173,7 @@ class AskViewTests(unittest.TestCase):
 
         # test if startpoint return only instruments
         expected_result = {
-            'nodes': {
-                'http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Instruments':
+            'nodes': [
                 {
                     'private': True,
                     'g':
@@ -182,7 +183,7 @@ class AskViewTests(unittest.TestCase):
                     'label': 'Instruments',
                     'public': False
                 }
-            }
+            ]
         }
 
         assert data == expected_result
@@ -268,7 +269,7 @@ class AskViewTests(unittest.TestCase):
 
     def test_load_data_into_graph(self):
         """Test load_data_into_graph method
-        
+
         Load the file people.tsv and test the results
         """
 
@@ -289,11 +290,11 @@ class AskViewTests(unittest.TestCase):
 
 
         assert data == {'total_triple_count': 6, 'status': 'ok', 'expected_lines_number': 6}
-        
+
 
     def test_load_gff_into_graph(self):
         """Test load_gff_into_graph method
-        
+
         Load the file small_data.gff3 and test the results
         """
 
@@ -314,7 +315,7 @@ class AskViewTests(unittest.TestCase):
 
     def test_load_ttl_into_graph(self):
         """Test load_gff_into_graph method
-        
+
         Load the file turtle_data.ttl and test the results
         """
 
@@ -361,7 +362,7 @@ class AskViewTests(unittest.TestCase):
 
     def test_get_value(self):
         """test get_value method
-        
+
         Load a test and test get_value
         """
         self.tps.clean_up()
@@ -426,20 +427,20 @@ class AskViewTests(unittest.TestCase):
     def test_upload_ttl(self):
         """Test uploadTtl method"""
 
-        #TODO: 
+        #TODO:
         pass
 
 
     def test_upload_csv(self):
         """Test uploadCsv method"""
 
-        #TODO: 
+        #TODO:
         pass
 
     def test_delet_csv(self):
         """Test deletCsv method"""
 
-        #TODO: 
+        #TODO:
         pass
 
     def test_signup(self):
@@ -501,7 +502,7 @@ class AskViewTests(unittest.TestCase):
             'username_email': 'jdoe',
             'password': 'iamjohndoe'
         }
-        
+
         data = self.askview.login()
 
         assert data == {'blocked': False, 'admin': True, 'error': [], 'username': 'jdoe'}
@@ -625,7 +626,7 @@ class AskViewTests(unittest.TestCase):
         }
 
         self.askview.signup()
-        
+
         # get my infos
         data = self.askview.get_my_infos()
 
