@@ -66,14 +66,18 @@ class AskomicsNodeView extends AskomicsObjectView {
   }
 
 /* ===============================================================================================*/
-
-  buildCategory(attribute) {
+  buildCategory(attribute,contextDependancy=false) {
     let labelSparqlVarId = attribute.SPARQLid;
     let URISparqlVarId   = "URICat"+labelSparqlVarId;
     let inp = $("<select/>").addClass("form-control").attr("multiple","multiple");
 
     __ihm.displayModal('Please wait', '', 'Close');
-    var tab = this.node.buildConstraintsGraphForCategory(attribute.id);
+    let tab = this.node.buildConstraintsGraphForCategory(attribute.id);
+
+    if (contextDependancy) {
+      let tab2 = __ihm.getGraphBuilder().buildConstraintsGraph();
+      tab[1][0] = [].concat.apply([], [tab[1][0], tab2[1][0]]);
+    }
 
     inp.attr("list", "opt_" + labelSparqlVarId)
        .attr("sparqlid",URISparqlVarId);
@@ -614,6 +618,22 @@ class AskomicsNodeView extends AskomicsObjectView {
    this.makeRemoveIcon();
  }
 
+ makeRefreshCategoryIcon(att) {
+   var icon = $('<span></span>')
+           .addClass('fa')
+           .addClass('fa-refresh')
+           .addClass('display');
+
+   let mythis = this;
+
+   icon.click(function(d) {
+      $(this).parent().find('select[linkvar!="true"]').remove();
+      $(this).parent().append(mythis.buildCategory(att,true));
+   });
+   return icon;
+ }
+
+
 /* ===============================================================================================*/
   create() {
     var mythis = this;
@@ -662,6 +682,7 @@ class AskomicsNodeView extends AskomicsObjectView {
                    .append(mythis.makeEyeIcon(attribute))
                    .append(mythis.makeNegativeMatchIcon('URICat'+attribute.SPARQLid))
                    .append(mythis.makeLinkVariableIcon('URICat'+attribute.SPARQLid))
+                   .append(mythis.makeRefreshCategoryIcon(attribute))
                    .append(mythis.buildCategory(attribute))
                    .append(mythis.buildLinkVariable(attribute)));
           } else if ( attribute.basic_type == "decimal" ) {
