@@ -114,13 +114,13 @@ class AskomicsNode extends GraphNode {
           /* check filter if exist */
 
           let subBlockNegativeConstraint = [];
-          if ( isInversedMatch && (this.inverseMatch[SparqlId] === 'inverseWithExistingRelation' || this.inverseMatch[SparqlId] === 'inverseWithNoRelation') ) {
+          if ( isInversedMatch ) {
             subBlockNegativeConstraint.push("?"+'URI'+this.SPARQLid+" "+this.URI(uri)+" "+"?negative"+SparqlId);
             subBlockNegativeConstraint.push("FILTER isLiteral(?negative"+SparqlId+")");
           }
           /* If Inverse Match we have to build a block */
           if ( isFiltered ) {
-            if ( isInversedMatch && (this.inverseMatch[SparqlId] === 'inverseWithExistingRelation' || this.inverseMatch[SparqlId] === 'inverseWithNoRelation') ) {
+            if ( isInversedMatch ) {
               let newfilt = this.filters[SparqlId].replace(SparqlId,"negative"+SparqlId);
               subBlockNegativeConstraint.push(newfilt);
             } else {
@@ -128,8 +128,8 @@ class AskomicsNode extends GraphNode {
             }
           }
 
-          if ( isInversedMatch && (this.inverseMatch[SparqlId] === 'inverseWithExistingRelation' || this.inverseMatch[SparqlId] === 'inverseWithNoRelation') ) {
-            if ( this._inverseMatch[SparqlId] === 'inverseWithNoRelation' ) {
+          if ( isInversedMatch ) {
+            if ( this.inverseMatch[SparqlId] === 'inverseWithNoRelation' ) {
                 blockConstraintByNode.push([subBlockConstraint,'OPTIONAL']);
             } else {
                 blockConstraintByNode.push([subBlockConstraint,'']);
@@ -158,14 +158,14 @@ class AskomicsNode extends GraphNode {
 
 
         let subBlockNegativeConstraint = [];
-        if ( isInversedMatch && (this.inverseMatch[SparqlId] === 'inverseWithExistingRelation' || this.inverseMatch[SparqlId] === 'inverseWithNoRelation') ) {
+        if ( isInversedMatch ) {
           subBlockNegativeConstraint.push("?"+'URI'+this.SPARQLid+" "+this.URI(uri)+" "+"?negative"+SparqlId);
           subBlockNegativeConstraint.push("[] displaySetting:category "+"?negative"+SparqlId);
           subBlockNegativeConstraint.push("?negative"+SparqlId+" "+'rdfs:label'+" "+"?negative"+this.categories[uri].SPARQLid);
         }
         /* If Inverse Match we have to build a block */
         if ( isFiltered ) {
-            if ( isInversedMatch && (this.inverseMatch[SparqlId] === 'inverseWithExistingRelation' || this.inverseMatch[SparqlId] === 'inverseWithNoRelation') ) {
+            if ( isInversedMatch ) {
               let newfilt = this.filters[SparqlId].replace(SparqlId,"negative"+SparqlId);
               subBlockNegativeConstraint.push(newfilt);
             } else {
@@ -173,8 +173,8 @@ class AskomicsNode extends GraphNode {
             }
           }
 
-        if ( isInversedMatch && (this.inverseMatch[SparqlId] === 'inverseWithExistingRelation' || this.inverseMatch[SparqlId] === 'inverseWithNoRelation') ) {
-            if ( this._inverseMatch[SparqlId] === 'inverseWithNoRelation' ) {
+        if ( isInversedMatch ) {
+            if ( this.inverseMatch[SparqlId] === 'inverseWithNoRelation' ) {
                 blockConstraintByNode.push([subBlockConstraint,'OPTIONAL']);
             } else {
                 blockConstraintByNode.push([subBlockConstraint,'']);
@@ -194,7 +194,7 @@ class AskomicsNode extends GraphNode {
     if (this.SPARQLid in this.filters) {
       /* If Inverse Match we have to build a block */
 
-      if ( this.inverseMatch[this.SPARQLid] === 'inverseWithExistingRelation' ) {
+      if ( this.SPARQLid in this.inverseMatch ) {
         let subBlockConstraint = [];
         subBlockConstraint.push("?"+'URI'+this.SPARQLid+" "+'rdfs:label'+" "+"?negative"+this.SPARQLid);
         let newfilt = this.filters[this.SPARQLid].replace(this.SPARQLid,"negative"+this.SPARQLid);
@@ -316,7 +316,7 @@ class AskomicsNode extends GraphNode {
   }
 
   setFilterLinkVariable(SPARQLid1,node2,SPARQLid2) {
-    this.setFilterAttributes(SPARQLid1,SPARQLid2,'FILTER ( ?'+SPARQLid1+'=?'+SPARQLid2+')');
+    this.setFilterAttributes(SPARQLid1,SPARQLid2,'FILTER (?'+SPARQLid1+'=?'+SPARQLid2+')');
     if (! (SPARQLid1 in this.linkvar) ) {
       this.linkvar[SPARQLid1] = {};
       this.linkvar[SPARQLid1].cpt = 0;       /* counter about this attribute */
@@ -344,11 +344,16 @@ class AskomicsNode extends GraphNode {
     this.setFilterAttributes(SPARQLid1,"","");
 
     this.linkvar[SPARQLid1].cpt--;
-    let n = new AskomicsGraphBuilder().nodes(this.linkvar[SPARQLid1].nodelink);
-    n.linkvar[SPARQLid2].cpt--;
+    
+    let n = __ihm.getGraphBuilder().nodes([this.linkvar[SPARQLid1].nodelink],'id');
+    if (n.length<=0) {
+      cnsole.log("AskomicsNode::removeFilterLinkVariable can not find linkvar node:"+this.linkvar[SPARQLid1].nodelink);
+      return ;
+    }
+    n[0].linkvar[SPARQLid2].cpt--;
 
     if ( this.linkvar[SPARQLid1].cpt <= 0 ) delete this.linkvar[SPARQLid1];
-    if ( n.linkvar[SPARQLid2].cpt <= 0 ) delete n.linkvar[SPARQLid2];
+    if ( n[0].linkvar[SPARQLid2].cpt <= 0 ) delete n[0].linkvar[SPARQLid2];
   }
 
   getAttributesDisplaying() {
@@ -357,7 +362,7 @@ class AskomicsNode extends GraphNode {
     let list_label = [];
     let map_url = {} ;
 
-    let orderAttributes = new AskomicsUserAbstraction().getOrderAttributesList(this.uri);
+    let orderAttributes = __ihm.getAbstraction().getOrderAttributesList(this.uri);
 
     for ( let uriAttI in orderAttributes ) {
       let uriAtt = orderAttributes[uriAttI].uri;

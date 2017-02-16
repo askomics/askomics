@@ -22,6 +22,7 @@ let instanceAskomicsJobsViewManager ;
       /* Create Job in status wait */
       this.jobs.push({
           jobid    : curId ,
+          wait     : true,
           state    : 'wait',
           tstart   : time,
           start    : new Date(time).toLocaleString(),
@@ -57,7 +58,8 @@ let instanceAskomicsJobsViewManager ;
             let s = addZero(elp.getSeconds(), 2);
             let ms = addZero(elp.getMilliseconds(), 3);
 
-            this.jobs[ij].end = new Date(time).toLocaleString();
+            this.jobs[ij].end   = new Date(time).toLocaleString();
+            this.jobs[ij].wait  = false;
             this.jobs[ij].state = "Ok";
             this.jobs[ij].nr    = data.nrow;
             this.jobs[ij].csv   = data.file;
@@ -73,6 +75,7 @@ let instanceAskomicsJobsViewManager ;
       for ( let ij in this.jobs ) {
           if (this.jobs[ij].jobid === id) {
             this.jobs[ij].end = $.now() ;
+            this.jobs[ij].wait  = false;
             this.jobs[ij].state = messErr ;
             this.jobs[ij].duration = this.jobs.end - this.jobs.start ;
             this.jobs[ij].classtr = "bg-danger";
@@ -87,6 +90,7 @@ let instanceAskomicsJobsViewManager ;
       service.get(this.jobs[index].csv);
       this.jobs.splice(index, 1);
       new AskomicsJobsViewManager().listJobs();
+      if (this.jobs.length<=0) $("#interrogation").trigger( "click" );
     }
 
     prepareQuery() {
@@ -96,7 +100,7 @@ let instanceAskomicsJobsViewManager ;
         //     :lim: LIMIT values for preview
         console.log('+++ prepareQuery +++');
 
-        var tab = __ihm.getGraphBuilder().buildConstraintsGraph();
+        let tab = __ihm.getGraphBuilder().buildConstraintsGraph();
         return {
                   'variates'             : tab[0],
                   'constraintesRelations': tab[1],

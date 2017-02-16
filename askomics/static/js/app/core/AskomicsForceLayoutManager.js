@@ -10,7 +10,7 @@ class AskomicsForceLayoutManager {
 	  this.charge   = -700 ;
     this.distance = 175 ;
     this.friction = 0.7 ;
-    this.w        = 650;
+    this.w        = 650 ;
     this.h        = 600 ;
 
     this.svgdivid = svgdiv_id;
@@ -229,12 +229,15 @@ class AskomicsForceLayoutManager {
 
     d3.select("#"+this.svgdivid).select("svg").remove();
 
-    this.vis = d3.select("#svgdiv")
+    this.vis = d3.select("#"+this.svgdivid)
                 .append("svg:svg")
                 /*.attr("pointer-events", "all")*/
                 .attr("width","100%")
                 .attr("height","100%")
-                .attr("viewBox", "0 0 " + this.w  + " " + this.h )
+                /* viewport : this.w,this.h :partie visible => viewBox : this.w*3,this.h*3 image size */
+                .attr("viewBox", "0 0 " + this.w + " " + this.h )
+                .attr("width",this.w)
+                .attr("height",this.h)
                 .attr("perserveAspectRatio", "xMinYMid meet")
                 .call(d3.behavior.zoom().on("zoom", function() {
                   let velocity = 1/10;

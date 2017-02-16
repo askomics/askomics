@@ -19,6 +19,7 @@ node_modules
 askomics/test/client/js/istanbul
 .coverage-js
 output_test.log
+askomics/test/client/index_tpl.html
 
 # Editors & tooling
 *.orig

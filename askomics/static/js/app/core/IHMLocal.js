@@ -9,7 +9,7 @@ class IHMLocal {
 
       this.chunkSize        =      400000 ;
       this.sizeFileMaxAdmin =  4000000000 ; // 4Go
-      this.sizeFileMaxUser  =     4000000 ; // 4 Mo
+      this.sizeFileMaxUser  =     10000000 ; // 10 Mo
       /* Implement a Singleton */
       if ( __ihm !== undefined ) {
           return __ihm;
@@ -230,6 +230,21 @@ class IHMLocal {
       return true;
     }
 
+    managelistErrorsMessage(listE) {
+      console.log("managelistErrorsMessage - error inside => "+JSON.stringify(listE));
+      // Remove last message
+      $('#error_div').remove();
+      // If there is an error message, how it
+      for(let l in listE) {
+          listE[l].replace(/\n/g,'<br/>');
+          let source = $('#template-error-message').html();
+          let template = Handlebars.compile(source);
+          let context = {message: listE[l]};
+          let html = template(context);
+          $('body').append(html);
+      }
+    }
+
     loadStartPoints() {
       console.log('---> loadStartPoints');
 
@@ -255,11 +270,11 @@ class IHMLocal {
             if (value.public) {
               textGraph = $('<em></em>').attr('class', 'text-warning')
                                    .append($('<i></i>').attr('class', 'fa fa-globe'))
-                                   .append(' ' + value.g);
+                                   .append(' ' + __ihm.graphname(value.g).name);
             } else if (value.private) {
               textGraph = $('<em></em>').attr('class', 'text-primary')
                                    .append($('<i></i>').attr('class', 'fa fa-lock'))
-                                   .append(' ' + value.g);
+                                   .append(' ' + __ihm.graphname(value.g).name);
             } else {
                throw "unknwon access ";
             }
@@ -357,13 +372,18 @@ class IHMLocal {
       $('#btn-empty').prop('disabled', false);
     }
 
+    graphname(graphn) {
+      let date = graphn.substr(graphn.lastIndexOf('_') + 1);
+      let new_name = graphn.substr(0,graphn.lastIndexOf('_'));
+      return { 'date' : date , 'name' : new_name } ;
+    }
+
     formatGraphName(graph) {
       /*
       Transform the name of the graph into a readable string
       */
-      let date = graph.g.substr(graph.g.lastIndexOf('_') + 1);
-      let new_name = graph.g.substr(0,graph.g.lastIndexOf('_'));
-      return new_name+" (<strong>date="+date+", ntriplets="+graph.count+"</strong>)";
+      let ret = __ihm.graphname(graph.g);
+      return "<em>"+ret.name+"</em> (<strong>date="+ret.date+", ntriplets="+graph.count+"</strong>)";
     }
 
     showLoginForm() {
@@ -541,7 +561,7 @@ class IHMLocal {
             // Uncomment the following to send cross-domain cookies:
             //xhrFields: {withCredentials: true},
             url: '/up/file/',
-            maxChunkSize: this.chunkSize,
+            maxChunkSize: __ihm.chunkSize,
             maxFileSize: sizeFileMax
         });
 

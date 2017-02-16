@@ -66,14 +66,18 @@ class AskomicsNodeView extends AskomicsObjectView {
   }
 
 /* ===============================================================================================*/
-
-  buildCategory(attribute) {
+  buildCategory(attribute,contextDependancy=false) {
     let labelSparqlVarId = attribute.SPARQLid;
     let URISparqlVarId   = "URICat"+labelSparqlVarId;
     let inp = $("<select/>").addClass("form-control").attr("multiple","multiple");
 
     __ihm.displayModal('Please wait', '', 'Close');
-    var tab = this.node.buildConstraintsGraphForCategory(attribute.id);
+    let tab = this.node.buildConstraintsGraphForCategory(attribute.id);
+
+    if (contextDependancy) {
+      let tab2 = __ihm.getGraphBuilder().buildConstraintsGraph();
+      tab[1][0] = [].concat.apply([], [tab[1][0], tab2[1][0]]);
+    }
 
     inp.attr("list", "opt_" + labelSparqlVarId)
        .attr("sparqlid",URISparqlVarId);
@@ -304,13 +308,11 @@ class AskomicsNodeView extends AskomicsObjectView {
           sparqlIdSelected = mythis.node.values[curAtt.SPARQLid];
         }
         /* set up the list with possible entities to link */
-
         for ( let n of __ihm.getGraphBuilder().nodes() ) {
           let attributes = __ihm.getAbstraction().getAttributesWithURI(n.uri);
           let firstPrintForThisNode = true;
           /* Manage Link node id  */
           if ( (n.id != curAtt.id) ) {
-
             inp.append($('<option></option>').prop('disabled', true).html("<b><i> --- "+ n.formatInHtmlLabelEntity()+" --- </i></b>"));
             firstPrintForThisNode = false;
             //ID Label is a string
@@ -331,7 +333,6 @@ class AskomicsNodeView extends AskomicsObjectView {
             let att = n.getAttributeOrCategoryForNode(a);
             /* we can not link the attribute with himself */
             if ( att.id == curAtt.id ) continue ;
-
             if ( 'type' in curAtt) {
               /* we can not link attributes with diffente type */
               if ( att.basic_type != curAtt.basic_type ) continue;
@@ -382,17 +383,21 @@ class AskomicsNodeView extends AskomicsObjectView {
 
     haveSelectionUserValue(currentIcon) {
       //filter on node.values does not work (event change is not call if user click just after to fill input box)
-      let hasSelection = false ;
+
       let lv = $(currentIcon).parent().find('input');
-      if ( lv.length>0) if (typeof(lv.val()) == "string" ) hasSelection =  (lv.val() !== "") ;
-      //console.log($(currentIcon).parent().find('select').length);
-      if ( !hasSelection ) {
-        lv = $(currentIcon).parent().find('select').find(":selected");
-        if ( lv.length > 1 ) return true;
-        // by default a first value with ="Link with an attribute node..."
-        //if ( lv.length > 0 ) hasSelection = true;
-      }
-      return hasSelection;
+
+      if ( lv.length>0 && lv.is(":visible")) if (typeof(lv.val()) == "string" ) return  (lv.val() !== "") ;
+
+      /* category case */
+      lv = $(currentIcon).parent().find('select:not([linkvar])');
+
+      if ( lv.find(":selected").length > 0 && lv.is(":visible") ) return true;
+
+      /* link var case */
+      lv = $(currentIcon).parent().find('select[linkvar]');
+      if ( lv.find(":selected").index() > 0 && lv.is(":visible") ) return true;
+
+      return false;
     }
 
     // dedicated to String entry
@@ -479,12 +484,15 @@ class AskomicsNodeView extends AskomicsObjectView {
         else if ( icon.hasClass('fa-eye') ) {
           icon.removeClass('fa-eye');
           icon.addClass('fa-question-circle');
+
           mythis.clean_box_attribute($(this).parent().parent());
           //if ( !(sparqlid in node.values) || ( node.values[sparqlid] === "" ) )
           //  __ihm.displayModal("Warning", "Optional results with a selection disable the current filter !", 'ok');
           //clean the selction
           $(this).parent().find('.fa-eraser').trigger('click');
+
           mythis.node.setActiveAttribute(sparqlid,true,true);
+
           $(this).parent().find("select").hide();
           $(this).parent().find("input").hide();
           $(this).parent().find(".fa").hide();
@@ -535,12 +543,12 @@ class AskomicsNodeView extends AskomicsObjectView {
               icon.removeClass('fa-plus');
               icon.addClass('fa-search-minus');
               mythis.node.inverseMatch[sparqlid] = 'inverseWithNoRelation';
-          }
+          } /*
           else if ( icon.hasClass('fa-minus') ) {
                 icon.removeClass('fa-minus');
                 icon.addClass('fa-search-minus');
                 mythis.node.inverseMatch[sparqlid] = 'inverseWithNoRelation';
-          } else {
+          } */ else {
               icon.removeClass('fa-search-minus');
               icon.addClass('fa-plus');
               delete mythis.node.inverseMatch[sparqlid] ;
@@ -576,6 +584,11 @@ class AskomicsNodeView extends AskomicsObjectView {
             $(this).parent().find('input[linkvar!="true"]').show();
             $(this).parent().find('select[linkvar!="true"]').show();
             $(this).parent().find('select[linkvar="true"]').hide();
+            /* unselect element */
+            $(this).parent().find('select[linkvar="true"]').val(
+              $(this).parent().find('select[linkvar="true"] option:first').val()
+            );
+
             mythis.node.removeFilterLinkVariable(sparqlid);
             mythis.updateNodeView();
           }
@@ -594,14 +607,32 @@ class AskomicsNodeView extends AskomicsObjectView {
 
    let classIcon   = "makeLinkVariableIcon";
    let defaultIcon = "fa-chain-broken";
+
    this.clean_icon(div_attribute,classIcon,defaultIcon);
 
    classIcon    = "makeNegativeMatchIcon";
    defaultIcon  = "fa-plus";
+
    this.clean_icon(div_attribute,classIcon,defaultIcon);
 
    this.makeRemoveIcon();
  }
+
+ makeRefreshCategoryIcon(att) {
+   var icon = $('<span></span>')
+           .addClass('fa')
+           .addClass('fa-refresh')
+           .addClass('display');
+
+   let mythis = this;
+
+   icon.click(function(d) {
+      $(this).parent().find('select[linkvar!="true"]').remove();
+      $(this).parent().append(mythis.buildCategory(att,true));
+   });
+   return icon;
+ }
+
 
 /* ===============================================================================================*/
   create() {
@@ -651,6 +682,7 @@ class AskomicsNodeView extends AskomicsObjectView {
                    .append(mythis.makeEyeIcon(attribute))
                    .append(mythis.makeNegativeMatchIcon('URICat'+attribute.SPARQLid))
                    .append(mythis.makeLinkVariableIcon('URICat'+attribute.SPARQLid))
+                   .append(mythis.makeRefreshCategoryIcon(attribute))
                    .append(mythis.buildCategory(attribute))
                    .append(mythis.buildLinkVariable(attribute)));
           } else if ( attribute.basic_type == "decimal" ) {

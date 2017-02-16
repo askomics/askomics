@@ -105,19 +105,7 @@ class AskView(object):
             return self.data
 
         tse = TripleStoreExplorer(self.settings, self.request.session)
-        nodes = tse.get_start_points()
-
-        self.data['nodes'] = {}
-
-        for node in nodes:
-            if node['uri'] in self.data['nodes'].keys():
-                if node['public'] and not self.data['nodes'][node['uri']]['public']:
-                    self.data['nodes'][node['uri']]['public'] = True
-                if node['private'] and not self.data['nodes'][node['uri']]['private']:
-                    self.data['nodes'][node['uri']]['private'] = True
-            else:
-                self.data['nodes'][node['uri']] = node
-
+        self.data['nodes'] = tse.get_start_points()
         return self.data
 
     @view_config(route_name='statistics', request_method='GET')
@@ -253,6 +241,7 @@ class AskView(object):
             named_graphs = self.get_list_private_graphs()
 
             for graph in named_graphs:
+
                 self.log.debug("--- DELETE GRAPH : %s", graph['g'])
                 ql.execute_query(sqb.get_drop_named_graph(graph['g']).query)
                 #delete metadatas

@@ -370,11 +370,9 @@ class AskomicsUserAbstraction {
     }
 
     unactiveGraph(graph) {
-      console.log("unactiv :"+graph);
       this.desactived_graph[graph] = 0;
     }
     activeGraph(graph) {
-      console.log("activ :"+graph);
       delete this.desactived_graph[graph];
     }
     isDesactivedGraph(graph) {

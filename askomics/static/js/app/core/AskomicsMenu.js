@@ -318,7 +318,7 @@ var graphFuncMenu = function(menu) {
 
   $.each(listGraph, function(g) {
     let graph = g;
-    let li = buildLiView(graph,graph,true);
+    let li = buildLiView(graph,__ihm.graphname(graph).name,true);
     li.on('click',function() {
         var span = $(this).find(".glyphicon");
         var cur_uri = $(this).attr("uri");

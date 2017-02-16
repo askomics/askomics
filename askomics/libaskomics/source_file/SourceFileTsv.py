@@ -8,7 +8,7 @@ import uuid
 from collections import defaultdict
 from pkg_resources import get_distribution
 
-from askomics.libaskomics.source_file.SourceFile import SourceFile
+from askomics.libaskomics.source_file.SourceFile import SourceFile,SourceFileSyntaxError
 from askomics.libaskomics.integration.AbstractedEntity import AbstractedEntity
 from askomics.libaskomics.integration.AbstractedRelation import AbstractedRelation
 from askomics.libaskomics.utils import cached_property, HaveCachedProperties, pformat_generic_object
@@ -225,9 +225,9 @@ class SourceFileTsv(SourceFile):
 
         for key in self.key_columns:
             if retval == None:
-                retval = row[int(self.key_columns[key])]
+                retval = row[int(key)]
             else:
-                retval += "_"+ row[int(self.key_columns[key])]
+                retval += "_"+ row[int(key)]
 
         #by default the first element is index
         if retval == None:
