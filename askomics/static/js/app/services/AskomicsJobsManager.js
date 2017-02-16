@@ -100,7 +100,7 @@ let instanceAskomicsJobsViewManager ;
         //     :lim: LIMIT values for preview
         console.log('+++ prepareQuery +++');
 
-        var tab = __ihm.getGraphBuilder().buildConstraintsGraph();
+        let tab = __ihm.getGraphBuilder().buildConstraintsGraph();
         return {
                   'variates'             : tab[0],
                   'constraintesRelations': tab[1],
