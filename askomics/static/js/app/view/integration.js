@@ -344,6 +344,9 @@ function checkExistingData(file_elem) {
           displayBlockedPage($('.username').attr('id'));
           return;
         }
+
+        if (! __ihm.manageErrorMessage(data)) return ;
+
         file_elem.find('.column_header').each(function( index ) {
             if (data.headers_status[index-1] == 'present') {
                 $(this).find("#relation_present").first().show();
@@ -355,12 +358,9 @@ function checkExistingData(file_elem) {
             }
         });
 
-        var insert_warning_elem = file_elem.find(".insert_warning").first();
         if (data.missing_headers.length > 0) {
-            insert_warning_elem.html("<strong>The following columns are missing:</strong> " + data.missing_headers.join(', '))
-                              .removeClass("hidden alert-success")
-                              .removeClass("hidden alert-danger")
-                              .addClass("show alert-warning");
+            data.error = "<strong>The following columns are missing:</strong> " + data.missing_headers.join(', ');
+            __ihm.manageErrorMessage(data);
         }
     });
 }
@@ -418,24 +418,31 @@ function loadSourceFile(file_elem, pub) {
         }
         __ihm.hideModal();
         var insert_status_elem = file_elem.find(".insert_status").first();
-        var insert_warning_elem = file_elem.find(".insert_warning").first();
         if (data.status != "ok") {
+            __ihm.manageErrorMessage(data);
+/*
             console.log(data.error);
             insert_warning_elem.append($('<span class="glyphicon glyphicon glyphicon-exclamation-sign"></span>')).
-                               append($('<p></p>').html(data.error));
+                               append($('<p></p>')
+                               .html(data.error)).show();
+
+            let test = file_elem.find(".warning-message");
+            test.append($("<p></p>").html("Hello World"));
             if ('url' in data) {
-                insert_warning_elem.append("<br>ttl file are available here: <a href=\""+data.url+"\">"+data.url+"</a>");
+                insert_warning_elem.append("<br>ttl file are available here: <a href=\""+data.url+"\">"+data.url+"</a>").show();
             }
-            insert_status_elem.removeClass('hidden alert-success')
-                              .addClass('show alert-danger');
+            insert_status_elem.removeClass('alert-success')
+                              .addClass('alert-danger')
+                              .show();*/
         }
         else {
             if($.inArray('entitySym', col_types) != -1) {
                 if (data.expected_lines_number*2 == data.total_triple_count) {
                     insert_status_elem.html('<strong><span class="glyphicon glyphicon-ok"></span> Success:</strong> inserted '+ data.total_triple_count + " lines of "+(data.expected_lines_number*2))
-                                      .removeClass('hidden alert-danger')
-                                      .removeClass('hidden alert-warning')
-                                      .addClass('show alert-success');
+                                      .removeClass('alert-danger')
+                                      .removeClass('alert-warning')
+                                      .addClass('alert-success')
+                                      .show();
 
                 }else{
                     insert_status_elem.html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> Warning:</strong> inserted '+ data.total_triple_count*2 + " lines of "+data.expected_lines_number)
@@ -525,14 +532,9 @@ function loadSourceFileGff(idfile, pub) {
         }
 
         let insert_status_elem = file_elem.find(".insert_status").first();
-        let insert_warning_elem = file_elem.find(".insert_warning").first();
 
-        //TODO: check if insertion is ok and then, display the success message or a warning message
         if (data.error) {
-            insert_status_elem.html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> ERROR:</strong> ' + JSON.stringify(data.error))
-                              .removeClass('hidden alert-success')
-                              .removeClass('hidden alert-warning')
-                              .addClass('show alert-danger');
+            __ihm.manageErrorMessage(data);
         }else{
             insert_status_elem.html('<span class="glyphicon glyphicon-ok"></span> ' + entities_string + ' inserted with success.')
                                                   .removeClass('hidden alert-danger')
@@ -568,13 +570,9 @@ function loadSourceFileTtl(idfile, pub) {
         }
 
         let insert_status_elem = file_elem.find(".insert_status").first();
-        let insert_warning_elem = file_elem.find(".insert_warning").first();
 
         if (data.error) {
-            insert_status_elem.html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> ERROR:</strong> ' + JSON.stringify(data.error))
-                              .removeClass('hidden alert-success')
-                              .removeClass('hidden alert-warning')
-                              .addClass('show alert-danger');
+            __ihm.manageErrorMessage(data);
         }else{
             insert_status_elem.html('<span class="glyphicon glyphicon-ok"></span> ' + idfile + ' inserted with success.')
                                                   .removeClass('hidden alert-danger')
