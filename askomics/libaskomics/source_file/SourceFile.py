@@ -274,6 +274,8 @@ class SourceFile(ParamManager, HaveCachedProperties):
             data['status'] = 'ok'
         except Exception as e:
             self._format_exception(e, data=data)
+            data["error"]+=self._print_line_source_file(e,fp.name)
+
         finally:
             if self.settings["askomics.debug"]:
                 data['url'] = url
@@ -282,14 +284,41 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         return data
 
+    def _print_line_source_file(self,e,filename):
+        from traceback import format_tb, format_exception_only
+        from html import escape
+        import re
+        fexception = format_exception_only(type(e), e)
+        fexception = escape('\n'.join(fexception))
+
+        matchObj = re.search('line\s+([0-9]+):',fexception)
+        errMess = ""
+        if matchObj:
+            linenumber = int(matchObj.group(1))
+            #print(data['error'])
+            #if data["error"] == None :
+            #    data['error'] = ''
+            errMess = "\n<br/><strong>Error line:"+str(linenumber)+"</strong><br/>"
+            errMess += "<pre>"
+            with open(filename) as f:
+                count = 0
+                for line in f:
+                    count+=1
+                    if abs(linenumber - count) < 3 :
+                        errMess += str(count)+":"+line
+            errMess += "</pre>"
+        return errMess
+
     def _format_exception(self, e, data=None, ctx='loading data'):
         from traceback import format_tb, format_exception_only
         from html import escape
 
         fexception = format_exception_only(type(e), e)
         ftb = format_tb(e.__traceback__)
+        self.log.debug(ftb)
+        #fexception = fexception + ftb
 
-        self.log.error("Error in %s while %s: %s", __name__, ctx, '\n'.join(fexception + ftb))
+        self.log.error("Error in %s while %s: %s", __name__, ctx, '\n'.join(fexception))
 
         fexception = escape('\n'.join(fexception))
         error = '<strong>Error while %s:</strong><pre>%s</pre>' % (ctx, fexception)

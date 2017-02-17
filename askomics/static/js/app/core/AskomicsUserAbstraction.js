@@ -129,7 +129,6 @@ class AskomicsUserAbstraction {
       let instanceUserAbstraction = this;
 
       service.postsync(data,function(resultListTripletSubjectRelationObject ) {
-
       /* All relation are stored in tripletSubjectRelationObject */
       instanceUserAbstraction.tripletSubjectRelationObject = resultListTripletSubjectRelationObject.relations;
       /* == External Service can add external relation == */

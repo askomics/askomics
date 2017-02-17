@@ -186,10 +186,6 @@ function setCorrectType(file) {
                 $.each(['start', 'end', 'numeric'],getSelectCallback);
             }
 
-            if ($.inArray(cols[i], ['entityGoterm']) == -1) {
-                $.each(['entityGoterm'],getSelectCallback);
-            }
-
             if ($.inArray( cols[i], values) >= 0) {
                 selectbox.val(cols[i]);
             }
@@ -408,6 +404,8 @@ function loadSourceFile(file_elem, pub) {
                   'public': pub};
 
     service.post(model, function(data) {
+        __ihm.hideModal();
+
         if (data == 'forbidden') {
           showLoginForm();
           return;
@@ -416,18 +414,20 @@ function loadSourceFile(file_elem, pub) {
           displayBlockedPage($('.username').attr('id'));
           return;
         }
-        __ihm.hideModal();
+
         var insert_status_elem = file_elem.find(".insert_status").first();
         var insert_warning_elem = file_elem.find(".insert_warning").first();
         if (data.status != "ok") {
-            console.log(data.error);
+            insert_warning_elem.empty();
+            insert_warning_elem.removeClass('hidden alert-success')
+                              .addClass('show alert-danger');
+
             insert_warning_elem.append($('<span class="glyphicon glyphicon glyphicon-exclamation-sign"></span>')).
-                               append($('<p></p>').html(data.error));
+                               append($('<p></p>').html(data.error).addClass('show alert-danger'));
             if ('url' in data) {
                 insert_warning_elem.append("<br>ttl file are available here: <a href=\""+data.url+"\">"+data.url+"</a>");
             }
-            insert_status_elem.removeClass('hidden alert-success')
-                              .addClass('show alert-danger');
+
         }
         else {
             if($.inArray('entitySym', col_types) != -1) {

@@ -101,6 +101,8 @@ pre {
     display: inline-block;
     white-space: nowrap;
     overflow-x: auto;
+    max-height: 450px;
+    overflow-y: auto;
 }
 
 .preview_table td:first-child,
