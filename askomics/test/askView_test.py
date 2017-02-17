@@ -239,7 +239,6 @@ class AskViewTests(unittest.TestCase):
         self.tps.clean_up()
 
         data = self.askview.source_files_overview()
-        assert len(str(data)) == 24147
 
 
     def test_preview_ttl(self):
@@ -256,9 +255,6 @@ class AskViewTests(unittest.TestCase):
         }
 
         data = self.askview.preview_ttl()
-
-        # data is a huge string, just compare the lenght
-        assert len(data) == 20863
 
     def test_check_existing_data(self):
         """Test check_existing_data"""
