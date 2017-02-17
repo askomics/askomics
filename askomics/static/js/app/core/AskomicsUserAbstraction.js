@@ -128,8 +128,10 @@ class AskomicsUserAbstraction {
 
       let instanceUserAbstraction = this;
 
-      service.postsync(data,function(resultListTripletSubjectRelationObject ) {
+      __ihm.displayModal('Loading abstraction...', '', 'Close');
 
+      service.postsync(data,function(resultListTripletSubjectRelationObject ) {
+      __ihm.hideModal();
       /* All relation are stored in tripletSubjectRelationObject */
       instanceUserAbstraction.tripletSubjectRelationObject = resultListTripletSubjectRelationObject.relations;
       /* == External Service can add external relation == */
