@@ -53,10 +53,7 @@ class SourceFileTsv(SourceFile):
             'ref': (':', ''),
             'strand': (':', ''),
             'start' : ('', ''),
-            'end' : ('', ''),
-            'entity'  : (':', ''),
-            'entitySym'  : (':', ''),
-            'entity_start'  : (':', '')}
+            'end' : ('', '')}
 
     @cached_property
     def dialect(self):
@@ -128,7 +125,7 @@ class SourceFileTsv(SourceFile):
         :return: the guessed type ('taxon','ref', 'strand', 'start', 'end', 'numeric', 'text' or 'category')
         """
 
-        types = {'ref':('chrom', 'ref'), 'taxon':('taxon', 'species'), 'strand':('strand',), 'start':('start', 'begin'), 'end':('end', 'stop')}
+        types = {'ref':('chrom',), 'taxon':('taxon', 'species'), 'strand':('strand',), 'start':('start', 'begin'), 'end':('end', 'stop')}
 
         # First check if it is specific type
         self.log.debug('header: '+header)
@@ -150,21 +147,21 @@ class SourceFileTsv(SourceFile):
 
         # check if relationShip with an other local entity
         if header.find("@")>0:
-            #m = re.search('@(...):', header)
-            #maybe by value
-            #if all( (val.lower().find("go:")>=0) for val in values):
-            #    raise ValueError("header for go:term follow this syntax: relationName@go:term")
-
             #general relation by default
             return "entity"
+            
         # Then, check if category
+        threshold=10
+        if len(values)<30:
+            threshold=5
 
         #if all(re.match(r'^\w+$', val) for val in values):#check if no scape chararcter
         if all(self.is_decimal(val) for val in values): # Then numeric
+            if all(val=='' for val in values):
+                return 'text'
             return 'numeric'
-        elif len(set(values)) < len(values) / 2:
+        elif len(set(values)) < threshold:
             return 'category'
-
 
         # default is text
         return 'text'
@@ -376,10 +373,12 @@ class SourceFileTsv(SourceFile):
                         #OFI : manage new header with relation@type_entity
                         #relationName = ":has_" + header # manage old way
                         relationName = ":"+self.encodeToRDFURI(header) # manage old way
+                        relation = False
                         if current_type.startswith('entity'):
                             idx = header.find("@")
                             if ( idx > 0 ):
                                 relationName = ":"+self.encodeToRDFURI(header[0:idx])
+                                relation = True
 
                         if current_type in ('category', 'taxon', 'ref', 'strand'):
                             # This is a category, keep track of allowed values for this column
@@ -399,6 +398,8 @@ class SourceFileTsv(SourceFile):
                                 ttl += indent + " " + ':position_ref' + " " + self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " ;\n"
                             elif current_type == 'strand':
                                 ttl += indent + " " + ':position_strand' + " " + self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " ;\n"
+                            elif current_type.startswith('entity'):
+                                ttl += indent + " "+ relationName + " :" + self.encodeToRDFURI(row[i]) + " ;\n"
                             else:
                                 ttl += indent + " "+ relationName + " " + self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " ;\n"
 
