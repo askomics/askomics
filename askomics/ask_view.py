@@ -361,6 +361,46 @@ class AskView(object):
 
         return self.data
 
+    @view_config(route_name='guess_csv_header_type', request_method='POST')
+    def guess_csv_header_type(self):
+        """Guess the headers type of a csv file
+
+        Used for the asko-cli scripts
+
+        :returns: list of guessed types
+        :rtype: dict
+        """
+
+        # Denny access for non loged users
+        if self.request.session['username'] == '':
+            return 'forbidden'
+
+        # Denny for blocked users
+        if self.request.session['blocked']:
+            return 'blocked'
+
+        body = self.request.json_body
+        filename = body['filename']
+
+        sfc = SourceFileConvertor(self.settings, self.request.session)
+        source_file = sfc.get_source_file(filename)
+        headers = source_file.headers
+        preview = source_file.get_preview_data()
+
+        guessed_types = []
+
+
+        for index_header in range(0, len(headers)):
+            guessed_types.append(source_file.guess_values_type(preview[index_header], headers[index_header]))
+
+        self.data['types'] = guessed_types
+
+        self.log.debug(self.data)
+        return self.data
+
+
+
+
     @view_config(route_name='source_files_overview', request_method='GET')
     def source_files_overview(self):
         """
@@ -1055,7 +1095,68 @@ class AskView(object):
             self.data['error'] = str(e)
             self.log.error(str(e))
 
+        param_manager = ParamManager(self.settings, self.request.session)
+        param_manager.getUploadDirectory()
+
+        # if not self.data['error']:
+        #     self.data.pop('error', None)
+
         return self.data
+
+    @view_config(route_name='api_key', request_method='POST')
+    def api_key(self):
+
+        # Denny access for non loged users or non admin users
+        if self.request.session['username'] == '':
+            return 'forbidden'
+
+        # Denny for blocked users
+        if self.request.session['blocked']:
+            return 'blocked'
+
+        body = self.request.json_body
+        self.log.debug(body)
+        username = body['username']
+        keyname = body['keyname']
+
+        security = Security(self.settings, self.request.session, username, '', '', '')
+
+        try:
+            security.add_apikey(keyname)
+            # query_laucher.process_query(sqa.add_apikey(username, keyname).query)
+        except Exception as e:
+            self.log.debug(str(e))
+            self.data['error'] = str(e)
+            return self.data
+
+        self.data['sucess'] = 'success'
+        return self.data
+
+    @view_config(route_name='del_apikey', request_method='POST')
+    def del_apikey(self):
+
+        # Denny access for non loged users or non admin users
+        if self.request.session['username'] == '':
+            return 'forbidden'
+
+        body = self.request.json_body
+        key = body['key']
+
+        security = Security(self.settings, self.request.session, self.request.session['username'], '', '', '')
+
+        # Check the key belong to the user
+        key_belong2user = security.ckeck_key_belong_user(key)
+
+        if key_belong2user:
+            security.delete_apikey(key)
+
+
+
+    @view_config(route_name='login_api', request_method='GET')
+    def login_api(self):
+
+        pass
+
 
     @view_config(route_name='get_users_infos', request_method='GET')
     def get_users_infos(self):
@@ -1245,11 +1346,25 @@ class AskView(object):
         except Exception as e:
             return 'failed: ' + str(e)
 
+
+        apikey_list = []
+
+        for res in result:
+            if 'keyname' in res:
+                self.log.debug(res['keyname'])
+                self.log.debug(res['apikey'])
+                # apikey_dict[res['keyname']] = res['apikey']
+                apikey_list.append({'name': res['keyname'], 'key': res['apikey']})
+
         result = result[0]
         result['email'] = re.sub(r'^mailto:', '', result['email'])
         result['username'] = self.request.session['username']
         result['admin'] = bool(int(result['admin']))
         result['blocked'] = bool(int(result['blocked']))
+        result.pop('keyname', None)
+        result.pop('apikey', None)
+
+        result['apikeys'] = apikey_list
 
         return result
     @view_config(route_name='update_mail', request_method='POST')

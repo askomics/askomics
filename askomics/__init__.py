@@ -33,6 +33,7 @@ def main(global_config, **settings):
     config.add_route('sparqlquery', '/sparqlquery')
     config.add_route('getSparqlQueryInTextFormat', '/getSparqlQueryInTextFormat')
     config.add_route('source_files_overview', '/source_files_overview')
+    config.add_route('guess_csv_header_type', '/guess_csv_header_type')
     config.add_route('load_data_into_graph', '/load_data_into_graph')
     config.add_route('load_gff_into_graph', '/load_gff_into_graph')
     config.add_route('load_ttl_into_graph', '/load_ttl_into_graph')
@@ -54,6 +55,7 @@ def main(global_config, **settings):
     # Authentication routes
     config.add_route('signup', '/signup')
     config.add_route('login', '/login')
+    config.add_route('login_api', '/login_api')
     config.add_route('logout', '/logout')
     config.add_route('checkuser', '/checkuser')
 
@@ -66,6 +68,12 @@ def main(global_config, **settings):
     config.add_route('get_my_infos', 'get_my_infos')
     config.add_route('update_mail', 'update_mail')
     config.add_route('update_passwd', 'update_passwd')
+    config.add_route('api_key', '/api_key')
+    config.add_route('del_apikey', '/del_apikey')
+
+    # Tests
+    config.add_route('test', '/test')
+    config.add_route('add', '/add')
 
 
     # TODO no absolute path to static files

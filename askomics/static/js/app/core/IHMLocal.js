@@ -767,9 +767,12 @@ class IHMLocal {
 
       let service = new RestServiceJs('get_my_infos');
       service.getAll(function(d) {
+        // console.log(JSON.stringify(d));
+        console.log('keys');
+        console.log(d.apikeys);
         let source = $('#template-user-managment').html();
         let template = Handlebars.compile(source);
-        let context = {user: d};
+        let context = {user: d, keys: d.apikeys};
         let html = template(context);
         $('#content_user_info').empty();
         $('#content_user_info').append(html);
@@ -783,7 +786,47 @@ class IHMLocal {
         $('.update_passwd#' + d.username).click(function() {
           __ihm.updatePasswd(d.username);
         });
+        $('.get_new_apikey#' + d.username).click(function() {
+          console.log('888');
+          __ihm.get_apikey(d.username, $('.new_apikey_name#' + d.username).val());
+        });
+
+        // Copy apikey
+        $('.copy_key').click(function() {
+          console.log(this);
+          __ihm.copyToClipboard($('.apikey#' + this.id));
+        });
+
+        // Delete key
+        $('.del_key').click(function() {
+          console.log(this);
+          __ihm.deleteApikey(this.id);
+
+        });
+
       });
+    }
+
+    deleteApikey(key) {
+      console.log('delete ' + key);
+      let service = new RestServiceJs('del_apikey');
+      let data = {'key': key};
+      service.post(data, function(d) {
+        console.log(data);
+        __ihm.userForm();
+      });
+    }
+
+    copyToClipboard(elem) {
+
+      let temp = $('<input>');
+      $('body').append(temp);
+      console.log(elem.val());
+      console.log(elem.text());
+      temp.val(elem.text()).select();
+      document.execCommand("copy");
+      console.log('copied into clipboard');
+      temp.remove();
     }
 
     validateEmail(email) {
@@ -860,6 +903,26 @@ class IHMLocal {
         $('#tick_mail').removeClass('hidden');
         $('.new_email#' + username).val('').attr("placeholder", email);
       });
+    }
+
+    get_apikey(username, keyname) {
+      console.log('-+-+- get_apikey -+-+-+');
+      console.log('for ' + username);
+      console.log('keyname: ' + keyname);
+      let service = new RestServiceJs('api_key');
+      let data = {'username': username, 'keyname': keyname};
+      $('#spinner_apikey').removeClass('hidden');
+      $('#tick_apikey').addClass('hidden');
+
+      service.post(data, function(d) {
+        if (!__ihm.manageErrorMessage(d)) {
+          return;
+        }
+        // reload
+        __ihm.userForm();
+      });
+
+
     }
 
     displayNavbar(loged, username, admin, blocked) {
@@ -962,6 +1025,7 @@ class IHMLocal {
                 $('#signup_success').show();
                 // User is logged, show the special button
                 __ihm.user = new AskomicsUser(data.username, data.admin, data.blocked);
+                console.log('loguser');
                 __ihm.user.logUser();
               }
           });

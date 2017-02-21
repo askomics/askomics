@@ -10,6 +10,7 @@ import os, shutil, tempfile
 class FileUpload(object):
 
     def __init__(self, request):
+        self.log = logging.getLogger(__name__)
         self.request = request
         request.response.headers['Access-Control-Allow-Origin'] = '*'
         request.response.headers['Access-Control-Allow-Methods'] = 'OPTIONS, HEAD, GET, POST, PUT, DELETE'
@@ -24,7 +25,7 @@ class FileUpload(object):
         pm = ParamManager(self.settings, self.request.session)
         self.upload_dir = pm.getUploadDirectory()
         #self.upload_dir = request.session['upload_directory']
-        self.log = logging.getLogger(__name__)
+        
         self.log.debug("upload_directory => "+self.upload_dir)
 
         self.allowed_types = self.settings["askomics.allowed_file_types"]
