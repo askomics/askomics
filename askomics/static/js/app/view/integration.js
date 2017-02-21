@@ -202,6 +202,7 @@ function setCorrectType(file) {
  * Get ttl representation of preview data
  */
 function previewTtl(file_elem) {
+    console.log('---> previewTtl');
 
     var idfile = file_elem.find('.file_name').attr('id');
 

@@ -1,4 +1,5 @@
 import logging
+import random
 # from pprint import pformat
 # from string import Template
 
@@ -92,6 +93,20 @@ class SparqlQueryAuth(SparqlQueryBuilder):
                      "}"
         }, True)
 
+    def ckeck_key_belong_user(self, username, key):
+        """Chek if a key belong to a user"""
+
+        return self.build_query_on_the_fly({
+            'select': '(COUNT(*) AS ?count)',
+            'query': "GRAPH <"+ self.get_param("askomics.users_graph") + "> {" +
+                     '\n?URIusername rdf:type foaf:Person .\n' +
+                     '\t?URIusername foaf:name "' + username + '" .\n' +
+                     '\t?URIusername :apikey ?URIkey .\n'+
+                     '\t?URIkey :key "' + key + '"'
+                     "}"
+        }, True)
+
+
     def get_admin_blocked_by_email(self, email):
         """
         get if a user is admin, by his email
@@ -127,13 +142,18 @@ class SparqlQueryAuth(SparqlQueryBuilder):
         Get infos about one user
         """
         return self.build_query_on_the_fly({
-            'select': '?username ?email ?admin ?blocked',
+            'select': '?email ?admin ?blocked ?keyname ?apikey',
             'query': "GRAPH <"+ self.get_param("askomics.users_graph") + "> {" +
                      '\t?URIusername rdf:type foaf:Person .\n' +
                      '\t?URIusername foaf:name "' + username + '" .\n' +
                      '\t?URIusername foaf:mbox ?email .\n' +
                      '\t?URIusername :isadmin ?admin .\n'+
-                     '\t?URIusername :isblocked ?blocked .' +
+                     '\t?URIusername :isblocked ?blocked .\n\n' +
+                     '\tOPTIONAL {\n' +
+                     '\t?URIusername :apikey ?URIkey .\n' +
+                     '\t?URIkey rdfs:label ?keyname .\n' +
+                     '\t?URIkey :key ?apikey .\n' +
+                     '\t}\n' +
                      "}"
         }, True)
 
@@ -175,4 +195,44 @@ class SparqlQueryAuth(SparqlQueryBuilder):
                      :""" + username + """ :randomsalt \"""" + salt + """\" . }
             WHERE { :""" + username + """ :password ?passwd .
                     :""" + username + """ :randomsalt ?salt . }
+            """)
+
+    def add_apikey(self, username, keyname):
+        """Insert a new api key"""
+
+        return self.prepare_query(
+            """
+            INSERT DATA {
+                GRAPH <""" + self.get_param('askomics.users_graph') + """> {
+                    :""" + username + """ :apikey :""" + keyname + """ .
+                    :""" + keyname + """ rdf:type :apikey .
+                    :""" + keyname + """ rdfs:label \"""" + keyname + """\" .
+                    :""" + keyname + """ :key \"""" + self.get_random_key() + """\" .
+                }
+            }
+            """)
+
+    @staticmethod
+    def get_random_key():
+        """return a random string of 10 character"""
+        # self.log.debug('get_random_key')
+
+        # alpabet = "!$%&()*+,-./:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~1234567890"
+        alpabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz123567890'
+        return ''.join(random.choice(alpabet) for i in range(20))
+
+    def delete_apikey(self, key):
+        """
+        Delet all info of a user
+        """
+        return self.prepare_query(
+            """
+            DELETE WHERE {
+                GRAPH <"""+self.get_param('askomics.users_graph')+"""> {
+                    ?URIusername :apikey ?URIkey .
+                    ?URIkey :key \"""" + key + """\" .
+                    ?URIkey rdf:type :apikey .
+                    ?URIkey rdfs:label ?keyname .
+                }
+            }
             """)

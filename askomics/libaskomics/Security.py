@@ -120,6 +120,27 @@ class Security(ParamManager):
 
         return bool(int(ts_shapw == shapw))
 
+    def ckeck_key_belong_user(self, key):
+        """Check if a key belong to a user"""
+
+        query_laucher = QueryLauncher(self.settings, self.session)
+        sqa = SparqlQueryAuth(self.settings, self.session)
+
+        result = query_laucher.process_query(sqa.ckeck_key_belong_user(self.username, key).query)
+
+        self.log.debug(result)
+
+        return bool(int(result[0]['count']))
+
+    def delete_apikey(self, key):
+        """delete an apikey"""
+
+        query_laucher = QueryLauncher(self.settings, self.session)
+        sqa = SparqlQueryAuth(self.settings, self.session)
+
+        query_laucher.execute_query(sqa.delete_apikey(key).query)
+
+
     def get_number_of_users(self):
         """
         get the number of users in the TS
@@ -317,3 +338,15 @@ class Security(ParamManager):
         sqa = SparqlQueryAuth(self.settings, self.session)
 
         query_laucher.process_query(sqa.update_passwd(self.username, self.sha256_pw, self.randomsalt).query)
+
+    def add_apikey(self, keyname):
+        """Add an api key
+
+        :param keyname: the keyname
+        :type keyname: string
+        """
+
+        query_laucher = QueryLauncher(self.settings, self.session)
+        sqa = SparqlQueryAuth(self.settings, self.session)
+
+        query_laucher.execute_query(sqa.add_apikey(self.username, keyname).query)

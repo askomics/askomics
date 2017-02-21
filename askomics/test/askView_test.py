@@ -626,7 +626,7 @@ class AskViewTests(unittest.TestCase):
         # get my infos
         data = self.askview.get_my_infos()
 
-        assert data == {'email': 'jdoe@example.com', 'username': 'jdoe', 'admin': True, 'blocked': False}
+        assert data == {'email': 'jdoe@example.com', 'username': 'jdoe', 'apikeys': [], 'blocked': False, 'admin': True}
 
     def test_update_mail(self):
         """Test update_mail"""
