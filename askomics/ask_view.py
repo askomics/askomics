@@ -1152,10 +1152,63 @@ class AskView(object):
 
 
 
-    @view_config(route_name='login_api', request_method='GET')
+    @view_config(route_name='login_api', request_method='POST')
     def login_api(self):
 
-        pass
+        body = self.request.json_body
+        username = body['username']
+        apikey = body['apikey']
+
+        self.data['error'] = []
+        error = False
+
+        security = Security(self.settings, self.request.session, username, '', '', '')
+
+        username_in_ts = security.check_username_in_database()
+
+        if not username_in_ts:
+            self.data['error'].append('username is not registered')
+            error = True
+
+        if error:
+            return self.data
+
+
+        # Get the admin and blocked status
+        admin_blocked = security.get_admin_blocked_by_username()
+        security.set_admin(admin_blocked['admin'])
+        security.set_blocked(admin_blocked['blocked'])
+
+
+        key_belong_to_user = security.ckeck_key_belong_user(apikey)
+
+        if not key_belong_to_user:
+            self.data['error'].append('Wrong API key')
+            error = True
+
+        if error:
+            return self.data
+
+
+        # User pass the authentication, log him
+        try:
+            security.log_user(self.request)
+            self.data['username'] = username
+            self.data['admin'] = admin_blocked['admin']
+            self.data['blocked'] = admin_blocked['blocked']
+
+        except Exception as e:
+            self.data['error'] = str(e)
+            self.log.error(str(e))
+
+        param_manager = ParamManager(self.settings, self.request.session)
+        param_manager.getUploadDirectory()
+
+        # if not self.data['error']:
+        #     self.data.pop('error', None)
+        self.log.debug('**************************')
+        self.log.debug(self.data)
+        return self.data
 
 
     @view_config(route_name='get_users_infos', request_method='GET')
