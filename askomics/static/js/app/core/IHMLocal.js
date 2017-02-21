@@ -783,6 +783,9 @@ class IHMLocal {
     }
 
     userForm() {
+
+
+
       console.log('-+-+- userForm -+-+-');
 
       let service = new RestServiceJs('get_my_infos');
@@ -811,19 +814,27 @@ class IHMLocal {
           __ihm.get_apikey(d.username, $('.new_apikey_name#' + d.username).val());
         });
 
+        // Active the tooltip
+        $('[data-toggle="tooltip"]').tooltip();
+
         // Copy apikey
         $('.copy_key').click(function() {
           console.log(this);
           __ihm.copyToClipboard($('.apikey#' + this.id));
+
+          // Change the message into the tooltip
+          $(this).attr('title', 'Copied!')
+                 .tooltip('fixTitle')
+                 .tooltip('show')
+                 .attr('title', "Copy to Clipboard")
+                 .tooltip('fixTitle');
         });
 
         // Delete key
         $('.del_key').click(function() {
           console.log(this);
           __ihm.deleteApikey(this.id);
-
         });
-
       });
     }
 
@@ -838,14 +849,10 @@ class IHMLocal {
     }
 
     copyToClipboard(elem) {
-
       let temp = $('<input>');
       $('body').append(temp);
-      console.log(elem.val());
-      console.log(elem.text());
       temp.val(elem.text()).select();
       document.execCommand("copy");
-      console.log('copied into clipboard');
       temp.remove();
     }
 
