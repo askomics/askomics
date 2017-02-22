@@ -527,8 +527,8 @@
         <div class="panel-body">
           <p class='apikey' id='{{this.key}}'>{{this.key}}<p/>
           {{!-- buttons --}}
-          <button type="button" class="pull-right btn btn-danger btn-xs del_key" id="{{this.key}}">Delete</button>
-          <button type="button" class="pull-right btn btn-default btn-xs copy_key" id="{{this.key}}">copy</button>
+          <button type="button" class="pull-right btn btn-xs btn-danger del_key" id="{{this.key}}"><i class="fa fa-trash" aria-hidden="true"></i> Delete</button>
+          <button type="button" class="pull-right btn btn-xs btn-default copy_key" data-toggle="tooltip" data-placement="left" title="Copy to Clipboard" id="{{this.key}}"><i class="fa fa-clipboard" aria-hidden="true"></i> Copy</button>
         </div>
       </div>
       {{/each}}

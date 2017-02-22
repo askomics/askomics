@@ -96,7 +96,8 @@ class SourceFileGff(SourceFile):
 
 
         for rec in GFF.parse(handle, limit_info=limit, target_lines=1):
-            ref_entity = taxon_entity+'_ref_'+self.encodeToRDFURI(str(rec.id))
+            # ref_entity = taxon_entity+'_ref_'+self.encodeToRDFURI(str(rec.id))
+            ref_entity = self.encodeToRDFURI(str(rec.id))
             if ref_entity not in self.getLabelFromUri:
                 self.getLabelFromUri[ref_entity] = str(rec.id)
 
