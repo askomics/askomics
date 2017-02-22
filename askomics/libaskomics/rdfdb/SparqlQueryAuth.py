@@ -101,8 +101,8 @@ class SparqlQueryAuth(SparqlQueryBuilder):
             'query': "GRAPH <"+ self.get_param("askomics.users_graph") + "> {" +
                      '\n?URIusername rdf:type foaf:Person .\n' +
                      '\t?URIusername foaf:name "' + username + '" .\n' +
-                     '\t?URIusername :apikey ?URIkey .\n'+
-                     '\t?URIkey :key "' + key + '"'
+                     '\t?URIusername :keyid ?URIkeyid .\n'+
+                     '\t?URIkeyid :key "' + key + '"'
                      "}"
         }, True)
 
@@ -150,9 +150,9 @@ class SparqlQueryAuth(SparqlQueryBuilder):
                      '\t?URIusername :isadmin ?admin .\n'+
                      '\t?URIusername :isblocked ?blocked .\n\n' +
                      '\tOPTIONAL {\n' +
-                     '\t?URIusername :apikey ?URIkey .\n' +
-                     '\t?URIkey rdfs:label ?keyname .\n' +
-                     '\t?URIkey :key ?apikey .\n' +
+                     '\t?URIusername :keyid ?URIkeyid .\n' +
+                     '\t?URIkeyid rdfs:label ?keyname .\n' +
+                     '\t?URIkeyid :key ?apikey .\n' +
                      '\t}\n' +
                      "}"
         }, True)
@@ -200,14 +200,17 @@ class SparqlQueryAuth(SparqlQueryBuilder):
     def add_apikey(self, username, keyname):
         """Insert a new api key"""
 
+        key = self.get_random_key()
+        keyid = keyname + '_' + key[:5]
+
         return self.prepare_query(
             """
             INSERT DATA {
                 GRAPH <""" + self.get_param('askomics.users_graph') + """> {
-                    :""" + username + """ :apikey :""" + keyname + """ .
-                    :""" + keyname + """ rdf:type :apikey .
-                    :""" + keyname + """ rdfs:label \"""" + keyname + """\" .
-                    :""" + keyname + """ :key \"""" + self.get_random_key() + """\" .
+                    :""" + username + """ :keyid :""" + keyid + """ .
+                    :""" + keyid + """ rdf:type :apikey .
+                    :""" + keyid + """ rdfs:label \"""" + keyname + """\" .
+                    :""" + keyid + """ :key \"""" + key + """\" .
                 }
             }
             """)
@@ -229,10 +232,10 @@ class SparqlQueryAuth(SparqlQueryBuilder):
             """
             DELETE WHERE {
                 GRAPH <"""+self.get_param('askomics.users_graph')+"""> {
-                    ?URIusername :apikey ?URIkey .
-                    ?URIkey :key \"""" + key + """\" .
-                    ?URIkey rdf:type :apikey .
-                    ?URIkey rdfs:label ?keyname .
+                    ?URIusername :keyid ?URIkeyid .
+                    ?URIkeyid :key \"""" + key + """\" .
+                    ?URIkeyid rdf:type :apikey .
+                    ?URIkeyid rdfs:label ?keyname .
                 }
             }
             """)
