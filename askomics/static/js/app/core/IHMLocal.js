@@ -783,9 +783,6 @@ class IHMLocal {
     }
 
     userForm() {
-
-
-
       console.log('-+-+- userForm -+-+-');
 
       let service = new RestServiceJs('get_my_infos');
