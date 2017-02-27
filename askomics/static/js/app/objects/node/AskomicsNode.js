@@ -109,14 +109,14 @@ class AskomicsNode extends GraphNode {
         if ( isLinked || isFiltered || isInversedMatch || this.attributes[uri].actif ) {
           let subBlockConstraint = [];
           subBlockConstraint.push("?"+'URI'+this.SPARQLid+" "+this.URI(uri)+" "+"?"+SparqlId);
-          subBlockConstraint.push("FILTER isLiteral(?"+SparqlId+")");
+          // subBlockConstraint.push("FILTER isLiteral(?"+SparqlId+")"); //FIXME: slow down the query
         //  subBlockConstraint.push("?"+SparqlId+" "+'a'+" "+this.URI(this.attributes[uri].type));
           /* check filter if exist */
 
           let subBlockNegativeConstraint = [];
           if ( isInversedMatch ) {
             subBlockNegativeConstraint.push("?"+'URI'+this.SPARQLid+" "+this.URI(uri)+" "+"?negative"+SparqlId);
-            subBlockNegativeConstraint.push("FILTER isLiteral(?negative"+SparqlId+")");
+            // subBlockNegativeConstraint.push("FILTER isLiteral(?negative"+SparqlId+")"); //FIXME: slow down the query
           }
           /* If Inverse Match we have to build a block */
           if ( isFiltered ) {
@@ -153,14 +153,14 @@ class AskomicsNode extends GraphNode {
       if ( isInversedMatch || isLinked || isFiltered || this.categories[uri].actif ) {
         let subBlockConstraint = [];
         subBlockConstraint.push("?"+'URI'+this.SPARQLid+" "+this.URI(uri)+" "+"?"+SparqlId);
-        subBlockConstraint.push("[] displaySetting:category ?"+SparqlId);
+        // subBlockConstraint.push("[] displaySetting:category ?"+SparqlId); //FIXME: slow down the query
         subBlockConstraint.push("?"+SparqlId+" "+'rdfs:label'+" "+"?"+this.categories[uri].SPARQLid);
 
 
         let subBlockNegativeConstraint = [];
         if ( isInversedMatch ) {
           subBlockNegativeConstraint.push("?"+'URI'+this.SPARQLid+" "+this.URI(uri)+" "+"?negative"+SparqlId);
-          subBlockNegativeConstraint.push("[] displaySetting:category "+"?negative"+SparqlId);
+          // subBlockNegativeConstraint.push("[] displaySetting:category "+"?negative"+SparqlId); //FIXME: slow down the query
           subBlockNegativeConstraint.push("?negative"+SparqlId+" "+'rdfs:label'+" "+"?negative"+this.categories[uri].SPARQLid);
         }
         /* If Inverse Match we have to build a block */
@@ -247,7 +247,7 @@ class AskomicsNode extends GraphNode {
     for (let uri in node.categories) {
       if ( node.categories[uri].id != attributeId ) continue;
       constraintRelations.push("?"+'URI'+node.SPARQLid+" "+this.URI(uri)+" "+"?URICat"+node.categories[uri].SPARQLid);
-      constraintRelations.push("[] displaySetting:category "+"?URICat"+node.categories[uri].SPARQLid);
+      // constraintRelations.push("[] displaySetting:category "+"?URICat"+node.categories[uri].SPARQLid); //FIXME: slow down the query
       constraintRelations.push("?URICat"+node.categories[uri].SPARQLid+" "+'rdfs:label'+" "+"?"+node.categories[uri].SPARQLid);
       variates.push("?"+node.categories[uri].SPARQLid);
       variates.push("?URICat"+node.categories[uri].SPARQLid);
