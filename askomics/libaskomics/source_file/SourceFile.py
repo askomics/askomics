@@ -34,7 +34,8 @@ class SourceFile(ParamManager, HaveCachedProperties):
         self.metadatas = {}
 
         # The name should not contain extension as dots are not allowed in rdf names
-        self.name = os.path.splitext(os.path.basename(path))[0]
+        # self.name = os.path.splitext(os.path.basename(path))[0]
+        self.name = os.path.basename(path)
 
         self.graph = 'askomics:unkown:uri:graph'
         if 'graph' in self.session:

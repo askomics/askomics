@@ -1,7 +1,6 @@
 from glob import glob
 import logging
 import os.path
-import re
 
 from askomics.libaskomics.ParamManager import ParamManager
 from askomics.libaskomics.source_file.SourceFileGff import SourceFileGff
@@ -24,51 +23,48 @@ class SourceFileConvertor(ParamManager):
         ParamManager.__init__(self, settings, session)
         self.log = logging.getLogger(__name__)
 
-    def get_source_files(self):
+    def get_source_files(self, forced_type):
+        """Get all source files
+
+
+        :returns: a list of source file
+        :rtype: list
         """
-        :return: List of the file to convert paths
-        :rtype: List
-        """
+
         src_dir = self.getUploadDirectory()
         paths = glob(src_dir + '/*')
 
         files = []
 
-        for p in paths:
-            file_type = self.guess_file_type(p)
-            if file_type == 'gff':
-                files.append(SourceFileGff(self.settings, self.session, p, '', []))
-            elif file_type == 'csv':
-                files.append(SourceFileTsv(self.settings, self.session, p, int(self.settings["askomics.overview_lines_limit"])))
-            elif file_type == 'ttl':
-                files.append(SourceFileTtl(self.settings, self.session, p))
+        for path in paths:
+            file_type = self.guess_file_type(path)
+            if file_type == 'gff' or forced_type == 'gff':
+                files.append(SourceFileGff(self.settings, self.session, path))
+            elif file_type == 'csv' or forced_type == 'csv':
+                files.append(SourceFileTsv(self.settings, self.session, path, int(self.settings["askomics.overview_lines_limit"])))
+            elif file_type == 'ttl' or forced_type == 'ttl':
+                files.append(SourceFileTtl(self.settings, self.session, path))
 
         return files
 
-    def guess_file_type(self, filepath):
+    @staticmethod
+    def guess_file_type(filepath):
+        """Guess the file type in function of their extention
+
+        :param filepath: path of file
+        :type filepath: string
+        :returns: file type
+        :rtype: string
+        """
         extension = os.path.splitext(filepath)[1]
         if extension.lower() in ('.gff', '.gff2', '.gff3'):
             return 'gff'
-        elif extension.lower() in ('.ttl',):
+        elif extension.lower() in ('.ttl', '.rdf'):
             return 'ttl'
         else:
             return 'csv'
 
-    def get_rdf_files(self):
-        """
-        :return: List of the file to convert paths
-        :rtype: List
-        """
-        src_dir = self.getRdfDirectory()
-        paths = glob(src_dir + '/*[.ttl,.rdf]')
-
-        files = []
-        for p in paths:
-            files.append(SourceFileTsv(self.settings, self.session, p, int(self.settings["askomics.overview_lines_limit"])))
-
-        return files
-
-    def get_source_file(self, name):
+    def get_source_file(self, name, forced_type=None):
         """
         Return an object representing a source file
 
@@ -77,41 +73,10 @@ class SourceFileConvertor(ParamManager):
         :rtype: SourceFile
         """
         # As the name can be different than the on-disk filename (extension are removed), we loop on all SourceFile objects
-        files = self.get_source_files()
+        files = self.get_source_files(forced_type)
 
-        for f in files:
-            if f.name == name:
-                return f
-
-        return None
-
-    def get_source_file_gff(self, name, tax, ent):
-        """
-        Return an object representing a gff source file
-
-        :param name: Yhe name of the gff file to return
-        :return: the sourcefile
-        :rtype: SourceFileGff
-        """
-
-        files = self.get_source_files_gff(tax, ent)
-
-        for f in files:
-            if f.name == name:
-                return f
+        for file in files:
+            if file.name == name:
+                return file
 
         return None
-
-    def get_source_files_gff(self, tax='', ent=[]):
-        """
-        :return: List of the file to convert paths
-        :rtype: List
-        """
-        src_dir = self.getUploadDirectory()
-        paths = glob(src_dir + '/*')
-
-        files = []
-        for p in paths:
-            files.append(SourceFileGff(self.settings, self.session, p, tax, ent))
-
-        return files
