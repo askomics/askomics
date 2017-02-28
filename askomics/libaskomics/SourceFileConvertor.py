@@ -23,7 +23,7 @@ class SourceFileConvertor(ParamManager):
         ParamManager.__init__(self, settings, session)
         self.log = logging.getLogger(__name__)
 
-    def get_source_files(self, forced_type):
+    def get_source_files(self, forced_type=None):
         """Get all source files
 
 
