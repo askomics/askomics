@@ -51,6 +51,10 @@ class AbstractedRelation(object):
             else:
                 self.rdfs_range = type_range
 
+        elif relation_type == "goterm":
+            self.relation_type = "owl:ObjectProperty"
+            self.rdfs_range = "owl:Class"
+
         elif relation_type.lower() in ('category', 'taxon', 'ref', 'strand'):
             self.relation_type = "owl:ObjectProperty"
             self.rdfs_range = ":" + ParamManager.encodeToRDFURI(type_range+"Category")
