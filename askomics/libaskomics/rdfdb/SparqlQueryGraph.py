@@ -35,7 +35,7 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         return self.build_query_on_the_fly({
             'select': '?g ?nodeUri ?nodeLabel ?accesLevel',
             'query': 'GRAPH ?g {\n'+
-                     '\t?nodeUri rdf:type owl:Class.\n'+
+                     '\t?nodeUri displaySetting:entity "true"^^xsd:boolean .\n' +
                      '\t?nodeUri displaySetting:startPoint "true"^^xsd:boolean .\n' +
                      '\t?nodeUri rdfs:label ?nodeLabel.\n'+
                      "}\n"+
@@ -54,7 +54,7 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         return self.build_query_on_the_fly({
             'select': '?g ?uri',
             'query': 'GRAPH ?g {\n'+
-                     '?uri rdf:type owl:Class.\n'+
+                     '?uri displaySetting:entity "true"^^xsd:boolean.\n'+
                      "} { ?g dc:creator ?d.} \n"
         })
 
@@ -124,14 +124,16 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         """
         return self.build_query_on_the_fly({
             'select': '?g ?entity ?attribute ?labelAttribute ?typeAttribute',
-            'query': 'GRAPH ?g { ?entity rdf:type owl:Class .\n' +
+            'query': 'GRAPH ?g {\n' +
+                     '\t?entity displaySetting:entity "true"^^xsd:boolean .\n\n' +
                      '\t?attribute displaySetting:attribute "true"^^xsd:boolean .\n\n' +
                      '\t?attribute rdf:type owl:DatatypeProperty ;\n' +
                      '\t           rdfs:label ?labelAttribute ;\n' +
                      '\t           rdfs:domain ?entity ;\n' +
                      '\t           rdfs:range ?typeAttribute .\n\n' +
                      '\tVALUES ?entity { ' + entities + ' }\n' +
-                     '\tVALUES ?typeAttribute { xsd:decimal xsd:string } } { ?g dc:creator ?d.}'
+                     '\tVALUES ?typeAttribute { xsd:decimal xsd:string } \n'+
+                     '} { ?g dc:creator ?d.}'
         })
 
     def get_abstraction_relation(self, prop):
@@ -142,7 +144,9 @@ class SparqlQueryGraph(SparqlQueryBuilder):
             'select': '?g ?subject ?relation ?object',
             'query': 'GRAPH ?g { ?relation rdf:type ' + prop + ' ;\n' +
                      '\t          rdfs:domain ?subject ;\n' +
-                     '\t          rdfs:range ?object .\n} { ?g dc:creator ?d.}'
+                     '\t          rdfs:range ?object .\n'+
+                     '\t?subject displaySetting:entity "true"^^xsd:boolean .\n\n' +
+                     '\t} { ?g dc:creator ?d.}'
             })
 
 
@@ -153,7 +157,7 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         return self.build_query_on_the_fly({
             'select': '?g ?entity ?property ?value',
             'query': 'GRAPH ?g { ?entity ?property ?value .\n' +
-                     '\t?entity rdf:type owl:Class .\n' +
+                     '\t?entity displaySetting:entity "true"^^xsd:boolean .\n' +
                      '\tVALUES ?entity { ' + entities + ' } } { ?g dc:creator ?d.}'
             })
 
@@ -163,7 +167,7 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         """
         return self.build_query_on_the_fly({
             'select': '?entity',
-            'query': '?entity rdf:type owl:Class .\n' +
+            'query': '?entity displaySetting:entity "true"^^xsd:boolean .\n' +
                      '\t?entity displaySetting:is_positionable "true"^^xsd:boolean .'
             })
 
@@ -173,7 +177,7 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         """
         return self.build_query_on_the_fly({
             'select': '?g ?entity ?category ?labelCategory ?typeCategory',
-            'query': 'GRAPH ?g { ?entity rdf:type owl:Class .\n' +
+            'query': 'GRAPH ?g { ?entity displaySetting:entity "true"^^xsd:boolean .\n' +
                      '\t?typeCategory displaySetting:category [] .\n' +
                      '\t?category rdf:type owl:ObjectProperty ;\n' +
                      '\t            rdfs:label ?labelCategory ;\n' +
