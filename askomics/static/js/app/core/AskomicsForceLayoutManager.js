@@ -445,7 +445,7 @@ class AskomicsForceLayoutManager {
         for (var uri in objectsTarget ) {
           /* Filter if node are not desired by the user */
           if (! this.isProposedUri("node",uri)) continue ;
-          /* creatin node */
+          /* creating node */
           let suggestedNode = __ihm.getAbstraction().buildBaseNode(uri);
           /* specific attribute for suggested node */
           suggestedNode = __ihm.getGraphBuilder().setSuggestedNode(suggestedNode,slt_node.x,slt_node.y);
