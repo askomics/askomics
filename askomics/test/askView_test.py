@@ -206,8 +206,8 @@ class AskViewTests(unittest.TestCase):
 
         assert len(data) == 2
         assert isinstance(data, list)
-        assert {'g': 'urn:sparql:test_askomics:jdoe:people_' + timestamp_people, 'count': '72'} in data
-        assert {'g': 'urn:sparql:test_askomics:jdoe:instruments_' + timestamp_instrument, 'count': '65'} in data
+        assert {'g': 'urn:sparql:test_askomics:jdoe:people_' + timestamp_people, 'count': '73'} in data
+        assert {'g': 'urn:sparql:test_askomics:jdoe:instruments_' + timestamp_instrument, 'count': '66'} in data
 
 
     def test_positionable_attr(self):
