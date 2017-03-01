@@ -304,7 +304,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
                 count = 0
                 for line in f:
                     count+=1
-                    if abs(linenumber - count) < 3 :
+                    if abs(linenumber - count) < 10 :
                         errMess += str(count)+":"+line
             errMess += "</pre>"
         return errMess
