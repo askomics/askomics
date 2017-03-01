@@ -258,7 +258,7 @@ class AskomicsResultsView {
 
           if ( headerName in this.activesAttributesUrl[node.id] ) {
             let valWithPrefix = __ihm.getAbstraction().shortRDF(val);
-            let url = this.activesAttributesUrl[node.id][headerName].replace("%s",this.data.values[i][this.activesAttributes[node.id][sparqlId]]);
+            let url = this.data.values[i]["URI"+headerName];
             row.append($('<td></td>').html($('<a></a>').attr('href',url).attr('target','_blank').text(valWithPrefix)));
           } else {
             row.append($('<td></td>').text(val));

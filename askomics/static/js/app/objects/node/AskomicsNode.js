@@ -212,6 +212,7 @@ class AskomicsNode extends GraphNode {
   instanciateVariateSPARQL(variates) {
     /* adding variable node name if asked by the user */
     if (this.actif) {
+      variates.push("?URI"+this.SPARQLid);
       variates.push("?"+this.SPARQLid);
     } else {
       return ; /* Attribute are not instanciate too */
@@ -344,7 +345,7 @@ class AskomicsNode extends GraphNode {
     this.setFilterAttributes(SPARQLid1,"","");
 
     this.linkvar[SPARQLid1].cpt--;
-    
+
     let n = __ihm.getGraphBuilder().nodes([this.linkvar[SPARQLid1].nodelink],'id');
     if (n.length<=0) {
       cnsole.log("AskomicsNode::removeFilterLinkVariable can not find linkvar node:"+this.linkvar[SPARQLid1].nodelink);
