@@ -44,7 +44,9 @@ class SourceFileTsv(SourceFile):
             'end': 'xsd:decimal',
             'entity'  : ':',
             'entitySym'  : ':',
-            'entity_start'  : ':'}
+            'entity_start'  : ':',
+            'goterm': ''
+            }
 
         self.delims = {
             'numeric' : ('', ''),
@@ -57,7 +59,9 @@ class SourceFileTsv(SourceFile):
             'end' : ('', ''),
             'entity'  : (':', ''),
             'entitySym'  : (':', ''),
-            'entity_start'  : (':', '')}
+            'entity_start'  : (':', ''),
+            'goterm': ('<http://purl.obolibrary.org/obo/GO_', '>')
+            }
 
         self.escape = {
             'numeric' : lambda str: str,
@@ -70,7 +74,8 @@ class SourceFileTsv(SourceFile):
             'end' : lambda str: str,
             'entity'  : self.encodeToRDFURI,
             'entitySym'  : self.encodeToRDFURI,
-            'entity_start'  : self.encodeToRDFURI
+            'entity_start'  : self.encodeToRDFURI,
+            'goterm': lambda str: str.replace("GO:", "")
             }
 
     @cached_property
@@ -140,7 +145,7 @@ class SourceFileTsv(SourceFile):
 
         :param values: a List of values to evaluate
         :param num: index of the header
-        :return: the guessed type ('taxon','ref', 'strand', 'start', 'end', 'numeric', 'text' or 'category')
+        :return: the guessed type ('taxon','ref', 'strand', 'start', 'end', 'numeric', 'text' or 'category', 'goterm')
         """
 
         types = {'ref':('chrom',), 'taxon':('taxon', 'species'), 'strand':('strand',), 'start':('start', 'begin'), 'end':('end', 'stop')}
@@ -161,7 +166,9 @@ class SourceFileTsv(SourceFile):
 
                     return typ
 
-
+        #check goterm
+        if all( (val.startswith("GO:") and val[3:].isdigit() ) for val in values):
+            return 'goterm'
 
         # check if relationShip with an other local entity
         if header.find("@")>0:
@@ -268,14 +275,17 @@ class SourceFileTsv(SourceFile):
 
         # Store all the relations
         for key, key_type in enumerate(self.forced_column_types):
-            if key > 0 and not key_type.startswith('entity'):
+            if key > 0 and key in self.disabled_columns:
+                continue
+
+            if key > 0 and not key_type.startswith('entity') :
                 if key_type in ('taxon', 'ref', 'strand', 'start', 'end'):
                     uri = 'position_'+key_type
                 else:
                     uri = self.encodeToRDFURI(self.headers[key])
                 ttl += ":" + uri + ' displaySetting:attribute "true"^^xsd:boolean .\n'
 
-            if key > 0 and key not in self.disabled_columns:
+            if key > 0 :
                 ttl += AbstractedRelation(key_type, self.headers[key], ref_entity, self.type_dict[key_type]).get_turtle()
 
         # Store the startpoint status
