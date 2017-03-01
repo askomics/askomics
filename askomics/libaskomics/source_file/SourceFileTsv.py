@@ -60,14 +60,14 @@ class SourceFileTsv(SourceFile):
             'entity_start'  : (':', '')}
 
         self.escape = {
-            'numeric' : lambda *args: None,
+            'numeric' : lambda str: str,
             'text'    : json.dumps,
             'category': self.encodeToRDFURI,
-            'taxon': lambda *args: None,
-            'ref': lambda *args: None,
-            'strand': lambda *args: None,
-            'start' : lambda *args: None,
-            'end' : lambda *args: None,
+            'taxon': lambda str: str,
+            'ref': lambda str: str,
+            'strand': lambda str: str,
+            'start' : lambda str: str,
+            'end' : lambda str: str,
             'entity'  : self.encodeToRDFURI,
             'entitySym'  : self.encodeToRDFURI,
             'entity_start'  : self.encodeToRDFURI
