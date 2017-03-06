@@ -63,21 +63,6 @@ class SourceFileTsv(SourceFile):
             'goterm': ('<http://purl.obolibrary.org/obo/GO_', '>')
             }
 
-        self.escape = {
-            'numeric' : lambda str: str,
-            'text'    : json.dumps,
-            'category': self.encodeToRDFURI,
-            'taxon': lambda str: str,
-            'ref': lambda str: str,
-            'strand': lambda str: str,
-            'start' : lambda str: str,
-            'end' : lambda str: str,
-            'entity'  : self.encodeToRDFURI,
-            'entitySym'  : self.encodeToRDFURI,
-            'entity_start'  : self.encodeToRDFURI,
-            'goterm': lambda str: str.replace("GO:", "")
-            }
-
     @cached_property
     def dialect(self):
         """

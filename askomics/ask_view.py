@@ -16,6 +16,7 @@ from pygments.lexers import TurtleLexer
 from pygments.formatters import HtmlFormatter
 
 from askomics.libaskomics.ParamManager import ParamManager
+from askomics.libaskomics.ModulesManager import ModulesManager
 from askomics.libaskomics.TripleStoreExplorer import TripleStoreExplorer
 from askomics.libaskomics.SourceFileConvertor import SourceFileConvertor
 from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
@@ -738,6 +739,8 @@ class AskView(object):
 
         return self.data
 
+    #TODO : this method is too generic. The build of RDF Shortucts should be here to avoid injection with bad intention...
+
     @view_config(route_name='importShortcut', request_method='POST')
     def importShortcut(self):
         """
@@ -806,6 +809,54 @@ class AskView(object):
         except Exception as e:
             #exc_type, exc_value, exc_traceback = sys.exc_info()
             #traceback.print_exc(limit=8)
+            traceback.print_exc(file=sys.stdout)
+            self.data['error'] = str(e)
+            self.log.error(str(e))
+
+        return self.data
+
+    @view_config(route_name='modules', request_method='POST')
+    def modules(self):
+
+        # Denny access for non loged users
+        if not self.request.session['admin'] :
+            return 'forbidden'
+
+        # Denny for blocked users
+        if self.request.session['blocked']:
+            return 'blocked'
+
+        try:
+            mm = ModulesManager(self.settings, self.request.session)
+            self.data =  mm.getListModules()
+        except Exception as e:
+            traceback.print_exc(file=sys.stdout)
+            self.data['error'] = str(e)
+            self.log.error(str(e))
+
+        return self.data
+
+    @view_config(route_name='manage_module', request_method='POST')
+    def manageModules(self):
+        # Denny access for non loged users
+        if not self.request.session['admin'] :
+            return 'forbidden'
+
+        # Denny for blocked users
+        if self.request.session['blocked']:
+            return 'blocked'
+
+        try:
+            body = self.request.json_body
+            mm = ModulesManager(self.settings, self.request.session)
+
+            mm.manageModules(
+                    self.request.host_url,
+                    body['uri'],
+                    body['name'],
+                    bool(body['checked']))
+
+        except Exception as e:
             traceback.print_exc(file=sys.stdout)
             self.data['error'] = str(e)
             self.log.error(str(e))

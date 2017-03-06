@@ -42,26 +42,24 @@ class SourceFileTtl(SourceFile):
         return highlight(ttl, TurtleLexer(), formatter) # Formated html
 
     def persist(self, urlbase, public, method):
+        import glob
         """
         insert the ttl sourcefile in the TS
 
         """
         pathttl = self.getRdfDirectory()
+        shutil.copy(self.path, pathttl)
 
         if method == 'load':
-
-            shutil.copy(self.path, pathttl)
             fil_open = open(pathttl + '/' + os.path.basename(self.path))
             self.load_data_from_file(fil_open, urlbase)
 
         else:
-
             chunk = self.file_get_contents(pathttl + '/' + os.path.basename(self.path))
             query_lauch = QueryLauncher(self.settings, self.session)
             query_lauch.insert_data(chunk, self.graph, '')
 
         self.insert_metadatas(public)
-
 
     def file_get_contents(self, filename):
         """

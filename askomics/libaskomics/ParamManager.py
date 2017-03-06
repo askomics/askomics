@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import os.path
 import re
 import requests
@@ -34,6 +36,22 @@ class ParamManager(object):
             self.userfilesdir=self.settings['user.files.dir']+"/"
 
         self.ASKOMICS_html_template      = 'askomics/templates/integration.pt'
+
+        self.escape = {
+            'numeric' : lambda str: str,
+            'text'    : json.dumps,
+            'category': self.encodeToRDFURI,
+            'taxon': lambda str: str,
+            'ref': lambda str: str,
+            'strand': lambda str: str,
+            'start' : lambda str: str,
+            'end' : lambda str: str,
+            'entity'  : self.encodeToRDFURI,
+            'entitySym'  : self.encodeToRDFURI,
+            'entity_start'  : self.encodeToRDFURI,
+            'goterm': lambda str: str.replace("GO:", "")
+            }
+
 
     def get_user_directory(self,typ):
         mdir = self.userfilesdir+typ+"/"+self.session['username'] + '/'
@@ -124,19 +142,24 @@ class ParamManager(object):
     @staticmethod
     def encodeToRDFURI(toencode):
         import urllib.parse
-        obj = toencode.replace(".", "_dot_")
-        obj = obj.replace("-", "_sep_")
-        obj = obj.replace(':', '_col_')
-        obj = urllib.parse.quote(obj)
+        obj = urllib.parse.quote(toencode)
+        obj = obj.replace(".", "_d_")
+        obj = obj.replace("-", "_t_")
+        obj = obj.replace(":", "_s1_")
+        obj = obj.replace("/", "_s2_")
+        obj = obj.replace("%", "_s3_")
 
         return obj
 
     @staticmethod
     def decodeToRDFURI(toencode):
         import urllib.parse
-        obj = urllib.parse.unquote(toencode)
-        obj = obj.replace("_dot_", ".")
-        obj = obj.replace("_sep_", "-")
-        obj = obj.replace("_col_", ":")
+
+        obj = toencode.replace("_d_", ".")
+        obj = obj.replace("_t_", "-")
+        obj = obj.replace("_s1_", ":")
+        obj = obj.replace("_s2_","/")
+        obj = obj.replace("_s3_","%")
+        obj = urllib.parse.unquote(obj)
 
         return obj
