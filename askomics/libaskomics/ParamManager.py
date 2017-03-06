@@ -163,3 +163,17 @@ class ParamManager(object):
         obj = urllib.parse.unquote(obj)
 
         return obj
+
+    @staticmethod
+    def Bool(result):
+
+        if result.lower() == 'false':
+            return False
+
+        if result.lower() == 'true':
+            return True
+
+        if result.isdigit():
+            return bool(int(result))
+
+        raise ValueError("Can not convert string to boolean : "+str(result))
