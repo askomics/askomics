@@ -41,7 +41,7 @@ class AskomicsLink extends GraphLink {
       let target = 'URI'+this.target.SPARQLid;
       if ( this.subclassof ) {
         target = 'SubURI'+this.target.SPARQLid;
-        blockConstraintByNode.push("?"+target+" (rdfs:subClassOf|rdfs:subClassOf/owl:someValuesFrom)* "+"?"+'URI'+this.target.SPARQLid+" ");
+        blockConstraintByNode.push("?"+target+" (rdfs:subClassOf*|rdf:type) "+"?"+'URI'+this.target.SPARQLid+" ");
       }
 
       if ( this.transitive ) rel += "+";

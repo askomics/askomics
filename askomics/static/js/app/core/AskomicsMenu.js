@@ -60,15 +60,16 @@ var fileFuncMenu = function(menu) {
 
 
   $("#dwl-query-sparql").on('click', function(d) {
-    var service = new RestServiceJs("getSparqlQueryInTextFormat");
-    var jdata = new AskomicsJobsViewManager().prepareQuery();
-    var date = new Date().getTime();
-    var current = this;
-    var query = "" ;
+    let service = new RestServiceJs("getSparqlQueryInTextFormat");
+    let jdata = new AskomicsJobsViewManager().prepareQuery();
+
+    let current = this;
+    $(current).removeAttr("href");
     service.postsync(jdata,function(data) {
-      query = data.query;
+      let date = new Date().getTime();
+      $(current).attr("href", "data:application/sparql-query," + encodeURIComponent(data.query)).attr("download", "query-" + date + ".rq");
     });
-    $(this).attr("href", "data:application/sparql-query," + encodeURIComponent(query)).attr("download", "query-" + date + ".rq");
+
   });
 };
 

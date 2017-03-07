@@ -914,7 +914,7 @@ class AskView(object):
             tse = TripleStoreExplorer(self.settings, self.request.session)
 
             body = self.request.json_body
-            results,query = tse.build_sparql_query_from_json(body["variates"],body["constraintesRelations"],False)
+            results,query = tse.build_sparql_query_from_json(body["variates"],body["constraintesRelations"],-1,False)
 
             self.data['query'] = query
         except Exception as e:
