@@ -365,7 +365,7 @@ const classesMapping = {
       for (let idx=0;idx<this._instanciedNodeGraph.length;idx++) {
         let node = dup_node_array[idx];
         /* find relation with this node and add it as a constraint  */
-        for (let ilx=dup_link_array.length-1;ilx>=0;ilx--) {
+        for (let ilx=0;ilx<dup_link_array.length;ilx++) {
 
           if ( (dup_link_array[ilx].source.id == node.id) ||  (dup_link_array[ilx].target.id == node.id) ) {
             let blockConstraintByLink = [] ;
