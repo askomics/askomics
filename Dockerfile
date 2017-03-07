@@ -2,55 +2,51 @@ FROM debian:jessie
 MAINTAINER Olivier Filangi "olivier.filangi@inra.fr"
 
 # Prerequisites
-#----------------------------------------------------------------------------------------
 RUN apt-get update && apt-get install -y \
   git \
   build-essential \
   python3 \
   python3-pip \
-  python3.4-venv \
+  python3-venv \
   vim \
   ruby \
   npm \
   nodejs-legacy
 
-# Install Askomics
-#------------------------------------------------------------------------------------------
-ENV VENV=/usr/local/AskomicsWeb/venv
-RUN mkdir -p /usr/local/AskomicsWeb
-RUN rm -rf $VENV
-WORKDIR /usr/local/AskomicsWeb/
+# Workdir
+RUN mkdir /usr/local/askomics
+WORKDIR /usr/local/askomics/
 
-#--------------------------------------------------------------------------------------------
-RUN npm config set prefix /usr/local
-RUN npm install gulp -g
-RUN npm install gulp-util
-RUN npm install gulp-concat
-RUN npm install gulp-sourcemaps
-RUN npm install gulp-babel babel-preset-es2015
-RUN npm install gulp-mocha
-RUN npm install gulp-mocha-phantomjs --save-dev
-RUN npm install should
-RUN npm install mocha
-RUN npm install chai
-RUN npm install jshint gulp-jshint --save-dev
-RUN npm install mocha-phantomjs-istanbul --save-dev
-RUN npm install gulp-istanbul --save-dev
-RUN npm install gulp-istanbul-report --save-dev
-RUN npm install gulp-inject --save-dev
-RUN gem install coveralls-lcov
-RUN npm install intro.js --save
-RUN npm install --save-dev gulp
-RUN npm install bluebird
-RUN npm install any-promise
-RUN npm install gulp-uglify
+# NPM packages
+RUN npm config set prefix /usr/local && \
+    npm install gulp -g && \
+    npm install gulp --save-dev && \
+    npm install gulp-util --save-dev && \
+    npm install gulp-concat --save-dev && \
+    npm install gulp-sourcemaps --save-dev && \
+    npm install gulp-babel --save-dev && \
+    npm install babel-preset-es2015 && \
+    npm install gulp-mocha --save-dev && \
+    npm install gulp-mocha-phantomjs --save-dev && \
+    npm install should --save-dev && \
+    npm install mocha --save-dev && \
+    npm install chai --save-dev && \
+    npm install jshint --save-dev && \
+    npm install gulp-jshint --save-dev && \
+    npm install mocha-phantomjs-istanbul --save-dev && \
+    npm install gulp-istanbul --save-dev && \
+    npm install gulp-istanbul-report --save-dev && \
+    npm install gulp-inject --save-dev && \
+    gem install coveralls-lcov && \
+    npm install intro.js  --save-dev && \
+    npm install bluebird --save-dev && \
+    npm install any-promise --save-dev && \
+    npm install gulp-uglify --save-dev
 
-COPY . /usr/local/AskomicsWeb/
+COPY . /usr/local/askomics/
+# Delete the local venv if exist
+RUN rm -rf /usr/local/askomics/venv
 
-RUN gulp
-
-# Launch Askomics
-#-------------------------------------------------------------------------------------------
 EXPOSE 6543
 ENTRYPOINT ["./startAskomics.sh"]
 CMD ["virtuoso", "prod"]
