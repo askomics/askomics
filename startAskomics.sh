@@ -1,11 +1,11 @@
 #!/bin/bash
 set -e
-set -x
+# set -x
 
 DIR_ASKOMICS=$(dirname "$0")
 
 DIR_CONFIG="${DIR_ASKOMICS}/configs"
-DIR_VENV=${DIR_VENV:-"${DIR_ASKOMICS}/venv"}
+DIR_VENV=${DIR_VENV:-"$DIR_ASKOMICS/venv"}
 
 PYTHON=${PYTHON:-"python3"}
 PYVENV=${PYVENV:-"$PYTHON -m venv"}
