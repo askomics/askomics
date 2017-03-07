@@ -127,6 +127,10 @@ class ParamManager(object):
         obj = toencode.replace(".", "_dot_")
         obj = obj.replace("-", "_sep_")
         obj = obj.replace(':', '_col_')
+
+        if obj[0].isdigit():
+            obj = 'URI_' + obj
+
         obj = urllib.parse.quote(obj)
 
         return obj
@@ -138,5 +142,6 @@ class ParamManager(object):
         obj = obj.replace("_dot_", ".")
         obj = obj.replace("_sep_", "-")
         obj = obj.replace("_col_", ":")
+        obj = obj.replace('URI_', '')
 
         return obj
