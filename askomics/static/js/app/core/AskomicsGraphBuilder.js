@@ -356,7 +356,14 @@ const classesMapping = {
       let dup_link_array = $.extend(true, [], this._instanciedLinkGraph);
 
       for (let idx=0;idx<this._instanciedNodeGraph.length;idx++) {
-        var node = dup_node_array[idx];
+        let node = dup_node_array[idx];
+        /* adding constraints about attributs about the current node */
+        blockConstraint.push(node.buildConstraintsSPARQL());
+        node.instanciateVariateSPARQL(variates);
+      }
+
+      for (let idx=0;idx<this._instanciedNodeGraph.length;idx++) {
+        let node = dup_node_array[idx];
         /* find relation with this node and add it as a constraint  */
         for (let ilx=dup_link_array.length-1;ilx>=0;ilx--) {
 
@@ -370,11 +377,8 @@ const classesMapping = {
             dup_link_array.splice(ilx,1);
           }
         }
-        let blockConstraintByNode = [] ;
-        /* adding constraints about attributs about the current node */
-        blockConstraint.push(node.buildConstraintsSPARQL());
-        node.instanciateVariateSPARQL(variates);
       }
+
       return [variates,[blockConstraint,'']] ;
     }
   }
