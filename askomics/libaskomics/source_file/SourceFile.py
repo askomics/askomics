@@ -48,6 +48,9 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         self.reset_cache()
 
+    def setGraph(self,graph):
+        self.graph = graph
+
     def insert_metadatas(self,accessL):
         """
         Insert the metadatas into the parent graph
