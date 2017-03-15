@@ -1,74 +1,101 @@
-#!/bin/bash
-set -e
-# set -x
+#! /bin/bash
 
-DIR_ASKOMICS=$(dirname "$0")
+dir_askomics=$(dirname "$0")
+dir_config="$dir_askomics/configs"
+dir_venv="$dir_askomics/venv"
 
-DIR_CONFIG="${DIR_ASKOMICS}/configs"
-DIR_VENV=${DIR_VENV:-"$DIR_ASKOMICS/venv"}
+python_ex="python3"
+pyvenv="$python -m venv"
+pip="$python -m pip"
 
-PYTHON=${PYTHON:-"python3"}
-PYVENV=${PYVENV:-"$PYTHON -m venv"}
-PIP=${PIP:-"$PYTHON -m pip"}
+python_flags="-s"
 
-PYTHON_FLAGS+=( -s )
-
-function usage {
-    echo $"Usage: $0 { fuseki | agraph | virtuoso } ({ dev | prod })"
-    echo " - args1: RDF Triple Store"
-    echo " - args2: deployment mode, production or development (default=prod)"
-    exit 1
+function usage() {
+    echo "Usage: $0 (-t { fuseki | agraph | virtuoso }) (-d { dev | prod })"
+    echo "    -t     triplestore (default: virtuoso)"
+    echo "    -d     deployment mode (default: production)"
+    echo "    -r     run only (without build javascript and python)"
+    echo "    -b     build only (python and js)"
 }
 
-if [[ $# -eq 0 ]] ; then
-    usage ;
-fi
+# Default options
+triplestore="virtuoso"
+run=false
+build=false
 
-RDFTYPE=$1
-DEPMODE=$2
-case "$DEPMODE" in
+while getopts "ht:d:rb" option; do
+    case $option in
+        h)
+            usage
+            exit 0
+        ;;
+
+        t)
+            triplestore=$OPTARG
+        ;;
+
+        d)
+            depmode=$OPTARG
+        ;;
+
+        r)
+            run=true
+        ;;
+
+        b)
+            build=true
+        ;;
+    esac
+done
+
+case $depmode in
     prod|production|"")
-        DEPMODE="production"
-        GULPMODE="--prod"
-        PSERVE_FLAGS+=( -b -q )
-        PYTHON_FLAGS+=( -OO )
-        ;;
+        depmode="production"
+        gulpmode="--prod"
+        pserve_flags="-b -q"
+        python_flags="$python_flags -OO"
+    ;;
     dev|development)
-        DEPMODE="development"
-        PSERVE_FLAGS+=( --reload )
-        PYTHON_FLAGS+=( -bb -Wall )
-        ;;
+        depmode="development"
+        gulpmode="--reload"
+        pserve_flags="--reload"
+        python_flags="$python_flags -bb -Wall"
+    ;;
     *)
+        echo "-d $depmode: wrong deployment mode"
         usage
+        exit 1
 esac
-echo "-----------------------------------------------------------------------------"
 
-CONFIG_NAME="${DEPMODE}.${RDFTYPE}.ini"
-CONFIG_PATH="${DIR_CONFIG}/${CONFIG_NAME}"
-if [[ ! -f $CONFIG_PATH ]]; then
-    echo "Configuration file ${CONFIG_NAME} not found in ${DIR_CONFIG}."
+config_name="$depmode.$triplestore.ini"
+config_path="$dir_config/$config_name"
+
+if [[ ! -f $config_path ]]; then
+    echo "Config file $config_name not found in $dir_config"
     usage
+    exit 1
 fi
-echo "${DIR_VENV}-----------------------------------------------------------------------------"
-ACTIVATE="${DIR_VENV}/bin/activate"
-if [[ ! -f $ACTIVATE ]] ; then
-    echo "Building python virtual environment at ${DIR_VENV}..."
-    #$PYTHON -m ensurepip
-    $PYVENV "$DIR_VENV"
-    source "$ACTIVATE"
-    $PIP install -e .
+
+activate="$dir_venv/bin/activate"
+
+if [[ ! -f $activate ]]; then
+    echo "building python virtual environment ..."
+    $pyvenv $dir_venv
+    source $activate
+    $pip install -e
 else
-    source "$ACTIVATE"
+    source $activate
 fi
-echo "-----------------------------------------------------------------------------"
 
-ASKOMICS="$PYTHON ${PYTHON_FLAGS[@]} "${DIR_VENV}/bin/pserve" $CONFIG_PATH ${PSERVE_FLAGS[@]}"
+if [[ $run == false ]]; then
+    echo "deploying javascript ..."
+    gulp $gulpmode
+fi
 
-echo "deploy .js"
-gulp $GULPMODE
+pserve="$dir_venv/bin/pserve"
+askomics="$python_ex $python_flags $pserve $config_path $pserve_flags"
 
-echo "Starting askomics with:"
-echo "$ . '${ACTIVATE}'"
-echo "$ ${ASKOMICS}"
-
-$ASKOMICS
+if [[ $build == false ]]; then
+    echo "starting askomics ..."
+    $askomics
+fi
