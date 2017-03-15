@@ -5,8 +5,8 @@ dir_config="$dir_askomics/configs"
 dir_venv="$dir_askomics/venv"
 
 python_ex="python3"
-pyvenv="$python -m venv"
-pip="$python -m pip"
+pyvenv="$python_ex -m venv"
+pip="$python_ex -m pip"
 
 python_flags="-s"
 
