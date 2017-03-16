@@ -13,6 +13,10 @@ class AskomicsNode extends GraphNode {
     this._inverseMatch = {} ; /* boolean if negation filter is actived */
     this._linkvar      = {} ; /* link variable are listed */
 
+    this.rdfslabel = {} ;
+    this.rdfslabel.actif = true     ;
+    this.rdfslabel.optional = false ;
+
     this.additionalShortcutListDisplayVar = {} ;
     return this;
   }
@@ -98,7 +102,13 @@ class AskomicsNode extends GraphNode {
     let blockConstraintByNode = [];
     /* add node inside */
     blockConstraintByNode.push("?"+'URI'+this.SPARQLid+" "+'rdf:type'+" "+this.URI());
-    blockConstraintByNode.push("?"+'URI'+this.SPARQLid+" "+'rdfs:label'+" "+"?"+this.SPARQLid);
+    if ( this.rdfslabel.actif ) {
+      if ( this.rdfslabel.optional ) {
+        blockConstraintByNode.push([["?"+'URI'+this.SPARQLid+" "+'rdfs:label'+" "+"?"+this.SPARQLid],'OPTIONAL']);
+      }  else {
+        blockConstraintByNode.push("?"+'URI'+this.SPARQLid+" "+'rdfs:label'+" "+"?"+this.SPARQLid);
+      }
+    }
 
     for (let uri in this.attributes) {
         let SparqlId = this.attributes[uri].SPARQLid;
@@ -243,11 +253,9 @@ class AskomicsNode extends GraphNode {
     var node = this;
     /* add node inside */
     constraintRelations.push("?"+'URI'+node.SPARQLid+" "+'rdf:type'+" "+node.URI());
-    constraintRelations.push("?"+'URI'+node.SPARQLid+" "+'rdfs:label'+" "+"?"+node.SPARQLid);
-
     for (let uri in node.categories) {
       if ( node.categories[uri].id != attributeId ) continue;
-      
+
       constraintRelations.push("<"+node.categories[uri].type+"> displaySetting:category "+"?URICat"+node.categories[uri].SPARQLid);
       constraintRelations.push("?"+'URI'+node.SPARQLid+" "+this.URI(uri)+" "+"?URICat"+node.categories[uri].SPARQLid);
       constraintRelations.push("?URICat"+node.categories[uri].SPARQLid+" "+'rdfs:label'+" "+"?"+node.categories[uri].SPARQLid);
@@ -279,11 +287,28 @@ class AskomicsNode extends GraphNode {
     return this._isregexp[idatt];
   }
 
+  isActif(uriId) {
+    if ( uriId == this.SPARQLid ) return this.rdfslabel.actif;
+    for (let a in this.attributes ) {
+      if ( this.attributes[a].SPARQLid == uriId ) return this.attributes[a].actif;
+    }
+    for (let a in this.categories ) {
+      if ( this.categories[a].SPARQLid == uriId ) return this.categories[a].actif;
+    }
+  }
+
   setActiveAttribute(uriId,boolean,optional) {
     if ( uriId === undefined ) throw "activeAttribute : undefined attribute !";
     let opt = false;
     if ( typeof optional !== undefined ) {
       opt = true;
+    }
+
+    // rdfs:label desactived
+    if ( uriId == this.SPARQLid ) {
+      this.rdfslabel.actif = boolean ;
+      if (opt) this.rdfslabel.optional = optional;
+      return ;
     }
 
     for (let a in this.attributes ) {

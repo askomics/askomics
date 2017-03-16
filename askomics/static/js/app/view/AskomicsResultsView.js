@@ -254,7 +254,11 @@ class AskomicsResultsView {
 
         for (let sparqlId in this.activesAttributes[node.id]) {
           let headerName = this.activesAttributes[node.id][sparqlId];
+
           let val = this.data.values[i][this.activesAttributes[node.id][sparqlId]];
+          if (val === undefined || val === '' ) { // case for rdfs label which are desactived
+            val = this.data.values[i]['URI'+this.activesAttributes[node.id][sparqlId]];
+          }
 
           if ( headerName in this.activesAttributesUrl[node.id] ) {
             let valWithPrefix = __ihm.getAbstraction().shortRDF(val);

@@ -450,20 +450,19 @@ class AskomicsNodeView extends AskomicsObjectView {
           return removeIcon;
     }
 
-    makeEyeIcon(attribute) {
+    makeEyeIcon(object) {
       // =============================================================================================
       //    Manage Attribute variate when eye is selected or deselected
       //
-      let eyeLabel = attribute.actif?'fa-eye':'fa-eye-slash';
+      let mythis = this;
+      let eyeLabel = mythis.node.isActif(object.SPARQLid)?'fa-eye':'fa-eye-slash';
       let icon = $('<span></span>')
-              .attr('sparqlid', attribute.SPARQLid)
+              .attr('sparqlid', object.SPARQLid)
               .attr('aria-hidden','true')
               .addClass('fa')
               .addClass('makeEyeIcon')
               .addClass(eyeLabel)
               .addClass('display');
-
-      let mythis = this;
 
       // eye-close --> optional search --> exact search
       icon.click(function(d) {
@@ -657,6 +656,7 @@ class AskomicsNodeView extends AskomicsObjectView {
              .attr("basic_type","string")
              .append(lab)
              .append(mythis.makeRemoveIcon())
+             .append(mythis.makeEyeIcon(node))
              .append(mythis.makeRegExpIcon(node.SPARQLid))
              .append(mythis.makeNegativeMatchIcon(node.SPARQLid))
              .append(mythis.makeLinkVariableIcon(node.SPARQLid))
