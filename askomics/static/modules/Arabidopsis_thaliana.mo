@@ -1,8 +1,10 @@
 {
-"module"  : "Reactome Arabidopsis thaliana" ,
-"comment" : "",
-"version" : "1.0",
-"owl"     : "http://download.bio2rdf.org/release/3/reactome/Arabidopsis_thaliana.owl",
-"rdf"     : [
-]
+    "comment": "",
+    "module": "Reactome Arabidopsis thaliana",
+    "owl": "http://download.bio2rdf.org/release/3/reactome/Arabidopsis_thaliana.owl",
+    "rdf": [
+        "@prefix displaySetting: <http://www.irisa.fr/dyliss/rdfVisualization/display>.",
+        "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>."
+    ],
+    "version": "1.0"
 }
