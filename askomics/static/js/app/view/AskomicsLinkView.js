@@ -104,7 +104,7 @@ class AskomicsLinkView extends AskomicsObjectView {
                                 .append($('<br>'))
                                 .append($('<label></label>').append(inpTrans).append('Transitive relation'))
                                 .append($('<br>'))
-                                .append($('<label></label>').append(inpNeg).append('Negative relation'))
+                                .append($('<label></label>').append(inpNeg).append('Absent relation'))
                                 .append($('<br>'))
                                 .append($('<label></label>').append(inpSub).append('Subclassof relation'));
     this.details.append($('<hr>'))

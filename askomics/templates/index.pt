@@ -62,7 +62,7 @@
                     <label for="graph_startpoint" class="col-md-offset-2">Select a graph :</label>
                     <select id='graph_startpoints' size='1' class="form-control col-md-offset-2"></select>
                   <br/>
-                    <label for="startpoint" class="col-md-offset-2">Select a start point to start a session :</label>
+                    <label for="startpoint" class="col-md-offset-2">Select an entity to start a session :</label>
                     <select id='startpoints' size='8' class="form-control col-md-offset-2"></select>
                     <div class="col-md-offset-2">Shared entities are <em class='text-warning'>yellow</em> and personal entities are <strong class='text-primary'>blue</strong></div>
                 </div>
