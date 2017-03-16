@@ -104,6 +104,31 @@ class ParamManager(object):
                 self.ASKOMICS_prefix[item]=dic[item]
                 self.log.info("add prefix:"+str(item)+":"+self.ASKOMICS_prefix[item])
 
+    def reversePrefix(self,uri):
+        url = "http://prefix.cc/reverse?format=json&uri="
+
+        for prefix in self.ASKOMICS_prefix:
+            print("URI..... uri:"+uri+" rec:"+self.ASKOMICS_prefix[prefix])
+            if uri.startswith(self.ASKOMICS_prefix[prefix]):
+                return prefix
+
+        response = requests.get(url+uri)
+        if response.status_code != 200:
+            self.log.error("request:"+str(url+item+ext))
+            self.log.error("status_code:"+str(response.status_code))
+            self.log.error(response)
+            self.ASKOMICS_prefix[uri]=uri
+            return
+        dic = json.loads(response.text)
+        if (len(dic)>0):
+            v = list(dic.values())[0]
+            k = list(dic.keys())[0]
+            self.ASKOMICS_prefix[k]=v
+            self.log.info("add prefix:"+str(k)+":"+self.ASKOMICS_prefix[k])
+            return k
+
+        return uri
+
     def header_sparql_config(self,sarqlrequest):
         header = ""
         regex = re.compile('\s(\w+):')

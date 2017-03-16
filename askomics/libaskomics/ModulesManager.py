@@ -285,7 +285,19 @@ class ModulesManager(ParamManager):
         for ent in entities:
             rdftab.append("<"+ent +"> displaySetting:entity \"true\"^^xsd:boolean.")
             if ent not in label:
-                rdftab.append("<"+ent +"> rdfs:label "+self.escape['text'](ent)+"^^xsd:string.")
+                label = ent
+
+                idxList = [ label.rfind('#'), label.rfind('/')]
+                idx = -1
+                for i in idxList:
+                    if i>idx:
+                        idx=i
+                if idx>=0:
+                    label = self.escape['text'](self.reversePrefix(label[:idx+1])+':'+label[idx+1:])
+                else:
+                    label = self.escape['text'](label)
+                rdftab.append("<"+ent +"> rdfs:label "+label+"^^xsd:string.")
+
             if len(entities[ent])>0:
                  rdftab.append("<"+ ent +"> displaySetting:startPoint \"true\"^^xsd:boolean.")
             if ent in attributes:
