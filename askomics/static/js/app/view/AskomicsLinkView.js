@@ -66,47 +66,52 @@ class AskomicsLinkView extends AskomicsObjectView {
 
   create() {
     this.divPanel() ;
-    let inpNeg = this.makeCheckBox(
-      function (l) {
-        return l.negative;
-      } ,
-      function (l) {
-        l.negative = true ;
-      } ,
-      function (l) {
-        l.negative = false ;
-      } ) ;
+    let listProperties = $('<div></div>') ;
 
-    let inpTrans = this.makeCheckBox(
-      function (l) {
-        return l.transitive;
-      } ,
-      function (l) {
-        l.transitive = true ;
-      } ,
-      function (l) {
-        l.transitive = false ;
-      } ) ;
+    if ( !(this.link instanceof AskomicsIsALink) ) {
 
-    let inpSub = this.makeCheckBox(
+      let inpTrans = this.makeCheckBox(
         function (l) {
-          return l.subclassof;
+          return l.transitive;
         } ,
         function (l) {
-          l.subclassof = true ;
+          l.transitive = true ;
         } ,
         function (l) {
-          l.subclassof = false ;
+          l.transitive = false ;
         } ) ;
 
-    let listProperties = $('<div></div>')
-                                .append($("<label></label>").html("Relations properties"))
+      let inpNeg = this.makeCheckBox(
+        function (l) {
+          return l.negative;
+        } ,
+        function (l) {
+          l.negative = true ;
+        } ,
+        function (l) {
+          l.negative = false ;
+        } ) ;
+
+        let inpSub = this.makeCheckBox(
+          function (l) {
+            return l.subclassof;
+          } ,
+          function (l) {
+            l.subclassof = true ;
+          } ,
+          function (l) {
+            l.subclassof = false ;
+          } ) ;
+
+        listProperties.append($("<label></label>").html("Relations properties"))
                                 .append($('<br>'))
                                 .append($('<label></label>').append(inpTrans).append('Transitive relation'))
                                 .append($('<br>'))
                                 .append($('<label></label>').append(inpNeg).append('Absent relation'))
                                 .append($('<br>'))
                                 .append($('<label></label>').append(inpSub).append('Subclassof relation'));
+    }
+
     this.details.append($('<hr>'))
                 .append(listProperties)
                 .append($('<hr>'));

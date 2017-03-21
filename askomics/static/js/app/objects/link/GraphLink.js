@@ -35,6 +35,10 @@ class GraphLink extends GraphObject {
     return "link";
   }
 
+  getClassSVG() {
+    return "objectpropertyClass";
+  }
+
   set source  (__source) { this._source = __source; }
   get source () { return this._source; }
 
@@ -74,7 +78,7 @@ class GraphLink extends GraphObject {
     this.target = t[1];
   }
 
-  getLinkStrokeColor() { return 'grey'; }
+  getLinkColor() { return 'grey'; }
   getTextFillColor() { return 'grey'; }
 
   toString() {

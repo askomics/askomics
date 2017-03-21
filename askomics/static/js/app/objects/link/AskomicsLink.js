@@ -65,6 +65,4 @@ class AskomicsLink extends GraphLink {
     }
   }
 
-  getLinkStrokeColor() { return super.getLinkStrokeColor(); }
-
 }

@@ -7,16 +7,6 @@ pre {
     overflow: auto;
 }
 
-.link {
-    stroke: #2E2E2E;
-    stroke-width: 2px;
-}
-
-.node {
-    stroke: #fff;
-    stroke-width: 2px;
-}
-
 .textClass {
     stroke: #323232;
     font-family: "Lucida Grande", "Droid Sans", Arial, Helvetica, sans-serif;

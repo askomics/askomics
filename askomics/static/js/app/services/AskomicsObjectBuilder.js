@@ -8,6 +8,8 @@ class AskomicsObjectBuilder {
   static instanceNode(node,x,y) {
     if ( __ihm.getAbstraction().isPositionable(node.uri) ) {
       return new AskomicsPositionableNode(node,x,y);
+    } else if ( 'alias' in node ) {
+      return new AskomicsAliasNode(node,x,y);
     } else {
       return new AskomicsNode(node,x,y);
     }

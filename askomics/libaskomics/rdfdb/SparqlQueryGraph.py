@@ -50,12 +50,25 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         """
         Get the list of entities
         """
-        self.log.debug('---> get_public_graphs')
+        self.log.debug('---> get_entities_availables')
         return self.build_query_on_the_fly({
             'select': '?g ?uri',
             'query': 'GRAPH ?g {\n'+
                      '?uri displaySetting:entity "true"^^xsd:boolean.\n'+
                      "} { ?g dc:creator ?d.} \n"
+        })
+
+    def get_isa_relation_entities(self):
+        """
+        Get the association list of entities and subclass
+        """
+        self.log.debug('---> get_isa_relation_entities')
+        return self.build_query_on_the_fly({
+            'select': '?uri ?urisub',
+            'query': '\n'+
+                     '?uri displaySetting:entity "true"^^xsd:boolean.\n'+
+                     '?uri rdfs:subClassOf ?urisub.\n'+
+                     '?urisub displaySetting:entity "true"^^xsd:boolean.\n'
         })
 
     def get_public_graphs(self):

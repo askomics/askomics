@@ -35,9 +35,9 @@ class AskomicsResultsView {
       } else {
          this.activesAttributesUrl[node.id] = {};
        }
-      if (this.activesAttributes[node.id].length != this.activesAttributesLabel[node.id].length ) {
+      /*if (this.activesAttributes[node.id].length != this.activesAttributesLabel[node.id].length ) {
         throw "Devel: Error node.getAttributesDisplaying give array with different size:"+str(this.activesAttributes[node.id].length)+","+str(this.activesAttributesLabel[node.id].length);
-      }
+      }*/
     }
   }
 

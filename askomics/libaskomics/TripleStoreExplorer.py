@@ -96,6 +96,12 @@ class TripleStoreExplorer(ParamManager):
         #    if not elt['subject'] in list_entities:
         #        list_entities[elt['subject']]=0
 
+
+
+        results = ql.process_query(sqg.get_isa_relation_entities().query)
+
+        data['subclassof'] = results
+
         filter_entities = ' '.join(["<"+s+">" for s in list_entities.keys()])
 
         results = ql.process_query(sqg.get_abstraction_entity(filter_entities).query)
