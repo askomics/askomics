@@ -386,7 +386,7 @@ const classesMapping = {
       functBefore();
       let tab = this.buildConstraintsGraph();
       let data = {
-        'variates'             : ['count(*)'],
+        'variates'             : ['(COUNT(DISTINCT *) as ?count)'],
         'constraintesRelations': tab[1],
         'constraintesFilters'  : tab[2],
         'removeGraph'          : __ihm.getAbstraction().listUnactivedGraph(),
@@ -394,8 +394,15 @@ const classesMapping = {
       };
       let service = new RestServiceJs("sparqlquery");
       service.post(data,function(res) {
-        functCount(res.values[0]["callret-0"]);
-        console.log("COUNT = "+JSON.stringify(res));
+          if ('error' in res) {
+            console.log("Error count:"+res.error);
+            return;
+          }
+          console.log("COUNT = "+JSON.stringify(res));
+          if ( ! ('values' in res) ) return ;
+          if ( res.values.length<= 0 ) return ;
+          if ( ! ('count' in res.values[0]) ) return ;
+          functCount(res.values[0].count);
       });
     }
 
