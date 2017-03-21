@@ -63,6 +63,7 @@ class AskomicsNodeView extends AskomicsObjectView {
 
   updateNodeView() {
     $("[constraint_node_id="+this.node.id+"]").text(this.node.getAttributesWithConstraintsString());
+    __ihm.forceLayoutManager.setNumberResultsSVG();
   }
 
 /* ===============================================================================================*/

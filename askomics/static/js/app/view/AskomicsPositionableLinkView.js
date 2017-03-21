@@ -54,7 +54,7 @@ class AskomicsPositionableLinkView extends AskomicsObjectView {
 
     // remove link
     var id = this.link.id;
-    var linkid = $('#'+id).attr("idlink");
+    var linkid = $('#'+id).attr("id");
 
     $('#'+id).remove(); // link
     $('#'+GraphObject.getSvgLabelPrefix()+id).remove(); // link label

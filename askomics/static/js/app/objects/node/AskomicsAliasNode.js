@@ -97,7 +97,7 @@ class AskomicsAliasNode extends GraphNode {
     return "AliasClass";
   }
 
-  getRNode() { return 11; }
+  getRNode() { return 10; }
 
   toString() {
     return "AskomicsAliasNode >" + super.toString();

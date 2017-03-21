@@ -381,4 +381,22 @@ const classesMapping = {
 
       return [variates,[blockConstraint,'']] ;
     }
+
+    countNumberOfSolution(functBefore,functCount) {
+      functBefore();
+      let tab = this.buildConstraintsGraph();
+      let data = {
+        'variates'             : ['count(*)'],
+        'constraintesRelations': tab[1],
+        'constraintesFilters'  : tab[2],
+        'removeGraph'          : __ihm.getAbstraction().listUnactivedGraph(),
+        'limit'                : -1
+      };
+      let service = new RestServiceJs("sparqlquery");
+      service.post(data,function(res) {
+        functCount(res.values[0]["callret-0"]);
+        console.log("COUNT = "+JSON.stringify(res));
+      });
+    }
+
   }

@@ -119,7 +119,7 @@ let instanceAskomicsJobsViewManager ;
       //create state view
       let curId = new AskomicsJobsViewManager().createWaitState();
       let service = new RestServiceJs("sparqlquery");
-      let jdata = this.prepareQuery(false, false);
+      let jdata = this.prepareQuery();
       service.post(jdata,function(data) {
         if ('error' in data) {
           //alert(data.error);
