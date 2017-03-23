@@ -57,7 +57,6 @@ case $depmode in
     ;;
     dev|development)
         depmode="development"
-        gulpmode="--reload"
         pserve_flags="--reload"
         python_flags="$python_flags -bb -Wall"
     ;;
