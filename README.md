@@ -69,7 +69,7 @@ AskOmics also uses the following bundled libraries:
 #### Browser compatibility
 
 | Chrome | Firefox | Internet Explorer | Opera | Safari |
-|---|---|---|---|---|---|
+|---|---|---|---|---|
 | 38+  | 13+  | Not supported  | 25+  |  7.1+ |
 
 ### Install Askomics
