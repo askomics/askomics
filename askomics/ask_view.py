@@ -85,6 +85,8 @@ class AskView(object):
         results = ql.process_query(sqg.get_private_graphs().query)
         self.settings['graph']['private'] = []
         for elt in results:
+            if 'g' not in elt:
+                continue
             if elt['g'] in removeGraph:
                 continue
             self.settings['graph']['private'].append(elt['g'])
@@ -966,66 +968,56 @@ class AskView(object):
         self.log.debug('username: ' + username)
         self.log.debug('email: ' + email)
 
-        self.data['error'] = []
-        error = False
 
-        security = Security(self.settings, self.request.session, username, email, password, password2)
 
-        is_valid_email = security.check_email()
-        are_passwords_identical = security.check_passwords()
-        is_pw_enough_longer = security.check_password_length()
-        is_username_already_exist = security.check_username_in_database()
-        is_email_already_exist = security.check_email_in_database()
-
-        if not is_valid_email:
-            self.data['error'].append('Email is not valid')
-            error = True
-
-        if not are_passwords_identical:
-            self.data['error'].append('Passwords are not identical')
-            error = True
-
-        if not is_pw_enough_longer:
-            self.data['error'].append('Password must be at least 8 characters')
-            error = True
-
-        if is_username_already_exist:
-            self.data['error'].append('Username already exist')
-            error = True
-
-        if is_email_already_exist:
-            self.data['error'].append('Email already exist')
-            error = True
-
-        if error:
-            return self.data
-
-        # no error, insert user in TS
         try:
+            security = Security(self.settings, self.request.session, username, email, password, password2)
+
+            is_valid_email = security.check_email()
+            are_passwords_identical = security.check_passwords()
+            is_pw_enough_longer = security.check_password_length()
+            is_username_already_exist = security.check_username_in_database()
+            is_email_already_exist = security.check_email_in_database()
+
+            self.data['error'] = []
+            error = False
+
+            if not is_valid_email:
+                self.data['error'].append('Email is not valid')
+                error = True
+
+            if not are_passwords_identical:
+                self.data['error'].append('Passwords are not identical')
+                error = True
+
+            if not is_pw_enough_longer:
+                self.data['error'].append('Password must be at least 8 characters')
+                error = True
+
+            if is_username_already_exist:
+                self.data['error'].append('Username already exist')
+                error = True
+
+            if is_email_already_exist:
+                self.data['error'].append('Email already exist')
+                error = True
+
+            if error:
+                return self.data
+
+            self.data['error'] = None
+
             security.persist_user()
-            pass
-        except Exception as e:
-            traceback.print_exc(file=sys.stdout)
-            self.data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
-            self.log.error(str(e))
-
-        # Create user graph
-        try:
             security.create_user_graph()
-        except Exception as e:
-            traceback.print_exc(file=sys.stdout)
-            self.data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
-            self.log.error(str(e))
-
-        # Log user
-        try:
             security.log_user(self.request)
+
             self.data['username'] = username
             admin_blocked = security.get_admin_blocked_by_username()
             self.data['admin'] = admin_blocked['admin']
             self.data['blocked'] = admin_blocked['blocked']
         except Exception as e:
-            self.data['error'] = traceback.format_exc(limit=8)+"\n\n\n"+str(e)
+            traceback.print_exc(file=sys.stdout)
+            self.data['error'] = ["Bad server configuration!"]
             self.log.error(str(e))
 
         return self.data
