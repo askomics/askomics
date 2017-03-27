@@ -83,7 +83,7 @@ class AskViewTests(unittest.TestCase):
             'nodes': [
                 {
                     'g':
-                    'urn:sparql:test_askomics:jdoe:instruments_' + timestamp_instruments,
+                    'urn:sparql:test_askomics:jdoe:instruments.tsv_' + timestamp_instruments,
                     'public': False,
                     'uri':
                     'http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Instruments',
@@ -92,7 +92,7 @@ class AskViewTests(unittest.TestCase):
                 },
                 {
                     'g':
-                    'urn:sparql:test_askomics:jdoe:people_' + timestamp_people,
+                    'urn:sparql:test_askomics:jdoe:people.tsv_' + timestamp_people,
                     'public': False,
                     'uri':
                     'http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#People',
@@ -103,11 +103,13 @@ class AskViewTests(unittest.TestCase):
         }
 
         print(data)
+        print(len(data["nodes"]))
 
         assert len(data["nodes"]) == 2
-        data["nodes"] = sorted(data["nodes"],key=self.getKeyNode)
-        expected_result["nodes"] = sorted(expected_result["nodes"],key=self.getKeyNode)
-        assert expected_result["nodes"]==data["nodes"]
+        data["nodes"] = sorted(data["nodes"], key=self.getKeyNode)
+        expected_result["nodes"] = sorted(
+            expected_result["nodes"], key=self.getKeyNode)
+        assert expected_result["nodes"] == data["nodes"]
 
     def test_statistics(self):
 
@@ -157,7 +159,7 @@ class AskViewTests(unittest.TestCase):
 
         # Delete only the people graph
         self.request.json_body = {
-            'namedGraphs': ['urn:sparql:test_askomics:jdoe:people_' + timestamp_people]
+            'namedGraphs': ['urn:sparql:test_askomics:jdoe:people.tsv_' + timestamp_people]
         }
 
         data = self.askview.delete_graph()
@@ -177,7 +179,7 @@ class AskViewTests(unittest.TestCase):
                 {
                     'private': True,
                     'g':
-                    'urn:sparql:test_askomics:jdoe:instruments_' + timestamp_instruments,
+                    'urn:sparql:test_askomics:jdoe:instruments.tsv_' + timestamp_instruments,
                     'uri':
                     'http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Instruments',
                     'label': 'Instruments',
@@ -206,8 +208,8 @@ class AskViewTests(unittest.TestCase):
 
         assert len(data) == 2
         assert isinstance(data, list)
-        assert {'g': 'urn:sparql:test_askomics:jdoe:people_' + timestamp_people, 'count': '72'} in data
-        assert {'g': 'urn:sparql:test_askomics:jdoe:instruments_' + timestamp_instrument, 'count': '65'} in data
+        assert {'g': 'urn:sparql:test_askomics:jdoe:people.tsv_' + timestamp_people, 'count': '72'} in data
+        assert {'g': 'urn:sparql:test_askomics:jdoe:instruments.tsv_' + timestamp_instrument, 'count': '65'} in data
 
 
     def test_positionable_attr(self):
@@ -246,7 +248,7 @@ class AskViewTests(unittest.TestCase):
         self.tps.clean_up()
 
         self.request.json_body = {
-            'file_name': 'people',
+            'file_name': 'people.tsv',
             'key_columns': [0],
             'col_types': [
                 'entity_start', 'text', 'text', 'category', 'numeric'
@@ -272,7 +274,7 @@ class AskViewTests(unittest.TestCase):
         self.tps.clean_up()
 
         self.request.json_body = {
-            'file_name': 'people',
+            'file_name': 'people.tsv',
             'key_columns': [0],
             'col_types': [
                 'entity_start', 'text', 'text', 'category', 'numeric'
@@ -297,11 +299,11 @@ class AskViewTests(unittest.TestCase):
         self.tps.clean_up()
 
         self.request.json_body = {
-            'file_name': 'small_data',
+            'file_name': 'small_data.gff3',
             'taxon': 'Arabidopsis_thaliana',
             'entities': ['transcript', 'gene'],
             'public': False,
-            'method': 'noload'
+            'method': 'load'
         }
 
         data = self.askview.load_gff_into_graph()
@@ -318,7 +320,7 @@ class AskViewTests(unittest.TestCase):
         self.tps.clean_up()
 
         self.request.json_body = {
-            'file_name': 'turtle_data',
+            'file_name': 'turtle_data.ttl',
             'public': False,
             'method': 'load'
         }
@@ -418,7 +420,7 @@ class AskViewTests(unittest.TestCase):
         data = self.askview.getSparqlQueryInTextFormat()
         print(len(str(data)))
 
-        assert len(str(data)) == 777
+        assert len(str(data)) == 781
 
     def test_upload_ttl(self):
         """Test uploadTtl method"""
