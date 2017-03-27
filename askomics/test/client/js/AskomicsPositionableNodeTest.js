@@ -18,8 +18,7 @@ let PositionableNodeJSON = {
     "_values": {},
     "_isregexp": {},
     "_inverseMatch": {},
-    "_linkvar": {},
-    "additionalShortcutListDisplayVar":{}
+    "_linkvar": {}
 };
 
 

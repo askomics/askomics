@@ -160,6 +160,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
                 data = self.load_data_from_file(fp, urlbase)
                 if data['status'] == 'failed':
                     return data
+                self.log.debug("source file : persist delete =>"+fp.name)
                 os.remove(fp.name) # Everything ok, remove previous temp file
 
             total_triple_count += triple_count
@@ -182,6 +183,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
             if data['status'] == 'failed':
                 return data
             data['total_triple_count'] = total_triple_count
+            self.log.debug("source file : persist delete =>"+fp.name)
             os.remove(fp.name)
 
         else:
@@ -267,6 +269,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
         ql = QueryLauncher(self.settings, self.session)
 
         url = urlbase+"/ttl/"+ self.session['username'] + '/' + os.path.basename(fp.name)
+        #url = urlbase+"/ttl/" + '/' + os.path.basename(fp.name)
         self.log.debug(url)
         data = {}
         try:
@@ -283,6 +286,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
             if self.settings["askomics.debug"]:
                 data['url'] = url
             else:
+                self.log.debug("source file : load_data_from_file delete =>"+fp.name)
                 os.remove(fp.name) # Everything ok, remove temp file
 
         return data

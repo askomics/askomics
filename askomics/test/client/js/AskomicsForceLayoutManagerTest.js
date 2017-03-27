@@ -1,7 +1,5 @@
 /*jshint esversion: 6 */
 var userAbstraction = new AskomicsUserAbstraction();
-var menuView = new AskomicsMenuView();
-var menuFile = new AskomicsMenuFile();
 
 describe('AskomicsForceLayoutManager', function(){
   describe('# methods', function(){

@@ -122,7 +122,6 @@ let instanceAskomicsJobsViewManager ;
       let jdata = this.prepareQuery();
       service.post(jdata,function(data) {
         if ('error' in data) {
-          //alert(data.error);
           new AskomicsJobsViewManager().changeKoState(curId,data.error);
           return;
         }
