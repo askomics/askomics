@@ -263,7 +263,11 @@ class SourceFile(ParamManager, HaveCachedProperties):
         sqb = SparqlQueryBuilder(self.settings, self.session)
         ql = QueryLauncher(self.settings, self.session)
 
+        if self.is_defined('askomics.load_url'):
+            urlbase = self.settings['askomics.load_url']
+
         url = urlbase+"/ttl/"+ self.session['username'] + '/' + os.path.basename(fp.name)
+
         self.log.debug(url)
         data = {}
         try:
