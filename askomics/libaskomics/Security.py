@@ -70,6 +70,9 @@ class Security(ParamManager):
         result = query_laucher.process_query(sqa.check_username_presence(self.username).query)
         self.log.debug('---> result: ' + str(result))
 
+        if (len(result)<=0):
+            return False
+
         return ParamManager.Bool(result[0]['status'])
 
     def check_email_in_database(self):
@@ -81,6 +84,10 @@ class Security(ParamManager):
         sqa = SparqlQueryAuth(self.settings, self.session)
 
         result = query_laucher.process_query(sqa.check_email_presence(self.email).query)
+        self.log.debug('---> result: ' + str(result))
+
+        if (len(result)<=0):
+            return False
 
         return ParamManager.Bool(result[0]['status'])
 
@@ -131,8 +138,10 @@ class Security(ParamManager):
         sqa = SparqlQueryAuth(self.settings, self.session)
 
         result = query_laucher.process_query(sqa.ckeck_key_belong_user(self.username, key).query)
+        self.log.debug('---> result: ' + str(result))
 
-        self.log.debug(result)
+        if len(result)<=0:
+            return False
 
         return ParamManager.Bool(result[0]['count'])
 
@@ -155,7 +164,10 @@ class Security(ParamManager):
 
         result = query_laucher.process_query(sqa.get_number_of_users().query)
 
-        self.log.debug(result)
+        self.log.debug('---> result: ' + str(result))
+
+        if len(result)<=0:
+            return 0
 
         return int(result[0]['count'])
 
