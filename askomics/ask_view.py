@@ -594,13 +594,17 @@ class AskView(object):
         if 'method' in body:
             method = body['method']
 
+        forced_type = None
+        if 'forced_type' in body:
+            forced_type = body['forced_type']
+
         # Allow data integration in public graph only if user is an admin
         if public and not self.request.session['admin']:
             self.data['error'] = ('/!\\ --> NOT ALLOWED TO INSERT IN PUBLIC GRAPH <-- /!\\')
             return self.data
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
-        src_file = sfc.get_source_file(file_name)
+        src_file = sfc.get_source_file(file_name, forced_type)
         src_file.set_forced_column_types(col_types)
         src_file.set_disabled_columns(disabled_columns)
         src_file.set_key_columns(key_columns)
@@ -648,13 +652,20 @@ class AskView(object):
         if 'method' in body:
             method = body['method']
 
+        forced_type = None
+        if 'forced_type' in body:
+            forced_type = body['forced_type']
+
         # Allow data integration in public graph only if user is an admin
         if public and not self.request.session['admin']:
             self.log.debug('/!\\ --> NOT ALLOWED TO INSERT IN PUBLIC GRAPH <-- /!\\')
             public = False
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
-        src_file_gff = sfc.get_source_file_gff(file_name, taxon, entities)
+        src_file_gff = sfc.get_source_file(file_name, forced_type)
+
+        src_file_gff.set_taxon(taxon)
+        src_file_gff.set_entities(entities)
 
         try:
             self.log.debug('--> Parsing GFF')
@@ -697,13 +708,17 @@ class AskView(object):
         if 'method' in body:
             method = body['method']
 
+        forced_type = None
+        if 'forced_type' in body:
+            forced_type = body['forced_type']
+
         # Allow data integration in public graph only if user is an admin
         if public and not self.request.session['admin']:
             self.log.debug('/!\\ --> NOT ALLOWED TO INSERT IN PUBLIC GRAPH <-- /!\\')
             public = False
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
-        src_file_ttl = sfc.get_source_file(file_name)
+        src_file_ttl = sfc.get_source_file(file_name, forced_type)
 
         try:
             src_file_ttl.persist(self.request.host_url, public, method)

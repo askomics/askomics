@@ -87,7 +87,7 @@ class QueryLauncher(ParamManager):
             #                      if not line.startswith('PREFIX '))
             self.log.debug("----------- QUERY --------------\n%s", query_log)
 
-        if externalService == None :
+        if externalService is None :
             urlupdate = None
             if self.is_defined("askomics.updatepoint"):
                 urlupdate = self.get_param("askomics.updatepoint")

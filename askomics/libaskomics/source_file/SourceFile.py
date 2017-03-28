@@ -34,7 +34,8 @@ class SourceFile(ParamManager, HaveCachedProperties):
         self.metadatas = {}
 
         # The name should not contain extension as dots are not allowed in rdf names
-        self.name = os.path.splitext(os.path.basename(path))[0]
+        # self.name = os.path.splitext(os.path.basename(path))[0]
+        self.name = os.path.basename(path)
 
         self.graph = 'askomics:unkown:uri:graph'
         if 'graph' in self.session:
@@ -268,8 +269,10 @@ class SourceFile(ParamManager, HaveCachedProperties):
         sqb = SparqlQueryBuilder(self.settings, self.session)
         ql = QueryLauncher(self.settings, self.session)
 
+        if self.is_defined('askomics.load_url'):
+            urlbase = self.settings['askomics.load_url']
+
         url = urlbase+"/ttl/"+ self.session['username'] + '/' + os.path.basename(fp.name)
-        #url = urlbase+"/ttl/" + '/' + os.path.basename(fp.name)
         self.log.debug(url)
         data = {}
         try:

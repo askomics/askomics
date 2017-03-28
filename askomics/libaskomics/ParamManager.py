@@ -167,6 +167,7 @@ class ParamManager(object):
     @staticmethod
     def encodeToRDFURI(toencode):
         import urllib.parse
+
         obj = urllib.parse.quote(toencode)
         obj = obj.replace(".", "_d_")
         obj = obj.replace("-", "_t_")
@@ -185,6 +186,7 @@ class ParamManager(object):
         obj = obj.replace("_s1_", ":")
         obj = obj.replace("_s2_","/")
         obj = obj.replace("_s3_","%")
+        
         obj = urllib.parse.unquote(obj)
 
         return obj

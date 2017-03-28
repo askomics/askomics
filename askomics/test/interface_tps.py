@@ -114,7 +114,7 @@ class InterfaceTPS(object):
         """
 
         col_types = ['entity_start', 'text', 'text', 'category', 'numeric']
-        return self.load_file("people", col_types)
+        return self.load_file("people.tsv", col_types)
 
     def load_instruments(self):
         """Load the file instruments.tsv
@@ -124,7 +124,7 @@ class InterfaceTPS(object):
         """
 
         col_types = ['entity_start', 'text', 'category']
-        return self.load_file("instruments", col_types)
+        return self.load_file("instruments.tsv", col_types)
 
     def load_play_instrument(self):
         """Load the file play_instruments.tsv
@@ -134,7 +134,7 @@ class InterfaceTPS(object):
         """
 
         col_types = ['entity_start', 'entity', 'category']
-        return self.load_file("play_instrument", col_types)
+        return self.load_file("play_instrument.tsv", col_types)
 
     def load_public_people(self):
         """Load the file people.tsv as public data
@@ -144,7 +144,7 @@ class InterfaceTPS(object):
         """
 
         col_types = ['entity_start', 'text', 'text', 'category', 'numeric']
-        return self.load_file("people", col_types, True)
+        return self.load_file("people.tsv", col_types, True)
 
     def load_transcript(self):
         """Load the file transcript.tsv
@@ -154,7 +154,7 @@ class InterfaceTPS(object):
         """
 
         col_types = ['entity_start', 'taxon', 'ref', 'start', 'end', 'strand', 'category']
-        return self.load_file("transcript", col_types)
+        return self.load_file("transcript.tsv", col_types)
 
     def load_qtl(self):
         """Load the file qtl.tsv
@@ -164,7 +164,7 @@ class InterfaceTPS(object):
         """
 
         col_types = ['entity_start', 'taxon', 'ref', 'start', 'end']
-        return self.load_file("qtl", col_types)
+        return self.load_file("qtl.tsv", col_types)
 
     def clean_up(self):
         """Delete all tests data

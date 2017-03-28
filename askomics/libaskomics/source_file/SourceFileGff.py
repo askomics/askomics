@@ -14,7 +14,7 @@ class SourceFileGff(SourceFile):
     Class representing a Gff3 Source file
     """
 
-    def __init__(self, settings, session, path, tax, ent):
+    def __init__(self, settings, session, path):
 
         SourceFile.__init__(self, settings, session, path)
 
@@ -31,13 +31,21 @@ class SourceFileGff(SourceFile):
 
         self.categories_list = ['position_taxon', 'position_ref', 'position_strand']
 
-        self.taxon = tax.strip()
+        self.taxon = ''
 
-        self.entities = ent
+        self.entities = []
 
         self.timestamp = datetime.datetime.now().isoformat()
 
         self.getLabelFromUri = {}
+
+    def set_taxon(self, taxon):
+
+        self.taxon = taxon
+
+    def set_entities(self, entities):
+
+        self.entities = entities
 
 
     def get_entities(self):
