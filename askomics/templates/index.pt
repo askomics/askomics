@@ -62,7 +62,7 @@
                     <label for="graph_startpoint" class="col-md-offset-2">Select a graph :</label>
                     <select id='graph_startpoints' size='1' class="form-control col-md-offset-2"></select>
                   <br/>
-                    <label for="startpoint" class="col-md-offset-2">Select a start point to start a session :</label>
+                    <label for="startpoint" class="col-md-offset-2">Select an entity to start a session :</label>
                     <select id='startpoints' size='8' class="form-control col-md-offset-2"></select>
                     <div class="col-md-offset-2">Shared entities are <em class='text-warning'>yellow</em> and personal entities are <strong class='text-primary'>blue</strong></div>
                 </div>
@@ -134,7 +134,7 @@
 
                     <div id="uploadedQuery" class="uploadedQuery" hidden contenteditable></div>
                         <div class="btn-group btn-group-query">
-                            <button type="button" class="btn btn-primary" onclick="new AskomicsJobsViewManager().createJob();">Launch query</button>
+                            <button type="button" class="btn btn-primary" onclick="new AskomicsJobsViewManager().createQueryJob();">Launch query</button>
                         </div>
 
                 </div>
@@ -148,9 +148,9 @@
                     <span id="objectName" class="label label-default"></span>
 
                     <div class="btn-group btn-group-query">
-                        <!--<span id="helpNode" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>-->
-                        <span id="showNode" class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
-                        <span id="deleteNode" class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span>
+                        <span id="refreshNode" class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
+                        <span id="showNode"    class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
+                        <span id="deleteNode"  class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span>
                     </div>
                     </h3>
                     <hr/>
@@ -205,10 +205,12 @@
              <ul class="nav nav-tabs">
               <li class="active"><a data-toggle="tab" href="#Users_adm">Users</a></li>
               <li><a data-toggle="tab" href="#Shortcuts_adm">Shortcuts</a></li>
+              <li><a data-toggle="tab" href="#Modules_adm">Modules</a></li>
              </ul>
              <div id="admin_page_tab_content" class="tab-content">
                   <div id="Users_adm" class="tab-pane fade in active"></div>
                   <div id="Shortcuts_adm" class="tab-pane fade"></div>
+                  <div id="Modules_adm" class="tab-pane fade"></div>
              </div>
             </div>
          </div>
@@ -612,6 +614,41 @@
           </div>
         </script>
 
+        <script id='template-admin-modules' type="text/x-handlebars-template">
+             <hr/>
+             <h3 class="header-div">Modules</h3>
+             <hr/>
+
+                <table class="table table-striped">
+                    <tr>
+                      <th>Modules</th>
+                      <th>Definition</th>
+                      <th>Version</th>
+                      <th>N triplets</th>
+                      <th>State</th>
+                      <th></th>
+                    </tr>
+                  {{#each modules}}
+                  <tr data-toggle="collapse" data-target="#accordion_{{@index}}" class="clickable">
+                      <td>{{this.module}}</td>
+                      <td>{{this.comment}}</td>
+                      <td>{{this.version}}</td>
+                      <td>{{this.ntriplets}}</td>
+                      <td>{{this.state}}</td>
+                      {{#if this.wait}}
+                      <td><i class="fa fa-spinner pulse"></i></td>
+                      {{else}}
+                      {{#if this.checked}}
+                      <td onclick="new ModulesParametersView().active('{{this.uri}}','{{this.module}}',false);"><span class="glyphicon glyphicon-check"></span></td>
+                      {{else}}
+                        <td onclick="new ModulesParametersView().active('{{this.uri}}','{{this.module}}',true);"><span class="glyphicon glyphicon-unchecked"></span></td>
+                      {{/if}}
+                      {{/if}}
+                  </tr>
+                  {{/each}}
+                    </table>
+           </script>
+
         <!-- template to display preview of a gff file -->
         <script id="template-gff-form" type="text/x-handlebars-template">
             <form id="source-file-gff-{{idfile}}" class="template-source_file form-horizontal text-left">
@@ -711,6 +748,7 @@
                                             <optgroup label='Relation type'>
                                                 <option value='entity'>General relation to entity</option>
                                                 <option value='entitySym'>Symmetric relation to entity</option>
+                                                <option value='goterm'>Gene ontology id</option>
                                             </optgroup>
                                         {{/if}}
                                     </select>

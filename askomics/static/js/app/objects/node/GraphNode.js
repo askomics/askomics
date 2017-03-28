@@ -102,6 +102,10 @@ class GraphNode extends GraphObject {
 
   getNodeStrokeColor() { return 'grey'; }
 
+  getClassSVG() { return "Class"; }
+
+  getSizeText() { return 14; }
+
   getColorInstanciatedNode() {
 
     if ( this.uri in colorUriList ) {

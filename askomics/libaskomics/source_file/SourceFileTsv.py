@@ -4,6 +4,7 @@ Classes to import data from a gff3 source files
 import re
 import csv
 import uuid
+import json
 
 from collections import defaultdict
 from pkg_resources import get_distribution
@@ -43,17 +44,24 @@ class SourceFileTsv(SourceFile):
             'end': 'xsd:decimal',
             'entity'  : ':',
             'entitySym'  : ':',
-            'entity_start'  : ':'}
+            'entity_start'  : ':',
+            'goterm': ''
+            }
 
         self.delims = {
             'numeric' : ('', ''),
-            'text'    : ('"', '"^^xsd:string'),
+            'text'    : ('', '^^xsd:string'),
             'category': (':', ''),
             'taxon': (':', ''),
             'ref': (':', ''),
             'strand': (':', ''),
             'start' : ('', ''),
-            'end' : ('', '')}
+            'end' : ('', ''),
+            'entity'  : (':', ''),
+            'entitySym'  : (':', ''),
+            'entity_start'  : (':', ''),
+            'goterm': ('<http://purl.obolibrary.org/obo/GO_', '>')
+            }
 
     @cached_property
     def dialect(self):
@@ -122,7 +130,7 @@ class SourceFileTsv(SourceFile):
 
         :param values: a List of values to evaluate
         :param num: index of the header
-        :return: the guessed type ('taxon','ref', 'strand', 'start', 'end', 'numeric', 'text' or 'category')
+        :return: the guessed type ('taxon','ref', 'strand', 'start', 'end', 'numeric', 'text' or 'category', 'goterm')
         """
 
         types = {'ref':('chrom',), 'taxon':('taxon', 'species'), 'strand':('strand',), 'start':('start', 'begin'), 'end':('end', 'stop')}
@@ -143,13 +151,15 @@ class SourceFileTsv(SourceFile):
 
                     return typ
 
-
+        #check goterm
+        if all( (val.startswith("GO:") and val[3:].isdigit() ) for val in values):
+            return 'goterm'
 
         # check if relationShip with an other local entity
         if header.find("@")>0:
             #general relation by default
             return "entity"
-            
+
         # Then, check if category
         threshold=10
         if len(values)<30:
@@ -250,14 +260,17 @@ class SourceFileTsv(SourceFile):
 
         # Store all the relations
         for key, key_type in enumerate(self.forced_column_types):
-            if key > 0 and not key_type.startswith('entity'):
+            if key > 0 and key in self.disabled_columns:
+                continue
+
+            if key > 0 and not key_type.startswith('entity') :
                 if key_type in ('taxon', 'ref', 'strand', 'start', 'end'):
                     uri = 'position_'+key_type
                 else:
                     uri = self.encodeToRDFURI(self.headers[key])
                 ttl += ":" + uri + ' displaySetting:attribute "true"^^xsd:boolean .\n'
 
-            if key > 0 and key not in self.disabled_columns:
+            if key > 0 :
                 ttl += AbstractedRelation(key_type, self.headers[key], ref_entity, self.type_dict[key_type]).get_turtle()
 
         # Store the startpoint status
@@ -288,7 +301,7 @@ class SourceFileTsv(SourceFile):
 
             for item in categories:
                 if item.strip() != "":
-                    ttl += ":" + self.encodeToRDFURI(item) + " rdf:type :" + self.encodeToRDFURI(header) + " ;\n" + len(item) * " " + "  rdfs:label \"" + item + "\"^^xsd:string .\n"
+                    ttl += ":" + self.encodeToRDFURI(item) + " rdf:type :" + self.encodeToRDFURI(header) + " ;\n" + len(item) * " " + "  rdfs:label " + self.escape['text'](item) + "^^xsd:string .\n"
 
         return ttl
 
@@ -360,7 +373,7 @@ class SourceFileTsv(SourceFile):
                 entity_id = self.key_id(row)
                 indent = (len(entity_id) + 1) * " "
                 ttl += ":" + self.encodeToRDFURI(entity_id) + " rdf:type :" + self.encodeToRDFURI(self.headers[0]) + " ;\n"
-                ttl += indent + " rdfs:label \"" + entity_label + "\"^^xsd:string ;\n"
+                ttl += indent + " rdfs:label " + self.escape['text'](entity_label) + "^^xsd:string ;\n"
 
                 # Add data from other columns
                 for i, header in enumerate(self.headers): # Skip the first column
@@ -383,28 +396,25 @@ class SourceFileTsv(SourceFile):
                         if current_type in ('category', 'taxon', 'ref', 'strand'):
                             # This is a category, keep track of allowed values for this column
                             self.category_values[header].add(row[i])
-                            row[i] = self.encodeToRDFURI(row[i])
 
                         # Create link to value
                         if row[i]: # Empty values are just ignored
                             # positionable attributes
                             if current_type == 'start':
-                                ttl += indent + " " + ':position_start' + " " + self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " ;\n"
+                                ttl += indent + " " + ':position_start' + " " + self.delims[current_type][0] + self.encodeToRDFURI(row[i]) + self.delims[current_type][1] + " ;\n"
                             elif current_type == 'end':
-                                ttl += indent + " " + ':position_end' + " " + self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " ;\n"
+                                ttl += indent + " " + ':position_end' + " " + self.delims[current_type][0] + self.encodeToRDFURI(row[i]) + self.delims[current_type][1] + " ;\n"
                             elif current_type == 'taxon':
-                                ttl += indent + " " + ':position_taxon' + " " + self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " ;\n"
+                                ttl += indent + " " + ':position_taxon' + " " + self.delims[current_type][0] + self.encodeToRDFURI(row[i]) + self.delims[current_type][1] + " ;\n"
                             elif current_type == 'ref':
-                                ttl += indent + " " + ':position_ref' + " " + self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " ;\n"
+                                ttl += indent + " " + ':position_ref' + " " + self.delims[current_type][0] + self.encodeToRDFURI(row[i]) + self.delims[current_type][1] + " ;\n"
                             elif current_type == 'strand':
-                                ttl += indent + " " + ':position_strand' + " " + self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " ;\n"
-                            elif current_type.startswith('entity'):
-                                ttl += indent + " "+ relationName + " :" + self.encodeToRDFURI(row[i]) + " ;\n"
+                                ttl += indent + " " + ':position_strand' + " " + self.delims[current_type][0] + self.encodeToRDFURI(row[i]) + self.delims[current_type][1] + " ;\n"
                             else:
-                                ttl += indent + " "+ relationName + " " + self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " ;\n"
+                                ttl += indent + " "+ relationName + " " + self.delims[current_type][0] + self.escape[current_type](row[i]) + self.delims[current_type][1] + " ;\n"
 
                         if current_type == 'entitySym':
-                            ttlSym += self.delims[current_type][0] + row[i] + self.delims[current_type][1] + " "+ relationName + " :" + self.encodeToRDFURI(entity_label)  + " .\n"
+                            ttlSym += self.delims[current_type][0] + self.escape[current_type](row[i]) + self.delims[current_type][1] + " "+ relationName + " :" + self.encodeToRDFURI(entity_label)  + " .\n"
 
                 ttl = ttl[:-2] + "."
                 #manage symmetric relation

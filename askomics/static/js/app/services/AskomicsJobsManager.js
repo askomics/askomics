@@ -37,7 +37,7 @@ let instanceAskomicsJobsViewManager ;
       return curId;
     }
 
-    changeOkState(id,data) {
+    changeOkState(id,data,preview_func) {
       function addZero(x, n) {
         while (x.toString().length < n) {
           x = "0" + x;
@@ -61,11 +61,15 @@ let instanceAskomicsJobsViewManager ;
             this.jobs[ij].end   = new Date(time).toLocaleString();
             this.jobs[ij].wait  = false;
             this.jobs[ij].state = "Ok";
-            this.jobs[ij].nr    = data.nrow;
-            this.jobs[ij].csv   = data.file;
+            if ( 'nrow' in data ) {
+              this.jobs[ij].nr    = data.nrow;
+            }
+            if ( 'file' in data ) {
+              this.jobs[ij].csv   = data.file;
+            }
             this.jobs[ij].duration = m + " m:" + s + " s:" + ms +" ms";
             this.jobs[ij].classtr = "bg-success";
-            this.jobs[ij].datable_preview = new AskomicsResultsView(data).getPreviewResults(this.jobs[ij].stateToReload);
+            this.jobs[ij].datable_preview = preview_func(this.jobs[ij].stateToReload) ; //new AskomicsResultsView(data).getPreviewResults(this.jobs[ij].stateToReload);
           }
       }
       new AskomicsJobsViewManager().listJobs();
@@ -85,9 +89,10 @@ let instanceAskomicsJobsViewManager ;
     }
 
     removeJob(index) {
-
-      let service = new RestServiceJs('del_csv/');//location.href='del_csv/{{this.csv}}';
-      service.get(this.jobs[index].csv);
+      if ('csv' in this.jobs[index] ) {
+        let service = new RestServiceJs('del_csv/');//location.href='del_csv/{{this.csv}}';
+        service.get(this.jobs[index].csv);
+      }
       this.jobs.splice(index, 1);
       new AskomicsJobsViewManager().listJobs();
       if (this.jobs.length<=0) $("#interrogation").trigger( "click" );
@@ -110,19 +115,45 @@ let instanceAskomicsJobsViewManager ;
                };
     }
 
-    createJob() {
+    createQueryJob() {
       //create state view
       let curId = new AskomicsJobsViewManager().createWaitState();
       let service = new RestServiceJs("sparqlquery");
-      let jdata = this.prepareQuery(false, false);
+      let jdata = this.prepareQuery();
       service.post(jdata,function(data) {
+        if ('error' in data) {
+          new AskomicsJobsViewManager().changeKoState(curId,data.error);
+          return;
+        }
+
+        new AskomicsJobsViewManager().changeOkState(curId,data,function(d) {
+          return new AskomicsResultsView(data).getPreviewResults(d) ;
+        });
+      });
+      /* position on job list view */
+      $("#jobsview").trigger( "click" );
+    }
+
+    createModuleJob(bool,urimo,name) {
+      //create state view
+      let curId = new AskomicsJobsViewManager().createWaitState();
+      let service = new RestServiceJs("manage_module");
+
+      let param = {
+        'checked' : bool,
+        'uri'     : urimo,
+        'name'    : name
+      } ;
+
+      service.post(param,function(data) {
         if ('error' in data) {
           //alert(data.error);
           new AskomicsJobsViewManager().changeKoState(curId,data.error);
           return;
         }
 
-        new AskomicsJobsViewManager().changeOkState(curId,data);
+        new AskomicsJobsViewManager().changeOkState(curId,data,function(d) { return "<p>Import "+name+" is done !</p>";});
+        new ModulesParametersView().updateModules();
       });
       /* position on job list view */
       $("#jobsview").trigger( "click" );

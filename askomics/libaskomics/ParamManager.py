@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import os.path
 import re
 import requests
@@ -34,6 +36,22 @@ class ParamManager(object):
             self.userfilesdir=self.settings['user.files.dir']+"/"
 
         self.ASKOMICS_html_template      = 'askomics/templates/integration.pt'
+
+        self.escape = {
+            'numeric' : lambda str: str,
+            'text'    : json.dumps,
+            'category': self.encodeToRDFURI,
+            'taxon': lambda str: str,
+            'ref': lambda str: str,
+            'strand': lambda str: str,
+            'start' : lambda str: str,
+            'end' : lambda str: str,
+            'entity'  : self.encodeToRDFURI,
+            'entitySym'  : self.encodeToRDFURI,
+            'entity_start'  : self.encodeToRDFURI,
+            'goterm': lambda str: str.replace("GO:", "")
+            }
+
 
     def get_user_directory(self,typ):
         mdir = self.userfilesdir+typ+"/"+self.session['username'] + '/'
@@ -86,6 +104,31 @@ class ParamManager(object):
                 self.ASKOMICS_prefix[item]=dic[item]
                 self.log.info("add prefix:"+str(item)+":"+self.ASKOMICS_prefix[item])
 
+    def reversePrefix(self,uri):
+        url = "http://prefix.cc/reverse?format=json&uri="
+
+        for prefix in self.ASKOMICS_prefix:
+            print("URI..... uri:"+uri+" rec:"+self.ASKOMICS_prefix[prefix])
+            if uri.startswith(self.ASKOMICS_prefix[prefix]):
+                return prefix
+
+        response = requests.get(url+uri)
+        if response.status_code != 200:
+            self.log.error("request:"+str(url+item+ext))
+            self.log.error("status_code:"+str(response.status_code))
+            self.log.error(response)
+            self.ASKOMICS_prefix[uri]=uri
+            return
+        dic = json.loads(response.text)
+        if (len(dic)>0):
+            v = list(dic.values())[0]
+            k = list(dic.keys())[0]
+            self.ASKOMICS_prefix[k]=v
+            self.log.info("add prefix:"+str(k)+":"+self.ASKOMICS_prefix[k])
+            return k
+
+        return uri
+
     def header_sparql_config(self,sarqlrequest):
         header = ""
         regex = re.compile('\s(\w+):')
@@ -124,24 +167,40 @@ class ParamManager(object):
     @staticmethod
     def encodeToRDFURI(toencode):
         import urllib.parse
-        obj = toencode.replace(".", "_dot_")
-        obj = obj.replace("-", "_sep_")
-        obj = obj.replace(':', '_col_')
 
-        if obj[0].isdigit():
-            obj = 'URI_' + obj
-
-        obj = urllib.parse.quote(obj)
+        obj = urllib.parse.quote(toencode)
+        obj = obj.replace(".", "_d_")
+        obj = obj.replace("-", "_t_")
+        obj = obj.replace(":", "_s1_")
+        obj = obj.replace("/", "_s2_")
+        obj = obj.replace("%", "_s3_")
 
         return obj
 
     @staticmethod
     def decodeToRDFURI(toencode):
         import urllib.parse
-        obj = urllib.parse.unquote(toencode)
-        obj = obj.replace("_dot_", ".")
-        obj = obj.replace("_sep_", "-")
-        obj = obj.replace("_col_", ":")
-        obj = obj.replace('URI_', '')
+
+        obj = toencode.replace("_d_", ".")
+        obj = obj.replace("_t_", "-")
+        obj = obj.replace("_s1_", ":")
+        obj = obj.replace("_s2_","/")
+        obj = obj.replace("_s3_","%")
+        
+        obj = urllib.parse.unquote(obj)
 
         return obj
+
+    @staticmethod
+    def Bool(result):
+
+        if result.lower() == 'false':
+            return False
+
+        if result.lower() == 'true':
+            return True
+
+        if result.isdigit():
+            return bool(int(result))
+
+        raise ValueError("Can not convert string to boolean : "+str(result))

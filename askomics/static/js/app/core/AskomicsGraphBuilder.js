@@ -356,9 +356,16 @@ const classesMapping = {
       let dup_link_array = $.extend(true, [], this._instanciedLinkGraph);
 
       for (let idx=0;idx<this._instanciedNodeGraph.length;idx++) {
-        var node = dup_node_array[idx];
+        let node = dup_node_array[idx];
+        /* adding constraints about attributs about the current node */
+        blockConstraint.push(node.buildConstraintsSPARQL());
+        node.instanciateVariateSPARQL(variates);
+      }
+
+      for (let idx=0;idx<this._instanciedNodeGraph.length;idx++) {
+        let node = dup_node_array[idx];
         /* find relation with this node and add it as a constraint  */
-        for (let ilx=dup_link_array.length-1;ilx>=0;ilx--) {
+        for (let ilx=0;ilx<dup_link_array.length;ilx++) {
 
           if ( (dup_link_array[ilx].source.id == node.id) ||  (dup_link_array[ilx].target.id == node.id) ) {
             let blockConstraintByLink = [] ;
@@ -370,11 +377,33 @@ const classesMapping = {
             dup_link_array.splice(ilx,1);
           }
         }
-        let blockConstraintByNode = [] ;
-        /* adding constraints about attributs about the current node */
-        blockConstraint.push(node.buildConstraintsSPARQL());
-        node.instanciateVariateSPARQL(variates);
       }
+
       return [variates,[blockConstraint,'']] ;
     }
+
+    countNumberOfSolution(functBefore,functCount) {
+      functBefore();
+      let tab = this.buildConstraintsGraph();
+      let data = {
+        'variates'             : ['(COUNT(DISTINCT *) as ?count)'],
+        'constraintesRelations': tab[1],
+        'constraintesFilters'  : tab[2],
+        'removeGraph'          : __ihm.getAbstraction().listUnactivedGraph(),
+        'limit'                : -1
+      };
+      let service = new RestServiceJs("sparqlquery");
+      service.post(data,function(res) {
+          if ('error' in res) {
+            console.log("Error count:"+res.error);
+            return;
+          }
+          console.log("COUNT = "+JSON.stringify(res));
+          if ( ! ('values' in res) ) return ;
+          if ( res.values.length<= 0 ) return ;
+          if ( ! ('count' in res.values[0]) ) return ;
+          functCount(res.values[0].count);
+      });
+    }
+
   }

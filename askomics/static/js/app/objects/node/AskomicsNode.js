@@ -13,8 +13,19 @@ class AskomicsNode extends GraphNode {
     this._inverseMatch = {} ; /* boolean if negation filter is actived */
     this._linkvar      = {} ; /* link variable are listed */
 
+    this.rdfslabel = {} ;
+    this.rdfslabel.actif = true     ;
+    this.rdfslabel.optional = false ;
+
     this.additionalShortcutListDisplayVar = {} ;
     return this;
+  }
+
+  attIsInside(uri,array) {
+    return this.attributes[uri].SPARQLid in array;
+  }
+  catIsInside(uri,array) {
+    return 'URICat'+this.categories[uri].SPARQLid in array;
   }
 
   getAttributesWithConstraints () {
@@ -24,21 +35,13 @@ class AskomicsNode extends GraphNode {
     let linkv = [];
 
     for (let uri in this.attributes) {
-
-      let inFilters = this.attributes[uri].SPARQLid in this.filters;
-      let inValues = this.attributes[uri].SPARQLid in this.values;
-      if ( inFilters || inValues ) {
+      if ( this.attIsInside(uri,this.filters) ) {
         attribs.push(this.attributes[uri].label);
       }
     }
 
     for (let uri in this.categories) {
-
-      let SPARQLIDv = 'URICat'+this.categories[uri].SPARQLid;
-      let inFilters = SPARQLIDv in this.filters;
-      let inValues = SPARQLIDv in this.values;
-
-      if ( inFilters || inValues ) {
+      if ( this.catIsInside(uri,this.filters) ) {
         attribs.push(this.categories[uri].label);
       }
     }
@@ -98,7 +101,13 @@ class AskomicsNode extends GraphNode {
     let blockConstraintByNode = [];
     /* add node inside */
     blockConstraintByNode.push("?"+'URI'+this.SPARQLid+" "+'rdf:type'+" "+this.URI());
-    blockConstraintByNode.push("?"+'URI'+this.SPARQLid+" "+'rdfs:label'+" "+"?"+this.SPARQLid);
+    if ( this.rdfslabel.actif ) {
+      if ( this.rdfslabel.optional ) {
+        blockConstraintByNode.push([["?"+'URI'+this.SPARQLid+" "+'rdfs:label'+" "+"?"+this.SPARQLid],'OPTIONAL']);
+      }  else {
+        blockConstraintByNode.push("?"+'URI'+this.SPARQLid+" "+'rdfs:label'+" "+"?"+this.SPARQLid);
+      }
+    }
 
     for (let uri in this.attributes) {
         let SparqlId = this.attributes[uri].SPARQLid;
@@ -110,7 +119,6 @@ class AskomicsNode extends GraphNode {
           let subBlockConstraint = [];
           subBlockConstraint.push("?"+'URI'+this.SPARQLid+" "+this.URI(uri)+" "+"?"+SparqlId);
           subBlockConstraint.push("FILTER isLiteral(?"+SparqlId+")");
-        //  subBlockConstraint.push("?"+SparqlId+" "+'a'+" "+this.URI(this.attributes[uri].type));
           /* check filter if exist */
 
           let subBlockNegativeConstraint = [];
@@ -119,7 +127,7 @@ class AskomicsNode extends GraphNode {
             subBlockNegativeConstraint.push("FILTER isLiteral(?negative"+SparqlId+")");
           }
           /* If Inverse Match we have to build a block */
-          if ( isFiltered ) {
+          if ( isFiltered  ) {
             if ( isInversedMatch ) {
               let newfilt = this.filters[SparqlId].replace(SparqlId,"negative"+SparqlId);
               subBlockNegativeConstraint.push(newfilt);
@@ -150,21 +158,21 @@ class AskomicsNode extends GraphNode {
       let isLinked = SparqlId in this.linkvar;
       let isInversedMatch = SparqlId in this.inverseMatch;
 
-      if ( isInversedMatch || isLinked || isFiltered || this.categories[uri].actif ) {
+      if ( isInversedMatch || isLinked || isFiltered  || this.categories[uri].actif ) {
         let subBlockConstraint = [];
+        subBlockConstraint.push("<"+this.categories[uri].type+"> displaySetting:category ?"+SparqlId);
         subBlockConstraint.push("?"+'URI'+this.SPARQLid+" "+this.URI(uri)+" "+"?"+SparqlId);
-        subBlockConstraint.push("[] displaySetting:category ?"+SparqlId);
         subBlockConstraint.push("?"+SparqlId+" "+'rdfs:label'+" "+"?"+this.categories[uri].SPARQLid);
 
 
         let subBlockNegativeConstraint = [];
         if ( isInversedMatch ) {
+          subBlockNegativeConstraint.push("<"+this.categories[uri].type+"> displaySetting:category "+"?negative"+SparqlId);
           subBlockNegativeConstraint.push("?"+'URI'+this.SPARQLid+" "+this.URI(uri)+" "+"?negative"+SparqlId);
-          subBlockNegativeConstraint.push("[] displaySetting:category "+"?negative"+SparqlId);
           subBlockNegativeConstraint.push("?negative"+SparqlId+" "+'rdfs:label'+" "+"?negative"+this.categories[uri].SPARQLid);
         }
         /* If Inverse Match we have to build a block */
-        if ( isFiltered ) {
+        if ( isFiltered  ) {
             if ( isInversedMatch ) {
               let newfilt = this.filters[SparqlId].replace(SparqlId,"negative"+SparqlId);
               subBlockNegativeConstraint.push(newfilt);
@@ -212,6 +220,7 @@ class AskomicsNode extends GraphNode {
   instanciateVariateSPARQL(variates) {
     /* adding variable node name if asked by the user */
     if (this.actif) {
+      variates.push("?URI"+this.SPARQLid);
       variates.push("?"+this.SPARQLid);
     } else {
       return ; /* Attribute are not instanciate too */
@@ -242,12 +251,11 @@ class AskomicsNode extends GraphNode {
     var node = this;
     /* add node inside */
     constraintRelations.push("?"+'URI'+node.SPARQLid+" "+'rdf:type'+" "+node.URI());
-    constraintRelations.push("?"+'URI'+node.SPARQLid+" "+'rdfs:label'+" "+"?"+node.SPARQLid);
-
     for (let uri in node.categories) {
       if ( node.categories[uri].id != attributeId ) continue;
+
+      constraintRelations.push("<"+node.categories[uri].type+"> displaySetting:category "+"?URICat"+node.categories[uri].SPARQLid);
       constraintRelations.push("?"+'URI'+node.SPARQLid+" "+this.URI(uri)+" "+"?URICat"+node.categories[uri].SPARQLid);
-      constraintRelations.push("[] displaySetting:category "+"?URICat"+node.categories[uri].SPARQLid);
       constraintRelations.push("?URICat"+node.categories[uri].SPARQLid+" "+'rdfs:label'+" "+"?"+node.categories[uri].SPARQLid);
       variates.push("?"+node.categories[uri].SPARQLid);
       variates.push("?URICat"+node.categories[uri].SPARQLid);
@@ -277,11 +285,28 @@ class AskomicsNode extends GraphNode {
     return this._isregexp[idatt];
   }
 
+  isActif(uriId) {
+    if ( uriId == this.SPARQLid ) return this.rdfslabel.actif;
+    for (let a in this.attributes ) {
+      if ( this.attributes[a].SPARQLid == uriId ) return this.attributes[a].actif;
+    }
+    for (let a in this.categories ) {
+      if ( this.categories[a].SPARQLid == uriId ) return this.categories[a].actif;
+    }
+  }
+
   setActiveAttribute(uriId,boolean,optional) {
     if ( uriId === undefined ) throw "activeAttribute : undefined attribute !";
     let opt = false;
     if ( typeof optional !== undefined ) {
       opt = true;
+    }
+
+    // rdfs:label desactived
+    if ( uriId == this.SPARQLid ) {
+      this.rdfslabel.actif = boolean ;
+      if (opt) this.rdfslabel.optional = optional;
+      return ;
     }
 
     for (let a in this.attributes ) {
@@ -344,7 +369,7 @@ class AskomicsNode extends GraphNode {
     this.setFilterAttributes(SPARQLid1,"","");
 
     this.linkvar[SPARQLid1].cpt--;
-    
+
     let n = __ihm.getGraphBuilder().nodes([this.linkvar[SPARQLid1].nodelink],'id');
     if (n.length<=0) {
       cnsole.log("AskomicsNode::removeFilterLinkVariable can not find linkvar node:"+this.linkvar[SPARQLid1].nodelink);

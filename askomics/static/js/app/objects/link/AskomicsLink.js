@@ -7,7 +7,11 @@ class AskomicsLink extends GraphLink {
     super(link,sourceN,targetN);
     this._transitive = false ;
     this._negative   = false ;
+    this._subclassof = false ;
   }
+
+  set subclassof (sub) { this._subclassof = sub; }
+  get subclassof () { return this._subclassof; }
 
   set transitive (transitive) { this._transitive = transitive; }
   get transitive () { return this._transitive; }
@@ -34,8 +38,15 @@ class AskomicsLink extends GraphLink {
     } else {
        /* classical link case */
       let rel = this.URI();
+      let target = 'URI'+this.target.SPARQLid;
+      if ( this.subclassof ) {
+        target = 'SubURI'+this.target.SPARQLid;
+        blockConstraintByNode.push("?"+target+" (rdfs:subClassOf*|rdf:type) "+"?"+'URI'+this.target.SPARQLid+" ");
+      }
+
       if ( this.transitive ) rel += "+";
-      blockConstraintByNode.push("?"+'URI'+this.source.SPARQLid+" "+rel+" "+"?"+'URI'+this.target.SPARQLid);
+
+      blockConstraintByNode.push("?"+'URI'+this.source.SPARQLid+" "+rel+" "+"?"+target);
       if ( this.negative ) {
         blockConstraintByNode = [blockConstraintByNode,'FILTER NOT EXISTS'];
       }
@@ -53,7 +64,5 @@ class AskomicsLink extends GraphLink {
       }
     }
   }
-
-  getLinkStrokeColor() { return super.getLinkStrokeColor(); }
 
 }

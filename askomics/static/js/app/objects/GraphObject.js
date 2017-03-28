@@ -57,7 +57,7 @@ class GraphObject {
       throw "removePrefix: uri is not a string :"+JSON.stringify(uribase);
     }
 
-    if ( uribase.indexOf("#")>0 ) {
+    if ( uribase.indexOf("#")>0 || uribase.indexOf("/")>0) {
       return '<'+uribase+">";
     }
     return uribase;

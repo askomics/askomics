@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import json
+
 from askomics.libaskomics.ParamManager import ParamManager
 from askomics.libaskomics.utils import pformat_generic_object
 
@@ -49,6 +51,10 @@ class AbstractedRelation(object):
             else:
                 self.rdfs_range = type_range
 
+        elif relation_type == "goterm":
+            self.relation_type = "owl:ObjectProperty"
+            self.rdfs_range = "owl:Class"
+
         elif relation_type.lower() in ('category', 'taxon', 'ref', 'strand'):
             self.relation_type = "owl:ObjectProperty"
             self.rdfs_range = ":" + ParamManager.encodeToRDFURI(type_range+"Category")
@@ -91,7 +97,7 @@ class AbstractedRelation(object):
 
         indent = (len(uri)) * " "
         turtle = uri + " rdf:type " + self.get_relation_type() + " ;\n"
-        turtle += indent + ' rdfs:label "' + self.get_label() + '"^^xsd:string ;\n'
+        turtle += indent + ' rdfs:label ' + json.dumps(self.get_label()) + '^^xsd:string ;\n'
         turtle += indent + " rdfs:domain " + self.get_domain() + " ;\n"
         turtle += indent + " rdfs:range " + self.get_range() + " .\n\n"
         return turtle

@@ -51,13 +51,13 @@ class Security(ParamManager):
         """
         Return true if the 2 passwd are identical
         """
-        return bool(self.passwd == self.passwd2)
+        return self.passwd == self.passwd2
 
     def check_password_length(self):
         """
         Return true if password have at least 8 char
         """
-        return bool(len(self.passwd) >= 1)
+        return len(self.passwd) >= 1
 
     def check_username_in_database(self):
         """
@@ -70,7 +70,10 @@ class Security(ParamManager):
         result = query_laucher.process_query(sqa.check_username_presence(self.username).query)
         self.log.debug('---> result: ' + str(result))
 
-        return bool(int(result[0]['status']))
+        if (len(result)<=0):
+            return False
+
+        return ParamManager.Bool(result[0]['status'])
 
     def check_email_in_database(self):
         """
@@ -81,8 +84,12 @@ class Security(ParamManager):
         sqa = SparqlQueryAuth(self.settings, self.session)
 
         result = query_laucher.process_query(sqa.check_email_presence(self.email).query)
+        self.log.debug('---> result: ' + str(result))
 
-        return bool(int(result[0]['status']))
+        if (len(result)<=0):
+            return False
+
+        return ParamManager.Bool(result[0]['status'])
 
     def check_email_password(self):
         """
@@ -100,7 +107,7 @@ class Security(ParamManager):
         concat = self.settings["askomics.salt"] + self.passwd + ts_salt
         shapw = hashlib.sha256(concat.encode('utf8')).hexdigest()
 
-        return bool(int(ts_shapw == shapw))
+        return ts_shapw == shapw
 
     def check_username_password(self):
         """
@@ -112,13 +119,17 @@ class Security(ParamManager):
 
         result = query_laucher.process_query(sqa.get_password_with_username(self.username).query)
 
-        ts_salt = result[0]['salt']
-        ts_shapw = result[0]['shapw']
+        if len(result)<=0:
+            ts_salt = ""
+            ts_shapw = ""
+        else:
+            ts_salt = result[0]['salt']
+            ts_shapw = result[0]['shapw']
 
         concat = self.settings["askomics.salt"] + self.passwd + ts_salt
         shapw = hashlib.sha256(concat.encode('utf8')).hexdigest()
 
-        return bool(int(ts_shapw == shapw))
+        return ts_shapw == shapw
 
     def ckeck_key_belong_user(self, key):
         """Check if a key belong to a user"""
@@ -127,10 +138,12 @@ class Security(ParamManager):
         sqa = SparqlQueryAuth(self.settings, self.session)
 
         result = query_laucher.process_query(sqa.ckeck_key_belong_user(self.username, key).query)
+        self.log.debug('---> result: ' + str(result))
 
-        self.log.debug(result)
+        if len(result)<=0:
+            return False
 
-        return bool(int(result[0]['count']))
+        return ParamManager.Bool(result[0]['count'])
 
     def delete_apikey(self, key):
         """delete an apikey"""
@@ -151,7 +164,10 @@ class Security(ParamManager):
 
         result = query_laucher.process_query(sqa.get_number_of_users().query)
 
-        self.log.debug(result)
+        self.log.debug('---> result: ' + str(result))
+
+        if len(result)<=0:
+            return 0
 
         return int(result[0]['count'])
 
@@ -278,20 +294,14 @@ class Security(ParamManager):
 
         result = query_laucher.process_query(sqa.get_admin_blocked_by_username(self.username).query)
 
-        # if len(result) == 0 :
-        #     admin = False
-        #     blocked = True
-
-        # if not ('admin' in result[0]) :
-        #     admin = False
-
-        # if not ('blocked' in result[0]) :
-        #     blocked = True
-
         results = {}
 
-        results['blocked'] = bool(int(result[0]['blocked']))
-        results['admin'] = bool(int(result[0]['admin']))
+        if len(result)<=0:
+            results['blocked'] = True
+            results['admin'] = True
+        else:
+            results['blocked'] = ParamManager.Bool(result[0]['blocked'])
+            results['admin'] = ParamManager.Bool(result[0]['admin'])
 
         return results
 
@@ -306,8 +316,12 @@ class Security(ParamManager):
 
         results = {}
 
-        results['blocked'] = bool(int(result[0]['blocked']))
-        results['admin'] = bool(int(result[0]['admin']))
+        if len(result)<=0:
+            results['blocked'] = True
+            results['admin'] = True
+        else:
+            results['blocked'] = ParamManager.Bool(result[0]['blocked'])
+            results['admin'] = ParamManager.Bool(result[0]['admin'])
 
         return results
 

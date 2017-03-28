@@ -289,7 +289,9 @@ class SourceFileGff(SourceFile):
             ttl += ':'+entity + ' ' + 'rdf:type owl:Class ;\n'
             indent = len(entity) * ' ' + ' '
             ttl += indent + 'rdfs:label \"' + self.decodeToRDFURI(entity.replace(':', '')) + "\" ;\n"
-            ttl += indent + 'displaySetting:startPoint \"true\"^^xsd:boolean .\n\n'
+            ttl += indent + 'displaySetting:startPoint \"true\"^^xsd:boolean ;\n\n'
+            ttl += indent + 'displaySetting:entity \"true\"^^xsd:boolean .\n\n'
+
             for type_attr, attr_list in attribute_dict.items():
                 if type_attr == 'pos_attr': # positionable attributes
                     for pos_attr in attr_list:

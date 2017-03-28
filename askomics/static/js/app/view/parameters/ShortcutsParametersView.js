@@ -21,7 +21,7 @@ class ShortcutsParametersView extends InterfaceParametersView {
   }
 
   setShortcut(sparql_res) {
-      console.log("===> SETUP SHORTCUT :"+sparql_res.shortcut+" \n"+JSON.stringify(sparql_res));
+    
       if ( ! (sparql_res.shortcut in this.shortcuts) ) {
         this.shortcuts[sparql_res.shortcut] = {};
         this.shortcuts[sparql_res.shortcut].label = sparql_res.label;

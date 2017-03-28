@@ -13,6 +13,7 @@ class AskomicsUserAbstraction {
       this.tripletSubjectRelationObject = [];
       this.entityInformationList = {}; /*   entityInformationList[g][uri1][rel] = uri2 ; */
       this.attributesEntityList = {};  /*   attributesEntityList[g][uri1] = [ att1, att2,... ] */
+      this.entitySubclassof = {}    ;  /*   entitySubclassof[uri] = [uri1,...]*/
       this.desactived_graph = {};
       /* uri ->W get information about ref, taxon, start, end */
       this.entityPositionableInformationList = {}; /* entityPositionableInformationList[uri1] = { taxon, ref, start, end } */
@@ -137,6 +138,8 @@ class AskomicsUserAbstraction {
       instanceUserAbstraction.entityInformationList = {};
       instanceUserAbstraction.entityPositionableInformationList = {};
       instanceUserAbstraction.attributesEntityList = {};
+      instanceUserAbstraction.entitySubclassof = {} ;
+      
       /* All information about an entity available in TPS are stored in entityInformationList */
       for (let entry in resultListTripletSubjectRelationObject.entities){
         //console.log("ENTITY:"+JSON.stringify(resultListTripletSubjectRelationObject.entities[entry]));
@@ -200,7 +203,7 @@ class AskomicsUserAbstraction {
           instanceUserAbstraction.attributesEntityList[graph][uri3].push(attribute);
         }
 
-        for (var entry4 in resultListTripletSubjectRelationObject.positionable){
+        for (let entry4 in resultListTripletSubjectRelationObject.positionable){
           //console.log('POSITIONABLE:'+JSON.stringify(resultListTripletSubjectRelationObject.positionable[entry4]));
           var uri4 = resultListTripletSubjectRelationObject.positionable[entry4].entity;
           if ( ! (uri4 in instanceUserAbstraction.entityPositionableInformationList) ) {
@@ -209,6 +212,15 @@ class AskomicsUserAbstraction {
             throw new Error("URI:"+uri4+" have several taxon,ref, start, end labels... "+JSON.stringify(instanceUserAbstraction.entityPositionableInformationList[uri4]));
           }
         }
+        for (let entry in resultListTripletSubjectRelationObject.subclassof){
+          let duo = resultListTripletSubjectRelationObject.subclassof[entry] ;
+          console.log(JSON.stringify(duo));
+          if ( ! (duo.uri in instanceUserAbstraction.entitySubclassof) ) {
+            instanceUserAbstraction.entitySubclassof[duo.uri] = [];
+          }
+          instanceUserAbstraction.entitySubclassof[duo.uri].push(duo.urisub);
+        }
+        console.log(JSON.stringify(instanceUserAbstraction.entitySubclassof));
         //console.log("=================== attributesEntityList =========================");
         //console.log(JSON.stringify(instanceUserAbstraction.attributesEntityList));
       });
@@ -391,5 +403,10 @@ class AskomicsUserAbstraction {
         if (! (g in listG ) ) listG[g] = 0;
       }
       return JSON.parse(JSON.stringify(listG));
+    }
+
+    getSubclassof(uri) {
+      if (uri in this.entitySubclassof ) return this.entitySubclassof[uri];
+      return [];
     }
   }

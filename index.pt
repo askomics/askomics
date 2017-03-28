@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="${request.locale_name}">
+    <head>
+        <meta charset="utf-8">
+        <title>Visual SPARQL query builder for an Biological RDF database</title>
+
+        <!-- ****************************************************************-->
+        <!-- Design Graph with D3.j -->
+        <script src="static/js/third-party/d3.min.js" charset="utf-8"></script>
+
+        <!-- ****************************************************************-->
+        <!-- JQuery -->
+        <script src="static/js/third-party/jquery-1.12.4.min.js"></script>
+        <script src="static/js/third-party/jquery-ui-1.12/jquery-ui.min.js"></script>
+        <link href="static/css/jquery-ui.min.css" rel="stylesheet" >
+
+        <!-- ****************************************************************-->
+        <!-- Bootstrap -->
+        <script src="static/js/third-party/tmpl.min.js"></script>
+        <script src="static/js/third-party/bootstrap.js"></script>
+        <script src="static/js/third-party/handlebars-v4.0.5.js"></script>
+        <link href="static/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+
+        <!-- ****************************************************************-->
+        <!-- Color Syntaxe for RDF  -->
+
+        <link href="static/css/pygment.css" rel="stylesheet" type="text/css">
+        <link href="static/css/google-material-icons.css" rel="stylesheet" type="text/css">
+
+        <!-- ****************************************************************-->
+        <!-- Alternative of Bootstrap font with more icon -->
+        <link href="static/css/font-awesome.css" rel="stylesheet" type="text/css">
+
+        <!-- ****************************************************************-->
+        <!-- To print Help -->
+        <script src="static/js/third-party/intro.js"></script>
+        <link href="static/css/introjs.css" rel="stylesheet" type="text/css">
+        <link href="static/css/introjs-style.min.css" rel="stylesheet" type="text/css" />
+        <link href="static/css/introjs-rtl.css" rel="stylesheet" type="text/css" />
+
+        <!-- ****************************************************************-->
+        <!-- Right Menu context with Jquery-contextMenu  -->
+        <script src="static/js/third-party/jQuery-contextMenu-2.30/jquery.contextMenu.min.js"></script>
+        <script src="static/js/third-party/jQuery-contextMenu-2.30/jquery.ui.position.min.js"></script>
+        <link href="static/css/jQuery-contextMenu-2.30/jquery.contextMenu.min.css" rel="stylesheet" type="text/css">
+
+        <!-- ****************************************************************-->
+        <!-- Askomics -->
+        <script src="static/dist/askomics.js"></script>
+        <link href="static/css/askomics.css" rel="stylesheet" type="text/css">
+
+    </head>
+    <body >
+        <nav id='navbar' class="navbar navbar-default navbar-fixed-top">
+        <!-- navbar is defined in a template below -->
+        </nav>
+
+        <br><br><br>
+        <div id="content_interrogation" class="container">
+            <div id="init" class="row">
+                <div class="form-group">
+                    <label for="graph_startpoints" class="col-md-offset-2">Select a graph :</label>
+                    <select id='graph_startpoints' size='1' class="form-control col-md-offset-2"></select>
+                    <label for="startpoint" class="col-md-offset-2">Select a start point to start a session :</label>
+                    <select id='startpoints' size='8' class="form-control col-md-offset-2"></select>
+                    <div class="col-md-offset-2">Shared entities are <em class='text-warning'>yellow</em> and personal entities are <strong class='text-primary'>blue</strong></div>
+                </div>
+                <button  id="starter" class="btn btn-default col-md-offset-2" onclick="__ihm.startSession();">Start</button>
+                <br><br><br>
+                <div class="col-md-offset-2"><p>Or upload an AskOmics file</p>
+                    <div class="uploadBtn btn btn-default">
+                        <span>Load query</span>
+                        <input id="uploadBtn" type="file" class="upload">
+                    </div>
+                </div>
+            </div>
+            <div id="queryBuilder" class="row" hidden>
+                <div id="PanelQuery" class="col-md-7">
+                  <h3 class="header-div">
+                   <div id="menuGraph" class="btn-group" role="group" aria-label="Menu Graph">
+                     <!-- Resize graph -->
+                      <button id='full-screen-graph' type="button" class="btn btn-default" aria-label="Right Align">
+                        <span id='icon-resize-graph' value='small' class="glyphicon glyphicon-resize-full" aria-hidden="true"></span>
+                      </button>
+
+                      <button id="buttonViewFile" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      Files<span class="caret"></span>
+                      </button>
+                      <ul id="viewMenuFile" class="dropdown-menu">
+                        <!--upload-->
+                        <li><a href="#" class="small">
+                        <div class="uploadBtn">
+                        <p><span class="fa fa-upload" aria-hidden="true"></span> Load query</p>
+                        <input id="uploadBtn" type="file" class="upload">
+                        </div>
+                        </a></li>
+                        <!--download-->
+                        <li><a href="#" id="dwl-query" class="small">
+                        <p><span class="fa fa-download small" aria-hidden="true"></span> Save query</p>
+                        </a></li>
+                        <!--download-->
+                        <li><a href="#" id="dwl-query-sparql" class="small">
+                        <p><span class="fa fa-floppy-o small small" aria-hidden="true"></span> Save SPARQL query</p>
+                        </a></li>
+                      </ul>
+
+                      <button id="buttonViewListGraph" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      Graph<span class="caret"></span>
+                      </button>
+                      <ul id="viewListGraph" class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+                      </ul>
+
+                      <button id="buttonViewListNodesAndLinks" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      View<span class="caret"></span>
+                      </button>
+                      <ul id="viewListNodesAndLinks" class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+                      </ul>
+
+                      <button id="buttonViewListShortcuts" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      Shortcuts<span class="caret"></span>
+                      </button>
+                      <ul id="viewListShortcuts" class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+                      </ul>
+
+                    </div>
+                    <div class="btn-group pull-right">
+                        <button type="button" class="btn btn-warning" onclick="__ihm.stopSession()">Reset</button>
+                    </div>
+                    </h3>
+                    <hr/>
+
+                    <div id="svgdiv"></div>
+
+                    <div id="uploadedQuery" class="uploadedQuery" hidden contenteditable></div>
+                        <div class="btn-group btn-group-query">
+                            <button type="button" class="btn btn-primary" onclick="new AskomicsJobsViewManager().createJob();">Launch query</button>
+                        </div>
+
+                </div>
+
+                <div id="viewDetails" class="col-md-5">
+                    <h3 class="header-div">
+                     <!-- Resize attributes view -->
+                    <button type="button" id='full-screen-attr' class="btn btn-default" aria-label="Right Align">
+                        <span id='icon-resize-attr' value='small' class="glyphicon glyphicon-resize-full" aria-hidden="true"></span>
+                    </button>
+                    <span id="objectName" class="label label-default"></span>
+
+                    <div class="btn-group btn-group-query">
+                        <span id="helpNode" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
+                        <span id="showNode" class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
+                        <span id="deleteNode" class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span>
+                    </div>
+                    </h3>
+                    <hr/>
+                </div>
+             </div>
+        </div>
+
+        <div id="content_jobsview" class="container" hidden>
+        </div>
+
+        <div id="content_integration" class="container" hidden>
+            <div id="overview" class="row"></div>
+        </div>
+
+        <div id="content_integration_ttl" class="container" hidden>
+        </div>
+
+        <div id="content_integration_gff" class="container" hidden>
+        </div>
+
+        <div id="content_datasets" class="container" hidden>
+            <hr/>
+            <h3 class="header-div">Manage User Datasets</h3>
+            <hr/>
+
+            <form class="form-horizontal">
+                <fieldset>
+                    <label>Choose which datasets you want to delete</label>
+                    <span class="glyphicon glyphicon-erase display" onclick="__ihm.unselectGraphs()"></span>
+                    <select multiple="multiple" id="dropNamedGraphSelected" class="form-control" onchange='__ihm.manageDelGraphButton()'></select>
+                </fieldset>
+                <div id="btn-del-graph" class="btn-group"><button id="btn-empty-graph" class="btn btn-primary" onclick="__ihm.deleteNamedGraph($('#dropNamedGraphSelected').val())" type="button" id="dropNamedGraphButton">Delete</button></div>
+                <div id="btn-del" class="btn-group"><button id="btn-empty" onclick="__ihm.emptyDatabase('confirm')" class="btn btn-danger">Delete all</button></div>
+            </form>
+        </div>
+
+        <div id="content_statistics" class="container" hidden>
+        </div>
+
+        <div id="content_user_info" class="container" hidden>
+        </div>
+
+        <div id="content_blocked" class="container" hidden>
+        </div>
+
+        <div id="content_administration" class="container" hidden>
+            <hr/>
+            <h3 class="header-div">Administration</h3>
+            <hr/>
+            <div id='admin_page'>
+             <!-- see the template below (template-admin) -->
+             <ul class="nav nav-tabs">
+              <li class="active"><a data-toggle="tab" href="#Users_adm">Users</a></li>
+              <li><a data-toggle="tab" href="#Shortcuts_adm">Shortcuts</a></li>
+             </ul>
+             <div id="admin_page_tab_content" class="tab-content">
+                  <div id="Users_adm" class="tab-pane fade in active"></div>
+                  <div id="Shortcuts_adm" class="tab-pane fade"></div>
+             </div>
+            </div>
+         </div>
+        <div id="content_about" class="container" hidden>
+          <hr/>
+          <h3 class="header-div">About</h3>
+          <hr/>
+
+          <p>
+          AskOmics provide a visual
+          representation of the user abstraction as a graph.
+          By starting from a node of interest and iteratively selecting its
+          neighbors, the user creates a path on an abstraction graph.
+          This path can then be transformed into a SPARQL query that can be
+          executed on the original dataset.
+         </p>
+          <hr/>
+        </div>
+
+        <!-- Login form -->
+        <div id="content_login" class="container" hidden>
+          <h3 class="header-div">Login</h3>
+          <hr/>
+          <label for="username">Username or email adress</label><br/>
+          <input id='login_username-email' name="username" type="text" placeholder="Username or email adress" required autofocus><br/><br/>
+
+          <label for="username">Password</label><br/>
+          <input id='login_password' name="password" type="password" placeholder="Password" required><br/><br/>
+
+          <button type="button" class="btn btn-primary" data-dismiss="modal" id="login_button">Log in</button>
+          <p>(or <a id='show_signup' href="#">sign up</a> if you don't have an account)</p>
+          <!-- error message -->
+            <div id='login_error' class="alert alert-danger" role="alert" hidden>
+            </div>
+          <!-- success message -->
+            <div id='login_success' class="alert alert-success" role="alert" hidden>
+            </div>
+        </div>
+
+        <!-- signup form -->
+        <div id="content_signup" class="container" hidden>
+          <h3 class="header-div">Sign up</h3>
+          <hr/>
+          <label for="username">Username</label><br/>
+          <input id = 'signup_username' name="username" type="text" placeholder="Username" required autofocus><br/><br/>
+
+          <label for="email">Email adress</label><br/>
+          <input id = 'signup_email' name="email" type="email" placeholder="Email" required><br/><br/>
+
+          <label for="password">Password</label><br/>
+          <input id = 'signup_password' name="password" type="password" placeholder="Password" required><br/><br/>
+
+          <label for="password2">Password (confirmation)</label><br/>
+          <input id = 'signup_password2' name="password2" type="password" placeholder="Password" required><br/><br/>
+
+          <button type="button" class="btn btn-primary" data-dismiss="modal" id="signup_button">Sign Up</button>
+          <p>(or <a id='show_login' href="#">log in</a> if you have an account)</p>
+          <!-- error message -->
+            <div id='signup_error' class="alert alert-danger" role="alert" hidden>
+            </div>
+          <!-- success message -->
+            <div id='signup_success' class="alert alert-success" role="alert" hidden>
+            </div>
+          <hr/>
+        </div>
+
+        <!-- Modal  -->
+        <div class="modal fade" id="modal"  role="dialog" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true" >
+          <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title" id="modalTitle"></h4>
+              </div>
+              <div class="modal-body">
+                <p id='modalMessage'></p>
+                <img id='help_figure' class='hidden'>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal" id="modalButton"></button>
+              </div>
+            </div><!-- /.modal-content -->
+          </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
+
+        <script id='template-error-message' type="text/x-handlebars-template">
+        <div id='error_div'>
+        <br><br>
+        <div class="container alert alert-dismissible alert-danger">
+          <button type="button" class="close" data-dismiss="alert">&times;</button>
+          <p id='error_message'></p>
+          <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+          <strong>Error: </strong>
+          {{message}}
+        </div>
+        </div>
+        </script>
+
+        <!-- template for the navbar -->
+        <script id='template-navbar' type="text/x-handlebars-template">
+            <div id="navbar_content" class="container">
+                <div class="navbar-header">
+                    <a id='navbar_title' class="navbar-brand site-header" href="/">{{name}}</a>
+                </div>
+                <div id="collapse-menu-main" class="collapse navbar-collapse">
+                    <ul class="nav navbar-nav navbar-right">
+                        <li id="interrogation" class="active"><a href="#" onclick="__ihm.loadStartPoints();"><span class="glyphicon glyphicon-play"></span></a></li>
+
+                        <li id="jobsview"><a href="#"><span class="glyphicon glyphicon-tasks"></span></a></li>
+                        {{#if loged}}
+                        {{#if nonblocked}}
+                        <li id="userdata" class="dropdown">
+                            <li id="integration"><a href="#"><span class="glyphicon glyphicon-cloud-upload"></span></a></li>
+                        </li>
+                        <li id="admin" class="dropdown">
+                          <a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="glyphicon glyphicon-cog"></span><span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                              <li id="datasets" onclick="__ihm.loadNamedGraphs()"><a href="#">Datasets</a></li>
+                              <li id="statistics" onclick="__ihm.loadStatistics()"><a href="#">Statistics</a></li>
+                            </ul>
+                          </li>
+                        {{/if}}
+                        {{/if}}
+                        <li id="about"><a href="#"><span class="glyphicon glyphicon-info-sign"></span></a></li>
+                        <li id="help"><a href="#" onclick="AskomicsHelp.start();"><span class="glyphicon glyphicon-question-sign"></span></a></li>
+                        {{#if loged}}
+
+                        <li id="user_menu" class="dropdown">
+                          <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                          {{#if admin}}
+                            <span class="glyphicon glyphicon-king"></span>
+                          {{else}}
+                            <span class="glyphicon glyphicon-user"></span>
+                          {{/if}}
+                            <span class="caret"></span>
+                          </a>
+                            <ul class="dropdown-menu">
+                                <li id="user_info"><a href="#"><span class="glyphicon glyphicon-cog"></span> Account managment (<i class='username' id='{{username}}'>{{username}}</i>)</a></li>
+                            {{#if admin}}
+                                <li id="administration"><a href="#"><span class="glyphicon glyphicon-king"></span> Administration</a></li>
+                            {{/if}}
+                              <li class="divider"></li>
+                              <li id="logout"><a href="#"><span class="glyphicon glyphicon-log-out"></span> Log out</a></li>
+                            </ul>
+                          </li>
+                        {{else}}
+                        <li id="login"><a href="#"><span class="glyphicon glyphicon-log-in"></span></a></li>
+                        {{/if}}
+                    </ul>
+                </div>
+            </div>
+        </script>
+
+        <!-- template to display the admin page -->
+        <script id='template-admin-users' type="text/x-handlebars-template">
+          <h4>Users</h4>
+          <hr/ >
+          <table class="table table-striped">
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Admin</th>
+                <th>Locked</th>
+                <th>Delete account</th>
+            </tr>
+            {{#each users}}
+            {{#if this.blocked}}
+            <tr class="danger">
+            {{else}}
+            <tr>
+            {{/if}}
+                <td>{{this.username}}</td>
+                <td><a href="mailto:{{this.email}}">{{this.email}}</a></td>
+                <td>
+                {{#if this.admin}}
+                <span style="color:orange" class="glyphicon glyphicon-king unset_admin" id={{this.username}}></span>
+                {{else}}
+                <span style="color:grey" class="glyphicon glyphicon-pawn set_admin" id={{this.username}}></span>
+                {{/if}}
+                <i class="hidden fa fa-spinner pulse spinner_admin" id='{{this.username}}'></i>
+                </td>
+                <td>{{#if this.blocked}}
+                <i style="color:red" class="fa fa-lock unlock_user" id="{{this.username}}"></i>
+                {{else}}
+                <i style="color:green" class="fa fa-unlock lock_user" id="{{this.username}}"></i>
+                {{/if}}
+                <i class="hidden fa fa-spinner pulse spinner_lock" id='{{this.username}}'></i>
+                </td>
+                <td>
+                <span style="color:red" class="glyphicon glyphicon-trash del_user" id={{this.username}}></span>
+                {{!-- hidden confirm button --}}
+                <div class="btn-group div_confirm_del_user hidden" id='{{this.username}}' role="group">
+                  <button type="button" class="btn btn-danger btn-xs confirm_del_user" id='{{this.username}}'>Delete</button>
+                  <button type="button" class="btn btn-default btn-xs no_del_user" id='{{this.username}}'>No</button>
+                </div>
+                <i class="hidden fa fa-spinner pulse spinner_del" id='{{this.username}}'></i>
+                </td>
+            </tr>
+            {{/each}}
+          </table>
+      </script>
+
+      <script id='template-user-managment' type="text/x-handlebars-template">
+      <div class='col-md-6'>
+       <h4>Hello {{user.username}}</h4>
+       <hr/ >
+       {{#if user.blocked}}
+       <div class="alert alert-danger" role="alert">Your account is locked, wait for an admin to unlock it</div>
+       {{/if}}
+
+       <h4>Update your infos</h4>
+       <hr/ >
+       <h5>Email</h5>
+
+        <div class="input-group">
+          <span class="input-group-addon" id="basic-addon1"><i class="fa fa-envelope" aria-hidden="true"></i></span>
+          <input type="email" class="form-control new_email" id='{{user.username}}' placeholder="{{user.email}}" aria-describedby="basic-addon1">
+          <span class="input-group-btn">
+            <button class="btn btn-default update_email" id='{{user.username}}' type="button">
+              <k>Update</k>
+              <i class="hidden fa fa-spinner pulse" id='spiner_mail'></i>
+              <i class="hidden fa fa-check text-success" id='tick_mail'></i>
+            </button>
+          </span>
+        </div>
+
+        <h5>Password</h5>
+
+        <div class="input-group">
+          <span class="input-group-addon" id="basic-addon1"><i class="fa fa-key" aria-hidden="true"></i></span>
+          <input type="password" class="form-control current_passwd" id='{{user.username}}' placeholder="Enter your current password" aria-describedby="basic-addon1">
+        </div>
+        <div class="input-group">
+          <span class="input-group-addon" id="basic-addon1"><i class="fa fa-key" aria-hidden="true"></i></span>
+          <input type="password" class="form-control new_passwd" id='{{user.username}}' placeholder="Enter a new password" aria-describedby="basic-addon1">
+        </div>
+        <div class="input-group">
+          <span class="input-group-addon" id="basic-addon1"><i class="fa fa-key" aria-hidden="true"></i></span>
+          <input type="password" class="form-control new_passwd2" id='{{user.username}}' placeholder="Confirm your new password" aria-describedby="basic-addon1">
+          <span class="input-group-btn">
+            <button class="btn btn-default update_passwd" id='{{user.username}}' type="button">
+              Update
+              <i class="hidden fa fa-spinner pulse" id='spiner_passwd'></i>
+              <i class="hidden fa fa-check text-success" id='tick_passwd'></i>
+            </button>
+          </span>
+        </div>
+
+      <hr/ >
+      <h4>Remove your account</h4>
+      <hr/ >
+        <p>Remove your account and all your data</p>
+        <p class='text-danger'>
+          <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+          This action can't be undone!
+        </p>
+        <br>
+        <button type="button" class="btn btn-danger del_user" id='{{user.username}}'><i class="fa fa-trash" aria-hidden="true"></i> Delete account</button>
+        <div class="btn-group div_confirm_del_user hidden" id='{{user.username}}' role="group">
+          <button type="button" class="btn btn-danger confirm_del_user" id='{{user.username}}'>Delete</button>
+          <button type="button" class="btn btn-default no_del_user" id='{{user.username}}'>No</button>
+        </div>
+        <br>
+        <div class="hidden passwd2del-group input-group" id="basic-addon1">
+          <span class="input-group-addon"><i class="fa fa-key" aria-hidden="true"></i></span>
+          <input type="password" class="form-control passwd_del" id='{{user.username}}' placeholder="Enter your password" aria-describedby="basic-addon1">
+        </div>
+      </div>
+      </script>
+
+     <script id='template-admin-shortcuts' type="text/x-handlebars-template">
+          <hr/>
+          <h3 class="header-div">Shortcuts</h3>
+          <hr/>
+
+          <ul class="nav nav-pills">
+           <li class="active"><a data-toggle="tab" href="#Shortcuts_List_adm">List</a></li>
+           <li><a data-toggle="tab" href="#Shortcuts_Import_adm">Import</a></li>
+          </ul>
+
+          <div id="Shortcuts_adm_tab_content" class="tab-content">
+               <div id="Shortcuts_List_adm" class="tab-pane fade in active">
+                 <table class="table table-striped">
+                     <tr>
+                         <th>Shortcuts</th>
+                         <th>Definition</th>
+                         <th>Version</th>
+                         <th>Input</th>
+                         <th>Output</th>
+                         <th></th>
+                     </tr>
+                     {{#each shortcuts}}
+                     <tr data-toggle="collapse" data-target="#accordion_{{@index}}" class="clickable">
+                         <td>{{this.shortcut}}</td>
+                         <td>{{this.comment}}</td>
+                         <td>{{this.version}}</td>
+                         <td>{{this.in}}</td>
+                         <td>{{this.out}}</td>
+                         <td onclick="new ShortcutsParametersView().removeShortcut('{{this.shortcut}}');"><span class="glyphicon glyphicon-remove"></span></td>
+                     </tr>
+                     <tr>
+                      <td colspan="6">
+                       <div id="accordion_{{@index}}" class="collapse">
+                          <h4>Printing Output</h4>
+                          <p>{{this.output_var}}+":"+{{this.output_varname}}</p>
+                          <h4>Prefix</h4>
+                          <p>{{this.prefix_string}}</p>
+                          <h4>Sparql</h4>
+                          <p>{{this.sparql_string}}</p>
+                       </div>
+                      </td>
+                     </tr>
+                     {{/each}}
+                 </table>
+               </div>
+               <div id="Shortcuts_Import_adm" class="tab-pane fade">
+                 <br/>
+                 <hr/>
+                 <h4 class="header-div">Import an Askomics shortcut</h4>
+                 <hr/>
+                 <textarea id="inputShortcutsLink" class="form-control" rows="10"></textarea>
+                 <br/>
+                 <button onclick="new ShortcutsParametersView().importShortcut($('#inputShortcutsLink').val())" class="btn btn-primary">Import</button>
+               </div>
+          </div>
+        </script>
+
+        <!-- template to display preview of a gff file -->
+        <script id="template-gff-form" type="text/x-handlebars-template">
+            <form id="source-file-gff-{{idfile}}" class="template-source_file form-horizontal text-left">
+                <div id="{{idfile}}" filename="{{file.name}}">
+                    <h4>GFF file: {{file.name}} </h4>
+                    <h5>Select which entities you want to integrate</h5>
+                    {{#each file.entities}}
+                        <label id="gff_checkbox-{{../idfile}}">
+                            <input type="checkbox" id="{{this}}" checked="checked"> {{this}}
+                        </label><br>
+                    {{/each}}
+                    <br>
+                    {{#if taxons.length}}
+                        <p>Select an existing taxon</p>
+                        <select>
+                            <option selected disabled hidden>choose taxon</option>
+                            {{#each taxons}}
+                                <option value="{{this}}" id="{{../idfile}}-{{this}}">{{this}}</option>
+                            {{/each}}
+                        </select>
+                        <p>Or enter a new one</p>
+                    {{else}}
+                        <p>Enter a taxon</p>
+                    {{/if}}
+                    <input type="text" name="frame" id="tax-{{idfile}}">
+                    <br><br>
+                    <input type="button" id="{{idfile}}" class="btn btn-primary load_data_gff" value="Insert in private graph">
+                    {{#if admin}}
+                    <input type="button" id="{{idfile}}" class="btn btn-warning load_data_gff_public" value="Insert in public graph" />
+                    {{/if}}
+                    <br><br>
+                    <p class="insert_status text-left alert hidden"></p>
+                    <p class="insert_warning text-left alert hidden"></p>
+                    <hr><br>
+                </div>
+            </form>
+        </script>
+
+
+        <!-- template to display preview of a csv file -->
+        <script id="template-csv-form" type="text/x-handlebars-template">
+            <form id="source-file-tsv-{{idfile}}" class="template-source_file form-horizontal text-center">
+                <h4 class="file_name" id="{{idfile}}" filename="{{file.name}}">TSV file: {{ file.name }}</h4>
+                <br/>
+                {{#if error}}
+                    <p class="error">{{ error }}</p>
+                {{else}}
+                    <table class='table table-striped preview_table'>
+                        <thead>
+                            <tr>
+                            {{#each file.headers}}
+                                <th class='column_header'>
+                                    {{#unless @first}}
+                                        <input type='checkbox' class='toggle_column_present' checked />
+                                        <!--
+                                        <i id='relation_present' class="material-icons">done</i>
+                                        <i id='relation_new' class="material-icons">fiber_new</i>
+                                        -->
+                                    {{/unless}}
+                                    {{ this }}
+
+                                </th>
+                            {{/each}}
+                            </tr>
+                            <tr>
+                              {{#each file.headers}}
+                               <th>
+                                 {{#if @first}}
+                                  <input type='checkbox' class='toggle_column_key' checked /> <i class="material-icons md-18">vpn_key</i>
+                                 {{else}}
+                                  <input type='checkbox' class='toggle_column_key'/> <i class="material-icons md-18">vpn_key</i>
+                                 {{/if}}
+                              </th>
+                              {{/each}}
+                           </tr>
+                            <tr>
+                            {{#each file.headers}}
+                                <th>
+                                    <select class='column_type form-control'>
+                                        {{#if @first}}
+                                            <optgroup label='Reference entity'>
+                                                <option value='entity_start'>Entity (Start)</option>
+                                                <option value='entity'>Entity</option>
+                                        {{else}}
+                                            <optgroup label='Attributes'>
+                                                <option value='numeric'>Numeric</option>
+                                                <option value='text'>Text</option>
+                                                <option value='category'>Category</option>
+                                            </optgroup>
+                                            <optgroup label='Positionable attributes'>
+                                                <option value='taxon'>Taxon</option>
+                                                <option value='ref'>Chromosome</option>
+                                                <option value='strand'>Strand</option>
+                                                <option value='start'>Start</option>
+                                                <option value='end'>End</option>
+                                            </optgroup>
+                                            <optgroup label='Relation type'>
+                                                <option value='entity'>General relation to entity</option>
+                                                <option value='entitySym'>Symmetric relation to entity</option>
+                                            </optgroup>
+                                        {{/if}}
+                                    </select>
+                                </th>
+                            {{/each}}
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{#each file.preview_data}}
+                                <tr>
+                                    {{#each this}}
+                                        <td>
+                                            {{ this }}
+                                        </td>
+                                    {{/each}}
+                                </tr>
+                            {{/each}}
+                        </tbody>
+                    </table>
+                    <pre class='preview_field'></pre>
+                    <div class="form-group form-inline">
+                        <div class="btn-group" role="group" aria-label="metadata">
+                            <input type="button" class="btn btn-success preview_button" value="Preview RDF" />
+                            <input type="button" class="btn btn-primary load_data_tsv" value="Insert in private graph" />
+                            {{#if admin}}
+                            <input type="button" class="btn btn-warning load_data_tsv_public" value="Insert in public graph" />
+                            {{/if}}
+                        </div>
+                    </div>
+                    <p class="insert_status text-left alert hidden"></p>
+                    <p class="insert_warning text-left alert hidden"></p>
+                    <div class="warning-message hidden"></div>
+                {{/if}}
+            </form>
+            <hr />
+        </script>
+
+
+        <!-- template to display preview of a ttl file -->
+        <script id="template-ttl-form" type="text/x-handlebars-template">
+            <form id="source-file-ttl-{{idfile}}" class="template-source_file form-horizontal text-center">
+                <div id="{{idfile}}" filename="{{file.name}}">
+                    <h4>TTL file: {{file.name}} </h4>
+                    <h5>Preview of the first 100 lines of the file</h5>
+                    <pre class='preview_field'></pre>
+                    <input type="button" id="{{idfile}}" class="btn btn-primary load_data_ttl" value="Insert in private graph">
+                    {{#if admin}}
+                    <input type="button" id="{{idfile}}" class="btn btn-warning load_data_ttl_public" value="Insert in public graph" />
+                    {{/if}}
+                    <br><br>
+                    <p class="insert_status text-left alert hidden"></p>
+                    <p class="insert_warning text-left alert hidden"></p>
+                    <hr><br>
+                </div>
+            </form>
+        </script>
+
+        <!-- template to display the blocked page -->
+        <script id="template-blocked" type="text/x-handlebars-template">
+          <div id="blocked_message">
+            <h4>Hello {{name}}!</h4>
+            <p>Your account is blocked, wait for an admin to unlock it.</p>
+            <p>In the meantime, you can play with the public data.</p>
+            <br />
+            <p>The AskoTeam.</p>
+          </div>
+        </script>
+
+
+
+        <!-- template to display stats -->
+        <script id="template-stats" type="text/x-handlebars-template">
+        <hr/>
+        <h3 class="header-div">Statistics</h3>
+        <hr/>
+        {{!-- Public stats --}}
+        <div class='col-md-8'>
+          <h4>Public data</h4>
+          <hr/ >
+          <ul class="list-group col-md-4">
+            <li class="list-group-item"><span class="badge">{{stats.public.ntriples}}</span>Number of triples</li>
+            <li class="list-group-item"><span class="badge">{{stats.public.nentities}}</span>Number of entities</li>
+            <li class="list-group-item"><span class="badge">{{stats.public.nclasses}}</span>Number of classes</li>
+            <li class="list-group-item"><span class="badge">{{stats.public.ngraphs}}</span>Number of datasets</li>
+          </ul>
+
+        <table class="table table-striped table-bordered">
+          <tr>
+            <th>Dataset</th>
+            <th>Loading date</th>
+            <th>Owner</th>
+            <th>Server</th>
+            <th>AskOmics version</th>
+          </tr>
+          {{#each stats.public.graphs}}
+          <tr>
+              <td>{{this.graph}}</td>
+              <td>{{this.date}}</td>
+              <td>{{this.owner}}</td>
+              <td>{{this.server}}</td>
+              <td>{{this.version}}</td>
+          </tr>
+          {{/each}}
+        </table>
+
+        <table class="table table-striped table-bordered">
+          <tr>
+            <th>Class</th>
+            <th>Relation</th>
+          </tr>
+          {{#each stats.public.class_rel}}
+          <tr>
+              <td>{{@key}}</td>
+              <td>{{#each this}}
+              ---- {{this.relname}} ---> {{this.target}} <br>
+              {{/each}}</td>
+          </tr>
+          {{/each}}
+        </table>
+
+
+        <table class="table table-striped table-bordered">
+          <tr>
+            <th>Class</th>
+            <th>Attributes</th>
+          </tr>
+          {{#each stats.public.class_attr}}
+          <tr>
+              <td>{{@key}}</td>
+              <td>
+              {{#each this}}
+              - {{this}} <br>
+              {{/each}}
+              </td>
+          </tr>
+          {{/each}}
+        </table>
+        </div>
+
+        {{!-- Private stats --}}
+        <div class='col-md-8'>
+          <h4>{{stats.username}} data</h4>
+          <hr/ >
+          <ul class="list-group col-md-4">
+            <li class="list-group-item"><span class="badge">{{stats.private.ntriples}}</span>Number of datasets</li>
+            <li class="list-group-item"><span class="badge">{{stats.private.nentities}}</span>Number of entities</li>
+            <li class="list-group-item"><span class="badge">{{stats.private.nclasses}}</span>Number of classes</li>
+            <li class="list-group-item"><span class="badge">{{stats.private.ngraphs}}</span>Number of graphs</li>
+          </ul>
+        </div>
+
+        <table class="table table-striped table-bordered">
+          <tr>
+            <th>Dataset</th>
+            <th>Loading date</th>
+            <th>Owner</th>
+            <th>Server</th>
+            <th>AskOmics version</th>
+          </tr>
+          {{#each stats.private.graphs}}
+          <tr>
+              <td>{{this.graph}}</td>
+              <td>{{this.date}}</td>
+              <td>{{this.owner}}</td>
+              <td>{{this.server}}</td>
+              <td>{{this.version}}</td>
+          </tr>
+          {{/each}}
+        </table>
+
+        <table class="table table-striped table-bordered">
+          <tr>
+            <th>Class</th>
+            <th>Relation</th>
+          </tr>
+          {{#each stats.private.class_rel}}
+          <tr>
+              <td>{{@key}}</td>
+              <td>{{#each this}}
+              ---- {{this.relname}} ---> {{this.target}} <br>
+              {{/each}}</td>
+          </tr>
+          {{/each}}
+        </table>
+
+        <table class="table table-striped table-bordered">
+          <tr>
+            <th>Class</th>
+            <th>Attributes</th>
+          </tr>
+          {{#each stats.private.class_attr}}
+          <tr>
+              <td>{{@key}}</td>
+              <td>
+              {{#each this}}
+              - {{this}} <br>
+              {{/each}}
+              </td>
+          </tr>
+          {{/each}}
+        </table>
+        </script>
+
+        <script id='template-admin-jobs' type="text/x-handlebars-template">
+             <hr/>
+             <h3 class="header-div">Jobs</h3>
+             <hr/>
+              <table class="table table-striped">
+                        <tr>
+                            <th>Job-ID</th>
+                            <th>State</th>
+                            <th>Start</th>
+                            <th>End</th>
+                            <th>Duration</th>
+                            <th>NRows</th>
+                            <th></th>
+                        </tr>
+                        {{#each jobs}}
+                        <tr class="{{this.classtr}}" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}" class="clickable">
+                            <td>{{this.jobid}}</td>
+                            <td>{{this.state}}</td>
+                            <td>{{this.start}}</td>
+                            <td>{{this.end}}</td>
+                            <td>{{this.duration}}</td>
+                            <td>{{this.nr}}</td>
+                            <td><span onclick="new AskomicsJobsViewManager().removeJob({{@index}});" alt="delete" class="glyphicon glyphicon-remove" aria-hidden="true"></td>
+                        </tr>
+                        <tr>
+                         <td colspan="7">
+                          <div id="jobview_accordion_{{@index}}" class="collapse">
+
+                            <div class="btn-group pull-right">
+                                <span style="font-size:1.5em;color:blue" onclick="location.href='csv/{{this.csv}}';" alt="save"  class="glyphicon glyphicon glyphicon-floppy-save" aria-hidden="true" ></span>
+                                <span style="font-size:1.5em;color:blue" onclick="__ihm.stopSession();__ihm.startSession({{this.stateToReload}});$('#interrogation').trigger( 'click' );"
+                                      alt="reload" class="glyphicon glyphicon-repeat" aria-hidden="true"></span>
+                            </div>
+                            <hr/>
+                            <div id="results_table_{{@index}}">
+                            </div>
+                          </div>
+                         </td>
+                        </tr>
+                        {{/each}}
+                    </table>
+           </script>
+    </body>
+    <script>
+        new IHMLocal().start();
+    </script>
+</html>

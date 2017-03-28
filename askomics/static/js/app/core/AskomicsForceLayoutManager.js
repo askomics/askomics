@@ -35,7 +35,9 @@ class AskomicsForceLayoutManager {
 
     this.optionsView = {
       attributesFiltering  : true,
-      relationsName        : true
+      relationsName        : true,
+      objectproperty       : true,
+      subclassof           : false
     };
 
     /*************************************************/
@@ -48,9 +50,60 @@ class AskomicsForceLayoutManager {
     let TitleFilterAtt = "Filtering attributes" ;
     let TitleFilterRelationName = "Relations name" ;
 
+    let funcCheckBoxMenuContext = function(title,actionCheck,actionUncheck) {
+      $(".context-menu-icon."+faCheckBox+",.context-menu-icon."+faCheckEmptBox).find("span").each(function( index ) {
+          if ( $( this ).text() === title ) {
+            if ($( this ).parent().hasClass(faCheckBox)) {
+              actionUncheck();
+              $( this ).parent().removeClass(faCheckBox);
+              $( this ).parent().addClass(faCheckEmptBox);
+            } else {
+              actionCheck();
+              $( this ).parent().removeClass(faCheckEmptBox);
+              $( this ).parent().addClass(faCheckBox);
+            }
+          }
+        });
+    };
     $.contextMenu({
             selector: '#'+currentFL.svgdivid,
             items: {
+              "rmenu-linkrelation"   : {
+                name: 'ObjectProperty relation',
+                icon  : currentFL.optionsView.objectproperty?faCheckBox:faCheckEmptBox,
+                callback: function(key, options) {
+                  funcCheckBoxMenuContext('ObjectProperty relation',
+                    function() { currentFL.optionsView.objectproperty = true;},
+                    function() { currentFL.optionsView.objectproperty = false ;});
+
+                  $(".arrowobjectpropertyClass, .linkobjectpropertyClass, .textobjectpropertyClass, .nodeClass, .textClass")
+                    .each(function (index, item) {
+                      let dis = ((!item.__data__._suggested) || currentFL.optionsView.objectproperty)?'block':'none';
+                      $(item).css("display",dis);
+                    });
+
+                  return false;
+                }
+              },
+              "rmenu-isarelation"   : {
+                name: 'is-a relation',
+                icon  : faCheckEmptBox,
+                callback: function(key, options) {
+                  funcCheckBoxMenuContext('is-a relation',
+                    function() { currentFL.optionsView.subclassof = true;},
+                    function() { currentFL.optionsView.subclassof = false ;}
+                  );
+
+                  $(".arrowsubclassofClass, .linksubclassofClass, .textsubclassofClass, .nodeAliasClass, .textAliasClass")
+                    .each(function (index, item) {
+                      let dis = ((!item.__data__._suggested) || currentFL.optionsView.subclassof)?'block':'none';
+                      $(item).css("display",dis);
+                    }
+                  );
+                  return false;
+                }
+              },
+              "sep0"   : "---------",
                 "rmenu-save-query"   : {
                   name: $("#dwl-query").text(),
                   icon: "fa-download",
@@ -72,19 +125,9 @@ class AskomicsForceLayoutManager {
                   name  : TitleFilterAtt,
                   icon  : faCheckBox,
                   callback: function(key, options) {
-                    $(".context-menu-icon."+faCheckBox+",.context-menu-icon."+faCheckEmptBox).find("span").each(function( index ) {
-                        if ( $( this ).text() === TitleFilterAtt ) {
-                          if ($( this ).parent().hasClass(faCheckBox)) {
-                            currentFL.optionsView.attributesFiltering = false;
-                            $( this ).parent().removeClass(faCheckBox);
-                            $( this ).parent().addClass(faCheckEmptBox);
-                          } else {
-                            currentFL.optionsView.attributesFiltering = true;
-                            $( this ).parent().removeClass(faCheckEmptBox);
-                            $( this ).parent().addClass(faCheckBox);
-                          }
-                        }
-                      });
+                    funcCheckBoxMenuContext(TitleFilterAtt,
+                      function() { currentFL.optionsView.attributesFiltering = true;},
+                      function() { currentFL.optionsView.attributesFiltering = false ;});
                       $("tspan[constraint_node_id]").css('display', currentFL.optionsView.attributesFiltering?'block':'none');
                       return false;
                   },
@@ -94,21 +137,9 @@ class AskomicsForceLayoutManager {
                   name  : TitleFilterRelationName,
                   icon  : faCheckBox,
                   callback: function(key, options) {
-
-                    $(".context-menu-icon."+faCheckBox+",.context-menu-icon."+faCheckEmptBox).find("span").each(function( index ) {
-
-                        if ( $( this ).text() === TitleFilterRelationName ) {
-                          if ($( this ).parent().hasClass(faCheckBox)) {
-                            $( this ).parent().removeClass(faCheckBox);
-                            $( this ).parent().addClass(faCheckEmptBox);
-                            currentFL.optionsView.relationsName = false;
-                          } else {
-                            currentFL.optionsView.relationsName = true;
-                            $( this ).parent().removeClass(faCheckEmptBox);
-                            $( this ).parent().addClass(faCheckBox);
-                          }
-                        }
-                      });
+                    funcCheckBoxMenuContext(TitleFilterRelationName,
+                      function() { currentFL.optionsView.relationsName = true;},
+                      function() { currentFL.optionsView.relationsName = false ;});
                       $("[id^=" + GraphObject.getSvgLabelPrefix() + "] textPath").css('display', currentFL.optionsView.relationsName?'block':'none');
                       return false;
                    }
@@ -208,8 +239,12 @@ class AskomicsForceLayoutManager {
     return true;
   }
 
-  colorSelectdObject(prefix,id) {
+  selectObject(prefix,id) {
     $(prefix+id).css("stroke", "firebrick");
+  }
+
+  unSelectObject(prefix,id) {
+    $(prefix+id).css("stroke", "grey");
   }
 
   updateInstanciedNode() {
@@ -276,9 +311,13 @@ class AskomicsForceLayoutManager {
     startPoint.getPanelView().show();
     /* insert new suggestion with startpoints */
     this.insertSuggestions();
+
+    /* update number of solution */
+    this.setNumberResultsSVG() ;
+
     /* build graph */
     this.update();
-    this.colorSelectdObject("#node_",startPoint.id);
+    this.selectObject("#node_",startPoint.id);
   }
 
   startWithQuery(dump) {
@@ -313,8 +352,11 @@ class AskomicsForceLayoutManager {
     lastn.getPanelView().show();
     /* insert new suggestion with startpoints */
     this.insertSuggestions();
+    /* update number of solution */
+    this.setNumberResultsSVG() ;
+
     this.update();
-    this.colorSelectdObject("#node_",lastn.id);
+    this.selectObject("#node_",lastn.id);
   }
 
   updateInstanciateLinks(links) {
@@ -345,18 +387,17 @@ class AskomicsForceLayoutManager {
     manageSelectedNodes(node) {
       if (! this.ctrlPressed) {
         $("[id*='node_']").each(function (index, value) {
-          $(this).css("stroke", "grey");
+            $(this).css("stroke", "grey");
         });
 
         /* if several node were selected or a diffente node were selected so select only the current node */
         if ( this.selectNodes.length > 1 || (this.selectNodes.length===0) || (this.selectNodes[0].id != node.id) ) {
           this.selectNodes = [] ;
           this.selectNodes.push(node);
-          this.colorSelectdObject("#node_",node.id);
+          this.selectObject("#node_",node.id);
         } else { /* deselection of node */
           this.selectNodes = [] ;
-          console.log('---> deselection');
-          $("#node_"+node.id).css("stroke", "grey");
+          this.unSelectObject("#node_",node.id);
         }
 
       } else {
@@ -364,13 +405,14 @@ class AskomicsForceLayoutManager {
         for ( let n in this.selectNodes ){
           if (this.selectNodes[n].id == node.id) {
             // remove the current node from the selected node list !
-             this.selectNodes.splice(n,1);
-             $("#node_"+node.id).css("stroke", "grey");
+            this.selectNodes.splice(n,1);
+             //$("#node_"+node.id).css("stroke", "grey");
+            this.unSelectObject("#node_",node.id);
              return;
           }
         }
         this.selectNodes.push(node);
-        this.colorSelectdObject("#node_",node.id);
+        this.selectObject("#node_",node.id);
       }
 
       if (this.selectNodes.length === 0) {
@@ -378,6 +420,13 @@ class AskomicsForceLayoutManager {
         AskomicsObjectView.hideAll();
         //linksView.hideAll();
       }
+    }
+
+    isSelected(node) {
+      for ( let n in this.selectNodes ) {
+        if ( this.selectNodes[n].id == node.id ) return true;
+      }
+      return false;
     }
 
     /* unselect all nodes */
@@ -399,11 +448,16 @@ class AskomicsForceLayoutManager {
 
     unSelectLink() {
       this.selectLink = '';
-      $(".link").each(function (index) {
+      $(".textobjectpropertyClass,.textsubclassofClass").each(function (index) {
         $(this).css("stroke", "grey");
         this.selectLink = '';
       });
-      $(".arrow").each(function (index) {
+      $(".linkobjectpropertyClass,.linksubclassofClass").each(function (index) {
+        $(this).css("stroke", "grey");
+        this.selectLink = '';
+      });
+      //alert("todo unSelectLink");
+      $(".arrowobjectpropertyClass,.arrowsubclassofClass").each(function (index) {
         $(this).css("stroke", "grey");
         $(this).css("fill", "grey");
         this.selectLink = '';
@@ -432,6 +486,9 @@ class AskomicsForceLayoutManager {
       }
       //shortcuts
       this.insertSuggestionsShortcuts(suggestedList,this.selectNodes);
+
+      //subclassof
+      this.insertSuggestionsSubclassof(this.selectNodes);
     }
 
     insertSuggestionsWithNewNode(suggestedList,slt_node) {
@@ -445,7 +502,7 @@ class AskomicsForceLayoutManager {
         for (var uri in objectsTarget ) {
           /* Filter if node are not desired by the user */
           if (! this.isProposedUri("node",uri)) continue ;
-          /* creatin node */
+          /* creating node */
           let suggestedNode = __ihm.getAbstraction().buildBaseNode(uri);
           /* specific attribute for suggested node */
           suggestedNode = __ihm.getGraphBuilder().setSuggestedNode(suggestedNode,slt_node.x,slt_node.y);
@@ -623,7 +680,6 @@ class AskomicsForceLayoutManager {
 
         if (! this.isProposedUri("shortcuts",shortcut)) continue ;
 
-        console.log(uri);
         if ( ! ( uri in suggestedList) ) {
           /* creatin node */
           suggestedNode = __ihm.getAbstraction().buildBaseNode(uri);
@@ -658,6 +714,41 @@ class AskomicsForceLayoutManager {
 
         link.id = __ihm.getGraphBuilder().getId();
         this.links.push(link);
+      }
+    }
+
+    insertSuggestionsSubclassof(listSelectedNodes) {
+
+      let suggestedList = {};
+
+      for (let entity in listSelectedNodes) {
+        let source = listSelectedNodes[entity] ;
+        let urisublist = __ihm.getAbstraction().getSubclassof(source.uri);
+        for (let urisubidx in urisublist ) {
+          let urisub = urisublist[urisubidx];
+          let suggestedNode ;
+          if ( !( urisub in suggestedList) ) {
+            /* creating node */
+            suggestedNode = __ihm.getAbstraction().buildBaseNode(urisub);
+            suggestedNode.alias = source;
+            /* specific attribute for suggested node */
+            suggestedNode = __ihm.getGraphBuilder().setSuggestedNode(suggestedNode,source.x,source.y);
+            this.nodes.push(suggestedNode);
+            suggestedList[urisub] = suggestedNode;
+          } else {
+            suggestedNode = suggestedList[urisub];
+          }
+
+          /* increment the number of link between the two nodes */
+          let linkbase     = {} ;
+          linkbase.uri     = "is a" ;
+          console.log(JSON.stringify(suggestedNode));
+          //link = new AskomicsLink(linkbase,source,target);
+          let link = new AskomicsIsALink(linkbase,source,suggestedNode);
+          link.id = __ihm.getGraphBuilder().getId();
+          this.links.push(link);
+        }
+
       }
     }
 
@@ -711,15 +802,75 @@ class AskomicsForceLayoutManager {
       }
     }
 
-  update () {
-    console.log('---> update graph!');
+  displayObject(node) {
+      let r = 'block';
+      if (this.isSelected(node)) return r;
 
-    var link = this.vis.selectAll(".link")
+      if (node instanceof AskomicsAliasNode || node instanceof AskomicsIsALink ) {
+        if (this.optionsView.subclassof ) {
+          r='block';
+        } else {
+          r='none';
+        }
+      } else {
+        if (this.optionsView.objectproperty) {
+          r='block';
+        } else {
+          r='none';
+        }
+      }
+      return r;
+    }
+
+  setNumberResultsSVG() {
+    let currentFL = this;
+    __ihm.getGraphBuilder().countNumberOfSolution(function() { $("#countresult").remove();} , function(count) { currentFL.updateCount(count);}) ;
+  }
+
+  updateCount(count) {
+    $("#shapecountresult,#countresult").remove();
+
+    let rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    let text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+
+    let txt = "n="+count ;
+    let fontsize=15;
+    let width = 12*txt.length ;
+    let rectx = this.w - width -20 ,recty = 20, heightrect=fontsize+5;
+    let opacity = 0.3;
+
+    $(rect).attr("x",rectx)
+            .attr("y",recty)
+             .attr("width",width)
+             .attr("height",heightrect)
+             .attr("id","shapecountresult")
+             .attr("fill","#044B94")
+             .attr("fill-opacity",opacity)
+             .appendTo(this.svgdiv.find("svg"));
+
+    $(text).attr("font-size",fontsize)
+           .attr("id","countresult")
+           .attr('x', rectx+5)
+           .attr('y', recty+heightrect-5)
+           .attr("fill-opacity",opacity)
+           .attr('fill', 'black')
+           .text(txt)
+           .appendTo(this.svgdiv.find("svg"));
+
+    let currentFL = this;
+    $("#shapecountresult,#countresult").on('click', function(d) {
+        currentFL.setNumberResultsSVG() ;
+    });
+  }
+
+  update () {
+
+    let link = this.vis.selectAll(".linkobjectpropertyClass,.linksubclassofClass")
                   .data(this.links, function (d) {
                       return d.id ;
                   });
 
-    var arrow = this.vis.selectAll(".arrow")
+    let arrow = this.vis.selectAll(".arrowobjectpropertyClass,.arrowsubclassofClass")
                    .data(this.links, function (d) {
                       return d.id ;
                    });
@@ -727,6 +878,7 @@ class AskomicsForceLayoutManager {
     // Link labels
     link.enter().append("text")
                 .attr("style", "text-anchor:middle; font: 10px sans-serif; cursor: pointer;")
+                .attr("class", function(d) { return "text"+d.getClassSVG();} )
                 .attr("dy", "-5")
                 .attr('id', function(d) { return d.getSvgLabelId();})
                 .style("opacity", function(d) {return d.getTextOpacity();})
@@ -735,7 +887,7 @@ class AskomicsForceLayoutManager {
                 .attr("startOffset", "35%")
                 .attr('fill', function(d){ return d.getTextFillColor();})
                 .text(function(d){return d.label;})
-                .style('display', currentFL.optionsView.relationsName?'block':'none')
+                .style('display', function(d){ return currentFL.displayObject(d);})
                 .on('click', function(d) { // Mouse down on a link label
                   if (d != currentFL.selectLink) { //if link is not selected
                     /* user want a new relation contraint betwwenn two node*/
@@ -767,6 +919,9 @@ class AskomicsForceLayoutManager {
                       }
                       //linksView.create(d);
                       d.getPanelView().create();
+                      /* update number of solution */
+                      currentFL.setNumberResultsSVG() ;
+
                     }else{
                       currentFL.removeSuggestions();
                     }
@@ -788,10 +943,10 @@ class AskomicsForceLayoutManager {
     // Arrows
     arrow.enter().append("svg:defs").append("svg:marker")
                      .attr("id", function(d) {return 'end-marker-'+d.id;})
-                     .attr('link_id', function(d) {return d.id;})
-                     .attr("class", "arrow")
-                     .style('stroke', 'grey')
-                     .style('fill', 'grey')
+                     .attr("class", function(d) { return "arrow"+d.getClassSVG();} )
+                     .style('stroke', function (d) {return d.getLinkColor();})
+                     .style('fill', function (d) {return d.getLinkColor();})
+                     .style('display', function(d){ return currentFL.displayObject(d);})
                      .attr("viewBox", "0 -5 10 10")
                      .attr("refX", 15)
                      .attr("refY", 0)
@@ -804,10 +959,10 @@ class AskomicsForceLayoutManager {
     // Second arrows
     arrow.enter().append("svg:defs").append("svg:marker")
                      .attr("id", function(d) {return 'start-marker-'+d.id;})
-                     .attr('link_id', function(d) {return d.id;})
-                     .attr("class", "arrow")
-                     .style('stroke', 'grey')
-                     .style('fill', 'grey')
+                     .attr("class", function(d) { return "arrow"+d.getClassSVG();} )
+                     .style('stroke', function (d) { return d.getLinkColor();})
+                     .style('fill', function (d) { return d.getLinkColor();})
+                     .style('display', function(d){ return currentFL.displayObject(d);})
                      .attr("viewBox", "0 -5 10 10")
                      .attr("refX", -5)
                      .attr("refY", 0)
@@ -820,15 +975,16 @@ class AskomicsForceLayoutManager {
       // Links
       link.enter().append("svg:path")
           .attr("id", function (d) { return d.id ; })
-          .attr('idlink', function(d) {return d.id;})
           .attr("label", function (d) { return d.label ; })
-          .attr("class", "link")
+          .attr("class", function(d) { return "link"+d.getClassSVG();} )
           .attr("marker-end", function(d) {return "url(#end-marker-"+d.id+")";})
           .attr("marker-start", function(d) {return d.type == 'overlap'?"url(#start-marker-"+d.id+")":"";})
-          .style('stroke', 'grey')
+          .style('stroke', function (d) {return d.getLinkColor();})
+          .style('fill', function (d) {return d.getLinkColor();})
+          .style('display', function(d){ return currentFL.displayObject(d);})
           .style("stroke-dasharray",function(d) {return d.suggested?"2":"";})
           .style("opacity", function(d) {return d.suggested?"0.3":"1";})
-          .style("stroke-width", "2");
+          .style("stroke-width", "2px");
         //  .on("mouseover", function(d) { this.style[2]="4";}); /* "TypeError: 2 is read-only" occurs in browser */
 
       var node = this.vis.selectAll("g.node")
@@ -839,13 +995,17 @@ class AskomicsForceLayoutManager {
                           .call(this.force.drag);
 
       //setup_node(nodeEnter,slt_elt,slt_data,prev_elt,prev_data);
+      //
       nodeEnter.append("svg:circle")
               .attr("style", "cursor: pointer;")
+              .style('display', function (d) { return currentFL.displayObject(d); })
               .attr("r", function (d)       { return d.getRNode(); })
               .attr("id", function (d)      { return "node_" + d.id; })
               .attr("uri", function (d)     { return d.uri; })
-              .attr("class", "nodeStrokeClass")
+              .attr("class", "node")
+              .attr("class", function(d) { return "node"+d.getClassSVG();})
               .style('stroke', function (d) { return d.getNodeStrokeColor(); })
+              .style('stroke-width','2px')
               .style("fill", function (d)   { return d.getColorInstanciatedNode(); })
               .style("opacity", function(d) { return d.getOpacity();})
               .on('click', function(d) {
@@ -861,10 +1021,12 @@ class AskomicsForceLayoutManager {
                   var listOfLinksInstancied = currentFL.selectListLinksUser(currentFL.links,d);
                   __ihm.getGraphBuilder().instanciateLink(listOfLinksInstancied);
                   currentFL.updateInstanciateLinks(listOfLinksInstancied);
-                  for (var ll of listOfLinksInstancied ) {
+                  for (let ll of listOfLinksInstancied ) {
                     ll.getPanelView().create();
                   }
                   d.getPanelView().create();
+                  /* update number of solution */
+                  currentFL.setNumberResultsSVG() ;
                 }
                 // show attribute view only if node is not selected
                 if (!$.inArray(d, currentFL.selectNodes)) {
@@ -880,8 +1042,11 @@ class AskomicsForceLayoutManager {
               });
 
       nodeEnter.append("svg:text")//.append("tspan")
-              .attr("class", "textClass")
-              .attr("x", 14)
+              .attr("class", function(d) { return "text"+d.getClassSVG();})
+              .attr("x", function (d)       { return d.getRNode()+1; })
+              .attr("font-size",function(d) { return d.getSizeText();})
+              .attr("dy",function (d)       { return d.getRNode()+1; } )
+              .style('display', function (d) { return currentFL.displayObject(d); })
               .attr('fill', function(d){return d.getTextFillColor();})
               .style('stroke', function(d){return d.getTextStrokeColor();})
               .style("opacity", function(d) { return d.getOpacity();})
@@ -899,10 +1064,9 @@ class AskomicsForceLayoutManager {
              .attr("constraint_node_id",function(d){
                return d.id;
              } )
-             .style('display', currentFL.optionsView.attributesFiltering?'block':'none')
-             .attr("font-size","8")
-             .attr("dy","10" )
-             .attr("x",14 )
+             .style('display', function (d) {
+               return currentFL.optionsView.attributesFiltering?'block':'none'; }
+             )
              .text(function (d) { return d.getAttributesWithConstraintsString(); }) ;
 
       link.exit().remove();
@@ -971,7 +1135,7 @@ class AskomicsForceLayoutManager {
       });
 
       // Ensure the nodes are in front and the links on the back
-      $(".nodeStrokeClass").each(function( index ) {
+      $(".nodeClass, .textClass, .nodeAliasClass, .textAliasClass").each(function( index ) {
           var gnode = this.parentNode;
           gnode.parentNode.appendChild(gnode);
       });

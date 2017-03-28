@@ -32,35 +32,33 @@
 
     <!-- Askomics files instrumented by Istanbul for coverage : see gulpfile.js -->
     <!-- askomics:js -->
-    <script src="js/istanbul/help/AskomicsHelp.js"></script>
-    <script src="js/istanbul/AskomicsRestManagement.js"></script>
-    <script src="js/istanbul/AskomicsUserAbstraction.js"></script>
-    <script src="js/istanbul/view/AskomicsPanelViewBuilder.js"></script>
-    <script src="js/istanbul/integration.js"></script>
-    <script src="js/istanbul/AskomicsResultsView.js"></script>
-    <script src="js/istanbul/query-handler.js"></script>
-    <script src="js/istanbul/AskomicsMenuFile.js"></script>
-    <script src="js/istanbul/AskomicsMenuView.js"></script>
-    <script src="js/istanbul/AskomicsMenuShortcuts.js"></script>
-    <script src="js/istanbul/GraphObject.js"></script>
-    <script src="js/istanbul/node/GraphNode.js"></script>
-    <script src="js/istanbul/node/AskomicsNode.js"></script>
-    <script src="js/istanbul/node/AskomicsPositionableNode.js"></script>
-    <script src="js/istanbul/link/GraphLink.js"></script>
-    <script src="js/istanbul/link/AskomicsLink.js"></script>
-    <script src="js/istanbul/link/AskomicsPositionableLink.js"></script>
-    <script src="js/istanbul/view/parameters/InterfaceParametersView.js"></script>
-    <script src="js/istanbul/view/parameters/ShortcutsParametersView.js"></script>
-    <script src="js/istanbul/view/AskomicsObjectView.js"></script>
-    <script src="js/istanbul/view/AskomicsLinkView.js"></script>
-    <script src="js/istanbul/view/AskomicsNodeView.js"></script>
-    <script src="js/istanbul/view/AskomicsPositionableLinkView.js"></script>
-    <script src="js/istanbul/view/AskomicsPositionableNodeView.js"></script>
-    <script src="js/istanbul/AskomicsObjectBuilder.js"></script>
-    <script src="js/istanbul/AskomicsGraphBuilder.js"></script>
-    <script src="js/istanbul/AskomicsForceLayoutManager.js"></script>
-    <script src="js/istanbul/MainAskomics.js"></script>
-    <script src="js/istanbul/AskomicsUser.js"></script>
+    <script src="js/istanbul/app/help/AskomicsHelp.js"></script>
+    <script src="js/istanbul/app/services/AskomicsRestManagement.js"></script>
+    <script src="js/istanbul/app/core/AskomicsUserAbstraction.js"></script>
+    <script src="js/istanbul/app/services/AskomicsJobsManager.js"></script>
+    <script src="js/istanbul/app/services/AskomicsObjectBuilder.js"></script>
+    <script src="js/istanbul/app/view/AskomicsPanelViewBuilder.js"></script>
+    <script src="js/istanbul/app/view/integration.js"></script>
+    <script src="js/istanbul/app/view/AskomicsResultsView.js"></script>
+    <script src="js/istanbul/app/objects/GraphObject.js"></script>
+    <script src="js/istanbul/app/objects/node/GraphNode.js"></script>
+    <script src="js/istanbul/app/objects/node/AskomicsNode.js"></script>
+    <script src="js/istanbul/app/objects/node/AskomicsPositionableNode.js"></script>
+    <script src="js/istanbul/app/objects/link/GraphLink.js"></script>
+    <script src="js/istanbul/app/objects/link/AskomicsLink.js"></script>
+    <script src="js/istanbul/app/objects/link/AskomicsPositionableLink.js"></script>
+    <script src="js/istanbul/app/view/parameters/InterfaceParametersView.js"></script>
+    <script src="js/istanbul/app/view/parameters/ShortcutsParametersView.js"></script>
+    <script src="js/istanbul/app/view/AskomicsObjectView.js"></script>
+    <script src="js/istanbul/app/view/AskomicsLinkView.js"></script>
+    <script src="js/istanbul/app/view/AskomicsNodeView.js"></script>
+    <script src="js/istanbul/app/view/AskomicsPositionableLinkView.js"></script>
+    <script src="js/istanbul/app/view/AskomicsPositionableNodeView.js"></script>
+    <script src="js/istanbul/app/core/AskomicsMenu.js"></script>
+    <script src="js/istanbul/app/core/AskomicsGraphBuilder.js"></script>
+    <script src="js/istanbul/app/core/AskomicsForceLayoutManager.js"></script>
+    <script src="js/istanbul/app/core/AskomicsUser.js"></script>
+    <script src="js/istanbul/app/core/IHMLocal.js"></script>
     <!-- endinject -->
     <!-- Test files by Askomics classes  -->
     <!-- askomicsTestFiles:js -->
@@ -73,6 +71,8 @@
     <script src="js/istanbul/test/AskomicsPositionableNodeTest.js"></script>
     <script src="js/istanbul/test/AskomicsResultsViewTest.js"></script>
     <script src="js/istanbul/test/AskomicsUserAbstractionTest.js"></script>
+    <script src="js/istanbul/test/GONodeViewTest.js"></script>
+    <script src="js/istanbul/test/GOParametersViewTest.js"></script>
     <script src="js/istanbul/test/GraphBuilderTest.js"></script>
     <script src="js/istanbul/test/GraphLinkTest.js"></script>
     <script src="js/istanbul/test/GraphNodeTest.js"></script>

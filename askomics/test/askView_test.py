@@ -208,8 +208,9 @@ class AskViewTests(unittest.TestCase):
 
         assert len(data) == 2
         assert isinstance(data, list)
-        assert {'g': 'urn:sparql:test_askomics:jdoe:people.tsv_' + timestamp_people, 'count': '72'} in data
-        assert {'g': 'urn:sparql:test_askomics:jdoe:instruments.tsv_' + timestamp_instrument, 'count': '65'} in data
+
+        assert {'g': 'urn:sparql:test_askomics:jdoe:people.tsv_' + timestamp_people, 'count': '73'} in data
+        assert {'g': 'urn:sparql:test_askomics:jdoe:instruments.tsv_' + timestamp_instrument, 'count': '66'} in data
 
 
     def test_positionable_attr(self):
@@ -343,7 +344,8 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.getUserAbstraction()
 
-        assert len(data) == 6 #FIXME hard to compare wih expected result cause there is a timestamp
+        #FIXME hard to compare wih expected result cause there is a timestamp
+        assert len(data) == 7
 
     def test_importShortcut(self):
         """
@@ -455,7 +457,7 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.signup()
 
-        assert data == {'error': [], 'blocked': False, 'admin': True, 'username': 'jdoe'}
+        assert data == {'error': None, 'blocked': False, 'admin': True, 'username': 'jdoe'}
 
     def test_checkuser(self):
         """Test checkuser method"""
@@ -534,7 +536,7 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.get_users_infos()
 
-        assert data == {'result': [], 'error': [], 'admin': True, 'blocked': False, 'username': 'jdoe'}
+        assert data == {'result': [], 'error': None, 'admin': True, 'blocked': False, 'username': 'jdoe'}
 
     def test_lock_user(self):
         """Test lock_user method"""
@@ -653,7 +655,7 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.update_mail()
 
-        assert data == {'username': 'jdoe', 'error': [], 'success': 'success', 'blocked': False, 'admin': True}
+        assert data == {'username': 'jdoe', 'error': None, 'success': 'success', 'blocked': False, 'admin': True}
 
     def test_update_passwd(self):
         """Test update_passwd method"""
@@ -680,4 +682,4 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.update_passwd()
 
-        assert data == {'error': [], 'admin': True, 'blocked': False, 'username': 'jdoe', 'success': 'success'}
+        assert data == {'error': None, 'admin': True, 'blocked': False, 'username': 'jdoe', 'success': 'success'}

@@ -71,6 +71,7 @@ class IHMLocal {
 
       //TODO: Manage all view in a array with a generic way
       this.shortcutsView      = new  ShortcutsParametersView();
+      this.moduleView      = new  ModulesParametersView();
 
       this.menus = {} ;
 

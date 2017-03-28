@@ -6,6 +6,7 @@
 const LINKVIEW_NEGATIVE_COLOR_TEXT = 'red';
 const LINKVIEW_TRANSITIVE_COLOR_TEXT = 'purple';
 const LINKVIEW_TRANSITIVE_NEGATIVE_COLOR_TEXT = 'orange';
+const LINKVIEW_SUBCLASSOF_COLOR_TEXT = 'blue';
 
 class AskomicsLinkView extends AskomicsObjectView {
 
@@ -13,6 +14,7 @@ class AskomicsLinkView extends AskomicsObjectView {
     super(link);
     this.link = link ;
   }
+
   display_help() {
     let help_title = 'Link "'+this.link.label+'"';
     let help_str = 'There is a relation between '+this.link.source.label+' and '+this.link.target.label+'.';
@@ -25,6 +27,7 @@ class AskomicsLinkView extends AskomicsObjectView {
     if ( this.link.negative && this.link.transitive ) return LINKVIEW_TRANSITIVE_NEGATIVE_COLOR_TEXT;
     if ( this.link.negative ) return LINKVIEW_NEGATIVE_COLOR_TEXT;
     if ( this.link.transitive ) return LINKVIEW_TRANSITIVE_COLOR_TEXT;
+    if ( this.link.subclassof ) return LINKVIEW_SUBCLASSOF_COLOR_TEXT;
     return this.link.getTextFillColor();
   }
 
@@ -32,71 +35,83 @@ class AskomicsLinkView extends AskomicsObjectView {
     if ( this.link.negative && this.link.transitive ) return 'NOT '+this.link.label+"+";
     if ( this.link.negative ) return 'NOT '+this.link.label;
     if ( this.link.transitive ) return this.link.label+"+";
+    if ( this.link.subclassof ) return "subclassof "+this.link.label;
     return this.link.label;
   }
 
-  makeNegativeCheckBox() {
-    let inpNeg = $('<input>')
+  makeCheckBox(funcCheck,functOk,funcKo) {
+    let inp = $('<input>')
     .attr('type', 'checkbox')
     .attr('linkid', this.link.id);
 
     let mythis = this;
 
-    inpNeg.click(function(d) {
+    inp.click(function(d) {
       let linkid = $(this).attr('linkid');
       let link = __ihm.getGraphBuilder().getInstanciedLink(linkid);
       if ($(this).is(':checked')) {
-        link.negative = true;
+        functOk(link);
       } else {
-        link.negative = false;
+        funcKo(link);
       }
       $('#'+mythis.link.getSvgLabelId()).find('textPath').attr('fill',mythis.getTextColorLabel());
       $('#'+mythis.link.getSvgLabelId()).find('textPath').text(mythis.getTextLabel());
     });
 
-    if (this.link.negative) {
-      inpNeg.attr('checked', 'checked');
+    if (funcCheck(this.link)) {
+      inp.attr('checked', 'checked');
     }
-
-    return inpNeg ;
-  }
-  makeTransitiveCheckBox() {
-    let inpTrans = $('<input>')
-    .attr('type', 'checkbox')
-    .attr('linkid', this.link.id);
-
-    let mythis = this;
-
-    inpTrans.click(function(d) {
-      let linkid = $(this).attr('linkid');
-      let link = __ihm.getGraphBuilder().getInstanciedLink(linkid);
-      if ($(this).is(':checked')) {
-        link.transitive = true;
-      } else {
-        link.transitive = false;
-      }
-      $('#'+mythis.link.getSvgLabelId()).find('textPath').attr('fill',mythis.getTextColorLabel());
-      $('#'+mythis.link.getSvgLabelId()).find('textPath').text(mythis.getTextLabel());
-    });
-
-    if (this.link.transitive) {
-      inpTrans.attr('checked', 'checked');
-    }
-
-    return inpTrans ;
+    return inp ;
   }
 
   create() {
     this.divPanel() ;
-    let inpNeg = this.makeNegativeCheckBox();
-    let inpTrans = this.makeTransitiveCheckBox();
+    let listProperties = $('<div></div>') ;
 
-    let listProperties = $('<div></div>')
-                                .append($("<label></label>").html("Relations properties"))
+    if ( !(this.link instanceof AskomicsIsALink) ) {
+
+      let inpTrans = this.makeCheckBox(
+        function (l) {
+          return l.transitive;
+        } ,
+        function (l) {
+          l.transitive = true ;
+        } ,
+        function (l) {
+          l.transitive = false ;
+        } ) ;
+
+      let inpNeg = this.makeCheckBox(
+        function (l) {
+          return l.negative;
+        } ,
+        function (l) {
+          l.negative = true ;
+        } ,
+        function (l) {
+          l.negative = false ;
+        } ) ;
+
+        let inpSub = this.makeCheckBox(
+          function (l) {
+            return l.subclassof;
+          } ,
+          function (l) {
+            l.subclassof = true ;
+          } ,
+          function (l) {
+            l.subclassof = false ;
+          } ) ;
+
+        listProperties.append($("<label></label>").html("Relations properties"))
                                 .append($('<br>'))
                                 .append($('<label></label>').append(inpTrans).append('Transitive relation'))
                                 .append($('<br>'))
-                                .append($('<label></label>').append(inpNeg).append('Negative relation'));
+                                .append($('<label></label>').append(inpNeg).append('Absent relation'))
+                                .append($('<br>'))
+                                .append($('<label></label>').append(inpSub).append('Subclassof relation'));
+    }
+
     this.details.append($('<hr>'))
                 .append(listProperties)
                 .append($('<hr>'));
