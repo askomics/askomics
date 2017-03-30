@@ -1,6 +1,10 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
 """
 Classes to import data from a gff3 source files
 """
+
+
 import re,os
 import datetime
 from BCBio.GFF import GFFExaminer
@@ -122,8 +126,8 @@ class SourceFileGff(SourceFile):
                     self.getLabelFromUri[id_entity] = str(feat.id)
                 else:
                     if not type_entity in icount:
-                        icount[type_entity]=0
-                    icount[type_entity]+=1
+                        icount[type_entity] = 0
+                    icount[type_entity] += 1
                     suff = os.path.basename(self.path)
                     #self.log.warning("can not succed get ID feat :"+type_entity+"\n"+str(feat))
                     if self.taxon != '' :

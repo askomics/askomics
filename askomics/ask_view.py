@@ -711,24 +711,25 @@ class AskView(object):
         forced_type = None
         if 'forced_type' in body:
             forced_type = body['forced_type']
-
+        
         # Allow data integration in public graph only if user is an admin
         if public and not self.request.session['admin']:
             self.log.debug('/!\\ --> NOT ALLOWED TO INSERT IN PUBLIC GRAPH <-- /!\\')
             public = False
 
-        sfc = SourceFileConvertor(self.settings, self.request.session)
+        sfc = SourceFileConvertor(self.settings, self.request.session)        
         src_file_ttl = sfc.get_source_file(file_name, forced_type)
-
+        
         try:
-            src_file_ttl.persist(self.request.host_url, public, method)
+            self.data = src_file_ttl.persist(self.request.host_url, public, method)
+            
         except Exception as e:
             #rollback
             sqb = SparqlQueryBuilder(self.settings, self.request.session)
             query_laucher = QueryLauncher(self.settings, self.request.session)
             query_laucher.execute_query(sqb.get_drop_named_graph(src_file_ttl.graph).query)
             query_laucher.execute_query(sqb.get_delete_metadatas_of_graph(src_file_ttl.graph).query)
-
+            
             self.data['error'] = 'Problem when integration of ' + file_name + '</br>' + str(e)
             self.log.error('ERROR: ' + str(e))
 

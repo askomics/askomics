@@ -1,6 +1,10 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+
 """
 Classes to import data from a gff3 source files
 """
+
 import re
 import csv
 import uuid
@@ -379,20 +383,20 @@ class SourceFileTsv(SourceFile):
                 for i, header in enumerate(self.headers): # Skip the first column
                     if i > 0 and i not in self.disabled_columns:
                         current_type = self.forced_column_types[i]
-                        #if current_type == 'entity':
-                            #relations.setdefault(header, {}).setdefault(entity_label, []).append(row[i]) # FIXME only useful if we want to check for duplicates
-                        #else
-
                         #OFI : manage new header with relation@type_entity
                         #relationName = ":has_" + header # manage old way
+                        havePrefix = False
                         relationName = ":"+self.encodeToRDFURI(header) # manage old way
-                        relation = False
                         if current_type.startswith('entity'):
                             idx = header.find("@")
-                            if ( idx > 0 ):
+                            
+                            if idx > 0:
                                 relationName = ":"+self.encodeToRDFURI(header[0:idx])
-                                relation = True
-
+                                print("HEADER::::::::"+str(header[idx+1]))
+                                typeEnt = header[idx+1:]
+                                clause1 = typeEnt.find(":")>0
+                                if  clause1 or (header[idx+1] == '<' and header[len(header)-1] == '>') :
+                                    havePrefix = True
                         if current_type in ('category', 'taxon', 'ref', 'strand'):
                             # This is a category, keep track of allowed values for this column
                             self.category_values[header].add(row[i])
@@ -401,7 +405,7 @@ class SourceFileTsv(SourceFile):
                         if row[i]: # Empty values are just ignored
                             # positionable attributes
                             if current_type == 'start':
-                                ttl += indent + " " + ':position_start' + " " + self.delims[current_type][0] + self.encodeToRDFURI(row[i]) + self.delims[current_type][1] + " ;\n"
+                                ttl += indent + " " + ':position_start' + " " +  self.delims[current_type][0] + self.encodeToRDFURI(row[i]) + self.delims[current_type][1] + " ;\n"
                             elif current_type == 'end':
                                 ttl += indent + " " + ':position_end' + " " + self.delims[current_type][0] + self.encodeToRDFURI(row[i]) + self.delims[current_type][1] + " ;\n"
                             elif current_type == 'taxon':
@@ -410,6 +414,8 @@ class SourceFileTsv(SourceFile):
                                 ttl += indent + " " + ':position_ref' + " " + self.delims[current_type][0] + self.encodeToRDFURI(row[i]) + self.delims[current_type][1] + " ;\n"
                             elif current_type == 'strand':
                                 ttl += indent + " " + ':position_strand' + " " + self.delims[current_type][0] + self.encodeToRDFURI(row[i]) + self.delims[current_type][1] + " ;\n"
+                            elif havePrefix:
+                                ttl += indent + " "+ relationName + " " + row[i] + " ;\n"
                             else:
                                 ttl += indent + " "+ relationName + " " + self.delims[current_type][0] + self.escape[current_type](row[i]) + self.delims[current_type][1] + " ;\n"
 

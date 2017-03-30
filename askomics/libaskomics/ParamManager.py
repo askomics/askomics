@@ -1,3 +1,5 @@
+
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 import os.path
@@ -52,7 +54,9 @@ class ParamManager(object):
             'goterm': lambda str: str.replace("GO:", "")
             }
 
-
+    """
+        Get a private directory to build bufferfile
+    """
     def get_user_directory(self,typ):
         mdir = self.userfilesdir+typ+"/"+self.session['username'] + '/'
         if not os.path.isdir(mdir):

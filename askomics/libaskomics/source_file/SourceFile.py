@@ -1,3 +1,6 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+
 """
 Classes to import data from source files
 """
@@ -275,15 +278,15 @@ class SourceFile(ParamManager, HaveCachedProperties):
         url = urlbase+"/ttl/"+ self.session['username'] + '/' + os.path.basename(fp.name)
         self.log.debug(url)
         data = {}
+        data["status"] = "ok"
         try:
             if self.is_defined("askomics.file_upload_url"):
                 queryResults = ql.upload_data(fp.name, self.graph)
             else:
                 queryResults = ql.load_data(url, self.graph)
-            data['status'] = 'ok'
         except Exception as e:
-            self._format_exception(e, data=data)
-            data["error"]+=self._print_line_source_file(e,fp.name)
+            data["status"] = "failed"
+            return self._format_exception(e)
 
         finally:
             if self.settings["askomics.debug"]:
