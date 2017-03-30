@@ -1,3 +1,6 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+
 """
 Classes to import data from a gff3 source files
 """
@@ -49,18 +52,20 @@ class SourceFileTtl(SourceFile):
         """
         pathttl = self.getRdfDirectory()
         shutil.copy(self.path, pathttl)
+        data = None;
 
         if method == 'load':
             fil_open = open(pathttl + '/' + os.path.basename(self.path))
-            self.load_data_from_file(fil_open, urlbase)
+            data = self.load_data_from_file(fil_open, urlbase)
 
         else:
             chunk = self.file_get_contents(pathttl + '/' + os.path.basename(self.path))
             query_lauch = QueryLauncher(self.settings, self.session)
-            query_lauch.insert_data(chunk, self.graph, '')
+            data = query_lauch.insert_data(chunk, self.graph, '')
 
         self.insert_metadatas(public)
-
+        return data
+        
     def file_get_contents(self, filename):
         """
         get the content of a file

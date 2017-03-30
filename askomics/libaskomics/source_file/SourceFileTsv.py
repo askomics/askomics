@@ -1,6 +1,10 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+
 """
 Classes to import data from a gff3 source files
 """
+
 import re
 import csv
 import uuid

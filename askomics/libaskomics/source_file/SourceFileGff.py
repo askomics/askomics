@@ -1,7 +1,10 @@
 #!/usr/bin/python3
+# -*- coding: utf-8 -*-
 """
 Classes to import data from a gff3 source files
 """
+
+
 import re,os
 import datetime
 from BCBio.GFF import GFFExaminer

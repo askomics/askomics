@@ -23,7 +23,7 @@ RUN npm config set prefix /usr/local && \
     npm install gulp --save-dev && \
     npm install gulp-util --save-dev && \
     npm install gulp-concat --save-dev && \
-    npm install gulp-sourcemaps --save-dev && \
+#    npm install gulp-sourcemaps --save-dev && \
     npm install gulp-babel --save-dev && \
     npm install babel-preset-es2015 && \
     npm install gulp-mocha --save-dev && \
