@@ -278,12 +278,14 @@ class SourceFile(ParamManager, HaveCachedProperties):
         url = urlbase+"/ttl/"+ self.session['username'] + '/' + os.path.basename(fp.name)
         self.log.debug(url)
         data = {}
+        data["status"] = "ok"
         try:
             if self.is_defined("askomics.file_upload_url"):
                 queryResults = ql.upload_data(fp.name, self.graph)
             else:
                 queryResults = ql.load_data(url, self.graph)
         except Exception as e:
+            data["status"] = "failed"
             return self._format_exception(e)
 
         finally:
