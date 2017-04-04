@@ -44,13 +44,12 @@ RUN npm config set prefix /usr/local && \
     npm install gulp-uglify --save-dev
 
 COPY . /usr/local/askomics/
+RUN chmod +x startAskomics.sh
+
 # Delete the local venv if exist and build the new one
 RUN rm -rf /usr/local/askomics/venv && \
     ./startAskomics.sh -b
 
 
-
-
 EXPOSE 6543
-ENTRYPOINT ["./startAskomics.sh -r"]
-# ENTRYPOINT ["./startAskomics_docker.sh"]
+ENTRYPOINT ["./startAskomics.sh","-r"]
