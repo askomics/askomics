@@ -23,6 +23,7 @@ triplestore="virtuoso"
 run=false
 build=false
 
+# Parse options -------------------------------------------
 while getopts "ht:d:rb" option; do
     case $option in
         h)
@@ -48,6 +49,7 @@ while getopts "ht:d:rb" option; do
     esac
 done
 
+# Get flags and deployment mode ---------------------------
 case $depmode in
     prod|production|"")
         depmode="production"
@@ -66,7 +68,31 @@ case $depmode in
         exit 1
 esac
 
-config_name="$depmode.$triplestore.ini"
+# Get config file -----------------------------------------
+if [[ ! -z $TRIPLESTORE_ENDPOINT && ! -z $ASKOMICS_LOAD_URL ]]; then
+    cp "$dir_config/$depmode.$triplestore.ini" "$dir_config/custom.ini"
+
+    if [[ ! -z $TRIPLESTORE_ENDPOINT ]]; then
+        echo "Custom triplestore endpoint: $TRIPLESTORE_ENDPOINT"
+        newline="askomics.endpoint = $TRIPLESTORE_ENDPOINT"
+        # replace the line
+        sed -i "s@^askomics.endpoint.*@$newline@" "$dir_config/custom.ini"
+    fi
+
+    if [[ ! -z $ASKOMICS_LOAD_URL ]]; then
+        echo "Custom load url: $ASKOMICS_LOAD_URL"
+        newline="askomics.load_url = $ASKOMICS_LOAD_URL"
+        # remove line if exist
+        sed -i '/^askomics.load_url/d' "$dir_config/custom.ini"
+        # add the line
+        sed -i "/app:main/a $newline" "$dir_config/custom.ini"
+    fi
+
+    config_name="custom.ini"
+else
+    config_name="$depmode.$triplestore.ini"
+fi
+
 config_path="$dir_config/$config_name"
 
 if [[ ! -f $config_path ]]; then
@@ -75,6 +101,7 @@ if [[ ! -f $config_path ]]; then
     exit 1
 fi
 
+# Build python virtual environment ------------------------
 activate="$dir_venv/bin/activate"
 
 if [[ ! -f $activate ]]; then
@@ -86,6 +113,7 @@ else
     source $activate
 fi
 
+# Build Javascript ----------------------------------------
 askojs="$dir_askomics/askomics/static/dist/askomics.js"
 
 # deploy JS if not run only option or if there is no js
@@ -94,6 +122,7 @@ if [[ $run == false || ! -f $askojs ]]; then
     gulp $gulpmode
 fi
 
+# Run Askomics --------------------------------------------
 pserve="$dir_venv/bin/pserve"
 askomics="$python_ex $python_flags $pserve $config_path $pserve_flags"
 
