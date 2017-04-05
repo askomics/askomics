@@ -1036,23 +1036,22 @@ class IHMLocal {
                         'password2': password2  };
 
           service.post(model, function(data) {
-              if (data.error.length !== 0) {
-                $('#signup_error').empty();
-                for (let i = data.error.length - 1; i >= 0; i--) {
-                  $('#signup_error').append(data.error[i] + '<br>');
-                }
-                $('#signup_success').hide();
-                $('#signup_error').show();
-              }else{
-                $('#signup_error').hide();
-                $('#signup_success').empty();
-                $('#signup_success').append('Account successfully created!');
-                $('#signup_success').show();
-                // User is logged, show the special button
-                __ihm.user = new AskomicsUser(data.username, data.admin, data.blocked);
-                console.log('loguser');
-                __ihm.user.logUser();
+            __ihm.hideModal();
+            if (data.error.length !== 0) {
+              $('#login_error').empty();
+              for (let i = data.error.length - 1; i >= 0; i--) {
+                $('#login_error').append(data.error[i] + '<br>');
               }
+              $('#login_success').hide();
+              $('#login_error').show();
+            }else{
+              $('#login_error').hide();
+              $('#login_success').empty();
+              $('#login_success').append('Account successfuly created!');
+              $('#login_success').show();
+              __ihm.user = new AskomicsUser(data.username, data.admin);
+              __ihm.user.logUser();
+            }
           });
 
         });

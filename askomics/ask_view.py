@@ -1021,7 +1021,7 @@ class AskView(object):
             if error:
                 return self.data
 
-            self.data['error'] = None
+            self.data['error'] = []
 
             security.persist_user()
             security.create_user_graph()
