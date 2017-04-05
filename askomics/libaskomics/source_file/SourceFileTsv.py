@@ -392,7 +392,6 @@ class SourceFileTsv(SourceFile):
                             
                             if idx > 0:
                                 relationName = ":"+self.encodeToRDFURI(header[0:idx])
-                                print("HEADER::::::::"+str(header[idx+1]))
                                 typeEnt = header[idx+1:]
                                 clause1 = typeEnt.find(":")>0
                                 if  clause1 or (header[idx+1] == '<' and header[len(header)-1] == '>') :
