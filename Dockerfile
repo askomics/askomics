@@ -43,6 +43,8 @@ RUN npm config set prefix /usr/local && \
     gem install coveralls-lcov
 
 COPY . /usr/local/askomics/
+RUN chmod +x startAskomics.sh
+
 # Delete the local venv if exist and build the new one
 RUN rm -rf /usr/local/askomics/venv && \
     ./startAskomics.sh -b
