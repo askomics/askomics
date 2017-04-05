@@ -24,3 +24,6 @@ askomics/test/client/index_tpl.html
 # Editors & tooling
 *.orig
 *~
+
+# custom config file
+configs/custom.ini

@@ -20,28 +20,27 @@ WORKDIR /usr/local/askomics/
 # NPM packages
 RUN npm config set prefix /usr/local && \
     npm install gulp -g && \
-    npm install gulp --save-dev && \
-    npm install gulp-util --save-dev && \
-    npm install gulp-concat --save-dev && \
-#    npm install gulp-sourcemaps --save-dev && \
-    npm install gulp-babel --save-dev && \
-    npm install babel-preset-es2015 && \
-    npm install gulp-mocha --save-dev && \
-    npm install gulp-mocha-phantomjs --save-dev && \
-    npm install should --save-dev && \
-    npm install mocha --save-dev && \
-    npm install chai --save-dev && \
-    npm install jshint --save-dev && \
-    npm install gulp-jshint --save-dev && \
-    npm install mocha-phantomjs-istanbul --save-dev && \
-    npm install gulp-istanbul --save-dev && \
-    npm install gulp-istanbul-report --save-dev && \
-    npm install gulp-inject --save-dev && \
-    gem install coveralls-lcov && \
-    npm install intro.js  --save-dev && \
-    npm install bluebird --save-dev && \
-    npm install any-promise --save-dev && \
-    npm install gulp-uglify --save-dev
+    npm install gulp \
+                gulp-util \
+                gulp-concat \
+                gulp-babel \
+                babel-preset-es2015 \
+                gulp-mocha \
+                gulp-mocha-phantomjs \
+                shoul \
+                mocha \
+                chai \
+                jshint \
+                gulp-jshint \
+                mocha-phantomjs-istanbul \
+                gulp-istanbul \
+                gulp-istanbul-report \
+                gulp-inject \
+                intro.js \
+                bluebird \
+                any-promise \
+                gulp-uglify --save-dev && \
+    gem install coveralls-lcov
 
 COPY . /usr/local/askomics/
 RUN chmod +x startAskomics.sh
@@ -50,6 +49,5 @@ RUN chmod +x startAskomics.sh
 RUN rm -rf /usr/local/askomics/venv && \
     ./startAskomics.sh -b
 
-
 EXPOSE 6543
-ENTRYPOINT ["./startAskomics.sh","-r"]
+ENTRYPOINT ["./startAskomics.sh", "-r"]

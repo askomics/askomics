@@ -458,7 +458,7 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.signup()
 
-        assert data == {'error': None, 'blocked': False, 'admin': True, 'username': 'jdoe'}
+        assert data == {'error': [], 'blocked': False, 'admin': True, 'username': 'jdoe'}
 
     def test_checkuser(self):
         """Test checkuser method"""
@@ -537,7 +537,7 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.get_users_infos()
 
-        assert data == {'result': [], 'error': None, 'admin': True, 'blocked': False, 'username': 'jdoe'}
+        assert data == {'result': [], 'error': [], 'admin': True, 'blocked': False, 'username': 'jdoe'}
 
     def test_lock_user(self):
         """Test lock_user method"""
@@ -656,7 +656,7 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.update_mail()
 
-        assert data == {'username': 'jdoe', 'error': None, 'success': 'success', 'blocked': False, 'admin': True}
+        assert data == {'username': 'jdoe', 'error': [], 'success': 'success', 'blocked': False, 'admin': True}
 
     def test_update_passwd(self):
         """Test update_passwd method"""
@@ -683,4 +683,4 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.update_passwd()
 
-        assert data == {'error': None, 'admin': True, 'blocked': False, 'username': 'jdoe', 'success': 'success'}
+        assert data == {'error': [], 'admin': True, 'blocked': False, 'username': 'jdoe', 'success': 'success'}
