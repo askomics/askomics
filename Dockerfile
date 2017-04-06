@@ -50,4 +50,4 @@ RUN rm -rf /usr/local/askomics/venv && \
     ./startAskomics.sh -b
 
 EXPOSE 6543
-ENTRYPOINT ["./startAskomics.sh", "-r"]
+CMD ["./startAskomics.sh", "-r"]
