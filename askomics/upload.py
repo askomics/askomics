@@ -91,7 +91,6 @@ class FileUpload(object):
     @view_config(request_method='GET', renderer="json")
     def get(self):
         p = self.request.matchdict.get('name')
-        self.log.debug(" ** USER ** => "+os.getlogin())
 
         if p:
             return self.fileinfo(p)

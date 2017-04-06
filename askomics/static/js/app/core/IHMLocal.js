@@ -561,7 +561,7 @@ class IHMLocal {
         $(content).find('#fileupload').fileupload({
             // Uncomment the following to send cross-domain cookies:
             //xhrFields: {withCredentials: true},
-            url: '/up/file/',
+            url: 'up/file/',
             maxChunkSize: __ihm.chunkSize,
             maxFileSize: sizeFileMax
         });
