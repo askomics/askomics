@@ -5,7 +5,7 @@ var concat = require('gulp-concat');
 //version 1.7.1 with bug
 //var sourcemaps = require('gulp-sourcemaps');
 var babel = require('gulp-babel');
-var mocha = require('gulp-mocha');
+//var mocha = require('gulp-mocha');
 var inject = require('gulp-inject');
 //var rename = require('gulp-rename');
 var istanbul = require('gulp-istanbul');
