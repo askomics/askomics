@@ -1,9 +1,9 @@
 <!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
-<link rel="stylesheet" href="/static/css/upload/jquery.fileupload.css">
-<link rel="stylesheet" href="/static/css/upload/jquery.fileupload-ui.css">
+<link rel="stylesheet" href="static/css/upload/jquery.fileupload.css">
+<link rel="stylesheet" href="static/css/upload/jquery.fileupload-ui.css">
 <!-- CSS adjustments for browsers with JavaScript disabled -->
-<noscript><link rel="stylesheet" href="/static/css/upload/jquery.fileupload-noscript.css"></noscript>
-<noscript><link rel="stylesheet" href="/static/css/upload/jquery.fileupload-ui-noscript.css"></noscript>
+<noscript><link rel="stylesheet" href="static/css/upload/jquery.fileupload-noscript.css"></noscript>
+<noscript><link rel="stylesheet" href="static/css/upload/jquery.fileupload-ui-noscript.css"></noscript>
 
 <div class="container">
   <hr/>
@@ -140,20 +140,20 @@
 <!-- Bootstrap JS is not required, but included for the responsive demo navigation -->
 <!-- <script src="//netdna.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script> -->
 <!-- blueimp Gallery script -->
-<script src="/static/js/third-party/jquery.blueimp-gallery.min.js"></script>
+<script src="static/js/third-party/jquery.blueimp-gallery.min.js"></script>
 <!-- The Iframe Transport is required for browsers without support for XHR file uploads -->
-<script src="/static/js/third-party/upload/jquery.iframe-transport.js"></script>
+<script src="static/js/third-party/upload/jquery.iframe-transport.js"></script>
 <!-- The basic File Upload plugin -->
-<script src="/static/js/third-party/upload/jquery.fileupload.js"></script>
+<script src="static/js/third-party/upload/jquery.fileupload.js"></script>
 <!-- The File Upload processing plugin -->
-<script src="/static/js/third-party/upload/jquery.fileupload-process.js"></script>
+<script src="static/js/third-party/upload/jquery.fileupload-process.js"></script>
 <!-- The File Upload validation plugin -->
-<script src="/static/js/third-party/upload/jquery.fileupload-validate.js"></script>
+<script src="static/js/third-party/upload/jquery.fileupload-validate.js"></script>
 <!-- The File Upload user interface plugin -->
-<script src="/static/js/third-party/upload/jquery.fileupload-ui.js"></script>
+<script src="static/js/third-party/upload/jquery.fileupload-ui.js"></script>
 <!-- The main application script -->
 <!-- <script src="/static/js/third-party/upload/main.js"></script> -->
 <!-- The XDomainRequest Transport is included for cross-domain file deletion for IE 8 and IE 9 -->
 <!--[if (gte IE 8)&(lt IE 10)]>
-<script src="/static/js/upload/cors/jquery.xdr-transport.js"></script>
+<script src="static/js/upload/cors/jquery.xdr-transport.js"></script>
 <![endif]-->
