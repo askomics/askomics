@@ -3,8 +3,7 @@
 [![Build Status](https://travis-ci.org/askomics/askomics.svg?branch=master)](https://travis-ci.org/askomics/askomics)
 [![Coverage Status](https://coveralls.io/repos/github/askomics/askomics/badge.svg?branch=master)](https://coveralls.io/github/askomics/askomics?branch=master)
 
-
- AskOmics is a visual SPARQL query interface supporting both intuitive data integration and querying while shielding the user from most of the technical difficulties underlying RDF and SPARQL
+AskOmics is a visual SPARQL query interface supporting both intuitive data integration and querying while shielding the user from most of the technical difficulties underlying RDF and SPARQL
 
 ![Askomics Homepage](static/askomics_home.png)
 
@@ -53,44 +52,36 @@ AskOmics also uses the following bundled libraries:
 + venv
 + npm
 + gulp
-
-Check the Dockerfile to see dependancies
-
-
-#### Installation with Docker
-
-```
-$ ./startService.sh <triplestore> <mode>
-```
-
-with:
-
-+ triplestore: fuseki or virtuoso
-+ mode: production or development
++ docker
 
 #### Manual installation
 
-+ Install  Virtuoso or Fuseki
++ Install  Virtuoso
+
+```
+docker run -d --name virtuoso \
+        -e VIRT_Parameters_TN_MAX_memory=4000000000 \
+        -e VIRT_SPARQL_ResultSetMaxRows=100000 \
+        -e VIRT_SPARQL_MaxQueryCostEstimationTime=300 \
+        -e VIRT_SPARQL_MaxQueryExecutionTime=300 \
+        -e VIRT_SPARQL_MaxDataSourceSize=1000000000 \
+        -e VIRT_Flags_TN_MAX_memory=4000000000 \
+        -e DBA_PASSWORD=dba \
+        -e SPARQL_UPDATE=true \
+        -e DEFAULT_GRAPH=http://localhost:8890/DAV \
+        --net="host" -t tenforce/virtuoso
+```
+
 + Run `startAskomics.sh`
 
 ```
-$ ./startAskomics <triplestore> <mode>
+$ ./startAskomics -t <triplestore> -d <mode>
 ```
 
 with:
 
 + triplestore: fuseki or virtuoso
-+ mode: production or development
-
-#### Developpment
-
-If you want to develop AskOmics, run:
-
-```
-$ gulp --dev --reload
-```
-
-It will reload javascript files when a file is modified.
++ mode: prod (production) or dev (development)
 
 
 ### Running tests
@@ -100,13 +91,11 @@ AskOmics comes with some unit and functional tests.
 #### Python tests
 
 ```
-$ ./testAskomics.sh
+$ ./venv/bin/python setup.py nosetests
 ```
-
-Python test work only with Virtuoso
-
 #### Javascript tests
 
 ```
 $ gulp test
 ```
+
