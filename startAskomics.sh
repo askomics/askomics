@@ -54,11 +54,12 @@ case $depmode in
     prod|production|"")
         depmode="production"
         gulpmode="--prod"
-        pserve_flags="-b -q"
-        python_flags="$python_flags -OO"
+        pserve_flags="-q"
+        python_flags="$python_flags"
     ;;
     dev|development)
         depmode="development"
+        gulpmode="--reload"
         pserve_flags="--reload"
         python_flags="$python_flags -bb -Wall"
     ;;
@@ -119,7 +120,8 @@ askojs="$dir_askomics/askomics/static/dist/askomics.js"
 # deploy JS if not run only option or if there is no js
 if [[ $run == false || ! -f $askojs ]]; then
     echo "deploying javascript ..."
-    gulp $gulpmode
+    gulp $gulpmode &
+    sleep 8
 fi
 
 # Run Askomics --------------------------------------------
