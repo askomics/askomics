@@ -68,9 +68,18 @@ case $depmode in
         usage
         exit 1
 esac
-
+echo "===>$ASKOMICS_SMTP_HOST"
 # Get config file -----------------------------------------
-if [[ ! -z $TRIPLESTORE_ENDPOINT && ! -z $ASKOMICS_LOAD_URL ]]; then
+if [[ 
+        ! -z $TRIPLESTORE_ENDPOINT || 
+        ! -z $ASKOMICS_LOAD_URL ||
+        ! -z $ASKOMICS_SMTP_HOST ||
+        ! -z $ASKOMICS_SMTP_PORT ||
+        ! -z $ASKOMICS_SMTP_LOGIN ||
+        ! -z $ASKOMICS_SMTP_PASSWORD ||
+        ! -z $ASKOMICS_SMTP_STARTTLS 
+    ]]; then
+
     cp "$dir_config/$depmode.$triplestore.ini" "$dir_config/custom.ini"
 
     if [[ ! -z $TRIPLESTORE_ENDPOINT ]]; then
@@ -87,6 +96,32 @@ if [[ ! -z $TRIPLESTORE_ENDPOINT && ! -z $ASKOMICS_LOAD_URL ]]; then
         sed -i '/^askomics.load_url/d' "$dir_config/custom.ini"
         # add the line
         sed -i "/app:main/a $newline" "$dir_config/custom.ini"
+    fi
+
+    if [[ ! -z $ASKOMICS_SMTP_HOST ]]; then
+        if [[ -z $ASKOMICS_SMTP_PORT || -z $ASKOMICS_SMTP_LOGIN || -z $ASKOMICS_SMTP_PASSWORD ]]; then
+            >&2 echo "Bad definition of smpt configuration. You must defined ASKOMICS_SMTP_HOST, ASKOMICS_SMTP_PORT, ASKOMICS_SMTP_LOGIN, ASKOMICS_SMTP_PASSWORD."
+            exit 1
+        fi
+        echo "-- SMTP definition --"
+        newline="smtp.host = $ASKOMICS_SMTP_HOST"
+        sed -i '/^smtp.host/d' "$dir_config/custom.ini"
+        sed -i "/app:main/a $newline" "$dir_config/custom.ini"
+        newline="smtp.port = $ASKOMICS_SMTP_PORT"
+        sed -i '/^smtp.port/d' "$dir_config/custom.ini"
+        sed -i "/app:main/a $newline" "$dir_config/custom.ini"
+        newline="smtp.login = $ASKOMICS_SMTP_LOGIN"
+        sed -i '/^smtp.login/d' "$dir_config/custom.ini"
+        sed -i "/app:main/a $newline" "$dir_config/custom.ini"
+        newline="smtp.password = $ASKOMICS_SMTP_PASSWORD"
+        sed -i '/^smtp.password/d' "$dir_config/custom.ini"
+        sed -i "/app:main/a $newline" "$dir_config/custom.ini"
+        if [[ ! -z $ASKOMICS_SMTP_STARTTLS ]]; then
+            newline="askomics.starttls = $ASKOMICS_SMTP_STARTTLS"
+            sed -i '/^askomics.starttls/d' "$dir_config/custom.ini"
+            sed -i "/app:main/a $newline" "$dir_config/custom.ini"
+        fi
+
     fi
 
     config_name="custom.ini"

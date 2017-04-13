@@ -177,7 +177,7 @@ class SecurityTests(unittest.TestCase):
 
         security = Security(self.settings, self.request.session, 'jdoe', 'jdoe@example.com', 'iamjohndoe', 'iamjohndoe')
 
-        security.persist_user()
+        security.persist_user('http://localhost')
 
         assert security.get_number_of_users() == 1
 
