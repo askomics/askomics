@@ -1023,7 +1023,7 @@ class AskView(object):
 
             self.data['error'] = []
 
-            security.persist_user()
+            security.persist_user(self.request.host_url)
             security.create_user_graph()
             security.log_user(self.request)
 

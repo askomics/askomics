@@ -2,6 +2,9 @@ import logging, hashlib
 from validate_email import validate_email
 import random
 import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
 import re
 
 from askomics.libaskomics.ParamManager import ParamManager
@@ -172,7 +175,7 @@ class Security(ParamManager):
         return int(result[0]['count'])
 
 
-    def persist_user(self):
+    def persist_user(self,host_url):
         """
         Persist all user infos in the TS
         """
@@ -209,35 +212,55 @@ class Security(ParamManager):
         body = 'Hello, ' + self.username + ' just create an account.\n'
         body += 'Log into the admin interface in order to unblock this user, or contact him '
         body += 'at ' + self.email + '.\n\n\n'
-        body += 'Cordialy, the AskOmics server'
+        body += host_url + '\n\n'
 
-        self.send_mails(emails, '[AskOmics] New account created', body)
+        self.send_mails(host_url,emails, '[AskOmics@'+host_url+'] New account created', body)
 
 
-    def send_mails(self, dests, subject, text):
+    def send_mails(self, host_url, dests, subject, text):
         """
         Send a mail to a list of Recipients
         """
-
+        self.log.debug(" == Security.py:send_mails == ")
         # Don't send mail if the smtp server is not in
         # the config file
         if not self.get_param('smtp.host'):
             return
+        if not self.get_param('smtp.port'):
+            return
+        if not self.get_param('smtp.login'):
+            return
+        if not self.get_param('smtp.password'):
+            return
+        starttls = False
+        if self.get_param('smtp.starttls'):
+            starttls = self.get_param('smtp.starttls').lower() == 'yes' or \
+                       self.get_param('smtp.starttls').lower() == 'ok' or \
+                       self.get_param('smtp.starttls').lower() == 'true'
 
+        host = self.get_param('smtp.host')
+        port = self.get_param('smtp.port')
+        login = self.get_param('smtp.login')
+        password = self.get_param('smtp.password')
 
-        sender = self.get_param('smtp.host')
+        self.log.debug(" HOST: "+host)
+        print(self)
 
-        message = """
-        From: %s
-        To: %s
-        Subject: %s
-
-        %s
-        """ % (sender, ", ".join(dests), subject, text)
+        msg = MIMEMultipart()
+        msg['From'] = 'AskoMics@'+host_url
+        msg['To'] = ", ".join(dests)
+        msg['Subject'] = subject
+        msg.attach(MIMEText(text, 'plain'))
 
         try:
-            smtp = smtplib.SMTP('localhost')
-            smtp.sendmail(sender, dests, message)
+            smtp = smtplib.SMTP(host, port)
+            smtp.set_debuglevel(1)
+            if starttls:
+                smtp.ehlo()
+                smtp.starttls()
+            smtp.login(login, password)
+            smtp.sendmail(dests[0], dests, msg.as_string())
+            smtp.quit()
             self.log.debug("Successfully sent email")
         except Exception as e:
             self.log.debug("Error: unable to send email: " + str(e))
@@ -251,7 +274,8 @@ class Security(ParamManager):
         query_laucher = QueryLauncher(self.settings, self.session)
         sqa = SparqlQueryAuth(self.settings, self.session)
 
-        ttl = '<' + self.settings['askomics.graph'] + ':' + self.username + '> rdfg:subGraphOf <' + self.settings['askomics.graph'] + '>'
+        ttl = '<' + self.settings['askomics.graph'] + ':' + self.username + \
+            '> rdfg:subGraphOf <' + self.settings['askomics.graph'] + '>'
 
         header_ttl = sqa.header_sparql_config(ttl)
         query_laucher.insert_data(ttl, self.settings["askomics.graph"], header_ttl)
