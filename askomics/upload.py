@@ -73,7 +73,8 @@ class FileUpload(object):
             info['name'] = name
             info['size'] = os.path.getsize(filename)
             info['delete_type'] = self.delete_method
-            info['delete_url'] = self.request.route_url('upload', sep='', name='') + '/' + name
+            info['delete_url'] = name
+            # info['delete_url'] = self.request.route_url('upload', sep='', name='') + '/' + name
             if self.delete_method != 'DELETE':
                 info['delete_url'] += '&_method=DELETE'
             return info
@@ -145,7 +146,7 @@ class FileUpload(object):
                 os.remove(self.filepath(result['name'])+"_tmp")
                 result['size'] = self.get_file_size(open(self.filepath(result['name']),"rb"))
                 result['delete_type'] = self.delete_method
-                result['delete_url'] = self.request.route_url('upload', sep='', name='') + '/' + result['name']
+                result['delete_url'] = result['name']
                 if self.delete_method != 'DELETE':
                     result['delete_url'] += '&_method=DELETE'
             results.append(result)
