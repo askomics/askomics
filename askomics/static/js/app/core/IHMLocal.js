@@ -215,7 +215,6 @@ class IHMLocal {
     }
 
     manageErrorMessage(data) {
-      console.log("manageErrorMessage - error inside => "+JSON.stringify('error' in data));
       // Remove last message
       $('#error_div').remove();
       // If there is an error message, how it
@@ -704,9 +703,7 @@ class IHMLocal {
             __ihm.displayBlockedPage($('.username').attr('id'));
             return;
           }
-          if (reload) {
-            location.reload();
-          }
+
           // Reload the page
           if (d == 'success') {
             __ihm.loadUsers();
@@ -1038,17 +1035,17 @@ class IHMLocal {
           service.post(model, function(data) {
             __ihm.hideModal();
             if (data.error.length !== 0) {
-              $('#login_error').empty();
+              $('#signup_error').empty();
               for (let i = data.error.length - 1; i >= 0; i--) {
-                $('#login_error').append(data.error[i] + '<br>');
+                $('#signup_error').append(data.error[i] + '<br/>');
               }
-              $('#login_success').hide();
-              $('#login_error').show();
+              $('#signup_success').hide();
+              $('#signup_error').show();
             }else{
-              $('#login_error').hide();
-              $('#login_success').empty();
-              $('#login_success').append('Account successfuly created!');
-              $('#login_success').show();
+              $('#signup_error').hide();
+              $('#signup_success').empty();
+              $('#signup_success').append('Account successfuly created!');
+              $('#signup_success').show();
               __ihm.user = new AskomicsUser(data.username, data.admin);
               __ihm.user.logUser();
             }
