@@ -154,20 +154,6 @@ class Security(ParamManager):
         if result:
             self.username = result[0]['username']
 
-    def ckeck_key_belong_user(self, key):
-        """Check if a key belong to a user"""
-
-        query_laucher = QueryLauncher(self.settings, self.session)
-        sqa = SparqlQueryAuth(self.settings, self.session)
-
-        result = query_laucher.process_query(sqa.ckeck_key_belong_user(self.username, key).query)
-        self.log.debug('---> result: ' + str(result))
-
-        if len(result) <= 0:
-            return False
-
-        return ParamManager.Bool(result[0]['count'])
-
     def delete_apikey(self, key):
         """delete an apikey"""
 
