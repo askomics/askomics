@@ -93,19 +93,18 @@ class SparqlQueryAuth(SparqlQueryBuilder):
                      "}"
         }, True)
 
-    def ckeck_key_belong_user(self, username, key):
-        """Chek if a key belong to a user"""
+    def get_owner_apikey(self, key):
+        """Get the owner of the API key"""
 
         return self.build_query_on_the_fly({
-            'select': '(COUNT(*) AS ?count)',
-            'query': "GRAPH <"+ self.get_param("askomics.users_graph") + "> {" +
-                     '\n?URIusername rdf:type foaf:Person .\n' +
-                     '\t?URIusername foaf:name "' + username + '" .\n' +
-                     '\t?URIusername :keyid ?URIkeyid .\n'+
-                     '\t?URIkeyid :key "' + key + '"'
-                     "}"
-        }, True)
-
+            'select': '?username',
+            'query': 'GRAPH <' + self.get_param('askomics.users_graph') + '> {' +
+                     '\t?URIusername rdf:type foaf:Person .\n' +
+                     '\t?URIusername :keyid ?keyid .\n' +
+                     '\t?keyid :key "' + key + '" .\n' +
+                     '\t?URIusername foaf:name ?username .\n' +
+                     '}'
+            }, True)
 
     def get_admin_blocked_by_email(self, email):
         """
@@ -221,7 +220,7 @@ class SparqlQueryAuth(SparqlQueryBuilder):
         # self.log.debug('get_random_key')
 
         # alpabet = "!$%&()*+,-./:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~1234567890"
-        alpabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz123567890'
+        alpabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
         return ''.join(random.choice(alpabet) for i in range(20))
 
     def delete_apikey(self, key):
