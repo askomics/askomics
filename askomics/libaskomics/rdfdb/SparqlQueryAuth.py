@@ -93,6 +93,19 @@ class SparqlQueryAuth(SparqlQueryBuilder):
                      "}"
         }, True)
 
+    def get_owner_apikey(self, key):
+        """Get the owner of the API key"""
+
+        return self.build_query_on_the_fly({
+            'select': '?username',
+            'query': 'GRAPH <' + self.get_param('askomics.users_graph') + '> {' +
+                     '\t?URIusername rdf:type foaf:Person .\n' +
+                     '\t?URIusername :keyid ?keyid .\n' +
+                     '\t?keyid :key "' + key + '" .\n' +
+                     '\t?URIusername foaf:name ?username .\n' +
+                     '}'
+            }, True)
+
     def ckeck_key_belong_user(self, username, key):
         """Chek if a key belong to a user"""
 
