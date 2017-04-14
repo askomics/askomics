@@ -234,7 +234,7 @@ class SparqlQueryAuth(SparqlQueryBuilder):
         # self.log.debug('get_random_key')
 
         # alpabet = "!$%&()*+,-./:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~1234567890"
-        alpabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz123567890'
+        alpabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
         return ''.join(random.choice(alpabet) for i in range(20))
 
     def delete_apikey(self, key):
