@@ -1,11 +1,12 @@
-import logging, hashlib
+import logging
+import hashlib
 import random
 import smtplib
 import re
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from validate_email import validate_email
-
+from bioblend import galaxy
 
 from askomics.libaskomics.ParamManager import ParamManager
 from askomics.libaskomics.rdfdb.SparqlQueryAuth import SparqlQueryAuth
@@ -394,3 +395,26 @@ class Security(ParamManager):
         sqa = SparqlQueryAuth(self.settings, self.session)
 
         query_laucher.execute_query(sqa.add_apikey(self.username, keyname).query)
+
+    def add_galaxy(self, url, key):
+        """Connect a galaxy account to Askomics
+
+        add triples for the url of galaxy, and the user api key
+
+        :param self; url: the galaxy url
+        :type self; url: string
+        :param key: the galaxy user api key
+        :type key: string
+        """
+
+        # try to connect to the galaxy server
+        try:
+            galaxy_instance = galaxy.GalaxyInstance(url, key)
+            galaxy_instance.config.get_config()
+        except Exception as e:
+            raise e
+
+        query_laucher = QueryLauncher(self.settings, self.session)
+        sqa = SparqlQueryAuth(self.settings, self.session)
+
+        query_laucher.execute_query(sqa.add_galaxy(self.username, url, key).query)

@@ -1198,6 +1198,29 @@ class AskView(object):
         if key_belong2user:
             security.delete_apikey(key)
 
+    @view_config(route_name='connect_galaxy', request_method='POST')
+    def connect_galaxy(self):
+
+        # Denny access for non loged users or non admin users
+        if self.request.session['username'] == '':
+            return 'forbidden'
+
+        body = self.request.json_body
+        url = body['url']
+        key = body['key']
+
+        security = Security(self.settings, self.request.session, self.request.session['username'], '', '', '')
+
+        try:
+            security.add_galaxy(url, key)
+        except Exception as e:
+
+            self.data['error'] = 'Connection to Galaxy failed'
+            return self.data
+
+        self.data['success'] = 'success'
+
+        return self.data
 
 
     @view_config(route_name='login_api', request_method='POST')

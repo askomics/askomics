@@ -22,6 +22,7 @@ requires = [
     'biopython',
     'bcbio-gff',
     'validate_email',
+    'bioblend',
     ]
 
 setup(name='Askomics',

@@ -535,6 +535,33 @@
       </div>
       {{/each}}
 
+      <hr />
+      <h4>Galaxy Account</h4>
+      <hr/ >
+      <p>Connect a galaxy account to askomics to get datasets from your galaxy history.</p>
+      <p>You need to provide the url of the galaxy server, and your galaxy api key.</p>
+
+        <div class="input-group">
+          <span class="input-group-addon" id="basic-addon1"><i class="fa fa-globe" aria-hidden="true"></i></span>
+          <input type="text" class="form-control galaxy_url" id='{{user.username}}' placeholder="{{#if galaxy}}{{galaxy.url}}{{else}}Galaxy url{{/if}}" aria-describedby="basic-addon1">
+        </div>
+        <div class="input-group">
+          <span class="input-group-addon" id="basic-addon1"><i class="fa fa-key" aria-hidden="true"></i></span>
+          <input type="text" class="form-control galaxy_key" id='{{user.username}}' placeholder="{{#if galaxy}}{{galaxy.url}}{{else}}Galaxy api key{{/if}}" aria-describedby="basic-addon1">
+          <span class="input-group-btn">
+            <button class="btn btn-default add_galaxy" id='{{user.username}}' type="button">
+              {{#if galaxy}}
+                Update
+              {{else}}
+                Add
+              {{/if}}
+              <i class="hidden fa fa-spinner pulse" id='spiner_galaxy'></i>
+              <i class="hidden fa fa-check text-success" id='tick_galaxy'></i>
+              <i class="hidden fa fa-times text-danger" id='cross_galaxy'></i>
+            </button>
+          </span>
+        </div>
+
       <hr/ >
       <h4>Remove your account</h4>
       <hr/ >

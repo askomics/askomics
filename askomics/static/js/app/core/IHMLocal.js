@@ -809,6 +809,9 @@ class IHMLocal {
           console.log('888');
           __ihm.get_apikey(d.username, $('.new_apikey_name#' + d.username).val());
         });
+        $('.add_galaxy#' + d.username).click(function() {
+          __ihm.connect_galaxy($('.galaxy_url#' + d.username).val(), $('.galaxy_key#' + d.username).val());
+        });
 
         // Active the tooltip
         $('[data-toggle="tooltip"]').tooltip();
@@ -946,6 +949,33 @@ class IHMLocal {
       });
 
 
+    }
+
+    connect_galaxy(url, key) {
+      let service = new RestServiceJs('connect_galaxy');
+      let data = {'url': url, 'key': key};
+      // show a spinner
+      $('#spinner_galaxy').removeClass('hidden');
+      $('#tick_galaxy').addClass('hidden');
+      $('#cross_galaxy').addClass('hidden');
+
+      service.post(data, function(d) {
+        console.log(JSON.stringify(d));
+        if (!__ihm.manageErrorMessage(d)) {
+          // show a red cross
+          $('#spinner_galaxy').addClass('hidden');
+          $('#tick_galaxy').addClass('hidden');
+          $('#cross_galaxy').removeClass('hidden');
+          return;
+        }
+      // show a green tick
+      $('#spinner_galaxy').addClass('hidden');
+      $('#tick_galaxy').removeClass('hidden');
+      $('#cross_galaxy').addClass('hidden');
+      // update the placeholder
+      $('.galaxy_url#' + username).attr('placeholder', url);
+      $('.galaxy_key#' + username).attr('placeholder', key);
+      });
     }
 
     displayNavbar(loged, username, admin, blocked) {

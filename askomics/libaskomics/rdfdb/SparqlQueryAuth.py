@@ -199,7 +199,7 @@ class SparqlQueryAuth(SparqlQueryBuilder):
     def add_apikey(self, username, keyname):
         """Insert a new api key"""
 
-        key = self.get_random_key()
+        key = self.get_random_string(20)
         keyid = keyname + '_' + key[:5]
 
         return self.prepare_query(
@@ -214,14 +214,34 @@ class SparqlQueryAuth(SparqlQueryBuilder):
             }
             """)
 
+    def add_galaxy(self, username, url, key):
+        """Insert a galaxy instance (url + api key)"""
+
+        instance = 'galaxy_' + self.get_random_string(5)
+
+        query = self.prepare_query(
+            """
+            INSERT DATA {
+                GRAPH <""" + self.get_param('askomics.users_graph') + """> {
+                    :""" + username + """ :galaxy_instance :""" + instance + """ .
+                    :""" + instance + """ rdf:type :galaxy .
+                    :""" + instance + """ :galaxy_url \"""" + url +"""\" .
+                    :""" + instance + """ :galaxy_key \"""" + key +"""\" .
+                }
+            }
+            """)
+
+        self.log.debug(query)
+        return query
+
     @staticmethod
-    def get_random_key():
-        """return a random string of 10 character"""
+    def get_random_string(number):
+        """return a random string of n character"""
         # self.log.debug('get_random_key')
 
         # alpabet = "!$%&()*+,-./:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~1234567890"
         alpabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-        return ''.join(random.choice(alpabet) for i in range(20))
+        return ''.join(random.choice(alpabet) for i in range(number))
 
     def delete_apikey(self, key):
         """
