@@ -276,6 +276,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
             urlbase = self.settings['askomics.load_url']
 
         url = urlbase+"/ttl/"+ self.session['username'] + '/' + os.path.basename(fp.name)
+        self.log.debug("= load_data_from_file =");
         self.log.debug(url)
         data = {}
         data["status"] = "ok"
@@ -285,8 +286,8 @@ class SourceFile(ParamManager, HaveCachedProperties):
             else:
                 queryResults = ql.load_data(url, self.graph)
         except Exception as e:
-            data["status"] = "failed"
-            return self._format_exception(e)
+            self.log.error(self._format_exception(e))
+            raise e
 
         finally:
             if self.settings["askomics.debug"]:
