@@ -68,7 +68,7 @@ case $depmode in
         usage
         exit 1
 esac
-echo "===>$ASKOMICS_SMTP_HOST"
+
 # Get config file -----------------------------------------
 if [[ 
         ! -z $TRIPLESTORE_ENDPOINT || 
@@ -165,5 +165,6 @@ askomics="$python_ex $python_flags $pserve $config_path $pserve_flags"
 
 if [[ $build == false ]]; then
     echo "starting askomics ..."
+    echo "$askomics"
     $askomics
 fi
