@@ -5,7 +5,8 @@
 Classes to import data from a gff3 source files
 """
 
-import os, shutil
+import os
+import shutil
 import textwrap
 from pygments import highlight
 from pygments.lexers import TurtleLexer
@@ -45,14 +46,13 @@ class SourceFileTtl(SourceFile):
         return highlight(ttl, TurtleLexer(), formatter) # Formated html
 
     def persist(self, urlbase, public, method):
-        import glob
         """
         insert the ttl sourcefile in the TS
 
         """
         pathttl = self.getRdfDirectory()
         shutil.copy(self.path, pathttl)
-        data = None;
+        data = None
 
         if method == 'load':
             fil_open = open(pathttl + '/' + os.path.basename(self.path))
@@ -65,7 +65,7 @@ class SourceFileTtl(SourceFile):
 
         self.insert_metadatas(public)
         return data
-        
+
     def file_get_contents(self, filename):
         """
         get the content of a file
