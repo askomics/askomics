@@ -20,24 +20,26 @@ class ParamManager(object):
         self.session = session
 
         self.ASKOMICS_prefix = {
-                                "": self.get_param("askomics.prefix"),
-                                "displaySetting": self.get_param("askomics.display_setting"),
-                                "xsd": """http://www.w3.org/2001/XMLSchema#""",
-                                "rdfs": """http://www.w3.org/2000/01/rdf-schema#""",
-                                "rdf": """http://www.w3.org/1999/02/22-rdf-syntax-ns#""",
-                                "rdfg": """http://www.w3.org/2004/03/trix/rdfg-1/""",
-                                "owl": """http://www.w3.org/2002/07/owl#""",
-                                "prov": """http://www.w3.org/ns/prov#""",
-                                "dc": """http://purl.org/dc/elements/1.1/"""
-                                }
+            "": self.get_param("askomics.prefix"),
+            "displaySetting": self.get_param("askomics.display_setting"),
+            "xsd": """http://www.w3.org/2001/XMLSchema#""",
+            "rdfs": """http://www.w3.org/2000/01/rdf-schema#""",
+            "rdf": """http://www.w3.org/1999/02/22-rdf-syntax-ns#""",
+            "rdfg": """http://www.w3.org/2004/03/trix/rdfg-1/""",
+            "owl": """http://www.w3.org/2002/07/owl#""",
+            "prov": """http://www.w3.org/ns/prov#""",
+            "dc": """http://purl.org/dc/elements/1.1/""",
+            "foaf": """http://xmlns.com/foaf/0.1/"""
+        }
 
-        self.userfilesdir='askomics/static/results/'
+        self.userfilesdir = 'askomics/static/results/'
         if not 'user.files.dir' in self.settings:
-            self.log.warning(" ******* 'user.files.dir' is not defined ! ********* \n Csv are saved in "+self.userfilesdir)
+            self.log.warning(" ******* 'user.files.dir' is not defined ! ********* "
+                             "\n Csv are saved in "+self.userfilesdir)
         else:
-            self.userfilesdir=self.settings['user.files.dir']+"/"
+            self.userfilesdir = self.settings['user.files.dir']+"/"
 
-        self.ASKOMICS_html_template      = 'askomics/templates/integration.pt'
+        self.ASKOMICS_html_template = 'askomics/templates/integration.pt'
 
         self.escape = {
             'numeric' : lambda str: str,
@@ -89,7 +91,7 @@ class ParamManager(object):
         return key in self.settings.keys()
 
     def updateListPrefix(self,listPrefix):
-        self.log.info("updateListPrefix")
+        self.log.debug("updateListPrefix")
         listPrefix = list(set(listPrefix))
 
         lPrefix = {}
@@ -208,3 +210,52 @@ class ParamManager(object):
             return bool(int(result))
 
         raise ValueError("Can not convert string to boolean : "+str(result))
+
+    def send_mails(self, host_url, dests, subject, text):
+        import smtplib
+        from email.mime.multipart import MIMEMultipart
+        from email.mime.text import MIMEText
+
+        """
+        Send a mail to a list of Recipients
+        """
+        self.log.debug(" == Security.py:send_mails == ")
+        # Don't send mail if the smtp server is not in
+        # the config file
+        if not self.get_param('smtp.host'):
+            return
+        if not self.get_param('smtp.port'):
+            return
+        if not self.get_param('smtp.login'):
+            return
+        if not self.get_param('smtp.password'):
+            return
+        starttls = False
+        if self.get_param('smtp.starttls'):
+            starttls = self.get_param('smtp.starttls').lower() == 'yes' or \
+                       self.get_param('smtp.starttls').lower() == 'ok' or \
+                       self.get_param('smtp.starttls').lower() == 'true'
+
+        host = self.get_param('smtp.host')
+        port = self.get_param('smtp.port')
+        login = self.get_param('smtp.login')
+        password = self.get_param('smtp.password')
+
+        msg = MIMEMultipart()
+        msg['From'] = 'AskoMics@'+host_url
+        msg['To'] = ", ".join(dests)
+        msg['Subject'] = subject
+        msg.attach(MIMEText(text, 'plain'))
+
+        try:
+            smtp = smtplib.SMTP(host, port)
+            smtp.set_debuglevel(1)
+            if starttls:
+                smtp.ehlo()
+                smtp.starttls()
+            smtp.login(login, password)
+            smtp.sendmail(dests[0], dests, msg.as_string())
+            smtp.quit()
+            self.log.debug("Successfully sent email")
+        except Exception as e:
+            self.log.debug("Error: unable to send email: " + str(e))
