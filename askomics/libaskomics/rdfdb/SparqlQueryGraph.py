@@ -1,9 +1,18 @@
-import logging
-# from pprint import pformat
-# from string import Template
+#! /usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+Classes to query triplestore on property of entity (attributes and relations).
 
-# from askomics.libaskomics.rdfdb.SparqlQuery import SparqlQuery
-# from askomics.libaskomics.ParamManager import ParamManager
+information on build_query_on_the_fly:
+
+* When querying as asdmin : build_query_on_the_fly(QUERY, True) 
+==> The query have to contains GRAPH ?g { ... } because all data are store on a Graph 
+
+* When querying as a classic user : build_query_on_the_fly(QUERY) or build_query_on_the_fly(QUERY, False)  
+=> The query can not contain the GRAPH keyword because 'FROM' clauses cause all triplets are merged in the unique DEFAULT graph !!  
+
+"""
+import logging
 from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
 
 class SparqlQueryGraph(SparqlQueryBuilder):
@@ -23,7 +32,6 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         """
         return self.build_query_on_the_fly({
             'select': '?s ?p ?o',
-            'from'  : '*',
             'query': '?s ?p ?o .'
             })
 
@@ -38,13 +46,16 @@ class SparqlQueryGraph(SparqlQueryBuilder):
                      '\t?nodeUri displaySetting:entity "true"^^xsd:boolean .\n' +
                      '\t?nodeUri displaySetting:startPoint "true"^^xsd:boolean .\n' +
                      '\t?nodeUri rdfs:label ?nodeLabel.\n'+
-                     "}\n"+
-                     "{ { ?g :accessLevel ?accesLevel VALUES ?accesLevel {'public'} } "+
-                     " UNION "+
-                     "{ ?g :accessLevel ?accesLevel.\n "+
-                       "?g dc:creator '" + self.session['username'] + "' }\n"+
-                      "}."
-        },True)
+                     "\t{\n"+
+                     "\t\t{ ?g :accessLevel ?accesLevel.\n"+
+                     "\t\t\tVALUES ?accesLevel { 'public' }."+
+                     "\t\t}\n"+
+                     "\t\tUNION\n"+
+                     "\t\t{ ?g :accessLevel ?accesLevel.\n "+
+                     "\t\t?g dc:creator '" + self.session['username'] + "' }\n"+
+                     "\t}\n."+
+                     "}"
+        }, True)
 
     def get_entities_availables(self):
         """
@@ -55,7 +66,8 @@ class SparqlQueryGraph(SparqlQueryBuilder):
             'select': '?g ?uri',
             'query': 'GRAPH ?g {\n'+
                      '?uri displaySetting:entity "true"^^xsd:boolean.\n'+
-                     "} { ?g dc:creator ?d.} \n"
+                     "{ { ?g :accessLevel 'public' } UNION { ?g dc:creator '" +
+                     self.session['username'] + "'. } } }\n"
         })
 
     def get_isa_relation_entities(self):
@@ -80,9 +92,8 @@ class SparqlQueryGraph(SparqlQueryBuilder):
             'select': '?g',
             'query': 'GRAPH ?g {\n'+
                      '?s ?p ?o.\n'+
-                     "}\n"+
-                     "{ ?g :accessLevel 'public'. } "
-        },True)
+                     "?g :accessLevel 'public'. } "
+        }, True)
 
     def get_private_graphs(self):
         """
@@ -91,11 +102,11 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         self.log.debug('---> get_private_graphs')
         return self.build_query_on_the_fly({
             'select': '?g (count(*) as ?co)',
-            'query': 'GRAPH ?g {\n'+
-                 '?s ?p ?o.\n'+
-                 "}\n"+
-                 "{ ?g dc:creator '" + self.session['username'] + "' . } "
-        },True)
+            'query': 'GRAPH ?g {\n'+\
+                 '?s ?p ?o.\n'+     \
+                 "?g dc:creator '" + self.session['username'] + "' . } ",
+            'post_action': 'GROUP BY ?g'
+        }, True)
 
 
     def get_if_positionable(self, uri):
@@ -105,8 +116,15 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         self.log.debug('---> get_if_positionable')
         return self.build_query_on_the_fly({
             'select': '?exist',
-            'query': 'BIND(EXISTS {<' + uri + '> displaySetting:is_positionable "true"^^xsd:boolean} AS ?exist)'
-        })
+            'query': 'GRAPH ?g {\n\tBIND(EXISTS {<' +
+                     uri + '> displaySetting:is_positionable "true"^^xsd:boolean} AS ?exist) '+
+                     '\t{'+
+                     '\t\t{ ?g :accessLevel "public". }'+
+                     '\t\tUNION '+
+                     '\t\t{ ?g dc:creator "'+self.session['username']+'".}'+
+                     '\t}'+
+                     '}'
+        }, True)
 
     def get_common_pos_attr(self, uri1, uri2):
         """
@@ -115,10 +133,17 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         self.log.debug('---> get_common_pos_attr')
         return self.build_query_on_the_fly({
             'select': '?uri ?pos_attr ?status',
-            'query': 'VALUES ?pos_attr {:position_taxon :position_ref :position_strand }\n' +
+            'query': 'GRAPH ?g {\n'+
+                     '\tVALUES ?pos_attr {:position_taxon :position_ref :position_strand }\n' +
                      '\tVALUES ?uri {<'+uri1+'> <'+uri2+'> }\n' +
-                     '\tBIND(EXISTS {?pos_attr rdfs:domain ?uri} AS ?status)'
-        })
+                     '\tBIND(EXISTS {?pos_attr rdfs:domain ?uri} AS ?status)'+
+                     '\t{'+
+                     '\t\t{ ?g :accessLevel "public". }'+
+                     '\t\tUNION '+
+                     '\t\t{ ?g dc:creator "'+self.session['username']+'".}'+
+                     '\t}'+
+                     '}'
+        }, True)
 
     def get_all_taxons(self):
         """
@@ -127,9 +152,16 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         self.log.debug('---> get_all_taxons')
         return self.build_query_on_the_fly({
             'select': '?taxon',
-            'query': ':taxonCategory displaySetting:category ?URItax .\n' +
-                     '\t?URItax rdfs:label ?taxon'
-        })
+            'query': 'GRAPH ?g {\n'+
+                     '\t:taxonCategory displaySetting:category ?URItax .\n' +
+                     '\t?URItax rdfs:label ?taxon'+
+                     '\t{'+
+                     '\t\t{ ?g :accessLevel "public". }'+
+                     '\t\tUNION '+
+                     '\t\t{ ?g dc:creator "'+self.session['username']+'".}'+
+                     '\t}'+
+                     '}'
+        }, True)
 
     def get_abstraction_attribute_entity(self, entities):
         """
@@ -137,30 +169,40 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         """
         return self.build_query_on_the_fly({
             'select': '?g ?entity ?attribute ?labelAttribute ?typeAttribute',
-            'query': 'GRAPH ?g {\n' +
+            'query': 'Graph ?g {\n' +
+                     '\tVALUES ?entity { ' + entities + ' }\n' +
                      '\t?entity displaySetting:entity "true"^^xsd:boolean .\n\n' +
                      '\t?attribute displaySetting:attribute "true"^^xsd:boolean .\n\n' +
                      '\t?attribute rdf:type owl:DatatypeProperty ;\n' +
                      '\t           rdfs:label ?labelAttribute ;\n' +
                      '\t           rdfs:domain ?entity ;\n' +
                      '\t           rdfs:range ?typeAttribute .\n\n' +
-                     '\tVALUES ?entity { ' + entities + ' }\n' +
                      '\tVALUES ?typeAttribute { xsd:decimal xsd:string } \n'+
-                     '} { ?g dc:creator ?d.}'
-        })
+                     '\t{'+
+                     '\t\t{ ?g :accessLevel "public". }'+
+                     '\t\tUNION '+
+                     '\t\t{ ?g dc:creator "'+self.session['username']+'".}'+
+                     '\t}'+
+                     '}'
+        }, True)
 
     def get_abstraction_relation(self, prop):
         """
         Get the relation of an entity
         """
         return self.build_query_on_the_fly({
-            'select': '?g ?subject ?relation ?object',
+            'select': '?g ?d ?subject ?relation ?object',
             'query': 'GRAPH ?g { ?relation rdf:type ' + prop + ' ;\n' +
                      '\t          rdfs:domain ?subject ;\n' +
                      '\t          rdfs:range ?object .\n'+
                      '\t?subject displaySetting:entity "true"^^xsd:boolean .\n\n' +
-                     '\t} { ?g dc:creator ?d.}'
-            })
+                     '\t{'+
+                     '\t\t{ ?g :accessLevel "public". }'+
+                     '\t\tUNION '+
+                     '\t\t{?g dc:creator "'+self.session['username']+'" .}'+
+                     '\t}'+
+                     '}'
+            }, True)
 
 
     def get_abstraction_entity(self, entities):
@@ -171,8 +213,14 @@ class SparqlQueryGraph(SparqlQueryBuilder):
             'select': '?g ?entity ?property ?value',
             'query': 'GRAPH ?g { ?entity ?property ?value .\n' +
                      '\t?entity displaySetting:entity "true"^^xsd:boolean .\n' +
-                     '\tVALUES ?entity { ' + entities + ' } } { ?g dc:creator ?d.}'
-            })
+                     '\tVALUES ?entity { ' + entities + '}.\n'+
+                     '\t{'+
+                     '\t\t{ ?g :accessLevel "public". }'+
+                     '\t\tUNION '+
+                     '\t\t{?g dc:creator "'+self.session['username']+'" .}'+
+                     '\t}'+
+                     '}'
+            }, True)
 
     def get_abstraction_positionable_entity(self):
         """
@@ -190,14 +238,21 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         """
         return self.build_query_on_the_fly({
             'select': '?g ?entity ?category ?labelCategory ?typeCategory',
-            'query': 'GRAPH ?g { ?entity displaySetting:entity "true"^^xsd:boolean .\n' +
+            'query': 'GRAPH ?g { \n'+
+                     '\tVALUES ?entity { ' + entities + ' }\n' +
+                     '\t?entity displaySetting:entity "true"^^xsd:boolean .\n' +
                      '\t?typeCategory displaySetting:category [] .\n' +
                      '\t?category rdf:type owl:ObjectProperty ;\n' +
                      '\t            rdfs:label ?labelCategory ;\n' +
                      '\t            rdfs:domain ?entity;\n' +
                      '\t            rdfs:range ?typeCategory\n' +
-                     '\tVALUES ?entity { ' + entities + ' } }'
-            })
+                     '\t{'+
+                     '\t\t{ ?g :accessLevel "public". }'+
+                     '\t\tUNION '+
+                     '\t\t{?g dc:creator "'+self.session['username']+'" .}'+
+                     '\t}'+
+                     '\t}'
+            }, True)
 
     def get_class_info_from_abstraction(self, node_class):
         """

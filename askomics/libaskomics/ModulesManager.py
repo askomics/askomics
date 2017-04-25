@@ -153,18 +153,18 @@ class ModulesManager(ParamManager):
             if not all modules files are saved with the unchecked status !
         '''
         sqb = SparqlQueryBuilder(self.settings, self.session)
-        ql  = QueryLauncher(self.settings, self.session)
+        ql = QueryLauncher(self.settings, self.session)
         results = ql.process_query(sqb.build_query_on_the_fly({
             'select': '?uri ?module ?comment ?version ?graph ?state',
-            'from'  : '<'+self.graph_modules+'>',
+            'from'  : [self.graph_modules],
             'query': '{\n'+
-            '?uri rdfs:label ?module .\n'+
-            '?uri rdfs:comment ?comment .\n'+
-            '?uri :module_version ?version .\n'+
-            '?uri :module_state ?state .\n'+
-            'OPTIONAL { ?uri :module_graph ?graph . } \n'+
-            '}\n'
-            },True).query)
+                     '?uri rdfs:label ?module .\n'+
+                     '?uri rdfs:comment ?comment .\n'+
+                     '?uri :module_version ?version .\n'+
+                     '?uri :module_state ?state .\n'+
+                     'OPTIONAL { ?uri :module_graph ?graph . } \n'+
+                     '}\n'
+        }, True).query)
 
         self.log.debug(' ***** module on TPS ***** ')
         listMoOnTps = {}
@@ -203,36 +203,36 @@ class ModulesManager(ParamManager):
 
         d = self.moStateOnTPS()
         #manage new database
-        if d == False :
+        if d == False:
             d = self.moStateOnTPS()
         return d
 
-    def generateAbstractAskomicsRDF(self,graph):
+    def generateAbstractAskomicsRDF(self, graph):
         '''
         '''
         sqb = SparqlQueryBuilder(self.settings, self.session)
-        ql  = QueryLauncher(self.settings, self.session)
+        ql = QueryLauncher(self.settings, self.session)
         results = ql.process_query(sqb.build_query_on_the_fly({
             'select': '?entityDom ?entityDomLab ?relation ?entityRan ?entityRanLab',
             'query': '{\n'+
-            'GRAPH ?g { \n' +
-            '?relation a owl:ObjectProperty.\n'+
-            '?relation rdfs:domain ?entityDom.\n'+
-            '?entityDom a owl:Class .\n'+
-            'OPTIONAL { ?entityDom rdfs:label ?entityDomLab }.\n'+
-            '?relation rdfs:range ?entityRan .\n'+
-            '?entityRan a owl:Class .\n'+
-            'OPTIONAL { ?entityRan rdfs:label ?entityRanLab }.\n'+
-            'FILTER ( isIRI(?entityDom)).\n ' +
-            'FILTER ( isIRI(?entityRan)).\n ' +
-            '}\n'+
-            'VALUES ?g {<'+graph+'>}'
-            '}\n'
-            },True).query)
+                     'GRAPH ?g { \n' +
+                     '?relation a owl:ObjectProperty.\n'+
+                     '?relation rdfs:domain ?entityDom.\n'+
+                     '?entityDom a owl:Class .\n'+
+                     'OPTIONAL { ?entityDom rdfs:label ?entityDomLab }.\n'+
+                     '?relation rdfs:range ?entityRan .\n'+
+                     '?entityRan a owl:Class .\n'+
+                     'OPTIONAL { ?entityRan rdfs:label ?entityRanLab }.\n'+
+                     'FILTER ( isIRI(?entityDom)).\n ' +
+                     'FILTER ( isIRI(?entityRan)).\n ' +
+                     '}\n'+
+                     'VALUES ?g {<'+graph+'>}'
+                     '}\n'
+        }, True).query)
 
-        entities   = {}
+        entities = {}
         attributes = {}
-        label      = {}
+        label = {}
 
         for r in results:
             if r['entityDom'] not in entities:
@@ -259,18 +259,17 @@ class ModulesManager(ParamManager):
             results = ql.process_query(sqb.build_query_on_the_fly({
                 'select': '?entity ?attribute ?basetype',
                 'query': '{\n'+
-                'GRAPH ?g { \n' +
-                '?attribute a owl:DatatypeProperty.\n'+
-                '?attribute rdfs:domain ?entity.\n'+
-                '?entity a owl:Class .\n'+
-                '?attribute rdfs:range ?basetype .\n'+
-                'FILTER ( isIRI(?basetype)).\n ' +
-                'VALUES ?entity {'+values+'}.\n ' +
-                '}\n'+
-                'VALUES ?g {<'+graph+'>}'
-                '}\n'
-                },True).query)
-
+                         'GRAPH ?g { \n' +
+                         '?attribute a owl:DatatypeProperty.\n'+
+                         '?attribute rdfs:domain ?entity.\n'+
+                         '?entity a owl:Class .\n'+
+                         '?attribute rdfs:range ?basetype .\n'+
+                         'FILTER ( isIRI(?basetype)).\n ' +
+                         'VALUES ?entity {'+values+'}.\n ' +
+                         '}\n'+
+                         'VALUES ?g {<'+graph+'>}'
+                         '}\n'
+            }, True).query)
 
             for r in results:
                 if r['entity'] not in attributes:
@@ -307,6 +306,7 @@ class ModulesManager(ParamManager):
         return rdftab
 
     def importRDF(self,mo,namemodule,host_url,graph=None):
+        self.log.debug("=============> importRDF <===================")
         fp = tempfile.NamedTemporaryFile(prefix="module_"+self.escape['entity'](namemodule), suffix=".ttl", mode="w", delete=False)
         fp.write('\n'.join(self.moduleFiles[namemodule]['rdf']))
         fp.close()
@@ -349,9 +349,20 @@ class ModulesManager(ParamManager):
         ql = QueryLauncher(self.settings, self.session)
 
         if active:
-            self.importRDF(mo,namemodule,host_url)
-            #loading owl file
-            ql.load_data(self.moduleFiles[namemodule]['owl'],mo['graph'])
+            
+            try:
+                self.importRDF(mo,namemodule,host_url)
+                #loading owl file
+                if 'owl' in self.moduleFiles[namemodule] and self.moduleFiles[namemodule]['owl'].strip() != '':
+                    ql.load_data(self.moduleFiles[namemodule]['owl'],mo['graph'])
+            except Exception as e:
+                self.log.error('failed: ' + str(e))
+                self.log.debug(" delete MO state :" + urimodule)
+                self.deleteMoState(urimodule,mo)
+                self.log.debug(" insert new MO state :"+urimodule)
+                self.importMoSate(mo,"off")
+                raise e
+
             self.log.debug(" delete MO state :" + urimodule)
             self.deleteMoState(urimodule,mo)
             self.log.debug(" insert new MO state :"+urimodule)
