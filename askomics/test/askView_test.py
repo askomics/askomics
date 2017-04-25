@@ -423,7 +423,7 @@ class AskViewTests(unittest.TestCase):
         data = self.askview.getSparqlQueryInTextFormat()
         print(len(str(data)))
 
-        assert len(str(data)) == 781
+        assert len(str(data)) == 824
 
     def test_upload_ttl(self):
         """Test uploadTtl method"""
