@@ -147,7 +147,18 @@ class QueryLauncher(ParamManager):
         return results
 
     def parse_results(self, json_res):
-        parsed =  [
+        '''
+            parse answer results from TPS
+        '''
+        
+        if json_res is None:
+            return []
+        if "results" not in json_res:
+            return []
+        if "bindings" not in json_res["results"]:
+            return []
+
+        parsed = [
                 {
                     sparql_variable: entry[sparql_variable]["value"]
                     for sparql_variable in entry.keys()
@@ -170,7 +181,11 @@ class QueryLauncher(ParamManager):
 
 
     def process_query(self, query):
+        '''
+            Execute query and parse the results if exist
+        '''
         json_query = self.execute_query(query, log_raw_results=False)
+        
         results = self.parse_results(json_query)
         return results
 
