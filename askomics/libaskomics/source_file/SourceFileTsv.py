@@ -94,6 +94,7 @@ class SourceFileTsv(SourceFile):
 
             # first line is header
             headers = next(tabreader)
+            headers = [h.strip() for h in headers]
 
         return headers
 
@@ -323,20 +324,20 @@ class SourceFileTsv(SourceFile):
             tabreader = csv.reader(tabfile, dialect=self.dialect)
             next(tabreader) # Skip header
 
-            entity_label = ""
             # Loop on lines
             for row_number, row in enumerate(tabreader):
                 #blanck line
                 if len(row) == 0:
                     continue
                 if len(row) != len(self.headers):
-                    e = SourceFileSyntaxError('Invalid line found: '+str(self.headers)+' columns expected, found '+str(len(row))+" - (last valid entity "+entity_label+")")
-                    e.filename = self.path
-                    e.lineno = row_number
-                    log.error(repr(e))
-                    raise e
+                    exc = SourceFileSyntaxError('Invalid line found: '+str(self.headers)+
+                                                ' columns expected, found '+str(len(row))+
+                                                " - (last valid entity "+entity_label+")")
+                    exc.filename = self.path
+                    exc.lineno = row_number
+                    self.log.error(repr(exc))
+                    raise exc
 
-                entity_label = row[0]
                 for i, (header, current_type) in enumerate(zip(self.headers, self.forced_column_types)):
                     if current_type in ('category', 'taxon', 'ref', 'strand'):
                         # This is a category, keep track of allowed values for this column
