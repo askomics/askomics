@@ -1211,6 +1211,19 @@ class AskView(object):
 
         security = Security(self.settings, self.request.session, self.request.session['username'], '', '', '')
 
+
+        # Check if a galaxy is already registred
+        galaxy_already_registred = security.check_galaxy()
+
+        if galaxy_already_registred:
+            security.delete_galaxy()
+
+        # If url or apikey are empty, do nothing (only deletion)
+        if not url or not key:
+            self.data['success'] = 'deleted'
+            return self.data
+
+        # Insert the new Galaxy
         try:
             security.add_galaxy(url, key)
         except Exception as e:
@@ -1218,7 +1231,7 @@ class AskView(object):
             self.data['error'] = 'Connection to Galaxy failed'
             return self.data
 
-        self.data['success'] = 'success'
+        self.data['success'] = 'inserted'
 
         return self.data
 
@@ -1453,6 +1466,7 @@ class AskView(object):
 
 
         apikey_list = []
+        galaxy_dict = {}
 
         for res in result:
             if 'keyname' in res:
@@ -1461,6 +1475,12 @@ class AskView(object):
                 # apikey_dict[res['keyname']] = res['apikey']
                 apikey_list.append({'name': res['keyname'], 'key': res['apikey']})
 
+        for res in result:
+            if 'Gurl' in res:
+                self.log.debug(res['Gurl'])
+                self.log.debug(res['Gkey'])
+                galaxy_dict = {'url': res['Gurl'], 'key': res['Gkey']}
+
         result = result[0]
         result['email'] = re.sub(r'^mailto:', '', result['email'])
         result['username'] = self.request.session['username']
@@ -1468,8 +1488,12 @@ class AskView(object):
         result['blocked'] = bool(int(result['blocked']))
         result.pop('keyname', None)
         result.pop('apikey', None)
+        result.pop('Gurl', None)
+        result.pop('Gkey', None)
 
         result['apikeys'] = apikey_list
+        if galaxy_dict:
+            result['galaxy'] = galaxy_dict
 
         return result
     @view_config(route_name='update_mail', request_method='POST')

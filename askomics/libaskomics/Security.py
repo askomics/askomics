@@ -418,3 +418,22 @@ class Security(ParamManager):
         sqa = SparqlQueryAuth(self.settings, self.session)
 
         query_laucher.execute_query(sqa.add_galaxy(self.username, url, key).query)
+
+    def check_galaxy(self):
+        """Check if user have galaxy triples"""
+
+        query_laucher = QueryLauncher(self.settings, self.session)
+        sqa = SparqlQueryAuth(self.settings, self.session)
+
+        result = query_laucher.process_query(sqa.check_galaxy(self.username).query)
+
+        return ParamManager.Bool(result[0]['status'])
+
+    def delete_galaxy(self):
+        """Delete galaxy triple for the user"""
+
+
+        query_laucher = QueryLauncher(self.settings, self.session)
+        sqa = SparqlQueryAuth(self.settings, self.session)
+
+        query_laucher.execute_query(sqa.delete_galaxy(self.username).query)

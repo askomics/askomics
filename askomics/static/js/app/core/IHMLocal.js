@@ -786,12 +786,9 @@ class IHMLocal {
 
       let service = new RestServiceJs('get_my_infos');
       service.getAll(function(d) {
-        // console.log(JSON.stringify(d));
-        console.log('keys');
-        console.log(d.apikeys);
         let source = $('#template-user-managment').html();
         let template = Handlebars.compile(source);
-        let context = {user: d, keys: d.apikeys};
+        let context = {user: d, keys: d.apikeys, galaxy: d.galaxy};
         let html = template(context);
         $('#content_user_info').empty();
         $('#content_user_info').append(html);
@@ -960,7 +957,6 @@ class IHMLocal {
       $('#cross_galaxy').addClass('hidden');
 
       service.post(data, function(d) {
-        console.log(JSON.stringify(d));
         if (!__ihm.manageErrorMessage(d)) {
           // show a red cross
           $('#spinner_galaxy').addClass('hidden');
@@ -968,13 +964,29 @@ class IHMLocal {
           $('#cross_galaxy').removeClass('hidden');
           return;
         }
-      // show a green tick
-      $('#spinner_galaxy').addClass('hidden');
-      $('#tick_galaxy').removeClass('hidden');
-      $('#cross_galaxy').addClass('hidden');
-      // update the placeholder
-      $('.galaxy_url#' + username).attr('placeholder', url);
-      $('.galaxy_key#' + username).attr('placeholder', key);
+        if (d.success == "deleted") {
+            //show a green tick
+            $('#spinner_galaxy').addClass('hidden');
+            $('#tick_galaxy').removeClass('hidden');
+            $('#cross_galaxy').addClass('hidden');
+            // update the placeholder with default values
+            $('.galaxy_url').attr('placeholder', 'Galaxy url');
+            $('.galaxy_key').attr('placeholder', 'Galaxy api key');
+            // Button name: add
+            $('.add_galaxy').html('Add');
+            return;
+        }
+        // Key updated
+        // show a green tick
+        $('#spinner_galaxy').addClass('hidden');
+        $('#tick_galaxy').removeClass('hidden');
+        $('#cross_galaxy').addClass('hidden');
+        // update the placeholder
+        $('.galaxy_url').attr('placeholder', url);
+        $('.galaxy_key').attr('placeholder', key);
+        // remove the values
+        $('.galaxy_url').val('');
+        $('.galaxy_key').val('');
       });
     }
 

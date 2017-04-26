@@ -141,7 +141,7 @@ class SparqlQueryAuth(SparqlQueryBuilder):
         Get infos about one user
         """
         return self.build_query_on_the_fly({
-            'select': '?email ?admin ?blocked ?keyname ?apikey',
+            'select': '?email ?admin ?blocked ?keyname ?apikey ?Gurl ?Gkey',
             'query': "GRAPH <"+ self.get_param("askomics.users_graph") + "> {" +
                      '\t?URIusername rdf:type foaf:Person .\n' +
                      '\t?URIusername foaf:name "' + username + '" .\n' +
@@ -152,6 +152,12 @@ class SparqlQueryAuth(SparqlQueryBuilder):
                      '\t?URIusername :keyid ?URIkeyid .\n' +
                      '\t?URIkeyid rdfs:label ?keyname .\n' +
                      '\t?URIkeyid :key ?apikey .\n' +
+                     '\t}\n' +
+                     '\tOPTIONAL {\n' +
+                     '\t?URIusername :galaxy_instance ?Ginstance .\n' +
+                     '\t?Ginstance rdf:type :galaxy .\n' +
+                     '\t?Ginstance :galaxy_url ?Gurl .\n' +
+                     '\t?Ginstance :galaxy_key ?Gkey .\n' +
                      '\t}\n' +
                      "}"
         }, True)
@@ -258,3 +264,27 @@ class SparqlQueryAuth(SparqlQueryBuilder):
                 }
             }
             """)
+
+    def delete_galaxy(self, username):
+        """delete galaxy triples of a user"""
+
+        return self.prepare_query(
+            """
+            DELETE WHERE {
+                GRAPH <"""+self.get_param('askomics.users_graph')+"""> {
+                    :""" + username + """ :galaxy_instance ?Ginstance .
+                    ?Ginstance ?p ?o .
+                }
+            }
+            """)
+
+    def check_galaxy(self, username):
+        """
+        Check if user have a galaxy
+        """
+        return self.build_query_on_the_fly({
+            'select': '?status',
+            'query': "GRAPH <"+ self.get_param("askomics.users_graph") + "> {" +
+                     'BIND(EXISTS {:' + username + ' :galaxy_instance ?Ginstance} AS ?status)' +
+                     "}"
+        }, True)
