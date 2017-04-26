@@ -60,7 +60,7 @@ class SourceFileGff(SourceFile):
         :rtype: List
         """
         exam = GFFExaminer()
-        handle = open(self.path)
+        handle = open(self.path, encoding="utf-8", errors="ignore")
         entities = []
         gff_type = exam.available_limits(handle)['gff_type']
         for ent in gff_type:
@@ -78,7 +78,7 @@ class SourceFileGff(SourceFile):
 
         self.log.debug('--> get turtle <--')
         self.log.debug(self.path)
-        handle = open(self.path)
+        handle = open(self.path, encoding="utf-8", errors="ignore")
 
         # To suffix all biological element without ID and try to have unique ID
         suffixURI = os.path.splitext(os.path.basename(self.path))[0]

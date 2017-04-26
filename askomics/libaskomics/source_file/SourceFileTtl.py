@@ -34,7 +34,7 @@ class SourceFileTtl(SourceFile):
 
         head = ''
 
-        with open(self.path, 'r') as fp:
+        with open(self.path, 'r', encoding="utf-8", errors="ignore") as fp:
             for x in range(1,100):
                 head += fp.readline()
 

@@ -314,7 +314,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
             #    data['error'] = ''
             errMess = "\n<br/><strong>Error line:"+str(linenumber)+"</strong><br/>"
             errMess += "<pre>"
-            with open(filename) as f:
+            with open(filename, encoding="utf-8", errors="ignore") as f:
                 count = 0
                 for line in f:
                     count+=1
@@ -357,7 +357,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
         :return: number of ligne (int)
         """
 
-        with open(self.path) as f:
+        with open(self.path, encoding="utf-8", errors="ignore") as f:
             for number, l in enumerate(f):
                 pass
 
