@@ -26,6 +26,7 @@ from askomics.libaskomics.rdfdb.SparqlQueryAuth import SparqlQueryAuth
 from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
 from askomics.libaskomics.rdfdb.ResultsBuilder import ResultsBuilder
 from askomics.libaskomics.source_file.SourceFile import SourceFile
+from askomics.libaskomics.GalaxyConnector import GalaxyConnector
 
 from pyramid.httpexceptions import (
     HTTPForbidden,
@@ -1563,4 +1564,34 @@ class AskView(object):
 
         self.data['success'] = 'success'
 
+        return self.data
+
+
+
+    @view_config(route_name='get_data_from_galaxy', request_method='GET')
+    def get_data_from_galaxy(self):
+
+        self.data = {}
+
+        # Check if a galaxy is registered
+        security = Security(self.settings, self.request.session, self.request.session['username'], '', '', '')
+
+        galaxy_auth = security.get_galaxy_infos()
+
+        self.log.debug(galaxy_auth)
+
+        if not galaxy_auth:
+            self.data['error'] = 'No galaxy'
+            return self.data
+
+        # check if the galaxy connection is ok
+        galaxy = GalaxyConnector(self.settings, self.request.session, galaxy_auth['url'], galaxy_auth['key'])
+        if not galaxy.check_galaxy_instance():
+            self.data['error'] = 'Wrong galaxy'
+            return self.data
+
+        # Then, get the datasets
+        datasets = galaxy.get_datasets()
+
+        self.data['datasets'] = datasets
         return self.data

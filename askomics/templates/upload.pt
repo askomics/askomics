@@ -58,6 +58,7 @@
             <span>Integrate</span>
         </span>
     </form>
+    <div id='galaxy_datasets'></div>
 </div>
 <!-- The template to display files available for upload -->
 <script id="template-upload" type="text/x-tmpl">

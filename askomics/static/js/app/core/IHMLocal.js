@@ -598,6 +598,16 @@ class IHMLocal {
 
         });
       });
+      // If a Galaxy instance is connected, show the form to get data from the Galaxy history
+      var service2 = new RestServiceJs('get_data_from_galaxy');
+      service2.getAll(function(data) {
+        let source = $('#template-galaxy-datasets').html();
+        let template = Handlebars.compile(source);
+        let context = {datasets: data.datasets};
+        let html = template(context);
+        $('#galaxy_datasets').empty();
+        $('#galaxy_datasets').append(html);
+      });
     }
 
     displayBlockedPage(username) {

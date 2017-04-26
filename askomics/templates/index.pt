@@ -1027,6 +1027,32 @@
                         {{/each}}
                     </table>
            </script>
+
+           <!-- template to display Galaxy datasets -->
+           <script id="template-galaxy-datasets" type="text/x-handlebars-template">
+           <hr/ >
+           <h4>Galaxy Datasets</h4>
+           <hr/ >
+           <table class='table table-striped'>
+           <tr>
+             <th>Id</th>
+             <th>File</th>
+             <th>Type</th>
+           </tr>
+           {{#each datasets}}
+            <tr>
+              <td>{{this.hid}}</td>
+              <td>{{this.name}}</td>
+              <td>{{this.extension}}</td>
+            </tr>
+           {{/each}}
+
+           </table>
+            <span id="integrate_galaxy" class="btn btn-primary integrate-button ">
+             <i class="glyphicon glyphicon-open-file"></i>
+            <span>Integrate</span>
+        </span>
+           </script>
     </body>
     <script>
         new IHMLocal().start();

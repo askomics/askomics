@@ -6,11 +6,11 @@ import re
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from validate_email import validate_email
-from bioblend import galaxy
 
 from askomics.libaskomics.ParamManager import ParamManager
 from askomics.libaskomics.rdfdb.SparqlQueryAuth import SparqlQueryAuth
 from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
+from askomics.libaskomics.GalaxyConnector import GalaxyConnector
 
 
 class Security(ParamManager):
@@ -408,9 +408,9 @@ class Security(ParamManager):
         """
 
         # try to connect to the galaxy server
+        galaxy = GalaxyConnector(self.settings, self.session, url, key)
         try:
-            galaxy_instance = galaxy.GalaxyInstance(url, key)
-            galaxy_instance.config.get_config()
+            galaxy.check_galaxy_instance()
         except Exception as e:
             raise e
 
@@ -418,6 +418,16 @@ class Security(ParamManager):
         sqa = SparqlQueryAuth(self.settings, self.session)
 
         query_laucher.execute_query(sqa.add_galaxy(self.username, url, key).query)
+
+    def get_galaxy_infos(self):
+        """Get Galaxy url and apikey of a user"""
+
+        query_laucher = QueryLauncher(self.settings, self.session)
+        sqa = SparqlQueryAuth(self.settings, self.session)
+
+        result = query_laucher.process_query(sqa.get_galaxy_infos(self.username).query)
+
+        return result[0]
 
     def check_galaxy(self):
         """Check if user have galaxy triples"""

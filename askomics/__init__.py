@@ -53,6 +53,8 @@ def main(global_config, **settings):
     config.add_route('uploadform', '/up/')
     config.add_route('upload_delete', '/up/file{sep:/*}{name:.*}&_method=DELETE')
     config.add_route('upload', '/up/file{sep:/*}{name:.*}')
+    # Galaxy route
+    config.add_route('get_data_from_galaxy', '/get_data_from_galaxy')
 
     # Authentication routes
     config.add_route('signup', '/signup')

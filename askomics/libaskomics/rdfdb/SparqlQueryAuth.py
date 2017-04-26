@@ -162,6 +162,21 @@ class SparqlQueryAuth(SparqlQueryBuilder):
                      "}"
         }, True)
 
+    def get_galaxy_infos(self, username):
+        """Get Galaxy url and apikey of a user"""
+
+        return self.build_query_on_the_fly({
+            'select': '?url ?key',
+            'query': "GRAPH <"+ self.get_param("askomics.users_graph") + "> {\n" +
+                     '\t?URIusername rdf:type foaf:Person .\n' +
+                     '\t?URIusername foaf:name "' + username + '" .\n' +
+                     '\t?URIusername :galaxy_instance ?Ginstance .\n' +
+                     '\t?Ginstance rdf:type :galaxy .\n' +
+                     '\t?Ginstance :galaxy_url ?url .\n' +
+                     '\t?Ginstance :galaxy_key ?key .\n' +
+                     "}"
+            }, True)
+
     def get_admins_emails(self):
         """
         Get emails of all admins
