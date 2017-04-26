@@ -549,7 +549,7 @@ class IHMLocal {
 
         formHtmlforUploadFiles.html = formHtmlforUploadFiles.html.replace("___TITLE_UPLOAD___",titleForm);
         formHtmlforUploadFiles.html = formHtmlforUploadFiles.html.replace("___SIZE_UPLOAD____",(sizeFileMax/(1000*1000))+" Mo");
-        formHtmlforUploadFiles.html = formHtmlforUploadFiles.html.replace('___URL___', $(location).attr('href'));
+        formHtmlforUploadFiles.html = formHtmlforUploadFiles.html.replace('___URL___', $(location).attr('origin'));
 
         $(content).html(formHtmlforUploadFiles.html);
         /*
