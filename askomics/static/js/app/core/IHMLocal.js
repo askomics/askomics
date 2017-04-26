@@ -549,16 +549,6 @@ class IHMLocal {
 
         formHtmlforUploadFiles.html = formHtmlforUploadFiles.html.replace("___TITLE_UPLOAD___",titleForm);
         formHtmlforUploadFiles.html = formHtmlforUploadFiles.html.replace("___SIZE_UPLOAD____",(sizeFileMax/(1000*1000))+" Mo");
-        let urlbase = $(location).attr('href').trim();
-        //console.log(urlbase);
-        //console.log(urlbase.charAt(urlbase.length-1));
-        if ( urlbase.charAt(urlbase.length-1) == "#" || urlbase.charAt(urlbase.length-1) == "/" ) {
-          urlbase = urlbase.substring(0, urlbase.length-2);
-        } 
-        formHtmlforUploadFiles.html = formHtmlforUploadFiles.html.replace('___URL___', urlbase);
-        
-        //console.log(JSON.stringify(location));
-
         $(content).html(formHtmlforUploadFiles.html);
         /*
 
