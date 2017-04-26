@@ -77,6 +77,7 @@ function set_property() {
     sed -i "/app:main/a $newline" "$dir_config/custom.ini"
 }
 # Get config file -----------------------------------------
+echo " === use config base : $dir_config/custom.ini "
 cp "$dir_config/$depmode.$triplestore.ini" "$dir_config/custom.ini"
 
 if [[ ! -z $TRIPLESTORE_ENDPOINT ]]; then
@@ -85,6 +86,7 @@ if [[ ! -z $TRIPLESTORE_ENDPOINT ]]; then
 fi
 
 if [[ ! -z $TRIPLESTORE_UPDATEPOINT ]]; then
+    echo "Custom triplestore updatepoint: $TRIPLESTORE_UPDATEPOINT"
     set_property "askomics.updatepoint" $TRIPLESTORE_UPDATEPOINT
 fi
 
