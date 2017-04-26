@@ -1204,58 +1204,39 @@ class AskView(object):
     def login_api(self):
 
         body = self.request.json_body
-        username = body['username']
         apikey = body['apikey']
 
-        self.data['error'] = []
-        error = False
+        self.data['error'] = ''
 
-        security = Security(self.settings, self.request.session, username, '', '', '')
+        security = Security(self.settings, self.request.session, '', '', '', '')
 
-        username_in_ts = security.check_username_in_database()
+        # Check if API key exist, and if yes, get the user
+        security.get_owner_of_apikey(apikey)
 
-        if not username_in_ts:
-            self.data['error'].append('username is not registered')
-            error = True
-
-        if error:
+        if not security.get_username():
+            self.data['error'] = 'API key belong to nobody'
             return self.data
-
 
         # Get the admin and blocked status
         admin_blocked = security.get_admin_blocked_by_username()
         security.set_admin(admin_blocked['admin'])
         security.set_blocked(admin_blocked['blocked'])
 
-
-        key_belong_to_user = security.ckeck_key_belong_user(apikey)
-
-        if not key_belong_to_user:
-            self.data['error'].append('Wrong API key')
-            error = True
-
-        if error:
-            return self.data
-
-
-        # User pass the authentication, log him
+        # Log the user
         try:
             security.log_user(self.request)
-            self.data['username'] = username
+            self.data['username'] = security.get_username()
             self.data['admin'] = admin_blocked['admin']
             self.data['blocked'] = admin_blocked['blocked']
 
         except Exception as e:
             self.data['error'] = str(e)
             self.log.error(str(e))
+            return self.data
 
         param_manager = ParamManager(self.settings, self.request.session)
         param_manager.getUploadDirectory()
 
-        # if not self.data['error']:
-        #     self.data.pop('error', None)
-        self.log.debug('**************************')
-        self.log.debug(self.data)
         return self.data
 
 

@@ -1,7 +1,7 @@
 import logging, hashlib
-from validate_email import validate_email
 import random
 import re
+
 
 from askomics.libaskomics.ParamManager import ParamManager
 from askomics.libaskomics.rdfdb.SparqlQueryAuth import SparqlQueryAuth
@@ -31,6 +31,10 @@ class Security(ParamManager):
         self.randomsalt = ''.join(random.choice(alpabet) for i in range(20))
         salted_pw = self.settings["askomics.salt"] + self.passwd + self.randomsalt
         self.sha256_pw = hashlib.sha256(salted_pw.encode('utf8')).hexdigest()
+
+    def get_username(self):
+        """get the username"""
+        return self.username
 
     def get_sha256_pw(self):
         """Get the hashed-salted password
@@ -85,7 +89,7 @@ class Security(ParamManager):
         result = query_laucher.process_query(sqa.check_email_presence(self.email).query)
         self.log.debug('---> result: ' + str(result))
 
-        if (len(result)<=0):
+        if len(result) <= 0:
             return False
 
         return ParamManager.Bool(result[0]['status'])
@@ -118,7 +122,7 @@ class Security(ParamManager):
 
         result = query_laucher.process_query(sqa.get_password_with_username(self.username).query)
 
-        if len(result)<=0:
+        if len(result) <= 0:
             ts_salt = ""
             ts_shapw = ""
         else:
@@ -130,19 +134,21 @@ class Security(ParamManager):
 
         return ts_shapw == shapw
 
-    def ckeck_key_belong_user(self, key):
-        """Check if a key belong to a user"""
+    def get_owner_of_apikey(self, key):
+        """Get the owner of an API kei
+
+        [description]
+        :param key: The API key
+        :type key: string
+        """
 
         query_laucher = QueryLauncher(self.settings, self.session)
         sqa = SparqlQueryAuth(self.settings, self.session)
 
-        result = query_laucher.process_query(sqa.ckeck_key_belong_user(self.username, key).query)
-        self.log.debug('---> result: ' + str(result))
+        result = query_laucher.process_query(sqa.get_owner_apikey(key).query)
 
-        if len(result)<=0:
-            return False
-
-        return ParamManager.Bool(result[0]['count'])
+        if result:
+            self.username = result[0]['username']
 
     def delete_apikey(self, key):
         """delete an apikey"""
@@ -165,7 +171,7 @@ class Security(ParamManager):
 
         self.log.debug('---> result: ' + str(result))
 
-        if len(result)<=0:
+        if len(result) <= 0:
             return 0
 
         return int(result[0]['count'])
@@ -267,7 +273,7 @@ class Security(ParamManager):
 
         results = {}
 
-        if len(result)<=0:
+        if len(result) <= 0:
             results['blocked'] = True
             results['admin'] = True
         else:
@@ -287,7 +293,7 @@ class Security(ParamManager):
 
         results = {}
 
-        if len(result)<=0:
+        if len(result) <= 0:
             results['blocked'] = True
             results['admin'] = True
         else:
