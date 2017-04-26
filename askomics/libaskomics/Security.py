@@ -1,4 +1,6 @@
-import logging, hashlib
+import logging
+import hashlib
+from validate_email import validate_email
 import random
 import re
 
