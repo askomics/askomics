@@ -231,7 +231,6 @@ class IHMLocal {
     }
 
     managelistErrorsMessage(listE) {
-      console.log("managelistErrorsMessage - error inside => "+JSON.stringify(listE));
       // Remove last message
       $('#error_div').remove();
       // If there is an error message, how it
@@ -247,7 +246,6 @@ class IHMLocal {
 
     loadStartPoints() {
       console.log('---> loadStartPoints');
-
       var service = new RestServiceJs("startpoints");
       $("#btn-down").prop("disabled", true);
       $("#showNode").hide();
@@ -395,8 +393,6 @@ class IHMLocal {
     }
 
     loadStatistics() {
-        console.log('-+-+- loadStatistics -+-+-');
-
         let service = new RestServiceJs('statistics');
 
         __ihm.displayModal('Loading statistics...', '', 'Close');
@@ -605,7 +601,6 @@ class IHMLocal {
     }
 
     displayBlockedPage(username) {
-      console.log('-+-+- displayBlockedPage -+-+-');
       $('#content_blocked').empty();
       let source = $('#template-blocked').html();
       let template = Handlebars.compile(source);
@@ -621,10 +616,6 @@ class IHMLocal {
     }
 
     loadUsers() {
-      console.log('-+-+- loadUsers -+-+-');
-
-      // __ihm.displayModal('Please wait', '', 'Close');
-
       let service = new RestServiceJs('get_users_infos');
       service.getAll(function(data) {
         $("#Users_adm").empty();
@@ -657,7 +648,6 @@ class IHMLocal {
     }
 
     delUser(username, reload=false, passwdconf=false) {
-      console.log('-+-+-delUser ' + username + ' -+-+-');
       // display confirmations buttons
       $('.del_user#' + username).hide();
       $('.div_confirm_del_user#' + username).removeClass('hidden').show();
@@ -673,7 +663,6 @@ class IHMLocal {
 
       //if yes, delete user and all this data and reload the list
       $('.confirm_del_user#' + username).click(function(e) {
-        console.log('CONFIRM DELETE USER ' + username);
         // get the passwd if needed
         let passwd = '';
         if (passwdconf) {
@@ -717,7 +706,6 @@ class IHMLocal {
     }
 
     lockUser(username, lock) {
-      console.log('-+-+- lockUser -+-+-');
       let service = new RestServiceJs('lockUser');
       let data = {'username': username, 'lock': lock};
 
@@ -750,7 +738,6 @@ class IHMLocal {
 
 
     setAdmin(username, admin) {
-      console.log('-+-+- setAdmin -+-+-');
       let service = new RestServiceJs('setAdmin');
       let data = {'username': username, 'admin': admin};
 
@@ -782,8 +769,6 @@ class IHMLocal {
     }
 
     userForm() {
-      console.log('-+-+- userForm -+-+-');
-
       let service = new RestServiceJs('get_my_infos');
       service.getAll(function(d) {
         let source = $('#template-user-managment').html();
@@ -803,7 +788,6 @@ class IHMLocal {
           __ihm.updatePasswd(d.username);
         });
         $('.get_new_apikey#' + d.username).click(function() {
-          console.log('888');
           __ihm.get_apikey(d.username, $('.new_apikey_name#' + d.username).val());
         });
         $('.add_galaxy#' + d.username).click(function() {
@@ -815,7 +799,6 @@ class IHMLocal {
 
         // Copy apikey
         $('.copy_key').click(function() {
-          console.log(this);
           __ihm.copyToClipboard($('.apikey#' + this.id));
 
           // Change the message into the tooltip
@@ -828,18 +811,15 @@ class IHMLocal {
 
         // Delete key
         $('.del_key').click(function() {
-          console.log(this);
           __ihm.deleteApikey(this.id);
         });
       });
     }
 
     deleteApikey(key) {
-      console.log('delete ' + key);
       let service = new RestServiceJs('del_apikey');
       let data = {'key': key};
       service.post(data, function(d) {
-        console.log(data);
         __ihm.userForm();
       });
     }
@@ -861,7 +841,6 @@ class IHMLocal {
     }
 
     updatePasswd(username) {
-      console.log('-+-+-+ updatePasswd -+-+-+');
       $('#tick_passwd').addClass('hidden');
       let passwd = $('.new_passwd#' + username).val();
       let passwd2 = $('.new_passwd2#' + username).val();
@@ -901,7 +880,6 @@ class IHMLocal {
     }
 
     updateMail(username) {
-      console.log('-+-+- updateMail -+-+-');
       $('#tick_mail').addClass('hidden');
       let email = $('.new_email#' + username).val();
 
@@ -929,9 +907,6 @@ class IHMLocal {
     }
 
     get_apikey(username, keyname) {
-      console.log('-+-+- get_apikey -+-+-+');
-      console.log('for ' + username);
-      console.log('keyname: ' + keyname);
       let service = new RestServiceJs('api_key');
       let data = {'username': username, 'keyname': keyname};
       $('#spinner_apikey').removeClass('hidden');
@@ -991,7 +966,6 @@ class IHMLocal {
     }
 
     displayNavbar(loged, username, admin, blocked) {
-        console.log('-+-+- displayNavbar -+-+-');
         $("#navbar").empty();
         let source = $('#template-navbar').html();
         let template = Handlebars.compile(source);
