@@ -51,6 +51,9 @@ class GalaxyConnector(ParamManager):
             for dataset in history_content:
                 if dataset['extension'] not in ('tabular', 'ttl', 'gff', 'gff3', 'gff2'):
                     continue
+                # Don't show deleted datasets
+                if dataset['deleted']:
+                    continue
                 dataset_list.append(dataset)
 
         return dataset_list
