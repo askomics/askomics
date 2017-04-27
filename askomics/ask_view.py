@@ -958,7 +958,7 @@ class AskView(object):
         pm = ParamManager(self.settings, self.request.session)
 
         response = FileResponse(
-            pm.getResultsCsvDirectory()+self.request.matchdict['name'],
+            pm.getUserResultsCsvDirectory()+self.request.matchdict['name'],
             content_type='text/csv'
             )
         return response
@@ -968,7 +968,7 @@ class AskView(object):
     def deletCsv(self):
 
         pm = ParamManager(self.settings, self.request.session)
-        os.remove(pm.getResultsCsvDirectory()+self.request.matchdict['name']),
+        os.remove(pm.getUserResultsCsvDirectory()+self.request.matchdict['name']),
 
 
 

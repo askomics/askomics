@@ -122,7 +122,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
         total_triple_count = 0
         chunk_count = 1
         chunk = ""
-        pathttl = self.getRdfDirectory()
+        pathttl = self.getRdfUserDirectory() 
         if method == 'load':
 
             fp = None
@@ -276,7 +276,6 @@ class SourceFile(ParamManager, HaveCachedProperties):
             urlbase = self.settings['askomics.load_url']
 
         url = urlbase+"/ttl/"+ self.session['username'] + '/' + os.path.basename(fp.name)
-        self.log.debug("= load_data_from_file =");
         self.log.debug(url)
         data = {}
         data["status"] = "ok"

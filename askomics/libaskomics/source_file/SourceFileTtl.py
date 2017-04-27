@@ -50,7 +50,7 @@ class SourceFileTtl(SourceFile):
         insert the ttl sourcefile in the TS
 
         """
-        pathttl = self.getRdfDirectory()
+        pathttl = self.getRdfUserDirectory()
         shutil.copy(self.path, pathttl)
         data = None
 

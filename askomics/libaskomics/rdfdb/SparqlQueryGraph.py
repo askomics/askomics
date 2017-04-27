@@ -260,9 +260,8 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         """
         return self.build_query_on_the_fly({
             'select': '?relation_label',
-            'query': '?class rdf:type owl:Class .\n' +
+            'query': 'GRAPH ?g { :'+node_class+' rdf:type owl:Class .\n' +
                      '\tOPTIONAL { ?relation rdfs:domain ?class } .\n' +
                      '\tOPTIONAL { ?relation rdfs:range ?range } .\n' +
-                     '\tOPTIONAL { ?relation rdfs:label ?relation_label } .\n' +
-                     '\tVALUES ?class { :' + node_class + ' }'
-            })
+                     '\tOPTIONAL { ?relation rdfs:label ?relation_label }.\n} '
+            },True)

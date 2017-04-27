@@ -56,16 +56,6 @@ class ParamManager(object):
             'goterm': lambda str: str.replace("GO:", "")
             }
 
-    """
-        Get a private directory to build bufferfile
-    """
-    def get_user_directory(self,typ):
-        mdir = self.userfilesdir+typ+"/"+self.session['username'] + '/'
-        if not os.path.isdir(mdir):
-            os.makedirs(mdir)
-
-        return mdir
-
     def getUploadDirectory(self):
         dir_string = '__' + self.session['username'] + '__'
         if 'upload_directory' not in self.session.keys() or dir_string not in self.session['upload_directory'] or not os.path.isdir(self.session['upload_directory']):
@@ -75,11 +65,20 @@ class ParamManager(object):
         self.log.debug(self.session['upload_directory'])
         return self.session['upload_directory']
 
-    def getResultsCsvDirectory(self):
-        return self.get_user_directory("csv")
+    def getUserResultsCsvDirectory(self):
+        mdir = self.userfilesdir+"csv"+"/"+self.session['username'] + '/'
+        if not os.path.isdir(mdir):
+            os.makedirs(mdir)
+        return mdir
 
     def getRdfDirectory(self):
-        return self.get_user_directory("rdf")
+        return self.userfilesdir+"rdf/"
+
+    def getRdfUserDirectory(self):
+        mdir = self.userfilesdir+"rdf"+"/"+self.session['username'] + '/'
+        if not os.path.isdir(mdir):
+            os.makedirs(mdir)
+        return mdir
 
     def get_param(self, key):
         if key in self.settings:
