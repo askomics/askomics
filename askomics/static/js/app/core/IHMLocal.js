@@ -607,6 +607,22 @@ class IHMLocal {
         let html = template(context);
         $('#galaxy_datasets').empty();
         $('#galaxy_datasets').append(html);
+
+        // Upload galaxy button
+        $('.btn#upload_galaxy').click(function() {
+          let list_datasets = [];
+          $('input:checkbox[name=galaxy_checkbox]:checked').each(function(){
+            list_datasets.push($(this).val());
+          });
+          //upload files
+          let service3 = new RestServiceJs('upload_galaxy_files');
+          let model = {'datasets': list_datasets};
+          service3.post(model, function(data) {
+            __ihm.manageErrorMessage(data);
+            // Reload upload form
+            __ihm.setUploadForm(content,titleForm,route_overview,callback);
+          });
+        });
       });
     }
 

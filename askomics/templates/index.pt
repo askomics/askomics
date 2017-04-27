@@ -1031,26 +1031,28 @@
            <!-- template to display Galaxy datasets -->
            <script id="template-galaxy-datasets" type="text/x-handlebars-template">
            <hr/ >
-           <h4>Galaxy Datasets</h4>
+           <h3 class='header-div'>Galaxy Datasets</h3>
            <hr/ >
            <table class='table table-striped'>
            <tr>
              <th>Id</th>
              <th>File</th>
              <th>Type</th>
+             <th>Select</th>
            </tr>
            {{#each datasets}}
             <tr>
               <td>{{this.hid}}</td>
               <td>{{this.name}}</td>
               <td>{{this.extension}}</td>
+              <td><input type="checkbox" name="galaxy_checkbox" value="{{this.id}}"></td>
             </tr>
            {{/each}}
 
            </table>
-            <span id="integrate_galaxy" class="btn btn-primary integrate-button ">
-             <i class="glyphicon glyphicon-open-file"></i>
-            <span>Integrate</span>
+            <span id="upload_galaxy" class="btn btn-primary">
+             <i class="fa fa-cloud-upload" aria-hidden="true"></i>
+            <span>Upload</span>
         </span>
            </script>
     </body>

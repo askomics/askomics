@@ -1595,3 +1595,30 @@ class AskView(object):
 
         self.data['datasets'] = datasets
         return self.data
+
+    @view_config(route_name='upload_galaxy_files', request_method='POST')
+    def upload_galaxy_file(self):
+
+        self.data = {}
+
+        body = self.request.json_body
+
+        # get galaxy infos
+        security = Security(self.settings, self.request.session, self.request.session['username'], '', '', '')
+
+        galaxy_auth = security.get_galaxy_infos()
+
+        if not galaxy_auth:
+            self.data['error'] = 'No Galaxy'
+            return self.data
+
+        # Upload files
+        try:
+            galaxy = GalaxyConnector(self.settings, self.request.session, galaxy_auth['url'], galaxy_auth['key'])
+            galaxy.upload_files(body['datasets'])
+        except Exception as e:
+            self.data['error'] = 'Error during galaxy upload: ' + str(e)
+            return self.data
+
+        self.data['success'] = 'Success'
+        return self.data

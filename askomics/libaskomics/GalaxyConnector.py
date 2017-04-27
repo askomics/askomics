@@ -54,3 +54,15 @@ class GalaxyConnector(ParamManager):
                 dataset_list.append(dataset)
 
         return dataset_list
+
+    def upload_files(self, files_id):
+        """Upload galaxy datasets into AskOmics server
+
+        :param files_id: Ids of Galaxy datasets to upload
+        :type files_id: list
+        """
+
+        galaxy_instance = galaxy.GalaxyInstance(self.url, self.apikey)
+
+        for file_id in files_id:
+            galaxy_instance.datasets.download_dataset(file_id, file_path=self.getUploadDirectory(), use_default_filename=True)
