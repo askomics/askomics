@@ -119,7 +119,7 @@
         </td>
         <td>
             {% if (file.delete_url) { %}
-                <button class="btn btn-danger delete" data-type="{%=file.delete_type%}" data-url="___URL___up/file/{%=file.delete_url%}">
+                <button class="btn btn-danger delete" data-type="{%=file.delete_type%}" data-url="up/file/{%=file.delete_url%}">
                     <i class="glyphicon glyphicon-trash"></i>
                     <span>Delete</span>
                 </button>

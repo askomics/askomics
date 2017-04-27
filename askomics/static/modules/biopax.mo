@@ -5,6 +5,7 @@
     "rdf": [
         "@prefix displaySetting: <http://www.irisa.fr/dyliss/rdfVisualization/display>.",
         "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.",
+        "@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.",
         "<http://www.biopax.org/release/biopax-level3.owl#GeneticInteraction> displaySetting:entity \"true\"^^xsd:boolean.",
         "<http://www.biopax.org/release/biopax-level3.owl#GeneticInteraction> rdfs:label \"biopax:GeneticInteraction\"^^xsd:string.",
         "<http://www.biopax.org/release/biopax-level3.owl#GeneticInteraction> displaySetting:startPoint \"true\"^^xsd:boolean.",

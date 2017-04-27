@@ -122,7 +122,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
         total_triple_count = 0
         chunk_count = 1
         chunk = ""
-        pathttl = self.getRdfDirectory()
+        pathttl = self.getRdfUserDirectory() 
         if method == 'load':
 
             fp = None
@@ -285,8 +285,8 @@ class SourceFile(ParamManager, HaveCachedProperties):
             else:
                 queryResults = ql.load_data(url, self.graph)
         except Exception as e:
-            data["status"] = "failed"
-            return self._format_exception(e)
+            self.log.error(self._format_exception(e))
+            raise e
 
         finally:
             if self.settings["askomics.debug"]:
@@ -313,7 +313,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
             #    data['error'] = ''
             errMess = "\n<br/><strong>Error line:"+str(linenumber)+"</strong><br/>"
             errMess += "<pre>"
-            with open(filename) as f:
+            with open(filename, encoding="utf-8", errors="ignore") as f:
                 count = 0
                 for line in f:
                     count+=1
@@ -356,7 +356,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
         :return: number of ligne (int)
         """
 
-        with open(self.path) as f:
+        with open(self.path, encoding="utf-8", errors="ignore") as f:
             for number, l in enumerate(f):
                 pass
 

@@ -1,10 +1,22 @@
-import logging
-# from pprint import pformat
-# from string import Template
+#! /usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+Classes to query triplestore on stats data.
 
-# from askomics.libaskomics.rdfdb.SparqlQuery import SparqlQuery
-# from askomics.libaskomics.ParamManager import ParamManager
+information on build_query_on_the_fly:
+
+* When querying as asdmin : build_query_on_the_fly(QUERY, True) 
+==> The query have to contains GRAPH ?g { ... } because all data are store on a Graph 
+
+* When querying as a classic user : build_query_on_the_fly(QUERY) or build_query_on_the_fly(QUERY, False)  
+=> The query can not contain the GRAPH keyword because 'FROM' clauses cause all triplets are merged in the unique DEFAULT graph !!  
+
+"""
+
+import logging
+
 from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
+
 
 class SparqlQueryStats(SparqlQueryBuilder):
     """
@@ -17,60 +29,75 @@ class SparqlQueryStats(SparqlQueryBuilder):
         self.log = logging.getLogger(__name__)
 
 
-    def get_number_of_triples(self,accessLevel):
+    def condition_query(self, access_level):
+        '''
+            return the query according the accessLevel
+        '''
+
+        if access_level == 'public':
+            return '?g :accessLevel "public".'
+
+        if self.session['admin']:
+            return '?g :accessLevel "private".'
+
+        query = '{ ?g :accessLevel \''+access_level+'\'.'
+        query += '  ?g dc:creator "'+self.session['username']+'" .}'
+
+        return query
+
+    def get_number_of_triples(self, access_level):
         """
         Get number of triples in public graph
         """
         return self.build_query_on_the_fly({
             'select': '(COUNT(*) AS ?number)',
-            'query': 'GRAPH ?g {?s ?p ?o} { ?g :accessLevel \''+accessLevel+'\' }'
-        })
+            'query': 'GRAPH ?g {?s ?p ?o.'+self.condition_query(access_level)+'}'
+        }, True)
 
-    def get_number_of_entities(self,accessLevel):
+    def get_number_of_entities(self, access_level):
         """
         Get number of triples in public graph
         """
         return self.build_query_on_the_fly({
             'select': '(COUNT(DISTINCT ?s) AS ?number)',
-            'query': 'GRAPH ?g {?s a []} { ?g :accessLevel \''+accessLevel+'\' }'
-        })
+            'query': 'GRAPH ?g {?s a [].'+self.condition_query(access_level)+'}'
+        }, True)
 
 
-    def get_number_of_classes(self,accessLevel):
+    def get_number_of_classes(self, access_level):
         """
         Get number of triples in public graph
         """
         return self.build_query_on_the_fly({
             'select': '(COUNT(DISTINCT ?s) AS ?number)',
-            'query': 'GRAPH ?g {?s rdf:type owl:Class} { ?g :accessLevel \''+accessLevel+'\' }'
-        })
+            'query': 'GRAPH ?g {?s rdf:type owl:Class.'+self.condition_query(access_level)+'}'
+        }, True)
 
-    def get_number_of_subgraph(self,accessLevel):
+    def get_number_of_subgraph(self, access_level):
         """
         Get number of triples in public graph
         """
         return self.build_query_on_the_fly({
             'select': '(COUNT(DISTINCT ?g) AS ?number)',
-            'query': 'GRAPH ?g {?s ?p ?o} { ?g :accessLevel \''+accessLevel+'\' }'
-        })
+            'query': 'GRAPH ?g {?s ?p ?o.'+self.condition_query(access_level)+'}'
+        }, True)
 
 
-    def get_subgraph_infos(self,accessLevel):
+    def get_subgraph_infos(self, access_level):
         """
         Get number of triples in public graph
         """
         return self.build_query_on_the_fly({
             'select': '?graph ?date ?owner ?server ?version',
-            'query': '?graph_uri prov:wasDerivedFrom ?graph .\n' +
-                     '\t?graph_uri dc:creator ?owner .\n' +
-                     '\t?graph_uri dc:hasVersion ?version .\n' +
-                     '\t?graph_uri prov:describesService ?server .\n' +
-                     '\t?graph_uri prov:generatedAtTime ?date .\n'+
-                     '\t?graph_uri :accessLevel \''+accessLevel+'\'.'
-        })
+            'query': 'GRAPH ?g {?g prov:wasDerivedFrom ?graph .\n' +
+                     '\t?g dc:creator ?owner .\n' +
+                     '\t?g dc:hasVersion ?version .\n' +
+                     '\t?g prov:describesService ?server .\n' +
+                     '\t?g prov:generatedAtTime ?date .'+self.condition_query(access_level)+'}'
+        }, True)
 
 
-    def get_attr_of_classes(self,accessLevel):
+    def get_attr_of_classes(self, access_level):
         """
         Get all the attributes of a class
         """
@@ -79,11 +106,11 @@ class SparqlQueryStats(SparqlQueryBuilder):
             'query': 'GRAPH ?g {?uri_class a owl:Class .\n' +
                      '\t?uri_class rdfs:label ?class .\n' +
                      '\t?uri_attr rdfs:domain ?uri_class .\n' +
-                     '\t?uri_attr rdfs:label ?attr .} { ?g :accessLevel \''+accessLevel+'\' }'
-            })
+                     '\t?uri_attr rdfs:label ?attr .'+self.condition_query(access_level)+'}'
+            }, True)
 
 
-    def get_rel_of_classes(self,accessLevel):
+    def get_rel_of_classes(self, access_level):
         """
         Get all the attributes of a class
         """
@@ -94,5 +121,5 @@ class SparqlQueryStats(SparqlQueryBuilder):
                      '\t?rel rdfs:domain ?uri_domain .\n' +
                      '\t?rel rdfs:range ?uri_range .\n' +
                      '\t?uri_domain rdfs:label ?domain .\n' +
-                     '\t?uri_range rdfs:label ?range .} { ?g :accessLevel \''+accessLevel+'\' }'
-            })
+                     '\t?uri_range rdfs:label ?range .'+self.condition_query(access_level)+'}'
+            }, True)
