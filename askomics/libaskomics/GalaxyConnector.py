@@ -49,12 +49,8 @@ class GalaxyConnector(ParamManager):
             history_id = history['id']
             history_content = galaxy_instance.histories.show_history(history_id, contents=True)
             for dataset in history_content:
-                # ds_dict = {
-                #     'history_id': dataset['history_id'],
-                #     'dataset_id': dataset['dataset_id'],
-                #     'name': dataset['name'],
-                #     'hid': dataset['hid']
-                # }
+                if dataset['extension'] not in ('tabular', 'ttl', 'gff', 'gff3', 'gff2'):
+                    continue
                 dataset_list.append(dataset)
 
         return dataset_list
