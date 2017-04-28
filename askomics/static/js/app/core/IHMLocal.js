@@ -1069,23 +1069,26 @@ class IHMLocal {
             'username_email': username_email,
             'password': password
           };
-
-          __ihm.displayModal('Please wait', '', 'Close');
-
+          $('#spinner_login').removeClass('hidden');
+          $('#tick_login').addClass('hidden');
+          $('#cross_login').addClass('hidden');
           service.post(model, function(data) {
-            __ihm.hideModal();
             if (data.error.length !== 0) {
               $('#login_error').empty();
               for (let i = data.error.length - 1; i >= 0; i--) {
                 $('#login_error').append(data.error[i] + '<br>');
               }
-              $('#login_success').hide();
+              // Error
               $('#login_error').show();
+              $('#spinner_login').addClass('hidden');
+              $('#tick_login').addClass('hidden');
+              $('#cross_login').removeClass('hidden');
             }else{
+              //Success
               $('#login_error').hide();
-              $('#login_success').empty();
-              $('#login_success').append('You are logged now');
-              $('#login_success').show();
+              $('#spinner_login').addClass('hidden');
+              $('#tick_login').removeClass('hidden');
+              $('#cross_login').addClass('hidden');
               __ihm.user = new AskomicsUser(data.username, data.admin);
               __ihm.user.logUser();
             }
