@@ -68,4 +68,6 @@ class GalaxyConnector(ParamManager):
         galaxy_instance = galaxy.GalaxyInstance(self.url, self.apikey)
 
         for file_id in files_id:
-            galaxy_instance.datasets.download_dataset(file_id, file_path=self.getUploadDirectory(), use_default_filename=True)
+            dataset = galaxy_instance.datasets.show_dataset(file_id)
+            path = self.getUploadDirectory() + '/Galaxy_' + str(dataset['hid']) + '_' + dataset['name']
+            galaxy_instance.datasets.download_dataset(file_id, file_path=path, use_default_filename=False)
