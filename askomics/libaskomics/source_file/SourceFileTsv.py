@@ -392,19 +392,26 @@ class SourceFileTsv(SourceFile):
                         relationName = ":"+self.encodeToRDFURI(header) # manage old way
                         if current_type.startswith('entity'):
                             idx = header.find("@")
-                            
+
                             if idx > 0:
                                 relationName = ":"+self.encodeToRDFURI(header[0:idx])
                                 typeEnt = header[idx+1:]
                                 clause1 = typeEnt.find(":")>0
                                 if  clause1 or (header[idx+1] == '<' and header[len(header)-1] == '>') :
                                     havePrefix = True
-                        if current_type in ('category', 'taxon', 'ref', 'strand'):
-                            # This is a category, keep track of allowed values for this column
-                            self.category_values[header].add(row[i])
-
                         # Create link to value
                         if row[i]: # Empty values are just ignored
+                            if current_type in ('category', 'taxon', 'ref', 'strand'):
+                                # This is a category, keep track of allowed values for this column
+                                self.category_values[header].add(row[i])
+
+                             #check numeric type
+                            if current_type in ('numeric', 'start', 'end'):
+                                if not row[i].isnumeric():
+                                    raise Exception("Type Error: Value \""+row[i]+\
+                                    "\" (Entity :"+entity_id+", Line "+str(row_number)+\
+                                    ") is not a numeric value.\n")
+
                             # positionable attributes
                             if current_type == 'start':
                                 ttl += indent + " " + ':position_start' + " " +  self.delims[current_type][0] + self.encodeToRDFURI(row[i]) + self.delims[current_type][1] + " ;\n"
