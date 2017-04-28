@@ -72,9 +72,11 @@ class SourceFileTsv(SourceFile):
         """
         Use csv.Sniffer to predict the CSV/TSV dialect
         """
-        with open(self.path, 'r') as tabfile:
-            # The sniffer needs to have enough data to guess, and we restrict to a list of allowed delimiters to avoid strange results
-            dialect = csv.Sniffer().sniff(tabfile.read(1024*16), delimiters=';,\t ')
+        with open(self.path, 'r', encoding="utf-8", errors="ignore") as tabfile:
+            # The sniffer needs to have enough data to guess,
+            # and we restrict to a list of allowed delimiters to avoid strange results
+            contents = tabfile.readline()
+            dialect = csv.Sniffer().sniff(contents, delimiters=';,\t ')
             self.log.debug("CSV dialect in %r: %s" % (self.path, pformat_generic_object(dialect)))
             return dialect
 
@@ -88,12 +90,13 @@ class SourceFileTsv(SourceFile):
         """
 
         headers = []
-        with open(self.path, 'r') as tabfile:
+        with open(self.path, 'r', encoding="utf-8", errors="ignore") as tabfile:
             # Load the file with reader
             tabreader = csv.reader(tabfile, dialect=self.dialect)
 
             # first line is header
             headers = next(tabreader)
+            headers = [h.strip() for h in headers]
 
         return headers
 
@@ -105,7 +108,7 @@ class SourceFileTsv(SourceFile):
         :rtype: List
         """
 
-        with open(self.path, 'r') as tabfile:
+        with open(self.path, 'r', encoding="utf-8", errors="ignore") as tabfile:
             # Load the file with reader
             tabreader = csv.reader(tabfile, dialect=self.dialect)
 
@@ -318,25 +321,25 @@ class SourceFileTsv(SourceFile):
         self.log.warning("category_values will be computed independently, get_turtle should be used to generate both at once (better performances)")
         category_values = defaultdict(set) # key=name of a column of 'category' type -> list of found values
 
-        with open(self.path, 'r') as tabfile:
+        with open(self.path, 'r', encoding="utf-8", errors="ignore") as tabfile:
             # Load the file with reader
             tabreader = csv.reader(tabfile, dialect=self.dialect)
             next(tabreader) # Skip header
 
-            entity_label = ""
             # Loop on lines
             for row_number, row in enumerate(tabreader):
                 #blanck line
                 if len(row) == 0:
                     continue
                 if len(row) != len(self.headers):
-                    e = SourceFileSyntaxError('Invalid line found: '+str(self.headers)+' columns expected, found '+str(len(row))+" - (last valid entity "+entity_label+")")
-                    e.filename = self.path
-                    e.lineno = row_number
-                    log.error(repr(e))
-                    raise e
+                    exc = SourceFileSyntaxError('Invalid line found: '+str(self.headers)+
+                                                ' columns expected, found '+str(len(row))+
+                                                " - (last valid entity "+entity_label+")")
+                    exc.filename = self.path
+                    exc.lineno = row_number
+                    self.log.error(repr(exc))
+                    raise exc
 
-                entity_label = row[0]
                 for i, (header, current_type) in enumerate(zip(self.headers, self.forced_column_types)):
                     if current_type in ('category', 'taxon', 'ref', 'strand'):
                         # This is a category, keep track of allowed values for this column
@@ -349,7 +352,7 @@ class SourceFileTsv(SourceFile):
 
         self.category_values = defaultdict(set) # key=name of a column of 'category' type -> list of found values
 
-        with open(self.path, 'r') as tabfile:
+        with open(self.path, 'r', encoding="utf-8", errors="ignore") as tabfile:
             # Load the file with reader
             tabreader = csv.reader(tabfile, dialect=self.dialect)
 

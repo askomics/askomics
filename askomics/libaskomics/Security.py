@@ -1,12 +1,8 @@
 import logging
 import hashlib
 import random
-import smtplib
 import re
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 from validate_email import validate_email
-
 from askomics.libaskomics.ParamManager import ParamManager
 from askomics.libaskomics.rdfdb.SparqlQueryAuth import SparqlQueryAuth
 from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
@@ -221,56 +217,7 @@ class Security(ParamManager):
         body += 'at ' + self.email + '.\n\n\n'
         body += host_url + '\n\n'
 
-        self.send_mails(host_url,emails, '[AskOmics@'+host_url+'] New account created', body)
-
-
-    def send_mails(self, host_url, dests, subject, text):
-        """
-        Send a mail to a list of Recipients
-        """
-        self.log.debug(" == Security.py:send_mails == ")
-        # Don't send mail if the smtp server is not in
-        # the config file
-        if not self.get_param('smtp.host'):
-            return
-        if not self.get_param('smtp.port'):
-            return
-        if not self.get_param('smtp.login'):
-            return
-        if not self.get_param('smtp.password'):
-            return
-        starttls = False
-        if self.get_param('smtp.starttls'):
-            starttls = self.get_param('smtp.starttls').lower() == 'yes' or \
-                       self.get_param('smtp.starttls').lower() == 'ok' or \
-                       self.get_param('smtp.starttls').lower() == 'true'
-
-        host = self.get_param('smtp.host')
-        port = self.get_param('smtp.port')
-        login = self.get_param('smtp.login')
-        password = self.get_param('smtp.password')
-
-        self.log.debug(" HOST: "+host)
-        print(self)
-
-        msg = MIMEMultipart()
-        msg['From'] = 'AskoMics@'+host_url
-        msg['To'] = ", ".join(dests)
-        msg['Subject'] = subject
-        msg.attach(MIMEText(text, 'plain'))
-
-        try:
-            smtp = smtplib.SMTP(host, port)
-            smtp.set_debuglevel(1)
-            if starttls:
-                smtp.ehlo()
-                smtp.starttls()
-            smtp.login(login, password)
-            smtp.sendmail(dests[0], dests, msg.as_string())
-            smtp.quit()
-            self.log.debug("Successfully sent email")
-        except Exception as e:
-            self.log.debug("Error: unable to send email: " + str(e))
+        self.send_mails(host_url, emails, '[AskOmics@'+ host_url + '] New account created', body)
 
 
     def create_user_graph(self):

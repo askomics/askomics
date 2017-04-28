@@ -350,7 +350,7 @@ class AskView(object):
                 list_pos_attr.append(elem['pos_attr'].replace("http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#", ""))
 
         for elem in list_pos_attr:
-            self.data['results'][elem] = False not in [bool(int(p['status'])) for p in results if p['pos_attr'] == "http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#"+elem]
+            self.data['results'][elem] = False not in [ParamManager.Bool(p['status']) for p in results if p['pos_attr'] == "http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#"+elem]
 
         return self.data
 
@@ -959,7 +959,7 @@ class AskView(object):
         pm = ParamManager(self.settings, self.request.session)
 
         response = FileResponse(
-            pm.getResultsCsvDirectory()+self.request.matchdict['name'],
+            pm.getUserResultsCsvDirectory()+self.request.matchdict['name'],
             content_type='text/csv'
             )
         return response
@@ -969,7 +969,7 @@ class AskView(object):
     def deletCsv(self):
 
         pm = ParamManager(self.settings, self.request.session)
-        os.remove(pm.getResultsCsvDirectory()+self.request.matchdict['name']),
+        os.remove(pm.getUserResultsCsvDirectory()+self.request.matchdict['name']),
 
 
 
@@ -1302,8 +1302,8 @@ class AskView(object):
             self.log.error(str(e))
 
         for res in result:
-            res['admin'] = bool(int(res['admin']))
-            res['blocked'] = bool(int(res['blocked']))
+            res['admin'] = ParamManager.Bool(res['admin'])
+            res['blocked'] = ParamManager.Bool(res['blocked'])
             res['email'] = re.sub(r'^mailto:', '', res['email'])
 
         self.log.debug(result)
@@ -1485,8 +1485,8 @@ class AskView(object):
         result = result[0]
         result['email'] = re.sub(r'^mailto:', '', result['email'])
         result['username'] = self.request.session['username']
-        result['admin'] = bool(int(result['admin']))
-        result['blocked'] = bool(int(result['blocked']))
+        result['admin'] = ParamManager.Bool(result['admin'])
+        result['blocked'] = ParamManager.Bool(result['blocked'])
         result.pop('keyname', None)
         result.pop('apikey', None)
         result.pop('Gurl', None)

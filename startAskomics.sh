@@ -68,67 +68,61 @@ case $depmode in
         usage
         exit 1
 esac
-echo "===>$ASKOMICS_SMTP_HOST"
+
+#set property on custom.ini file
+function set_property() {
+    local newline="$1 = $2"
+    # replace the line
+    sed -i "/^$1/d" "$dir_config/custom.ini"
+    sed -i "/app:main/a $newline" "$dir_config/custom.ini"
+}
 # Get config file -----------------------------------------
-if [[ 
-        ! -z $TRIPLESTORE_ENDPOINT || 
-        ! -z $ASKOMICS_LOAD_URL ||
-        ! -z $ASKOMICS_SMTP_HOST ||
-        ! -z $ASKOMICS_SMTP_PORT ||
-        ! -z $ASKOMICS_SMTP_LOGIN ||
-        ! -z $ASKOMICS_SMTP_PASSWORD ||
-        ! -z $ASKOMICS_SMTP_STARTTLS 
-    ]]; then
+echo " === use config base : $dir_config/custom.ini "
+cp "$dir_config/$depmode.$triplestore.ini" "$dir_config/custom.ini"
 
-    cp "$dir_config/$depmode.$triplestore.ini" "$dir_config/custom.ini"
-
-    if [[ ! -z $TRIPLESTORE_ENDPOINT ]]; then
-        echo "Custom triplestore endpoint: $TRIPLESTORE_ENDPOINT"
-        newline="askomics.endpoint = $TRIPLESTORE_ENDPOINT"
-        # replace the line
-        sed -i "s@^askomics.endpoint.*@$newline@" "$dir_config/custom.ini"
-    fi
-
-    if [[ ! -z $ASKOMICS_LOAD_URL ]]; then
-        echo "Custom load url: $ASKOMICS_LOAD_URL"
-        newline="askomics.load_url = $ASKOMICS_LOAD_URL"
-        # remove line if exist
-        sed -i '/^askomics.load_url/d' "$dir_config/custom.ini"
-        # add the line
-        sed -i "/app:main/a $newline" "$dir_config/custom.ini"
-    fi
-
-    if [[ ! -z $ASKOMICS_SMTP_HOST ]]; then
-        if [[ -z $ASKOMICS_SMTP_PORT || -z $ASKOMICS_SMTP_LOGIN || -z $ASKOMICS_SMTP_PASSWORD ]]; then
-            >&2 echo "Bad definition of smpt configuration. You must defined ASKOMICS_SMTP_HOST, ASKOMICS_SMTP_PORT, ASKOMICS_SMTP_LOGIN, ASKOMICS_SMTP_PASSWORD."
-            exit 1
-        fi
-        echo "-- SMTP definition --"
-        newline="smtp.host = $ASKOMICS_SMTP_HOST"
-        sed -i '/^smtp.host/d' "$dir_config/custom.ini"
-        sed -i "/app:main/a $newline" "$dir_config/custom.ini"
-        newline="smtp.port = $ASKOMICS_SMTP_PORT"
-        sed -i '/^smtp.port/d' "$dir_config/custom.ini"
-        sed -i "/app:main/a $newline" "$dir_config/custom.ini"
-        newline="smtp.login = $ASKOMICS_SMTP_LOGIN"
-        sed -i '/^smtp.login/d' "$dir_config/custom.ini"
-        sed -i "/app:main/a $newline" "$dir_config/custom.ini"
-        newline="smtp.password = $ASKOMICS_SMTP_PASSWORD"
-        sed -i '/^smtp.password/d' "$dir_config/custom.ini"
-        sed -i "/app:main/a $newline" "$dir_config/custom.ini"
-        if [[ ! -z $ASKOMICS_SMTP_STARTTLS ]]; then
-            newline="askomics.starttls = $ASKOMICS_SMTP_STARTTLS"
-            sed -i '/^askomics.starttls/d' "$dir_config/custom.ini"
-            sed -i "/app:main/a $newline" "$dir_config/custom.ini"
-        fi
-
-    fi
-
-    config_name="custom.ini"
-else
-    config_name="$depmode.$triplestore.ini"
+if [[ ! -z $TRIPLESTORE_ENDPOINT ]]; then
+    echo "Custom triplestore endpoint: $TRIPLESTORE_ENDPOINT"
+    set_property "askomics.endpoint" $TRIPLESTORE_ENDPOINT
 fi
 
+if [[ ! -z $TRIPLESTORE_UPDATEPOINT ]]; then
+    echo "Custom triplestore updatepoint: $TRIPLESTORE_UPDATEPOINT"
+    set_property "askomics.updatepoint" $TRIPLESTORE_UPDATEPOINT
+fi
+
+if [[ ! -z $TRIPLESTORE_ENDPOINT_USERNAME || ! -z $TRIPLESTORE_ENDPOINT_PASSWD  ]]; then
+    if [[ -z $TRIPLESTORE_ENDPOINT_USERNAME || -z $TRIPLESTORE_ENDPOINT_PASSWD ]]; then
+        >&2 echo "Bad definition of triplestore administration auth. You must defined TRIPLESTORE_ENDPOINT_USERNAME, TRIPLESTORE_ENDPOINT_PASSWD."
+        exit 1
+    fi
+
+    echo "Defined triplestore auth with username $TRIPLESTORE_ENDPOINT_USERNAME"
+    set_property "askomics.endpoint.username" $TRIPLESTORE_ENDPOINT_USERNAME
+    set_property "askomics.endpoint.passwd" $TRIPLESTORE_ENDPOINT_PASSWD
+fi
+
+if [[ ! -z $ASKOMICS_LOAD_URL ]]; then
+    echo "Custom load url: $ASKOMICS_LOAD_URL"
+    set_property "askomics.load_url" $ASKOMICS_LOAD_URL
+fi
+
+if [[ ! -z $ASKOMICS_SMTP_HOST ]]; then
+    if [[ -z $ASKOMICS_SMTP_PORT || -z $ASKOMICS_SMTP_LOGIN || -z $ASKOMICS_SMTP_PASSWORD ]]; then
+        >&2 echo "Bad definition of smpt configuration. You must defined ASKOMICS_SMTP_HOST, ASKOMICS_SMTP_PORT, ASKOMICS_SMTP_LOGIN, ASKOMICS_SMTP_PASSWORD."
+        exit 1
+    fi
+    echo "-- SMTP definition --"
+    set_property "smtp.host" $ASKOMICS_SMTP_HOST
+    set_property "smtp.port" $ASKOMICS_SMTP_PORT
+    set_property "smtp.login" $ASKOMICS_SMTP_LOGIN
+    set_property "smtp.password" $ASKOMICS_SMTP_PASSWORD
+    if [[ ! -z $ASKOMICS_SMTP_STARTTLS ]]; then
+        set_property "smtp.starttls" $ASKOMICS_SMTP_STARTTLS
+    fi
+
+fi
+
+config_name="custom.ini"
 config_path="$dir_config/$config_name"
 
 if [[ ! -f $config_path ]]; then
@@ -165,5 +159,6 @@ askomics="$python_ex $python_flags $pserve $config_path $pserve_flags"
 
 if [[ $build == false ]]; then
     echo "starting askomics ..."
+    echo "$askomics"
     $askomics
 fi
