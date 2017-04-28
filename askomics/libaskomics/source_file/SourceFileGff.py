@@ -109,7 +109,7 @@ class SourceFileGff(SourceFile):
 
         for rec in GFF.parse(handle, limit_info=limit, target_lines=1):
             # ref_entity = taxon_entity+'_ref_'+self.encodeToRDFURI(str(rec.id))
-            ref_entity = self.encodeToRDFURI(str(rec.id))
+            ref_entity =  ':' + self.encodeToRDFURI(str(rec.id))
             if ref_entity not in self.getLabelFromUri:
                 self.getLabelFromUri[ref_entity] = str(rec.id)
 
@@ -150,12 +150,12 @@ class SourceFileGff(SourceFile):
                     strand_entity = ':none'
 
                 attribute_dict = {
-                    'rdf:type':  [ ':'+ type_entity ] ,
-                    ':position_taxon':  [ taxon_entity ] ,
-                    ':position_ref':   [ ref_entity ] ,
-                    ':position_start': [ start_entity ] ,
-                    ':position_end':  [ end_entity ]  ,
-                    ':position_strand': [ strand_entity ],
+                    'rdf:type':  [':'+ type_entity],
+                    ':position_taxon': [taxon_entity],
+                    ':position_ref': [ref_entity],
+                    ':position_start': [start_entity],
+                    ':position_end': [end_entity],
+                    ':position_strand': [strand_entity],
                     'rdfs:label' : ['\"'+self.getLabelFromUri[id_entity]+'\"^^xsd:string']
                 }
 
