@@ -1030,7 +1030,9 @@ class IHMLocal {
                         'email': email,
                         'password': password,
                         'password2': password2  };
-
+          $('#spinner_signup').removeClass('hidden');
+          $('#tick_signup').addClass('hidden');
+          $('#cross_signup').addClass('hidden');
           service.post(model, function(data) {
             __ihm.hideModal();
             if (data.error.length !== 0) {
@@ -1038,13 +1040,18 @@ class IHMLocal {
               for (let i = data.error.length - 1; i >= 0; i--) {
                 $('#signup_error').append(data.error[i] + '<br/>');
               }
-              $('#signup_success').hide();
+
+              // Error
               $('#signup_error').show();
+              $('#spinner_signup').addClass('hidden');
+              $('#tick_signup').addClass('hidden');
+              $('#cross_signup').removeClass('hidden');
             }else{
+              // Success
               $('#signup_error').hide();
-              $('#signup_success').empty();
-              $('#signup_success').append('Account successfuly created!');
-              $('#signup_success').show();
+              $('#spinner_signup').addClass('hidden');
+              $('#tick_signup').removeClass('hidden');
+              $('#cross_signup').addClass('hidden');
               __ihm.user = new AskomicsUser(data.username, data.admin);
               __ihm.user.logUser();
             }

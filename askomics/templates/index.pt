@@ -311,12 +311,12 @@
           <input id = 'signup_password2' name="password2" type="password" placeholder="Password" required><br/><br/>
 
           <button type="button" class="btn btn-primary" data-dismiss="modal" id="signup_button">Sign Up</button>
+          <i class="hidden fa fa-spinner pulse" id='spinner_signup'></i>
+          <i class="hidden fa fa-check text-success" id='tick_signup'></i>
+          <i class="hidden fa fa-times text-danger" id='cross_signup'></i>
           <p>(or <a id='show_login' href="#">log in</a> if you have an account)</p>
           <!-- error message -->
             <div id='signup_error' class="alert alert-danger" role="alert" hidden>
-            </div>
-          <!-- success message -->
-            <div id='signup_success' class="alert alert-success" role="alert" hidden>
             </div>
           <hr/>
         </div>
