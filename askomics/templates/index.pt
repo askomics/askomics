@@ -285,12 +285,13 @@
           <input id='login_password' name="password" type="password" placeholder="Password" required><br/><br/>
 
           <button type="button" class="btn btn-primary" data-dismiss="modal" id="login_button">Log in</button>
+          <i class="hidden fa fa-spinner pulse" id='spinner_login'></i>
+          <i class="hidden fa fa-check text-success" id='tick_login'></i>
+          <i class="hidden fa fa-times text-danger" id='cross_login'></i>
+
           <p>(or <a id='show_signup' href="#">sign up</a> if you don't have an account)</p>
           <!-- error message -->
             <div id='login_error' class="alert alert-danger" role="alert" hidden>
-            </div>
-          <!-- success message -->
-            <div id='login_success' class="alert alert-success" role="alert" hidden>
             </div>
         </div>
 
