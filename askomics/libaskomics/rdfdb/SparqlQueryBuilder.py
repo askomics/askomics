@@ -85,8 +85,8 @@ class SparqlQueryBuilder(ParamManager):
             #add ALL GRAPHS user only if from is not defined !!
             if 'from' not in set(replacement) or \
                 len(replacement['from']) == 0:
-                self.settings['graph'] = self.getGraphUser()
-                listfrom = self.settings['graph']['public'] + self.settings['graph']['private']
+                graphs = self.getGraphUser()
+                listfrom = graphs['public'] + graphs['private']
             else:
                 listfrom = replacement['from']
 

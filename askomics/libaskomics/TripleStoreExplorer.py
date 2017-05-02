@@ -113,10 +113,7 @@ class TripleStoreExplorer(ParamManager):
 
         data['positionable'] = results
 
-        if 'graph' in self.settings:
-            data['graph'] = self.settings['graph']
-        else:
-            data['graph'] = sqg.getGraphUser()
+        data['graph'] = sqg.getGraphUser()
 
         return data
 
