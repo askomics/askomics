@@ -200,3 +200,20 @@ div.uploadedQuery {
   0% { -webkit-transform: rotate(0deg); }
   100% { -webkit-transform: rotate(359deg); }
 }
+
+
+/**
+ * Progress bars with centered text
+ */
+
+.progress-small {
+  position: relative;
+  width: 100px;
+}
+
+.progress span {
+    position: absolute;
+    display: block;
+    width: 100%;
+    color: black;
+}
