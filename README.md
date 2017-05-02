@@ -4,6 +4,8 @@
 [![Coverage Status](https://coveralls.io/repos/github/askomics/askomics/badge.svg?branch=master)](https://coveralls.io/github/askomics/askomics?branch=master)
 ![Docker Build](https://img.shields.io/docker/pulls/askomics/askomics.svg)
 
+![Askomics logo](static/askomics.png)
+
 AskOmics is a visual SPARQL query interface supporting both intuitive data integration and querying while shielding the user from most of the technical difficulties underlying RDF and SPARQL
 
 ![Askomics Homepage](static/askomics_home.png)
