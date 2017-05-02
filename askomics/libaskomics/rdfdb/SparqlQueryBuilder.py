@@ -21,47 +21,45 @@ class SparqlQueryBuilder(ParamManager):
         self.log = logging.getLogger(__name__)
 
     def getGraphUser(self,removeGraph=[]):
-        self.log.debug("=============setGraphUser")
+        self.log.debug("=== setGraphUser ===")
         settings = {}
         #finding all private graph graph
        
         qu = self.build_query_on_the_fly({
             'select': '?g',
             'query': 'GRAPH ?g {\n'+\
-            '?s ?p ?o.\n'+     \
             "?g dc:creator '" + self.session['username'] + "' . } ",
             'post_action': 'GROUP BY ?g'
         }, True)
 
         ql = QueryLauncher(self.settings, self.session)
         results = ql.process_query(qu.query)
-        self.settings['private'] = []
+        settings['private'] = []
 
         for elt in results:
             if 'g' not in elt:
                 continue
             if elt['g'] in removeGraph:
                 continue
-            self.settings['private'].append(elt['g'])
-        self.log.debug("setting['private']:\n"+str(self.settings['private']))
+            settings['private'].append(elt['g'])
+        self.log.debug("setting['private']:\n"+str(settings['private']))
 
         #finding all public graph
         qu = self.build_query_on_the_fly({
             'select': '?g',
             'query': 'GRAPH ?g {\n'+
-            '?s ?p ?o.\n'+
             "?g :accessLevel 'public'. } "
         }, True)
         ql = QueryLauncher(self.settings, self.session)
         results = ql.process_query(qu.query)
-        self.log.debug("------------------------------------------------------Traitement results public graph:")
-        self.settings['public'] = []
+        settings['public'] = []
         for elt in results:
             if elt['g'] in removeGraph:
                 continue
-            self.settings['public'].append(elt['g'])
+            settings['public'].append(elt['g'])
 
-        self.log.debug("setting['public']:\n"+str(self.settings['public']))
+        self.log.debug("setting['public']:\n"+str(settings['public']))
+        return settings
 
     def build_query_on_the_fly(self, replacement, adminrequest=False):
         """
@@ -82,26 +80,19 @@ class SparqlQueryBuilder(ParamManager):
         #security test
         if not 'admin' in self.session or not isinstance(self.session['admin'], bool):
             self.session['admin'] = False
-
         # ADM can query on all database !
         if not isinstance(adminrequest, bool) or not adminrequest:
             #add ALL GRAPHS user only if from is not defined !!
-            if 'from' not in set(replacement):
-                if 'graph' not in self.settings:
-                    self.settings['graph'] = self.getGraphUser()
-
+            if 'from' not in set(replacement) or \
+                len(replacement['from']) == 0:
+                self.settings['graph'] = self.getGraphUser()
                 listfrom = self.settings['graph']['public'] + self.settings['graph']['private']
+            else:
+                listfrom = replacement['from']
 
-                if len(listfrom) <= 0:
-                    pass
-                    # None solution because none graph !
-                else:
-                    for elt in set(listfrom):
-                        query += "FROM <"+elt+">\n"
-
-        if 'from' in set(replacement):
-            for vfrom in replacement['from']:
-                query += "FROM <"+vfrom+">\n"
+            if len(listfrom) > 0:
+                for elt in set(listfrom):
+                    query += "FROM <"+elt+">\n"
 
         query += "WHERE {"+"\n"
         query += replacement['query']+"\n"

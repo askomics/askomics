@@ -91,7 +91,6 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         return self.build_query_on_the_fly({
             'select': '?g',
             'query': 'GRAPH ?g {\n'+
-                     '?s ?p ?o.\n'+
                      "?g :accessLevel 'public'. } "
         }, True)
 
@@ -103,7 +102,6 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         return self.build_query_on_the_fly({
             'select': '?g',
             'query': 'GRAPH ?g {\n'+\
-                 '?s ?p ?o.\n'+     \
                  "?g dc:creator '" + self.session['username'] + "' . } ",
             'post_action': 'GROUP BY ?g'
         }, True)
