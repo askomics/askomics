@@ -1593,6 +1593,17 @@ class AskView(object):
         # Then, get the datasets
         datasets = galaxy.get_datasets()
 
+        # Boolean values for handlebars
+        for dataset in datasets:
+            if dataset['state'] == 'ok':
+                dataset['success'] = True
+            elif dataset['state'] == 'queued':
+                dataset['notick'] = False
+                dataset['queued'] = True
+            else:
+                dataset['notick'] = False
+                dataset['error'] = True
+
         self.data['datasets'] = datasets
         return self.data
 
