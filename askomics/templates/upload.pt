@@ -18,24 +18,15 @@
         <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
         <div class="row fileupload-buttonbar">
             <div class="col-lg-7">
-                <!-- The fileinput-button span is used to style the file input field as button -->
-                <span id="add_files_upload" class="btn btn-success fileinput-button">
-                    <i class="glyphicon glyphicon-plus"></i>
-                    <span>Add files...</span>
-                    <input type="file" name="files[]" multiple>
-                </span>
-                <button id="start_upload" type="submit" class="btn btn-primary start">
-                    <i class="glyphicon glyphicon-upload"></i>
-                    <span>Start upload</span>
-                </button>
-                <button id="cancel_upload" type="reset" class="btn btn-warning cancel">
-                    <i class="glyphicon glyphicon-ban-circle"></i>
-                    <span>Cancel upload</span>
-                </button>
-                <button id="delete_upload" type="button" class="btn btn-danger delete">
-                    <i class="glyphicon glyphicon-trash"></i>
-                    <span>Delete</span>
-                </button>
+                <div class="btn-group" role="group" aria-label="...">
+                    <span id="add_files_upload" class="btn btn-default fileinput-button">
+                    <i class="fa fa-plus text-success" aria-hidden="true"></i> Add files ...
+                        <input type="file" name="files[]" multiple>
+                    </span>
+                  <button id='start_upload' type="button" class="btn btn-default start"><i class="fa fa-arrow-circle-o-up text-default" aria-hidden="true"></i> Start upload</button>
+                  <button id='cancel_upload' type="button" class="btn btn-default cancel"><i class="fa fa-ban text-warning" aria-hidden="true"></i> Cancel upload</button>
+                  <button id='delete_upload' type="button" class="btn btn-default delete"><i class="fa fa-trash text-danger" aria-hidden="true"></i> Delete</button>
+                </div>
                 <input type="checkbox" class="toggle">
                 <!-- The global file processing state -->
                 <span class="fileupload-process"></span>
@@ -43,8 +34,8 @@
             <!-- The global progress state -->
             <div class="col-lg-5 fileupload-progress fade">
                 <!-- The global progress bar -->
-                <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
-                    <div class="progress-bar progress-bar-success" style="width:0%;"></div>
+                <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+                    <div class="progress-bar" style="width:0%;"></div>
                 </div>
                 <!-- The extended global progress state -->
                 <div class="progress-extended">&nbsp;</div>
@@ -53,8 +44,8 @@
         <!-- The table listing the files available for upload/download -->
         <table role="presentation" class="table table-striped"><tbody class="files"></tbody></table>
 
-        <span id="integrate_upload" class="btn btn-primary integrate-button ">
-            <i class="glyphicon glyphicon-open-file"></i>
+        <span id="integrate_upload" class="btn btn-default integrate-button ">
+            <i class="fa fa-database"></i>
             <span>Integrate</span>
         </span>
     </form>
@@ -72,19 +63,18 @@
             <strong class="error text-danger"></strong>
         </td>
         <td>
-            <p class="size">Processing...</p>
-            <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar progress-bar-success" style="width:0%;"></div></div>
+            <div class="progress progress-small active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar" style="width:0%;"><span>{%=o.formatFileSize(file.size)%}</span></div></div>
         </td>
         <td>
             {% if (!i && !o.options.autoUpload) { %}
-                <button class="btn btn-primary start" disabled>
-                    <i class="glyphicon glyphicon-upload"></i>
+                <button class="btn btn-default start" disabled>
+                    <i class="glyphicon glyphicon-upload text-primary"></i>
                     <span>Start</span>
                 </button>
             {% } %}
             {% if (!i) { %}
-                <button class="btn btn-warning cancel">
-                    <i class="glyphicon glyphicon-ban-circle"></i>
+                <button class="btn btn-default cancel">
+                    <i class="glyphicon glyphicon-ban-circle text-warning"></i>
                     <span>Cancel</span>
                 </button>
             {% } %}
@@ -120,14 +110,14 @@
         </td>
         <td>
             {% if (file.delete_url) { %}
-                <button class="btn btn-danger delete" data-type="{%=file.delete_type%}" data-url="up/file/{%=file.delete_url%}">
-                    <i class="glyphicon glyphicon-trash"></i>
+                <button class="btn btn-default delete" data-type="{%=file.delete_type%}" data-url="up/file/{%=file.delete_url%}">
+                    <i class="glyphicon glyphicon-trash text-danger"></i>
                     <span>Delete</span>
                 </button>
                 <input type="checkbox" name="delete" value="1" class="toggle">
             {% } else { %}
-                <button class="btn btn-warning cancel">
-                    <i class="glyphicon glyphicon-ban-circle"></i>
+                <button class="btn btn-default cancel">
+                    <i class="glyphicon glyphicon-ban-circle text-warning"></i>
                     <span>Cancel</span>
                 </button>
             {% } %}
