@@ -74,31 +74,6 @@ class AskView(object):
             return True
         return False
 
-    def setGraphUser(self,removeGraph=[]):
-
-        self.settings['graph'] = {}
-
-        #finding all private graph graph
-        sqg = SparqlQueryGraph(self.settings, self.request.session)
-        ql = QueryLauncher(self.settings, self.request.session)
-
-        results = ql.process_query(sqg.get_private_graphs().query)
-        self.settings['graph']['private'] = []
-        for elt in results:
-            if 'g' not in elt:
-                continue
-            if elt['g'] in removeGraph:
-                continue
-            self.settings['graph']['private'].append(elt['g'])
-
-        #finding all public graph
-        results = ql.process_query(sqg.get_public_graphs().query)
-        self.settings['graph']['public'] = []
-        for elt in results:
-            if elt['g'] in removeGraph:
-                continue
-            self.settings['graph']['public'].append(elt['g'])
-
     @view_config(route_name='start_point', request_method='GET')
     def start_points(self):
         """ Get the nodes being query starters """
@@ -303,7 +278,7 @@ class AskView(object):
         sqg = SparqlQueryGraph(self.settings, self.request.session)
         ql = QueryLauncher(self.settings, self.request.session)
 
-        res = ql.execute_query(sqg.get_private_graphs().query)
+        res = ql.execute_query(sqg.get_private_graphs_and_count().query)
 
         namedGraphs = []
 
@@ -323,8 +298,6 @@ class AskView(object):
         #FIXEME: Rewrite this ugly method
 
         body = self.request.json_body
-
-        self.setGraphUser()
 
         sqg = SparqlQueryGraph(self.settings, self.request.session)
         ql = QueryLauncher(self.settings, self.request.session)
@@ -406,8 +379,6 @@ class AskView(object):
         # Denny for blocked users
         if self.request.session['blocked']:
             return 'blocked'
-
-        self.setGraphUser()
 
         self.log.debug(" ========= Askview:source_files_overview =============")
         sfc = SourceFileConvertor(self.settings, self.request.session)
@@ -743,11 +714,6 @@ class AskView(object):
         self.log.debug("== getUserAbstraction ==")
         body = self.request.json_body
 
-        self.setGraphUser()
-        self.data['graph'] = self.settings['graph']
-        print("====================================================")
-        self.log.debug(self.settings['graph'])
-
         service = ''
         if 'service' in body :
             service = body['service']
@@ -888,13 +854,12 @@ class AskView(object):
         body=self.request.json_body
 
         try:
-            lRemove = []
-            if "removeGraph" in body:
-                lRemove = body["removeGraph"]
-            self.setGraphUser(lRemove)
             tse = TripleStoreExplorer(self.settings, self.request.session)
-
-            results,query = tse.build_sparql_query_from_json(body["variates"],body["constraintesRelations"],True)
+            lfrom = []
+            if 'from' in body:
+                lfrom = body['from']
+            results,query = tse.build_sparql_query_from_json(lfrom,body["variates"],body["constraintesRelations"],True)
+            
             #body["limit"]
             # Remove prefixes in the results table
             l = int(body["limit"]) + 1
@@ -926,13 +891,15 @@ class AskView(object):
         """ Build a request from a json whith the following contents :variates,constraintesRelations,constraintesFilters"""
         self.log.debug("== Attribute Value ==")
 
-        self.setGraphUser()
-
         try:
             tse = TripleStoreExplorer(self.settings, self.request.session)
 
             body = self.request.json_body
-            results,query = tse.build_sparql_query_from_json(body["variates"],body["constraintesRelations"],-1,False)
+            lfrom = []
+            if 'from' in body:
+                lfrom = body['from']
+
+            results,query = tse.build_sparql_query_from_json(lfrom,body["variates"],body["constraintesRelations"],-1,False)
 
             self.data['query'] = query
         except Exception as e:

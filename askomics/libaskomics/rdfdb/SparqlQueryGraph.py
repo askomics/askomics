@@ -68,7 +68,7 @@ class SparqlQueryGraph(SparqlQueryBuilder):
                      '?uri displaySetting:entity "true"^^xsd:boolean.\n'+
                      "{ { ?g :accessLevel 'public' } UNION { ?g dc:creator '" +
                      self.session['username'] + "'. } } }\n"
-        })
+        }, True)
 
     def get_isa_relation_entities(self):
         """
@@ -78,10 +78,10 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         return self.build_query_on_the_fly({
             'select': '?uri ?urisub',
             'query': '\n'+
-                     '?uri displaySetting:entity "true"^^xsd:boolean.\n'+
-                     '?uri rdfs:subClassOf ?urisub.\n'+
-                     '?urisub displaySetting:entity "true"^^xsd:boolean.\n'
-        })
+                     'GRAPH ?g1 { ?uri displaySetting:entity "true"^^xsd:boolean.}\n'+
+                     'GRAPH ?g2 {?uri rdfs:subClassOf ?urisub.}\n'+
+                     'GRAPH ?g3 {?urisub displaySetting:entity "true"^^xsd:boolean.}\n'
+        }, True)
 
     def get_public_graphs(self):
         """
@@ -96,6 +96,19 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         }, True)
 
     def get_private_graphs(self):
+        """
+        Get the list of privat named graph
+        """
+        self.log.debug('---> get_private_graphs')
+        return self.build_query_on_the_fly({
+            'select': '?g',
+            'query': 'GRAPH ?g {\n'+\
+                 '?s ?p ?o.\n'+     \
+                 "?g dc:creator '" + self.session['username'] + "' . } ",
+            'post_action': 'GROUP BY ?g'
+        }, True)
+
+    def get_private_graphs_and_count(self):
         """
         Get the list of privat named graph
         """
@@ -228,9 +241,9 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         """
         return self.build_query_on_the_fly({
             'select': '?entity',
-            'query': '?entity displaySetting:entity "true"^^xsd:boolean .\n' +
-                     '\t?entity displaySetting:is_positionable "true"^^xsd:boolean .'
-            })
+            'query': 'GRAPH ?g1 { ?entity displaySetting:entity "true"^^xsd:boolean .\n' +
+                     '?entity displaySetting:is_positionable "true"^^xsd:boolean .}'
+            }, True)
 
     def get_abstraction_category_entity(self, entities):
         """

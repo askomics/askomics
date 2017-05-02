@@ -241,7 +241,7 @@ class AskomicsNode extends GraphNode {
   }
 
   /* Using by the View to get Categories */
-  buildConstraintsGraphForCategory(attributeId) {
+  buildConstraintsGraphForCategory(attributeId,entityDepends=false) {
     let variates = [] ;
     let constraintRelations = [] ;
 
@@ -249,14 +249,14 @@ class AskomicsNode extends GraphNode {
       return [[],[]] ;
     }
     var node = this;
+
     /* add node inside */
-    constraintRelations.push("?"+'URI'+node.SPARQLid+" "+'rdf:type'+" "+node.URI());
     for (let uri in node.categories) {
       if ( node.categories[uri].id != attributeId ) continue;
-
       constraintRelations.push("<"+node.categories[uri].type+"> displaySetting:category "+"?URICat"+node.categories[uri].SPARQLid);
-      constraintRelations.push("?"+'URI'+node.SPARQLid+" "+this.URI(uri)+" "+"?URICat"+node.categories[uri].SPARQLid);
       constraintRelations.push("?URICat"+node.categories[uri].SPARQLid+" "+'rdfs:label'+" "+"?"+node.categories[uri].SPARQLid);
+      if (entityDepends)
+        constraintRelations.push("?"+'URI'+node.SPARQLid+" "+this.URI(uri)+" "+"?URICat"+node.categories[uri].SPARQLid);
       variates.push("?"+node.categories[uri].SPARQLid);
       variates.push("?URICat"+node.categories[uri].SPARQLid);
       return [variates,[constraintRelations,'']] ;
