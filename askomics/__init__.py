@@ -72,11 +72,6 @@ def main(global_config, **settings):
     config.add_route('api_key', '/api_key')
     config.add_route('del_apikey', '/del_apikey')
 
-    # Tests
-    config.add_route('test', '/test')
-    config.add_route('add', '/add')
-
-
     # TODO no absolute path to static files
     # TODO check what is cors (iframe redirect?)
     # TODO check security (delete truc/../../../)
