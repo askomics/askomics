@@ -824,7 +824,7 @@ class AskomicsForceLayoutManager {
 
   setNumberResultsSVG() {
     let currentFL = this;
-    __ihm.getGraphBuilder().countNumberOfSolution(function() { $("#countresult").remove();} , function(count) { currentFL.updateCount(count);}) ;
+    // __ihm.getGraphBuilder().countNumberOfSolution(function() { $("#countresult").remove();} , function(count) { currentFL.updateCount(count);}) ;
   }
 
   updateCount(count) {

@@ -529,46 +529,6 @@ class AskView(object):
         formatter = HtmlFormatter(cssclass='preview_field', nowrap=True, nobackground=True)
         return highlight(self.data, TurtleLexer(), formatter) # Formated html
 
-    @view_config(route_name='check_existing_data', request_method='POST')
-    def check_existing_data(self):
-        """
-        Compare the user data and what is already in the triple store
-        """
-
-        # Denny access for non loged users
-        if self.request.session['username'] == '':
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
-
-        body = self.request.json_body
-        file_name = body["file_name"]
-        col_types = body["col_types"]
-        disabled_columns = body["disabled_columns"]
-        key_columns = body["key_columns"]
-
-        sfc = SourceFileConvertor(self.settings, self.request.session)
-        try:
-            src_file = sfc.get_source_file(file_name)
-            src_file.set_forced_column_types(col_types)
-            src_file.set_disabled_columns(disabled_columns)
-            src_file.set_key_columns(key_columns)
-
-            headers_status, missing_headers = src_file.compare_to_database()
-
-            self.data["headers_status"] = headers_status
-            self.data["missing_headers"] = missing_headers
-        except Exception as e:
-            self.data["headers_status"] = ""
-            self.data["missing_headers"] = ""
-            traceback.print_exc(file=sys.stdout)
-            self.data['error'] = str(e)
-            self.log.error(str(e))
-
-        return self.data
-
     @view_config(route_name='load_data_into_graph', request_method='POST')
     def load_data_into_graph(self):
         """
