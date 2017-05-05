@@ -594,7 +594,6 @@ class AskomicsForceLayoutManager {
           let source   = suggestedList[uri] ;
           let target   = slt_node;
           link = new AskomicsPositionableLink(linkbase,source,target);
-          link.setCommonPosAttr();
           link.id = __ihm.getGraphBuilder().getId();
           this.links.push(link);
         }
@@ -658,7 +657,6 @@ class AskomicsForceLayoutManager {
         let source   = node2 ;
         let target   = node1;
         let link = new AskomicsPositionableLink(linkbase,source,target);
-        link.setCommonPosAttr();
         link.id = __ihm.getGraphBuilder().getId();
         this.links.push(link);
       }

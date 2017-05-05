@@ -283,48 +283,13 @@ class AskView(object):
         namedGraphs = []
 
         for indexResult in range(len(res['results']['bindings'])):
-            namedGraphs.append({
-            'g' : res['results']['bindings'][indexResult]['g']['value'],
-            'count' : res['results']['bindings'][indexResult]['co']['value']
-            })
+            if 'g' in res['results']['bindings'][indexResult]:
+                namedGraphs.append({
+                    'g' : res['results']['bindings'][indexResult]['g']['value'],
+                    'count' : res['results']['bindings'][indexResult]['co']['value']
+                })
 
         return namedGraphs
-
-    @view_config(route_name='positionable_attr', request_method='POST')
-    def positionable_attr(self):
-        """
-        Return the positionable attributes in common between two positionable entity
-        """
-        #FIXEME: Rewrite this ugly method
-
-        body = self.request.json_body
-
-        sqg = SparqlQueryGraph(self.settings, self.request.session)
-        ql = QueryLauncher(self.settings, self.request.session)
-
-        # Check if the two entity are positionable
-        positionable1 = ql.process_query(sqg.get_if_positionable(body['node']).query)
-        positionable2 = ql.process_query(sqg.get_if_positionable(body['second_node']).query)
-
-        if positionable1 == 0 or positionable2 == 0:
-            self.data['error'] = 'Entities are not positionable nodes !'
-            return self.data
-
-        results = ql.process_query(sqg.get_common_pos_attr(body['node'], body['second_node']).query)
-        self.log.debug(results)
-
-        self.data['results'] = {}
-
-        list_pos_attr = []
-
-        for elem in results:
-            if elem['pos_attr'] not in list_pos_attr:
-                list_pos_attr.append(elem['pos_attr'].replace("http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#", ""))
-
-        for elem in list_pos_attr:
-            self.data['results'][elem] = False not in [ParamManager.Bool(p['status']) for p in results if p['pos_attr'] == "http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#"+elem]
-
-        return self.data
 
     @view_config(route_name='guess_csv_header_type', request_method='POST')
     def guess_csv_header_type(self):

@@ -137,25 +137,6 @@ class SparqlQueryGraph(SparqlQueryBuilder):
                      '}'
         }, True)
 
-    def get_common_pos_attr(self, uri1, uri2):
-        """
-        Get the common positionable attributes between 2 entity
-        """
-        self.log.debug('---> get_common_pos_attr')
-        return self.build_query_on_the_fly({
-            'select': '?uri ?pos_attr ?status',
-            'query': 'GRAPH ?g {\n'+
-                     '\tVALUES ?pos_attr {:position_taxon :position_ref :position_strand }\n' +
-                     '\tVALUES ?uri {<'+uri1+'> <'+uri2+'> }\n' +
-                     '\tBIND(EXISTS {?pos_attr rdfs:domain ?uri} AS ?status)'+
-                     '\t{'+
-                     '\t\t{ ?g :accessLevel "public". }'+
-                     '\t\tUNION '+
-                     '\t\t{ ?g dc:creator "'+self.session['username']+'".}'+
-                     '\t}'+
-                     '}'
-        }, True)
-
     def get_all_taxons(self):
         """
         Get the list of all taxon

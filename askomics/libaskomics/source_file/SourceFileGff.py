@@ -106,6 +106,7 @@ class SourceFileGff(SourceFile):
         self.getLabelFromUri[':minus'] = 'minus'
         self.getLabelFromUri[':none'] = ''
 
+        blockbase=50000
 
         for rec in GFF.parse(handle, limit_info=limit, target_lines=1):
             # ref_entity = taxon_entity+'_ref_'+self.encodeToRDFURI(str(rec.id))
@@ -141,13 +142,20 @@ class SourceFileGff(SourceFile):
 
                 start_entity = int(feat.location.start)
                 end_entity = int(feat.location.end)
+                faldo_strand =""
 
                 if int(feat.location.strand == 1):
                     strand_entity = ':plus'
+                    faldo_strand = "faldo:ForwardStrandPosition"
                 elif int(feat.location.strand == -1):
                     strand_entity = ':minus'
+                    faldo_strand = "faldo:ReverseStrandPosition"
                 else:
                     strand_entity = ':none'
+                    faldo_strand = "faldo:BothStrandPosition"
+                
+                block_idxstart = int(start_entity) // blockbase
+                block_idxend = (int(end_entity) // blockbase)+1
 
                 attribute_dict = {
                     'rdf:type':  [':'+ type_entity],
@@ -156,6 +164,18 @@ class SourceFileGff(SourceFile):
                     ':position_start': [start_entity],
                     ':position_end': [end_entity],
                     ':position_strand': [strand_entity],
+                    ':blockstart'     : [str(block_idxstart*blockbase)],
+                    ':blockend'       : [str(block_idxend*blockbase)],
+                    'faldo:location' : ["[ a faldo:Region ;\n"+
+                                        "    faldo:begin [ a faldo:ExactPosition;\n"+
+                                        "                  a "+faldo_strand+";\n"+
+                                        "                  faldo:position "+str(start_entity)+";\n"+
+                                        "                  faldo:reference "+ref_entity+" ];\n"+
+                                        "    faldo:end [ a faldo:ExactPosition;\n"+
+                                        "                a "+faldo_strand+";\n"+
+                                        "                  faldo:position "+str(end_entity)+";\n"+
+                                        "                  faldo:reference "+ref_entity+" ]"+
+                                        "]"],
                     'rdfs:label' : ['\"'+self.getLabelFromUri[id_entity]+'\"^^xsd:string']
                 }
 
@@ -190,12 +210,12 @@ class SourceFileGff(SourceFile):
                         valuri = self.encodeToRDFURI(val)
                         # if there are, it's the label !
                         if qualifier_key == 'Name':
-                            attribute_dict['rdfs:label'] = [ '\"'+ str(val) +'\"^^xsd:string']
+                            attribute_dict['rdfs:label'] = ['\"'+ str(val) +'\"^^xsd:string']
                         elif qualifier_key == 'ID':
                             if (valuri not in type_entities) and type_entity != '':
                                 type_entities[valuri] = type_entity
 
-                        elif qualifier_key in ['Parent','Derives_from']:
+                        elif qualifier_key in ['Parent', 'Derives_from']:
                             if not valuri in type_entities:
                                 #raise ValueError("Unknown "+qualifier_key+" ID ["+val+"]")
                                 #build later

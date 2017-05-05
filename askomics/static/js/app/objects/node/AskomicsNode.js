@@ -96,6 +96,24 @@ class AskomicsNode extends GraphNode {
   set linkvar (__inverseMatch) { this._linkvar = __linkvar; }
   get linkvar () { return this._linkvar; }
 
+  att_position_active(attpos) {
+    for (let uri in this.attributes) {
+      if ( uri.indexOf("position_"+attpos) > 0 ) {
+        if ( this.attributes[uri].actif  ) {
+          return this.attributes[uri].SPARQLid;
+        }
+      } 
+    }
+    for (let uri in this.categories) {
+      if ( uri.indexOf("position_"+attpos) > 0 ) {
+        if ( this.categories[uri].actif  ) {
+          return this.categories[uri].SPARQLid;
+        }
+      } 
+    }
+    return null;
+  }
+
   buildConstraintsSPARQL() {
 
     let blockConstraintByNode = [];
@@ -160,14 +178,16 @@ class AskomicsNode extends GraphNode {
 
       if ( isInversedMatch || isLinked || isFiltered  || this.categories[uri].actif ) {
         let subBlockConstraint = [];
-        subBlockConstraint.push("<"+this.categories[uri].type+"> displaySetting:category ?"+SparqlId);
+        // *** cause a very long execution with virtuoso ***
+        //subBlockConstraint.push("<"+this.categories[uri].type+"> displaySetting:category ?"+SparqlId);
         subBlockConstraint.push("?"+'URI'+this.SPARQLid+" "+this.URI(uri)+" "+"?"+SparqlId);
         subBlockConstraint.push("?"+SparqlId+" "+'rdfs:label'+" "+"?"+this.categories[uri].SPARQLid);
 
 
         let subBlockNegativeConstraint = [];
         if ( isInversedMatch ) {
-          subBlockNegativeConstraint.push("<"+this.categories[uri].type+"> displaySetting:category "+"?negative"+SparqlId);
+          // *** cause a very long execution with virtuoso ***
+          //subBlockNegativeConstraint.push("<"+this.categories[uri].type+"> displaySetting:category "+"?negative"+SparqlId);
           subBlockNegativeConstraint.push("?"+'URI'+this.SPARQLid+" "+this.URI(uri)+" "+"?negative"+SparqlId);
           subBlockNegativeConstraint.push("?negative"+SparqlId+" "+'rdfs:label'+" "+"?negative"+this.categories[uri].SPARQLid);
         }
