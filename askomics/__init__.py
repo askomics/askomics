@@ -38,7 +38,6 @@ def main(global_config, **settings):
     config.add_route('load_gff_into_graph', '/load_gff_into_graph')
     config.add_route('load_ttl_into_graph', '/load_ttl_into_graph')
     config.add_route('preview_ttl', '/preview_ttl')
-    config.add_route('check_existing_data', '/check_existing_data')
     config.add_route('ttl', '/ttl/{name:.*}')
     config.add_route('csv', '/csv/{name:.*}')
     config.add_route('del_csv', '/del_csv/{name:.*}')
@@ -71,11 +70,6 @@ def main(global_config, **settings):
     config.add_route('update_passwd', 'update_passwd')
     config.add_route('api_key', '/api_key')
     config.add_route('del_apikey', '/del_apikey')
-
-    # Tests
-    config.add_route('test', '/test')
-    config.add_route('add', '/add')
-
 
     # TODO no absolute path to static files
     # TODO check what is cors (iframe redirect?)
