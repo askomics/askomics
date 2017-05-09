@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="${request.locale_name}">
+    <head>
+        <meta charset="utf-8">
+        <title>Visual SPARQL query builder for an Biological RDF database</title>
+
+        <!-- D3.js -->
+        <script src="static/libs/d3js/d3.min.js" charset="utf-8"></script>
+
+        <!-- JQuery -->
+        <script src="static/libs/jquery/jquery-1.12.4.min.js"></script>
+        <script src="static/libs/jquery/jquery-ui-1.12.min.js"></script>
+        <link href="static/libs/jquery/jquery-ui.min.css" rel="stylesheet" >
+
+        <!-- Bootstrap -->
+        <!--<script src="static/libs/tmpl.min.js"></script> -->
+        <script src="static/libs/bootstrap/bootstrap.min.js"></script>
+        <link href="static/libs/bootstrap/bootstrap.min.css" rel="stylesheet" type="text/css">
+
+        <!-- Pygment  -->
+        <link href="static/libs/pygment/pygment.css" rel="stylesheet" type="text/css">
+
+        <!-- Font Awesome -->
+        <link href="static/libs/font-awesome/font-awesome.css" rel="stylesheet" type="text/css">
+
+        <!-- intro.js -->
+        <script src="static/libs/intro-js/intro.js"></script>
+        <link href="static/libs/intro-js/introjs.css" rel="stylesheet" type="text/css">
+        <link href="static/libs/intro-js/introjs-style.min.css" rel="stylesheet" type="text/css" />
+        <link href="static/libs/intro-js/introjs-rtl.css" rel="stylesheet" type="text/css" />
+
+        <!-- Jquery-contextMenu  -->
+        <script src="static/libs/jquery-context-menu/jquery.contextMenu.min.js"></script>
+        <script src="static/libs/jquery-context-menu/jquery.ui.position.min.js"></script>
+        <link href="static/libs/jquery-context-menu/jquery.contextMenu.min.css" rel="stylesheet" type="text/css">
+
+        <!-- Handlebars -->
+        <script src="static/libs/handlebars/handlebars-v4.0.5.js"></script>
+
+        <!-- Askomics -->
+        <script src="static/dist/askomics.js"></script>
+        <link href="static/dist/askomics.css" rel="stylesheet" type="text/css">
+        <script src="static/dist/templates.js"></script>
+
+    </head>
+    <body >
+        <nav id='navbar' class="navbar navbar-default navbar-fixed-top"></nav>
+
+        <br><br><br>
+        <div id="content_interrogation" class="container">
+            <div id="init" class="row">
+                <div class="form-group">
+                    <label for="graph_startpoint" class="col-md-offset-2">Select a graph :</label>
+                    <select id='graph_startpoints' size='1' class="form-control col-md-offset-2"></select>
+                  <br/>
+                    <label for="startpoint" class="col-md-offset-2">Select an entity to start a session :</label>
+                    <select id='startpoints' size='8' class="form-control col-md-offset-2"></select>
+                    <div class="col-md-offset-2">Shared entities are <em class='text-warning'>yellow</em> and personal entities are <strong class='text-primary'>blue</strong></div>
+                </div>
+                <button  id="starter" class="btn btn-default col-md-offset-2" onclick="__ihm.startSession();">Start</button>
+                <br><br><br>
+                <div class="col-md-offset-2"><p>Or upload an AskOmics file</p>
+                    <div class="uploadBtn btn btn-default">
+                        <span>Load query</span>
+                        <input id="uploadBtn" type="file" class="upload">
+                    </div>
+                </div>
+            </div>
+            <div id="queryBuilder" class="row" hidden>
+                <div id="PanelQuery" class="col-md-7">
+                  <h3 class="header-div">
+                   <div id="menuGraph" class="btn-group" role="group" aria-label="Menu Graph">
+                     <!-- Resize graph -->
+                      <button id='full-screen-graph' type="button" class="btn btn-default" aria-label="Right Align">
+                        <span id='icon-resize-graph' value='small' class="glyphicon glyphicon-resize-full" aria-hidden="true"></span>
+                      </button>
+
+                      <button id="buttonViewFile" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      Files<span class="caret"></span>
+                      </button>
+                      <ul id="viewMenuFile" class="dropdown-menu">
+                        <!--upload-->
+                        <li><a href="#" class="small">
+                        <div class="uploadBtn">
+                        <p><span class="fa fa-upload" aria-hidden="true"></span> Load query</p>
+                        <input id="uploadBtn" type="file" class="upload">
+                        </div>
+                        </a></li>
+                        <!--download-->
+                        <li><a href="#" id="dwl-query" class="small">
+                        <p><span class="fa fa-download small" aria-hidden="true"></span> Save query</p>
+                        </a></li>
+                        <!--download-->
+                        <li><a href="#" id="dwl-query-sparql" class="small">
+                        <p><span class="fa fa-floppy-o small small" aria-hidden="true"></span> Save SPARQL query</p>
+                        </a></li>
+                      </ul>
+
+                      <button id="buttonViewListGraph" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      Graph<span class="caret"></span>
+                      </button>
+                      <ul id="viewListGraph" class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+                      </ul>
+
+                      <button id="buttonViewListNodesAndLinks" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      View<span class="caret"></span>
+                      </button>
+                      <ul id="viewListNodesAndLinks" class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+                      </ul>
+
+                      <button id="buttonViewListShortcuts" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      Shortcuts<span class="caret"></span>
+                      </button>
+                      <ul id="viewListShortcuts" class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+                      </ul>
+
+                    </div>
+                    <div class="btn-group pull-right">
+                        <button id="buttonReset" type="button" class="btn btn-warning" onclick="__ihm.stopSession()">Reset</button>
+                    </div>
+                    </h3>
+                    <hr/>
+
+                    <div id="svgdiv"></div>
+
+                    <div id="uploadedQuery" class="uploadedQuery" hidden contenteditable></div>
+                        <div class="btn-group btn-group-query">
+                            <button type="button" class="btn btn-primary" onclick="new AskomicsJobsViewManager().createQueryJob();">Launch query</button>
+                        </div>
+
+                </div>
+
+                <div id="viewDetails" class="col-md-5">
+                    <h3 class="header-div">
+                     <!-- Resize attributes view -->
+                    <button type="button" id='full-screen-attr' class="btn btn-default" aria-label="Right Align">
+                        <span id='icon-resize-attr' value='small' class="glyphicon glyphicon-resize-full" aria-hidden="true"></span>
+                    </button>
+                    <span id="objectName" class="label label-default"></span>
+
+                    <div class="btn-group btn-group-query">
+                        <span id="refreshNode" class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
+                        <span id="showNode"    class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
+                        <span id="deleteNode"  class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span>
+                    </div>
+                    </h3>
+                    <hr/>
+                </div>
+             </div>
+        </div>
+
+        <div id="content_jobsview" class="container" hidden>
+        </div>
+
+        <div id="content_integration" class="container" hidden>
+            <div id="overview" class="row"></div>
+        </div>
+
+        <div id="content_integration_ttl" class="container" hidden>
+        </div>
+
+        <div id="content_integration_gff" class="container" hidden>
+        </div>
+
+        <div id="content_datasets" class="container" hidden>
+            <hr/>
+            <h3 class="header-div">Manage User Datasets</h3>
+            <hr/>
+
+            <form class="form-horizontal">
+                <fieldset>
+                    <label>Choose which datasets you want to delete</label>
+                    <span class="glyphicon glyphicon-erase display" onclick="__ihm.unselectGraphs()"></span>
+                    <select multiple="multiple" id="dropNamedGraphSelected" class="form-control" onchange='__ihm.manageDelGraphButton()'></select>
+                </fieldset>
+                <div id="btn-del-graph" class="btn-group"><button id="btn-empty-graph" class="btn btn-primary" onclick="__ihm.deleteNamedGraph($('#dropNamedGraphSelected').val())" type="button" id="dropNamedGraphButton">Delete</button></div>
+                <div id="btn-del" class="btn-group"><button id="btn-empty" onclick="__ihm.emptyDatabase('confirm')" class="btn btn-danger">Delete all</button></div>
+            </form>
+        </div>
+
+        <div id="content_statistics" class="container" hidden>
+        </div>
+
+        <div id="content_user_info" class="container" hidden>
+        </div>
+
+        <div id="content_blocked" class="container" hidden>
+        </div>
+
+        <div id="content_administration" class="container" hidden>
+            <hr/>
+            <h3 class="header-div">Administration</h3>
+            <hr/>
+            <div id='admin_page'>
+             <!-- see the template below (template-admin) -->
+             <ul class="nav nav-tabs">
+              <li class="active"><a data-toggle="tab" href="#Users_adm">Users</a></li>
+              <li><a data-toggle="tab" href="#Shortcuts_adm">Shortcuts</a></li>
+              <li><a data-toggle="tab" href="#Modules_adm">Modules</a></li>
+             </ul>
+             <div id="admin_page_tab_content" class="tab-content">
+                  <div id="Users_adm" class="tab-pane fade in active"></div>
+                  <div id="Shortcuts_adm" class="tab-pane fade"></div>
+                  <div id="Modules_adm" class="tab-pane fade"></div>
+             </div>
+            </div>
+         </div>
+        <div id="content_about" class="container" hidden>
+          <hr/>
+          <h3 class="header-div">About</h3>
+          <hr/>
+
+          <p>
+          AskOmics provide a visual
+          representation of the user abstraction as a graph.
+          By starting from a node of interest and iteratively selecting its
+          neighbors, the user creates a path on an abstraction graph.
+          This path can then be transformed into a SPARQL query that can be
+          executed on the original dataset.
+         </p>
+         <br/>
+
+         <hr/>
+         <h3 class="header-div">AskOmics Data repositories</h3>
+         <hr/>
+
+          <a target="_blank" href="https://bipaa.genouest.org/is/">
+            <img src="static/src/images/logos/Logo-BIPAA-horiz-trans.png" height="72" alt="logo BIPAA"/>
+          </a>
+          <a target="_blank" href="https://bbip.genouest.org/is/">
+            <img src="static/src/images/logos/Logo-BBIP-horiz-trans.png" height="72" alt="logo BBIP"/>
+          </a>
+          <!--<img target="_blank" src="static/src/images/logos/Logo-GOGEPP.png" height="42" alt="logo genouest"/>-->
+
+          <br/>
+
+          <hr/>
+          <h3 class="header-div">Partnerships</h3>
+          <hr/>
+          <p>
+            AskOmics is a collaborative project supporting with a strong scientific partnerships with:
+          </p>
+            <a target="_blank" href="http://www6.rennes.inra.fr/igepp_eng/">
+
+             <strong>Institute for Genetics, Environment and Plant Protection – Igepp Unit</strong>
+             <img target="_blank" src="static/src/images/logos/Logo_Tutelles_Igepp.jpg" height="72" alt="logo IGEPP"/>
+
+          <hr/>
+          <br/>
+           <a target="_blank" href="http://www.irisa.fr/dyliss/">
+
+            <strong>Dyliss  - DYnamics, Logics and Inference for biological Systems and Sequences</strong>
+            <img target="_blank" src="static/src/images/logos/dyliss_logo_couleur_15pourcent.png" height="72" alt="logo IGEPP"/>
+
+          </a>
+          <hr/>
+          <br/>
+
+          <a target="_blank" href="https://www.genouest.org/">
+            <strong>GenOuest BioInformatics Platform</strong>
+            <img src="static/src/images/logos/logoGO.png" height="72" alt="logo GenOuest"/>
+          </a>
+
+
+        </div>
+
+        <!-- Login form -->
+        <div id="content_login" class="container" hidden>
+          <h3 class="header-div">Login</h3>
+          <hr/>
+          <label for="username">Username or email adress</label><br/>
+          <input id='login_username-email' name="username" type="text" placeholder="Username or email adress" required autofocus><br/><br/>
+
+          <label for="username">Password</label><br/>
+          <input id='login_password' name="password" type="password" placeholder="Password" required><br/><br/>
+
+          <button type="button" class="btn btn-primary" data-dismiss="modal" id="login_button">Log in</button>
+          <i class="hidden fa fa-spinner pulse" id='spinner_login'></i>
+          <i class="hidden fa fa-check text-success" id='tick_login'></i>
+          <i class="hidden fa fa-times text-danger" id='cross_login'></i>
+
+          <p>(or <a id='show_signup' href="#">sign up</a> if you don't have an account)</p>
+          <!-- error message -->
+            <div id='login_error' class="alert alert-danger" role="alert" hidden>
+            </div>
+        </div>
+
+        <!-- signup form -->
+        <div id="content_signup" class="container" hidden>
+          <h3 class="header-div">Sign up</h3>
+          <hr/>
+          <label for="username">Username</label><br/>
+          <input id = 'signup_username' name="username" type="text" placeholder="Username" required autofocus><br/><br/>
+
+          <label for="email">Email adress</label><br/>
+          <input id = 'signup_email' name="email" type="email" placeholder="Email" required><br/><br/>
+
+          <label for="password">Password</label><br/>
+          <input id = 'signup_password' name="password" type="password" placeholder="Password" required><br/><br/>
+
+          <label for="password2">Password (confirmation)</label><br/>
+          <input id = 'signup_password2' name="password2" type="password" placeholder="Password" required><br/><br/>
+
+          <button type="button" class="btn btn-primary" data-dismiss="modal" id="signup_button">Sign Up</button>
+          <i class="hidden fa fa-spinner pulse" id='spinner_signup'></i>
+          <i class="hidden fa fa-check text-success" id='tick_signup'></i>
+          <i class="hidden fa fa-times text-danger" id='cross_signup'></i>
+          <p>(or <a id='show_login' href="#">log in</a> if you have an account)</p>
+          <!-- error message -->
+            <div id='signup_error' class="alert alert-danger" role="alert" hidden>
+            </div>
+          <hr/>
+        </div>
+
+        <!-- Modal  -->
+        <div class="modal fade" id="modal"  role="dialog" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true" >
+          <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title" id="modalTitle"></h4>
+              </div>
+              <div class="modal-body">
+                <p id='modalMessage'></p>
+                <img id='help_figure' class='hidden'>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal" id="modalButton"></button>
+              </div>
+            </div><!-- /.modal-content -->
+          </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
+    </body>
+    <script>
+        new IHMLocal().start();
+    </script>
+</html>

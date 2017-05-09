@@ -150,7 +150,7 @@ askojs="$dir_askomics/askomics/static/dist/askomics.js"
 if [[ $run == false || ! -f $askojs ]]; then
     echo "deploying javascript ..."
     gulp $gulpmode &
-    sleep 8
+    sleep 2
 fi
 
 # Run Askomics --------------------------------------------

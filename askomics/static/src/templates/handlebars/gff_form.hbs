@@ -1,0 +1,34 @@
+<form id="source-file-gff-{{idfile}}" class="template-source_file form-horizontal text-left">
+    <div id="{{idfile}}" filename="{{file.name}}">
+        <h4>GFF file: {{file.name}} </h4>
+        <h5>Select which entities you want to integrate</h5>
+        {{#each file.entities}}
+            <label id="gff_checkbox-{{../idfile}}">
+                <input type="checkbox" id="{{this}}" checked="checked"> {{this}}
+            </label><br>
+        {{/each}}
+        <br>
+        {{#if taxons.length}}
+            <p>Select an existing taxon</p>
+            <select>
+                <option selected disabled hidden>choose taxon</option>
+                {{#each taxons}}
+                    <option value="{{this}}" id="{{../idfile}}-{{this}}">{{this}}</option>
+                {{/each}}
+            </select>
+            <p>Or enter a new one</p>
+        {{else}}
+            <p>Enter a taxon</p>
+        {{/if}}
+        <input type="text" name="frame" id="tax-{{idfile}}">
+        <br><br>
+        <input type="button" id="{{idfile}}" class="btn btn-primary load_data_gff" value="Insert in private graph">
+        {{#if admin}}
+        <input type="button" id="{{idfile}}" class="btn btn-warning load_data_gff_public" value="Insert in public graph" />
+        {{/if}}
+        <br><br>
+        <p class="insert_status text-left alert hidden"></p>
+        <p class="insert_warning text-left alert hidden"></p>
+        <hr><br>
+    </div>
+</form>

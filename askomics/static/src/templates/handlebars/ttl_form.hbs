@@ -1,0 +1,15 @@
+<form id="source-file-ttl-{{idfile}}" class="template-source_file form-horizontal text-center">
+    <div id="{{idfile}}" filename="{{file.name}}">
+        <h4>TTL file: {{file.name}} </h4>
+        <h5>Preview of the first 100 lines of the file</h5>
+        <pre class='preview_field'></pre>
+        <input type="button" id="{{idfile}}" class="btn btn-primary load_data_ttl" value="Insert in private graph">
+        {{#if admin}}
+        <input type="button" id="{{idfile}}" class="btn btn-warning load_data_ttl_public" value="Insert in public graph" />
+        {{/if}}
+        <br><br>
+        <p class="insert_status text-left alert hidden"></p>
+        <p class="insert_warning text-left alert hidden"></p>
+        <hr><br>
+    </div>
+</form>
