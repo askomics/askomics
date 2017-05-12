@@ -13,10 +13,11 @@
         <link href="static/libs/jquery/jquery-ui.min.css" rel="stylesheet" >
 
         <!-- Bootstrap -->
-        <!--<script src="static/libs/tmpl.min.js"></script> -->
         <script src="static/libs/bootstrap/bootstrap.min.js"></script>
         <link href="static/libs/bootstrap/bootstrap.min.css" rel="stylesheet" type="text/css">
 
+        <!-- tmpl -->
+        <script src="static/libs/tmpl/tmpl.min.js"></script>
         <!-- Pygment  -->
         <link href="static/libs/pygment/pygment.css" rel="stylesheet" type="text/css">
 
