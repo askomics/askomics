@@ -49,9 +49,6 @@ class AskomicsUser {
 
     logout() {
         let service = new RestServiceJs('logout');
-
-        __ihm.displayModal('Please wait', '', 'Close');
-
         service.getAll(function() {
             location.reload();
         });
