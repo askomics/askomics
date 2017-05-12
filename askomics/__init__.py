@@ -40,7 +40,6 @@ def main(global_config, **settings):
     config.add_route('load_gff_into_graph', '/load_gff_into_graph')
     config.add_route('load_ttl_into_graph', '/load_ttl_into_graph')
     config.add_route('preview_ttl', '/preview_ttl')
-    config.add_route('check_existing_data', '/check_existing_data')
     config.add_route('positionable_attr', '/positionable_attr')
     config.add_route('ttl', '/ttl/{name:.*}')
     config.add_route('csv', '/csv/{name:.*}')

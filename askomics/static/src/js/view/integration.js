@@ -10,7 +10,7 @@ $(function () {
         if (block.find('.preview_field').is(':visible')) {
             previewTtl(block);
         }
-        checkExistingData(block);
+        checkData(block);
     });
 
     $("#content_integration").on('change', '.column_type', function(event) {
@@ -18,7 +18,7 @@ $(function () {
         if (block.find('.preview_field').is(':visible')) {
             previewTtl(block);
         }
-        checkExistingData(block);
+        checkData(block);
     });
 
     $("#content_integration").on('click', '.preview_button', function(event) {
@@ -189,7 +189,7 @@ function setCorrectType(file) {
             }
 
             // Check what is in the db
-            checkExistingData($('div#content_integration form#source-file-tsv-' + getIdFile(file)));
+            checkData($('div#content_integration form#source-file-tsv-' + getIdFile(file)));
         }
     }
 
@@ -278,7 +278,7 @@ function containAll(Array1,Array2){
 /**
  * Compare the user data and what is already in the triple store
  */
-function checkExistingData(file_elem) {
+function checkData(file_elem) {
 
     let idfile = file_elem.find('.file_name').attr('id');
     let file_name = $("#"+idfile).attr("filename");
@@ -322,42 +322,6 @@ function checkExistingData(file_elem) {
         __ihm.displayModal('Select one column to define a unique key', '', 'Close');
         return;
     }
-
-    var service = new RestServiceJs("check_existing_data");
-    var model = { 'file_name': $("#"+idfile).attr("filename"),
-                  'col_types': col_types,
-                  'disabled_columns': disabled_columns,
-                  'key_columns':key_columns
-                };
-
-    service.post(model, function(data) {
-        if (data == 'forbidden') {
-          showLoginForm();
-          return;
-        }
-        if (data == 'blocked') {
-          displayBlockedPage($('.username').attr('id'));
-          return;
-        }
-        file_elem.find('.column_header').each(function( index ) {
-            if (data.headers_status[index-1] == 'present') {
-                $(this).find("#relation_present").first().show();
-                $(this).find("#relation_new").first().hide();
-            }
-            else {
-                $(this).find("#relation_present").first().hide();
-                $(this).find("#relation_new").first().show();
-            }
-        });
-
-        var insert_warning_elem = file_elem.find(".insert_warning").first();
-        if (data.missing_headers.length > 0) {
-            insert_warning_elem.html("<strong>The following columns are missing:</strong> " + data.missing_headers.join(', '))
-                              .removeClass("hidden alert-success")
-                              .removeClass("hidden alert-danger")
-                              .addClass("show alert-warning");
-        }
-    });
 }
 
 /**
@@ -460,7 +424,7 @@ function loadSourceFile(file_elem, pub) {
 
         // Check what is in the db now
         $('.template-source_file').each(function( index ) {
-            checkExistingData(file_elem);
+            checkData(file_elem);
         });
     });
 
