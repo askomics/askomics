@@ -56,7 +56,7 @@ var askomicsSourceFiles = [
         'askomics/static/src/js/core/IHMLocal.js'
     ];
 
-var askomicsCssFiles = ['askomics/static/src/css/.css'];
+var askomicsCssFiles = ['askomics/static/src/css/*.css'];
 
 var askomicsTemplateFiles = ['askomics/static/src/templates/handlebars/*.hbs'];
 

@@ -1,0 +1,10 @@
+@font-face {
+    font-family: ocra;
+    src: url(../src/fonts/OCRAEXT.TTF);
+}
+
+a.navbar-brand {
+    font-family: ocra;
+    font-size: 25px;
+    /*color: chocolate;*/
+}
