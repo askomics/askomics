@@ -472,7 +472,7 @@ class SourceFileTsv(SourceFile):
                     ttl += indent + ' :blockend ' + str(block_idxend*blockbase) +';\n'
                     
                     for sliceb in range(block_idxstart,block_idxend+1):
-                        ttl += indent + ' :IsIncludeInRef ' + referenceFaldo+str(sliceb) +' ;\n'
+                        ttl += indent + ' :IsIncludeInRef ' + referenceFaldo+"_"+str(sliceb) +' ;\n'
                         ttl += indent + ' :IsIncludeIn ' + str(sliceb) +' ;\n'
                     
                     faldo_strand = self.getStrandFaldo(strandFaldo)
