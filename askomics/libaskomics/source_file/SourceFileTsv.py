@@ -464,11 +464,17 @@ class SourceFileTsv(SourceFile):
                     if startFaldo is None or endFaldo is None or referenceFaldo is None:
                         raise Exception("miss positionable attribute :\"(Entity:"+
                                         entity_id+", Line "+str(row_number)+")")
-                    blockbase=50000
+                    blockbase=10000
                     block_idxstart = int(startFaldo) // blockbase
-                    block_idxend = (int(endFaldo) // blockbase)+1
+                    block_idxend  = int(endFaldo) // blockbase
+                    
                     ttl += indent + ' :blockstart ' + str(block_idxstart*blockbase) +';\n'
                     ttl += indent + ' :blockend ' + str(block_idxend*blockbase) +';\n'
+                    
+                    for sliceb in range(block_idxstart,block_idxend+1):
+                        ttl += indent + ' :IsIncludeInRef ' + referenceFaldo+str(sliceb) +' ;\n'
+                        ttl += indent + ' :IsIncludeIn ' + str(sliceb) +' ;\n'
+                    
                     faldo_strand = self.getStrandFaldo(strandFaldo)
 
                     ttl += indent +    " faldo:location [ a faldo:Region ;\n"+\

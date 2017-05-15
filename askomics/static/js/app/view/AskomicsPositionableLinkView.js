@@ -104,7 +104,8 @@ class AskomicsPositionableLinkView extends AskomicsObjectView {
     var select = $('<select></select>').attr('id', 'type-'+id_link);
 
     // Uncomment near when near query is OK
-    var types = {'included': 'included in', 'excluded': 'excluded of', 'overlap': 'overlap with'/*, 'near': 'near'*/};
+    //var types = {'included': 'included in', 'excluded': 'excluded of', 'overlap': 'overlap with'/*, 'near': 'near'*/};
+    var types = {'included': 'included in', 'overlap': 'overlap with'/*, 'near': 'near'*/};
 
     for (var key in types) {
       if(this.type == key) {

@@ -106,7 +106,7 @@ class SourceFileGff(SourceFile):
         self.getLabelFromUri[':minus'] = 'minus'
         self.getLabelFromUri[':none'] = ''
 
-        blockbase=50000
+        blockbase=10000
 
         for rec in GFF.parse(handle, limit_info=limit, target_lines=1):
             # ref_entity = taxon_entity+'_ref_'+self.encodeToRDFURI(str(rec.id))
@@ -155,7 +155,12 @@ class SourceFileGff(SourceFile):
                     faldo_strand = "faldo:BothStrandPosition"
                 
                 block_idxstart = int(start_entity) // blockbase
-                block_idxend = (int(end_entity) // blockbase)+1
+                block_idxend = (int(end_entity) // blockbase)
+                listSliceRef = []
+                listSlice = []
+                for sliceb in range(block_idxstart,block_idxend+1):
+                        listSliceRef.append(self.encodeToRDFURI(str(rec.id))+str(sliceb))
+                        listSlice.append(str(sliceb))
 
                 attribute_dict = {
                     'rdf:type':  [':'+ type_entity],
@@ -166,6 +171,8 @@ class SourceFileGff(SourceFile):
                     ':position_strand': [strand_entity],
                     ':blockstart'     : [str(block_idxstart*blockbase)],
                     ':blockend'       : [str(block_idxend*blockbase)],
+                    ':IsIncludeInRef' : listSliceRef,
+                    ':IsIncludeIn'    : listSlice,
                     'faldo:location' : ["[ a faldo:Region ;\n"+
                                         "    faldo:begin [ a faldo:ExactPosition;\n"+
                                         "                  a "+faldo_strand+";\n"+
