@@ -173,7 +173,7 @@ class IHMLocal {
       $("#svg").attr('width', $("#content_interrogation").width());
 
       //change icon
-      $('#icon-resize-graph').attr('class', 'glyphicon glyphicon-resize-small');
+      $('#icon-resize-graph').attr('class', 'fa fa-compress');
       $('#icon-resize-graph').attr('value', 'full');
     }
 
@@ -185,7 +185,7 @@ class IHMLocal {
       $("#svg").attr('width', this.w);
 
       //change icon
-      $('#icon-resize-graph').attr('class', 'glyphicon glyphicon-resize-full');
+      $('#icon-resize-graph').attr('class', 'fa fa-expand');
       $('#icon-resize-graph').attr('value', 'small');
     }
 
@@ -195,7 +195,7 @@ class IHMLocal {
       $('.div-details').attr('class', 'div-details-max');
 
       //change icon
-      $('#icon-resize-attr').attr('class', 'glyphicon glyphicon-resize-small');
+      $('#icon-resize-attr').attr('class', 'fa fa-compress');
       $('#icon-resize-attr').attr('value', 'full');
     }
 
@@ -205,7 +205,7 @@ class IHMLocal {
       $('.div-details-max').attr('class', 'div-details');
 
       //change icon
-      $('#icon-resize-attr').attr('class', 'glyphicon glyphicon-resize-full');
+      $('#icon-resize-attr').attr('class', 'fa fa-expand');
       $('#icon-resize-attr').attr('value', 'small');
     }
 

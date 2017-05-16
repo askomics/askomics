@@ -70,55 +70,56 @@
             <div id="queryBuilder" class="row" hidden>
                 <div id="PanelQuery" class="col-md-7">
                   <h3 class="header-div">
-                   <div id="menuGraph" class="btn-group" role="group" aria-label="Menu Graph">
-                     <!-- Resize graph -->
-                      <button id='full-screen-graph' type="button" class="btn btn-default" aria-label="Right Align">
-                        <span id='icon-resize-graph' value='small' class="glyphicon glyphicon-resize-full" aria-hidden="true"></span>
-                      </button>
-
-                      <button id="buttonViewFile" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                      Files<span class="caret"></span>
-                      </button>
-                      <ul id="viewMenuFile" class="dropdown-menu">
-                        <!--upload-->
-                        <li><a href="#" class="small">
-                        <div class="uploadBtn">
-                        <p><span class="fa fa-upload" aria-hidden="true"></span> Load query</p>
-                        <input id="uploadBtn" type="file" class="upload">
+                        <!-- Button bar -->
+                        <div class="btn-group" role="group" aria-label="...">
+                        <!-- Zoom -->
+                          <button id='full-screen-graph' type="button" class="btn btn-default" aria-label="Right Align">
+                            <i id='icon-resize-graph' value='small' class="fa fa-expand" aria-hidden="true"></i>
+                          </button>
+                          <!-- dropdown Files -->
+                          <div class="btn-group" role="group">
+                            <button type="button" id="buttonViewFile" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                              Files
+                              <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                              <li><a href="#" id="uploadBtn"><i class="fa fa-upload" aria-hidden="true"></i> Load query</a></li>
+                              <li><a href="#" id="dwl-query"><i class="fa fa-download" aria-hidden="true"></i> Save query</a></li>
+                              <li><a href="#" id="dwl-query-sparql"><i class="fa fa-floppy-o" aria-hidden="true"></i> Save sparql query</a></li>
+                            </ul>
+                          </div>
+                          <!-- dropdown Graph -->
+                          <div class="btn-group" role="group">
+                            <button type="button" id="buttonViewListGraph" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                              Graph
+                              <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" id="viewListGraph">
+                            </ul>
+                          </div>
+                          <!-- dropdown View -->
+                          <div class="btn-group" role="group">
+                            <button type="button" id="buttonViewListNodesAndLinks" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                              View
+                              <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" id="viewListNodesAndLinks">
+                            </ul>
+                          </div>
+                          <!-- dropdown Shortcuts -->
+                          <div class="btn-group" role="group">
+                            <button type="button" id="buttonViewListShortcuts" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                              Shortcuts
+                              <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" id="viewListShortcuts">
+                            </ul>
+                          </div>
                         </div>
-                        </a></li>
-                        <!--download-->
-                        <li><a href="#" id="dwl-query" class="small">
-                        <p><span class="fa fa-download small" aria-hidden="true"></span> Save query</p>
-                        </a></li>
-                        <!--download-->
-                        <li><a href="#" id="dwl-query-sparql" class="small">
-                        <p><span class="fa fa-floppy-o small small" aria-hidden="true"></span> Save SPARQL query</p>
-                        </a></li>
-                      </ul>
-
-                      <button id="buttonViewListGraph" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                      Graph<span class="caret"></span>
-                      </button>
-                      <ul id="viewListGraph" class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
-                      </ul>
-
-                      <button id="buttonViewListNodesAndLinks" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                      View<span class="caret"></span>
-                      </button>
-                      <ul id="viewListNodesAndLinks" class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
-                      </ul>
-
-                      <button id="buttonViewListShortcuts" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                      Shortcuts<span class="caret"></span>
-                      </button>
-                      <ul id="viewListShortcuts" class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
-                      </ul>
-
-                    </div>
-                    <div class="btn-group pull-right">
-                        <button id="buttonReset" type="button" class="btn btn-warning" onclick="__ihm.stopSession()">Reset</button>
-                    </div>
+                        <!-- Reset -->
+                        <div class="btn-group pull-right">
+                          <button id="buttonReset" type="button" class="btn btn-default" onclick="__ihm.stopSession()"><i class="fa fa-repeat text-warning" aria-hidden="true"></i> Reset</button>
+                        </div>
                     </h3>
                     <hr/>
 
@@ -126,7 +127,7 @@
 
                     <div id="uploadedQuery" class="uploadedQuery" hidden contenteditable></div>
                         <div class="btn-group btn-group-query">
-                            <button type="button" class="btn btn-primary" onclick="new AskomicsJobsViewManager().createQueryJob();">Launch query</button>
+                            <button type="button" class="btn btn-default" onclick="new AskomicsJobsViewManager().createQueryJob();"><i class="fa fa-play text-primary" aria-hidden="true"></i> Launch query</button>
                         </div>
 
                 </div>
@@ -135,7 +136,7 @@
                     <h3 class="header-div">
                      <!-- Resize attributes view -->
                     <button type="button" id='full-screen-attr' class="btn btn-default" aria-label="Right Align">
-                        <span id='icon-resize-attr' value='small' class="glyphicon glyphicon-resize-full" aria-hidden="true"></span>
+                        <i id='icon-resize-attr' value='small' class="fa fa-expand" aria-hidden="true"></i>
                     </button>
                     <span id="objectName" class="label label-default"></span>
 
