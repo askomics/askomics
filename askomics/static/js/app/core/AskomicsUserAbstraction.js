@@ -335,7 +335,8 @@ class AskomicsUserAbstraction {
 
     /* return a list of attributes according a uri node */
     getAttributesWithURI(UriSelectedNode) {
-      let listAtt = {};
+      let listAtt = {}; /* list attributes find for the entity*/
+      let listGraphByUri = {}; /* list of graph where attributes are defined */
       for (let g in this.attributesEntityList ) {
         if ( this.isDesactivedGraph(g) ) continue;
         if ( UriSelectedNode in this.attributesEntityList[g] )
@@ -343,10 +344,12 @@ class AskomicsUserAbstraction {
             let uriAtt =this.attributesEntityList[g][UriSelectedNode][att].uri;
             if ( ! (uriAtt in listAtt) ) {
               listAtt[uriAtt] = this.attributesEntityList[g][UriSelectedNode][att];
+              listGraphByUri[uriAtt] = [];  
             }
+            listGraphByUri[uriAtt].push(g);
           }
       }
-      return Object.values(listAtt);
+      return [Object.values(listAtt),listGraphByUri];
     }
 
     isPositionable(Uri) {

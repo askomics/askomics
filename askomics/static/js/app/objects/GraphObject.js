@@ -56,7 +56,15 @@ class GraphObject {
     if ( typeof(uribase) !== "string" ) {
       throw "removePrefix: uri is not a string :"+JSON.stringify(uribase);
     }
-
+    
+    let idx = uribase.indexOf('position_');
+   
+    if ( idx>0 ) {
+      let property = uribase.substring(idx+'position_'.length);
+      if (property == "start") return "faldo:location/faldo:begin/faldo:position";
+      if (property == "end") return "faldo:location/faldo:end/faldo:position";
+      if (property == "ref") return "faldo:location/faldo:begin/faldo:reference";
+    }
     if ( uribase.indexOf("#")>0 || uribase.indexOf("/")>0) {
       return '<'+uribase+">";
     }

@@ -369,8 +369,12 @@ const classesMapping = {
 
           if ( (dup_link_array[ilx].source.id == node.id) ||  (dup_link_array[ilx].target.id == node.id) ) {
             let blockConstraintByLink = [] ;
-
-            blockConstraint.push(dup_link_array[ilx].buildConstraintsSPARQL());
+            let bc = dup_link_array[ilx].buildConstraintsSPARQL();
+            if ( dup_link_array[ilx] instanceof AskomicsPositionableLink ) {
+              blockConstraint.splice(0, 0, bc); 
+            } else { 
+              blockConstraint.push(bc);
+            }
             dup_link_array[ilx].instanciateVariateSPARQL(variates);
 
             //remove link to avoid to add two same constraint
