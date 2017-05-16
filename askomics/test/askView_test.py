@@ -212,30 +212,6 @@ class AskViewTests(unittest.TestCase):
         assert {'g': 'urn:sparql:test_askomics:jdoe:people.tsv_' + timestamp_people, 'count': '73'} in data
         assert {'g': 'urn:sparql:test_askomics:jdoe:instruments.tsv_' + timestamp_instrument, 'count': '66'} in data
 
-
-    def test_positionable_attr(self):
-        """test positionable_attr method
-
-        insert positionnable data and test it
-        """
-        self.tps.clean_up()
-
-        self.tps.load_transcript()
-        self.tps.load_qtl()
-
-        self.request.json_body = {
-            'node' : 'http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#transcript',
-            'second_node' : 'http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#qtl'
-        }
-
-        expected_result = {
-            'results' : {'position_ref': True, 'position_strand': False, 'position_taxon': True}
-        }
-
-        data = self.askview.positionable_attr()
-
-        assert data == expected_result
-
     def test_source_files_overview(self):
         """Test source_files_overview method"""
 
