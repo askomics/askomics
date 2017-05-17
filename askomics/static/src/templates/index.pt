@@ -262,7 +262,7 @@
           <label for="username">Password</label><br/>
           <input id='login_password' name="password" type="password" placeholder="Password" required><br/><br/>
 
-          <button type="button" class="btn btn-primary" data-dismiss="modal" id="login_button">Log in</button>
+          <button type="button" class="btn btn-default" data-dismiss="modal" id="login_button"><i class="fa fa-sign-in text-primary"></i> Log in</button>
           <i class="hidden fa fa-spinner pulse" id='spinner_login'></i>
           <i class="hidden fa fa-check text-success" id='tick_login'></i>
           <i class="hidden fa fa-times text-danger" id='cross_login'></i>
@@ -289,7 +289,7 @@
           <label for="password2">Password (confirmation)</label><br/>
           <input id = 'signup_password2' name="password2" type="password" placeholder="Password" required><br/><br/>
 
-          <button type="button" class="btn btn-primary" data-dismiss="modal" id="signup_button">Sign Up</button>
+          <button type="button" class="btn btn-default" data-dismiss="modal" id="signup_button"><i class="fa fa-user-plus text-primary"></i> Sign Up</button>
           <i class="hidden fa fa-spinner pulse" id='spinner_signup'></i>
           <i class="hidden fa fa-check text-success" id='tick_signup'></i>
           <i class="hidden fa fa-times text-danger" id='cross_signup'></i>
