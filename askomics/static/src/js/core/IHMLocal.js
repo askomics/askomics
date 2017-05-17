@@ -270,7 +270,7 @@ class IHMLocal {
                                    .append($('<i></i>').attr('class', 'fa fa-globe'))
                                    .append(' ' + __ihm.graphname(value.g).name);
             } else if (value.private) {
-              textGraph = $('<em></em>').attr('class', 'text-primary')
+              textGraph = $('<strong></strong>').attr('class', 'text-primary')
                                    .append($('<i></i>').attr('class', 'fa fa-lock'))
                                    .append(' ' + __ihm.graphname(value.g).name);
             } else {
@@ -291,7 +291,7 @@ class IHMLocal {
                                                                  .append($('<i></i>').attr('class', 'fa fa-globe'))
                                                                  .append(' ' + val.label);
                                           } else if (val.private) {
-                                            text = $('<em></em>').attr('class', 'text-primary')
+                                            text = $('<strong></strong>').attr('class', 'text-primary')
                                                                  .append($('<i></i>').attr('class', 'fa fa-lock'))
                                                                  .append(' ' + val.label);
                                           }  else {
@@ -321,67 +321,67 @@ class IHMLocal {
 
 
     loadNamedGraphs() {
-        var select = $('#dropNamedGraphSelected');
-        select.empty();
-        __ihm.manageDelGraphButton();
+        let service = new RestServiceJs('list_user_graph');
+        service.getAll(function(data) {
+            let template = AskOmics.templates.datasets;
+            for (var i = data.length - 1; i >= 0; i--) {
+                data[i].count = __ihm.format_number(data[i].count);
+            }
+            let context = {datasets: data};
+            let html = template(context);
+            $('#content_datasets').empty();
+            $('#content_datasets').append(html);
 
-        var serviceNamedGraphs = new RestServiceJs('list_private_graphs');
-        serviceNamedGraphs.getAll(function(namedGraphs) {
-            if (namedGraphs == 'forbidden') {
-              __ihm.showLoginForm();
-              return;
-            }
-            if (namedGraphs == 'blocked') {
-              __ihm.displayBlockedPage($('.username').attr('id'));
-            }
-            if (namedGraphs.length === 0) {
-              __ihm.disableDelButton();
-              return;
-            }else{
-              __ihm.enableDelButton();
-            }
-            for (let graphName in namedGraphs){
-                select.append($("<option></option>").attr("value", namedGraphs[graphName].g)
-                                                    .append(__ihm.formatGraphName(namedGraphs[graphName])));
-            }
+            // check all
+            $(".check_all_datasets").change(function () {
+                $(".check_dataset").prop('checked', $(this).prop("checked"));
+            });
+
+            // hide delete button if no checkbox checked
+            $(".check_ds").change(function(){
+                if ($('.check_dataset:checked').length !== 0) {
+                   $('#delete_datasets').removeAttr('disabled');
+                }else{
+                    $('#delete_datasets').attr('disabled', 'disabled');
+                }
+            });
+
+            // Delete selected datasets
+            $('#delete_datasets').click(function() {
+                let selected = [];
+                $('.check_dataset').each(function() {
+                    if ($(this).is(':checked')) {selected.push($(this).attr('name'));}
+                });
+                let service2 = new RestServiceJs('delete_graph');
+                let model = {'named_graph': selected};
+                //show the spinner
+                $('#spinner_delete').removeClass('hidden');
+                service2.post(model, function(data) {
+                    __ihm.loadNamedGraphs();
+                    __ihm.stopSession();
+                    __ihm.resetStats();
+                });
+            });
         });
     }
 
-
-    unselectGraphs() {
-      $('#dropNamedGraphSelected option:selected').removeAttr("selected");
-      __ihm.manageDelGraphButton();
-    }
-
-    manageDelGraphButton() {
-      let graphs = $('#dropNamedGraphSelected').val();
-      if (graphs === null) {
-        $('#btn-empty-graph').prop('disabled', true);
-      }else{
-        $('#btn-empty-graph').prop('disabled', false);
-      }
-    }
-
-    disableDelButton() {
-      $('#btn-empty').prop('disabled', true);
-    }
-
-    enableDelButton() {
-      $('#btn-empty').prop('disabled', false);
+    format_number(number) {
+        // number = number;
+        number += '';
+        let x = number.split('.');
+        let x1 = x[0];
+        let x2 = x.length > 1 ? '.' + x[1] : '';
+        let rgx = /(\d+)(\d{3})/;
+        while (rgx.test(x1)) {
+            x1 = x1.replace(rgx, '$1' + ' ' + '$2');
+        }
+        return x1 + x2;
     }
 
     graphname(graphn) {
       let date = graphn.substr(graphn.lastIndexOf('_') + 1);
       let new_name = graphn.substr(0,graphn.lastIndexOf('_'));
       return { 'date' : date , 'name' : new_name } ;
-    }
-
-    formatGraphName(graph) {
-      /*
-      Transform the name of the graph into a readable string
-      */
-      let ret = __ihm.graphname(graph.g);
-      return "<em>"+ret.name+"</em> (<strong>date="+ret.date+", ntriplets="+graph.count+"</strong>)";
     }
 
     showLoginForm() {
@@ -415,74 +415,6 @@ class IHMLocal {
           $('#content_statistics').append(html);
 
           __ihm.hideModal();
-        });
-    }
-
-
-    emptyDatabase(value) {
-        if (value == 'confirm') {
-            $("#btn-del").empty();
-            $("#btn-del")//.append('Confirm')
-                          .append($('<button></button>')
-                                .attr('type', 'button')
-                                .attr('class', 'btn btn-danger')
-                                .attr('onclick', '__ihm.emptyDatabase(\"yes\")')
-                                .append('Yes')
-                          ).append($('<button></button>')
-                                .attr('type', 'button')
-                                .attr('class', 'btn btn-default')
-                                .attr('onclick', '__ihm.emptyDatabase(\"no\")')
-                                .append('No')
-                              );
-            return;
-        }
-
-        if (value == 'no') {
-            $("#btn-del").empty();
-            $("#btn-del").append("<button id='btn-empty' onclick='__ihm.emptyDatabase(\"confirm\")' class='btn btn-danger'>Delete all</button>");
-            return;
-        }
-
-        if (value == 'yes') {
-            __ihm.displayModal('Please wait ...', '', 'Close');
-            var service = new RestServiceJs("empty_user_database");
-                service.getAll(function(empty_db){
-                  if (empty_db == 'forbidden') {
-                    __ihm.showLoginForm();
-                  }
-                  __ihm.hideModal();
-                  if ('error' in empty_db ) {
-                    alert(empty_db.error);
-                  }
-                $('#statistics_div').empty();
-                $('#btn-del').empty();
-                $("#btn-del").append("<button id='btn-empty' onclick='__ihm.emptyDatabase(\"confirm\")' class='btn btn-danger'>Delete all</button>");
-                $('#btn-del').append(' All triples deleted!');
-                __ihm.stopSession();
-                __ihm.resetStats();
-                __ihm.loadNamedGraphs();
-            });
-        }
-    }
-
-
-    deleteNamedGraph(graphs) {
-        __ihm.displayModal('Please Wait', '', 'Close');
-        var service = new RestServiceJs("delete_graph");
-        let data = {'namedGraphs':graphs };
-            service.post(data, function(d){
-              if (d == 'forbidden') {
-                __ihm.showLoginForm();
-                return;
-              }
-              if (d == 'blocked') {
-                __ihm.displayBlockedPage($('.username').attr('id'));
-                return;
-              }
-            __ihm.stopSession();
-            __ihm.resetStats();
-            __ihm.hideModal();
-            __ihm.loadNamedGraphs();
         });
     }
 

@@ -164,21 +164,7 @@
         <div id="content_integration_gff" class="container" hidden>
         </div>
 
-        <div id="content_datasets" class="container" hidden>
-            <hr/>
-            <h3 class="header-div">Manage User Datasets</h3>
-            <hr/>
-
-            <form class="form-horizontal">
-                <fieldset>
-                    <label>Choose which datasets you want to delete</label>
-                    <span class="glyphicon glyphicon-erase display" onclick="__ihm.unselectGraphs()"></span>
-                    <select multiple="multiple" id="dropNamedGraphSelected" class="form-control" onchange='__ihm.manageDelGraphButton()'></select>
-                </fieldset>
-                <div id="btn-del-graph" class="btn-group"><button id="btn-empty-graph" class="btn btn-primary" onclick="__ihm.deleteNamedGraph($('#dropNamedGraphSelected').val())" type="button" id="dropNamedGraphButton">Delete</button></div>
-                <div id="btn-del" class="btn-group"><button id="btn-empty" onclick="__ihm.emptyDatabase('confirm')" class="btn btn-danger">Delete all</button></div>
-            </form>
-        </div>
+        <div id="content_datasets" class="container" hidden></div>
 
         <div id="content_statistics" class="container" hidden>
         </div>

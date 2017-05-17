@@ -1,0 +1,28 @@
+<hr/>
+<h3 class="header-div">Datasets</h3>
+<hr/>
+<table class="table table-striped">
+	<tr>
+		<th><input class="check_ds check_all_datasets" type="checkbox"></th>
+		<th>Name</th>
+		<th>Creation date</th>
+		<th>Access level</th>
+		<th>Number of triples</th>
+	</tr>
+
+	{{#each datasets}}
+	<tr id="{{this.g}}">
+		<td><input class="check_ds check_dataset" name="{{this.g}}" type="checkbox"></td>
+		<td>{{this.name}}</td>
+		<td>{{this.readable_date}}</td>
+		<td>{{#if this.access_bool}}<i class="fa fa-globe text-warning"></i> <em class="text-warning">{{this.access}}</em>
+		    {{else}}<i class="fa fa-lock text-primary"></i> <strong class="text-primary">{{this.access}}</strong>
+		    {{/if}}
+		</td>
+		<td>{{this.count}}</td>
+	</tr>
+	{{/each}}
+</table>
+
+<button id="delete_datasets" type="button" class="btn btn-default" disabled><i class="fa fa-trash text-danger"></i> Delete</button>
+<i class="hidden fa fa-spinner pulse" id='spinner_delete'></i>
