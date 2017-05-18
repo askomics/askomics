@@ -83,7 +83,7 @@ build task : jshint files
 */
 gulp.task('build', function() {
     // Compile Javascript
-    gulp.src(askomicsSourceFiles)
+    return gulp.src(askomicsSourceFiles)
         .pipe(jshint())
         .pipe(jshint.reporter('default'))
         .pipe(babel({
