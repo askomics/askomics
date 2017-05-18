@@ -104,7 +104,8 @@ class AskomicsPositionableLinkView extends AskomicsObjectView {
     var select = $('<select></select>').attr('id', 'type-'+id_link);
 
     // Uncomment near when near query is OK
-    var types = {'included': 'included in', 'excluded': 'excluded of', 'overlap': 'overlap with'/*, 'near': 'near'*/};
+    //var types = {'included': 'included in', 'excluded': 'excluded of', 'overlap': 'overlap with'/*, 'near': 'near'*/};
+    var types = {'included': 'included in', 'overlap': 'overlap with'/*, 'near': 'near'*/};
 
     for (var key in types) {
       if(this.type == key) {
@@ -123,48 +124,38 @@ class AskomicsPositionableLinkView extends AskomicsObjectView {
     var checkbox_samestrand;
     var radio_samestrand;
 
-    if (this.link.position_ref) {
-        if (this.link.same_ref) {
-          checkbox_sameref = $('<label></label>').attr('id', 'reflab-'+id_link).append($('<input>').attr('type', 'checkbox').attr('id', 'ref-'+id_link).attr('checked', 'checked')).append('Reference');
-        }else{
-          checkbox_sameref = $('<label></label>').attr('id', 'reflab-'+id_link).append($('<input>').attr('type', 'checkbox').attr('id', 'ref-'+id_link)).append('Reference');
-        }
-
-        checkbox_sameref.change(function() {
-          if ($('#ref-'+id_link).is(':checked')) {
-            view.changeSameRef(true);
-          }else{
-            view.changeSameRef(false);
-          }
-        });
+    if (this.link.same_ref) {
+        checkbox_sameref = $('<label></label>').attr('id', 'reflab-'+id_link).append($('<input>').attr('type', 'checkbox').attr('id', 'ref-'+id_link).attr('checked', 'checked')).append('Reference');
     }else{
-      checkbox_sameref = '';
+        checkbox_sameref = $('<label></label>').attr('id', 'reflab-'+id_link).append($('<input>').attr('type', 'checkbox').attr('id', 'ref-'+id_link)).append('Reference');
     }
 
-    if (this.link.position_taxon) {
-        if (this.link.same_tax) {
-          checkbox_sametax = $('<label></label>').attr('id', 'taxlab-'+id_link).append($('<input>').attr('type', 'checkbox').attr('id', 'tax-'+id_link).attr('checked', 'checked')).append('Taxon');
-        }else{
-          checkbox_sametax = $('<label></label>').attr('id', 'taxlab-'+id_link)
+    checkbox_sameref.change(function() {
+      if ($('#ref-'+id_link).is(':checked')) {
+         view.changeSameRef(true);
+       }else{
+         view.changeSameRef(false);
+       }
+      });
+   
+    if (this.link.same_tax) {
+      checkbox_sametax = $('<label></label>').attr('id', 'taxlab-'+id_link).append($('<input>').attr('type', 'checkbox').attr('id', 'tax-'+id_link).attr('checked', 'checked')).append('Taxon');
+    } else {
+      checkbox_sametax = $('<label></label>').attr('id', 'taxlab-'+id_link)
                                                  .append($('<input>').attr('type', 'checkbox')
                                                                      .attr('id', 'tax-'+id_link))
                                                  .append('Taxon');
-        }
-
-        checkbox_sametax.change(function() {
-          if($('#tax-'+id_link).is(':checked')) {
-            view.changeSameTax(true);
-          }else{
-            view.changeSameTax(false);
-          }
-        });
-    }else{
-      checkbox_sametax = '';
     }
 
-    if (this.link.position_strand) {
-       if (this.link.which_strand == 'same') {
-        radio_samestrand = $('<div></div>').attr('id', 'div_strand-'+id_link)
+    checkbox_sametax.change(function() {
+      if($('#tax-'+id_link).is(':checked')) {
+         view.changeSameTax(true);
+      } else{
+         view.changeSameTax(false);
+      }
+     });
+
+    radio_samestrand = $('<div></div>').attr('id', 'div_strand-'+id_link)
                                               .append('Strand:')
                                               .append('<br>')
                                               .append($('<input>').attr('id', 'both_strand-'+id_link)
@@ -176,69 +167,21 @@ class AskomicsPositionableLinkView extends AskomicsObjectView {
                                                                   .attr('type', 'radio')
                                                                   .attr('name', 'strand-'+id_link)
                                                                   .attr('value', 'same')
-                                                                  .attr('checked', 'checked'))
+                                                                  .attr('checked', this.link.which_strand == 'same'?'checked':'none'))
                                               .append('same').append('<br>')
+                                              /*
                                               .append($('<input>').attr('id', 'opp_strand-'+id_link)
                                                                   .attr('type', 'radio')
                                                                   .attr('name', 'strand-'+id_link)
                                                                   .attr('value', 'opp'))
-                                              .append('opposite').append('<br>');
-       }else if (this.link.which_strand == 'opp') {
-        radio_samestrand = $('<div></div>').attr('id', 'div_strand-'+id_link)
-                                              .append('Strand:')
-                                              .append('<br>')
-                                              .append($('<input>').attr('id', 'both_strand-'+id_link)
-                                                                  .attr('type', 'radio')
-                                                                  .attr('name', 'strand-'+id_link)
-                                                                  .attr('value', 'both'))
-                                              .append('both').append('<br>')
-                                              .append($('<input>').attr('id', 'same_strand-'+id_link)
-                                                                  .attr('type', 'radio')
-                                                                  .attr('name', 'strand-'+id_link)
-                                                                  .attr('value', 'same'))
-                                              .append('same').append('<br>')
-                                              .append($('<input>').attr('id', 'opp_strand-'+id_link)
-                                                                  .attr('type', 'radio')
-                                                                  .attr('name', 'strand-'+id_link)
-                                                                  .attr('value', 'opp')
-                                                                  .attr('checked', 'checked'))
-                                              .append('opposite').append('<br>');
-       }else{ // 'both'
-        radio_samestrand = $('<div></div>').attr('id', 'div_strand-'+id_link)
-                                              .append('Strand:')
-                                              .append('<br>')
-                                              .append($('<input>').attr('id', 'both_strand-'+id_link)
-                                                                  .attr('type', 'radio')
-                                                                  .attr('name', 'strand-'+id_link)
-                                                                  .attr('value', 'both')
-                                                                  .attr('checked', 'checked'))
-                                              .append('both').append('<br>')
-                                              .append($('<input>').attr('id', 'same_strand-'+id_link)
-                                                                  .attr('type', 'radio')
-                                                                  .attr('name', 'strand-'+id_link)
-                                                                  .attr('value', 'same'))
-                                              .append('same').append('<br>')
-                                              .append($('<input>').attr('id', 'opp_strand-'+id_link)
-                                                                  .attr('type', 'radio')
-                                                                  .attr('name', 'strand-'+id_link)
-                                                                  .attr('value', 'opp'))
-                                              .append('opposite').append('<br>');
-      }
+                                              .append('opposite').append('<br>')*/
+                                              ;
+      
       // Onchange function for strand
       radio_samestrand.change(function() {
         let value = $('input[name=strand-'+id_link+']:checked', '#div_strand-'+id_link).val();
         view.changeStrand(value);
       });
-
-
-
-
-
-
-
-    }else{
-      radio_samestrand = '';
-    }
 
     var onTheSame = $('<div></div>').append('On the same:')
                                     .append($('<br>'))

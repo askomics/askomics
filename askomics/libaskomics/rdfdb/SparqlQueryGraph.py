@@ -68,7 +68,7 @@ class SparqlQueryGraph(SparqlQueryBuilder):
                      '?uri displaySetting:entity "true"^^xsd:boolean.\n'+
                      "{ { ?g :accessLevel 'public' } UNION { ?g dc:creator '" +
                      self.session['username'] + "'. } } }\n"
-        })
+        }, True)
 
     def get_isa_relation_entities(self):
         """
@@ -78,10 +78,10 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         return self.build_query_on_the_fly({
             'select': '?uri ?urisub',
             'query': '\n'+
-                     '?uri displaySetting:entity "true"^^xsd:boolean.\n'+
-                     '?uri rdfs:subClassOf ?urisub.\n'+
-                     '?urisub displaySetting:entity "true"^^xsd:boolean.\n'
-        })
+                     'GRAPH ?g1 { ?uri displaySetting:entity "true"^^xsd:boolean.}\n'+
+                     'GRAPH ?g2 {?uri rdfs:subClassOf ?urisub.}\n'+
+                     'GRAPH ?g3 {?urisub displaySetting:entity "true"^^xsd:boolean.}\n'
+        }, True)
 
     def get_public_graphs(self):
         """
@@ -91,7 +91,6 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         return self.build_query_on_the_fly({
             'select': '?g',
             'query': 'GRAPH ?g {\n'+
-                     '?s ?p ?o.\n'+
                      "?g :accessLevel 'public'. } "
         }, True)
 
@@ -116,25 +115,6 @@ class SparqlQueryGraph(SparqlQueryBuilder):
             'select': '?exist',
             'query': 'GRAPH ?g {\n\tBIND(EXISTS {<' +
                      uri + '> displaySetting:is_positionable "true"^^xsd:boolean} AS ?exist) '+
-                     '\t{'+
-                     '\t\t{ ?g :accessLevel "public". }'+
-                     '\t\tUNION '+
-                     '\t\t{ ?g dc:creator "'+self.session['username']+'".}'+
-                     '\t}'+
-                     '}'
-        }, True)
-
-    def get_common_pos_attr(self, uri1, uri2):
-        """
-        Get the common positionable attributes between 2 entity
-        """
-        self.log.debug('---> get_common_pos_attr')
-        return self.build_query_on_the_fly({
-            'select': '?uri ?pos_attr ?status',
-            'query': 'GRAPH ?g {\n'+
-                     '\tVALUES ?pos_attr {:position_taxon :position_ref :position_strand }\n' +
-                     '\tVALUES ?uri {<'+uri1+'> <'+uri2+'> }\n' +
-                     '\tBIND(EXISTS {?pos_attr rdfs:domain ?uri} AS ?status)'+
                      '\t{'+
                      '\t\t{ ?g :accessLevel "public". }'+
                      '\t\tUNION '+
@@ -226,9 +206,9 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         """
         return self.build_query_on_the_fly({
             'select': '?entity',
-            'query': '?entity displaySetting:entity "true"^^xsd:boolean .\n' +
-                     '\t?entity displaySetting:is_positionable "true"^^xsd:boolean .'
-            })
+            'query': 'GRAPH ?g1 { ?entity displaySetting:entity "true"^^xsd:boolean .\n' +
+                     '?entity displaySetting:is_positionable "true"^^xsd:boolean .}'
+            }, True)
 
     def get_abstraction_category_entity(self, entities):
         """

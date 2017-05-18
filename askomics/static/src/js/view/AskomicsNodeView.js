@@ -67,17 +67,22 @@ class AskomicsNodeView extends AskomicsObjectView {
   }
 
 /* ===============================================================================================*/
-  buildCategory(attribute,contextDependancy=false) {
+  buildCategory(attribute,listGraphsWithAtt,contextDependancy=false) {
     let labelSparqlVarId = attribute.SPARQLid;
     let URISparqlVarId   = "URICat"+labelSparqlVarId;
     let inp = $("<select/>").addClass("form-control").attr("multiple","multiple");
 
     __ihm.displayModal('Please wait', '', 'Close');
-    let tab = this.node.buildConstraintsGraphForCategory(attribute.id);
+    let tab = [];
 
+    let listForceFrom = listGraphsWithAtt;
     if (contextDependancy) {
+      tab = this.node.buildConstraintsGraphForCategory(attribute.id,true);
       let tab2 = __ihm.getGraphBuilder().buildConstraintsGraph();
       tab[1][0] = [].concat.apply([], [tab[1][0], tab2[1][0]]);
+      listForceFrom = []; /* unactive if query concern a user query */
+    } else {
+      tab = this.node.buildConstraintsGraphForCategory(attribute.id,false);
     }
 
     inp.attr("list", "opt_" + labelSparqlVarId)
@@ -92,6 +97,11 @@ class AskomicsNodeView extends AskomicsObjectView {
       'removeGraph'          : __ihm.getAbstraction().listUnactivedGraph(),
       'export':false,
     };
+
+    /* For a basic query to search category value, we ask only on graph which contain the category */
+    if(listForceFrom.length >0) {
+      model.from = listForceFrom;
+    } 
 
     let mythis = this;
   //  console.log(attribute.uri);
@@ -310,7 +320,7 @@ class AskomicsNodeView extends AskomicsObjectView {
         }
         /* set up the list with possible entities to link */
         for ( let n of __ihm.getGraphBuilder().nodes() ) {
-          let attributes = __ihm.getAbstraction().getAttributesWithURI(n.uri);
+          let attributes = __ihm.getAbstraction().getAttributesWithURI(n.uri)[0];
           let firstPrintForThisNode = true;
           /* Manage Link node id  */
           if ( (n.id != curAtt.id) ) {
@@ -618,7 +628,7 @@ class AskomicsNodeView extends AskomicsObjectView {
    this.makeRemoveIcon();
  }
 
- makeRefreshCategoryIcon(att) {
+ makeRefreshCategoryIcon(att,listGraphsWithAtt) {
    var icon = $('<span></span>')
            .addClass('fa')
            .addClass('fa-refresh')
@@ -628,7 +638,7 @@ class AskomicsNodeView extends AskomicsObjectView {
 
    icon.click(function(d) {
       $(this).parent().find('select[linkvar!="true"]').remove();
-      $(this).parent().append(mythis.buildCategory(att,true));
+      $(this).parent().append(mythis.buildCategory(att,listGraphsWithAtt,true));
    });
    return icon;
  }
@@ -664,11 +674,12 @@ class AskomicsNodeView extends AskomicsObjectView {
              .append(mythis.buildString(node.SPARQLid))
              .append(mythis.buildLinkVariable(node)));
 
-      var attributes = __ihm.getAbstraction().getAttributesWithURI(node.uri);
-
+      let res = __ihm.getAbstraction().getAttributesWithURI(node.uri);
+      let attributes = res[0];
+      let graphsWhereAreDefinedAttr = res[1];
       $.each(attributes, function(i) {
           let attribute = node.getAttributeOrCategoryForNode(attributes[i]);
-
+          let listGraphsWithAtt = graphsWhereAreDefinedAttr[attribute.uri];
           var lab = $("<label></label>").attr("uri",attribute.uri).attr("for",attribute.label).text(attribute.label);
 
           if ( attribute.basic_type == "category" ) {
@@ -683,8 +694,8 @@ class AskomicsNodeView extends AskomicsObjectView {
                    .append(mythis.makeEyeIcon(attribute))
                    .append(mythis.makeNegativeMatchIcon('URICat'+attribute.SPARQLid))
                    .append(mythis.makeLinkVariableIcon('URICat'+attribute.SPARQLid))
-                   .append(mythis.makeRefreshCategoryIcon(attribute))
-                   .append(mythis.buildCategory(attribute))
+                   .append(mythis.makeRefreshCategoryIcon(attribute,listGraphsWithAtt))
+                   .append(mythis.buildCategory(attribute,listGraphsWithAtt))
                    .append(mythis.buildLinkVariable(attribute)));
           } else if ( attribute.basic_type == "decimal" ) {
             /* RemoveIcon, EyeIcon, Attribute IHM */

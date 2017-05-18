@@ -308,11 +308,16 @@ class AskView(object):
 
         for index_result in range(len(res['results']['bindings'])):
 
+<<<<<<< HEAD
             dat = datetime.datetime.strptime(res['results']['bindings'][index_result]['date']['value'], "%Y-%m-%dT%H:%M:%S.%f")
             self.log.debug(dat)
+=======
+        res = ql.execute_query(sqg.get_private_graphs_and_count().query)
+>>>>>>> master
 
             readable_date = dat.strftime("%y-%m-%d at %H:%M:%S")
 
+<<<<<<< HEAD
             named_graphs.append({
                 'g': res['results']['bindings'][index_result]['g']['value'],
                 'name': res['results']['bindings'][index_result]['name']['value'],
@@ -322,46 +327,16 @@ class AskView(object):
                 'access': res['results']['bindings'][index_result]['access']['value'],
                 'access_bool': bool(res['results']['bindings'][index_result]['access']['value'] == 'public')
             })
+=======
+        for indexResult in range(len(res['results']['bindings'])):
+            if 'g' in res['results']['bindings'][indexResult]:
+                namedGraphs.append({
+                    'g' : res['results']['bindings'][indexResult]['g']['value'],
+                    'count' : res['results']['bindings'][indexResult]['co']['value']
+                })
+>>>>>>> master
 
         return named_graphs
-
-    @view_config(route_name='positionable_attr', request_method='POST')
-    def positionable_attr(self):
-        """
-        Return the positionable attributes in common between two positionable entity
-        """
-        #FIXEME: Rewrite this ugly method
-
-        body = self.request.json_body
-
-        self.setGraphUser()
-
-        sqg = SparqlQueryGraph(self.settings, self.request.session)
-        ql = QueryLauncher(self.settings, self.request.session)
-
-        # Check if the two entity are positionable
-        positionable1 = ql.process_query(sqg.get_if_positionable(body['node']).query)
-        positionable2 = ql.process_query(sqg.get_if_positionable(body['second_node']).query)
-
-        if positionable1 == 0 or positionable2 == 0:
-            self.data['error'] = 'Entities are not positionable nodes !'
-            return self.data
-
-        results = ql.process_query(sqg.get_common_pos_attr(body['node'], body['second_node']).query)
-        self.log.debug(results)
-
-        self.data['results'] = {}
-
-        list_pos_attr = []
-
-        for elem in results:
-            if elem['pos_attr'] not in list_pos_attr:
-                list_pos_attr.append(elem['pos_attr'].replace("http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#", ""))
-
-        for elem in list_pos_attr:
-            self.data['results'][elem] = False not in [ParamManager.Bool(p['status']) for p in results if p['pos_attr'] == "http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#"+elem]
-
-        return self.data
 
     @view_config(route_name='guess_csv_header_type', request_method='POST')
     def guess_csv_header_type(self):
@@ -416,8 +391,6 @@ class AskView(object):
         # Denny for blocked users
         if self.request.session['blocked']:
             return 'blocked'
-
-        self.setGraphUser()
 
         self.log.debug(" ========= Askview:source_files_overview =============")
         sfc = SourceFileConvertor(self.settings, self.request.session)
@@ -713,11 +686,6 @@ class AskView(object):
         self.log.debug("== getUserAbstraction ==")
         body = self.request.json_body
 
-        self.setGraphUser()
-        self.data['graph'] = self.settings['graph']
-        print("====================================================")
-        self.log.debug(self.settings['graph'])
-
         service = ''
         if 'service' in body :
             service = body['service']
@@ -858,13 +826,12 @@ class AskView(object):
         body=self.request.json_body
 
         try:
-            lRemove = []
-            if "removeGraph" in body:
-                lRemove = body["removeGraph"]
-            self.setGraphUser(lRemove)
             tse = TripleStoreExplorer(self.settings, self.request.session)
-
-            results,query = tse.build_sparql_query_from_json(body["variates"],body["constraintesRelations"],True)
+            lfrom = []
+            if 'from' in body:
+                lfrom = body['from']
+            results,query = tse.build_sparql_query_from_json(lfrom,body["variates"],body["constraintesRelations"],True)
+            
             #body["limit"]
             # Remove prefixes in the results table
             l = int(body["limit"]) + 1
@@ -896,13 +863,15 @@ class AskView(object):
         """ Build a request from a json whith the following contents :variates,constraintesRelations,constraintesFilters"""
         self.log.debug("== Attribute Value ==")
 
-        self.setGraphUser()
-
         try:
             tse = TripleStoreExplorer(self.settings, self.request.session)
 
             body = self.request.json_body
-            results,query = tse.build_sparql_query_from_json(body["variates"],body["constraintesRelations"],-1,False)
+            lfrom = []
+            if 'from' in body:
+                lfrom = body['from']
+
+            results,query = tse.build_sparql_query_from_json(lfrom,body["variates"],body["constraintesRelations"],-1,False)
 
             self.data['query'] = query
         except Exception as e:

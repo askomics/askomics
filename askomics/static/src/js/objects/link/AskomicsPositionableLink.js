@@ -5,37 +5,18 @@ class AskomicsPositionableLink extends AskomicsLink {
   constructor(link,sourceN,targetN) {
     super(link,sourceN,targetN);
 
-    this.type     = 'included' ;
-    this.label    = 'included in';
-    this.same_tax  =   'undef';
-    this.same_ref  =   'undef';
-    this.which_strand = 'both' ; // 'both', 'same' or 'opp'
-    this.strict   =  true ;
-    this.position_taxon = 'undef' ;
-    this.position_ref = 'undef' ;
-    this.position_strand = 'undef' ;
-  }
+    this.type         = 'included' ;
+    this.label        = 'included in';
+    this.same_tax     =  false;
+    this.same_ref     =  true;
+    this.which_strand =  'both'; // same/opp;
+    this.strict       =  true ;
 
-  setCommonPosAttr() {
-    /*  get list of common positionable attributes
-        (taxon, ref and strand) */
-    let service = new RestServiceJs("positionable_attr");
-    let model = { 'node': this.source.uri,
-                  'second_node': this.target.uri,
-                  'link': this };
+    this.startNodeVar = null ;
+    this.endNodeVar   = null ;
+    this.startSecondNodeVar = null ;
+    this.endSecondNodeVar   = null ;
 
-    __ihm.displayModal('Please wait', '', 'Close');
-    service.post(model, function(data) {
-        if (! __ihm.manageErrorMessage(data)) return;
-
-        model.link.position_taxon = data.results.position_taxon;
-        model.link.position_ref = data.results.position_ref;
-        model.link.position_strand = data.results.position_strand;
-
-        model.link.same_tax = data.results.position_taxon?true:false;
-        model.link.same_ref = data.results.position_ref?true:false;
-        __ihm.hideModal();
-    });
   }
 
   setjson(obj) {
@@ -44,11 +25,8 @@ class AskomicsPositionableLink extends AskomicsLink {
     this.label    = obj.label;
     this.same_tax  =  obj.same_tax ;
     this.same_ref  =  obj.same_ref ;
-    this.which_strand = obj.which_strand ;
+    this.same_strand = obj.same_strand ;
     this.strict   =  obj.strict ;
-    this.position_taxon = obj.position_taxon ;
-    this.position_ref = obj.position_ref ;
-    this.position_strand = obj.position_strand ;
   }
 
   getTextFillColor() { return 'darkgreen'; }
@@ -59,75 +37,108 @@ class AskomicsPositionableLink extends AskomicsLink {
     let secondNode = this.source ;
     let blockConstraint = [];
 
-    /* constrainte to target the same ref */
-    if (this.position_ref) {
-      blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ ":position_ref"+" "+ "?ref_"+node.SPARQLid);
-      blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ ":position_ref"+" "+ "?ref_"+secondNode.SPARQLid);
+    /* block management */
+    if (this.same_ref) {
+      blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ ":IsIncludeInRef"+" "+ "?s");
+      blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ ":IsIncludeInRef"+" "+ "?s");
+    } else {
+      blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ ":IsIncludeIn"+" "+ "?s");
+      blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ ":IsIncludeIn"+" "+ "?s");
+    }
+    
+    /* manage start and end variates */
+    this.startNodeVar = node.att_position_active("start") ;
+    if ( this.startNodeVar === null  ) { 
+      this.startNodeVar = "start_"+node.SPARQLid;
+      blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ "faldo:location/faldo:begin/faldo:position"+" "+ "?"+this.startNodeVar);
+    }
+    this.endNodeVar = node.att_position_active("end") ;
+    if ( this.endNodeVar === null ) { 
+      this.endNodeVar = "end_"+node.SPARQLid ;
+      blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ "faldo:location/faldo:end/faldo:position"+" "+ "?"+this.endNodeVar);
+    }
+    this.startSecondNodeVar = secondNode.att_position_active("start") ;
+    if ( this.startSecondNodeVar === null ) { 
+      this.startSecondNodeVar = "start_"+secondNode.SPARQLid;
+      blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ "faldo:location/faldo:begin/faldo:position"+" "+ "?"+this.startSecondNodeVar);
+    }
+    this.endSecondNodeVar =  secondNode.att_position_active("end") ;
+    if ( this.endSecondNodeVar === null ) { 
+      this.endSecondNodeVar = "end_"+secondNode.SPARQLid;
+      blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ "faldo:location/faldo:end/faldo:position"+" "+ "?"+this.endSecondNodeVar );
     }
 
+     this.setFiltersOperator(blockConstraint,this.startNodeVar,this.startSecondNodeVar,this.endNodeVar,this.endSecondNodeVar);
+
+    /* constrainte to target the same ref */
+    /*
+    if (this.same_ref) {
+      let att1 = node.att_position_active("ref") ;
+      let att2 = secondNode.att_position_active("ref") ;
+      if ( att1 === null && att2 === null) { 
+      } else if ( att1 === null ) {
+        blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ "faldo:location/faldo:begin/faldo:reference"+" "+ "?URICat"+att2);
+      } else if ( att2 === null ) {
+        blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ "faldo:location/faldo:begin/faldo:reference"+" "+ "?URICat"+att1);
+      } else {
+        blockConstraint.push("FILTER ( "+ "?"+att1+"="+"?"+att2+" )");
+      }
+    }*/
+
     /* constrainte to target the same taxon */
-    if (this.position_taxon) {
-      blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ ":position_taxon"+" "+ "?taxon_"+node.SPARQLid);
-      blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ ":position_taxon"+" "+ "?taxon_"+secondNode.SPARQLid);
+    if (this.same_tax) {
+      let att1 = node.att_position_active("taxon") ;
+      let att2 = secondNode.att_position_active("taxon") ;
+      if ( att1 === null && att2 === null) { 
+        blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ ":position_taxon"+" "+ "?taxon_"+node.SPARQLid+secondNode.SPARQLid);
+        blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ ":position_taxon"+" "+ "?taxon_"+node.SPARQLid+secondNode.SPARQLid);
+      } else if ( att1 === null ) {
+        blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ ":position_taxon"+" "+ "?"+att2);
+      } else if ( att2 === null ) {
+        blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ ":position_taxon"+" "+ "?"+att1);
+      } else {
+        blockConstraint.push("FILTER ( "+ "?"+att1+"="+"?"+att2+" )");
+      }
     }
 
     /* constraint to target the same/opposite strand */
-    if (this.position_strand) {
-      blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ ":position_strand"+" "+ "?strand_"+node.SPARQLid);
-      blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ ":position_strand"+" "+ "?strand_"+secondNode.SPARQLid);
+    if (this.which_strand == "same" ) {
+      let att1 = node.att_position_active("strand") ;
+      let att2 = secondNode.att_position_active("strand") ;
+      if ( att1 === null && att2 === null) { 
+        blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ ":position_strand"+" "+ "?strand_"+node.SPARQLid+secondNode.SPARQLid);
+        blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ ":position_strand"+" "+ "?strand_"+node.SPARQLid+secondNode.SPARQLid);
+      } else if ( att1 === null ) {
+        blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ ":position_strand"+" "+ "?"+att2);
+      } else if ( att2 === null ) {
+        blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ ":position_strand"+" "+ "?"+att1);
+      } else {
+        blockConstraint.push("FILTER ( "+ "?"+att1+"="+"?"+att2+" )");
+      }
     }
 
-    /* manage start and end variates */
-    blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ ":position_start"+" "+ "?start_"+node.SPARQLid);
-    blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ ":position_end"+" "+ "?end_"+node.SPARQLid);
-
-    blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ ":position_start"+" "+ "?start_"+secondNode.SPARQLid);
-    blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ ":position_end"+" "+ "?end_"+secondNode.SPARQLid);
 
     this.buildFiltersSPARQL(blockConstraint);
     return [blockConstraint,''];
   }
 
-  buildFiltersSPARQL(filters) {
+  setFiltersOperator(filters, startVar1,startVar2,endVar1,endVar2) {
     let equalsign = '';
 
     if (!this.strict) {
       equalsign = '=';
     }
-
-    let node = this.target ;
-    let secondNode = this.source ;
-
-
-    if (this.same_ref) {
-      //TODO: test which of the following line is the fastest
-      filters.push('FILTER(?ref_'+node.SPARQLid+' = ?ref_'+secondNode.SPARQLid+')');
-      //filters.push('FILTER(SAMETERM(?ref_'+node.SPARQLid+', ?ref_'+secondNode.SPARQLid+'))');
-    }
-
-    if (this.same_tax) {
-      //TODO: test which of the following line is the fastest
-      filters.push('FILTER(?taxon_'+node.SPARQLid+' = ?taxon_'+secondNode.SPARQLid+')');
-      //filters.push('FILTER(SAMETERM(?taxon_'+node.SPARQLid+', ?taxon_'+secondNode.SPARQLid+'))');
-    }
-
-    if (this.which_strand == 'same') {
-      filters.push('FILTER(?strand_'+node.SPARQLid+' = ?strand_'+secondNode.SPARQLid+')');
-    }else if (this.which_strand == 'opp') {
-      filters.push('FILTER(?strand_'+node.SPARQLid+' != ?strand_'+secondNode.SPARQLid+')');
-    }
-
-
     switch(this.type) {
       case 'included' :
-          filters.push('FILTER((?start_'+secondNode.SPARQLid+' >'+equalsign+' ?start_'+node.SPARQLid+' ) && (?end_'+secondNode.SPARQLid+' <'+equalsign+' ?end_'+node.SPARQLid+'))');
+          filters.push('FILTER(('+"?"+startVar2+' >'+equalsign+' '+"?"+startVar1+' ) && ('+"?"+endVar2+' <'+equalsign+' '+"?"+endVar1+'))');
           break;
       case 'excluded':
-          filters.push('FILTER(?end_'+node.SPARQLid+' <'+equalsign+' ?start_'+secondNode.SPARQLid+' || ?start_'+node.SPARQLid+' >'+equalsign+' ?end_'+secondNode.SPARQLid+')');
+          filters.push('FILTER('+"?"+endVar1+' <'+equalsign+' '+"?"+startVar2+' || '+"?"+startVar1+' >'+equalsign+' '+"?"+endVar2+')');
           break;
 
       case 'overlap':
-          filters.push('FILTER(((?end_'+secondNode.SPARQLid+' >'+equalsign+' ?start_'+node.SPARQLid+') && (?start_'+secondNode.SPARQLid+' <'+equalsign+' ?end_'+node.SPARQLid+')) || ((?start_'+secondNode.SPARQLid+' <'+equalsign+' ?end_'+node.SPARQLid+') && (?end_'+secondNode.SPARQLid+' >'+equalsign+' ?start_'+node.SPARQLid+')))');
+          filters.push('FILTER((('+"?"+endVar2+' >'+equalsign+' '+"?"+startVar1+') && ('+"?"+startVar2+' <'+equalsign+' '+"?"+endVar1+
+          ')) || (('+"?"+startVar2+' <'+equalsign+' '+"?"+endVar1+') && ('+"?"+endVar2+' >'+equalsign+' '+"?"+startVar1+')))');
           break;
 
       case 'near':
@@ -137,6 +148,10 @@ class AskomicsPositionableLink extends AskomicsLink {
       default:
         throw new Error("buildPositionableConstraintsGraph: unkown type: "+this.type);
     }
+  }
+
+  buildFiltersSPARQL(filters) {
+    //this.setFiltersOperator(filters,this.startNodeVar,this.startSecondNodeVar,this.endNodeVar,this.endSecondNodeVar);
   }
 
   instanciateVariateSPARQL(variates) {
