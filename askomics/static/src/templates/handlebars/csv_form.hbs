@@ -76,10 +76,13 @@
         <pre class='preview_field'></pre>
         <div class="form-group form-inline">
             <div class="btn-group" role="group" aria-label="metadata">
-                <input type="button" class="btn btn-success preview_button" value="Preview RDF" />
-                <input type="button" class="btn btn-primary load_data_tsv" value="Insert in private graph" />
+                <label for="preview_button_tsv" class="btn btn-default preview_button"><i class="fa fa-file-code-o text-success"></i> Preview RDF</label>
+                <input id="preview_button_tsv" class="btn hidden" value="Preview RDF" />
+                <label for="insert_button_tsv" class="btn btn-default load_data_tsv"><i class="fa fa-lock text-primary"></i> Insert as a <i class="text-primary">private</i> dataset</label>
+                <input id="insert_button_tsv"class="btn hidden" value="Insert in private graph" />
                 {{#if admin}}
-                <input type="button" class="btn btn-warning load_data_tsv_public" value="Insert in public graph" />
+                <input id="insert_public_button_tsv" class="btn hidden" value="Insert in public graph" />
+                <label for="insert_public_button_tsv" class="btn btn-default load_data_tsv_public"><i class="fa fa-globe text-warning"></i> Insert as a <em class="text-warning">public</em> dataset</label>
                 {{/if}}
             </div>
         </div>

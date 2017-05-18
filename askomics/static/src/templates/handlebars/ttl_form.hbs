@@ -3,10 +3,14 @@
         <h4>TTL file: {{file.name}} </h4>
         <h5>Preview of the first 100 lines of the file</h5>
         <pre class='preview_field'></pre>
-        <input type="button" id="{{idfile}}" class="btn btn-primary load_data_ttl" value="Insert in private graph">
-        {{#if admin}}
-        <input type="button" id="{{idfile}}" class="btn btn-warning load_data_ttl_public" value="Insert in public graph" />
-        {{/if}}
+        <div class="btn-group" role="group" aria-label="metadata">
+            <label id="{{idfile}}" for="{{idfile}}" class="btn btn-default load_data_ttl"><i class="fa fa-lock text-primary"></i> Insert as a <i class="text-primary">private</i> dataset</label>
+            <input id="{{idfile}}"class="btn hidden" value="Insert in private graph" />
+            {{#if admin}}
+            <input id="{{idfile}}" class="btn hidden" value="Insert in public graph" />
+            <label id="{{idfile}}" for="{{idfile}}" class="btn btn-default load_data_ttl_public"><i class="fa fa-globe text-warning"></i> Insert as a <em class="text-warning">public</em> dataset</label>
+            {{/if}}
+        </div>
         <br><br>
         <p class="insert_status text-left alert hidden"></p>
         <p class="insert_warning text-left alert hidden"></p>
