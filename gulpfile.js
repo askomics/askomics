@@ -66,51 +66,51 @@ var reload = !!util.env.reload;
 prod ? console.log('---> Production') : console.log('---> Development');
 reload ? console.log('---> Reload') : util.noop();
 
-/*
-Default task : run 'build'
-               if `gulp --reload`, watch AskOmics file and run 'build' when a file is modified
-*/
-gulp.task('default', ['build'], function () {
-  reload ? gulp.watch(askomicsTemplateFiles.concat(askomicsCssFiles).concat(askomicsSourceFiles), ['build']) : util.noop();
+// Default task : run build task, if `gulp --reload`, watch AskOmics file and run build when a file is modified
+gulp.task('default', ['javascript', 'css', 'templates'], function () {
+  reload ?gulp.watch(askomicsSourceFiles, ['javascript']) : util.noop() ;
+  reload ?gulp.watch(askomicsCssFiles, ['css']) : util.noop() ;
+  reload ?gulp.watch(askomicsTemplateFiles, ['templates']) : util.noop() ;
 });
 
-
-/*
-build task : jshint files
-             babel
-             concat all files in askomics.js
-             if `gulp --prod` uglify askomics.js
-*/
-gulp.task('build', function() {
-    // Compile Javascript
+// Concat all js files, uglyfy if --prod
+gulp.task('javascript', function() {
     return gulp.src(askomicsSourceFiles)
-        .pipe(jshint())
-        .pipe(jshint.reporter('default'))
-        .pipe(babel({
-            presets: ['es2015']
-        }))
-        .pipe(concat('askomics.js'))
-        .pipe(prod ? uglify() : util.noop())
-        .pipe(gulp.dest('askomics/static/dist/'));
-    // Compile handlebars templates
-    gulp.src(askomicsTemplateFiles)
-        .pipe(handlebars({
-            handlebars: require('handlebars')
-        }))
-        .pipe(wrap('Handlebars.template(<%= contents %>)'))
-        .pipe(declare({
-            namespace: 'AskOmics.templates',
-            noRedeclare: true,
-        }))
-        .pipe(concat('templates.js'))
-        .pipe(prod ? uglify() : util.noop())
-        .pipe(gulp.dest('askomics/static/dist/'));
-    // Build CSS
-    gulp.src(askomicsCssFiles)
-        .pipe(concat('askomics.css'))
-        .pipe(prod ? uglifycss() : util.noop())
-        .pipe(gulp.dest('askomics/static/dist/'));
+               .pipe(jshint())
+               .pipe(jshint.reporter('default'))
+               .pipe(babel({
+                   presets: ['es2015']
+                }))
+               .pipe(concat('askomics.js'))
+               .pipe(prod ? uglify() : util.noop())
+               .pipe(gulp.dest('askomics/static/dist/'));
 });
+
+// Concat all css files, uglyfy if --prod
+gulp.task('css', function() {
+    return gulp.src(askomicsCssFiles)
+               .pipe(concat('askomics.css'))
+               .pipe(prod ? uglifycss() : util.noop())
+               .pipe(gulp.dest('askomics/static/dist/'));
+});
+
+// Concat all handlebars files, uglyfy if --prod
+gulp.task('templates', function() {
+    return gulp.src(askomicsTemplateFiles)
+               .pipe(handlebars({
+                   handlebars: require('handlebars')
+               }))
+               .pipe(wrap('Handlebars.template(<%= contents %>)'))
+               .pipe(declare({
+                   namespace: 'AskOmics.templates',
+                   noRedeclare: true,
+               }))
+               .pipe(concat('templates.js'))
+               .pipe(prod ? uglify() : util.noop())
+               .pipe(gulp.dest('askomics/static/dist/'));
+    });
+
+
 
 var coverageFile = './.coverage-js/coverage.json';
 var mochaPhantomOpts = {
