@@ -19,16 +19,16 @@
         <!-- tmpl -->
         <script src="static/libs/tmpl/tmpl.min.js"></script>
         <!-- Pygment  -->
-        <link href="static/libs/pygment/pygment.css" rel="stylesheet" type="text/css">
+        <link href="static/libs/pygment/pygment.min.css" rel="stylesheet" type="text/css">
 
         <!-- Font Awesome -->
-        <link href="static/libs/font-awesome/font-awesome.css" rel="stylesheet" type="text/css">
+        <link href="static/libs/font-awesome/font-awesome.min.css" rel="stylesheet" type="text/css">
 
         <!-- intro.js -->
-        <script src="static/libs/intro-js/intro.js"></script>
-        <link href="static/libs/intro-js/introjs.css" rel="stylesheet" type="text/css">
+        <script src="static/libs/intro-js/intro.min.js"></script>
+        <link href="static/libs/intro-js/introjs.min.css" rel="stylesheet" type="text/css">
         <link href="static/libs/intro-js/introjs-style.min.css" rel="stylesheet" type="text/css" />
-        <link href="static/libs/intro-js/introjs-rtl.css" rel="stylesheet" type="text/css" />
+        <link href="static/libs/intro-js/introjs-rtl.min.css" rel="stylesheet" type="text/css" />
 
         <!-- Jquery-contextMenu  -->
         <script src="static/libs/jquery-context-menu/jquery.contextMenu.min.js"></script>
@@ -36,7 +36,7 @@
         <link href="static/libs/jquery-context-menu/jquery.contextMenu.min.css" rel="stylesheet" type="text/css">
 
         <!-- Handlebars -->
-        <script src="static/libs/handlebars/handlebars-v4.0.5.js"></script>
+        <script src="static/libs/handlebars/handlebars-v4.0.5.min.js"></script>
 
         <!-- Askomics -->
         <script src="static/dist/askomics.js"></script>
