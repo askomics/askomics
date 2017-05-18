@@ -16,7 +16,6 @@ var uglifycss = require('gulp-uglifycss');
 var handlebars = require('gulp-handlebars');
 var wrap = require('gulp-wrap');
 var declare = require('gulp-declare');
-var jquery = require('gulp-jquery');
 //var remapIstanbul = require('remap-istanbul/lib/gulpRemapIstanbul');
 
 //console.log(require('istanbul').Report.getReportList());
