@@ -728,7 +728,6 @@ class IHMLocal {
           __ihm.updatePasswd(d.username);
         });
         $('.get_new_apikey#' + d.username).click(function() {
-          console.log('888');
           __ihm.get_apikey(d.username, $('.new_apikey_name#' + d.username).val());
         });
 
@@ -737,7 +736,6 @@ class IHMLocal {
 
         // Copy apikey
         $('.copy_key').click(function() {
-          console.log(this);
           __ihm.copyToClipboard($('.apikey#' + this.id));
 
           // Change the message into the tooltip
@@ -750,7 +748,6 @@ class IHMLocal {
 
         // Delete key
         $('.del_key').click(function() {
-          console.log(this);
           __ihm.deleteApikey(this.id);
         });
       });
@@ -761,7 +758,6 @@ class IHMLocal {
       let service = new RestServiceJs('del_apikey');
       let data = {'key': key};
       service.post(data, function(d) {
-        console.log(data);
         __ihm.userForm();
       });
     }
