@@ -1,0 +1,34 @@
+<hr/ >
+<h3 class='header-div'>Galaxy Datasets</h3>
+<hr/ >
+<table class='table'>
+    <tr>
+        <th><input class="check_galaxy check_all_galaxy" type="checkbox"></th>
+        <th>Id</th>
+        <th>File</th>
+        <th>Type</th>
+    </tr>
+    {{#each datasets}}
+    <tr>
+        <td><input class="check_galaxy check_one_galaxy" type="checkbox" value="{{this.id}}" {{#if this.notick}} class='disabled'{{/if}}></td>
+        {{#if this.success}}
+        <td><i class="text-success">{{this.hid}}</i></td>
+        <td><i class="text-success">{{this.name}}</i></td>
+        <td><i class="text-success">{{this.extension}}</i></td>
+        {{/if}}
+        {{#if this.queued}}
+        <td><i class="text-warning">{{this.hid}}</i></td>
+        <td><i class="text-warning">{{this.name}}</i></td>
+        <td><i class="text-warning">{{this.extension}}</i></td>
+        {{/if}}
+        {{#if this.error}}
+        <td><i class="text-danger">{{this.hid}}</i></td>
+        <td><i class="text-danger">{{this.name}}</i></td>
+        <td><i class="text-danger">{{this.extension}}</i></td>
+        {{/if}}
+    </tr>
+    {{/each}}
+</table>
+
+<button id="upload_galaxy" type="button" class="btn btn-default" disabled><i class="fa fa-cloud-upload text-primary"></i> Upload to AskOmics</button>
+<i class="hidden fa fa-spinner pulse" id='spinner_galaxy-upload'></i>

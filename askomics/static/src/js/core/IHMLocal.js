@@ -528,27 +528,41 @@ class IHMLocal {
       // If a Galaxy instance is connected, show the form to get data from the Galaxy history
       var service2 = new RestServiceJs('get_data_from_galaxy');
       service2.getAll(function(data) {
-        let source = $('#template-galaxy-datasets').html();
-        let template = Handlebars.compile(source);
+        let template = AskOmics.templates.galaxy_datasets;
         let context = {datasets: data.datasets};
         let html = template(context);
         $('#galaxy_datasets').empty();
         $('#galaxy_datasets').append(html);
 
-        // Upload galaxy button
-        $('.btn#upload_galaxy').click(function() {
-          let list_datasets = [];
-          $('input:checkbox[name=galaxy_checkbox]:checked').each(function(){
-            list_datasets.push($(this).val());
-          });
-          //upload files
-          let service3 = new RestServiceJs('upload_galaxy_files');
-          let model = {'datasets': list_datasets};
-          service3.post(model, function(data) {
-            __ihm.manageErrorMessage(data);
-            // Reload upload form
-            __ihm.setUploadForm(content,titleForm,route_overview,callback);
-          });
+        // check all
+        $(".check_all_galaxy").change(function () {
+            $(".check_one_galaxy").prop('checked', $(this).prop("checked"));
+        });
+
+        //Show/hide upload button
+        $(".check_galaxy").change(function(){
+            if ($('.check_one_galaxy:checked').length !== 0) {
+               $('#upload_galaxy').removeAttr('disabled');
+            }else{
+                $('#upload_galaxy').attr('disabled', 'disabled');
+            }
+        });
+
+        // Upload selected datasets
+        $('#upload_galaxy').click(function() {
+            $("#spinner_galaxy-upload").removeClass("hidden");
+            let selected_datasets = [];
+            $('.check_one_galaxy').each(function() {
+                if ($(this).is(':checked')) {selected_datasets.push($(this).attr('value'));}
+            });
+            //upload files
+            let service3 = new RestServiceJs('upload_galaxy_files');
+            let model = {'datasets': selected_datasets};
+            service3.post(model, function(data) {
+                __ihm.manageErrorMessage(data);
+                // Reload upload form
+                __ihm.setUploadForm(content,titleForm,route_overview,callback);
+            });
         });
       });
     }
@@ -724,7 +738,7 @@ class IHMLocal {
         console.log('keys');
         console.log(d.apikeys);
         let template = AskOmics.templates.user_managment;
-        let context = {user: d, keys: d.apikeys};
+        let context = {user: d, keys: d.apikeys, galaxy: d.galaxy};
         let html = template(context);
         $('#content_user_info').empty();
         $('#content_user_info').append(html);
