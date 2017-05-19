@@ -36,7 +36,7 @@ class FileUpload(object):
     @view_config(route_name='uploadform', request_method='GET', renderer="json")
     def upload(self):
         _here = os.path.dirname(__file__)
-        template_file = _here + "/templates/upload.pt"
+        template_file = _here + "/static/src/templates/upload.pt"
         html = ""
         info = {}
         with open(template_file) as template:

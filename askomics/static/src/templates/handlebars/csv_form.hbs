@@ -1,0 +1,94 @@
+<form id="source-file-tsv-{{idfile}}" class="template-source_file form-horizontal text-center">
+    <h4 class="file_name" id="{{idfile}}" filename="{{file.name}}">TSV file: {{ file.name }}</h4>
+    <br/>
+    {{#if error}}
+        <p class="error">{{ error }}</p>
+    {{else}}
+        <table class='table table-striped preview_table'>
+            <thead>
+                <tr>
+                {{#each file.headers}}
+                    <th class='column_header'>
+                        {{#unless @first}}
+                            <input type='checkbox' class='toggle_column_present' checked />
+                        {{/unless}}
+                        {{ this }}
+
+                    </th>
+                {{/each}}
+                </tr>
+                <tr>
+                  {{#each file.headers}}
+                   <th>
+                     {{#if @first}}
+                      <input type='checkbox' class='toggle_column_key' checked /> <i class="fa fa-key" aria-hidden="true"></i>
+                     {{else}}
+                      <input type='checkbox' class='toggle_column_key'/> <i class="fa fa-key" aria-hidden="true"></i>
+                     {{/if}}
+                  </th>
+                  {{/each}}
+               </tr>
+                <tr>
+                {{#each file.headers}}
+                    <th>
+                        <select class='column_type form-control'>
+                            {{#if @first}}
+                                <optgroup label='Reference entity'>
+                                    <option value='entity_start'>Entity (Start)</option>
+                                    <option value='entity'>Entity</option>
+                            {{else}}
+                                <optgroup label='Attributes'>
+                                    <option value='numeric'>Numeric</option>
+                                    <option value='text'>Text</option>
+                                    <option value='category'>Category</option>
+                                </optgroup>
+                                <optgroup label='Positionable attributes'>
+                                    <option value='taxon'>Taxon</option>
+                                    <option value='ref'>Chromosome</option>
+                                    <option value='strand'>Strand</option>
+                                    <option value='start'>Start</option>
+                                    <option value='end'>End</option>
+                                </optgroup>
+                                <optgroup label='Relation type'>
+                                    <option value='entity'>General relation to entity</option>
+                                    <option value='entitySym'>Symmetric relation to entity</option>
+                                    <option value='goterm'>Gene ontology id</option>
+                                </optgroup>
+                            {{/if}}
+                        </select>
+                    </th>
+                {{/each}}
+
+                </tr>
+            </thead>
+            <tbody>
+                {{#each file.preview_data}}
+                    <tr>
+                        {{#each this}}
+                            <td>
+                                {{ this }}
+                            </td>
+                        {{/each}}
+                    </tr>
+                {{/each}}
+            </tbody>
+        </table>
+        <pre class='preview_field'></pre>
+        <div class="form-group form-inline">
+            <div class="btn-group" role="group" aria-label="metadata">
+                <label for="preview_button_tsv" class="btn btn-default preview_button"><i class="fa fa-file-code-o text-success"></i> Preview RDF</label>
+                <input id="preview_button_tsv" class="btn hidden" value="Preview RDF" />
+                <label for="insert_button_tsv" class="btn btn-default load_data_tsv"><i class="fa fa-lock text-primary"></i> Insert as a <i class="text-primary">private</i> dataset</label>
+                <input id="insert_button_tsv"class="btn hidden" value="Insert in private graph" />
+                {{#if admin}}
+                <input id="insert_public_button_tsv" class="btn hidden" value="Insert in public graph" />
+                <label for="insert_public_button_tsv" class="btn btn-default load_data_tsv_public"><i class="fa fa-globe text-warning"></i> Insert as a <em class="text-warning">public</em> dataset</label>
+                {{/if}}
+            </div>
+        </div>
+        <p class="insert_status text-left alert hidden"></p>
+        <p class="insert_warning text-left alert hidden"></p>
+        <div class="warning-message hidden"></div>
+    {{/if}}
+</form>
+<hr />

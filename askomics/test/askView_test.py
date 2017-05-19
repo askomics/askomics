@@ -3,6 +3,7 @@
 import unittest
 import os
 import tempfile
+import datetime
 
 from shutil import copyfile
 
@@ -159,7 +160,7 @@ class AskViewTests(unittest.TestCase):
 
         # Delete only the people graph
         self.request.json_body = {
-            'namedGraphs': ['urn:sparql:test_askomics:jdoe:people.tsv_' + timestamp_people]
+            'named_graph': ['urn:sparql:test_askomics:jdoe:people.tsv_' + timestamp_people]
         }
 
         data = self.askview.delete_graph()
@@ -190,7 +191,7 @@ class AskViewTests(unittest.TestCase):
 
         assert data == expected_result
 
-    def test_get_list_private_graph(self):
+    def test_get_list_user_graph(self):
         """Test get_list_private_graph method
 
         insert 1 dataset and one public dataset and check which is private
@@ -204,13 +205,34 @@ class AskViewTests(unittest.TestCase):
         timestamp_instrument = self.tps.load_instruments()
         #TODO: insert data for another user and test that the function don't return data of another user
 
-        data = self.askview.get_list_private_graphs()
+        data = self.askview.list_user_graph()
+
+        readable_date_people = datetime.datetime.strptime(timestamp_people, "%Y-%m-%dT%H:%M:%S.%f").strftime("%y-%m-%d at %H:%M:%S")
+        readable_date_instrument = datetime.datetime.strptime(timestamp_instrument, "%Y-%m-%dT%H:%M:%S.%f").strftime("%y-%m-%d at %H:%M:%S")
 
         assert len(data) == 2
         assert isinstance(data, list)
 
-        assert {'g': 'urn:sparql:test_askomics:jdoe:people.tsv_' + timestamp_people, 'count': '73'} in data
-        assert {'g': 'urn:sparql:test_askomics:jdoe:instruments.tsv_' + timestamp_instrument, 'count': '66'} in data
+        assert {
+            'g': 'urn:sparql:test_askomics:jdoe:people.tsv_' + timestamp_people,
+            'count': '73',
+            'access': 'public',
+            'date': timestamp_people,
+            'readable_date': readable_date_people,
+            'name': 'people.tsv',
+            'access_bool': True
+        } in data
+
+        assert {
+            'g':
+            'urn:sparql:test_askomics:jdoe:instruments.tsv_' + timestamp_instrument,
+            'count': '66',
+            'access': 'private',
+            'date': timestamp_instrument,
+            'readable_date': readable_date_instrument,
+            'name': 'instruments.tsv',
+            'access_bool': False
+        } in data
 
     def test_source_files_overview(self):
         """Test source_files_overview method"""

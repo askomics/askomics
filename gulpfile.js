@@ -12,48 +12,52 @@ var istanbul = require('gulp-istanbul');
 var mochaPhantomJS = require('gulp-mocha-phantomjs');
 var istanbulReport = require('gulp-istanbul-report');
 var uglify = require('gulp-uglify');
+var uglifycss = require('gulp-uglifycss');
+var handlebars = require('gulp-handlebars');
+var wrap = require('gulp-wrap');
+var declare = require('gulp-declare');
 //var remapIstanbul = require('remap-istanbul/lib/gulpRemapIstanbul');
 
 //console.log(require('istanbul').Report.getReportList());
 
-//var askomicsSourceFiles = ['askomics/static/js/app/**/*.js','!askomics/static/js/app/third-party/**/*.js'];
+// var askomicsSourceFiles = ['askomics/static/js/app/**/*.js','!askomics/static/js/app/third-party/**/*.js'];
 var askomicsSourceFiles = [
-        'askomics/static/js/app/help/AskomicsHelp.js',
-        'askomics/static/js/app/services/AskomicsRestManagement.js',
-        'askomics/static/js/app/core/AskomicsUserAbstraction.js',
-        'askomics/static/js/app/services/AskomicsJobsManager.js',
-        'askomics/static/js/app/services/AskomicsObjectBuilder.js',
-        'askomics/static/js/app/view/AskomicsPanelViewBuilder.js',
-        'askomics/static/js/app/view/integration.js',
-        'askomics/static/js/app/view/AskomicsResultsView.js',
-        'askomics/static/js/app/query-handler.js',
-        'askomics/static/js/app/objects/GraphObject.js',
-        'askomics/static/js/app/objects/node/GraphNode.js',
-        'askomics/static/js/app/objects/node/AskomicsNode.js',
-        'askomics/static/js/app/objects/node/AskomicsAliasNode.js',
-        'askomics/static/js/app/objects/node/AskomicsPositionableNode.js',
-        'askomics/static/js/app/objects/link/GraphLink.js',
-        'askomics/static/js/app/objects/link/AskomicsLink.js',
-        'askomics/static/js/app/objects/link/AskomicsIsALink.js',
-        'askomics/static/js/app/objects/link/AskomicsPositionableLink.js',
-        'askomics/static/js/app/view/parameters/InterfaceParametersView.js',
-        'askomics/static/js/app/view/parameters/ShortcutsParametersView.js',
-        'askomics/static/js/app/view/parameters/ModulesParametersView.js',
-        'askomics/static/js/app/view/AskomicsObjectView.js',
-        'askomics/static/js/app/view/AskomicsLinkView.js',
-        'askomics/static/js/app/view/AskomicsNodeView.js',
-        'askomics/static/js/app/view/AskomicsPositionableLinkView.js',
-        'askomics/static/js/app/view/AskomicsPositionableNodeView.js',
-        'askomics/static/js/app/core/AskomicsMenu.js',
-        'askomics/static/js/app/core/AskomicsGraphBuilder.js',
-        'askomics/static/js/app/core/AskomicsForceLayoutManager.js',
-        'askomics/static/js/app/core/AskomicsUser.js',
-        'askomics/static/js/app/core/IHMLocal.js'
+        'askomics/static/src/js/help/AskomicsHelp.js',
+        'askomics/static/src/js/services/AskomicsRestManagement.js',
+        'askomics/static/src/js/core/AskomicsUserAbstraction.js',
+        'askomics/static/src/js/services/AskomicsJobsManager.js',
+        'askomics/static/src/js/services/AskomicsObjectBuilder.js',
+        'askomics/static/src/js/view/AskomicsPanelViewBuilder.js',
+        'askomics/static/src/js/view/integration.js',
+        'askomics/static/src/js/view/AskomicsResultsView.js',
+        'askomics/static/src/js/query-handler.js',
+        'askomics/static/src/js/objects/GraphObject.js',
+        'askomics/static/src/js/objects/node/GraphNode.js',
+        'askomics/static/src/js/objects/node/AskomicsNode.js',
+        'askomics/static/src/js/objects/node/AskomicsAliasNode.js',
+        'askomics/static/src/js/objects/node/AskomicsPositionableNode.js',
+        'askomics/static/src/js/objects/link/GraphLink.js',
+        'askomics/static/src/js/objects/link/AskomicsLink.js',
+        'askomics/static/src/js/objects/link/AskomicsIsALink.js',
+        'askomics/static/src/js/objects/link/AskomicsPositionableLink.js',
+        'askomics/static/src/js/view/parameters/InterfaceParametersView.js',
+        'askomics/static/src/js/view/parameters/ShortcutsParametersView.js',
+        'askomics/static/src/js/view/parameters/ModulesParametersView.js',
+        'askomics/static/src/js/view/AskomicsObjectView.js',
+        'askomics/static/src/js/view/AskomicsLinkView.js',
+        'askomics/static/src/js/view/AskomicsNodeView.js',
+        'askomics/static/src/js/view/AskomicsPositionableLinkView.js',
+        'askomics/static/src/js/view/AskomicsPositionableNodeView.js',
+        'askomics/static/src/js/core/AskomicsMenu.js',
+        'askomics/static/src/js/core/AskomicsGraphBuilder.js',
+        'askomics/static/src/js/core/AskomicsForceLayoutManager.js',
+        'askomics/static/src/js/core/AskomicsUser.js',
+        'askomics/static/src/js/core/IHMLocal.js'
     ];
 
-var askomicsCssFiles = [
-  'askomics'
-];
+var askomicsCssFiles = ['askomics/static/src/css/*.css'];
+
+var askomicsTemplateFiles = ['askomics/static/src/templates/handlebars/*.hbs'];
 
 var prod = !!util.env.prod;
 var reload = !!util.env.reload;
@@ -61,34 +65,51 @@ var reload = !!util.env.reload;
 prod ? console.log('---> Production') : console.log('---> Development');
 reload ? console.log('---> Reload') : util.noop();
 
-/*
-Default task : run 'build'
-               if `gulp --reload`, watch AskOmics file and run 'build' when a file is modified
-*/
-gulp.task('default', ['build'], function () {
-  reload ? gulp.watch(askomicsSourceFiles, ['build']) : util.noop();
+// Default task : run build task, if `gulp --reload`, watch AskOmics file and run build when a file is modified
+gulp.task('default', ['javascript', 'css', 'templates'], function () {
+  reload ?gulp.watch(askomicsSourceFiles, ['javascript']) : util.noop() ;
+  reload ?gulp.watch(askomicsCssFiles, ['css']) : util.noop() ;
+  reload ?gulp.watch(askomicsTemplateFiles, ['templates']) : util.noop() ;
 });
 
-
-/*
-build task : jshint files
-             babel
-             concat all files in askomics.js
-             if `gulp --prod` uglify askomics.js
-*/
-gulp.task('build', function() {
+// Concat all js files, uglyfy if --prod
+gulp.task('javascript', function() {
     return gulp.src(askomicsSourceFiles)
-        .pipe(jshint())
-        .pipe(jshint.reporter('default'))
-    //    .pipe(sourcemaps.init())
-        .pipe(babel({
-            presets: ['es2015']
-        }))
-        .pipe(concat('askomics.js'))
-        .pipe(prod ? uglify() : util.noop() )
-     //   .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest('askomics/static/dist'));
+               .pipe(jshint())
+               .pipe(jshint.reporter('default'))
+               .pipe(babel({
+                   presets: ['es2015']
+                }))
+               .pipe(concat('askomics.js'))
+               .pipe(prod ? uglify() : util.noop())
+               .pipe(gulp.dest('askomics/static/dist/'));
 });
+
+// Concat all css files, uglyfy if --prod
+gulp.task('css', function() {
+    return gulp.src(askomicsCssFiles)
+               .pipe(concat('askomics.css'))
+               .pipe(prod ? uglifycss() : util.noop())
+               .pipe(gulp.dest('askomics/static/dist/'));
+});
+
+// Concat all handlebars files, uglyfy if --prod
+gulp.task('templates', function() {
+    return gulp.src(askomicsTemplateFiles)
+               .pipe(handlebars({
+                   handlebars: require('handlebars')
+               }))
+               .pipe(wrap('Handlebars.template(<%= contents %>)'))
+               .pipe(declare({
+                   namespace: 'AskOmics.templates',
+                   noRedeclare: true,
+               }))
+               .pipe(concat('templates.js'))
+               .pipe(prod ? uglify() : util.noop())
+               .pipe(gulp.dest('askomics/static/dist/'));
+    });
+
+
 
 var coverageFile = './.coverage-js/coverage.json';
 var mochaPhantomOpts = {

@@ -27,11 +27,13 @@ def main(global_config, **settings):
     config.add_route('start_point', '/startpoints')
     config.add_route('statistics', '/statistics')
     config.add_route('empty_user_database', '/empty_user_database')
-    config.add_route('list_private_graphs', '/list_private_graphs')
+    config.add_route('list_user_graph', '/list_user_graph')
     config.add_route('delete_graph', '/delete_graph')
     config.add_route('getUserAbstraction', '/userAbstraction')
     config.add_route('sparqlquery', '/sparqlquery')
     config.add_route('getSparqlQueryInTextFormat', '/getSparqlQueryInTextFormat')
+
+    # Upload/integration routes
     config.add_route('source_files_overview', '/source_files_overview')
     config.add_route('guess_csv_header_type', '/guess_csv_header_type')
     config.add_route('load_data_into_graph', '/load_data_into_graph')
@@ -41,6 +43,8 @@ def main(global_config, **settings):
     config.add_route('ttl', '/ttl/{name:.*}')
     config.add_route('csv', '/csv/{name:.*}')
     config.add_route('del_csv', '/del_csv/{name:.*}')
+
+    # Shortcuts and modules routes
     config.add_route('importShortcut', '/importShortcut')
     config.add_route('deleteShortcut', '/deleteShortcut')
     config.add_route('modules', '/modules')
@@ -51,6 +55,11 @@ def main(global_config, **settings):
     config.add_route('uploadform', '/up/')
     config.add_route('upload_delete', '/up/file{sep:/*}{name:.*}&_method=DELETE')
     config.add_route('upload', '/up/file{sep:/*}{name:.*}')
+
+    # Galaxy route
+    config.add_route('connect_galaxy', '/connect_galaxy')
+    config.add_route('get_data_from_galaxy', '/get_data_from_galaxy')
+    config.add_route('upload_galaxy_files', '/upload_galaxy_files')
 
     # Authentication routes
     config.add_route('signup', '/signup')

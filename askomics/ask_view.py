@@ -10,6 +10,7 @@ from pyramid.response import FileResponse
 import logging
 from pprint import pformat
 import textwrap
+import datetime
 
 from pygments import highlight
 from pygments.lexers import TurtleLexer
@@ -73,6 +74,31 @@ class AskView(object):
         if 'error' in self.data :
             return True
         return False
+
+    def setGraphUser(self,removeGraph=[]):
+
+        self.settings['graph'] = {}
+
+        #finding all private graph graph
+        sqg = SparqlQueryGraph(self.settings, self.request.session)
+        ql = QueryLauncher(self.settings, self.request.session)
+
+        results = ql.process_query(sqg.get_user_graph_infos().query)
+        self.settings['graph']['private'] = []
+        for elt in results:
+            if 'g' not in elt:
+                continue
+            if elt['g'] in removeGraph:
+                continue
+            self.settings['graph']['private'].append(elt['g'])
+
+        #finding all public graph
+        results = ql.process_query(sqg.get_public_graphs().query)
+        self.settings['graph']['public'] = []
+        for elt in results:
+            if elt['g'] in removeGraph:
+                continue
+            self.settings['graph']['public'].append(elt['g'])
 
     @view_config(route_name='start_point', request_method='GET')
     def start_points(self):
@@ -216,7 +242,7 @@ class AskView(object):
             sqb = SparqlQueryBuilder(self.settings, self.request.session)
             ql = QueryLauncher(self.settings, self.request.session)
 
-            named_graphs = self.get_list_private_graphs()
+            named_graphs = self.list_user_graph()
 
             for graph in named_graphs:
 
@@ -246,12 +272,12 @@ class AskView(object):
         if self.request.session['blocked']:
             return 'blocked'
 
-        self.log.debug("=== DELETE SELECTED GRAPHS ===")
-
         sqb = SparqlQueryBuilder(self.settings, self.request.session)
         ql = QueryLauncher(self.settings, self.request.session)
 
-        graphs = self.request.json_body['namedGraphs']
+        graphs = self.request.json_body['named_graph']
+
+        #TODO: check if the graph belong to user
 
         for graph in graphs:
             self.log.debug("--- DELETE GRAPH : %s", graph)
@@ -259,10 +285,10 @@ class AskView(object):
             #delete metadatas
             ql.execute_query(sqb.get_delete_metadatas_of_graph(graph).query)
 
-    @view_config(route_name='list_private_graphs', request_method='GET')
-    def get_list_private_graphs(self):
+    @view_config(route_name='list_user_graph', request_method='GET')
+    def list_user_graph(self):
         """
-        Return a list with all the named graphs.
+        Return a list with all the named graphs of a user.
         """
 
         # Denny access for non loged users
@@ -273,23 +299,31 @@ class AskView(object):
         if self.request.session['blocked']:
             return 'blocked'
 
-        self.log.debug("=== LIST OF NAMED GRAPHS ===")
-
         sqg = SparqlQueryGraph(self.settings, self.request.session)
-        ql = QueryLauncher(self.settings, self.request.session)
+        query_launcher = QueryLauncher(self.settings, self.request.session)
 
-        res = ql.execute_query(sqg.get_private_graphs_and_count().query)
+        res = query_launcher.execute_query(sqg.get_user_graph_infos().query)
 
-        namedGraphs = []
+        named_graphs = []
 
-        for indexResult in range(len(res['results']['bindings'])):
-            if 'g' in res['results']['bindings'][indexResult]:
-                namedGraphs.append({
-                    'g' : res['results']['bindings'][indexResult]['g']['value'],
-                    'count' : res['results']['bindings'][indexResult]['co']['value']
-                })
+        for index_result in range(len(res['results']['bindings'])):
 
-        return namedGraphs
+            dat = datetime.datetime.strptime(res['results']['bindings'][index_result]['date']['value'], "%Y-%m-%dT%H:%M:%S.%f")
+            self.log.debug(dat)
+
+            readable_date = dat.strftime("%y-%m-%d at %H:%M:%S")
+
+            named_graphs.append({
+                'g': res['results']['bindings'][index_result]['g']['value'],
+                'name': res['results']['bindings'][index_result]['name']['value'],
+                'count': res['results']['bindings'][index_result]['co']['value'],
+                'date': res['results']['bindings'][index_result]['date']['value'],
+                'readable_date': readable_date,
+                'access': res['results']['bindings'][index_result]['access']['value'],
+                'access_bool': bool(res['results']['bindings'][index_result]['access']['value'] == 'public')
+            })
+
+        return named_graphs
 
     @view_config(route_name='guess_csv_header_type', request_method='POST')
     def guess_csv_header_type(self):

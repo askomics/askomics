@@ -1,0 +1,219 @@
+pre {
+    font-family:"Courier New", Courier, monospace;
+    text-align: left;
+    word-break: normal !important;
+    word-wrap: normal !important;
+    white-space: pre !important;
+    overflow: auto;
+}
+
+.textClass {
+    stroke: #323232;
+    font-family: "Lucida Grande", "Droid Sans", Arial, Helvetica, sans-serif;
+    font-weight: normal;
+    stroke-width: .5;
+    font-size: 14px;
+}
+
+.site-header {
+    text-transform: full-width;
+    font-weight: bold;
+}
+
+.tableHeader {
+    text-align: center;
+}
+
+.header-div {
+    text-transform: full-width;
+    margin-top: -1px;
+    font-size: 20px;
+}
+
+.btn-group-query {
+    float: right;
+}
+
+.display {
+    float: right;
+    padding-right: 1%;
+    font-size: 16px;
+    padding-top: 5px;
+}
+
+.div-details {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.div-details-max {
+    overflow-y: auto;
+}
+
+.glyphicon:hover {
+    cursor: pointer;
+    color: chocolate;
+}
+
+.fa:hover {
+    cursor: pointer;
+    color: chocolate;
+}
+
+#btn-file {
+    float: left;
+}
+
+#graph_startpoints {
+    width: 30%;
+}
+
+#startpoints {
+    width: 30%;
+}
+
+#queryBuilder {
+    max-height: 600px;
+}
+
+#svgdiv {
+    /*max-height: 600px;*/
+    background: Gainsboro;
+    border: 1px solid;
+}
+
+#results, #init {
+    margin-top: 40px;
+}
+
+.preview_table {
+    width: auto;
+    display: inline-block;
+    white-space: nowrap;
+    overflow-x: auto;
+    max-height: 450px;
+    overflow-y: auto;
+}
+
+.preview_table td:first-child,
+.preview_table th:first-child {
+    border-right: 2px solid #ddd;
+}
+
+.preview_table th {
+    padding: 0px !important;
+    border-bottom: 0px !important;
+    border-top: 0px !important;
+    text-align: center;
+}
+
+.preview_table td {
+    padding: 4px !important;
+    text-align:left;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.fileTypeSelection label {
+    display: inline-block;
+}
+.fileTypeSelection input {
+    display: inline-block;
+}
+
+div.uploadedQuery {
+    font-family:"Courier New";
+    text-align: left;
+    height: auto;
+    width: auto;
+    max-width: 100%;
+    max-height: 300px;
+    overflow: auto;
+    background-color: #eeeeee;
+    word-break: normal !important;
+    word-wrap: normal !important;
+    white-space: pre !important;
+}
+
+.uploadBtn {
+    position: relative;
+    overflow: hidden;
+    margin: auto;
+}
+.uploadBtn input.upload {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    font-size: 20px;
+    cursor: pointer;
+    opacity: 0;
+    filter: alpha(opacity=0);
+}
+
+.preview_field {
+    max-height: 400px;
+    display: none;
+}
+
+.template-source_file {
+    margin-bottom: 4em;
+}
+
+.results-div {
+    overflow-x: hidden;
+}
+
+.table-results {
+    margin-bottom: 0px;
+}
+
+
+
+.icon {
+    display: inline-block;
+    margin: 20px;
+    font-size: 28px;
+}
+
+.spin {
+  -webkit-animation: spin 2s infinite linear;
+  animation: spin 2s infinite linear;
+}
+
+.pulse {
+    -webkit-animation: spin 1s infinite steps(8);
+    animation: spin 1s infinite steps(8);
+}
+
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(359deg); }
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(359deg); }
+}
+
+@-webkit-keyframes spin-2 {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(359deg); }
+}
+
+
+/**
+ * Progress bars with centered text
+ */
+
+.progress-small {
+  position: relative;
+  width: 100px;
+}
+
+.progress span {
+    position: absolute;
+    display: block;
+    width: 100%;
+    color: black;
+}

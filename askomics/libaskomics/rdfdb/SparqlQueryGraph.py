@@ -94,31 +94,17 @@ class SparqlQueryGraph(SparqlQueryBuilder):
                      "?g :accessLevel 'public'. } "
         }, True)
 
-    def get_private_graphs(self):
-        """
-        Get the list of privat named graph
-        """
-        self.log.debug('---> get_private_graphs')
+    def get_user_graph_infos(self):
+        """Get infos of all datasets owned by a user"""
         return self.build_query_on_the_fly({
-            'select': '?g',
-            'query': 'GRAPH ?g {\n'+\
-                 "?g dc:creator '" + self.session['username'] + "' . } ",
-            'post_action': 'GROUP BY ?g'
+            'select': '?g ?name ?date ?access (count(*) as ?co)',
+            'query': 'GRAPH ?g {\n' +
+                     '\t?s ?p ?o .\n' +
+                     '\t?g prov:generatedAtTime ?date .\n' +
+                     '\t?g prov:wasDerivedFrom ?name .\n'+
+                     '\t?g :accessLevel ?access .\n' +
+                     '}'
         }, True)
-
-    def get_private_graphs_and_count(self):
-        """
-        Get the list of privat named graph
-        """
-        self.log.debug('---> get_private_graphs')
-        return self.build_query_on_the_fly({
-            'select': '?g (count(*) as ?co)',
-            'query': 'GRAPH ?g {\n'+\
-                 '?s ?p ?o.\n'+     \
-                 "?g dc:creator '" + self.session['username'] + "' . } ",
-            'post_action': 'GROUP BY ?g'
-        }, True)
-
 
     def get_if_positionable(self, uri):
         """
