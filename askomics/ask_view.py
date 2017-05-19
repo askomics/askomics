@@ -10,6 +10,7 @@ from pyramid.response import FileResponse
 import logging
 from pprint import pformat
 import textwrap
+import datetime
 
 from pygments import highlight
 from pygments.lexers import TurtleLexer
@@ -83,7 +84,7 @@ class AskView(object):
         sqg = SparqlQueryGraph(self.settings, self.request.session)
         ql = QueryLauncher(self.settings, self.request.session)
 
-        results = ql.process_query(sqg.get_private_graphs().query)
+        results = ql.process_query(sqg.get_user_graph_infos().query)
         self.settings['graph']['private'] = []
         for elt in results:
             if 'g' not in elt:
@@ -242,7 +243,7 @@ class AskView(object):
             sqb = SparqlQueryBuilder(self.settings, self.request.session)
             ql = QueryLauncher(self.settings, self.request.session)
 
-            named_graphs = self.get_list_private_graphs()
+            named_graphs = self.list_user_graph()
 
             for graph in named_graphs:
 
@@ -272,12 +273,12 @@ class AskView(object):
         if self.request.session['blocked']:
             return 'blocked'
 
-        self.log.debug("=== DELETE SELECTED GRAPHS ===")
-
         sqb = SparqlQueryBuilder(self.settings, self.request.session)
         ql = QueryLauncher(self.settings, self.request.session)
 
-        graphs = self.request.json_body['namedGraphs']
+        graphs = self.request.json_body['named_graph']
+
+        #TODO: check if the graph belong to user
 
         for graph in graphs:
             self.log.debug("--- DELETE GRAPH : %s", graph)
@@ -285,10 +286,10 @@ class AskView(object):
             #delete metadatas
             ql.execute_query(sqb.get_delete_metadatas_of_graph(graph).query)
 
-    @view_config(route_name='list_private_graphs', request_method='GET')
-    def get_list_private_graphs(self):
+    @view_config(route_name='list_user_graph', request_method='GET')
+    def list_user_graph(self):
         """
-        Return a list with all the named graphs.
+        Return a list with all the named graphs of a user.
         """
 
         # Denny access for non loged users
@@ -299,60 +300,31 @@ class AskView(object):
         if self.request.session['blocked']:
             return 'blocked'
 
-        self.log.debug("=== LIST OF NAMED GRAPHS ===")
-
         sqg = SparqlQueryGraph(self.settings, self.request.session)
-        ql = QueryLauncher(self.settings, self.request.session)
+        query_launcher = QueryLauncher(self.settings, self.request.session)
 
-        res = ql.execute_query(sqg.get_private_graphs().query)
+        res = query_launcher.execute_query(sqg.get_user_graph_infos().query)
 
-        namedGraphs = []
+        named_graphs = []
 
-        for indexResult in range(len(res['results']['bindings'])):
-            namedGraphs.append({
-            'g' : res['results']['bindings'][indexResult]['g']['value'],
-            'count' : res['results']['bindings'][indexResult]['co']['value']
+        for index_result in range(len(res['results']['bindings'])):
+
+            dat = datetime.datetime.strptime(res['results']['bindings'][index_result]['date']['value'], "%Y-%m-%dT%H:%M:%S.%f")
+            self.log.debug(dat)
+
+            readable_date = dat.strftime("%y-%m-%d at %H:%M:%S")
+
+            named_graphs.append({
+                'g': res['results']['bindings'][index_result]['g']['value'],
+                'name': res['results']['bindings'][index_result]['name']['value'],
+                'count': res['results']['bindings'][index_result]['co']['value'],
+                'date': res['results']['bindings'][index_result]['date']['value'],
+                'readable_date': readable_date,
+                'access': res['results']['bindings'][index_result]['access']['value'],
+                'access_bool': bool(res['results']['bindings'][index_result]['access']['value'] == 'public')
             })
 
-        return namedGraphs
-
-    @view_config(route_name='positionable_attr', request_method='POST')
-    def positionable_attr(self):
-        """
-        Return the positionable attributes in common between two positionable entity
-        """
-        #FIXEME: Rewrite this ugly method
-
-        body = self.request.json_body
-
-        self.setGraphUser()
-
-        sqg = SparqlQueryGraph(self.settings, self.request.session)
-        ql = QueryLauncher(self.settings, self.request.session)
-
-        # Check if the two entity are positionable
-        positionable1 = ql.process_query(sqg.get_if_positionable(body['node']).query)
-        positionable2 = ql.process_query(sqg.get_if_positionable(body['second_node']).query)
-
-        if positionable1 == 0 or positionable2 == 0:
-            self.data['error'] = 'Entities are not positionable nodes !'
-            return self.data
-
-        results = ql.process_query(sqg.get_common_pos_attr(body['node'], body['second_node']).query)
-        self.log.debug(results)
-
-        self.data['results'] = {}
-
-        list_pos_attr = []
-
-        for elem in results:
-            if elem['pos_attr'] not in list_pos_attr:
-                list_pos_attr.append(elem['pos_attr'].replace("http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#", ""))
-
-        for elem in list_pos_attr:
-            self.data['results'][elem] = False not in [ParamManager.Bool(p['status']) for p in results if p['pos_attr'] == "http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#"+elem]
-
-        return self.data
+        return named_graphs
 
     @view_config(route_name='guess_csv_header_type', request_method='POST')
     def guess_csv_header_type(self):
@@ -407,8 +379,6 @@ class AskView(object):
         # Denny for blocked users
         if self.request.session['blocked']:
             return 'blocked'
-
-        self.setGraphUser()
 
         self.log.debug(" ========= Askview:source_files_overview =============")
         sfc = SourceFileConvertor(self.settings, self.request.session)
@@ -529,46 +499,6 @@ class AskView(object):
 
         formatter = HtmlFormatter(cssclass='preview_field', nowrap=True, nobackground=True)
         return highlight(self.data, TurtleLexer(), formatter) # Formated html
-
-    @view_config(route_name='check_existing_data', request_method='POST')
-    def check_existing_data(self):
-        """
-        Compare the user data and what is already in the triple store
-        """
-
-        # Denny access for non loged users
-        if self.request.session['username'] == '':
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
-
-        body = self.request.json_body
-        file_name = body["file_name"]
-        col_types = body["col_types"]
-        disabled_columns = body["disabled_columns"]
-        key_columns = body["key_columns"]
-
-        sfc = SourceFileConvertor(self.settings, self.request.session)
-        try:
-            src_file = sfc.get_source_file(file_name)
-            src_file.set_forced_column_types(col_types)
-            src_file.set_disabled_columns(disabled_columns)
-            src_file.set_key_columns(key_columns)
-
-            headers_status, missing_headers = src_file.compare_to_database()
-
-            self.data["headers_status"] = headers_status
-            self.data["missing_headers"] = missing_headers
-        except Exception as e:
-            self.data["headers_status"] = ""
-            self.data["missing_headers"] = ""
-            traceback.print_exc(file=sys.stdout)
-            self.data['error'] = str(e)
-            self.log.error(str(e))
-
-        return self.data
 
     @view_config(route_name='load_data_into_graph', request_method='POST')
     def load_data_into_graph(self):
@@ -744,11 +674,6 @@ class AskView(object):
         self.log.debug("== getUserAbstraction ==")
         body = self.request.json_body
 
-        self.setGraphUser()
-        self.data['graph'] = self.settings['graph']
-        print("====================================================")
-        self.log.debug(self.settings['graph'])
-
         service = ''
         if 'service' in body :
             service = body['service']
@@ -889,13 +814,12 @@ class AskView(object):
         body=self.request.json_body
 
         try:
-            lRemove = []
-            if "removeGraph" in body:
-                lRemove = body["removeGraph"]
-            self.setGraphUser(lRemove)
             tse = TripleStoreExplorer(self.settings, self.request.session)
-
-            results,query = tse.build_sparql_query_from_json(body["variates"],body["constraintesRelations"],True)
+            lfrom = []
+            if 'from' in body:
+                lfrom = body['from']
+            results,query = tse.build_sparql_query_from_json(lfrom,body["variates"],body["constraintesRelations"],True)
+            
             #body["limit"]
             # Remove prefixes in the results table
             l = int(body["limit"]) + 1
@@ -927,13 +851,15 @@ class AskView(object):
         """ Build a request from a json whith the following contents :variates,constraintesRelations,constraintesFilters"""
         self.log.debug("== Attribute Value ==")
 
-        self.setGraphUser()
-
         try:
             tse = TripleStoreExplorer(self.settings, self.request.session)
 
             body = self.request.json_body
-            results,query = tse.build_sparql_query_from_json(body["variates"],body["constraintesRelations"],-1,False)
+            lfrom = []
+            if 'from' in body:
+                lfrom = body['from']
+
+            results,query = tse.build_sparql_query_from_json(lfrom,body["variates"],body["constraintesRelations"],-1,False)
 
             self.data['query'] = query
         except Exception as e:

@@ -27,7 +27,7 @@ def main(global_config, **settings):
     config.add_route('start_point', '/startpoints')
     config.add_route('statistics', '/statistics')
     config.add_route('empty_user_database', '/empty_user_database')
-    config.add_route('list_private_graphs', '/list_private_graphs')
+    config.add_route('list_user_graph', '/list_user_graph')
     config.add_route('delete_graph', '/delete_graph')
     config.add_route('getUserAbstraction', '/userAbstraction')
     config.add_route('sparqlquery', '/sparqlquery')
@@ -40,8 +40,6 @@ def main(global_config, **settings):
     config.add_route('load_gff_into_graph', '/load_gff_into_graph')
     config.add_route('load_ttl_into_graph', '/load_ttl_into_graph')
     config.add_route('preview_ttl', '/preview_ttl')
-    config.add_route('check_existing_data', '/check_existing_data')
-    config.add_route('positionable_attr', '/positionable_attr')
     config.add_route('ttl', '/ttl/{name:.*}')
     config.add_route('csv', '/csv/{name:.*}')
     config.add_route('del_csv', '/del_csv/{name:.*}')
@@ -59,6 +57,7 @@ def main(global_config, **settings):
     config.add_route('upload', '/up/file{sep:/*}{name:.*}')
 
     # Galaxy route
+    config.add_route('connect_galaxy', '/connect_galaxy')
     config.add_route('get_data_from_galaxy', '/get_data_from_galaxy')
     config.add_route('upload_galaxy_files', '/upload_galaxy_files')
 
@@ -80,7 +79,6 @@ def main(global_config, **settings):
     config.add_route('update_passwd', 'update_passwd')
     config.add_route('api_key', '/api_key')
     config.add_route('del_apikey', '/del_apikey')
-    config.add_route('connect_galaxy', '/connect_galaxy')
 
     # TODO no absolute path to static files
     # TODO check what is cors (iframe redirect?)

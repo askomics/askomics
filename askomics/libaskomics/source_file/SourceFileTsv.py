@@ -249,6 +249,19 @@ class SourceFileTsv(SourceFile):
 
         return retval
 
+    def getStrandFaldo(self,strand):
+        
+        if strand == None:
+            return "faldo:BothStrandPosition"
+        
+        if strand.lower() == "plus" or strand.startswith("+"):
+            return "faldo:ForwardStrandPosition"
+        
+        if strand.lower() == "minus" or strand.startswith("-"):
+            return "faldo:ReverseStrandPosition"
+
+        return "faldo:BothStrandPosition"
+
     def get_abstraction(self):
         # TODO use rdflib or other abstraction layer to create rdf
         """
@@ -269,9 +282,17 @@ class SourceFileTsv(SourceFile):
         for key, key_type in enumerate(self.forced_column_types):
             if key > 0 and key in self.disabled_columns:
                 continue
-
+            
+            # *** CARREFULLY ***
+            # We keep def of attribute position_ to keep cmpatibility with IHM but we don't define value for each entity
+            # Position are defined inside a faldo:Location object
+            #  
+            # ==> IHM detect position_ attribute and transforme all query with faldo:location/faldo:begin/faldo:reference
+            #
             if key > 0 and not key_type.startswith('entity') :
                 if key_type in ('taxon', 'ref', 'strand', 'start', 'end'):
+                    uri = 'position_'+key_type
+                elif key_type == 'taxon':
                     uri = 'position_'+key_type
                 else:
                     uri = self.encodeToRDFURI(self.headers[key])
@@ -381,7 +402,10 @@ class SourceFileTsv(SourceFile):
                 indent = (len(entity_id) + 1) * " "
                 ttl += ":" + self.encodeToRDFURI(entity_id) + " rdf:type :" + self.encodeToRDFURI(self.headers[0]) + " ;\n"
                 ttl += indent + " rdfs:label " + self.escape['text'](entity_label) + "^^xsd:string ;\n"
-
+                startFaldo = None
+                endFaldo = None
+                referenceFaldo = None
+                strandFaldo = None
                 # Add data from other columns
                 for i, header in enumerate(self.headers): # Skip the first column
                     if i > 0 and i not in self.disabled_columns:
@@ -392,29 +416,37 @@ class SourceFileTsv(SourceFile):
                         relationName = ":"+self.encodeToRDFURI(header) # manage old way
                         if current_type.startswith('entity'):
                             idx = header.find("@")
-                            
+
                             if idx > 0:
                                 relationName = ":"+self.encodeToRDFURI(header[0:idx])
                                 typeEnt = header[idx+1:]
                                 clause1 = typeEnt.find(":")>0
                                 if  clause1 or (header[idx+1] == '<' and header[len(header)-1] == '>') :
                                     havePrefix = True
-                        if current_type in ('category', 'taxon', 'ref', 'strand'):
-                            # This is a category, keep track of allowed values for this column
-                            self.category_values[header].add(row[i])
-
                         # Create link to value
                         if row[i]: # Empty values are just ignored
+                            if current_type in ('category', 'taxon', 'ref', 'strand'):
+                                # This is a category, keep track of allowed values for this column
+                                self.category_values[header].add(row[i])
+
+                             #check numeric type
+                            if current_type in ('numeric', 'start', 'end'):
+                                if not row[i].isnumeric():
+                                    raise Exception("Type Error: Value \""+row[i]+\
+                                    "\" (Entity :"+entity_id+", Line "+str(row_number)+\
+                                    ") is not a numeric value.\n")
+
                             # positionable attributes
                             if current_type == 'start':
-                                ttl += indent + " " + ':position_start' + " " +  self.delims[current_type][0] + self.encodeToRDFURI(row[i]) + self.delims[current_type][1] + " ;\n"
+                                startFaldo = row[i]
                             elif current_type == 'end':
-                                ttl += indent + " " + ':position_end' + " " + self.delims[current_type][0] + self.encodeToRDFURI(row[i]) + self.delims[current_type][1] + " ;\n"
+                                endFaldo = row[i]
                             elif current_type == 'taxon':
                                 ttl += indent + " " + ':position_taxon' + " " + self.delims[current_type][0] + self.encodeToRDFURI(row[i]) + self.delims[current_type][1] + " ;\n"
                             elif current_type == 'ref':
-                                ttl += indent + " " + ':position_ref' + " " + self.delims[current_type][0] + self.encodeToRDFURI(row[i]) + self.delims[current_type][1] + " ;\n"
+                                referenceFaldo = self.encodeToRDFURI(row[i])
                             elif current_type == 'strand':
+                                strandFaldo = row[i]
                                 ttl += indent + " " + ':position_strand' + " " + self.delims[current_type][0] + self.encodeToRDFURI(row[i]) + self.delims[current_type][1] + " ;\n"
                             elif havePrefix:
                                 ttl += indent + " "+ relationName + " " + row[i] + " ;\n"
@@ -422,7 +454,38 @@ class SourceFileTsv(SourceFile):
                                 ttl += indent + " "+ relationName + " " + self.delims[current_type][0] + self.escape[current_type](row[i]) + self.delims[current_type][1] + " ;\n"
 
                         if current_type == 'entitySym':
-                            ttlSym += self.delims[current_type][0] + self.escape[current_type](row[i]) + self.delims[current_type][1] + " "+ relationName + " :" + self.encodeToRDFURI(entity_label)  + " .\n"
+                            ttlSym += self.delims[current_type][0]+\
+                                      self.escape[current_type](row[i])+\
+                                      self.delims[current_type][1]+" "+relationName+" :"+\
+                                      self.encodeToRDFURI(entity_label)  + " .\n"
+
+                #Faldo position management
+                if startFaldo != None or endFaldo != None or referenceFaldo != None:
+                    if startFaldo is None or endFaldo is None or referenceFaldo is None:
+                        raise Exception("miss positionable attribute :\"(Entity:"+
+                                        entity_id+", Line "+str(row_number)+")")
+                    blockbase=10000
+                    block_idxstart = int(startFaldo) // blockbase
+                    block_idxend  = int(endFaldo) // blockbase
+                    
+                    ttl += indent + ' :blockstart ' + str(block_idxstart*blockbase) +';\n'
+                    ttl += indent + ' :blockend ' + str(block_idxend*blockbase) +';\n'
+                    
+                    for sliceb in range(block_idxstart,block_idxend+1):
+                        ttl += indent + ' :IsIncludeInRef ' + referenceFaldo+"_"+str(sliceb) +' ;\n'
+                        ttl += indent + ' :IsIncludeIn ' + str(sliceb) +' ;\n'
+                    
+                    faldo_strand = self.getStrandFaldo(strandFaldo)
+
+                    ttl += indent +    " faldo:location [ a faldo:Region ;\n"+\
+                                       "                  faldo:begin [ a faldo:ExactPosition;\n"+\
+                                       "                                a "+faldo_strand+";\n"+\
+                                       "                                faldo:position "+str(startFaldo)+";\n"+\
+                                       "                                faldo:reference :"+referenceFaldo+" ];\n"+\
+                                       "                  faldo:end [ a faldo:ExactPosition;\n"+\
+                                       "                              a "+faldo_strand+";\n"+\
+                                       "                              faldo:position "+str(endFaldo)+";\n"+\
+                                       "                              faldo:reference :"+referenceFaldo+" ]] ;\n"
 
                 ttl = ttl[:-2] + "."
                 #manage symmetric relation
@@ -433,47 +496,3 @@ class SourceFileTsv(SourceFile):
                 # Stop after x lines
                 if preview_only and row_number > self.preview_limit:
                     return
-
-    def compare_to_database(self):
-        """
-        Ask the database to compare the headers of a file to convert to the corresponding data in the database
-
-        :return: a tuple containing 2 Lists: status of asked headers, and missing headers
-        """
-
-        headers_status = []
-        missing_headers = []
-
-        header_tmp = []
-        # change header to avoid @ character
-        for header in self.headers[1:]:
-            idx = header.find("@")
-            if idx != -1:
-                header_tmp.append(header[0:idx])
-                header = header[idx+1:]
-            else:
-                header_tmp.append(header)
-
-        if self.existing_relations == []:
-            # No results, everything is new
-            for elem in header_tmp:
-                headers_status.append('new')
-
-            return headers_status, missing_headers
-
-        for rel in self.existing_relations:
-            if rel not in header_tmp:
-                self.log.warning('Expected relation "%s" but did not find corresponding source file: %s.', rel, repr(header_tmp))
-                missing_headers.append(rel)
-
-        headers_status.append('present') # There are some existing relations, it means the entity is present
-
-        for header in header_tmp[1:]:
-            if header not in self.existing_relations:
-                self.log.debug('New class detected "%s".', header)
-                headers_status.append('new')
-            elif header not in missing_headers:
-                self.log.debug('Known class detected "%s".', header)
-                headers_status.append('present')
-
-        return headers_status, missing_headers

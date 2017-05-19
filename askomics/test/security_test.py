@@ -231,8 +231,11 @@ class SecurityTests(unittest.TestCase):
 
         self.tps.add_another_admin_in_users()
 
-        assert security.get_admins_emails() == ['admin@example.com', 'otheradmin@example.com']
+        res_emails = security.get_admins_emails()
 
+        assert len(res_emails) == 2
+        assert 'admin@example.com' in res_emails
+        assert 'otheradmin@example.com' in res_emails
 
     def test_set_admin(self):
         """Test set_admin"""

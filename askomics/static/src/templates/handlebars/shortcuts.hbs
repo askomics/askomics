@@ -1,0 +1,54 @@
+<hr/>
+<h3 class="header-div">Shortcuts</h3>
+<hr/>
+
+<ul class="nav nav-pills">
+ <li class="active"><a data-toggle="tab" href="#Shortcuts_List_adm">List</a></li>
+ <li><a data-toggle="tab" href="#Shortcuts_Import_adm">Import</a></li>
+</ul>
+
+<div id="Shortcuts_adm_tab_content" class="tab-content">
+     <div id="Shortcuts_List_adm" class="tab-pane fade in active">
+       <table class="table table-striped">
+           <tr>
+               <th>Shortcuts</th>
+               <th>Definition</th>
+               <th>Version</th>
+               <th>Input</th>
+               <th>Output</th>
+               <th></th>
+           </tr>
+           {{#each shortcuts}}
+           <tr data-toggle="collapse" data-target="#accordion_{{@index}}" class="clickable">
+               <td>{{this.shortcut}}</td>
+               <td>{{this.comment}}</td>
+               <td>{{this.version}}</td>
+               <td>{{this.in}}</td>
+               <td>{{this.out}}</td>
+               <td onclick="new ShortcutsParametersView().removeShortcut('{{this.shortcut}}');"><span class="glyphicon glyphicon-remove"></span></td>
+           </tr>
+           <tr>
+            <td colspan="6">
+             <div id="accordion_{{@index}}" class="collapse">
+                <h4>Printing Output</h4>
+                <p>{{this.output_var}}+":"+{{this.output_varname}}</p>
+                <h4>Prefix</h4>
+                <p>{{this.prefix_string}}</p>
+                <h4>Sparql</h4>
+                <p>{{this.sparql_string}}</p>
+             </div>
+            </td>
+           </tr>
+           {{/each}}
+       </table>
+     </div>
+     <div id="Shortcuts_Import_adm" class="tab-pane fade">
+       <br/>
+       <hr/>
+       <h4 class="header-div">Import an Askomics shortcut</h4>
+       <hr/>
+       <textarea id="inputShortcutsLink" class="form-control" rows="10"></textarea>
+       <br/>
+       <button onclick="new ShortcutsParametersView().importShortcut($('#inputShortcutsLink').val())" class="btn btn-primary">Import</button>
+     </div>
+</div>

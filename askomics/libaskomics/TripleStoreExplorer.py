@@ -90,15 +90,6 @@ class TripleStoreExplorer(ParamManager):
             if not elt['subject'] in list_entities:
                 list_entities[elt['subject']] = 0
 
-        #data['relationsSym'] = results
-
-        #for elt in results:
-        #    if not elt['object'] in list_entities:
-        #        list_entities[elt['object']]=0
-        #    if not elt['subject'] in list_entities:
-        #        list_entities[elt['subject']]=0
-
-
 
         results = ql.process_query(sqg.get_isa_relation_entities().query)
 
@@ -122,6 +113,7 @@ class TripleStoreExplorer(ParamManager):
 
         data['positionable'] = results
 
+        data['graph'] = sqg.getGraphUser()
 
         return data
 
@@ -155,7 +147,7 @@ class TripleStoreExplorer(ParamManager):
             return req
         return ""
 
-    def build_sparql_query_from_json(self, variates, constraintes_relations,limit, send_request_to_tps=True):
+    def build_sparql_query_from_json(self, fromgraphs, variates, constraintes_relations,limit, send_request_to_tps=True):
         """
         Build a sparql query from JSON constraints
         """
@@ -170,11 +162,11 @@ class TripleStoreExplorer(ParamManager):
         #     query += ' LIMIT ' + str(limit)
 
         if send_request_to_tps:
-            results = query_launcher.process_query(sqb.custom_query(select, query).query)
+            results = query_launcher.process_query(sqb.custom_query(fromgraphs, select, query).query)
         else:
             results = []
 
-        return results, sqb.custom_query(select, query).query
+        return results, sqb.custom_query(fromgraphs, select, query).query
 
     #FIXME: DEAD CODE ??
     def build_sparql_query_from_json2(self, variates, constraintes_relations, limit, send_request_to_TPS):

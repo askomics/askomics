@@ -53,7 +53,7 @@ class InterfaceTPS(object):
         sqb = SparqlQueryGraph(self.settings, self.request.session)
         query_laucher = QueryLauncher(self.settings, self.request.session)
 
-        res = query_laucher.execute_query(sqb.get_private_graphs().query)
+        res = query_laucher.execute_query(sqb.get_user_graph_infos().query)
 
         named_graphs = []
 

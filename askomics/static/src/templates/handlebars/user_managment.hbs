@@ -1,0 +1,98 @@
+<div class='col-md-6'>
+ <h4>Hello {{user.username}}</h4>
+ <hr/ >
+ {{#if user.blocked}}
+ <div class="alert alert-danger" role="alert">Your account is locked, wait for an admin to unlock it</div>
+ {{/if}}
+
+ <h4>Update your infos</h4>
+ <hr/ >
+ <h5>Email</h5>
+
+  <div class="input-group">
+    <span class="input-group-addon" id="basic-addon1"><i class="fa fa-envelope" aria-hidden="true"></i></span>
+    <input type="email" class="form-control new_email" id='{{user.username}}' placeholder="{{user.email}}" aria-describedby="basic-addon1">
+    <span class="input-group-btn">
+      <button class="btn btn-default update_email" id='{{user.username}}' type="button">
+        <k>Update</k>
+        <i class="hidden fa fa-spinner pulse" id='spiner_mail'></i>
+        <i class="hidden fa fa-check text-success" id='tick_mail'></i>
+      </button>
+    </span>
+  </div>
+
+  <h5>Password</h5>
+
+  <div class="input-group">
+    <span class="input-group-addon" id="basic-addon1"><i class="fa fa-unlock-alt" aria-hidden="true"></i></span>
+    <input type="password" class="form-control current_passwd" id='{{user.username}}' placeholder="Enter your current password" aria-describedby="basic-addon1">
+  </div>
+  <div class="input-group">
+    <span class="input-group-addon" id="basic-addon1"><i class="fa fa-unlock-alt" aria-hidden="true"></i></span>
+    <input type="password" class="form-control new_passwd" id='{{user.username}}' placeholder="Enter a new password" aria-describedby="basic-addon1">
+  </div>
+  <div class="input-group">
+    <span class="input-group-addon" id="basic-addon1"><i class="fa fa-unlock-alt" aria-hidden="true"></i></span>
+    <input type="password" class="form-control new_passwd2" id='{{user.username}}' placeholder="Confirm your new password" aria-describedby="basic-addon1">
+    <span class="input-group-btn">
+      <button class="btn btn-default update_passwd" id='{{user.username}}' type="button">
+        Update
+        <i class="hidden fa fa-spinner pulse" id='spiner_passwd'></i>
+        <i class="hidden fa fa-check text-success" id='tick_passwd'></i>
+      </button>
+    </span>
+  </div>
+
+<hr/ >
+<h4>API keys</h4>
+<hr/ >
+<p>API keys allow login with the askomics API without giving your password</p>
+<p>You can have up to 5 API keys!</p>
+
+<div class="input-group">
+  <span class="input-group-addon" id="basic-addon1"><i class="fa fa-key" aria-hidden="true"></i></span>
+  <input type="text" class="form-control new_apikey_name" id='{{user.username}}' placeholder="Name of your key" aria-describedby="basic-addon1">
+  <span class="input-group-btn">
+    <button class="btn btn-default get_new_apikey" id='{{user.username}}' type="button">
+      Get API key
+      <i class="hidden fa fa-spinner pulse" id='spiner_apikey'></i>
+      <i class="hidden fa fa-check text-success" id='tick_apikey'></i>
+    </button>
+  </span>
+</div>
+
+<br>
+
+{{#each keys}}
+<br>
+<div class="panel panel-default">
+  <div class="panel-heading">{{this.name}}</div>
+  <div class="panel-body">
+    <p class='apikey' id='{{this.key}}'>{{this.key}}<p/>
+    {{!-- buttons --}}
+    <button type="button" class="pull-right btn btn-xs btn-danger del_key" id="{{this.key}}"><i class="fa fa-trash" aria-hidden="true"></i> Delete</button>
+    <button type="button" class="pull-right btn btn-xs btn-default copy_key" data-toggle="tooltip" data-placement="left" title="Copy to Clipboard" id="{{this.key}}"><i class="fa fa-clipboard" aria-hidden="true"></i> Copy</button>
+  </div>
+</div>
+{{/each}}
+
+<hr/ >
+<h4>Remove your account</h4>
+<hr/ >
+  <p>Remove your account and all your data</p>
+  <p class='text-danger'>
+    <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+    This action can't be undone!
+  </p>
+  <br>
+  <button type="button" class="btn btn-danger del_user" id='{{user.username}}'><i class="fa fa-trash" aria-hidden="true"></i> Delete account</button>
+  <div class="btn-group div_confirm_del_user hidden" id='{{user.username}}' role="group">
+    <button type="button" class="btn btn-danger confirm_del_user" id='{{user.username}}'>Delete</button>
+    <button type="button" class="btn btn-default no_del_user" id='{{user.username}}'>No</button>
+  </div>
+  <br>
+  <div class="hidden passwd2del-group input-group" id="basic-addon1">
+    <span class="input-group-addon"><i class="fa fa-key" aria-hidden="true"></i></span>
+    <input type="password" class="form-control passwd_del" id='{{user.username}}' placeholder="Enter your password" aria-describedby="basic-addon1">
+  </div>
+</div>
