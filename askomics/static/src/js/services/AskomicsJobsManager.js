@@ -11,6 +11,7 @@ let instanceAskomicsJobsViewManager ;
       this.jobs = [];
       this.jobGenId=0   ;
       this.npreview=30 ; /* max data to transfert to IHM */
+      this.galaxy = false;
 
       instanceAskomicsJobsViewManager = this;
     }
@@ -33,7 +34,7 @@ let instanceAskomicsJobsViewManager ;
           stateToReload : JSON.stringify(__ihm.getGraphBuilder().getInternalState())
       });
 
-      new AskomicsJobsViewManager().listJobs();
+      this.listJobs();
       return curId;
     }
 
@@ -72,7 +73,7 @@ let instanceAskomicsJobsViewManager ;
             this.jobs[ij].datable_preview = preview_func(this.jobs[ij].stateToReload) ; //new AskomicsResultsView(data).getPreviewResults(this.jobs[ij].stateToReload);
           }
       }
-      new AskomicsJobsViewManager().listJobs();
+      this.listJobs();
     }
 
     changeKoState(id,messErr) {
@@ -85,7 +86,7 @@ let instanceAskomicsJobsViewManager ;
             this.jobs[ij].classtr = "bg-danger";
           }
       }
-      new AskomicsJobsViewManager().listJobs();
+      this.listJobs();
     }
 
     removeJob(index) {
@@ -94,7 +95,7 @@ let instanceAskomicsJobsViewManager ;
         service.get(this.jobs[index].csv);
       }
       this.jobs.splice(index, 1);
-      new AskomicsJobsViewManager().listJobs();
+      this.listJobs();
       if (this.jobs.length<=0) $("#interrogation").trigger( "click" );
     }
 
@@ -117,16 +118,20 @@ let instanceAskomicsJobsViewManager ;
 
     createQueryJob() {
       //create state view
-      let curId = new AskomicsJobsViewManager().createWaitState();
+      let curId = this.createWaitState();
       let service = new RestServiceJs("sparqlquery");
       let jdata = this.prepareQuery();
+      let self = this;
       service.post(jdata,function(data) {
         if ('error' in data) {
-          new AskomicsJobsViewManager().changeKoState(curId,data.error);
+          self.changeKoState(curId,data.error);
           return;
         }
 
-        new AskomicsJobsViewManager().changeOkState(curId,data,function(d) {
+        // Check if a galaxy is connected to display a button
+        self.galaxy = data.galaxy;
+
+        self.changeOkState(curId,data,function(d) {
           return new AskomicsResultsView(data).getPreviewResults(d) ;
         });
       });
@@ -134,9 +139,32 @@ let instanceAskomicsJobsViewManager ;
       $("#jobsview").trigger( "click" );
     }
 
+    send2galaxy(index) {
+      let job = this.jobs[index];
+      let galaxy_dataset_name = 'AskOmics_query_' + job.jobid + '_' + job.tstart + '.tsv';
+      let file = job.csv;
+      let service = new RestServiceJs('send_to_galaxy');
+      let model = {'path': file, 'name': galaxy_dataset_name};
+      $("#spinner_send_galaxy").removeClass('hidden');
+      $("#check_send_galaxy").addClass('hidden');
+      $("#cross_send_galaxy").addClass('hidden');
+      service.post(model, function(data) {
+        __ihm.manageErrorMessage(data);
+        if (data.error) {
+          $("#spinner_send_galaxy").addClass('hidden');
+          $("#check_send_galaxy").addClass('hidden');
+          $("#cross_send_galaxy").removeClass('hidden');
+        }else{
+          $("#spinner_send_galaxy").addClass('hidden');
+          $("#check_send_galaxy").removeClass('hidden');
+          $("#cross_send_galaxy").addClass('hidden');
+        }
+      });
+    }
+
     createModuleJob(bool,urimo,name) {
       //create state view
-      let curId = new AskomicsJobsViewManager().createWaitState();
+      let curId = this.createWaitState();
       let service = new RestServiceJs("manage_module");
 
       let param = {
@@ -144,15 +172,15 @@ let instanceAskomicsJobsViewManager ;
         'uri'     : urimo,
         'name'    : name
       } ;
-
+      let self = this;
       service.post(param,function(data) {
         if ('error' in data) {
           //alert(data.error);
-          new AskomicsJobsViewManager().changeKoState(curId,data.error);
+          self.changeKoState(curId,data.error);
           return;
         }
 
-        new AskomicsJobsViewManager().changeOkState(curId,data,function(d) { return "<p>Import "+name+" is done !</p>";});
+        self.changeOkState(curId,data,function(d) { return "<p>Import "+name+" is done !</p>";});
         new ModulesParametersView().updateModules();
       });
       /* position on job list view */
@@ -162,8 +190,7 @@ let instanceAskomicsJobsViewManager ;
     listJobs() {
 
       let template = AskOmics.templates.jobs;
-
-      let context = {jobs: this.jobs };
+      let context = {jobs: this.jobs, galaxy: this.galaxy};
       let html = template(context);
 
       $("#content_jobsview").empty();
@@ -176,7 +203,7 @@ let instanceAskomicsJobsViewManager ;
 
             $("<h3></h3>").addClass("header-div")
                           .css("text-align","center")
-                          .html("Preview ("+Math.min(this.npreview,this.jobs[ij].nr)+" nrows)")
+                          .html("Preview ("+Math.min(this.npreview,this.jobs[ij].nr)+" rows)")
                         );
 
           r.append(this.jobs[ij].datable_preview);

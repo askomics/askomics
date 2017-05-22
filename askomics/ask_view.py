@@ -66,6 +66,9 @@ class AskView(object):
             if 'username' not in self.request.session.keys():
                 self.request.session['username'] = ''
 
+            if 'galaxy' not in self.request.session.keys():
+                self.request.session['galaxy'] = False
+
         except Exception as e:
                 traceback.print_exc(file=sys.stdout)
                 self.data['error'] = str(e)
@@ -844,6 +847,8 @@ class AskView(object):
             self.data['error'] = str(e)
             self.log.error(str(e))
 
+        self.data['galaxy'] = self.request.session['galaxy']
+
         return self.data
 
     @view_config(route_name='getSparqlQueryInTextFormat', request_method='POST')
@@ -982,9 +987,6 @@ class AskView(object):
         Log out the user, reset the session
         """
 
-        self.request.session['username'] = ''
-        self.request.session['admin'] = ''
-        self.request.session['graph'] = ''
         self.request.session = {}
 
         return
@@ -1049,6 +1051,10 @@ class AskView(object):
             admin_blocked = security.get_admin_blocked_by_username()
             security.set_admin(admin_blocked['admin'])
             security.set_blocked(admin_blocked['blocked'])
+
+            # Get if user has a connected Galaxy account
+            galaxy = security.check_galaxy()
+            security.set_galaxy(galaxy)
 
             password_is_correct = security.check_username_password()
 
@@ -1144,6 +1150,7 @@ class AskView(object):
 
         if galaxy_already_registred:
             security.delete_galaxy()
+            self.request.session['galaxy'] = False
 
         # If url or apikey are empty, do nothing (only deletion)
         if not url or not key:
@@ -1153,6 +1160,7 @@ class AskView(object):
         # Insert the new Galaxy
         try:
             security.add_galaxy(url, key)
+            self.request.session['galaxy'] = True
         except Exception as e:
 
             self.data['error'] = 'Connection to Galaxy failed'
@@ -1558,4 +1566,33 @@ class AskView(object):
             return self.data
 
         self.data['success'] = 'Success'
+        return self.data
+
+    @view_config(route_name='send_to_galaxy', request_method='POST')
+    def send2galaxy(self):
+        self.data = {}
+
+        body = self.request.json_body
+        param_manager = ParamManager(self.settings, self.request.session)
+        path = param_manager.getUserResultsCsvDirectory() + body['path']
+        name = body['name']
+
+        # get Galaxy infos
+        security = Security(self.settings, self.request.session, self.request.session['username'], '', '', '')
+
+        galaxy_auth = security.get_galaxy_infos()
+
+        if not galaxy_auth:
+            self.data['error'] = 'No Galaxy'
+            return self.data
+
+        # Send the file to Galaxy
+        try:
+            galaxy = GalaxyConnector(self.settings, self.request.session, galaxy_auth['url'], galaxy_auth['key'])
+            galaxy.send_to_history(path, name)
+        except Exception as e:
+            self.data['error'] = 'Error during sending: ' + str(e)
+            return self.data
+
+        self.data['success'] = 'path successfully sended in Galaxy'
         return self.data

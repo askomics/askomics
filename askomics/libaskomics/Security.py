@@ -25,6 +25,7 @@ class Security(ParamManager):
         self.passwd2 = str(password2)
         self.admin = False
         self.blocked = True
+        self.galaxy = False
 
         # concatenate askmics salt, password and random salt and hash it with sha256 function
         # see --"https://en.wikipedia.org/wiki/Salt_(cryptography)"-- for more info about salt
@@ -256,6 +257,13 @@ class Security(ParamManager):
         self.admin = admin
         self.session['admin'] = admin
 
+    def set_galaxy(self, galaxy):
+        """
+        set self.galaxy at True if user has a connected galaxy account
+        """
+        self.galaxy = galaxy
+        self.session['galaxy'] = galaxy
+
     def set_blocked(self, blocked):
         """
         set self.blocked at True if user is a blocked
@@ -312,6 +320,7 @@ class Security(ParamManager):
         session['admin'] = self.admin
         session['blocked'] = self.blocked
         session['graph'] = self.settings['askomics.graph'] + ':' + self.username
+        session['galaxy'] = self.galaxy
 
     def update_email(self):
         """
