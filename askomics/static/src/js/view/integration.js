@@ -244,6 +244,22 @@ function previewTtl(file_elem) {
           __ihm.displayBlockedPage();
           return;
         }
+
+        let insert_warning_elem = file_elem.find(".insert_warning").first();
+        if (data.error) {
+
+            insert_warning_elem.removeClass('hidden alert-success')
+                               .addClass('show alert-danger');
+
+            insert_warning_elem.html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> ERROR:</strong> ' + JSON.stringify(data.error))
+                              .removeClass('hidden alert-success')
+                              .removeClass('hidden alert-warning')
+                              .addClass('show alert-danger');
+            return ;
+        }
+        
+        insert_warning_elem.removeClass('hidden alert-danger');
+
         file_elem.find(".preview_field").html(data);
         file_elem.find(".preview_field").show();
     });
@@ -378,8 +394,8 @@ function loadSourceFile(file_elem, pub) {
           return;
         }
 
-        var insert_status_elem = file_elem.find(".insert_status").first();
-        var insert_warning_elem = file_elem.find(".insert_warning").first();
+        let insert_status_elem = file_elem.find(".insert_status").first();
+        let insert_warning_elem = file_elem.find(".insert_warning").first();
         if (data.status != "ok") {
             insert_warning_elem.empty();
             insert_warning_elem.removeClass('hidden alert-success')
