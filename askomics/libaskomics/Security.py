@@ -213,7 +213,8 @@ class Security(ParamManager):
         emails = self.get_admins_emails()
 
         # Send a mail to all admins
-        body = 'Hello, ' + self.username + ' just create an account.\n'
+        body = 'Hello,\n'
+        body = 'User \'' + self.username + '\' just created an account on Askomics.\n'
         body += 'Log into the admin interface in order to unblock this user, or contact him '
         body += 'at ' + self.email + '.\n\n\n'
         body += host_url + '\n\n'
