@@ -214,7 +214,7 @@ class Security(ParamManager):
 
         # Send a mail to all admins
         body = 'Hello,\n'
-        body = 'User \'' + self.username + '\' just created an account on Askomics.\n'
+        body += 'User \'' + self.username + '\' just created an account on Askomics.\n'
         body += 'Log into the admin interface in order to unblock this user, or contact him '
         body += 'at ' + self.email + '.\n\n\n'
         body += host_url + '\n\n'
