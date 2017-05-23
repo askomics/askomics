@@ -125,8 +125,10 @@ class IHMLocal {
 
         AskomicsObjectView.start();
         if ( contents === undefined ) {
-          /* Get information about start point to bgin query */
-          let startPoint = $('#startpoints').find(":selected").data("value");
+
+        let uri = $('input.start_point_radio:checked').attr('id');
+        let label = $('input.start_point_radio:checked').attr('value');
+        let startPoint = {'uri': uri, 'label': label};
 
           __ihm.getSVGLayout().start(startPoint);
         } else {
@@ -244,79 +246,58 @@ class IHMLocal {
     }
 
     loadStartPoints() {
-      console.log('---> loadStartPoints');
+        let service = new RestServiceJs('startpoints');
+        service.getAll(function(start_points) {
+            if (! __ihm.manageErrorMessage(start_points)) return;
+            $("#init").empty();
+            let template = AskOmics.templates.startpoints;
+            let context = {startpoints: start_points.nodes};
+            let html = template(context);
+            $('#init').append(html);
 
-      var service = new RestServiceJs("startpoints");
-      $("#btn-down").prop("disabled", true);
-      $("#showNode").hide();
-      $("#deleteNode").hide();
+            // Filter --------------
+            // list of all entities
+            let list_entities = [];
+            $.each($('.start_point_radio'), function(entity) {
+                list_entities.push($(this).attr('value'));
+            });
+            // on input change
+            $('#filter_entities').on('input', function() {
+                let new_list = list_entities.slice();
+                let filter = $('#filter_entities').val();
+                if (filter.trim()) {
+                    $.each(list_entities, function(index, value) {
+                        if (!value.match(filter, "i")) {
+                            let index2splice = new_list.indexOf(value);
+                            new_list.splice(index2splice, 1);
+                        }
+                    });
+                    $.each($(".label_startpoints"), function() {
+                        let label = $(this).attr('id');
+                        if (new_list.indexOf(label) >= 0) {
+                            //show
+                            $(this).removeClass('hidden');
+                        }else{
+                            // hide
+                            $(this).addClass('hidden');
+                            // deselect it
+                            if ($(".start_point_radio[value="+label+"]").is(':checked')) {
+                                $(".start_point_radio[value="+label+"]").removeAttr('checked');
+                                $('#starter').attr('disabled', 'disabled');
+                            }
+                        }
+                    });
+                }else{
+                    // show all
+                    $('.label_startpoints').removeClass('hidden');
+                }
+            });
 
-      service.getAll(function(startPointsDict) {
-          if (! __ihm.manageErrorMessage(startPointsDict)) return;
-
-          $("#startpoints").empty();
-          $('#graph_startpoints').empty();
-
-          for (let g in __ihm.startPointsByGraph ) {
-            delete __ihm.startPointsByGraph[g];
-          }
-          __ihm.startPointsByGraph = {} ;
-
-          $.each(startPointsDict.nodes, function(key, value) {
-            let textGraph;
-
-            if (value.public) {
-              textGraph = $('<em></em>').attr('class', 'text-warning')
-                                   .append($('<i></i>').attr('class', 'fa fa-globe'))
-                                   .append(' ' + __ihm.graphname(value.g).name);
-            } else if (value.private) {
-              textGraph = $('<strong></strong>').attr('class', 'text-primary')
-                                   .append($('<i></i>').attr('class', 'fa fa-lock'))
-                                   .append(' ' + __ihm.graphname(value.g).name);
-            } else {
-               throw "unknwon access ";
-            }
-
-            if ( ! (value.g in __ihm.startPointsByGraph) ) {
-                  $('#graph_startpoints').append(
-                      $('<option></option>')
-                                      .attr('data-value', JSON.stringify(value.g))
-                                      .click(function(){
-                                        $('#startpoints').empty();
-                                        for (let idxOption in __ihm.startPointsByGraph[value.g] ) {
-                                          let val = __ihm.startPointsByGraph[value.g][idxOption];
-                                          let text = "";
-                                          if (val.public) {
-                                            text = $('<em></em>').attr('class', 'text-warning')
-                                                                 .append($('<i></i>').attr('class', 'fa fa-globe'))
-                                                                 .append(' ' + val.label);
-                                          } else if (val.private) {
-                                            text = $('<strong></strong>').attr('class', 'text-primary')
-                                                                 .append($('<i></i>').attr('class', 'fa fa-lock'))
-                                                                 .append(' ' + val.label);
-                                          }  else {
-                                             throw "unknwon access ";
-                                          }
-
-                                          $('#startpoints').append($('<option></option>')
-                                                                        .attr('data-value', JSON.stringify(val))
-                                                                        .append(text));
-                                        }
-                                      })
-                                      .append(textGraph));
-                  __ihm.startPointsByGraph[value.g]=[];
-            }
-            __ihm.startPointsByGraph[value.g].push( value );
-          });
-          $('#graph_startpoints').find(":selected").click();
-
-          $("#starter").prop("disabled", true);
-          $("#startpoints").click(function(){
-              if ($("#starter").prop("disabled")) {
-                  $("#starter").prop("disabled", false);
-              }
-          });
-      });
+            // on radio change, hide/show start button
+            $('.start_point_radio').change(function() {
+                $('#starter').removeAttr('disabled');
+            });
+        });
     }
 
 

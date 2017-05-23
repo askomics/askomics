@@ -105,12 +105,30 @@ class AskView(object):
         """ Get the nodes being query starters """
         self.log.debug("== START POINT ==")
 
-        if self.check_error() :
+        if self.check_error():
             return self.data
 
+        self.setGraphUser([])
+
         tse = TripleStoreExplorer(self.settings, self.request.session)
-        self.data['nodes'] = tse.get_start_points()
+        nodes = tse.get_start_points()
+
+        self.data['nodes'] = {}
+
+        for node in nodes:
+            if node['uri'] in self.data['nodes'].keys():
+                if node['public'] and not self.data['nodes'][node['uri']]['public']:
+                    self.data['nodes'][node['uri']]['public'] = True
+                if node['private'] and not self.data['nodes'][node['uri']]['private']:
+                    self.data['nodes'][node['uri']]['private'] = True
+                self.data['nodes'][node['uri']]['public_and_private'] = bool(
+                    self.data['nodes'][node['uri']]['public'] and
+                    self.data['nodes'][node['uri']]['private'])
+            else:
+                self.data['nodes'][node['uri']] = node
+
         return self.data
+
 
     @view_config(route_name='statistics', request_method='GET')
     def statistics(self):
