@@ -8,6 +8,7 @@
 class AskomicsUserAbstraction {
     constructor() {
       this.prefix = {};
+      this.prefix_error = {};
       /* Ontology is save locally to avoid request with TPS  */
       /* --------------------------------------------------- */
       this.tripletSubjectRelationObject = [];
@@ -139,7 +140,7 @@ class AskomicsUserAbstraction {
       instanceUserAbstraction.entityPositionableInformationList = {};
       instanceUserAbstraction.attributesEntityList = {};
       instanceUserAbstraction.entitySubclassof = {} ;
-      
+
       /* All information about an entity available in TPS are stored in entityInformationList */
       for (let entry in resultListTripletSubjectRelationObject.entities){
         //console.log("ENTITY:"+JSON.stringify(resultListTripletSubjectRelationObject.entities[entry]));
@@ -228,6 +229,12 @@ class AskomicsUserAbstraction {
 
     getPrefix(ns) {
       let instanceUserAbstraction = this;
+
+      if (ns in this.prefix_error) {
+        console.log("erreur.........................");
+        return ns;
+      }
+
       if (! (ns in this.prefix)) {
         //get info in prefix.cc
         //
@@ -236,13 +243,19 @@ class AskomicsUserAbstraction {
           type: 'GET',
           url: 'http://prefix.cc/'+ns.trim()+'.file.json',
           success: function( result_json ) {
-            //console.log("new prefix:"+ns+"==>"+result_json[ns]);
             instanceUserAbstraction.prefix[ns] = result_json[ns];
           },
-          error: function(req, status, ex) {},
+          error: function(req, status, ex) {
+            instanceUserAbstraction.prefix_error[ns] = true ;
+          },
           timeout:30
         });
       }
+
+      if (ns in this.prefix_error) {
+        return ns;
+      }
+
       return this.prefix[ns];
     }
 
@@ -344,7 +357,7 @@ class AskomicsUserAbstraction {
             let uriAtt =this.attributesEntityList[g][UriSelectedNode][att].uri;
             if ( ! (uriAtt in listAtt) ) {
               listAtt[uriAtt] = this.attributesEntityList[g][UriSelectedNode][att];
-              listGraphByUri[uriAtt] = [];  
+              listGraphByUri[uriAtt] = [];
             }
             listGraphByUri[uriAtt].push(g);
           }

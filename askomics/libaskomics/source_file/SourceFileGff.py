@@ -213,14 +213,14 @@ class SourceFileGff(SourceFile):
                 for qualifier_key, qualifier_value in feat.qualifiers.items():
                     keyuri = self.encodeToRDFURI(qualifier_key)
                     attribute_dict[':'+keyuri] = []
+
                     for val in qualifier_value:
                         valuri = self.encodeToRDFURI(val)
-                        # if there are, it's the label !
-                        if qualifier_key == 'Name':
-                            attribute_dict['rdfs:label'] = ['\"'+ str(val) +'\"^^xsd:string']
-                        elif qualifier_key == 'ID':
+                        if qualifier_key == 'ID':
                             if (valuri not in type_entities) and type_entity != '':
                                 type_entities[valuri] = type_entity
+
+                            attribute_dict['rdfs:label'] = ['\"'+ str(val) +'\"^^xsd:string']
 
                         elif qualifier_key in ['Parent', 'Derives_from']:
                             if not valuri in type_entities:
