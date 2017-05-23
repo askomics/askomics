@@ -472,47 +472,50 @@ class AskView(object):
 
 
         self.log.debug("preview_ttl")
+        try:
+            body = self.request.json_body
+            file_name = body["file_name"]
+            col_types = body["col_types"]
+            disabled_columns = body["disabled_columns"]
+            key_columns = body["key_columns"]
 
-        body = self.request.json_body
-        file_name = body["file_name"]
-        col_types = body["col_types"]
-        disabled_columns = body["disabled_columns"]
-        key_columns = body["key_columns"]
+            sfc = SourceFileConvertor(self.settings, self.request.session)
 
-        sfc = SourceFileConvertor(self.settings, self.request.session)
+            src_file = sfc.get_source_file(file_name)
+            src_file.set_forced_column_types(col_types)
+            src_file.set_disabled_columns(disabled_columns)
+            src_file.set_key_columns(key_columns)
 
-        src_file = sfc.get_source_file(file_name)
-        src_file.set_forced_column_types(col_types)
-        src_file.set_disabled_columns(disabled_columns)
-        src_file.set_key_columns(key_columns)
+            cont_ttl = '\n'.join(src_file.get_turtle(preview_only=True))
+            self.data = textwrap.dedent(
+            """
+            {header}
 
-        cont_ttl = '\n'.join(src_file.get_turtle(preview_only=True))
-        self.data = textwrap.dedent(
-        """
-        {header}
+            #############
+            #  Content  #
+            #############
 
-        #############
-        #  Content  #
-        #############
+            {content_ttl}
 
-        {content_ttl}
+            #################
+            #  Abstraction  #
+            #################
 
-        #################
-        #  Abstraction  #
-        #################
+            {abstraction_ttl}
 
-        {abstraction_ttl}
+            ######################
+            #  Domain knowledge  #
+            ######################
 
-        ######################
-        #  Domain knowledge  #
-        ######################
-
-        {domain_knowledge_ttl}
-        """).format(header=sfc.get_turtle_template(cont_ttl),
+            {domain_knowledge_ttl}
+            """).format(header=sfc.get_turtle_template(cont_ttl),
                     content_ttl = cont_ttl,
                     abstraction_ttl = src_file.get_abstraction(),
                     domain_knowledge_ttl = src_file.get_domain_knowledge()
                     )
+        except Exception as e:
+            self.data['error'] = str(e)
+            return self.data
 
         formatter = HtmlFormatter(cssclass='preview_field', nowrap=True, nobackground=True)
         return highlight(self.data, TurtleLexer(), formatter) # Formated html
@@ -659,25 +662,25 @@ class AskView(object):
         forced_type = None
         if 'forced_type' in body:
             forced_type = body['forced_type']
-        
+
         # Allow data integration in public graph only if user is an admin
         if public and not self.request.session['admin']:
             self.log.debug('/!\\ --> NOT ALLOWED TO INSERT IN PUBLIC GRAPH <-- /!\\')
             public = False
 
-        sfc = SourceFileConvertor(self.settings, self.request.session)        
+        sfc = SourceFileConvertor(self.settings, self.request.session)
         src_file_ttl = sfc.get_source_file(file_name, forced_type)
-        
+
         try:
             self.data = src_file_ttl.persist(self.request.host_url, public, method)
-            
+
         except Exception as e:
             #rollback
             sqb = SparqlQueryBuilder(self.settings, self.request.session)
             query_laucher = QueryLauncher(self.settings, self.request.session)
             query_laucher.execute_query(sqb.get_drop_named_graph(src_file_ttl.graph).query)
             query_laucher.execute_query(sqb.get_delete_metadatas_of_graph(src_file_ttl.graph).query)
-            
+
             self.data['error'] = 'Problem when integration of ' + file_name + '</br>' + str(e)
             self.log.error('ERROR: ' + str(e))
 
@@ -836,7 +839,7 @@ class AskView(object):
             if 'from' in body:
                 lfrom = body['from']
             results,query = tse.build_sparql_query_from_json(lfrom,body["variates"],body["constraintesRelations"],True)
-            
+
             #body["limit"]
             # Remove prefixes in the results table
             l = int(body["limit"]) + 1

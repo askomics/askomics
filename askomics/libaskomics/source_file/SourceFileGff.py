@@ -153,7 +153,7 @@ class SourceFileGff(SourceFile):
                 else:
                     strand_entity = ':none'
                     faldo_strand = "faldo:BothStrandPosition"
-                
+
                 block_idxstart = int(start_entity) // blockbase
                 block_idxend = (int(end_entity) // blockbase)
                 listSliceRef = []
@@ -213,14 +213,14 @@ class SourceFileGff(SourceFile):
                 for qualifier_key, qualifier_value in feat.qualifiers.items():
                     keyuri = self.encodeToRDFURI(qualifier_key)
                     attribute_dict[':'+keyuri] = []
+
                     for val in qualifier_value:
                         valuri = self.encodeToRDFURI(val)
-                        # if there are, it's the label !
-                        if qualifier_key == 'Name':
-                            attribute_dict['rdfs:label'] = ['\"'+ str(val) +'\"^^xsd:string']
-                        elif qualifier_key == 'ID':
+                        if qualifier_key == 'ID':
                             if (valuri not in type_entities) and type_entity != '':
                                 type_entities[valuri] = type_entity
+
+                            attribute_dict['rdfs:label'] = ['\"'+ str(val) +'\"^^xsd:string']
 
                         elif qualifier_key in ['Parent', 'Derives_from']:
                             if not valuri in type_entities:
@@ -319,7 +319,7 @@ class SourceFileGff(SourceFile):
         for entity, attribute_dict in self.abstraction_dict.items():
             ttl += ':'+entity + ' ' + 'rdf:type owl:Class ;\n'
             indent = len(entity) * ' ' + ' '
-            ttl += indent + 'rdfs:label \"' + self.decodeToRDFURI(entity.replace(':', '')) + "\" ;\n"
+            ttl += indent + 'rdfs:label \"' + self.decodeToRDFURI(entity.replace(':', '')) + "\"^^xsd:string ;\n"
             ttl += indent + 'displaySetting:startPoint \"true\"^^xsd:boolean ;\n\n'
             ttl += indent + 'displaySetting:entity \"true\"^^xsd:boolean .\n\n'
 

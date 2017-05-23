@@ -250,13 +250,13 @@ class SourceFileTsv(SourceFile):
         return retval
 
     def getStrandFaldo(self,strand):
-        
+
         if strand == None:
             return "faldo:BothStrandPosition"
-        
+
         if strand.lower() == "plus" or strand.startswith("+"):
             return "faldo:ForwardStrandPosition"
-        
+
         if strand.lower() == "minus" or strand.startswith("-"):
             return "faldo:ReverseStrandPosition"
 
@@ -282,11 +282,11 @@ class SourceFileTsv(SourceFile):
         for key, key_type in enumerate(self.forced_column_types):
             if key > 0 and key in self.disabled_columns:
                 continue
-            
+
             # *** CARREFULLY ***
             # We keep def of attribute position_ to keep cmpatibility with IHM but we don't define value for each entity
             # Position are defined inside a faldo:Location object
-            #  
+            #
             # ==> IHM detect position_ attribute and transforme all query with faldo:location/faldo:begin/faldo:reference
             #
             if key > 0 and not key_type.startswith('entity') :
@@ -389,15 +389,14 @@ class SourceFileTsv(SourceFile):
                 if len(row) == 0:
                     continue
 
-                if len(row) != len(self.headers):
-                    e = SourceFileSyntaxError('Invalid line found: '+str(len(self.headers))+' columns expected, found '+str(len(row))+" - (last valid entity "+entity_label+")")
-                    e.filename = self.path
-                    e.lineno = row_number
-                    self.log.error(repr(e))
-                    raise e
-
                 # Create the entity (first column)
                 entity_label = row[0]
+
+                if len(row) != len(self.headers):
+                    raise Exception('Invalid line found: '+str(len(self.headers))
+                                             +' columns expected, found '+str(len(row))
+                                             +" - (last valid entity "+entity_label+")")
+
                 entity_id = self.key_id(row)
                 indent = (len(entity_id) + 1) * " "
                 ttl += ":" + self.encodeToRDFURI(entity_id) + " rdf:type :" + self.encodeToRDFURI(self.headers[0]) + " ;\n"
@@ -430,11 +429,11 @@ class SourceFileTsv(SourceFile):
                                 self.category_values[header].add(row[i])
 
                              #check numeric type
-                            if current_type in ('numeric', 'start', 'end'):
-                                if not row[i].isnumeric():
-                                    raise Exception("Type Error: Value \""+row[i]+\
-                                    "\" (Entity :"+entity_id+", Line "+str(row_number)+\
-                                    ") is not a numeric value.\n")
+                            #if current_type in ('numeric', 'start', 'end'):
+                            #    if not row[i].isnumeric():
+                            #        raise Exception("Type Error: Value \""+row[i]+\
+                            #        "\" (Entity :"+entity_id+", Line "+str(row_number)+\
+                            #        ") is not a numeric value.\n")
 
                             # positionable attributes
                             if current_type == 'start':
@@ -467,14 +466,14 @@ class SourceFileTsv(SourceFile):
                     blockbase=10000
                     block_idxstart = int(startFaldo) // blockbase
                     block_idxend  = int(endFaldo) // blockbase
-                    
+
                     ttl += indent + ' :blockstart ' + str(block_idxstart*blockbase) +';\n'
                     ttl += indent + ' :blockend ' + str(block_idxend*blockbase) +';\n'
-                    
+
                     for sliceb in range(block_idxstart,block_idxend+1):
                         ttl += indent + ' :IsIncludeInRef ' + referenceFaldo+"_"+str(sliceb) +' ;\n'
                         ttl += indent + ' :IsIncludeIn ' + str(sliceb) +' ;\n'
-                    
+
                     faldo_strand = self.getStrandFaldo(strandFaldo)
 
                     ttl += indent +    " faldo:location [ a faldo:Region ;\n"+\
