@@ -136,8 +136,10 @@ function displayGffForm(file, taxons) {
     if ($('#administration').length) {
         admin = true;
     }
+    
+    file.entities = file.entities.sort();
 
-    let context = {idfile: getIdFile(file),file: file, taxons: taxons, admin: admin};
+    let context = {idfile: getIdFile(file),file: file, taxons: taxons.sort(), admin: admin};
     let html = template(context);
 
     $("#content_integration").append(html);
@@ -257,7 +259,7 @@ function previewTtl(file_elem) {
                               .addClass('show alert-danger');
             return ;
         }
-        
+
         insert_warning_elem.removeClass('hidden alert-danger');
 
         file_elem.find(".preview_field").html(data);
