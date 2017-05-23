@@ -153,7 +153,7 @@ class SourceFileGff(SourceFile):
                 else:
                     strand_entity = ':none'
                     faldo_strand = "faldo:BothStrandPosition"
-                
+
                 block_idxstart = int(start_entity) // blockbase
                 block_idxend = (int(end_entity) // blockbase)
                 listSliceRef = []
@@ -319,7 +319,7 @@ class SourceFileGff(SourceFile):
         for entity, attribute_dict in self.abstraction_dict.items():
             ttl += ':'+entity + ' ' + 'rdf:type owl:Class ;\n'
             indent = len(entity) * ' ' + ' '
-            ttl += indent + 'rdfs:label \"' + self.decodeToRDFURI(entity.replace(':', '')) + "\" ;\n"
+            ttl += indent + 'rdfs:label \"' + self.decodeToRDFURI(entity.replace(':', '')) + "\"^^xsd:string ;\n"
             ttl += indent + 'displaySetting:startPoint \"true\"^^xsd:boolean ;\n\n'
             ttl += indent + 'displaySetting:entity \"true\"^^xsd:boolean .\n\n'
 
