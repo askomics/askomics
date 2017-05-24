@@ -81,35 +81,39 @@ class AskViewTests(unittest.TestCase):
 
 
         expected_result = {
-            'nodes': [
+            'nodes': {
+                'http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Instruments':
                 {
+                    'uri':
+                    'http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Instruments',
                     'g':
                     'urn:sparql:test_askomics:jdoe:instruments.tsv_' + timestamp_instruments,
                     'public': False,
-                    'uri':
-                    'http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Instruments',
-                    'private': True,
-                    'label': 'Instruments'
+                    'label': 'Instruments',
+                    'private': True
                 },
+                'http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#People':
                 {
+                    'uri':
+                    'http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#People',
                     'g':
                     'urn:sparql:test_askomics:jdoe:people.tsv_' + timestamp_people,
                     'public': False,
-                    'uri':
-                    'http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#People',
-                    'private': True,
-                    'label': 'People'
+                    'label': 'People',
+                    'private': True
                 }
-            ]
+            }
         }
+
+
 
         print(data)
         print(len(data["nodes"]))
 
         assert len(data["nodes"]) == 2
-        data["nodes"] = sorted(data["nodes"], key=self.getKeyNode)
-        expected_result["nodes"] = sorted(
-            expected_result["nodes"], key=self.getKeyNode)
+        # data["nodes"] = sorted(data["nodes"], key=self.getKeyNode)
+        # expected_result["nodes"] = sorted(
+            # expected_result["nodes"], key=self.getKeyNode)
         assert expected_result["nodes"] == data["nodes"]
 
     def test_statistics(self):
@@ -141,7 +145,7 @@ class AskViewTests(unittest.TestCase):
         askview2.settings = self.settings
         data = askview2.start_points()
 
-        assert data == {'nodes': []}
+        assert data == {'nodes': {}}
 
 
     def test_delete_graph(self):
@@ -176,17 +180,18 @@ class AskViewTests(unittest.TestCase):
 
         # test if startpoint return only instruments
         expected_result = {
-            'nodes': [
+            'nodes': {
+                'http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Instruments':
                 {
-                    'private': True,
-                    'g':
-                    'urn:sparql:test_askomics:jdoe:instruments.tsv_' + timestamp_instruments,
+                    'public': False,
+                    'label': 'Instruments',
                     'uri':
                     'http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Instruments',
-                    'label': 'Instruments',
-                    'public': False
+                    'private': True,
+                    'g':
+                    'urn:sparql:test_askomics:jdoe:instruments.tsv_' + timestamp_instruments
                 }
-            ]
+            }
         }
 
         assert data == expected_result
