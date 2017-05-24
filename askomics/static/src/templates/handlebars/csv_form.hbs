@@ -21,9 +21,9 @@
                   {{#each file.headers}}
                    <th>
                      {{#if @first}}
-                      <input type='checkbox' class='toggle_column_key' checked /> <i class="fa fa-key" aria-hidden="true"></i>
+                      <input type='checkbox' class='toggle_column_key' checked /> <i data-toggle="tooltip" title="concat headers to create the key column" data-placement="bottom" class="fa fa-key" aria-hidden="true"></i>
                      {{else}}
-                      <input type='checkbox' class='toggle_column_key'/> <i class="fa fa-key" aria-hidden="true"></i>
+                      <input type='checkbox' class='toggle_column_key'/> <i data-toggle="tooltip" title="concat headers to create the key column" data-placement="bottom" class="fa fa-key" aria-hidden="true"></i>
                      {{/if}}
                   </th>
                   {{/each}}
@@ -36,6 +36,7 @@
                                 <optgroup label='Reference entity'>
                                     <option value='entity_start'>Entity (Start)</option>
                                     <option value='entity'>Entity</option>
+                                </optgroup>
                             {{else}}
                                 <optgroup label='Attributes'>
                                     <option value='numeric'>Numeric</option>
