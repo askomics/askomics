@@ -267,7 +267,7 @@ class IHMLocal {
                 let filter = $('#filter_entities').val();
                 if (filter.trim()) {
                     $.each(list_entities, function(index, value) {
-                        if (!value.match(filter, "i")) {
+                        if (!value.toLowerCase().match(filter.toLowerCase())) {
                             let index2splice = new_list.indexOf(value);
                             new_list.splice(index2splice, 1);
                         }
