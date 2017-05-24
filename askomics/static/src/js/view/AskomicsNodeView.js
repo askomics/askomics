@@ -419,7 +419,10 @@ class AskomicsNodeView extends AskomicsObjectView {
               .addClass('makeRegExpIcon')
               .addClass('fa')
               .addClass('fa-filter')
-              .addClass('display');
+              .addClass('display')
+              .attr('data-toggle', 'tooltip')
+              .attr('data-placement', 'bottom')
+              .attr('title', 'Exact filter');
 
       let mythis = this;
 
@@ -427,9 +430,11 @@ class AskomicsNodeView extends AskomicsObjectView {
           if (icon.hasClass('fa-filter')) {
                 icon.removeClass('fa-filter');
                 icon.addClass('fa-font');
+                icon.attr('title', 'Regexp filter');
           } else {
                 icon.removeClass('fa-font');
                 icon.addClass('fa-filter');
+                icon.attr('title', 'Exact filter');
           }
 
           var sparqlid  = $(this).attr('sparqlid');
@@ -446,7 +451,10 @@ class AskomicsNodeView extends AskomicsObjectView {
           .addClass('makeRemoveIcon')
           .addClass('fa')
           .addClass('fa-eraser')
-          .addClass('display');
+          .addClass('display')
+          .attr('data-toggle', 'tooltip')
+          .attr('data-placement', 'bottom')
+          .attr('title', 'Reset filter');
           removeIcon.click(function() {
             $(this).parent().find('input[linkvar!="true"]').val(null).trigger("change");
             $(this).parent().find('select[linkvar!="true"]').val(null).trigger("change");
@@ -467,13 +475,17 @@ class AskomicsNodeView extends AskomicsObjectView {
       //
       let mythis = this;
       let eyeLabel = mythis.node.isActif(object.SPARQLid)?'fa-eye':'fa-eye-slash';
+      let tooltip_txt = mythis.node.isActif(object.SPARQLid)?'Show this attribut, even if it is empty':'Show this attribut';
       let icon = $('<span></span>')
               .attr('sparqlid', object.SPARQLid)
               .attr('aria-hidden','true')
               .addClass('fa')
               .addClass('makeEyeIcon')
               .addClass(eyeLabel)
-              .addClass('display');
+              .addClass('display')
+              .attr('data-toggle', 'tooltip')
+              .attr('data-placement', 'bottom')
+              .attr('title', tooltip_txt);
 
       // eye-close --> optional search --> exact search
       icon.click(function(d) {
@@ -483,17 +495,20 @@ class AskomicsNodeView extends AskomicsObjectView {
         if (icon.hasClass('fa-eye-slash') ) {
           icon.removeClass('fa-eye-slash');
           icon.addClass('fa-eye');
+          icon.attr('title', 'Show this attribut, even if it is empty');
           mythis.node.setActiveAttribute(sparqlid,true,false);
         //
         } else if (icon.hasClass('fa-eye') && hasSelection) {
           icon.removeClass('fa-eye');
           icon.addClass('fa-eye-slash');
+          icon.attr('title', 'Show this attribut' );
           mythis.node.setActiveAttribute(sparqlid,false,false);
         }
         // No filter are defined
         else if ( icon.hasClass('fa-eye') ) {
           icon.removeClass('fa-eye');
           icon.addClass('fa-question-circle');
+          icon.attr('title', 'Hide this attribut');
 
           mythis.clean_box_attribute($(this).parent().parent());
           //if ( !(sparqlid in node.values) || ( node.values[sparqlid] === "" ) )
@@ -510,6 +525,7 @@ class AskomicsNodeView extends AskomicsObjectView {
         } else {
             icon.removeClass('fa-question-circle');
             icon.addClass('fa-eye-slash');
+            icon.attr('title', 'Show this attribut');
 
             if ($(this).parent().find('.fa-link').length>0) {
                 $(this).parent().find('select[linkvar="true"]').show();
@@ -533,7 +549,10 @@ class AskomicsNodeView extends AskomicsObjectView {
               .addClass('makeNegativeMatchIcon')
               .addClass('fa')
               .addClass('fa-plus')
-              .addClass('display');
+              .addClass('display')
+              .attr('data-toggle', 'tooltip')
+              .attr('data-placement', 'bottom')
+              .attr('title', 'Negative match');
 
       let mythis = this;
 
@@ -551,16 +570,18 @@ class AskomicsNodeView extends AskomicsObjectView {
           //} else if (icon.hasClass('fa-plus')) {
           if (icon.hasClass('fa-plus')) {
               icon.removeClass('fa-plus');
-              icon.addClass('fa-search-minus');
+              icon.addClass('fa-minus');
+              icon.attr('title', 'Match');
               mythis.node.inverseMatch[sparqlid] = 'inverseWithNoRelation';
           } /*
           else if ( icon.hasClass('fa-minus') ) {
                 icon.removeClass('fa-minus');
-                icon.addClass('fa-search-minus');
+                icon.addClass('fa-minus');
                 mythis.node.inverseMatch[sparqlid] = 'inverseWithNoRelation';
           } */ else {
-              icon.removeClass('fa-search-minus');
+              icon.removeClass('fa-minus');
               icon.addClass('fa-plus');
+              icon.attr('title', 'Negative match');
               delete mythis.node.inverseMatch[sparqlid] ;
             }
           mythis.updateNodeView();
@@ -576,7 +597,10 @@ class AskomicsNodeView extends AskomicsObjectView {
               .addClass('makeLinkVariableIcon')
               .addClass('fa')
               .addClass('fa-chain-broken')
-              .addClass('display');
+              .addClass('display')
+              .attr('data-toggle', 'tooltip')
+              .attr('data-placement', 'bottom')
+              .attr('title', 'Link to another node');
 
       let mythis = this;
 
@@ -584,6 +608,7 @@ class AskomicsNodeView extends AskomicsObjectView {
           if (icon.hasClass('fa-chain-broken')) {
             icon.removeClass('fa-chain-broken');
             icon.addClass('fa-link');
+            icon.attr('title', 'Filter the attributes');
             $(this).parent().find('input[linkvar!="true"]').hide();
             $(this).parent().find('select[linkvar!="true"]').hide();
             $(this).parent().find('select[linkvar="true"]').show();
@@ -591,6 +616,7 @@ class AskomicsNodeView extends AskomicsObjectView {
             let sparqlid  = $(this).attr('sparqlid');
             icon.removeClass('fa-link');
             icon.addClass('fa-chain-broken');
+            icon.attr('title', 'Link to another node');
             $(this).parent().find('input[linkvar!="true"]').show();
             $(this).parent().find('select[linkvar!="true"]').show();
             $(this).parent().find('select[linkvar="true"]').hide();
@@ -632,7 +658,10 @@ class AskomicsNodeView extends AskomicsObjectView {
    var icon = $('<span></span>')
            .addClass('fa')
            .addClass('fa-refresh')
-           .addClass('display');
+           .addClass('display')
+           .attr('data-toggle', 'tooltip')
+           .attr('data-placement', 'bottom')
+           .attr('title', 'Refresh categories');
 
    let mythis = this;
 

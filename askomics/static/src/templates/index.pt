@@ -126,7 +126,7 @@
                     <div class="btn-group btn-group-query">
                         <span id="refreshNode" class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
                         <span id="showNode"    class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
-                        <span id="deleteNode"  class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span>
+                        <span id="deleteNode"  class="glyphicon glyphicon-remove-circle" aria-hidden="true" data-toggle="tooltip" data-placement="bottom" title="Remove this node"></span>
                     </div>
                     </h3>
                     <hr/>
