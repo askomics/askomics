@@ -105,6 +105,7 @@ class IHMLocal {
     startSession(contents) {
 
         //Following code is automatically executed at start or is triggered by the action of the user
+        $('[data-toggle="tooltip"]').tooltip();
         $("#init").hide();
         $("#queryBuilder").show();
 
@@ -400,8 +401,6 @@ class IHMLocal {
     }
 
     resetStats() {
-      $('#btn-del').empty();
-      $("#btn-del").append("<button id='btn-empty' onclick='__ihm.emptyDatabase(\"confirm\")' class='btn btn-danger'>Delete all</button>");
       $('#statistics_div').empty();
     }
 
