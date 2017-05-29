@@ -1008,6 +1008,10 @@ class AskView(object):
         Log out the user, reset the session
         """
 
+        self.request.session['username'] = ''
+        self.request.session['admin'] = ''
+        self.request.session['graph'] = ''
+        self.request.session['galaxy'] = False
         self.request.session = {}
 
         return
