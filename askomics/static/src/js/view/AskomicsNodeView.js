@@ -63,7 +63,7 @@ class AskomicsNodeView extends AskomicsObjectView {
 
   updateNodeView() {
     $("[constraint_node_id="+this.node.id+"]").text(this.node.getAttributesWithConstraintsString());
-    __ihm.getSVGLayout().setNumberResultsSVG();
+    __ihm.getSVGLayout().update();
   }
 
 /* ===============================================================================================*/
@@ -101,7 +101,7 @@ class AskomicsNodeView extends AskomicsObjectView {
     /* For a basic query to search category value, we ask only on graph which contain the category */
     if(listForceFrom.length >0) {
       model.from = listForceFrom;
-    } 
+    }
 
     let mythis = this;
   //  console.log(attribute.uri);
@@ -212,46 +212,24 @@ class AskomicsNodeView extends AskomicsObjectView {
     v.val(inputValue);
     tr.append($("<td></td>").append(v));
 
-    /* add condition */
-    /*
-    let span = $("<span></span>").attr("id",attribute.SPARQLid+"_span_decimal_add_"+idDecimal).addClass("glyphicon glyphicon-plus").attr("value","small");
-
-    span.click(function(d) {
-      $("span[id^='"+attribute.SPARQLid+"_span_decimal_add_']").hide();
-      $("span[id^='"+attribute.SPARQLid+"_span_decimal_min_']").hide();
-      mythis.buildDecimal(idDecimal+1,attribute).insertAfter($("#decimal_"+attribute.SPARQLid+"_"+idDecimal));
-    } );
-    tr.append($("<td></td>").append(span));
-    */
-    /* remove condition */
-    /*
-    if ( idDecimal > 1 ) {
-      span = $("<span></span>").attr("id",attribute.SPARQLid+"_span_decimal_min_"+idDecimal).addClass("glyphicon glyphicon-minus").attr("value","small").attr("aria-hidden","true");
-      span.click(function(d) {
-        $("span[id^='"+attribute.SPARQLid+"_span_decimal_add_"+idDecimal-1+"']").show();
-        $("span[id^='"+attribute.SPARQLid+"_span_decimal_min_"+idDecimal-1+"']").show();
-        $("#decimal_"+attribute.SPARQLid+"_"+idDecimal).remove();
-      } );
-      tr.append($("<td></td>").append(span));
-    }
-    */
     inp.append(tr);
 
     inp.change(function(d) {
-      var op = $(this).find("option:selected").text();
-      var value = $(this).find('input').val();
-
-
-      if (! $.isNumeric(value) ) {
-      //    __ihm.displayModal("'"+value + "' is not a numeric value !", '', 'Close');
-          value = $(this).find('input').val(null);
-          return;
-      }
-
+      let op = $(this).find("option:selected").text();
+      let value = $(this).find('input').val();
       let sparlid = $(this).find('select').attr('sparqlid');
-
-      mythis.node.setFilterAttributes(sparlid,value,'FILTER ( ?'+sparlid+' '+op+' '+value+')');
-      mythis.node.setFilterAttributes("op_"+sparlid,op,'');
+      if (! $.isNumeric(value) ) {
+          value = $(this).find('input').val(null);
+          mythis.node.setFilterAttributes(sparlid,'','');
+          mythis.node.setFilterAttributes("op_"+sparlid,'','');
+          if ( op != '=' && op != '<' && op != '<=' && op != '>' && op != '>=' && op != '!=') {
+            $(this).find('option[value="="]').prop('selected', true);
+          }
+          return;
+      } else {
+        mythis.node.setFilterAttributes(sparlid,value,'FILTER ( ?'+sparlid+' '+op+' '+value+' )');
+        mythis.node.setFilterAttributes("op_"+sparlid,op,'');
+      }
       mythis.updateNodeView();
     });
     return inp ;

@@ -13,7 +13,6 @@ class AskomicsObjectView {
     $("#objectName").text("");
     $("#showNode").hide();
     $("#deleteNode").hide();
-    $("#refreshNode").hide();
     $("#objectName").removeAttr("objid");
   }
 
@@ -24,7 +23,6 @@ class AskomicsObjectView {
     $("#objectName").attr("type",this.objet.getType());
     $("#showNode").show();
     $("#deleteNode").show();
-    $("#refreshNode").show();
 
     if ('actif' in this.objet ) {
       if ( this.objet.actif ) {
@@ -49,8 +47,6 @@ class AskomicsObjectView {
 
     $("#showNode").unbind();
     $("#deleteNode").unbind();
-    $("#refreshNode").unbind();
-  //  $('#helpNode').unbind();
   }
 
   show() {
@@ -191,81 +187,6 @@ class AskomicsObjectView {
       } else {
         throw "Unknown type of this Graph Object:"+type;
       }
-      __ihm.getSVGLayout().setNumberResultsSVG();
-    });
-
-    $("#refreshNode").click(function() {
-      /*
-      let id = $("#objectName").attr("objid");
-      let type = $("#objectName").attr("type");
-      if ( type == "node" ) {
-        let node = __ihm.getGraphBuilder().getInstanciedNode(id);
-
-        for (let uri in node.attributes) {
-          let sparqlid = node.attributes[uri].SPARQLid;
-          let div = $("div[sparqlid='"+sparqlid+"'] *");
-
-          if (div.length<=0) continue;
-          if (node.attIsInside(uri,node.filters)) continue;
-
-          let tab = __ihm.getGraphBuilder().buildConstraintsGraph();
-          // add attribute and count results
-          let subBlockConstraint = [];
-          subBlockConstraint.push("?"+'URI'+node.SPARQLid+" "+node.URI(uri)+" "+"?"+sparqlid);
-          tab[1][0].push([subBlockConstraint,'']);
-
-          let data = {
-            'variates'             : ['(COUNT(DISTINCT *) as ?count)'],
-            'constraintesRelations': tab[1],
-            'constraintesFilters'  : tab[2],
-            'removeGraph'          : __ihm.getAbstraction().listUnactivedGraph(),
-            'limit'                : -1
-          };
-
-
-          let promise = new Promise(function (resolve, reject) {
-            let service = new RestServiceJs("sparqlquery");
-            service.post(data,function(res) {
-              if ('error' in res) {
-                reject(res.error);
-              } else {
-                resolve(res);
-              }
-            });
-          }).then(function (res) {
-             if ( ! ('values' in res) ) {
-              div.hide();
-              return ;
-            }
-
-            if ( res.values.length<= 0 ) {
-              div.hide();
-              return ;
-            }
-            if ( ! ('count' in res.values[0]) ) {
-              div.hide();
-              return ;
-            }
-            if (res.values[0].count<=0) {
-              div.hide();
-              return ;
-            }
-          }).catch(function (errorMessage) {
-            console.log("Error count:"+errorMessage);
-          });
-
-        }
-        for (let uri in node.categories) {
-          let sparqlid = node.categories[uri].SPARQLid;
-          let div = $("div[sparqlid='"+sparqlid+"'] *");
-          console.log(sparqlid);
-          if (div.length>0) {
-            console.log("ok");
-            div.hide();
-          }
-        }
-      }
-      */
     });
   }
 }

@@ -312,9 +312,6 @@ class AskomicsForceLayoutManager {
     /* insert new suggestion with startpoints */
     this.insertSuggestions();
 
-    /* update number of solution */
-    this.setNumberResultsSVG() ;
-
     /* build graph */
     this.update();
     this.selectObject("#node_",startPoint.id);
@@ -352,8 +349,6 @@ class AskomicsForceLayoutManager {
     lastn.getPanelView().show();
     /* insert new suggestion with startpoints */
     this.insertSuggestions();
-    /* update number of solution */
-    this.setNumberResultsSVG() ;
 
     this.update();
     this.selectObject("#node_",lastn.id);
@@ -820,47 +815,6 @@ class AskomicsForceLayoutManager {
       return r;
     }
 
-  setNumberResultsSVG() {
-    let currentFL = this;
-    // __ihm.getGraphBuilder().countNumberOfSolution(function() { $("#countresult").remove();} , function(count) { currentFL.updateCount(count);}) ;
-  }
-
-  updateCount(count) {
-    $("#shapecountresult,#countresult").remove();
-
-    let rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-    let text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-
-    let txt = "n="+count ;
-    let fontsize=15;
-    let width = 12*txt.length ;
-    let rectx = this.w - width -20 ,recty = 20, heightrect=fontsize+5;
-    let opacity = 0.3;
-
-    $(rect).attr("x",rectx)
-            .attr("y",recty)
-             .attr("width",width)
-             .attr("height",heightrect)
-             .attr("id","shapecountresult")
-             .attr("fill","#044B94")
-             .attr("fill-opacity",opacity)
-             .appendTo(this.svgdiv.find("svg"));
-
-    $(text).attr("font-size",fontsize)
-           .attr("id","countresult")
-           .attr('x', rectx+5)
-           .attr('y', recty+heightrect-5)
-           .attr("fill-opacity",opacity)
-           .attr('fill', 'black')
-           .text(txt)
-           .appendTo(this.svgdiv.find("svg"));
-
-    let currentFL = this;
-    $("#shapecountresult,#countresult").on('click', function(d) {
-        currentFL.setNumberResultsSVG() ;
-    });
-  }
-
   update () {
 
     let link = this.vis.selectAll(".linkobjectpropertyClass,.linksubclassofClass")
@@ -917,9 +871,6 @@ class AskomicsForceLayoutManager {
                       }
                       //linksView.create(d);
                       d.getPanelView().create();
-                      /* update number of solution */
-                      currentFL.setNumberResultsSVG() ;
-
                     }else{
                       currentFL.removeSuggestions();
                     }
@@ -1023,8 +974,6 @@ class AskomicsForceLayoutManager {
                     ll.getPanelView().create();
                   }
                   d.getPanelView().create();
-                  /* update number of solution */
-                  currentFL.setNumberResultsSVG() ;
                 }
                 // show attribute view only if node is not selected
                 if (!$.inArray(d, currentFL.selectNodes)) {

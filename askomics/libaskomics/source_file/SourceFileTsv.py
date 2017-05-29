@@ -391,8 +391,9 @@ class SourceFileTsv(SourceFile):
 
                 # Create the entity (first column)
                 entity_label = row[0]
-
+                
                 if len(row) != len(self.headers):
+                    self.log.warning("*"+', '.join(row)+"*")
                     raise Exception('Invalid line found: '+str(len(self.headers))
                                              +' columns expected, found '+str(len(row))
                                              +" - (last valid entity "+entity_label+")")
