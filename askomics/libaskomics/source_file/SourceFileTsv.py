@@ -140,6 +140,11 @@ class SourceFileTsv(SourceFile):
         :return: the guessed type ('taxon','ref', 'strand', 'start', 'end', 'numeric', 'text' or 'category', 'goterm')
         """
 
+        # check if relationShip with an other local entity
+        if header.find("@")>0:
+            #general relation by default
+            return "entity"
+
         types = {'ref':('chrom',), 'taxon':('taxon', 'species'), 'strand':('strand',), 'start':('start', 'begin'), 'end':('end', 'stop')}
 
         # First check if it is specific type
@@ -161,11 +166,6 @@ class SourceFileTsv(SourceFile):
         #check goterm
         if all( (val.startswith("GO:") and val[3:].isdigit() ) for val in values):
             return 'goterm'
-
-        # check if relationShip with an other local entity
-        if header.find("@")>0:
-            #general relation by default
-            return "entity"
 
         # Then, check if category
         threshold=10
