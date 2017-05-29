@@ -90,6 +90,7 @@ gulp.task('javascript', function(cb) {
 gulp.task('css', function(cb) {
     pump([
         gulp.src(askomicsCssFiles),
+        concat('askomics.css'),
         prod ? uglifycss() : util.noop(),
         gulp.dest('askomics/static/dist/')
     ], cb);
