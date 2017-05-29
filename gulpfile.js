@@ -16,6 +16,7 @@ var uglifycss = require('gulp-uglifycss');
 var handlebars = require('gulp-handlebars');
 var wrap = require('gulp-wrap');
 var declare = require('gulp-declare');
+var pump = require('pump');
 //var remapIstanbul = require('remap-istanbul/lib/gulpRemapIstanbul');
 
 //console.log(require('istanbul').Report.getReportList());
@@ -73,41 +74,44 @@ gulp.task('default', ['javascript', 'css', 'templates'], function () {
 });
 
 // Concat all js files, uglyfy if --prod
-gulp.task('javascript', function() {
-    return gulp.src(askomicsSourceFiles)
-               .pipe(jshint())
-               .pipe(jshint.reporter('default'))
-               .pipe(babel({
-                   presets: ['es2015']
-                }))
-               .pipe(concat('askomics.js'))
-               .pipe(prod ? uglify() : util.noop())
-               .pipe(gulp.dest('askomics/static/dist/'));
+gulp.task('javascript', function(cb) {
+    pump([
+        gulp.src(askomicsSourceFiles),
+        jshint(),
+        jshint.reporter('default'),
+        babel({presets: ['es2015']}),
+        concat('askomics.js'),
+        prod ? uglify() : util.noop(),
+        gulp.dest('askomics/static/dist/')
+    ], cb);
 });
 
 // Concat all css files, uglyfy if --prod
-gulp.task('css', function() {
-    return gulp.src(askomicsCssFiles)
-               .pipe(concat('askomics.css'))
-               .pipe(prod ? uglifycss() : util.noop())
-               .pipe(gulp.dest('askomics/static/dist/'));
+gulp.task('css', function(cb) {
+    pump([
+        gulp.src(askomicsCssFiles),
+        prod ? uglifycss() : util.noop(),
+        gulp.dest('askomics/static/dist/')
+    ], cb);
 });
 
 // Concat all handlebars files, uglyfy if --prod
-gulp.task('templates', function() {
-    return gulp.src(askomicsTemplateFiles)
-               .pipe(handlebars({
-                   handlebars: require('handlebars')
-               }))
-               .pipe(wrap('Handlebars.template(<%= contents %>)'))
-               .pipe(declare({
-                   namespace: 'AskOmics.templates',
-                   noRedeclare: true,
-               }))
-               .pipe(concat('templates.js'))
-               .pipe(prod ? uglify() : util.noop())
-               .pipe(gulp.dest('askomics/static/dist/'));
-    });
+gulp.task('templates', function(cb) {
+    pump([
+        gulp.src(askomicsTemplateFiles),
+        handlebars({
+            handlebars: require('handlebars')
+        }),
+        wrap('Handlebars.template(<%= contents %>)'),
+        declare({
+            namespace: 'AskOmics.templates',
+            noRedeclare: true
+        }),
+        concat('templates.js'),
+        prod ? uglify() : util.noop(),
+        gulp.dest('askomics/static/dist/')
+    ], cb)
+});
 
 
 
