@@ -5,6 +5,7 @@ class AskomicsLink extends GraphLink {
 
   constructor(link,sourceN,targetN) {
     super(link,sourceN,targetN);
+    this._positionable = false;
     this._transitive = false ;
     this._negative   = false ;
     this._subclassof = false ;

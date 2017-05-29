@@ -1,11 +1,4 @@
 /*jshint esversion: 6 */
-const classesMapping = {
-  'AskomicsPositionableNode': AskomicsPositionableNode,
-  'AskomicsNode': AskomicsNode,
-  'GraphLink': GraphLink,
-  'AskomicsLink': AskomicsLink,
-  'AskomicsPositionableLink': AskomicsPositionableLink
-};
 
 /* constructeur de AskomicsGraphBuilder */
   class AskomicsGraphBuilder {
@@ -96,7 +89,12 @@ const classesMapping = {
         for (let i=0;i<nodes.length;i++) {
           let className = nodes[i][0];
           let jsonObj = nodes[i][1];
-          let n = new classesMapping[className]({uri:"undefined"});
+          let n;
+          if (jsonObj._positionable) {
+            n = new AskomicsPositionableNode({uri:"undefined"});
+          }else{
+            n = new AskomicsNode({uri:"undefined"});
+          }
           n.setjson(jsonObj);
           this.nodes().push(n);
         }
@@ -105,7 +103,12 @@ const classesMapping = {
         for (let i=0;i<links.length;i++) {
           let className = links[i][0];
           let jsonObj = links[i][1];
-          let l = new classesMapping[className]({uri:"undefined"});
+          let l;
+          if (jsonObj._positionable) {
+            l = new AskomicsPositionableLink({uri:"undefined"});
+          }else{
+            l = new AskomicsLink({uri:"undefined"});
+          }
           l.setjson(jsonObj,this);
           this.links().push(l);
         }
