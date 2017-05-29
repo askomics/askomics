@@ -152,7 +152,7 @@ class IHMLocal {
       this.graphBuilder.reset();
 
       //unbind fullscreen buttons
-      this.unbindFullscreenButtons();
+      // this.unbindFullscreenButtons();
 
       // removes menus
       for (let m in this.menus) {
