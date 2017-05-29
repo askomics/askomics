@@ -8,7 +8,7 @@ from pyramid.session import SignedCookieSessionFactory
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """
-    my_session_factory = SignedCookieSessionFactory('itsaseekreet')
+    my_session_factory = SignedCookieSessionFactory('itsaseekreet',timeout=None)
 
     config = Configurator(settings=settings)
     config.set_session_factory(my_session_factory)

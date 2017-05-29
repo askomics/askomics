@@ -5,6 +5,7 @@ class AskomicsNode extends GraphNode {
   constructor(node,x,y) {
     super(node,x,y);
 
+    this._positionable = false;
     this._attributes = {} ;
     this._categories = {} ;
     this._filters    = {} ; /* filters of attributes key:sparqlid*/

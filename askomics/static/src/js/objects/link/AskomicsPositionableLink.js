@@ -4,7 +4,7 @@ class AskomicsPositionableLink extends AskomicsLink {
 
   constructor(link,sourceN,targetN) {
     super(link,sourceN,targetN);
-
+    this._positionable = true;
     this.type         = 'included' ;
     this.label        = 'included in';
     this.same_tax     =  false;

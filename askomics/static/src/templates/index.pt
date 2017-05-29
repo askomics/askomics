@@ -49,24 +49,7 @@
 
         <br><br><br>
         <div id="content_interrogation" class="container">
-            <div id="init" class="row">
-                <div class="form-group">
-                    <label for="graph_startpoint" class="col-md-offset-2">Select a graph :</label>
-                    <select id='graph_startpoints' size='1' class="form-control col-md-offset-2"></select>
-                  <br/>
-                    <label for="startpoint" class="col-md-offset-2">Select an entity to start a session :</label>
-                    <select id='startpoints' size='8' class="form-control col-md-offset-2"></select>
-                    <div class="col-md-offset-2">Shared entities are <em class='text-warning'>yellow</em> and personal entities are <strong class='text-primary'>blue</strong></div>
-                </div>
-                <button  id="starter" class="btn btn-default col-md-offset-2" onclick="__ihm.startSession();">Start</button>
-                <br><br><br>
-                <div class="col-md-offset-2"><p>Or upload an AskOmics file</p>
-                    <div class="uploadBtn btn btn-default">
-                        <span>Load query</span>
-                        <input id="uploadBtn" type="file" class="upload">
-                    </div>
-                </div>
-            </div>
+            <div id="init" class="row"><!--startpoints.hbs--></div>
             <div id="queryBuilder" class="row" hidden>
                 <div id="PanelQuery" class="col-md-7">
                   <h3 class="header-div">
@@ -141,9 +124,8 @@
                     <span id="objectName" class="label label-default"></span>
 
                     <div class="btn-group btn-group-query">
-                        <span id="refreshNode" class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
                         <span id="showNode"    class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
-                        <span id="deleteNode"  class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span>
+                        <span id="deleteNode"  class="glyphicon glyphicon-remove-circle" aria-hidden="true" data-toggle="tooltip" data-placement="bottom" title="Remove this node"></span>
                     </div>
                     </h3>
                     <hr/>

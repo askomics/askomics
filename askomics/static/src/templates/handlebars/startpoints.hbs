@@ -1,0 +1,40 @@
+<div class="small_div">
+    <p>Select an entity to start a session:</p>
+    <div class="input-group">
+        <span class="input-group-addon" id="basic-addon1"><i class="fa fa-filter"></i></span>
+        <input id="filter_entities" type="text" class="form-control" placeholder="Filter entities" aria-describedby="basic-addon1">
+    </div>
+</div>
+<div class="scroll">
+  {{#each startpoints}}
+  {{#if this.public_and_private}}
+    <input class="hidden start_point_radio" value={{this.label}} type="radio" name="startpoints" id="{{this.uri}}" data-value="{{this}}">
+    <label id={{this.label}} for="{{this.uri}}" class="label_startpoints">
+        <i class="fa fa-globe text-warning"></i> <i class="fa fa-lock text-primary"></i> <em class="text-primary"><strong>{{this.label}}</strong></em>
+    </label>
+  {{else if this.public}}
+    <input class="hidden start_point_radio" value={{this.label}} type="radio" name="startpoints" id="{{this.uri}}" data-value="{{this}}">
+    <label id={{this.label}} for="{{this.uri}}" class="label_startpoints">
+        <i class="fa fa-globe text-warning"></i> <em class="text-warning">{{this.label}}</em>
+    </label>
+  {{else}}
+    <input class="hidden start_point_radio" value={{this.label}} type="radio" name="startpoints" id="{{this.uri}}" data-value="{{this}}">
+    <label id={{this.label}} for="{{this.uri}}" class="label_startpoints">
+        <i class="fa fa-lock text-primary"></i> <strong class="text-primary">{{this.label}}</strong>
+    </label>
+  {{/if}}
+  {{/each}}
+</div>
+
+<div>Shared entities are <em class='text-warning'>yellow</em> and personal entities are <strong class='text-primary'>blue</strong></div>
+<br>
+<button class="btn btn-default"  id="starter" onclick="__ihm.startSession();" disabled>Start</button>
+
+<br><br><br>
+
+<div><p>Or upload an AskOmics file</p>
+    <div class="uploadBtn btn btn-default">
+        <span>Load query</span>
+        <input id="uploadBtn" type="file" class="upload">
+    </div>
+</div>

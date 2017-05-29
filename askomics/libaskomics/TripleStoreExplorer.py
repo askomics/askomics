@@ -66,53 +66,17 @@ class TripleStoreExplorer(ParamManager):
         :rtype:
         """
         data = {}
-        list_entities = {}
-
         self.log.debug(" =========== TripleStoreExplorer:getUserAbstraction ===========")
-
+        
         sqg = SparqlQueryGraph(self.settings, self.session)
         ql = QueryLauncher(self.settings, self.session)
-        results = ql.process_query(sqg.get_entities_availables().query)
 
-        for elt in results:
-            list_entities[elt['uri']] = 0
-
-        # sqb = SparqlQueryBuilder(self.settings, self.session)
-        sqg = SparqlQueryGraph(self.settings, self.session)
-        ql = QueryLauncher(self.settings, self.session)
-        results = ql.process_query(sqg.get_abstraction_relation('owl:ObjectProperty').query)
-
-        data['relations'] = results
-
-        for elt in results:
-            if not elt['object'] in list_entities:
-                list_entities[elt['object']] = 0
-            if not elt['subject'] in list_entities:
-                list_entities[elt['subject']] = 0
-
-
-        results = ql.process_query(sqg.get_isa_relation_entities().query)
-
-        data['subclassof'] = results
-
-        filter_entities = ' '.join(["<"+s+">" for s in list_entities.keys()])
-
-        results = ql.process_query(sqg.get_abstraction_entity(filter_entities).query)
-
-        data['entities'] = results
-
-        results = ql.process_query(sqg.get_abstraction_attribute_entity(filter_entities).query)
-
-        data['attributes'] = results
-
-        results = ql.process_query(sqg.get_abstraction_category_entity(filter_entities).query)
-
-        data['categories'] = results
-
-        results = ql.process_query(sqg.get_abstraction_positionable_entity().query)
-
-        data['positionable'] = results
-
+        data['relations'] = ql.process_query(sqg.get_abstraction_relation('owl:ObjectProperty').query)
+        data['subclassof'] = ql.process_query(sqg.get_isa_relation_entities().query)
+        data['entities'] = ql.process_query(sqg.get_abstraction_entity().query)
+        data['attributes'] = ql.process_query(sqg.get_abstraction_attribute_entity().query)
+        data['categories'] = ql.process_query(sqg.get_abstraction_category_entity().query)
+        data['positionable'] = ql.process_query(sqg.get_abstraction_positionable_entity().query)
         data['graph'] = sqg.getGraphUser()
 
         return data
