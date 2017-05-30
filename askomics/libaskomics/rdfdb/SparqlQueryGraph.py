@@ -202,11 +202,11 @@ class SparqlQueryGraph(SparqlQueryBuilder):
             'select': '?g ?entity ?category ?labelCategory ?typeCategory',
             'query': 'GRAPH ?g { \n'+
                      '\t?entity displaySetting:entity "true"^^xsd:boolean .\n' +
-                     '\t?typeCategory displaySetting:category [] .\n' +
                      '\t?category rdf:type owl:ObjectProperty ;\n' +
                      '\t            rdfs:label ?labelCategory ;\n' +
                      '\t            rdfs:domain ?entity;\n' +
-                     '\t            rdfs:range ?typeCategory\n' +
+                     '\t            rdfs:range ?typeCategory.\n' +
+                     '\t?typeCategory displaySetting:category [] .\n' +
                      '\t{'+
                      '\t\t{ ?g :accessLevel "public". }'+
                      '\t\tUNION '+
