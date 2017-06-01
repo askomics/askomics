@@ -106,9 +106,9 @@ class AskomicsNodeView extends AskomicsObjectView {
     let mythis = this;
   //  console.log(attribute.uri);
     service.post(model, function(d) {
-        let selectedValue = "";
-        if (labelSparqlVarId in mythis.node.values) {
-          selectedValue = mythis.node.values[labelSparqlVarId];
+        let selectedValue = [];
+        if (URISparqlVarId in mythis.node.values) {
+          selectedValue = mythis.node.values[URISparqlVarId];
         }
 
         /* bubble sort */
@@ -131,7 +131,11 @@ class AskomicsNodeView extends AskomicsObjectView {
         inp.attr("size",sizeSelect);
         if ( d.values.length > 1 ) {
           for (let v of d.values) {
-            if ( selectedValue == v[labelSparqlVarId] ) {
+            let isSelected;
+            for (isSelected=0;isSelected<selectedValue.length;isSelected++) {
+              if ( v[URISparqlVarId] == selectedValue[isSelected] ) break ;
+            }
+            if (isSelected<selectedValue.length) {
               inp.append($("<option></option>").attr("value", v[URISparqlVarId]).attr("selected", "selected").append(v[labelSparqlVarId]));
             } else {
               inp.append($("<option></option>").attr("value", v[URISparqlVarId]).append(v[labelSparqlVarId]));
@@ -154,9 +158,21 @@ class AskomicsNodeView extends AskomicsObjectView {
 
       var listValue = "";
       for (let i=0;i<value.length;i++) {
+        listValue+="?"+sparqlid+" = <"+value[i]+"> ||";
+      }
+      if ( listValue.length>=2) {
+        listValue = listValue.substring(0, listValue.length-2);
+      }
+
+      mythis.node.setFilterAttributes(sparqlid,value,'FILTER ('+listValue +')');
+
+	  /*
+      var listValue = "";
+      for (let i=0;i<value.length;i++) {
         listValue+="<"+value[i]+"> ";
       }
       mythis.node.setFilterAttributes(sparqlid,value,'VALUES ?'+sparqlid+' { '+listValue +'}');
+      */
       mythis.updateNodeView();
     });
 
