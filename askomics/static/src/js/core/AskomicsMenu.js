@@ -52,9 +52,9 @@ class AskomicsMenu {
 /**/
 /**/
 var fileFuncMenu = function(menu) {
-  //$("#uploadedQuery")
+
   $("#dwl-query").on('click', function(d) {
-    var date = new Date().getTime();
+    let date = new Date().getTime();
     $(this).attr("href", "data:application/octet-stream," + encodeURIComponent(__ihm.getGraphBuilder().getInternalState())).attr("download", "query-" + date + ".json");
   });
 
@@ -84,11 +84,11 @@ var shortcutsFuncMenu = function(menu) {
 
   var buildLiView = function (uri,label,submenu) {
 
-    var icheck = $("<span/>")
+    let icheck = $("<span/>")
         .attr("class","glyphicon glyphicon-check")
         .css("visibility","hidden");
 
-    var a = $("<a></a>")
+    let a = $("<a></a>")
             .attr("href","#")
             .attr("class","small")
             .attr("tabIndex","-1") ;
@@ -97,7 +97,7 @@ var shortcutsFuncMenu = function(menu) {
     } else {
       a.html($("<b></b>").append(label+"\t")).append(icheck);
     }
-    var li = $("<li></li>");
+    let li = $("<li></li>");
     li.attr("uri",uri);
     li.css("display","table-cell");
     li.css("vertical-align","middle");
@@ -119,12 +119,12 @@ var shortcutsFuncMenu = function(menu) {
 */
   //console.log(JSON.stringify(lshortcuts));
   $.each(lshortcuts, function(i) {
-    var li = buildLiView(i,lshortcuts[i].label,false);
+    let li = buildLiView(i,lshortcuts[i].label,false);
     __ihm.getSVGLayout().offProposedUri("shortcuts",i);
 
     li.on('click', function() {
-      var span = $(this).find(".glyphicon");
-      var cur_uri = $(this).attr("uri");
+      let span = $(this).find(".glyphicon");
+      let cur_uri = $(this).attr("uri");
       if ( span.css("visibility") == "visible" ) {
         span.css("visibility","hidden");
         __ihm.getSVGLayout().offProposedUri("shortcuts",cur_uri);
@@ -159,13 +159,13 @@ var shortcutsFuncMenu = function(menu) {
 var entitiesAndRelationsFuncMenu = function(menu) {
   var buildLiView = function(uri,label,submenu,hidden) {
 
-    var icheck = $("<span/>")
+    let icheck = $("<span/>")
         .attr("class","glyphicon glyphicon-check");
 
     if (hidden) {
       icheck.css("visibility","hidden");
     }
-    var a = $("<a></a>")
+    let a = $("<a></a>")
             .attr("href","#")
             .attr("class","small")
             .attr("tabIndex","-1") ;
@@ -174,14 +174,14 @@ var entitiesAndRelationsFuncMenu = function(menu) {
     } else {
       a.html($("<b></b>").append(label+"\t")).append(icheck);
     }
-    var li = $("<li></li>");
+    let li = $("<li></li>");
     li.attr("uri",uri);
     li.css("display","table-cell");
     li.css("vertical-align","middle");
     li.append(a);
     return li;
   };
-  var menuView = menu;
+  let menuView = menu;
   // <li><a href="#" class="small" data-value="option1" tabIndex="-1"><input type="checkbox"/>&nbsp;Option 1</a></li>
   let lentities = Object.keys(__ihm.getAbstraction().getEntities());
 
@@ -189,11 +189,11 @@ var entitiesAndRelationsFuncMenu = function(menu) {
 
     let node = new GraphObject({'uri' : lentities[i]});
     let nodeuri = node.uri;
-    var li = buildLiView(nodeuri,node.removePrefix(),false,false);
+    let li = buildLiView(nodeuri,node.removePrefix(),false,false);
 
     li.on('click', function() {
-      var span = $(this).find(".glyphicon");
-      var cur_uri = $(this).attr("uri");
+      let span = $(this).find(".glyphicon");
+      let cur_uri = $(this).attr("uri");
       if ( span.css("visibility") == "visible" ) {
         span.css("visibility","hidden");
         __ihm.getSVGLayout().offProposedUri("node",cur_uri);
@@ -233,8 +233,8 @@ var entitiesAndRelationsFuncMenu = function(menu) {
             /* when this li is unavailable, we can do nothing */
             if ( $(this).attr("class") === "disabled" ) return ;
 
-            var span = $(this).find(".glyphicon");
-            var cur_uri = $(this).attr("uri");
+            let span = $(this).find(".glyphicon");
+            let cur_uri = $(this).attr("uri");
             if ( span.css("visibility") == "visible" ) {
              span.css("visibility","hidden");
              __ihm.getSVGLayout().offProposedUri("link",cur_uri);
@@ -265,8 +265,8 @@ var entitiesAndRelationsFuncMenu = function(menu) {
 
     li.attr("nodeuri",posuri)
       .on('click', function() {
-        var span = $(this).find(".glyphicon");
-        var cur_uri = $(this).attr("uri");
+        let span = $(this).find(".glyphicon");
+        let cur_uri = $(this).attr("uri");
         if ( span.css("visibility") == "visible" ) {
           span.css("visibility","hidden");
           __ihm.getSVGLayout().offProposedUri("link",cur_uri);
@@ -295,10 +295,10 @@ var entitiesAndRelationsFuncMenu = function(menu) {
 var graphFuncMenu = function(menu) {
   var buildLiView = function (uri,label,submenu) {
 
-    var icheck = $("<span/>")
+    let icheck = $("<span/>")
         .attr("class","glyphicon glyphicon-check");
 
-    var a = $("<a></a>")
+    let a = $("<a></a>")
             .attr("href","#")
             .attr("class","small")
             .attr("tabIndex","-1") ;
@@ -307,7 +307,7 @@ var graphFuncMenu = function(menu) {
     } else {
       a.html($("<b></b>").append(label+"\t")).append(icheck);
     }
-    var li = $("<li></li>");
+    let li = $("<li></li>");
     li.attr("uri",uri);
     li.css("display","table-cell");
     li.css("vertical-align","middle");
@@ -321,8 +321,8 @@ var graphFuncMenu = function(menu) {
     let graph = g;
     let li = buildLiView(graph,__ihm.graphname(graph).name,true);
     li.on('click',function() {
-        var span = $(this).find(".glyphicon");
-        var cur_uri = $(this).attr("uri");
+        let span = $(this).find(".glyphicon");
+        let cur_uri = $(this).attr("uri");
         if ( span.css("visibility") == "visible" ) {
           span.css("visibility","hidden");
           __ihm.getAbstraction().unactiveGraph(cur_uri);
