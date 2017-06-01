@@ -176,7 +176,7 @@ let instanceAskomicsJobsViewManager ;
 
             $("<h3></h3>").addClass("header-div")
                           .css("text-align","center")
-                          .html("Preview ("+Math.min(this.npreview,this.jobs[ij].nr)+" nrows)")
+                          .html("Preview ("+Math.min(this.npreview,this.jobs[ij].nr)+" rows)")
                         );
 
           r.append(this.jobs[ij].datable_preview);
