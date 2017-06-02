@@ -404,7 +404,8 @@ class AskViewTests(unittest.TestCase):
                 'People1': 'p6'
             }],
             'file': data['file'],
-            'nrow': 6
+            'nrow': 6,
+            'galaxy': False
         }
 
     def test_get_sparql_query_text(self):
