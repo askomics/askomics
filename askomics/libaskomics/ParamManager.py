@@ -29,7 +29,8 @@ class ParamManager(object):
             "owl": """http://www.w3.org/2002/07/owl#""",
             "prov": """http://www.w3.org/ns/prov#""",
             "dc": """http://purl.org/dc/elements/1.1/""",
-            "foaf": """http://xmlns.com/foaf/0.1/"""
+            "foaf": """http://xmlns.com/foaf/0.1/""",
+            "faldo": """http://biohackathon.org/resource/faldo#"""
         }
 
         self.userfilesdir = 'askomics/static/results/'

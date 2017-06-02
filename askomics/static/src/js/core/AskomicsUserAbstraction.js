@@ -8,6 +8,12 @@
 class AskomicsUserAbstraction {
     constructor() {
       this.prefix = {};
+      this.prefix.xsd = "http://www.w3.org/2001/XMLSchema#";
+      this.prefix.rdf = "http://www.w3.org/2001/XMLSchema#";
+      this.prefix.rdfs = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+      this.prefix.owl = "http://www.w3.org/2002/07/owl#";
+      this.prefix.rdfg = "http://www.w3.org/2004/03/trix/rdfg-1/";
+
       this.prefix_error = {};
       /* Ontology is save locally to avoid request with TPS  */
       /* --------------------------------------------------- */

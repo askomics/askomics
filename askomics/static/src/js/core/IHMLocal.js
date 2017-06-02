@@ -7,8 +7,8 @@ let __ihm ;
 class IHMLocal {
     constructor() {
 
-      this.chunkSize        =      400000 ;
-      this.sizeFileMaxAdmin =  4000000000 ; // 4Go
+      this.chunkSize        =      400000  ;
+      this.sizeFileMaxAdmin =  4000000000  ; // 4Go
       this.sizeFileMaxUser  =     10000000 ; // 10 Mo
       /* Implement a Singleton */
       if ( __ihm !== undefined ) {
@@ -49,18 +49,6 @@ class IHMLocal {
           return;
         }
       });
-
-      // Loading a sparql query file
-      $(".uploadBtn").change( function(event) {
-        var uploadedFile = event.target.files[0];
-        if (uploadedFile) {
-            var fr = new FileReader();
-            fr.onload = function(e) {
-              __ihm.startSession(e.target.result);
-            };
-            fr.readAsText(uploadedFile);
-        }
-      });
     }
 
     init() {
@@ -79,7 +67,6 @@ class IHMLocal {
       this.menus.menuGraph = new AskomicsMenu("menuGraph","buttonViewListGraph","viewListGraph",graphFuncMenu);
       this.menus.menuView = new AskomicsMenu("menuView","buttonViewListNodesAndLinks","viewListNodesAndLinks",entitiesAndRelationsFuncMenu);
       this.menus.menuShortcuts = new AskomicsMenu("menuShortcuts","buttonViewListShortcuts","viewListShortcuts",shortcutsFuncMenu);
-
     }
 
     getAbstraction() {
@@ -92,6 +79,21 @@ class IHMLocal {
 
     getSVGLayout() {
       return this.forceLayoutManager;
+    }
+
+    loadAskomicsJsonFiles() {
+      $('#uploadInput').change(function(event) {
+        // Loading a sparql query file
+        let uploadedFile = event.target.files[0];
+        if (uploadedFile) {
+          let fr = new FileReader();
+
+          fr.onload = function(e) {
+            __ihm.startSession(e.target.result);
+          };
+          fr.readAsText(uploadedFile);
+        }
+      });
     }
 
     start() {
