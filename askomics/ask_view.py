@@ -1540,14 +1540,17 @@ class AskView(object):
         self.log.debug(galaxy_auth)
 
         if not galaxy_auth:
-            self.data['error'] = 'No galaxy'
+            self.data['galaxy'] = False
             return self.data
 
         # check if the galaxy connection is ok
         galaxy = GalaxyConnector(self.settings, self.request.session, galaxy_auth['url'], galaxy_auth['key'])
         if not galaxy.check_galaxy_instance():
             self.data['error'] = 'Wrong galaxy'
+            self.data['galaxy'] = False
             return self.data
+
+        self.data['galaxy'] = True
 
         # Then, get the datasets
         datasets = galaxy.get_datasets()

@@ -384,7 +384,9 @@ class Security(ParamManager):
 
         result = query_laucher.process_query(sqa.get_galaxy_infos(self.username).query)
 
-        return result[0]
+        if result:
+            return result[0]
+        return []
 
     def check_galaxy(self):
         """Check if user have galaxy triples"""
