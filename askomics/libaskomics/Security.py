@@ -73,7 +73,6 @@ class Security(ParamManager):
         sqa = SparqlQueryAuth(self.settings, self.session)
 
         result = query_laucher.process_query(sqa.check_username_presence(self.username).query)
-        self.log.debug('---> result: ' + str(result))
 
         if len(result) <= 0:
             return False
@@ -89,12 +88,22 @@ class Security(ParamManager):
         sqa = SparqlQueryAuth(self.settings, self.session)
 
         result = query_laucher.process_query(sqa.check_email_presence(self.email).query)
-        self.log.debug('---> result: ' + str(result))
 
         if len(result) <= 0:
             return False
 
         return ParamManager.Bool(result[0]['status'])
+
+    def set_username_by_email(self):
+        """Get the username of a user by his email"""
+
+        query_laucher = QueryLauncher(self.settings, self.session)
+        sqa = SparqlQueryAuth(self.settings, self.session)
+
+        result = query_laucher.process_query(sqa.get_username_by_email(self.email).query)
+
+        # return result[0]['username']
+        self.username = result[0]['username']
 
     def check_email_password(self):
         """
@@ -170,8 +179,6 @@ class Security(ParamManager):
         sqa = SparqlQueryAuth(self.settings, self.session)
 
         result = query_laucher.process_query(sqa.get_number_of_users().query)
-
-        self.log.debug('---> result: ' + str(result))
 
         if len(result) <= 0:
             return 0

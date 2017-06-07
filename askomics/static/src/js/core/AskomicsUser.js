@@ -17,12 +17,7 @@ class AskomicsUser {
     }
 
     logUser() {
-        // displayNavbar(true, this.username, this.admin, this.blocked);
-        // location.reload();
         setTimeout(function() {
-            // $('.container#content_login').hide();
-            // $('.container#content_signup').hide();
-            // $('.container#content_interrogation').show();
             location.reload();
         }, 1000);
     }
@@ -31,15 +26,11 @@ class AskomicsUser {
         let service = new RestServiceJs("checkuser");
         let self = this;
 
-        // __ihm.displayModal('Please wait', '', 'Close');
-
         service.getAll(function(data) {
-            // __ihm.hideModal();
             if (data.username) {
                 self.username = data.username;
                 self.admin = data.admin;
                 self.blocked = data.blocked;
-                // self.logUser();
                 __ihm.displayNavbar(true, self.username, self.admin, self.blocked);
             }else{
                 __ihm.displayNavbar(false, '');

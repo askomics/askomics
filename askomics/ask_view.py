@@ -1019,7 +1019,6 @@ class AskView(object):
         email = ''
 
         self.data['error'] = []
-        error = False
 
         if validate_email(username_email):
             email = username_email
@@ -1035,19 +1034,16 @@ class AskView(object):
 
             if not email_in_ts:
                 self.data['error'].append('email is not registered')
-                error = True
-
-            if error:
                 return self.data
 
             password_is_correct = security.check_email_password()
 
             if not password_is_correct:
                 self.data['error'].append('Password is incorrect')
-                error = True
-
-            if error:
                 return self.data
+
+            # Set username
+            security.set_username_by_email()
 
             # Get the admin and blocked status
             admin_blocked = security.get_admin_blocked_by_email()
@@ -1060,9 +1056,6 @@ class AskView(object):
 
             if not username_in_ts:
                 self.data['error'].append('username is not registered')
-                error = True
-
-            if error:
                 return self.data
 
             # Get the admin and blocked status
@@ -1074,9 +1067,6 @@ class AskView(object):
 
             if not password_is_correct:
                 self.data['error'].append('Password is incorrect')
-                error = True
-
-            if error:
                 return self.data
 
         # User pass the authentication, log him
@@ -1092,9 +1082,6 @@ class AskView(object):
 
         param_manager = ParamManager(self.settings, self.request.session)
         param_manager.getUploadDirectory()
-
-        # if not self.data['error']:
-        #     self.data.pop('error', None)
 
         return self.data
 
