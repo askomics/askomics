@@ -150,7 +150,11 @@ askojs="$dir_askomics/askomics/static/dist/askomics.js"
 # deploy JS if not run only option or if there is no js
 if [[ $run == false || ! -f $askojs ]]; then
     echo "deploying javascript ..."
-    gulp $gulpmode &
+    if [[ $depmode == "development" ]]; then
+        gulp $gulpmode &
+    else
+        gulp $gulpmode
+    fi
 fi
 
 # Run Askomics --------------------------------------------
