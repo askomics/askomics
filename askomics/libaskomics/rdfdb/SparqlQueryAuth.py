@@ -106,6 +106,20 @@ class SparqlQueryAuth(SparqlQueryBuilder):
                      '}'
             }, True)
 
+
+    def ckeck_key_belong_user(self, username, key):
+        """Chek if a key belong to a user"""
+
+        return self.build_query_on_the_fly({
+            'select': '(COUNT(*) AS ?count)',
+            'query': "GRAPH <"+ self.get_param("askomics.users_graph") + "> {" +
+                     '\n?URIusername rdf:type foaf:Person .\n' +
+                     '\t?URIusername foaf:name "' + username + '" .\n' +
+                     '\t?URIusername :keyid ?URIkeyid .\n'+
+                     '\t?URIkeyid :key "' + key + '"'
+                     "}"
+            }, True)
+
     def get_admin_blocked_by_email(self, email):
         """
         get if a user is admin, by his email
