@@ -1,0 +1,17 @@
+<hr/ >
+<h3 class='header-div'>Uploaded files</h3>
+<hr/ >
+<table class='table'>
+    <tr>
+        <th><input class="check_uploaded check_all_uploaded" type="checkbox"></th>
+        <th>File</th>
+    </tr>
+    {{#each files}}
+    <tr>
+        <td><input class="check_uploaded check_one_uploaded" type="checkbox" value="{{this}}"></td>
+        <td><i>{{this}}</i></td>
+    </tr>
+    {{/each}}
+</table>
+
+<button id="integrate_uploaded" type="button" class="btn btn-default" disabled><i class="fa fa-database text-primary"></i> Integrate</button>

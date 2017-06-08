@@ -449,8 +449,48 @@ class IHMLocal {
         document.body.removeChild(element);
     }
 
+    get_uploaded_files() {
+        let service = new RestServiceJs("get_uploaded_files");
+        service.getAll(function(data) {
+            console.log(JSON.stringify(data));
+            let template = AskOmics.templates.uploaded_files;
+            let context = {files: data.files};
+            let html = template(context);
+            $('#content_integration').empty();
+            $('#content_integration').append(html);
 
-    setUploadForm(content,titleForm,route_overview,callback) {
+            // check all
+            $(".check_all_uploaded").change(function () {
+                $(".check_one_uploaded").prop('checked', $(this).prop("checked"));
+            });
+
+            // Show/hide upload button
+            $(".check_uploaded").change(function(){
+                if ($('.check_one_uploaded:checked').length !== 0) {
+                   $('#integrate_uploaded').removeAttr('disabled');
+                }else{
+                    $('#integrate_uploaded').attr('disabled', 'disabled');
+                }
+            });
+
+            // Upload selected datasets
+            $('#integrate_uploaded').click(function() {
+
+                let selected_files = [];
+                $('.check_one_uploaded').each(function() {
+                    if ($(this).is(':checked')) {selected_files.push($(this).attr('value'));}
+                });
+                console.log(selected_files);
+                let service = new RestServiceJs('source_files_overview');
+                service.post(selected_files, function(data) {
+                    displayIntegrationForm(data);
+                });
+            });
+        });
+    }
+
+
+    DEAD_setUploadForm(content,titleForm,route_overview,callback) {
       var service = new RestServiceJs("up/");
       service.getAll(function(formHtmlforUploadFiles) {
         let sizeFileMax = __ihm.user.isAdmin()?__ihm.sizeFileMaxAdmin:__ihm.sizeFileMaxUser;
@@ -936,7 +976,7 @@ class IHMLocal {
 
         // Get the overview of files to integrate
         $("#integration").click(function() {
-            __ihm.setUploadForm('div#content_integration',"Upload User Files","source_files_overview",displayIntegrationForm);
+            __ihm.get_uploaded_files();
         });
 
         // Visual effect on active tab (Ask! / Integrate / Credits)

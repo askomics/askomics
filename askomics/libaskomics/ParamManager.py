@@ -33,7 +33,7 @@ class ParamManager(object):
             "faldo": """http://biohackathon.org/resource/faldo#"""
         }
 
-        self.userfilesdir = self.get_param('askomics.files_dir')
+        self.userfilesdir = self.get_param('askomics.files_dir') + '/'
 
         self.escape = {
             'numeric' : lambda str: str,

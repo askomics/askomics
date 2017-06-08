@@ -387,7 +387,7 @@ class AskView(object):
 
 
 
-    @view_config(route_name='source_files_overview', request_method='GET')
+    @view_config(route_name='source_files_overview', request_method='POST')
     def source_files_overview(self):
         """
         Get preview data for all the available files
@@ -400,6 +400,8 @@ class AskView(object):
         # Denny for blocked users
         if self.request.session['blocked']:
             return 'blocked'
+
+        files_to_integrate = self.request.json_body
 
         self.log.debug(" ========= Askview:source_files_overview =============")
         sfc = SourceFileConvertor(self.settings, self.request.session)
@@ -418,6 +420,11 @@ class AskView(object):
         self.data['taxons'] = taxons_list
 
         for src_file in source_files:
+
+            # Process only selected files
+            if src_file.name not in files_to_integrate:
+                continue
+
             infos = {}
             infos['name'] = src_file.name
             infos['type'] = src_file.type
@@ -1610,4 +1617,17 @@ class AskView(object):
             return self.data
 
         self.data['success'] = 'path successfully sended in Galaxy'
+        return self.data
+
+
+    @view_config(route_name='get_uploaded_files', request_method="GET")
+    def get_uploaded_files(self):
+
+        param_manager = ParamManager(self.settings, self.request.session)
+        path = param_manager.get_upload_directory()
+
+        files = os.listdir(path)
+        self.data = {}
+        self.data['files'] = files
+
         return self.data
