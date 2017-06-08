@@ -40,6 +40,16 @@ class SparqlQueryAuth(SparqlQueryBuilder):
                      "}"
         }, True)
 
+    def get_username_by_email(self, email):
+        """Get usermail of a user by his email"""
+
+        return self.build_query_on_the_fly({
+            'select': '?username',
+            'query': '?URIusername rdf:type foaf:Person .\n' +
+                     '?URIusername foaf:name ?username .\n' +
+                     '?URIusername foaf:mbox <mailto:' + email + '> .'
+        }, True)
+
     def get_password_with_email(self, email):
         """
         Check the password of a user by his email
