@@ -191,7 +191,7 @@ class QueryLauncher(ParamManager):
 
     def format_results_csv(self, table):
 
-        dircsv = self.getUserResultsCsvDirectory()
+        dircsv = self.get_user_csv_directory()
         if not os.path.isdir(dircsv):
             os.mkdir(dircsv)
 

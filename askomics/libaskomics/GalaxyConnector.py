@@ -69,7 +69,7 @@ class GalaxyConnector(ParamManager):
 
         for file_id in files_id:
             dataset = galaxy_instance.datasets.show_dataset(file_id)
-            path = self.getUploadDirectory() + '/Galaxy_' + str(dataset['hid']) + '_' + dataset['name']
+            path = self.get_upload_directory() + '/Galaxy_' + str(dataset['hid']) + '_' + dataset['name']
             galaxy_instance.datasets.download_dataset(file_id, file_path=path, use_default_filename=False)
 
     def send_to_history(self, path, name):

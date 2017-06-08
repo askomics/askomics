@@ -122,7 +122,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
         total_triple_count = 0
         chunk_count = 1
         chunk = ""
-        pathttl = self.getRdfUserDirectory() 
+        pathttl = self.get_rdf_user_directory() 
         if method == 'load':
 
             fp = None

@@ -39,7 +39,7 @@ class AbstractedRelation(object):
         else:
             self.label = identifier
 
-        identifier =  ParamManager.encodeToRDFURI(self.label)
+        identifier =  ParamManager.encode_to_rdf_uri(self.label)
         self.uri = ":"+identifier
 
         self.col_type = relation_type
@@ -47,7 +47,7 @@ class AbstractedRelation(object):
         if relation_type.startswith("entity"):
             self.relation_type = "owl:ObjectProperty"
             if type_range.find(":")<0:
-                self.rdfs_range = ":" + ParamManager.encodeToRDFURI(type_range)
+                self.rdfs_range = ":" + ParamManager.encode_to_rdf_uri(type_range)
             else:
                 self.rdfs_range = type_range
 
@@ -57,12 +57,12 @@ class AbstractedRelation(object):
 
         elif relation_type.lower() in ('category', 'taxon', 'ref', 'strand'):
             self.relation_type = "owl:ObjectProperty"
-            self.rdfs_range = ":" + ParamManager.encodeToRDFURI(type_range+"Category")
+            self.rdfs_range = ":" + ParamManager.encode_to_rdf_uri(type_range+"Category")
         else:
             self.relation_type = "owl:DatatypeProperty"
             self.rdfs_range = rdfs_range
 
-        self.rdfs_domain = ":" + ParamManager.encodeToRDFURI(rdfs_domain)
+        self.rdfs_domain = ":" + ParamManager.encode_to_rdf_uri(rdfs_domain)
         self.log = logging.getLogger(__name__)
 
     def get_uri(self):

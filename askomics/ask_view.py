@@ -900,7 +900,7 @@ class AskView(object):
 
         pm = ParamManager(self.settings, self.request.session)
         response = FileResponse(
-            pm.getRdfDirectory()+self.request.matchdict['name'],
+            pm.get_rdf_directory()+self.request.matchdict['name'],
             content_type='text/turtle'
             )
         return response
@@ -911,7 +911,7 @@ class AskView(object):
         pm = ParamManager(self.settings, self.request.session)
 
         response = FileResponse(
-            pm.getUserResultsCsvDirectory()+self.request.matchdict['name'],
+            pm.get_user_csv_directory()+self.request.matchdict['name'],
             content_type='text/csv'
             )
         return response
@@ -921,7 +921,7 @@ class AskView(object):
     def deletCsv(self):
 
         pm = ParamManager(self.settings, self.request.session)
-        os.remove(pm.getUserResultsCsvDirectory()+self.request.matchdict['name']),
+        os.remove(pm.get_user_csv_directory()+self.request.matchdict['name']),
 
 
 
@@ -1092,7 +1092,7 @@ class AskView(object):
             self.log.error(str(e))
 
         param_manager = ParamManager(self.settings, self.request.session)
-        param_manager.getUploadDirectory()
+        param_manager.get_upload_directory()
 
         return self.data
 
@@ -1218,7 +1218,7 @@ class AskView(object):
             return self.data
 
         param_manager = ParamManager(self.settings, self.request.session)
-        param_manager.getUploadDirectory()
+        param_manager.get_upload_directory()
 
         return self.data
 
@@ -1589,7 +1589,7 @@ class AskView(object):
 
         body = self.request.json_body
         param_manager = ParamManager(self.settings, self.request.session)
-        path = param_manager.getUserResultsCsvDirectory() + body['path']
+        path = param_manager.get_user_csv_directory() + body['path']
         name = body['name']
 
         # get Galaxy infos

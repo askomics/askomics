@@ -295,7 +295,7 @@ class SourceFileTsv(SourceFile):
                 elif key_type == 'taxon':
                     uri = 'position_'+key_type
                 else:
-                    uri = self.encodeToRDFURI(self.headers[key])
+                    uri = self.encode_to_rdf_uri(self.headers[key])
                 ttl += ":" + uri + ' displaySetting:attribute "true"^^xsd:boolean .\n'
 
             if key > 0 :
@@ -303,7 +303,7 @@ class SourceFileTsv(SourceFile):
 
         # Store the startpoint status
         if self.forced_column_types[0] == 'entity_start':
-            ttl += ":" + self.encodeToRDFURI(ref_entity) + ' displaySetting:startPoint "true"^^xsd:boolean .\n'
+            ttl += ":" + self.encode_to_rdf_uri(ref_entity) + ' displaySetting:startPoint "true"^^xsd:boolean .\n'
 
         return ttl
 
@@ -318,18 +318,18 @@ class SourceFileTsv(SourceFile):
         ttl = ''
 
         if all(types in self.forced_column_types for types in ('start', 'end')): # a positionable entity have to have a start and a end
-            ttl += ":" + self.encodeToRDFURI(self.headers[0]) + ' displaySetting:is_positionable "true"^^xsd:boolean .\n'
+            ttl += ":" + self.encode_to_rdf_uri(self.headers[0]) + ' displaySetting:is_positionable "true"^^xsd:boolean .\n'
             ttl += ":is_positionable rdfs:label 'is_positionable'^^xsd:string .\n"
             ttl += ":is_positionable rdf:type owl:ObjectProperty .\n"
 
         for header, categories in self.category_values.items():
             indent = len(header) * " " + len("displaySetting:category") * " " + 3 * " "
-            ttl += ":" + self.encodeToRDFURI(header+"Category") + " displaySetting:category :"
-            ttl += (" , \n" + indent + ":").join(map(self.encodeToRDFURI,categories)) + " .\n"
+            ttl += ":" + self.encode_to_rdf_uri(header+"Category") + " displaySetting:category :"
+            ttl += (" , \n" + indent + ":").join(map(self.encode_to_rdf_uri,categories)) + " .\n"
 
             for item in categories:
                 if item.strip() != "":
-                    ttl += ":" + self.encodeToRDFURI(item) + " rdf:type :" + self.encodeToRDFURI(header) + " ;\n" + len(item) * " " + "  rdfs:label " + self.escape['text'](item) + "^^xsd:string .\n"
+                    ttl += ":" + self.encode_to_rdf_uri(item) + " rdf:type :" + self.encode_to_rdf_uri(header) + " ;\n" + len(item) * " " + "  rdfs:label " + self.escape['text'](item) + "^^xsd:string .\n"
 
         return ttl
 
@@ -400,7 +400,7 @@ class SourceFileTsv(SourceFile):
 
                 entity_id = self.key_id(row)
                 indent = (len(entity_id) + 1) * " "
-                ttl += ":" + self.encodeToRDFURI(entity_id) + " rdf:type :" + self.encodeToRDFURI(self.headers[0]) + " ;\n"
+                ttl += ":" + self.encode_to_rdf_uri(entity_id) + " rdf:type :" + self.encode_to_rdf_uri(self.headers[0]) + " ;\n"
                 ttl += indent + " rdfs:label " + self.escape['text'](entity_label) + "^^xsd:string ;\n"
                 startFaldo = None
                 endFaldo = None
@@ -413,12 +413,12 @@ class SourceFileTsv(SourceFile):
                         #OFI : manage new header with relation@type_entity
                         #relationName = ":has_" + header # manage old way
                         havePrefix = False
-                        relationName = ":"+self.encodeToRDFURI(header) # manage old way
+                        relationName = ":"+self.encode_to_rdf_uri(header) # manage old way
                         if current_type.startswith('entity'):
                             idx = header.find("@")
 
                             if idx > 0:
-                                relationName = ":"+self.encodeToRDFURI(header[0:idx])
+                                relationName = ":"+self.encode_to_rdf_uri(header[0:idx])
                                 typeEnt = header[idx+1:]
                                 clause1 = typeEnt.find(":")>0
                                 if  clause1 or (header[idx+1] == '<' and header[len(header)-1] == '>') :
@@ -442,12 +442,12 @@ class SourceFileTsv(SourceFile):
                             elif current_type == 'end':
                                 endFaldo = row[i]
                             elif current_type == 'taxon':
-                                ttl += indent + " " + ':position_taxon' + " " + self.delims[current_type][0] + self.encodeToRDFURI(row[i]) + self.delims[current_type][1] + " ;\n"
+                                ttl += indent + " " + ':position_taxon' + " " + self.delims[current_type][0] + self.encode_to_rdf_uri(row[i]) + self.delims[current_type][1] + " ;\n"
                             elif current_type == 'ref':
-                                referenceFaldo = self.encodeToRDFURI(row[i])
+                                referenceFaldo = self.encode_to_rdf_uri(row[i])
                             elif current_type == 'strand':
                                 strandFaldo = row[i]
-                                ttl += indent + " " + ':position_strand' + " " + self.delims[current_type][0] + self.encodeToRDFURI(row[i]) + self.delims[current_type][1] + " ;\n"
+                                ttl += indent + " " + ':position_strand' + " " + self.delims[current_type][0] + self.encode_to_rdf_uri(row[i]) + self.delims[current_type][1] + " ;\n"
                             elif havePrefix:
                                 ttl += indent + " "+ relationName + " " + row[i] + " ;\n"
                             else:
@@ -457,7 +457,7 @@ class SourceFileTsv(SourceFile):
                             ttlSym += self.delims[current_type][0]+\
                                       self.escape[current_type](row[i])+\
                                       self.delims[current_type][1]+" "+relationName+" :"+\
-                                      self.encodeToRDFURI(entity_label)  + " .\n"
+                                      self.encode_to_rdf_uri(entity_label)  + " .\n"
 
                 #Faldo position management
                 if startFaldo != None or endFaldo != None or referenceFaldo != None:

@@ -23,7 +23,7 @@ class FileUpload(object):
         self.settings = request.registry.settings
 
         pm = ParamManager(self.settings, self.request.session)
-        self.upload_dir = pm.getUploadDirectory()
+        self.upload_dir = pm.get_upload_directory()
         #self.upload_dir = request.session['upload_directory']
         
         self.log.debug("upload_directory => "+self.upload_dir)
