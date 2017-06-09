@@ -475,7 +475,7 @@ class IHMLocal {
 
             // Upload selected datasets
             $('#integrate_uploaded').click(function() {
-
+                $("#spinner_uploaded").removeClass("hidden");
                 let selected_files = [];
                 $('.check_one_uploaded').each(function() {
                     if ($(this).is(':checked')) {selected_files.push($(this).attr('value'));}
