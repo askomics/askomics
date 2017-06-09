@@ -452,9 +452,8 @@ class IHMLocal {
     get_uploaded_files() {
         let service = new RestServiceJs("get_uploaded_files");
         service.getAll(function(data) {
-            console.log(JSON.stringify(data));
             let template = AskOmics.templates.uploaded_files;
-            let context = {files: data.files, galaxy: data.galaxy};
+            let context = {files: data.files, galaxy: data.galaxy, allowed_upload: $.parseJSON(data.allowed_upload)};
             let html = template(context);
             $('#content_integration').empty();
             $('#content_integration').append(html);

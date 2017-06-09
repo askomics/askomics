@@ -1626,6 +1626,7 @@ class AskView(object):
 
         param_manager = ParamManager(self.settings, self.request.session)
         path = param_manager.get_upload_directory()
+        allowed_upload = param_manager.get_param('askomics.allowed_upload')
 
         self.data = {}
         self.data['files'] = {}
@@ -1638,6 +1639,7 @@ class AskView(object):
             self.data['files'][file] = file_size
 
         self.data['galaxy'] = self.request.session['galaxy']
+        self.data['allowed_upload'] = allowed_upload
 
         return self.data
 
