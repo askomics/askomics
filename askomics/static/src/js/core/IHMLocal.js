@@ -502,6 +502,66 @@ class IHMLocal {
             $('#upload_from_computer').click(function() {
                 __ihm.set_upload_form();
             });
+
+            $('#upload_from_galaxy').click(function() {
+                __ihm.set_upload_galaxy_form();
+            });
+        });
+    }
+
+    set_upload_galaxy_form() {
+        $('#modalTitle').text('Upload Galaxy files');
+        $('.modal-sm').css('width', '50%');
+        $('.modal-body').show();
+        $('#modalButton').text('Close');
+        $('#modal').modal('show');
+        $('#modalMessage').html($('<i></i>').attr('class', 'fa fa-2x fa-spinner pulse'));
+
+        // If a Galaxy instance is connected, show the form to get data from the Galaxy history
+        let service = new RestServiceJs('get_data_from_galaxy');
+        service.getAll(function(data) {
+            if (!data.galaxy) return;
+            let template = AskOmics.templates.galaxy_datasets;
+            let context = {datasets: data.datasets};
+            let html = template(context);
+
+            $('#modalTitle').text('Upload Galaxy files');
+            $('.modal-sm').css('width', '50%');
+            $('.modal-body').show();
+            $('#modalButton').text('Close');
+            $('#modal').modal('show');
+            $('#modalMessage').html(html);
+
+            // check all
+            $(".check_all_galaxy").change(function () {
+                $(".check_one_galaxy").prop('checked', $(this).prop("checked"));
+            });
+
+            //Show/hide upload button
+            $(".check_galaxy").change(function(){
+                if ($('.check_one_galaxy:checked').length !== 0) {
+                   $('#upload_galaxy').removeAttr('disabled');
+                }else{
+                    $('#upload_galaxy').attr('disabled', 'disabled');
+                }
+            });
+
+            // Upload selected datasets
+            $('#upload_galaxy').click(function() {
+                $("#spinner_galaxy-upload").removeClass("hidden");
+                let selected_datasets = [];
+                $('.check_one_galaxy').each(function() {
+                    if ($(this).is(':checked')) {selected_datasets.push($(this).attr('value'));}
+                });
+                //upload files
+                let service2 = new RestServiceJs('upload_galaxy_files');
+                let model = {'datasets': selected_datasets};
+                service2.post(model, function(data) {
+                    __ihm.manageErrorMessage(data);
+                    $("#spinner_galaxy-upload").addClass("hidden");
+                    __ihm.get_uploaded_files();
+                });
+            });
         });
     }
 
@@ -544,108 +604,6 @@ class IHMLocal {
         // reload when modal is closed
         $('#modal').on('hide.bs.modal', function (e) {
             __ihm.get_uploaded_files();
-        });
-      });
-    }
-
-
-    DEAD_setUploadForm(content,titleForm,route_overview,callback) {
-      var service = new RestServiceJs("up/");
-      service.getAll(function(formHtmlforUploadFiles) {
-        let sizeFileMax = __ihm.user.isAdmin()?__ihm.sizeFileMaxAdmin:__ihm.sizeFileMaxUser;
-
-        formHtmlforUploadFiles.html = formHtmlforUploadFiles.html.replace("___TITLE_UPLOAD___",titleForm);
-        formHtmlforUploadFiles.html = formHtmlforUploadFiles.html.replace("___SIZE_UPLOAD____",(sizeFileMax/(1000*1000))+" Mo");
-        $(content).html(formHtmlforUploadFiles.html);
-        /*
-
-              MAIN UPLOAD Third party => copy from /static/js/third-party/upload/main.js (thi file is disbale in askomics)
-
-        */
-        // Initialize the jQuery File Upload widget
-        $(content).find('#fileupload').fileupload({
-            // Uncomment the following to send cross-domain cookies:
-            //xhrFields: {withCredentials: true},
-            url: 'up/file/',
-            maxChunkSize: __ihm.chunkSize,
-            maxFileSize: sizeFileMax
-        });
-
-        // Enable iframe cross-domain access via redirect option
-        $(content).find('#fileupload').fileupload(
-            'option',
-            'redirect',
-            window.location.href.replace(
-                /\/[^\/]*$/,
-                '/cors/result.html?%s'
-            )
-        );
-
-        // Load existing files
-        $(content).find('#fileupload').addClass('fileupload-processing');
-        $.ajax({
-            // Uncomment the following to send cross-domain cookies:
-            //xhrFields: {withCredentials: true},
-            url: $(content).find('#fileupload').fileupload('option', 'url'),
-            dataType: 'json',
-            context: $(content).find('#fileupload')[0]
-        }).always(function () {
-            $(this).removeClass('fileupload-processing');
-        }).done(function (result) {
-            $(this).fileupload('option', 'done')
-                .call(this, $.Event('done'), {result: result});
-        });
-
-        // Integrate button
-        $('.integrate-button').click(function() {
-            __ihm.displayModal('Please Wait', '', 'Close');
-            var service = new RestServiceJs(route_overview);
-            service.getAll(function(data) {
-                callback(data);
-                __ihm.hideModal();
-            });
-
-        });
-      });
-      // If a Galaxy instance is connected, show the form to get data from the Galaxy history
-      var service2 = new RestServiceJs('get_data_from_galaxy');
-      service2.getAll(function(data) {
-        if (!data.galaxy) return;
-        let template = AskOmics.templates.galaxy_datasets;
-        let context = {datasets: data.datasets};
-        let html = template(context);
-        $('#galaxy_datasets').empty();
-        $('#galaxy_datasets').append(html);
-
-        // check all
-        $(".check_all_galaxy").change(function () {
-            $(".check_one_galaxy").prop('checked', $(this).prop("checked"));
-        });
-
-        //Show/hide upload button
-        $(".check_galaxy").change(function(){
-            if ($('.check_one_galaxy:checked').length !== 0) {
-               $('#upload_galaxy').removeAttr('disabled');
-            }else{
-                $('#upload_galaxy').attr('disabled', 'disabled');
-            }
-        });
-
-        // Upload selected datasets
-        $('#upload_galaxy').click(function() {
-            $("#spinner_galaxy-upload").removeClass("hidden");
-            let selected_datasets = [];
-            $('.check_one_galaxy').each(function() {
-                if ($(this).is(':checked')) {selected_datasets.push($(this).attr('value'));}
-            });
-            //upload files
-            let service3 = new RestServiceJs('upload_galaxy_files');
-            let model = {'datasets': selected_datasets};
-            service3.post(model, function(data) {
-                __ihm.manageErrorMessage(data);
-                // Reload upload form
-                __ihm.setUploadForm(content,titleForm,route_overview,callback);
-            });
         });
       });
     }
