@@ -11,6 +11,7 @@ import logging
 from pprint import pformat
 import textwrap
 import datetime
+import humanize
 
 from pygments import highlight
 from pygments.lexers import TurtleLexer
@@ -1626,8 +1627,17 @@ class AskView(object):
         param_manager = ParamManager(self.settings, self.request.session)
         path = param_manager.get_upload_directory()
 
-        files = os.listdir(path)
         self.data = {}
-        self.data['files'] = files
+        self.data['files'] = {}
+
+        files = os.listdir(path)
+
+        for file in files:
+            file_path = path + '/' + file
+            file_size = humanize.naturalsize(os.path.getsize(file_path), binary=True)
+            # file_dict = {file: file_size}
+            self.data['files'][file] = file_size
+
+        self.log.debug(self.data)
 
         return self.data

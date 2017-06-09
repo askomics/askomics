@@ -5,11 +5,13 @@
     <tr>
         <th><input class="check_uploaded check_all_uploaded" type="checkbox"></th>
         <th>File</th>
+        <th>Size</th>
     </tr>
     {{#each files}}
     <tr>
-        <td><input class="check_uploaded check_one_uploaded" type="checkbox" value="{{this}}"></td>
-        <td><i>{{this}}</i></td>
+        <td><input class="check_uploaded check_one_uploaded" type="checkbox" value="{{@key}}"></td>
+        <td>{{@key}}</td>
+        <td>{{this}}</td>
     </tr>
     {{/each}}
 </table>

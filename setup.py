@@ -23,6 +23,7 @@ requires = [
     'bcbio-gff',
     'validate_email',
     'bioblend==0.9.0',
+    'humanize'
     ]
 
 setup(name='Askomics',
