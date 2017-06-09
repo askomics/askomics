@@ -454,7 +454,7 @@ class IHMLocal {
         service.getAll(function(data) {
             console.log(JSON.stringify(data));
             let template = AskOmics.templates.uploaded_files;
-            let context = {files: data.files};
+            let context = {files: data.files, galaxy: data.galaxy};
             let html = template(context);
             $('#content_integration').empty();
             $('#content_integration').append(html);
@@ -467,9 +467,9 @@ class IHMLocal {
             // Show/hide upload button
             $(".check_uploaded").change(function(){
                 if ($('.check_one_uploaded:checked').length !== 0) {
-                   $('#integrate_uploaded').removeAttr('disabled');
+                   $('.btn-uploaded').removeAttr('disabled');
                 }else{
-                    $('#integrate_uploaded').attr('disabled', 'disabled');
+                    $('.btn-uploaded').attr('disabled', 'disabled');
                 }
             });
 
@@ -480,13 +480,72 @@ class IHMLocal {
                 $('.check_one_uploaded').each(function() {
                     if ($(this).is(':checked')) {selected_files.push($(this).attr('value'));}
                 });
-                console.log(selected_files);
                 let service = new RestServiceJs('source_files_overview');
                 service.post(selected_files, function(data) {
                     displayIntegrationForm(data);
                 });
             });
+
+            // Delete selected datasets
+            $("#delete_uploaded").click(function() {
+                $("#spinner_uploaded").removeClass("hidden");
+                let selected_files = [];
+                $('.check_one_uploaded').each(function() {
+                    if ($(this).is(':checked')) {selected_files.push($(this).attr('value'));}
+                });
+                let service = new RestServiceJs('delete_uploaded_files');
+                service.post(selected_files, function(data) {
+                    __ihm.get_uploaded_files();
+                });
+            });
+
+            $('#upload_from_computer').click(function() {
+                __ihm.set_upload_form();
+            });
         });
+    }
+
+    set_upload_form() {
+        $('#modalTitle').text('Upload files');
+        $('.modal-sm').css('width', '50%');
+        $('.modal-body').show();
+        $('#modalButton').text('Close');
+        $('#modal').modal('show');
+
+        let content = '#modalMessage';
+
+        // Upload form
+        let service = new RestServiceJs("up/");
+        service.getAll(function(html) {
+        let size_file_max = __ihm.user.isAdmin()?__ihm.sizeFileMaxAdmin:__ihm.sizeFileMaxUser;
+
+        html.html = html.html.replace("___SIZE_UPLOAD____",(size_file_max/(1000*1000))+" Mo");
+        $(content).html(html.html);
+
+        // Initialize the jQuery File Upload widget
+        $(content).find('#fileupload').fileupload({
+            // Uncomment the following to send cross-domain cookies:
+            //xhrFields: {withCredentials: true},
+            url: 'up/file/',
+            maxChunkSize: __ihm.chunkSize,
+            maxFileSize: size_file_max
+        });
+
+        // Enable iframe cross-domain access via redirect option
+        $(content).find('#fileupload').fileupload(
+            'option',
+            'redirect',
+            window.location.href.replace(
+                /\/[^\/]*$/,
+                '/cors/result.html?%s'
+            )
+        );
+
+        // reload when modal is closed
+        $('#modal').on('hide.bs.modal', function (e) {
+            __ihm.get_uploaded_files();
+        });
+      });
     }
 
 

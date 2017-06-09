@@ -1,6 +1,13 @@
 <hr/ >
 <h3 class='header-div'>Uploaded files</h3>
 <hr/ >
+<div class="btn-group" role="group" aria-label="...">
+  <button id="upload_from_computer" type="button" class="btn btn-default"><i class="fa fa-upload"></i> Upload</button>
+  {{#if galaxy}}
+  <button id="upload_from_galaxy" type="button" class="btn btn-default"><i class="fa fa-arrow-left"></i> Get from Galaxy</button>
+  {{/if}}
+</div>
+<br/ ><br/ >
 <table class='table'>
     <tr>
         <th><input class="check_uploaded check_all_uploaded" type="checkbox"></th>
@@ -16,5 +23,8 @@
     {{/each}}
 </table>
 
-<button id="integrate_uploaded" type="button" class="btn btn-default" disabled><i class="fa fa-database text-primary"></i> Integrate</button>
+<div class="btn-group" role="group">
+  <button id="delete_uploaded" type="button" class="btn-uploaded btn btn-default" disabled><i class="fa fa-trash text-danger"></i> Delete</button>
+  <button id="integrate_uploaded" type="button" class="btn-uploaded btn btn-default" disabled><i class="fa fa-database text-primary"></i> Integrate</button>
+</div>
 <i class="hidden fa fa-spinner pulse" id='spinner_uploaded'></i>

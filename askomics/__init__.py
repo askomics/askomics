@@ -44,7 +44,8 @@ def main(global_config, **settings):
     config.add_route('csv', '/csv/{name:.*}')
     config.add_route('del_csv', '/del_csv/{name:.*}')
 
-    config.add_route('get_uploaded_files', 'get_uploaded_files')
+    config.add_route('get_uploaded_files', '/get_uploaded_files')
+    config.add_route('delete_uploaded_files', '/delete_uploaded_files')
 
     # Shortcuts and modules routes
     config.add_route('importShortcut', '/importShortcut')

@@ -5,9 +5,7 @@
 <noscript><link rel="stylesheet" href="static/libs/jquery-file-upload/jquery.fileupload-noscript.css"></noscript>
 <noscript><link rel="stylesheet" href="static/libs/jquery-file-upload/jquery.fileupload-ui-noscript.css"></noscript>
 
-<div class="container">
-  <hr/>
-  <h3 class="header-div">___TITLE_UPLOAD___</h3>
+<div>
   <p>Supported file: CSV, TSV, GFF, TTL</p>
   <p><mark>the maximum file upload size is ___SIZE_UPLOAD____</mark></p>
   <hr/>
@@ -43,13 +41,7 @@
         </div>
         <!-- The table listing the files available for upload/download -->
         <table role="presentation" class="table table-striped"><tbody class="files"></tbody></table>
-
-        <span id="integrate_upload" class="btn btn-default integrate-button ">
-            <i class="fa fa-database"></i>
-            <span>Integrate</span>
-        </span>
     </form>
-    <div id='galaxy_datasets'></div>
 </div>
 <!-- The template to display files available for upload -->
 <script id="template-upload" type="text/x-tmpl">

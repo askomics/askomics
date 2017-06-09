@@ -1635,9 +1635,19 @@ class AskView(object):
         for file in files:
             file_path = path + '/' + file
             file_size = humanize.naturalsize(os.path.getsize(file_path), binary=True)
-            # file_dict = {file: file_size}
             self.data['files'][file] = file_size
 
-        self.log.debug(self.data)
+        self.data['galaxy'] = self.request.session['galaxy']
 
         return self.data
+
+    @view_config(route_name="delete_uploaded_files", request_method="POST")
+    def delete_uploaded_files(self):
+
+        files_to_delete = self.request.json_body
+        param_manager = ParamManager(self.settings, self.request.session)
+        path = param_manager.get_upload_directory()
+
+
+        for file in files_to_delete:
+            os.remove(path + '/' + file)
