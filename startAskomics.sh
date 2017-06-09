@@ -80,6 +80,14 @@ function set_property() {
 echo " === use config base : $dir_config/custom.ini "
 cp "$dir_config/$depmode.$triplestore.ini" "$dir_config/custom.ini"
 
+if [[ ! -z $ASKOMICS_ALLOWED_UPLOAD ]]; then
+    set_property "askomics.allowed_upload" $ASKOMICS_ALLOWED_UPLOAD
+fi
+
+if [[ ! -z $ASKOMICS_FILES_DIR ]]; then
+    set_property "askomics.files_dir" $ASKOMICS_FILES_DIR
+fi
+
 if [[ ! -z $TRIPLESTORE_ENDPOINT ]]; then
     echo "Custom triplestore endpoint: $TRIPLESTORE_ENDPOINT"
     set_property "askomics.endpoint" $TRIPLESTORE_ENDPOINT
