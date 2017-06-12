@@ -69,6 +69,7 @@ def main(global_config, **settings):
     config.add_route('signup', '/signup')
     config.add_route('login', '/login')
     config.add_route('login_api', '/login_api')
+    config.add_route('login_api_url', '/login_api_url')
     config.add_route('logout', '/logout')
     config.add_route('checkuser', '/checkuser')
 

@@ -1190,6 +1190,44 @@ class AskView(object):
 
         return self.data
 
+    @view_config(route_name='login_api_url', request_method='GET')
+    def login_api_url(self):
+
+        apikey = self.request.GET['key']
+
+        self.data['error'] = ''
+
+        security = Security(self.settings, self.request.session, '', '', '', '')
+
+        # Check if API key exist, and if yes, get the user
+        security.get_owner_of_apikey(apikey)
+
+        if not security.get_username():
+            self.data['error'] = 'API key belong to nobody'
+            return self.data
+
+        # Get the admin and blocked status
+        admin_blocked = security.get_admin_blocked_by_username()
+        security.set_admin(admin_blocked['admin'])
+        security.set_blocked(admin_blocked['blocked'])
+
+        # Log the user
+        try:
+            security.log_user(self.request)
+            self.data['username'] = security.get_username()
+            self.data['admin'] = admin_blocked['admin']
+            self.data['blocked'] = admin_blocked['blocked']
+
+        except Exception as e:
+            self.data['error'] = str(e)
+            self.log.error(str(e))
+            return self.data
+
+        param_manager = ParamManager(self.settings, self.request.session)
+        param_manager.get_upload_directory()
+
+        return HTTPFound(self.request.application_url)
+
 
     @view_config(route_name='login_api', request_method='POST')
     def login_api(self):
