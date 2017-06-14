@@ -1210,6 +1210,9 @@ class AskView(object):
         admin_blocked = security.get_admin_blocked_by_username()
         security.set_admin(admin_blocked['admin'])
         security.set_blocked(admin_blocked['blocked'])
+        # Get if user has a connected Galaxy account
+        galaxy = security.check_galaxy()
+        security.set_galaxy(galaxy)
 
         # Log the user
         try:
@@ -1250,6 +1253,9 @@ class AskView(object):
         admin_blocked = security.get_admin_blocked_by_username()
         security.set_admin(admin_blocked['admin'])
         security.set_blocked(admin_blocked['blocked'])
+        # Get if user has a connected Galaxy account
+        galaxy = security.check_galaxy()
+        security.set_galaxy(galaxy)
 
         # Log the user
         try:
