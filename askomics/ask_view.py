@@ -1190,10 +1190,11 @@ class AskView(object):
 
         return self.data
 
-    @view_config(route_name='login_api_url', request_method='GET')
-    def login_api_url(self):
+    @view_config(route_name='login_api_gie', request_method='GET')
+    def login_api_gie(self):
 
         apikey = self.request.GET['key']
+        galaxy_ids = [s.strip() for s in re.split(",", self.request.GET['ids'])]
 
         self.data['error'] = ''
 
@@ -1228,6 +1229,13 @@ class AskView(object):
 
         param_manager = ParamManager(self.settings, self.request.session)
         param_manager.get_upload_directory()
+
+        # Upload datasets in user directory
+        if galaxy_ids:
+            galaxy_auth = security.get_galaxy_infos()
+            galaxy = GalaxyConnector(self.settings, self.request.session, galaxy_auth['url'], galaxy_auth['key'])
+            galaxy.upload_files(galaxy_ids)
+
 
         return HTTPFound(self.request.application_url)
 

@@ -566,10 +566,11 @@ class IHMLocal {
 
     set_upload_form() {
         $('#modalTitle').text('Upload files');
-        $('.modal-sm').css('width', '50%');
+        $('.modal-sm').css('width', '55%');
         $('.modal-body').show();
         $('#modalButton').text('Close');
         $('#modal').modal('show');
+        $('#modal').addClass('upload-modal');
 
         let content = '#modalMessage';
 
@@ -601,9 +602,10 @@ class IHMLocal {
         );
 
         // reload when modal is closed
-        $('#modal').on('hide.bs.modal', function (e) {
-            __ihm.get_uploaded_files();
-        });
+        // $('.upload-modal').on('hide.bs.modal', function (e) {
+        //     $(this).removeClass('upload-modal');
+        //     __ihm.get_uploaded_files();
+        // });
       });
     }
 
