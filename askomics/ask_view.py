@@ -1230,12 +1230,12 @@ class AskView(object):
         param_manager.get_upload_directory()
 
         # Upload datasets in user directory
-        if self.request.GET['ids']:
+        if 'ids' in self.request.GET:
             galaxy_ids = [s.strip() for s in re.split(",", self.request.GET['ids'])]
-            try:
-                galaxy_auth = security.get_galaxy_infos()
-                galaxy = GalaxyConnector(self.settings, self.request.session, galaxy_auth['url'], galaxy_auth['key'])
-                galaxy.upload_files(galaxy_ids)
+
+            galaxy_auth = security.get_galaxy_infos()
+            galaxy = GalaxyConnector(self.settings, self.request.session, galaxy_auth['url'], galaxy_auth['key'])
+            galaxy.upload_files(galaxy_ids)
 
 
         return HTTPFound(self.request.application_url)
