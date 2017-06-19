@@ -5,6 +5,7 @@
 Classes to import data from source files
 """
 import os
+import re
 import logging
 import os.path
 import tempfile
@@ -39,12 +40,14 @@ class SourceFile(ParamManager, HaveCachedProperties):
         # The name should not contain extension as dots are not allowed in rdf names
         # self.name = os.path.splitext(os.path.basename(path))[0]
         self.name = os.path.basename(path)
+        self.alphanum_name = re.sub('[^0-9a-zA-Z]+', '_', self.name)
 
         self.graph = 'askomics:unkown:uri:graph'
         if 'graph' in self.session:
             self.graph = self.session['graph']
 
-        self.graph = self.graph + ':' + self.name + '_' + self.timestamp
+        # Graph name can't contain any non alphanumeric characters. replace all with _
+        self.graph = self.graph + ':' + self.alphanum_name + '_' + self.timestamp
 
         # FIXME check name uniqueness as we remove extension (collision if uploading example.tsv and example.txt)
 
@@ -137,7 +140,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
                 if triple_count > int(self.settings['askomics.max_content_size_to_update_database']):
                     # Temp file must be accessed by http so we place it in askomics/ttl/ dir
-                    fp = tempfile.NamedTemporaryFile(dir=pathttl, prefix="tmp_"+self.name, suffix=".ttl", mode="w", delete=False)
+                    fp = tempfile.NamedTemporaryFile(dir=pathttl, prefix="tmp_"+self.alphanum_name, suffix=".ttl", mode="w", delete=False)
                     # We have reached the maximum chunk size, load it and then we will start a new chunk
                     self.log.debug("Loading ttl chunk %s file %s" % (chunk_count, fp.name))
                     header_ttl = self.get_turtle_template(chunk)
@@ -156,7 +159,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
             # Load the last chunk
             if triple_count > 0:
                 self.log.debug("Loading ttl chunk %s (last)" % (chunk_count))
-                fp = tempfile.NamedTemporaryFile(dir=pathttl, prefix="tmp_"+self.name, suffix=".ttl", mode="w", delete=False)
+                fp = tempfile.NamedTemporaryFile(dir=pathttl, prefix="tmp_"+self.alphanum_name, suffix=".ttl", mode="w", delete=False)
                 header_ttl = self.get_turtle_template(chunk)
                 fp.write(header_ttl + '\n')
                 fp.write(chunk)
@@ -176,7 +179,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
             domain_knowledge_ttl = self.get_domain_knowledge()
             header_ttl = self.get_turtle_template(abstraction_ttl+"\n"+domain_knowledge_ttl)
 
-            fp = tempfile.NamedTemporaryFile(dir=pathttl, prefix="tmp_"+self.name, suffix=".ttl", mode="w", delete=False)
+            fp = tempfile.NamedTemporaryFile(dir=pathttl, prefix="tmp_"+self.alphanum_name, suffix=".ttl", mode="w", delete=False)
             fp.write(header_ttl + '\n')
             fp.write(abstraction_ttl + '\n')
             fp.write(domain_knowledge_ttl + '\n')
