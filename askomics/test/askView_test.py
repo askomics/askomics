@@ -87,7 +87,7 @@ class AskViewTests(unittest.TestCase):
                     'uri':
                     'http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Instruments',
                     'g':
-                    'urn:sparql:test_askomics:jdoe:instruments.tsv_' + timestamp_instruments,
+                    'urn:sparql:test_askomics:jdoe:instruments_tsv_' + timestamp_instruments,
                     'public': False,
                     'label': 'Instruments',
                     'private': True
@@ -97,7 +97,7 @@ class AskViewTests(unittest.TestCase):
                     'uri':
                     'http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#People',
                     'g':
-                    'urn:sparql:test_askomics:jdoe:people.tsv_' + timestamp_people,
+                    'urn:sparql:test_askomics:jdoe:people_tsv_' + timestamp_people,
                     'public': False,
                     'label': 'People',
                     'private': True
@@ -164,7 +164,7 @@ class AskViewTests(unittest.TestCase):
 
         # Delete only the people graph
         self.request.json_body = {
-            'named_graph': ['urn:sparql:test_askomics:jdoe:people.tsv_' + timestamp_people]
+            'named_graph': ['urn:sparql:test_askomics:jdoe:people_tsv_' + timestamp_people]
         }
 
         data = self.askview.delete_graph()
@@ -189,7 +189,7 @@ class AskViewTests(unittest.TestCase):
                     'http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Instruments',
                     'private': True,
                     'g':
-                    'urn:sparql:test_askomics:jdoe:instruments.tsv_' + timestamp_instruments
+                    'urn:sparql:test_askomics:jdoe:instruments_tsv_' + timestamp_instruments
                 }
             }
         }
@@ -219,7 +219,7 @@ class AskViewTests(unittest.TestCase):
         assert isinstance(data, list)
 
         assert {
-            'g': 'urn:sparql:test_askomics:jdoe:people.tsv_' + timestamp_people,
+            'g': 'urn:sparql:test_askomics:jdoe:people_tsv_' + timestamp_people,
             'count': '73',
             'access': 'public',
             'date': timestamp_people,
@@ -230,7 +230,7 @@ class AskViewTests(unittest.TestCase):
 
         assert {
             'g':
-            'urn:sparql:test_askomics:jdoe:instruments.tsv_' + timestamp_instrument,
+            'urn:sparql:test_askomics:jdoe:instruments_tsv_' + timestamp_instrument,
             'count': '66',
             'access': 'private',
             'date': timestamp_instrument,
