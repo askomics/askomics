@@ -1,3 +1,15 @@
+<p>Select a galaxy history: </p>
+<select id="change_history">
+  {{#each histories}}
+    {{#if this.selected}}
+        <option value="{{this.id}}" selected="selected">{{this.name}}</option>
+    {{else}}
+        <option value="{{this.id}}">{{this.name}}</option>
+    {{/if}}
+  {{/each}}
+</select>
+<br/ ><br/ >
+
 <table class='table'>
     <tr>
         <th><input class="check_galaxy check_all_galaxy" type="checkbox"></th>

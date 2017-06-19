@@ -34,29 +34,47 @@ class GalaxyConnector(ParamManager):
 
         return True
 
-    def get_datasets(self):
-        """Get Galaxy datasets of a user
+    def get_datasets_and_histories(self, history_id=None):
+        """Get Galaxy datasets of current history
+        and all histories of a user
 
         :returns: a list of datasets
-        :rtype: list
+        :rtype: dict
         """
 
         galaxy_instance = galaxy.GalaxyInstance(self.url, self.apikey)
-        dataset_list = []
+        results = {}
+
+
+        # get current history
+        if not history_id:
+            history_id = galaxy_instance.histories.get_current_history()['id']
+
+        # Get all available history id and name
         histories = galaxy_instance.histories.get_histories()
-
+        histories_list = []
         for history in histories:
-            history_id = history['id']
-            history_content = galaxy_instance.histories.show_history(history_id, contents=True)
-            for dataset in history_content:
-                if dataset['extension'] not in ('tabular', 'ttl', 'gff', 'gff3', 'gff2'):
-                    continue
-                # Don't show deleted datasets
-                if dataset['deleted']:
-                    continue
-                dataset_list.append(dataset)
+            if history['id'] == history_id:
+                history_dict = {"name": history['name'], "id": history['id'], "selected": True}
+            else:
+                history_dict = {"name": history['name'], "id": history['id'], "selected": False}
+            histories_list.append(history_dict)
 
-        return dataset_list
+        # Get datasets of selected history
+        dataset_list = []
+        history_content = galaxy_instance.histories.show_history(history_id, contents=True)
+        for dataset in history_content:
+            if dataset['extension'] not in ('tabular', 'ttl', 'gff', 'gff3', 'gff2'):
+                continue
+            # Don't show deleted datasets
+            if dataset['deleted']:
+                continue
+            dataset_list.append(dataset)
+
+        results['datasets'] = dataset_list
+        results['histories'] = histories_list
+
+        return results
 
     def upload_files(self, files_id):
         """Upload galaxy datasets into AskOmics server

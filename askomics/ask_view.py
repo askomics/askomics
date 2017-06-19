@@ -1566,8 +1566,11 @@ class AskView(object):
 
 
 
-    @view_config(route_name='get_data_from_galaxy', request_method='GET')
+    @view_config(route_name='get_data_from_galaxy', request_method='POST')
     def get_data_from_galaxy(self):
+
+        body = self.request.json_body
+        history = body['history']
 
         self.data = {}
 
@@ -1592,10 +1595,10 @@ class AskView(object):
         self.data['galaxy'] = True
 
         # Then, get the datasets
-        datasets = galaxy.get_datasets()
+        results = galaxy.get_datasets_and_histories(history_id=history)
 
         # Boolean values for handlebars
-        for dataset in datasets:
+        for dataset in results['datasets']:
             if dataset['state'] == 'ok':
                 dataset['success'] = True
             elif dataset['state'] == 'queued':
@@ -1605,7 +1608,8 @@ class AskView(object):
                 dataset['notick'] = False
                 dataset['error'] = True
 
-        self.data['datasets'] = datasets
+        self.data['datasets'] = results['datasets']
+        self.data['histories'] = results['histories']
         return self.data
 
     @view_config(route_name='upload_galaxy_files', request_method='POST')

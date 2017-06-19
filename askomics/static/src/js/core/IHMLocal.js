@@ -508,7 +508,7 @@ class IHMLocal {
         });
     }
 
-    set_upload_galaxy_form() {
+    set_upload_galaxy_form(history_id) {
         $('#modalTitle').text('Upload Galaxy files');
         $('.modal-sm').css('width', '50%');
         $('.modal-body').show();
@@ -516,12 +516,17 @@ class IHMLocal {
         $('#modal').modal('show');
         $('#modalMessage').html($('<i></i>').attr('class', 'fa fa-2x fa-spinner pulse'));
 
+        if (typeof history_id === 'undefined' || history_id === null) {
+            history_id = false;
+        }
+
         // If a Galaxy instance is connected, show the form to get data from the Galaxy history
         let service = new RestServiceJs('get_data_from_galaxy');
-        service.getAll(function(data) {
+        let model = {history: history_id};
+        service.post(model, function(data) {
             if (!data.galaxy) return;
             let template = AskOmics.templates.galaxy_datasets;
-            let context = {datasets: data.datasets};
+            let context = {datasets: data.datasets, histories: data.histories};
             let html = template(context);
 
             $('#modalTitle').text('Upload Galaxy files');
@@ -560,6 +565,11 @@ class IHMLocal {
                     $("#spinner_galaxy-upload").addClass("hidden");
                     __ihm.get_uploaded_files();
                 });
+            });
+
+            // On select change, reload
+            $('#change_history').on('change', function() {
+                __ihm.set_upload_galaxy_form(this.value);
             });
         });
     }
