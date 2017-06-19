@@ -101,7 +101,8 @@ function displayIntegrationForm(data) {
 }
 
 function getIdFile(file) {
-  return file.name.split('.').join('_');
+    // replace non a-z A-Z 0-9 char to _
+    return file.name.replace(/[^a-zA-Z0-9]/g, '_');
 }
 
 function displayTSVForm(file) {
