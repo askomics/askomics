@@ -87,7 +87,7 @@ class GalaxyConnector(ParamManager):
 
         for file_id in files_id:
             dataset = galaxy_instance.datasets.show_dataset(file_id)
-            path = self.get_upload_directory() + '/Galaxy_' + str(dataset['hid']) + '_' + dataset['name']
+            path = self.get_upload_directory() + '/[' + str(dataset['hid']) + '] ' + dataset['name'] + '.' + dataset['extension']
             galaxy_instance.datasets.download_dataset(file_id, file_path=path, use_default_filename=False)
 
     def send_to_history(self, path, name):
@@ -97,7 +97,6 @@ class GalaxyConnector(ParamManager):
         :type path: string
         """
 
-        galaxy_instance = galaxy.GalaxyInstance(self.url, self.apikey)
         galaxy_instance = galaxy.GalaxyInstance(self.url, self.apikey)
         last_history = galaxy_instance.histories.get_most_recently_used_history()
         galaxy_instance.tools.upload_file(path, last_history['id'], file_name=name)
