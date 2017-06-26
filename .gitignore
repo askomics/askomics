@@ -27,3 +27,6 @@ askomics/test/client/index_tpl.html
 
 # custom config file
 configs/custom.ini
+
+# docker file
+Dockerfile
