@@ -110,4 +110,4 @@ class GalaxyConnector(ParamManager):
         """
         galaxy_instance = galaxy.GalaxyInstance(self.url, self.apikey)
         last_history = galaxy_instance.histories.get_most_recently_used_history()
-        galaxy_instance.tools.paste_content(json, last_history['id'])
+        galaxy_instance.tools.paste_content(json, last_history['id'], file_type='json')
