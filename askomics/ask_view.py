@@ -1644,9 +1644,6 @@ class AskView(object):
         self.data = {}
 
         body = self.request.json_body
-        param_manager = ParamManager(self.settings, self.request.session)
-        path = param_manager.get_user_csv_directory() + body['path']
-        name = body['name']
 
         # get Galaxy infos
         security = Security(self.settings, self.request.session, self.request.session['username'], '', '', '')
@@ -1660,7 +1657,13 @@ class AskView(object):
         # Send the file to Galaxy
         try:
             galaxy = GalaxyConnector(self.settings, self.request.session, galaxy_auth['url'], galaxy_auth['key'])
-            galaxy.send_to_history(path, name)
+            if 'json' in body:
+                galaxy.send_json_to_history(body['json'])
+            else:
+                param_manager = ParamManager(self.settings, self.request.session)
+                path = param_manager.get_user_csv_directory() + body['path']
+                name = body['name']
+                galaxy.send_to_history(path, name)
         except Exception as e:
             self.data['error'] = 'Error during sending: ' + str(e)
             return self.data

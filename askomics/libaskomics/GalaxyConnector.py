@@ -100,3 +100,14 @@ class GalaxyConnector(ParamManager):
         galaxy_instance = galaxy.GalaxyInstance(self.url, self.apikey)
         last_history = galaxy_instance.histories.get_most_recently_used_history()
         galaxy_instance.tools.upload_file(path, last_history['id'], file_name=name)
+
+
+    def send_json_to_history(self, json):
+        """Send json data into the last used galaxy history
+
+        :param json: json data to send
+        :type json: string
+        """
+        galaxy_instance = galaxy.GalaxyInstance(self.url, self.apikey)
+        last_history = galaxy_instance.histories.get_most_recently_used_history()
+        galaxy_instance.tools.paste_content(json, last_history['id'])

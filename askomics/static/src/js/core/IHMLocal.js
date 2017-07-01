@@ -435,6 +435,10 @@ class IHMLocal {
         $('#modal').modal('hide');
     }
 
+    send_query_to_galaxy() {
+        console.log('Send query to galaxy');
+    }
+
     downloadTextAsFile(filename, text) {
         // Download text as file
         var element = document.createElement('a');

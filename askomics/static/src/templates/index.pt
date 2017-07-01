@@ -68,6 +68,7 @@
                             <ul class="dropdown-menu">
                               <li><a href="#" id="dwl-query"><i class="fa fa-download" aria-hidden="true"></i> Save query</a></li>
                               <li><a href="#" id="dwl-query-sparql"><i class="fa fa-floppy-o" aria-hidden="true"></i> Save sparql query</a></li>
+                              <li><a href="#" id="send-query-galaxy"><i class="fa fa-arrow-right"></i> Send query to Galaxy</a></li>
                             </ul>
                           </div>
                           <!-- dropdown Graph -->
