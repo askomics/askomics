@@ -277,8 +277,8 @@ class SourceFileGff(SourceFile):
                         if DomAndRange not in self.abstraction_dict[type_entity]['normal_attr']:
                             self.abstraction_dict[type_entity]['normal_attr'].append(DomAndRange)
                         del attribute_dict[qualifier_key]
-                        entity = {id_entity: attribute_dict}
-                        yield self.get_content_ttl(entity)
+                entity = {id_entity: attribute_dict}
+                yield self.get_content_ttl(entity)
 
         handle.close()
 
