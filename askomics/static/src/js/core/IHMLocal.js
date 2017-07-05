@@ -258,6 +258,12 @@ class IHMLocal {
             let html = template(context);
             $('#init').append(html);
 
+            // Sort inputs
+            let inputs = $("#spdiv");
+            inputs.children().detach().sort(function(a, b) {
+                return $(a).attr("id").localeCompare($(b).attr("id"));
+            }).appendTo(inputs);
+
             // Filter --------------
             // list of all entities
             let list_entities = [];

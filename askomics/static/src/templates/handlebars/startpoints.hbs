@@ -5,23 +5,29 @@
         <input id="filter_entities" type="text" class="form-control" placeholder="Filter entities" aria-describedby="basic-addon1">
     </div>
 </div>
-<div class="scroll">
+<div id="spdiv" class="scroll">
   {{#each startpoints}}
   {{#if this.public_and_private}}
+    <div class="input-label" id="{{this.label}}">
     <input class="hidden start_point_radio" value={{this.label}} type="radio" name="startpoints" id="{{this.uri}}" data-value="{{this}}">
     <label id={{this.label}} for="{{this.uri}}" class="label_startpoints">
         <i class="fa fa-globe text-warning"></i> <i class="fa fa-lock text-primary"></i> <em class="text-primary"><strong>{{this.label}}</strong></em>
     </label>
+    </div>
   {{else if this.public}}
+    <div class="input-label" id="{{this.label}}">
     <input class="hidden start_point_radio" value={{this.label}} type="radio" name="startpoints" id="{{this.uri}}" data-value="{{this}}">
     <label id={{this.label}} for="{{this.uri}}" class="label_startpoints">
         <i class="fa fa-globe text-warning"></i> <em class="text-warning">{{this.label}}</em>
     </label>
+    </div>
   {{else}}
+    <div class="input-label" id="{{this.label}}">
     <input class="hidden start_point_radio" value={{this.label}} type="radio" name="startpoints" id="{{this.uri}}" data-value="{{this}}">
     <label id={{this.label}} for="{{this.uri}}" class="label_startpoints">
         <i class="fa fa-lock text-primary"></i> <strong class="text-primary">{{this.label}}</strong>
     </label>
+    </div>
   {{/if}}
   {{/each}}
 </div>
