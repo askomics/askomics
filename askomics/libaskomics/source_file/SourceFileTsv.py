@@ -406,6 +406,13 @@ class SourceFileTsv(SourceFile):
                 endFaldo = None
                 referenceFaldo = None
                 strandFaldo = None
+
+                # check positionable
+                positionable = False
+                if 'start' in self.forced_column_types and 'end' in self.forced_column_types and 'strand' in self.forced_column_types and 'ref' in self.forced_column_types:
+                    # its a positionable entity
+                    positionable = True
+
                 # Add data from other columns
                 for i, header in enumerate(self.headers): # Skip the first column
                     if i > 0 and i not in self.disabled_columns:
@@ -436,21 +443,26 @@ class SourceFileTsv(SourceFile):
                             #        "\" (Entity :"+entity_id+", Line "+str(row_number)+\
                             #        ") is not a numeric value.\n")
 
-                            # positionable attributes
-                            if current_type == 'start':
-                                startFaldo = row[i]
-                            elif current_type == 'end':
-                                endFaldo = row[i]
-                            elif current_type == 'taxon':
-                                ttl += indent + " " + ':position_taxon' + " " + self.delims[current_type][0] + self.encodeToRDFURI(row[i]) + self.delims[current_type][1] + " ;\n"
-                            elif current_type == 'ref':
-                                referenceFaldo = self.encodeToRDFURI(row[i])
-                            elif current_type == 'strand':
-                                strandFaldo = row[i]
-                                ttl += indent + " " + ':position_strand' + " " + self.delims[current_type][0] + self.encodeToRDFURI(row[i]) + self.delims[current_type][1] + " ;\n"
-                            elif havePrefix:
-                                ttl += indent + " "+ relationName + " " + row[i] + " ;\n"
+                            if positionable:
+                                # positionable attributes
+                                if current_type == 'start':
+                                    startFaldo = row[i]
+                                elif current_type == 'end':
+                                    endFaldo = row[i]
+                                elif current_type == 'taxon':
+                                    ttl += indent + " " + ':position_taxon' + " " + self.delims[current_type][0] + self.encodeToRDFURI(row[i]) + self.delims[current_type][1] + " ;\n"
+                                elif current_type == 'ref':
+                                    referenceFaldo = self.encodeToRDFURI(row[i])
+                                elif current_type == 'strand':
+                                    strandFaldo = row[i]
+                                    ttl += indent + " " + ':position_strand' + " " + self.delims[current_type][0] + self.encodeToRDFURI(row[i]) + self.delims[current_type][1] + " ;\n"
+                                elif havePrefix:
+                                    ttl += indent + " "+ relationName + " " + row[i] + " ;\n"
+                                else:
+                                    ttl += indent + " "+ relationName + " " + self.delims[current_type][0] + self.escape[current_type](row[i]) + self.delims[current_type][1] + " ;\n"
+
                             else:
+                                # Not positionable
                                 ttl += indent + " "+ relationName + " " + self.delims[current_type][0] + self.escape[current_type](row[i]) + self.delims[current_type][1] + " ;\n"
 
                         if current_type == 'entitySym':
@@ -459,11 +471,8 @@ class SourceFileTsv(SourceFile):
                                       self.delims[current_type][1]+" "+relationName+" :"+\
                                       self.encodeToRDFURI(entity_label)  + " .\n"
 
-                #Faldo position management
-                if startFaldo != None or endFaldo != None or referenceFaldo != None:
-                    if startFaldo is None or endFaldo is None or referenceFaldo is None:
-                        raise Exception("miss positionable attribute :\"(Entity:"+
-                                        entity_id+", Line "+str(row_number)+")")
+                # Faldo position management
+                if positionable:
                     blockbase=10000
                     block_idxstart = int(startFaldo) // blockbase
                     block_idxend  = int(endFaldo) // blockbase
@@ -487,7 +496,9 @@ class SourceFileTsv(SourceFile):
                                        "                              faldo:position "+str(endFaldo)+";\n"+\
                                        "                              faldo:reference :"+referenceFaldo+" ]] ;\n"
 
-                ttl = ttl[:-2] + "."
+                    ttl = ttl[:-2] + "."
+
+
                 #manage symmetric relation
                 if ttlSym != "":
                     yield ttlSym

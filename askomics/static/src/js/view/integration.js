@@ -310,10 +310,10 @@ function checkData(file_elem) {
     // check if all positionable attributes are set
     var warning_elem = file_elem.find(".warning-message").first();
 
-    if (containAll(col_types,['start', 'end'])) {//positionable entity with all attributes
+    if (containAll(col_types,['start', 'end', 'strand', 'ref'])) {//positionable entity with all attributes
         warning_elem.html("").removeClass("show").addClass("hidden");
     }else{
-        if (containAny(col_types,['start', 'end', 'ref', 'taxon'])) { //positionable entity with missing attributes
+        if (containAny(col_types,['start', 'end', 'ref', 'taxon', 'strand'])) { //positionable entity with missing attributes
             warning_elem.html('<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> Missing positionable attributes for '+file_name)
                                 .removeClass('hidden')
                               .addClass("show alert alert-danger");
