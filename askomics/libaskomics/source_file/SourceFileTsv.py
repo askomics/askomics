@@ -496,7 +496,7 @@ class SourceFileTsv(SourceFile):
                                        "                              faldo:position "+str(endFaldo)+";\n"+\
                                        "                              faldo:reference :"+referenceFaldo+" ]] ;\n"
 
-                    ttl = ttl[:-2] + "."
+                ttl = ttl[:-2] + "."
 
 
                 #manage symmetric relation
