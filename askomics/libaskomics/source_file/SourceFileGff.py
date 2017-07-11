@@ -18,9 +18,9 @@ class SourceFileGff(SourceFile):
     Class representing a Gff3 Source file
     """
 
-    def __init__(self, settings, session, path):
+    def __init__(self, settings, session, path, uri=None):
 
-        SourceFile.__init__(self, settings, session, path)
+        SourceFile.__init__(self, settings, session, path, uri=uri)
 
         self.type = 'gff'
 
@@ -76,7 +76,6 @@ class SourceFileGff(SourceFile):
         Get turtle string for a gff file
         """
 
-        self.log.debug('--> get turtle <--')
         self.log.debug(self.path)
         handle = open(self.path, encoding="utf-8", errors="ignore")
 
@@ -84,10 +83,8 @@ class SourceFileGff(SourceFile):
         suffixURI = os.path.splitext(os.path.basename(self.path))[0]
 
 
-        self.log.debug("FILTER ON =>"+str(self.entities))
 
         limit = dict(gff_type=self.entities)
-        self.log.debug('--> go!')
 
         regex = re.compile(r'.*:')
         ttl = ''
@@ -268,7 +265,6 @@ class SourceFileGff(SourceFile):
                 if qualifier_key in attribute_dict:
                     for valuri in attribute_dict[qualifier_key]:
                         if not valuri in type_entities:
-                            self.log.warning("Unknown "+qualifier_key+" ID ["+self.decodeToRDFURI(valuri)+"]. Certainly because this element have not been selected.")
                             continue
                         keyuri = self.encodeToRDFURI(qualifier_key+"_"+type_entities[valuri])
                         attribute_dict[':'+keyuri] = str(':' + valuri)
@@ -290,8 +286,8 @@ class SourceFileGff(SourceFile):
         for id_entity, attribute_dict in entity.items():
             first = True
 
-            ttl = ':'+str(id_entity)
-            indent = len(str(id_entity)) * ' ' + ' '
+            ttl = '<' + self.uri + str(id_entity) + '>'
+            indent = len(str(id_entity + self.uri + '<>')) * ' ' + ' '
             for key, attr in attribute_dict.items():
                 if len(attr) <= 0 : # empty attr, dont insert triple
                     continue

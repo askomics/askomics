@@ -371,6 +371,18 @@ function loadSourceFile(file_elem, pub) {
         }
     });
 
+
+    // custom uri
+    let uri = file_elem.find('.div-radio-uri').map(function() {
+        // get the custom uri if set
+        let uri_type = $('input[name=radio-uri]:checked', $(this)).val();
+        let uri;
+        if (uri_type == 'custom') {
+            uri = $('#custom-uri', $(this)).val();
+        }
+        return uri;
+    }).get()[0];
+
     if ( key_columns.length <= 0 ) {
         __ihm.displayModal('Select one column to define a unique key', '', 'Close');
         return;
@@ -383,7 +395,8 @@ function loadSourceFile(file_elem, pub) {
                   'col_types': col_types,
                   'disabled_columns': disabled_columns,
                   'key_columns':key_columns,
-                  'public': pub};
+                  'public': pub,
+                  'uri': uri};
 
     service.post(model, function(data) {
         __ihm.hideModal();
@@ -475,6 +488,17 @@ function loadSourceFileGff(idfile, pub) {
         }
     });
 
+    // custom uri
+    let uri = file_elem.find('.div-radio-uri').map(function() {
+        // get the custom uri if set
+        let uri_type = $('input[name=radio-uri]:checked', $(this)).val();
+        let uri;
+        if (uri_type == 'custom') {
+            uri = $('#custom-uri', $(this)).val();
+        }
+        return uri;
+    }).get()[0];
+
     __ihm.displayModal('Please wait', '', 'Close');
 
     let service = new RestServiceJs("load_gff_into_graph");
@@ -482,7 +506,8 @@ function loadSourceFileGff(idfile, pub) {
     let model = { 'file_name': $("#"+idfile).attr("filename"),
                   'taxon': taxon,
                   'entities': entities,
-                  'public': pub  };
+                  'public': pub,
+                  'uri': uri};
 
     service.post(model, function(data) {
         if (data == 'forbidden') {

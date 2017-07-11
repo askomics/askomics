@@ -176,7 +176,6 @@ class QueryLauncher(ParamManager):
                 else:
                     log_res = pformat(parsed)
                 self.log.debug("----------- RESULTS --------------\n%s", log_res)
-
         return parsed
 
 

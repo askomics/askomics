@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Classes to import data from a gff3 source files
+Classes to import data from a tsv source files
 """
 
 import re
@@ -23,9 +23,9 @@ class SourceFileTsv(SourceFile):
     Class representing a Gff3 Source file
     """
 
-    def __init__(self, settings, session, path, preview_limit):
+    def __init__(self, settings, session, path, preview_limit, uri=None):
 
-        SourceFile.__init__(self, settings, session, path)
+        SourceFile.__init__(self, settings, session, path, uri=uri)
 
         self.type = 'tsv'
 
@@ -251,7 +251,7 @@ class SourceFileTsv(SourceFile):
 
     def getStrandFaldo(self,strand):
 
-        if strand == None:
+        if strand is None:
             return "faldo:BothStrandPosition"
 
         if strand.lower() == "plus" or strand.startswith("+"):
@@ -399,8 +399,8 @@ class SourceFileTsv(SourceFile):
                                              +" - (last valid entity "+entity_label+")")
 
                 entity_id = self.key_id(row)
-                indent = (len(entity_id) + 1) * " "
-                ttl += ":" + self.encodeToRDFURI(entity_id) + " rdf:type :" + self.encodeToRDFURI(self.headers[0]) + " ;\n"
+                indent = (len(self.uri + entity_id) + 2) * " "
+                ttl += "<" + self.uri + self.encodeToRDFURI(entity_id) + "> rdf:type :" + self.encodeToRDFURI(self.headers[0]) + " ;\n"
                 ttl += indent + " rdfs:label " + self.escape['text'](entity_label) + "^^xsd:string ;\n"
                 startFaldo = None
                 endFaldo = None
@@ -420,7 +420,7 @@ class SourceFileTsv(SourceFile):
                         #OFI : manage new header with relation@type_entity
                         #relationName = ":has_" + header # manage old way
                         havePrefix = False
-                        relationName = ":"+self.encodeToRDFURI(header) # manage old way
+                        relationName = ":" + self.encodeToRDFURI(header) # manage old way
                         if current_type.startswith('entity'):
                             idx = header.find("@")
 
@@ -487,14 +487,14 @@ class SourceFileTsv(SourceFile):
                     faldo_strand = self.getStrandFaldo(strandFaldo)
 
                     ttl += indent +    " faldo:location [ a faldo:Region ;\n"+\
-                                       "                  faldo:begin [ a faldo:ExactPosition;\n"+\
-                                       "                                a "+faldo_strand+";\n"+\
-                                       "                                faldo:position "+str(startFaldo)+";\n"+\
-                                       "                                faldo:reference :"+referenceFaldo+" ];\n"+\
-                                       "                  faldo:end [ a faldo:ExactPosition;\n"+\
-                                       "                              a "+faldo_strand+";\n"+\
-                                       "                              faldo:position "+str(endFaldo)+";\n"+\
-                                       "                              faldo:reference :"+referenceFaldo+" ]] ;\n"
+                              indent + "                  faldo:begin [ a faldo:ExactPosition;\n"+\
+                              indent + "                                a "+faldo_strand+";\n"+\
+                              indent + "                                faldo:position "+str(startFaldo)+";\n"+\
+                              indent + "                                faldo:reference :"+referenceFaldo+" ];\n"+\
+                              indent + "                  faldo:end [ a faldo:ExactPosition;\n"+\
+                              indent + "                              a "+faldo_strand+";\n"+\
+                              indent + "                              faldo:position "+str(endFaldo)+";\n"+\
+                              indent + "                              faldo:reference :"+referenceFaldo+" ]] ;\n"
 
                 ttl = ttl[:-2] + "."
 

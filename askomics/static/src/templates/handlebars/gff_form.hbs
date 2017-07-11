@@ -22,6 +22,15 @@
         {{/if}}
         <input type="text" name="frame" id="tax-{{idfile}}">
         <br><br>
+
+        <div class="form-group form-inlines div-radio-uri">
+            <input type="radio" name="radio-uri" value="default" id="default" checked="checked" />
+            <label for="default">Use default URI</label><br/ >
+            <input type="radio" name="radio-uri" value="custom" id="custom" />
+            <label for="custom">Use custom URI </label>
+            <input id='custom-uri' type="text"></input>
+        </div>
+
         <div class="btn-group" role="group" aria-label="metadata">
             <label id="{{idfile}}" for="{{idfile}}" class="btn btn-default load_data_gff"><i class="fa fa-lock text-primary"></i> Insert as a <i class="text-primary">private</i> dataset</label>
             <input id="{{idfile}}"class="btn hidden" value="Insert in private graph" />

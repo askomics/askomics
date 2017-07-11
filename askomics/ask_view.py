@@ -540,6 +540,9 @@ class AskView(object):
         disabled_columns = body["disabled_columns"]
         key_columns = body["key_columns"]
         public = body['public']
+        uri = None
+        if 'uri' in body:
+            uri = body['uri']
 
         method = 'load'
         if 'method' in body:
@@ -555,7 +558,7 @@ class AskView(object):
             return self.data
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
-        src_file = sfc.get_source_file(file_name, forced_type)
+        src_file = sfc.get_source_file(file_name, forced_type, uri=uri)
         src_file.set_forced_column_types(col_types)
         src_file.set_disabled_columns(disabled_columns)
         src_file.set_key_columns(key_columns)
@@ -598,6 +601,9 @@ class AskView(object):
         taxon = body['taxon']
         entities = body['entities']
         public = body['public']
+        uri = None
+        if 'uri' in body:
+            uri = body['uri']
 
         method = 'load'
         if 'method' in body:
@@ -613,7 +619,7 @@ class AskView(object):
             public = False
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
-        src_file_gff = sfc.get_source_file(file_name, forced_type)
+        src_file_gff = sfc.get_source_file(file_name, forced_type, uri=uri)
 
         src_file_gff.set_taxon(taxon)
         src_file_gff.set_entities(entities)

@@ -237,6 +237,6 @@ label.label_startpoints {
     margin-left: 5px;
 }
 
-input[type="radio"]:checked+label{
+input[type="radio"].start_point_radio:checked+label{
     background-color: #ccc;
 }
