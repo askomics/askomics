@@ -419,7 +419,7 @@ class AskView(object):
             infos['type'] = src_file.type
             if src_file.type == 'tsv':
                 try:
-                    infos['headers'] = src_file.headers
+                    infos['headers'] = src_file.get_headers_by_file
                     infos['preview_data'] = src_file.get_preview_data()
                     infos['column_types'] = []
                     header_num = 0
@@ -540,6 +540,7 @@ class AskView(object):
         disabled_columns = body["disabled_columns"]
         key_columns = body["key_columns"]
         public = body['public']
+        headers = body['headers']
         uri = None
         if 'uri' in body:
             uri = body['uri']
@@ -559,6 +560,7 @@ class AskView(object):
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
         src_file = sfc.get_source_file(file_name, forced_type, uri=uri)
+        src_file.set_headers(headers)
         src_file.set_forced_column_types(col_types)
         src_file.set_disabled_columns(disabled_columns)
         src_file.set_key_columns(key_columns)

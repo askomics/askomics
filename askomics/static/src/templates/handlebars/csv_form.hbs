@@ -1,4 +1,4 @@
-<form id="source-file-tsv-{{idfile}}" class="template-source_file form-horizontal text-center">
+<form id="source-file-tsv-{{idfile}}" class="template-source_file form-horizontal text-center" header={{file.headers}}>
     <h4 class="file_name" id="{{idfile}}" filename="{{file.name}}">TSV file: {{ file.name }}</h4>
     <br/>
     {{#if error}}
@@ -12,7 +12,7 @@
                         {{#unless @first}}
                             <input type='checkbox' class='toggle_column_present' checked />
                         {{/unless}}
-                        {{ this }}
+                        <k class='header-text'>{{this}}</k>
 
                     </th>
                 {{/each}}
@@ -75,6 +75,9 @@
             </tbody>
         </table>
         <pre class='preview_field'></pre>
+        <div class="form-group form-inline">
+            <div class="btn btn-default" id="edit-headers">Edit headers</div>
+        </div>
 
         <div class="form-group form-inlines div-radio-uri">
             <input type="radio" name="radio-uri" value="default" id="default" checked="checked" />

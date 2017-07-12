@@ -33,7 +33,8 @@ class SourceFileTsv(SourceFile):
 
         self.forced_column_types = ['entity']
         self.disabled_columns = []
-        self.key_columns = [];
+        self.key_columns = []
+        self.headers = self.get_headers_by_file
 
         self.category_values = defaultdict(set)
 
@@ -81,7 +82,7 @@ class SourceFileTsv(SourceFile):
             return dialect
 
     @cached_property
-    def headers(self):
+    def get_headers_by_file(self):
         """
         Read and return the column headers.
 
@@ -99,6 +100,15 @@ class SourceFileTsv(SourceFile):
             headers = [h.strip() for h in headers]
 
         return headers
+
+    def set_headers(self, headers):
+        """Set the headers
+
+        :param headers: the headers list
+        :type headers: list
+        """
+
+        self.headers = headers
 
     def get_preview_data(self):
         """

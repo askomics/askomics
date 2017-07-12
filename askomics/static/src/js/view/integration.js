@@ -31,12 +31,24 @@ $(function () {
     });
 
     $("#content_integration").on('click', '.load_data_tsv', function(event) {
-        loadSourceFile($(event.target).closest('.template-source_file'), false);
+        // get headers
+        let headers = [];
+        let form = $(event.target).closest('.template-source_file');
+        form.find($('.header-text')).each(function(){
+            headers.push($(this).text());
+        });
+        loadSourceFile($(event.target).closest('.template-source_file'), false, headers);
     });
 
     // Load the tsv file into the public graph
     $("#content_integration").on('click', '.load_data_tsv_public', function(event) {
-        loadSourceFile($(event.target).closest('.template-source_file'), true);
+        // get headers
+        let headers = [];
+        let form = $(event.target).closest('.template-source_file');
+        form.find($('.header-text')).each(function(){
+            headers.push($(this).text());
+        });
+        loadSourceFile($(event.target).closest('.template-source_file'), true, headers);
     });
 
     $("#content_integration").on('click', '.load_data_gff', function() {
@@ -106,7 +118,6 @@ function getIdFile(file) {
 }
 
 function displayTSVForm(file) {
-    console.log('-+-+- displayTSVForm -+-+-');
     // tranform columns to rows
     if ('preview_data' in file) {
         file.preview_data = cols2rows(file.preview_data);
@@ -125,11 +136,24 @@ function displayTSVForm(file) {
 
     $("#content_integration").append(html);
     setCorrectType(file);
+
+    // Edit headers
+    let edit_headers_button = $('#source-file-tsv-' + getIdFile(file)).find("#edit-headers");
+    edit_headers_button.click(function(){
+        console.log('edit headers');
+        $('.header-text').each(function(){
+            if ($(this).find('input').length){
+                $(this).text($(this).find('input').val());
+            }
+            else {
+                var t = $(this).text();
+                $(this).text('').append($('<input />',{'value' : t}).val(t));
+            }
+        });
+    });
 }
 
 function displayGffForm(file, taxons) {
-    console.log('-+-+- displayGffForm -+-+-');
-
     let template = AskOmics.templates.gff_form;
 
     // User is admin if administration element is present in navbar
@@ -147,8 +171,6 @@ function displayGffForm(file, taxons) {
 }
 
 function displayTtlForm(file) {
-    console.log('--- displayTtlForm ---');
-
     let template = AskOmics.templates.ttl_form;
 
     // User is admin if administration element is present in navbar
@@ -167,8 +189,6 @@ function displayTtlForm(file) {
 }
 
 function setCorrectType(file) {
-    console.log('--- setCorrectType ---');
-
     function mapCallback() {
         return $(this).val();
     }
@@ -203,8 +223,6 @@ function setCorrectType(file) {
  * Get ttl representation of preview data
  */
 function previewTtl(file_elem) {
-    console.log('---> previewTtl');
-
     var idfile = file_elem.find('.file_name').attr('id');
 
     // Get column types
@@ -346,8 +364,7 @@ function checkData(file_elem) {
 /**
  * Load a source_file into the triplestore
  */
-function loadSourceFile(file_elem, pub) {
-    console.log('---> loadSourceFile');
+function loadSourceFile(file_elem, pub, headers) {
 
     let idfile = file_elem.find('.file_name').attr('id');
 
@@ -392,6 +409,7 @@ function loadSourceFile(file_elem, pub) {
 
     var service = new RestServiceJs("load_data_into_graph");
     var model = { 'file_name': $("#"+idfile).attr("filename"),
+                  'headers': headers,
                   'col_types': col_types,
                   'disabled_columns': disabled_columns,
                   'key_columns':key_columns,
