@@ -35,7 +35,7 @@ $(function () {
         let headers = [];
         let form = $(event.target).closest('.template-source_file');
         form.find($('.header-text')).each(function(){
-            headers.push($(this).text());
+            headers.push($(this).val());
         });
         loadSourceFile($(event.target).closest('.template-source_file'), false, headers);
     });
@@ -118,6 +118,7 @@ function getIdFile(file) {
 }
 
 function displayTSVForm(file) {
+    console.log('diplay tsv form for file ' + file.name);
     // tranform columns to rows
     if ('preview_data' in file) {
         file.preview_data = cols2rows(file.preview_data);
@@ -136,21 +137,6 @@ function displayTSVForm(file) {
 
     $("#content_integration").append(html);
     setCorrectType(file);
-
-    // Edit headers
-    let edit_headers_button = $('#source-file-tsv-' + getIdFile(file)).find("#edit-headers");
-    edit_headers_button.click(function(){
-        console.log('edit headers');
-        $('.header-text').each(function(){
-            if ($(this).find('input').length){
-                $(this).text($(this).find('input').val());
-            }
-            else {
-                var t = $(this).text();
-                $(this).text('').append($('<input />',{'value' : t}).val(t));
-            }
-        });
-    });
 }
 
 function displayGffForm(file, taxons) {

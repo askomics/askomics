@@ -12,7 +12,7 @@
                         {{#unless @first}}
                             <input type='checkbox' class='toggle_column_present' checked />
                         {{/unless}}
-                        <k class='header-text'>{{this}}</k>
+                        <input class='header-text' value="{{this}}"></input>
 
                     </th>
                 {{/each}}
@@ -75,9 +75,6 @@
             </tbody>
         </table>
         <pre class='preview_field'></pre>
-        <div class="form-group form-inline">
-            <div class="btn btn-default" id="edit-headers">Edit headers</div>
-        </div>
 
         <div class="form-group form-inlines div-radio-uri">
             <input type="radio" name="radio-uri" value="default" id="default" checked="checked" />
