@@ -285,6 +285,7 @@ class AskViewTests(unittest.TestCase):
             ],
             'disabled_columns': [],
             'public': False,
+            'headers': ['People', 'First_name', 'Last_name', 'Sex', 'Age'],
             'method': 'noload'
         }
 
