@@ -88,13 +88,16 @@ pre {
 
 .preview_table {
     width: 100%;
+    display: table;
+}
+
+.preview_table-div {
+    width: 100%;
     display: block;
-    white-space: nowrap;
     overflow-x: auto;
     max-height: 450px;
     overflow-y: auto;
 }
-
 .preview_table td:first-child,
 .preview_table th:first-child {
     border-right: 2px solid #ddd;
