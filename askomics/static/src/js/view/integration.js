@@ -87,6 +87,10 @@ function cols2rows(items) {
             if (!(j in out))  {
                 out[j] = [];
             }
+            // only 205 first chars. if more, append "..."
+            if (items[i][j].length > 25) {
+               items[i][j] = items[i][j].substring(0, 25) + "...";
+            }
             out[j][i] = items[i][j];
         }
     }
