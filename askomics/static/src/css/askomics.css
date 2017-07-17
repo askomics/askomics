@@ -87,8 +87,8 @@ pre {
 }
 
 .preview_table {
-    width: auto;
-    display: inline-block;
+    width: 100%;
+    display: block;
     white-space: nowrap;
     overflow-x: auto;
     max-height: 450px;

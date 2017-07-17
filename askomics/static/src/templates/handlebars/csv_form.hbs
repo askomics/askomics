@@ -76,12 +76,27 @@
         </table>
         <pre class='preview_field'></pre>
 
-        <div class="form-group form-inlines div-radio-uri">
-            <input type="radio" name="radio-uri" value="default" id="default-{{idfile}}" checked="checked" />
-            <label for="default-{{idfile}}">Use default URI</label><br/ >
-            <input type="radio" name="radio-uri" value="custom" id="custom-{{idfile}}" />
-            <label for="custom-{{idfile}}">Use custom URI </label>
-            <input id='custom-uri' type="text"></input>
+        <div class="container">
+          <div class="panel-group">
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <h4 class="panel-title">
+                  <a data-toggle="collapse" href="#advanced-{{idfile}}">Advanced features</a>
+                </h4>
+              </div>
+              <div id="advanced-{{idfile}}" class="panel-collapse collapse">
+                <div class="panel-body">
+                    <div class="form-group form-inlines div-radio-uri" id="advanced-{{idfile}}">
+                        <input type="radio" name="radio-uri" value="default" id="default-{{idfile}}" checked="checked" />
+                        <label for="default-{{idfile}}">Use default URI</label><br/ >
+                        <input type="radio" name="radio-uri" value="custom" id="custom-{{idfile}}" />
+                        <label for="custom-{{idfile}}">Use custom URI </label>
+                        <input id='custom-uri' type="text"></input>
+                    </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="form-group form-inline">
