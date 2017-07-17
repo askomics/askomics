@@ -38,6 +38,10 @@
         <!-- Handlebars -->
         <script src="static/libs/handlebars/handlebars-v4.0.5.min.js"></script>
 
+        <!-- dataTables -->
+        <link href="static/libs/dataTables/datatables.min.css" rel="stylesheet" type="text/css">
+        <script src="static/libs/dataTables/datatables.min.js"></script>
+
         <!-- Askomics -->
         <script src="static/dist/askomics.js"></script>
         <link href="static/dist/askomics.css" rel="stylesheet" type="text/css">

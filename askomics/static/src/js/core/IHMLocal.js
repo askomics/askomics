@@ -352,6 +352,13 @@ class IHMLocal {
                     __ihm.resetStats();
                 });
             });
+
+            // sorted dataTable
+            $('.data-table').DataTable({
+                'order': [[1, 'asc']],
+                'columnDefs': [{ 'orderable': false, 'targets': 0 }]
+            });
+
         });
     }
 
