@@ -568,7 +568,7 @@ class IHMLocal {
         $('.del_user').click(function() {
           __ihm.delUser(this.id);
         });
-        // __ihm.hideModal();
+        $('.table-user').DataTable();
       });
 
       this.shortcutsView.updateShortcuts(true);
