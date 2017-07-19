@@ -243,3 +243,11 @@ label.label_startpoints {
 input[type="radio"].start_point_radio:checked+label{
     background-color: #ccc;
 }
+
+.dataTables_length label {
+    font-weight: normal;
+}
+
+.dataTables_filter label {
+    font-weight: normal;
+}
