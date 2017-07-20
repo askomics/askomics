@@ -207,7 +207,7 @@ class SparqlQueryGraph(SparqlQueryBuilder):
                      '\t            rdfs:label ?labelCategory ;\n' +
                      '\t            rdfs:domain ?entity;\n' +
                      '\t            rdfs:range ?typeCategory.\n' +
-                     '\tOPTIONAL {?attribute displaySetting:attributeOrder ?order .}\n' +
+                     '\tOPTIONAL {?category displaySetting:attributeOrder ?order .}\n' +
                      '\t?typeCategory displaySetting:category [] .\n' +
                      '\t{'+
                      '\t\t{ ?g :accessLevel "public". }'+
@@ -227,4 +227,4 @@ class SparqlQueryGraph(SparqlQueryBuilder):
                      '\tOPTIONAL { ?relation rdfs:domain ?class } .\n' +
                      '\tOPTIONAL { ?relation rdfs:range ?range } .\n' +
                      '\tOPTIONAL { ?relation rdfs:label ?relation_label }.\n} '
-            },True)
+            }, True)

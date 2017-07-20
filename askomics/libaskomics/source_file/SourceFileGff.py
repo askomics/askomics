@@ -308,6 +308,15 @@ class SourceFileGff(SourceFile):
         Get Abstraction (turtle) of the GFF
         """
 
+        order_dict = {
+            'Name': '1',
+            'position_ref': '2',
+            'position_start': '3',
+            'position_end': '4',
+            'position_strand': '5',
+            'position_taxon': '6'
+        }
+
         ttl =  '#################\n'
         ttl += '#  Abstraction  #\n'
         ttl += '#################\n\n'
@@ -329,6 +338,7 @@ class SourceFileGff(SourceFile):
                             ttl += indent + 'rdfs:label \"' + pos_attr.replace('position_', '') + '\"^^xsd:string ;\n'
                             ttl += indent + 'rdfs:domain ' + ':'+ entity + ' ;\n'
                             ttl += indent + 'rdfs:range xsd:decimal .\n\n'
+                            ttl += ":" + pos_attr + ' displaySetting:attributeOrder "' + order_dict[pos_attr] + '"^^xsd:decimal .\n'
                         else:
                             # No taxon, don't write triple and continue loop
                             if pos_attr == 'position_taxon' and self.taxon == '':
@@ -339,9 +349,10 @@ class SourceFileGff(SourceFile):
                             ttl += indent + 'rdfs:label \"' + pos_attr.replace('position_', '') + '\"^^xsd:string ;\n'
                             ttl += indent + 'rdfs:domain ' + ':'+ entity + ' ;\n'
                             ttl += indent + 'rdfs:range :' + pos_attr.replace('position_', '') + "Category .\n\n"
+                            ttl += ":" + pos_attr + ' displaySetting:attributeOrder "' + order_dict[pos_attr] + '"^^xsd:decimal .\n'
                 else: # other attributes
                     for attr in attr_list:
-                        if type(attr) == type({}): # Parent relation
+                        if isinstance(attr, dict): # Parent relation
                             for key, value in attr.items():
                                 ttl += ':' + key + ' rdf:type owl:ObjectProperty ;\n'
                                 indent = len(key) * ' ' + '  '
@@ -355,6 +366,8 @@ class SourceFileGff(SourceFile):
                             ttl += indent + 'rdfs:label \"' + attr + '\"^^xsd:string ;\n'
                             ttl += indent + 'rdfs:domain ' + ':'+ entity + " ;\n"
                             ttl += indent + 'rdfs:range xsd:string .\n\n'
+                            if attr == 'Name':
+                                ttl += ":" + attr + ' displaySetting:attributeOrder "' + order_dict[attr] + '"^^xsd:decimal .\n'
         #print(ttl)
         return ttl
 
