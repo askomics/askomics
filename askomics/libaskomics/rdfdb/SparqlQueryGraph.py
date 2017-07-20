@@ -133,13 +133,14 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         Get all attributes of an entity
         """
         return self.build_query_on_the_fly({
-            'select': '?g ?entity ?attribute ?labelAttribute ?typeAttribute',
+            'select': '?g ?entity ?attribute ?labelAttribute ?typeAttribute ?order',
             'query': 'Graph ?g {\n' +
                      '\t?entity displaySetting:entity "true"^^xsd:boolean .\n\n' +
                      '\t?attribute displaySetting:attribute "true"^^xsd:boolean .\n\n' +
                      '\t?attribute rdf:type owl:DatatypeProperty ;\n' +
                      '\t           rdfs:label ?labelAttribute ;\n' +
                      '\t           rdfs:domain ?entity ;\n' +
+                     '\t           displaySetting:attributeOrder ?order ;\n' +
                      '\t           rdfs:range ?typeAttribute .\n\n' +
                      '\t{'+
                      '\t\t{ ?g :accessLevel "public". }'+
@@ -199,12 +200,13 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         Get the category of an entity
         """
         return self.build_query_on_the_fly({
-            'select': '?g ?entity ?category ?labelCategory ?typeCategory',
+            'select': '?g ?entity ?category ?labelCategory ?typeCategory ?order',
             'query': 'GRAPH ?g { \n'+
                      '\t?entity displaySetting:entity "true"^^xsd:boolean .\n' +
                      '\t?category rdf:type owl:ObjectProperty ;\n' +
                      '\t            rdfs:label ?labelCategory ;\n' +
                      '\t            rdfs:domain ?entity;\n' +
+                     '\t           displaySetting:attributeOrder ?order ;\n' +
                      '\t            rdfs:range ?typeCategory.\n' +
                      '\t?typeCategory displaySetting:category [] .\n' +
                      '\t{'+

@@ -302,11 +302,13 @@ class SourceFileTsv(SourceFile):
             if key > 0 and not key_type.startswith('entity') :
                 if key_type in ('taxon', 'ref', 'strand', 'start', 'end'):
                     uri = 'position_'+key_type
-                elif key_type == 'taxon':
-                    uri = 'position_'+key_type
+                # elif key_type == 'taxon':
+                #     uri = 'position_'+key_type
                 else:
                     uri = self.encodeToRDFURI(self.headers[key])
                 ttl += ":" + uri + ' displaySetting:attribute "true"^^xsd:boolean .\n'
+                # store the order of attrbutes in order to display attributes in the right order
+                ttl += ":" + uri + ' displaySetting:attributeOrder "' + str(key) + '"^^xsd:decimal .\n'
 
             if key > 0 :
                 ttl += AbstractedRelation(key_type, self.headers[key], ref_entity, self.type_dict[key_type]).get_turtle()

@@ -669,10 +669,10 @@ class AskomicsNodeView extends AskomicsObjectView {
 
 /* ===============================================================================================*/
   create() {
-    var mythis = this;
-    var node = this.node;
+    let mythis = this;
+    let node = this.node;
 
-     var elemUri = node.uri,
+     let elemUri = node.uri,
           //elemId  = node.SPARQLid,
           nameDiv = this.prefix+node.SPARQLid ;
 
@@ -683,7 +683,7 @@ class AskomicsNodeView extends AskomicsObjectView {
       let lab = $("<label></label>").attr("urinode",node.uri).attr("uri",node.uri).attr("for",node.label).html(node.label);
       node.switchRegexpMode(node.SPARQLid);
 
-      mythis.addPanel($('<div></div>')
+      mythis.addPanel(0, $('<div></div>')
              .attr("id",node.id)
              .attr("sparqlid",node.SPARQLid)
              .attr("uri",node.uri)
@@ -706,8 +706,9 @@ class AskomicsNodeView extends AskomicsObjectView {
           var lab = $("<label></label>").attr("uri",attribute.uri).attr("for",attribute.label).text(attribute.label);
 
           if ( attribute.basic_type == "category" ) {
+            let order = attribute.order;
             /* RemoveIcon, EyeIcon, Attribute IHM */
-            mythis.addPanel($('<div></div>')
+            mythis.addPanel(order, $('<div></div>')
                    .attr("id",attribute.id)
                    .attr("sparqlid",attribute.SPARQLid)
                    .attr("uri",attribute.uri)
@@ -721,8 +722,9 @@ class AskomicsNodeView extends AskomicsObjectView {
                    .append(mythis.buildCategory(attribute,listGraphsWithAtt))
                    .append(mythis.buildLinkVariable(attribute)));
           } else if ( attribute.basic_type == "decimal" ) {
+            let order = attribute.order;
             /* RemoveIcon, EyeIcon, Attribute IHM */
-            mythis.addPanel($('<div></div>').append(lab)
+            mythis.addPanel(order, $('<div></div>').append(lab)
                    .attr("id",attribute.id)
                    .attr("sparqlid",attribute.SPARQLid)
                    .attr("uri",attribute.uri)
@@ -734,9 +736,10 @@ class AskomicsNodeView extends AskomicsObjectView {
                    .append(mythis.buildDecimal(1,attribute))
                    .append(mythis.buildLinkVariable(attribute)));
           } else if ( attribute.basic_type == "string" ) {
+            let order = attribute.order;
             node.switchRegexpMode(attribute.SPARQLid);
             /* RemoveIcon, EyeIcon, Attribute IHM */
-            mythis.addPanel($('<div></div>').append(lab)
+            mythis.addPanel(order, $('<div></div>').append(lab)
                    .attr("id",attribute.id)
                    .attr("sparqlid",attribute.SPARQLid)
                    .attr("uri",attribute.uri)
@@ -753,6 +756,17 @@ class AskomicsNodeView extends AskomicsObjectView {
           }
           //$('#waitModal').modal('hide');
       });
+
+      // Sort the list
+      let list = this.details.find("#sortableAttribute");
+      let items = list.children("li").get();
+
+      items.sort(function(a, b) {
+          return ($(b).attr('order')) < ($(a).attr('order')) ? 1 : -1;
+      });
+
+      $.each(items, function(idx, itm) {list.append(itm);});
+
       //TODO: set a method in super class
       $("#viewDetails").append(this.details);
   }
