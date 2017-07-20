@@ -140,8 +140,8 @@ class SparqlQueryGraph(SparqlQueryBuilder):
                      '\t?attribute rdf:type owl:DatatypeProperty ;\n' +
                      '\t           rdfs:label ?labelAttribute ;\n' +
                      '\t           rdfs:domain ?entity ;\n' +
-                     '\t           displaySetting:attributeOrder ?order ;\n' +
                      '\t           rdfs:range ?typeAttribute .\n\n' +
+                     '\tOPTIONAL {?attribute displaySetting:attributeOrder ?order .}\n' +
                      '\t{'+
                      '\t\t{ ?g :accessLevel "public". }'+
                      '\t\tUNION '+
@@ -206,8 +206,8 @@ class SparqlQueryGraph(SparqlQueryBuilder):
                      '\t?category rdf:type owl:ObjectProperty ;\n' +
                      '\t            rdfs:label ?labelCategory ;\n' +
                      '\t            rdfs:domain ?entity;\n' +
-                     '\t           displaySetting:attributeOrder ?order ;\n' +
                      '\t            rdfs:range ?typeCategory.\n' +
+                     '\tOPTIONAL {?attribute displaySetting:attributeOrder ?order .}\n' +
                      '\t?typeCategory displaySetting:category [] .\n' +
                      '\t{'+
                      '\t\t{ ?g :accessLevel "public". }'+
