@@ -386,6 +386,7 @@ class AskViewTests(unittest.TestCase):
                 '?URIPeople1 rdfs:label ?People1'
             ], '']], ''],
             'variates': ['?People1'],
+            'headers': ['People1'],
             'removeGraph': []
         }
 
