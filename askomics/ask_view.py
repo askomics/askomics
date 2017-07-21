@@ -25,7 +25,6 @@ from askomics.libaskomics.rdfdb.SparqlQueryGraph import SparqlQueryGraph
 from askomics.libaskomics.rdfdb.SparqlQueryStats import SparqlQueryStats
 from askomics.libaskomics.rdfdb.SparqlQueryAuth import SparqlQueryAuth
 from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
-from askomics.libaskomics.rdfdb.ResultsBuilder import ResultsBuilder
 from askomics.libaskomics.source_file.SourceFile import SourceFile
 
 from pyramid.httpexceptions import (
@@ -838,21 +837,24 @@ class AskView(object):
     @view_config(route_name='sparqlquery', request_method='POST')
     def get_value(self):
         """ Build a request from a json whith the following contents :variates,constraintesRelations,constraintesFilters"""
-        self.log.debug("== Attribute Value ==")
-        body=self.request.json_body
+
+        body = self.request.json_body
+
+        if 'headers' in body:
+            ordered_headers = body['headers']
 
         try:
             tse = TripleStoreExplorer(self.settings, self.request.session)
             lfrom = []
             if 'from' in body:
                 lfrom = body['from']
-            results,query = tse.build_sparql_query_from_json(lfrom,body["variates"],body["constraintesRelations"],True)
+            results, query = tse.build_sparql_query_from_json(lfrom, body["variates"], body["constraintesRelations"], True)
 
             #body["limit"]
             # Remove prefixes in the results table
-            l = int(body["limit"]) + 1
-            if body["limit"]!=-1 and l < len(results):
-                self.data['values'] = results[1:l+1]
+            limit = int(body["limit"]) + 1
+            if body["limit"] != -1 and limit < len(results):
+                self.data['values'] = results[1:limit+1]
             else:
                 self.data['values'] = results
 
@@ -860,9 +862,9 @@ class AskView(object):
 
             # Provide results file
             if (not 'nofile' in body) or body['nofile']:
-                ql = QueryLauncher(self.settings, self.request.session)
-                rb = ResultsBuilder(self.settings, self.request.session)
-                self.data['file'] = ql.format_results_csv(rb.build_csv_table(results))
+                query_laucher = QueryLauncher(self.settings, self.request.session)
+                self.data['file'] = query_laucher.format_results_csv(results, ordered_headers)
+
         except Exception as e:
             #exc_type, exc_value, exc_traceback = sys.exc_info()
             #traceback.print_exc(limit=8)

@@ -242,6 +242,7 @@ class AskomicsNode extends GraphNode {
     /* adding variable node name if asked by the user */
     if (this.actif) {
       variates.push("?"+this.SPARQLid);
+      variates.push("?URI"+this.SPARQLid);
     } else {
       return ; /* Attribute are not instanciate too */
     }

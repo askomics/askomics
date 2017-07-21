@@ -16,6 +16,10 @@ class AskomicsResultsView {
     if (this.activesAttributes === undefined ) throw "AskomicsResultsView :: activesAttributes is not set.";
   }
 
+  getActivesAttributes() {
+    return this.activesAttributes;
+  }
+
   setActivesAttributes() {
 
     this.is_valid();
