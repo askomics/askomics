@@ -67,6 +67,7 @@ class GraphNode extends GraphObject {
     AttOrCatArray[attributeForUri.uri].type      = attributeForUri.type ;
     AttOrCatArray[attributeForUri.uri].basic_type  = attributeForUri.basic_type ;
     AttOrCatArray[attributeForUri.uri].label     = attributeForUri.label ;
+    AttOrCatArray[attributeForUri.uri].order = attributeForUri.order;
 
     __ihm.getGraphBuilder().setSPARQLVariateId(AttOrCatArray[attributeForUri.uri]);
     AttOrCatArray[attributeForUri.uri].id=__ihm.getGraphBuilder().getId();

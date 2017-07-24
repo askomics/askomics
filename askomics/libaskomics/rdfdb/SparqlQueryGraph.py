@@ -133,7 +133,7 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         Get all attributes of an entity
         """
         return self.build_query_on_the_fly({
-            'select': '?g ?entity ?attribute ?labelAttribute ?typeAttribute',
+            'select': '?g ?entity ?attribute ?labelAttribute ?typeAttribute ?order',
             'query': 'Graph ?g {\n' +
                      '\t?entity displaySetting:entity "true"^^xsd:boolean .\n\n' +
                      '\t?attribute displaySetting:attribute "true"^^xsd:boolean .\n\n' +
@@ -141,6 +141,7 @@ class SparqlQueryGraph(SparqlQueryBuilder):
                      '\t           rdfs:label ?labelAttribute ;\n' +
                      '\t           rdfs:domain ?entity ;\n' +
                      '\t           rdfs:range ?typeAttribute .\n\n' +
+                     '\tOPTIONAL {?attribute displaySetting:attributeOrder ?order .}\n' +
                      '\t{'+
                      '\t\t{ ?g :accessLevel "public". }'+
                      '\t\tUNION '+
@@ -199,13 +200,14 @@ class SparqlQueryGraph(SparqlQueryBuilder):
         Get the category of an entity
         """
         return self.build_query_on_the_fly({
-            'select': '?g ?entity ?category ?labelCategory ?typeCategory',
+            'select': '?g ?entity ?category ?labelCategory ?typeCategory ?order',
             'query': 'GRAPH ?g { \n'+
                      '\t?entity displaySetting:entity "true"^^xsd:boolean .\n' +
                      '\t?category rdf:type owl:ObjectProperty ;\n' +
                      '\t            rdfs:label ?labelCategory ;\n' +
                      '\t            rdfs:domain ?entity;\n' +
                      '\t            rdfs:range ?typeCategory.\n' +
+                     '\tOPTIONAL {?category displaySetting:attributeOrder ?order .}\n' +
                      '\t?typeCategory displaySetting:category [] .\n' +
                      '\t{'+
                      '\t\t{ ?g :accessLevel "public". }'+
@@ -225,4 +227,4 @@ class SparqlQueryGraph(SparqlQueryBuilder):
                      '\tOPTIONAL { ?relation rdfs:domain ?class } .\n' +
                      '\tOPTIONAL { ?relation rdfs:range ?range } .\n' +
                      '\tOPTIONAL { ?relation rdfs:label ?relation_label }.\n} '
-            },True)
+            }, True)

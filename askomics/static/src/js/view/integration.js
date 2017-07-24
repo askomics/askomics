@@ -31,12 +31,24 @@ $(function () {
     });
 
     $("#content_integration").on('click', '.load_data_tsv', function(event) {
-        loadSourceFile($(event.target).closest('.template-source_file'), false);
+        // get headers
+        let headers = [];
+        let form = $(event.target).closest('.template-source_file');
+        form.find($('.header-text')).each(function(){
+            headers.push($(this).val());
+        });
+        loadSourceFile($(event.target).closest('.template-source_file'), false, headers);
     });
 
     // Load the tsv file into the public graph
     $("#content_integration").on('click', '.load_data_tsv_public', function(event) {
-        loadSourceFile($(event.target).closest('.template-source_file'), true);
+        // get headers
+        let headers = [];
+        let form = $(event.target).closest('.template-source_file');
+        form.find($('.header-text')).each(function(){
+            headers.push($(this).text());
+        });
+        loadSourceFile($(event.target).closest('.template-source_file'), true, headers);
     });
 
     $("#content_integration").on('click', '.load_data_gff', function() {
@@ -75,6 +87,10 @@ function cols2rows(items) {
             if (!(j in out))  {
                 out[j] = [];
             }
+            // only 205 first chars. if more, append "..."
+            if (items[i][j].length > 25) {
+               items[i][j] = items[i][j].substring(0, 25) + "...";
+            }
             out[j][i] = items[i][j];
         }
     }
@@ -106,7 +122,7 @@ function getIdFile(file) {
 }
 
 function displayTSVForm(file) {
-    console.log('-+-+- displayTSVForm -+-+-');
+    console.log('diplay tsv form for file ' + file.name);
     // tranform columns to rows
     if ('preview_data' in file) {
         file.preview_data = cols2rows(file.preview_data);
@@ -128,8 +144,6 @@ function displayTSVForm(file) {
 }
 
 function displayGffForm(file, taxons) {
-    console.log('-+-+- displayGffForm -+-+-');
-
     let template = AskOmics.templates.gff_form;
 
     // User is admin if administration element is present in navbar
@@ -147,8 +161,6 @@ function displayGffForm(file, taxons) {
 }
 
 function displayTtlForm(file) {
-    console.log('--- displayTtlForm ---');
-
     let template = AskOmics.templates.ttl_form;
 
     // User is admin if administration element is present in navbar
@@ -167,8 +179,6 @@ function displayTtlForm(file) {
 }
 
 function setCorrectType(file) {
-    console.log('--- setCorrectType ---');
-
     function mapCallback() {
         return $(this).val();
     }
@@ -203,8 +213,6 @@ function setCorrectType(file) {
  * Get ttl representation of preview data
  */
 function previewTtl(file_elem) {
-    console.log('---> previewTtl');
-
     var idfile = file_elem.find('.file_name').attr('id');
 
     // Get column types
@@ -310,10 +318,10 @@ function checkData(file_elem) {
     // check if all positionable attributes are set
     var warning_elem = file_elem.find(".warning-message").first();
 
-    if (containAll(col_types,['start', 'end'])) {//positionable entity with all attributes
+    if (containAll(col_types,['start', 'end', 'strand', 'ref'])) {//positionable entity with all attributes
         warning_elem.html("").removeClass("show").addClass("hidden");
     }else{
-        if (containAny(col_types,['start', 'end', 'ref', 'taxon'])) { //positionable entity with missing attributes
+        if (containAny(col_types,['start', 'end', 'ref', 'taxon', 'strand'])) { //positionable entity with missing attributes
             warning_elem.html('<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> Missing positionable attributes for '+file_name)
                                 .removeClass('hidden')
                               .addClass("show alert alert-danger");
@@ -346,8 +354,7 @@ function checkData(file_elem) {
 /**
  * Load a source_file into the triplestore
  */
-function loadSourceFile(file_elem, pub) {
-    console.log('---> loadSourceFile');
+function loadSourceFile(file_elem, pub, headers) {
 
     let idfile = file_elem.find('.file_name').attr('id');
 
@@ -371,6 +378,18 @@ function loadSourceFile(file_elem, pub) {
         }
     });
 
+
+    // custom uri
+    let uri = file_elem.find('.div-radio-uri').map(function() {
+        // get the custom uri if set
+        let uri_type = $('input[name=radio-uri]:checked', $(this)).val();
+        let uri;
+        if (uri_type == 'custom') {
+            uri = $('#custom-uri', $(this)).val();
+        }
+        return uri;
+    }).get()[0];
+
     if ( key_columns.length <= 0 ) {
         __ihm.displayModal('Select one column to define a unique key', '', 'Close');
         return;
@@ -380,10 +399,12 @@ function loadSourceFile(file_elem, pub) {
 
     var service = new RestServiceJs("load_data_into_graph");
     var model = { 'file_name': $("#"+idfile).attr("filename"),
+                  'headers': headers,
                   'col_types': col_types,
                   'disabled_columns': disabled_columns,
                   'key_columns':key_columns,
-                  'public': pub};
+                  'public': pub,
+                  'uri': uri};
 
     service.post(model, function(data) {
         __ihm.hideModal();
@@ -475,6 +496,17 @@ function loadSourceFileGff(idfile, pub) {
         }
     });
 
+    // custom uri
+    let uri = file_elem.find('.div-radio-uri').map(function() {
+        // get the custom uri if set
+        let uri_type = $('input[name=radio-uri]:checked', $(this)).val();
+        let uri;
+        if (uri_type == 'custom') {
+            uri = $('#custom-uri', $(this)).val();
+        }
+        return uri;
+    }).get()[0];
+
     __ihm.displayModal('Please wait', '', 'Close');
 
     let service = new RestServiceJs("load_gff_into_graph");
@@ -482,7 +514,8 @@ function loadSourceFileGff(idfile, pub) {
     let model = { 'file_name': $("#"+idfile).attr("filename"),
                   'taxon': taxon,
                   'entities': entities,
-                  'public': pub  };
+                  'public': pub,
+                  'uri': uri};
 
     service.post(model, function(data) {
         if (data == 'forbidden') {

@@ -1,9 +1,10 @@
-<form id="source-file-tsv-{{idfile}}" class="template-source_file form-horizontal text-center">
+<form id="source-file-tsv-{{idfile}}" class="template-source_file form-horizontal text-center" header={{file.headers}}>
     <h4 class="file_name" id="{{idfile}}" filename="{{file.name}}">TSV file: {{ file.name }}</h4>
     <br/>
     {{#if error}}
         <p class="error">{{ error }}</p>
     {{else}}
+    <div class="preview_table-div">
         <table class='table table-striped preview_table'>
             <thead>
                 <tr>
@@ -12,7 +13,7 @@
                         {{#unless @first}}
                             <input type='checkbox' class='toggle_column_present' checked />
                         {{/unless}}
-                        {{ this }}
+                        <input class='header-text' value="{{this}}"></input>
 
                     </th>
                 {{/each}}
@@ -74,7 +75,30 @@
                 {{/each}}
             </tbody>
         </table>
+        </div>
         <pre class='preview_field'></pre>
+
+        <div class="panel-group">
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <h4 class="panel-title">
+                  <a data-toggle="collapse" href="#advanced-{{idfile}}">Advanced features</a>
+                </h4>
+              </div>
+              <div id="advanced-{{idfile}}" class="panel-collapse collapse">
+                <div class="panel-body">
+                    <div class="form-group form-inlines div-radio-uri" id="advanced-{{idfile}}">
+                        <input type="radio" name="radio-uri" value="default" id="default-{{idfile}}" checked="checked" />
+                        <label for="default-{{idfile}}">Use default URI</label><br/ >
+                        <input type="radio" name="radio-uri" value="custom" id="custom-{{idfile}}" />
+                        <label for="custom-{{idfile}}">Use custom URI </label>
+                        <input id='custom-uri' type="text"></input>
+                    </div>
+                </div>
+              </div>
+            </div>
+        </div>
+
         <div class="form-group form-inline">
             <div class="btn-group" role="group" aria-label="metadata">
                 <label for="preview_button_tsv" class="btn btn-default preview_button"><i class="fa fa-file-code-o text-success"></i> Preview RDF</label>

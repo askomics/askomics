@@ -176,6 +176,7 @@ class AskomicsUserAbstraction {
         attribute.label = resultListTripletSubjectRelationObject.attributes[entry2].labelAttribute;
         attribute.type  = resultListTripletSubjectRelationObject.attributes[entry2].typeAttribute;
         attribute.basic_type  = instanceUserAbstraction.getTypeAttribute(resultListTripletSubjectRelationObject.attributes[entry2].typeAttribute);
+        attribute.order = resultListTripletSubjectRelationObject.attributes[entry2].order;
 
 
         if ( ! (graph in instanceUserAbstraction.attributesEntityList) ) {
@@ -198,6 +199,7 @@ class AskomicsUserAbstraction {
           attribute.label = resultListTripletSubjectRelationObject.categories[entry3].labelCategory;
           attribute.type  = resultListTripletSubjectRelationObject.categories[entry3].typeCategory;
           attribute.basic_type  = 'category';
+          attribute.order = resultListTripletSubjectRelationObject.categories[entry3].order;
 
           if ( ! (graph in instanceUserAbstraction.attributesEntityList) ) {
               instanceUserAbstraction.attributesEntityList[graph] = [];

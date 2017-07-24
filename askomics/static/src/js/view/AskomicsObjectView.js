@@ -97,13 +97,15 @@ class AskomicsObjectView {
     this.details.append(ul);
   }
 
-  addPanel(element) {
+  addPanel(order, element) {
+    order = Number(order);
     let ul = this.details.find("#sortableAttribute");
     if ( ul.length === 0 ) {
       this.details.append(element);
     } else {
       element.addClass("attribute");
       ul.append($("<li></li>")
+        .attr("order", order)
         .addClass("ui-state-default")
         .css("margin","5px")
         .css("padding","5px")
