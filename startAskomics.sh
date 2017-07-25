@@ -138,6 +138,7 @@ if [[ ! -f $activate ]]; then
     echo "building python virtual environment ..."
     $pyvenv $dir_venv
     source $activate
+    $pip install --upgrade pip
     $pip install -e .
 else
     source $activate

@@ -451,6 +451,15 @@ class AskView(object):
                 infos['preview'] = src_file.get_preview_ttl()
                 self.data['files'].append(infos)
 
+            elif src_file.type == 'bed':
+                try:
+                    src_file.open_bed
+                    infos['test'] = 'OK'
+                except Exception as e:
+                    self.log.error(str(e))
+                    infos['error'] = 'Could not read input file, are you sure it is a valid BED file ?'
+                self.data['files'].append(infos)
+
 
         return self.data
 
@@ -694,6 +703,65 @@ class AskView(object):
         self.data['status'] = 'ok'
         return self.data
 
+    @view_config(route_name='load_bed_into_graph', request_method='POST')
+    def load_bed_into_graph(self):
+        """
+        Load a BED file into the triplestore
+        """
+
+        # Denny access for non loged users
+        if self.request.session['username'] == '':
+            return 'forbidden'
+
+        # Denny for blocked users
+        if self.request.session['blocked']:
+            return 'blocked'
+
+        body = self.request.json_body
+        self.log.debug('===> body: '+str(body))
+        file_name = body['file_name']
+        taxon = body['taxon']
+        entity = body['entity_name']
+        public = body['public']
+        uri = None
+        if 'uri' in body:
+            uri = body['uri']
+
+        method = 'load'
+        if 'method' in body:
+            method = body['method']
+
+        forced_type = None
+        if 'forced_type' in body:
+            forced_type = body['forced_type']
+
+        # Allow data integration in public graph only if user is an admin
+        if public and not self.request.session['admin']:
+            self.log.debug('/!\\ --> NOT ALLOWED TO INSERT IN PUBLIC GRAPH <-- /!\\')
+            public = False
+
+        sfc = SourceFileConvertor(self.settings, self.request.session)
+        src_file_bed = sfc.get_source_file(file_name, forced_type, uri=uri)
+
+        src_file_bed.set_taxon(taxon)
+        src_file_bed.set_entity_name(entity)
+
+        try:
+            self.log.debug('--> Parsing BED')
+            src_file_bed.persist(self.request.host_url, method, public)
+        except Exception as e:
+            #rollback
+            sqb = SparqlQueryBuilder(self.settings, self.request.session)
+            query_laucher = QueryLauncher(self.settings, self.request.session)
+            query_laucher.execute_query(sqb.get_drop_named_graph(src_file_bed.graph).query)
+            query_laucher.execute_query(sqb.get_delete_metadatas_of_graph(src_file_bed.graph).query)
+
+            traceback.print_exc(file=sys.stdout)
+            self.data['error'] = 'Problem when integration of '+file_name+'.</br>'+str(e)
+            self.log.error(str(e))
+
+        self.data['status'] = 'ok'
+        return self.data
 
     @view_config(route_name='getUserAbstraction', request_method='POST')
     def getUserAbstraction(self):
@@ -840,6 +908,7 @@ class AskView(object):
 
         body = self.request.json_body
 
+        ordered_headers = []
         if 'headers' in body:
             ordered_headers = body['headers']
 
