@@ -141,8 +141,8 @@ class SourceFile(ParamManager, HaveCachedProperties):
                 chunk += triple + '\n'
                 triple_count += 1
 
-                with open('/tmp/DEBUGTTL' + str(triple_count), 'w') as debug_file:
-                    debug_file.write(chunk)
+                # with open('/tmp/DEBUGTTL' + str(triple_count), 'w') as debug_file:
+                #     debug_file.write(chunk)
 
                 if triple_count > int(self.settings['askomics.max_content_size_to_update_database']):
                     # Temp file must be accessed by http so we place it in askomics/ttl/ dir
