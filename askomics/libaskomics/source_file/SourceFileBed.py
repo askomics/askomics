@@ -140,9 +140,6 @@ class SourceFileBed(SourceFile):
             if score_entity is not None:
                 ttl += indent + ':score ' + score_entity + ' ;\n'
 
-            if rgb_entity is not None:
-                ttl += indent + ':color ' + rgb_entity + ' ;\n'
-
             ttl += indent + ':blockstart ' + str(block_idxstart * blockbase) + ' ;\n'
             ttl += indent + ':blockend ' + str(block_idxend * blockbase) + ' ;\n'
             for sliceb in range(block_idxstart, block_idxend + 1):
