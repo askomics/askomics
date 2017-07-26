@@ -331,9 +331,8 @@ class AskView(object):
         for index_result in range(len(res['results']['bindings'])):
 
             dat = datetime.datetime.strptime(res['results']['bindings'][index_result]['date']['value'], "%Y-%m-%dT%H:%M:%S.%f")
-            self.log.debug(dat)
 
-            readable_date = dat.strftime("%y-%m-%d at %H:%M:%S")
+            readable_date = dat.strftime("%d/%m/%Y %H:%M:%S") #dd/mm/YYYY hh:ii:ss
 
             named_graphs.append({
                 'g': res['results']['bindings'][index_result]['g']['value'],

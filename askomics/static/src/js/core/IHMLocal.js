@@ -314,7 +314,6 @@ class IHMLocal {
         service.getAll(function(data) {
             let template = AskOmics.templates.datasets;
             for (var i = data.length - 1; i >= 0; i--) {
-                data[i].count = __ihm.format_number(data[i].count);
             }
             let context = {datasets: data};
             let html = template(context);
@@ -355,23 +354,13 @@ class IHMLocal {
             // sorted dataTable
             $('.data-table').DataTable({
                 'order': [[1, 'asc']],
-                'columnDefs': [{ 'orderable': false, 'targets': 0 }]
+                'columnDefs': [
+                    { 'orderable': false, 'targets': 0 },
+                    { type: 'date-euro', targets: 2 }
+                ]
             });
 
         });
-    }
-
-    format_number(number) {
-        // number = number;
-        number += '';
-        let x = number.split('.');
-        let x1 = x[0];
-        let x2 = x.length > 1 ? '.' + x[1] : '';
-        let rgx = /(\d+)(\d{3})/;
-        while (rgx.test(x1)) {
-            x1 = x1.replace(rgx, '$1' + ' ' + '$2');
-        }
-        return x1 + x2;
     }
 
     graphname(graphn) {
@@ -526,7 +515,10 @@ class IHMLocal {
             // sorted dataTable
             $('.uploaded-data-table').DataTable({
                 'order': [[1, 'asc']],
-                'columnDefs': [{ 'orderable': false, 'targets': 0 }]
+                'columnDefs': [
+                    { 'orderable': false, 'targets': 0 },
+                    { "type": "file-size", targets: 2 }
+                ]
             });
         });
     }

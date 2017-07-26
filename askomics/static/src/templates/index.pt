@@ -41,6 +41,8 @@
         <!-- dataTables -->
         <link href="static/libs/dataTables/datatables.min.css" rel="stylesheet" type="text/css">
         <script src="static/libs/dataTables/datatables.min.js"></script>
+        <script src="static/libs/dataTables/file-size.js"></script>
+        <script src="static/libs/dataTables/date-euro.js"></script>
 
         <!-- Askomics -->
         <script src="static/dist/askomics.js"></script>
