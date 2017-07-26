@@ -88,7 +88,7 @@ class SourceFileBed(SourceFile):
         for feature in bedfile:
 
             # Type
-            type_entity = 'feature'
+            type_entity = 'element'
             if self.entity != '':
                 type_entity = self.entity
 
@@ -96,7 +96,7 @@ class SourceFileBed(SourceFile):
             if feature.name != '.':
                 name_entity = feature.name
             else:
-                name_entity = 'feature_' + str(count)
+                name_entity = type_entity + '_' + str(count)
             count += 1
 
 
