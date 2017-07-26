@@ -522,6 +522,12 @@ class IHMLocal {
             $('#upload_from_galaxy').click(function() {
                 __ihm.set_upload_galaxy_form();
             });
+
+            // sorted dataTable
+            $('.uploaded-data-table').DataTable({
+                'order': [[1, 'asc']],
+                'columnDefs': [{ 'orderable': false, 'targets': 0 }]
+            });
         });
     }
 

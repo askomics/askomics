@@ -10,19 +10,23 @@
 </div>
 {{/if}}
 <br/ ><br/ >
-<table class='table'>
-    <tr>
-        <th><input class="check_uploaded check_all_uploaded" type="checkbox"></th>
-        <th>File</th>
-        <th>Size</th>
-    </tr>
-    {{#each files}}
-    <tr>
-        <td><input class="check_uploaded check_one_uploaded" type="checkbox" value="{{@key}}"></td>
-        <td>{{@key}}</td>
-        <td>{{this}}</td>
-    </tr>
-    {{/each}}
+<table class='table uploaded-data-table'>
+    <thead>
+        <tr>
+            <th><input class="check_uploaded check_all_uploaded" type="checkbox"></th>
+            <th>File</th>
+            <th>Size</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#each files}}
+        <tr>
+            <td><input class="check_uploaded check_one_uploaded" type="checkbox" value="{{@key}}"></td>
+            <td>{{@key}}</td>
+            <td>{{this}}</td>
+        </tr>
+        {{/each}}
+    </tbody>
 </table>
 
 <div class="btn-group" role="group">
