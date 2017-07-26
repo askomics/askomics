@@ -257,6 +257,12 @@ class IHMLocal {
             let html = template(context);
             $('#init').append(html);
 
+            // Sort inputs
+            let inputs = $("#spdiv");
+            inputs.children().detach().sort(function(a, b) {
+                return $(a).attr("id").localeCompare($(b).attr("id"));
+            }).appendTo(inputs);
+
             // Filter --------------
             // list of all entities
             let list_entities = [];
@@ -345,6 +351,13 @@ class IHMLocal {
                     __ihm.resetStats();
                 });
             });
+
+            // sorted dataTable
+            $('.data-table').DataTable({
+                'order': [[1, 'asc']],
+                'columnDefs': [{ 'orderable': false, 'targets': 0 }]
+            });
+
         });
     }
 
@@ -660,7 +673,7 @@ class IHMLocal {
         $('.del_user').click(function() {
           __ihm.delUser(this.id);
         });
-        // __ihm.hideModal();
+        $('.table-user').DataTable();
       });
 
       this.shortcutsView.updateShortcuts(true);

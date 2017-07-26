@@ -218,9 +218,11 @@ class AskViewTests(unittest.TestCase):
         assert len(data) == 2
         assert isinstance(data, list)
 
+        print(data)
+
         assert {
             'g': 'urn:sparql:test_askomics:jdoe:people_tsv_' + timestamp_people,
-            'count': '73',
+            'count': '77',
             'access': 'public',
             'date': timestamp_people,
             'readable_date': readable_date_people,
@@ -231,7 +233,7 @@ class AskViewTests(unittest.TestCase):
         assert {
             'g':
             'urn:sparql:test_askomics:jdoe:instruments_tsv_' + timestamp_instrument,
-            'count': '66',
+            'count': '68',
             'access': 'private',
             'date': timestamp_instrument,
             'readable_date': readable_date_instrument,
@@ -285,6 +287,7 @@ class AskViewTests(unittest.TestCase):
             ],
             'disabled_columns': [],
             'public': False,
+            'headers': ['People', 'First_name', 'Last_name', 'Sex', 'Age'],
             'method': 'noload'
         }
 
@@ -383,6 +386,7 @@ class AskViewTests(unittest.TestCase):
                 '?URIPeople1 rdfs:label ?People1'
             ], '']], ''],
             'variates': ['?People1'],
+            'headers': ['People1'],
             'removeGraph': []
         }
 

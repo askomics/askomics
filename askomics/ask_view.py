@@ -26,7 +26,6 @@ from askomics.libaskomics.rdfdb.SparqlQueryGraph import SparqlQueryGraph
 from askomics.libaskomics.rdfdb.SparqlQueryStats import SparqlQueryStats
 from askomics.libaskomics.rdfdb.SparqlQueryAuth import SparqlQueryAuth
 from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
-from askomics.libaskomics.rdfdb.ResultsBuilder import ResultsBuilder
 from askomics.libaskomics.source_file.SourceFile import SourceFile
 from askomics.libaskomics.GalaxyConnector import GalaxyConnector
 
@@ -431,7 +430,7 @@ class AskView(object):
             infos['type'] = src_file.type
             if src_file.type == 'tsv':
                 try:
-                    infos['headers'] = src_file.headers
+                    infos['headers'] = src_file.get_headers_by_file
                     infos['preview_data'] = src_file.get_preview_data()
                     infos['column_types'] = []
                     header_num = 0
@@ -552,6 +551,10 @@ class AskView(object):
         disabled_columns = body["disabled_columns"]
         key_columns = body["key_columns"]
         public = body['public']
+        headers = body['headers']
+        uri = None
+        if 'uri' in body:
+            uri = body['uri']
 
         method = 'load'
         if 'method' in body:
@@ -567,7 +570,8 @@ class AskView(object):
             return self.data
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
-        src_file = sfc.get_source_file(file_name, forced_type)
+        src_file = sfc.get_source_file(file_name, forced_type, uri=uri)
+        src_file.set_headers(headers)
         src_file.set_forced_column_types(col_types)
         src_file.set_disabled_columns(disabled_columns)
         src_file.set_key_columns(key_columns)
@@ -610,6 +614,9 @@ class AskView(object):
         taxon = body['taxon']
         entities = body['entities']
         public = body['public']
+        uri = None
+        if 'uri' in body:
+            uri = body['uri']
 
         method = 'load'
         if 'method' in body:
@@ -625,7 +632,7 @@ class AskView(object):
             public = False
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
-        src_file_gff = sfc.get_source_file(file_name, forced_type)
+        src_file_gff = sfc.get_source_file(file_name, forced_type, uri=uri)
 
         src_file_gff.set_taxon(taxon)
         src_file_gff.set_entities(entities)
@@ -842,21 +849,24 @@ class AskView(object):
     @view_config(route_name='sparqlquery', request_method='POST')
     def get_value(self):
         """ Build a request from a json whith the following contents :variates,constraintesRelations,constraintesFilters"""
-        self.log.debug("== Attribute Value ==")
-        body=self.request.json_body
+
+        body = self.request.json_body
+
+        if 'headers' in body:
+            ordered_headers = body['headers']
 
         try:
             tse = TripleStoreExplorer(self.settings, self.request.session)
             lfrom = []
             if 'from' in body:
                 lfrom = body['from']
-            results,query = tse.build_sparql_query_from_json(lfrom,body["variates"],body["constraintesRelations"],True)
+            results, query = tse.build_sparql_query_from_json(lfrom, body["variates"], body["constraintesRelations"], True)
 
             #body["limit"]
             # Remove prefixes in the results table
-            l = int(body["limit"]) + 1
-            if body["limit"]!=-1 and l < len(results):
-                self.data['values'] = results[1:l+1]
+            limit = int(body["limit"]) + 1
+            if body["limit"] != -1 and limit < len(results):
+                self.data['values'] = results[1:limit+1]
             else:
                 self.data['values'] = results
 
@@ -864,9 +874,9 @@ class AskView(object):
 
             # Provide results file
             if (not 'nofile' in body) or body['nofile']:
-                ql = QueryLauncher(self.settings, self.request.session)
-                rb = ResultsBuilder(self.settings, self.request.session)
-                self.data['file'] = ql.format_results_csv(rb.build_csv_table(results))
+                query_laucher = QueryLauncher(self.settings, self.request.session)
+                self.data['file'] = query_laucher.format_results_csv(results, ordered_headers)
+
         except Exception as e:
             #exc_type, exc_value, exc_traceback = sys.exc_info()
             #traceback.print_exc(limit=8)

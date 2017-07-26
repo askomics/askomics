@@ -8,6 +8,7 @@ import requests
 import json
 import tempfile
 import logging
+import urllib.parse
 
 class ParamManager(object):
     """
@@ -168,7 +169,6 @@ class ParamManager(object):
 
     @staticmethod
     def encode_to_rdf_uri(toencode):
-        import urllib.parse
 
         obj = urllib.parse.quote(toencode)
         obj = obj.replace(".", "_d_")
@@ -181,7 +181,6 @@ class ParamManager(object):
 
     @staticmethod
     def decode_to_rdf_uri(toencode):
-        import urllib.parse
 
         obj = toencode.replace("_d_", ".")
         obj = obj.replace("_t_", "-")

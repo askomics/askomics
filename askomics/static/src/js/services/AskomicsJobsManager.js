@@ -122,6 +122,18 @@ let instanceAskomicsJobsViewManager ;
       let service = new RestServiceJs("sparqlquery");
       let jdata = this.prepareQuery();
       let self = this;
+
+      // Get ordered headers
+      let result_view = new AskomicsResultsView({});
+      result_view.setActivesAttributes();
+      let attributes = result_view.getActivesAttributes();
+      let ordered_headers = [];
+      $.map(attributes, function(value, key) {
+        $.merge(ordered_headers, value);
+      });
+
+      jdata.headers = ordered_headers;
+
       service.post(jdata,function(data) {
         if ('error' in data) {
           self.changeKoState(curId,data.error);

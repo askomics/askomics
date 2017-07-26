@@ -23,7 +23,7 @@ class SourceFileConvertor(ParamManager):
         ParamManager.__init__(self, settings, session)
         self.log = logging.getLogger(__name__)
 
-    def get_source_files(self, forced_type=None):
+    def get_source_files(self, forced_type=None, uri=None):
         """Get all source files
 
 
@@ -39,9 +39,9 @@ class SourceFileConvertor(ParamManager):
         for path in paths:
             file_type = self.guess_file_type(path)
             if file_type == 'gff' or forced_type == 'gff':
-                files.append(SourceFileGff(self.settings, self.session, path))
+                files.append(SourceFileGff(self.settings, self.session, path, uri=uri))
             elif file_type == 'csv' or forced_type == 'csv':
-                files.append(SourceFileTsv(self.settings, self.session, path, int(self.settings["askomics.overview_lines_limit"])))
+                files.append(SourceFileTsv(self.settings, self.session, path, int(self.settings["askomics.overview_lines_limit"]), uri=uri))
             elif file_type == 'ttl' or forced_type == 'ttl':
                 files.append(SourceFileTtl(self.settings, self.session, path))
 
@@ -64,7 +64,7 @@ class SourceFileConvertor(ParamManager):
         else:
             return 'csv'
 
-    def get_source_file(self, name, forced_type=None):
+    def get_source_file(self, name, forced_type=None, uri=None):
         """
         Return an object representing a source file
 
@@ -73,7 +73,7 @@ class SourceFileConvertor(ParamManager):
         :rtype: SourceFile
         """
         # As the name can be different than the on-disk filename (extension are removed), we loop on all SourceFile objects
-        files = self.get_source_files(forced_type)
+        files = self.get_source_files(forced_type, uri=uri)
 
         for file in files:
             if file.name == name:

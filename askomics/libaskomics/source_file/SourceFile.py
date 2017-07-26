@@ -27,7 +27,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
     Class representing a source file.
     """
 
-    def __init__(self, settings, session, path):
+    def __init__(self, settings, session, path, uri=None):
 
         ParamManager.__init__(self, settings, session)
 
@@ -49,11 +49,17 @@ class SourceFile(ParamManager, HaveCachedProperties):
         # Graph name can't contain any non alphanumeric characters. replace all with _
         self.graph = self.graph + ':' + self.alphanum_name + '_' + self.timestamp
 
-        # FIXME check name uniqueness as we remove extension (collision if uploading example.tsv and example.txt)
-
         self.log = logging.getLogger(__name__)
 
         self.reset_cache()
+
+        if uri:
+            # uri have to end with # or /
+            if not uri.endswith('#') and not uri.endswith('/'):
+                uri = uri + "/"
+            self.uri = uri
+        else:
+            self.uri = self.get_param("askomics.prefix")
 
     def setGraph(self,graph):
         self.graph = graph
@@ -135,8 +141,8 @@ class SourceFile(ParamManager, HaveCachedProperties):
                 chunk += triple + '\n'
                 triple_count += 1
 
-                #with open('/tmp/DEBUGTTL'+str(triple_count), 'w') as fff:
-                #    fff.write(chunk);
+                with open('/tmp/DEBUGTTL' + str(triple_count), 'w') as debug_file:
+                    debug_file.write(chunk)
 
                 if triple_count > int(self.settings['askomics.max_content_size_to_update_database']):
                     # Temp file must be accessed by http so we place it in askomics/ttl/ dir

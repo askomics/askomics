@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Classes to import data from a gff3 source files
+Classes to import data from a tsv source files
 """
 
 import re
@@ -23,9 +23,9 @@ class SourceFileTsv(SourceFile):
     Class representing a Gff3 Source file
     """
 
-    def __init__(self, settings, session, path, preview_limit):
+    def __init__(self, settings, session, path, preview_limit, uri=None):
 
-        SourceFile.__init__(self, settings, session, path)
+        SourceFile.__init__(self, settings, session, path, uri=uri)
 
         self.type = 'tsv'
 
@@ -33,7 +33,8 @@ class SourceFileTsv(SourceFile):
 
         self.forced_column_types = ['entity']
         self.disabled_columns = []
-        self.key_columns = [];
+        self.key_columns = []
+        self.headers = self.get_headers_by_file
 
         self.category_values = defaultdict(set)
 
@@ -81,7 +82,7 @@ class SourceFileTsv(SourceFile):
             return dialect
 
     @cached_property
-    def headers(self):
+    def get_headers_by_file(self):
         """
         Read and return the column headers.
 
@@ -99,6 +100,15 @@ class SourceFileTsv(SourceFile):
             headers = [h.strip() for h in headers]
 
         return headers
+
+    def set_headers(self, headers):
+        """Set the headers
+
+        :param headers: the headers list
+        :type headers: list
+        """
+
+        self.headers = headers
 
     def get_preview_data(self):
         """
@@ -251,7 +261,7 @@ class SourceFileTsv(SourceFile):
 
     def getStrandFaldo(self,strand):
 
-        if strand == None:
+        if strand is None:
             return "faldo:BothStrandPosition"
 
         if strand.lower() == "plus" or strand.startswith("+"):
@@ -292,11 +302,13 @@ class SourceFileTsv(SourceFile):
             if key > 0 and not key_type.startswith('entity') :
                 if key_type in ('taxon', 'ref', 'strand', 'start', 'end'):
                     uri = 'position_'+key_type
-                elif key_type == 'taxon':
-                    uri = 'position_'+key_type
+                # elif key_type == 'taxon':
+                #     uri = 'position_'+key_type
                 else:
                     uri = self.encode_to_rdf_uri(self.headers[key])
                 ttl += ":" + uri + ' displaySetting:attribute "true"^^xsd:boolean .\n'
+                # store the order of attrbutes in order to display attributes in the right order
+                ttl += ":" + uri + ' displaySetting:attributeOrder "' + str(key) + '"^^xsd:decimal .\n'
 
             if key > 0 :
                 ttl += AbstractedRelation(key_type, self.headers[key], ref_entity, self.type_dict[key_type]).get_turtle()
@@ -406,6 +418,13 @@ class SourceFileTsv(SourceFile):
                 endFaldo = None
                 referenceFaldo = None
                 strandFaldo = None
+
+                # check positionable
+                positionable = False
+                if 'start' in self.forced_column_types and 'end' in self.forced_column_types and 'strand' in self.forced_column_types and 'ref' in self.forced_column_types:
+                    # its a positionable entity
+                    positionable = True
+
                 # Add data from other columns
                 for i, header in enumerate(self.headers): # Skip the first column
                     if i > 0 and i not in self.disabled_columns:
@@ -451,6 +470,7 @@ class SourceFileTsv(SourceFile):
                             elif havePrefix:
                                 ttl += indent + " "+ relationName + " " + row[i] + " ;\n"
                             else:
+                                # Not positionable
                                 ttl += indent + " "+ relationName + " " + self.delims[current_type][0] + self.escape[current_type](row[i]) + self.delims[current_type][1] + " ;\n"
 
                         if current_type == 'entitySym':
@@ -459,11 +479,8 @@ class SourceFileTsv(SourceFile):
                                       self.delims[current_type][1]+" "+relationName+" :"+\
                                       self.encode_to_rdf_uri(entity_label)  + " .\n"
 
-                #Faldo position management
-                if startFaldo != None or endFaldo != None or referenceFaldo != None:
-                    if startFaldo is None or endFaldo is None or referenceFaldo is None:
-                        raise Exception("miss positionable attribute :\"(Entity:"+
-                                        entity_id+", Line "+str(row_number)+")")
+                # Faldo position management
+                if positionable:
                     blockbase=10000
                     block_idxstart = int(startFaldo) // blockbase
                     block_idxend  = int(endFaldo) // blockbase
@@ -478,16 +495,18 @@ class SourceFileTsv(SourceFile):
                     faldo_strand = self.getStrandFaldo(strandFaldo)
 
                     ttl += indent +    " faldo:location [ a faldo:Region ;\n"+\
-                                       "                  faldo:begin [ a faldo:ExactPosition;\n"+\
-                                       "                                a "+faldo_strand+";\n"+\
-                                       "                                faldo:position "+str(startFaldo)+";\n"+\
-                                       "                                faldo:reference :"+referenceFaldo+" ];\n"+\
-                                       "                  faldo:end [ a faldo:ExactPosition;\n"+\
-                                       "                              a "+faldo_strand+";\n"+\
-                                       "                              faldo:position "+str(endFaldo)+";\n"+\
-                                       "                              faldo:reference :"+referenceFaldo+" ]] ;\n"
+                              indent + "                  faldo:begin [ a faldo:ExactPosition;\n"+\
+                              indent + "                                a "+faldo_strand+";\n"+\
+                              indent + "                                faldo:position "+str(startFaldo)+";\n"+\
+                              indent + "                                faldo:reference :"+referenceFaldo+" ];\n"+\
+                              indent + "                  faldo:end [ a faldo:ExactPosition;\n"+\
+                              indent + "                              a "+faldo_strand+";\n"+\
+                              indent + "                              faldo:position "+str(endFaldo)+";\n"+\
+                              indent + "                              faldo:reference :"+referenceFaldo+" ]] ;\n"
 
                 ttl = ttl[:-2] + "."
+
+
                 #manage symmetric relation
                 if ttlSym != "":
                     yield ttlSym

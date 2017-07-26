@@ -1,6 +1,8 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 import os, time, tempfile
+import re
+import csv
 from pprint import pformat
 from SPARQLWrapper import SPARQLWrapper, JSON
 import requests
@@ -176,7 +178,6 @@ class QueryLauncher(ParamManager):
                 else:
                     log_res = pformat(parsed)
                 self.log.debug("----------- RESULTS --------------\n%s", log_res)
-
         return parsed
 
 
@@ -189,16 +190,36 @@ class QueryLauncher(ParamManager):
         results = self.parse_results(json_query)
         return results
 
-    def format_results_csv(self, table):
+
+    def format_results_csv(self, data, headers):
+        """write the csv result file from a data ist
+
+        :param data: the data to process
+        :type data: list
+        :param headers: Ordered headers of the result file
+        :type headers: list
+        :returns: The path of the created file
+        :rtype: string
+        """
 
         dircsv = self.get_user_csv_directory()
         if not os.path.isdir(dircsv):
             os.mkdir(dircsv)
 
-        with tempfile.NamedTemporaryFile(dir=dircsv, prefix="data_"+str(time.time()).replace('.', ''), suffix=".csv", mode="w+t", delete=False) as fp:
-            fp.write(table)
+        # Open the CSV File
+        filename = 'data_' + str(time.time()).replace('.', '') + '.csv'
+        with open(dircsv + '/' + filename, 'w') as csvfile:
+            writer = csv.writer(csvfile, delimiter='\t')
+            # Write headers
+            writer.writerow(headers)
+            # Write rows
+            for value in data:
+                row = []
+                for header in headers:
+                    row.append(value[header])
+                writer.writerow(row)
 
-        return os.path.basename(fp.name)
+        return filename
 
     # TODO see if we can make a rollback in case of malformed data
     def load_data(self, url, graphName):

@@ -87,14 +87,17 @@ pre {
 }
 
 .preview_table {
-    width: auto;
-    display: inline-block;
-    white-space: nowrap;
+    width: 100%;
+    display: table;
+}
+
+.preview_table-div {
+    width: 100%;
+    display: block;
     overflow-x: auto;
     max-height: 450px;
     overflow-y: auto;
 }
-
 .preview_table td:first-child,
 .preview_table th:first-child {
     border-right: 2px solid #ddd;
@@ -237,6 +240,14 @@ label.label_startpoints {
     margin-left: 5px;
 }
 
-input[type="radio"]:checked+label{ 
+input[type="radio"].start_point_radio:checked+label{
     background-color: #ccc;
+}
+
+.dataTables_length label {
+    font-weight: normal;
+}
+
+.dataTables_filter label {
+    font-weight: normal;
 }
