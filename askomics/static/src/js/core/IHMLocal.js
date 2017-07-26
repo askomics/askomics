@@ -632,13 +632,8 @@ class IHMLocal {
                 /\/[^\/]*$/,
                 '/cors/result.html?%s'
             )
-        );
+        ).bind('fileuploaddone', function () {__ihm.get_uploaded_files();});
 
-        // reload when modal is closed
-        // $('.upload-modal').on('hide.bs.modal', function (e) {
-        //     $(this).removeClass('upload-modal');
-        //     __ihm.get_uploaded_files();
-        // });
       });
     }
 
