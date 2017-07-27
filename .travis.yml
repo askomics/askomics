@@ -3,10 +3,12 @@ language: python
 python:
   - "3.4"
   - "3.5"
+  - "3.6"
 services:
   - docker
 cache: pip
 install:
+  - pip install bioblend==0.9.0
   - pip install coveralls
   - python setup.py install
 #  - npm install -g gulp
