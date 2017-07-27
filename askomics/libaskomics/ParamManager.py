@@ -78,6 +78,12 @@ class ParamManager(object):
             os.makedirs(mdir)
         return mdir
 
+    def get_json_user_directory(self):
+        mdir = self.userfilesdir+"json"+"/"+self.session['username'] + '/'
+        if not os.path.isdir(mdir):
+            os.makedirs(mdir)
+        return mdir
+
     def get_param(self, key):
         if key in self.settings:
             return self.settings[key]

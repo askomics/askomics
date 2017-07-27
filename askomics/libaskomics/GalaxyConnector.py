@@ -1,5 +1,6 @@
+import os
+import tempfile
 import logging
-
 from bioblend import galaxy
 
 from askomics.libaskomics.ParamManager import ParamManager
@@ -109,5 +110,15 @@ class GalaxyConnector(ParamManager):
         :type json: string
         """
         galaxy_instance = galaxy.GalaxyInstance(self.url, self.apikey)
-        last_history = galaxy_instance.histories.get_most_recently_used_history()
-        galaxy_instance.tools.paste_content(json, last_history['id'], file_type='json')
+        last_history_id = galaxy_instance.histories.get_most_recently_used_history()['id']
+
+        # Write json in a temp file
+        temp_file = tempfile.NamedTemporaryFile(dir=self.get_json_user_directory(), prefix='askomics_query_', suffix=".json", mode="w", delete=False)
+        temp_file.write(json)
+        temp_file.close()
+
+        # Load the file into Galaxy
+        galaxy_instance.tools.upload_file(temp_file.name, last_history_id, file_type='json')
+
+        # Remove the temp file
+        os.remove(temp_file.name)
