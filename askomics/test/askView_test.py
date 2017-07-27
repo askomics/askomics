@@ -44,8 +44,10 @@ class AskViewTests(unittest.TestCase):
 
         self.request.host_url = 'http://localhost:6543'
 
-        # Create the tmp_file
-        self.temp_directory = tempfile.mkdtemp(suffix='_tmp', prefix='__' + self.request.session['username'] + '__')
+        # Create the user dir
+        self.temp_directory = self.settings['askomics.files_dir'] + '/upload/' + self.request.session['username']
+        if not os.path.isdir(self.temp_directory):
+            os.makedirs(self.temp_directory)
         # Set the upload dir
         self.request.session['upload_directory'] = self.temp_directory
 
@@ -212,8 +214,8 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.list_user_graph()
 
-        readable_date_people = datetime.datetime.strptime(timestamp_people, "%Y-%m-%dT%H:%M:%S.%f").strftime("%y-%m-%d at %H:%M:%S")
-        readable_date_instrument = datetime.datetime.strptime(timestamp_instrument, "%Y-%m-%dT%H:%M:%S.%f").strftime("%y-%m-%d at %H:%M:%S")
+        readable_date_people = datetime.datetime.strptime(timestamp_people, "%Y-%m-%dT%H:%M:%S.%f").strftime("%d/%m/%Y %H:%M:%S")
+        readable_date_instrument = datetime.datetime.strptime(timestamp_instrument, "%Y-%m-%dT%H:%M:%S.%f").strftime("%d/%m/%Y %H:%M:%S")
 
         assert len(data) == 2
         assert isinstance(data, list)
@@ -246,7 +248,39 @@ class AskViewTests(unittest.TestCase):
 
         self.tps.clean_up()
 
+        self.request.json_body = ['people.tsv', 'instruments.tsv']
+
         data = self.askview.source_files_overview()
+
+        expected = {
+            'taxons': [],
+            'files': [{
+                'type': 'tsv',
+                'name': 'people.tsv',
+                'headers': ['People', 'First_name', 'Last_name', 'Sex', 'Age'],
+                'preview_data':
+                [['p1', 'p2', 'p3', 'p4', 'p5', 'p6'],
+                 ['Mike', 'Jean-Michel', 'Roger', 'Matthew', 'Ellen', 'Richard'],
+                 ['Oldfield', 'Jarre', 'Waters', 'Bellamy', 'Fraatz', 'Melville'],
+                 ['M', 'M', 'M', 'M', 'F', 'M'], ['63', '68', '73', '38', '39', '51']],
+                'column_types': ['text', 'text', 'text', 'category', 'numeric']
+            }, {
+                'type': 'tsv',
+                'name': 'instruments.tsv',
+                'headers': ['Instruments', 'Name', 'Class'],
+                'preview_data':
+                [['i1', 'i2', 'i3', 'i4', 'i5', 'i6', 'i7', 'i8', 'i9'], [
+                    'Tubular_Bells', 'Mandolin', 'Electric_guitar', 'Violin',
+                    'Acoustic_guitar', 'Bass_guitar', 'MiniMoog', 'Laser_Harp', 'Piano'
+                ], [
+                    'Percussion', 'String', 'String', 'String', 'String', 'String',
+                    'Electro-analog', 'Electro-analog', 'String'
+                ]],
+                'column_types': ['text', 'text', 'category']
+            }]
+        }
+
+        assert data == expected
 
 
     def test_preview_ttl(self):
