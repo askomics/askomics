@@ -8,7 +8,7 @@
 <div class="container">
   <hr/>
   <h3 class="header-div">___TITLE_UPLOAD___</h3>
-  <p>Supported file: CSV, TSV, GFF, TTL</p>
+  <p>Supported file: CSV, TSV, GFF, BED and TTL</p>
   <p><mark>the maximum file upload size is ___SIZE_UPLOAD____</mark></p>
   <hr/>
     <!-- The file upload form used as target for the file upload widget -->

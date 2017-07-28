@@ -71,9 +71,15 @@ $(function () {
         loadSourceFileTtl(idfile, true);
     });
 
-    // $('.taxon-selector').change(function() {
-    //     console.log('---> ' + $(this).val);
-    // });
+    $("#content_integration").on('click', '.load_data_bed', function() {
+        let idfile = $(this).attr('id');
+        loadSourceFileBed(idfile, false);
+    });
+
+    $("#content_integration").on('click', '.load_data_bed_public', function() {
+        let idfile = $(this).attr('id');
+        loadSourceFileBed(idfile, true);
+    });
 });
 
 /**
@@ -111,6 +117,9 @@ function displayIntegrationForm(data) {
             break;
             case 'ttl':
                 displayTtlForm(data.files[i]);
+            break;
+            case 'bed':
+                displayBedForm(data.files[i], data.taxons);
             break;
         }
     }
@@ -176,6 +185,20 @@ function displayTtlForm(file) {
 
     $('#source-file-ttl-' + getIdFile(file)).find(".preview_field").html(file.preview);
     $('#source-file-ttl-' + getIdFile(file)).find(".preview_field").show();
+}
+
+function displayBedForm(file, taxons) {
+    let template = AskOmics.templates.bed_form;
+
+    let admin = false;
+    if ($('#administration').length) {
+        admin = true;
+    }
+
+    let context = {idfile: getIdFile(file),file: file, taxons: taxons.sort(), admin: admin};
+    let html = template(context);
+
+    $('#content_integration').append(html);
 }
 
 function setCorrectType(file) {
@@ -597,5 +620,72 @@ function loadSourceFileTtl(idfile, pub) {
                                                   .addClass('show alert-success');
         }
         __ihm.hideModal();
+    });
+}
+
+function loadSourceFileBed(idfile, pub) {
+    // get taxon
+    let taxon = '';
+
+    let file_elem = $("#source-file-bed-" + idfile);
+
+    // get the taxon in the selector or in the input field
+    taxon = $('#' + idfile + '-selector').val();
+    if ( taxon === null || taxon === undefined) {
+        taxon = $('#tax-'+idfile).val();
+    }
+
+    // get entity name
+    let entity = $('#entity-' + idfile).val();
+
+    // custom uri
+    let uri = file_elem.find('.div-radio-uri').map(function() {
+        // get the custom uri if set
+        let uri_type = $('input[name=radio-uri]:checked', $(this)).val();
+        let uri;
+        if (uri_type == 'custom') {
+            uri = $('#custom-uri', $(this)).val();
+        }
+        return uri;
+    }).get()[0];
+
+    __ihm.displayModal('Please wait', '', 'Close');
+
+    let service = new RestServiceJs("load_bed_into_graph");
+
+    let model = { 'file_name': $("#"+idfile).attr("filename"),
+                  'taxon': taxon,
+                  'entity_name': entity,
+                  'public': pub,
+                  'uri': uri};
+
+    service.post(model, function(data) {
+        if (data == 'forbidden') {
+          showLoginForm();
+          return;
+        }
+        if (data == 'blocked') {
+          displayBlockedPage($('.username').attr('id'));
+          return;
+        }
+
+        let insert_status_elem = file_elem.find(".insert_status").first();
+        let insert_warning_elem = file_elem.find(".insert_warning").first();
+
+        //TODO: check if insertion is ok and then, display the success message or a warning message
+        if (data.error) {
+            insert_status_elem.html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> ERROR:</strong> ' + JSON.stringify(data.error))
+                              .removeClass('hidden alert-success')
+                              .removeClass('hidden alert-warning')
+                              .addClass('show alert-danger');
+        }else{
+            insert_status_elem.html('<span class="glyphicon glyphicon-ok"></span> bed file inserted with success.')
+                                                  .removeClass('hidden alert-danger')
+                                                  .removeClass('hidden alert-warning')
+                                                  .addClass('show alert-success');
+        }
+
+        __ihm.hideModal();
+
     });
 }
