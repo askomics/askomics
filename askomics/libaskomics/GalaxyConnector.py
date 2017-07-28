@@ -35,7 +35,7 @@ class GalaxyConnector(ParamManager):
 
         return True
 
-    def get_datasets_and_histories(self, history_id=None):
+    def get_datasets_and_histories(self, allowed_files, history_id=None):
         """Get Galaxy datasets of current history
         and all histories of a user
 
@@ -65,7 +65,7 @@ class GalaxyConnector(ParamManager):
         dataset_list = []
         history_content = galaxy_instance.histories.show_history(history_id, contents=True)
         for dataset in history_content:
-            if dataset['extension'] not in ('tabular', 'ttl', 'gff', 'gff3', 'gff2'):
+            if dataset['extension'] not in allowed_files:
                 continue
             # Don't show deleted datasets
             if dataset['deleted']:
@@ -90,6 +90,22 @@ class GalaxyConnector(ParamManager):
             dataset = galaxy_instance.datasets.show_dataset(file_id)
             path = self.get_upload_directory() + '/[' + str(dataset['hid']) + '] ' + dataset['name'] + '.' + dataset['extension']
             galaxy_instance.datasets.download_dataset(file_id, file_path=path, use_default_filename=False)
+
+
+    def get_file_content(self, dataset_id):
+        """Get the content of a Galaxy dataset
+
+        :param dataset_id: the dataset id
+        :type dataset_id: string
+        :returns: the dataset content
+        :rtype: sring
+        """
+
+        galaxy_instance = galaxy.GalaxyInstance(self.url, self.apikey)
+        dataset = galaxy_instance.datasets.download_dataset(dataset_id).decode('utf-8')
+
+        return dataset
+
 
     def send_to_history(self, path, name):
         """Send a file into the most recent Galaxy history

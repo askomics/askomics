@@ -62,6 +62,7 @@ def main(global_config, **settings):
     # Galaxy route
     config.add_route('connect_galaxy', '/connect_galaxy')
     config.add_route('get_data_from_galaxy', '/get_data_from_galaxy')
+    config.add_route('get_galaxy_file_content', '/get_galaxy_file_content')
     config.add_route('upload_galaxy_files', '/upload_galaxy_files')
     config.add_route('send_to_galaxy', '/send_to_galaxy')
 

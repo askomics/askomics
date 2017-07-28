@@ -305,6 +305,13 @@ class IHMLocal {
             $('.start_point_radio').change(function() {
                 $('#starter').removeAttr('disabled');
             });
+
+            // Galaxy upload
+            $('.import-galaxy-query').click(function(d) {
+                console.log('Display galaxy form');
+                __ihm.set_upload_galaxy_form(false, false);
+            });
+
         });
     }
 
@@ -509,7 +516,7 @@ class IHMLocal {
             });
 
             $('#upload_from_galaxy').click(function() {
-                __ihm.set_upload_galaxy_form();
+                __ihm.set_upload_galaxy_form(false, true);
             });
 
             // sorted dataTable
@@ -523,8 +530,28 @@ class IHMLocal {
         });
     }
 
-    set_upload_galaxy_form(history_id) {
-        $('#modalTitle').text('Upload Galaxy files');
+    set_upload_galaxy_form(history_id, input) {
+
+        let title;
+        let radio;
+        let input_type;
+        let allowed_files;
+        if (input) {
+            // Input file upload
+            title = 'Upload Galaxy files';
+            radio = true;
+            input_type = 'checkbox';
+            allowed_files = ['tabular', 'ttl', 'gff', 'gff3', 'gff2'];
+        }else{
+            // Query file upload
+            title = 'Upload a Galaxy query file';
+            radio = false;
+            input_type = 'radio';
+            allowed_files = ['json'];
+        }
+
+
+        $('#modalTitle').text(title);
         $('.modal-sm').css('width', '50%');
         $('.modal-body').show();
         $('#modalButton').text('Close');
@@ -537,14 +564,14 @@ class IHMLocal {
 
         // If a Galaxy instance is connected, show the form to get data from the Galaxy history
         let service = new RestServiceJs('get_data_from_galaxy');
-        let model = {history: history_id};
+        let model = {history: history_id, allowed_files: allowed_files};
         service.post(model, function(data) {
             if (!data.galaxy) return;
             let template = AskOmics.templates.galaxy_datasets;
-            let context = {datasets: data.datasets, histories: data.histories};
+            let context = {datasets: data.datasets, histories: data.histories, radio: radio, input_type: input_type};
             let html = template(context);
 
-            $('#modalTitle').text('Upload Galaxy files');
+            $('#modalTitle').text(title);
             $('.modal-sm').css('width', '50%');
             $('.modal-body').show();
             $('#modalButton').text('Close');
@@ -565,26 +592,41 @@ class IHMLocal {
                 }
             });
 
-            // Upload selected datasets
             $('#upload_galaxy').click(function() {
-                $("#spinner_galaxy-upload").removeClass("hidden");
-                let selected_datasets = [];
-                $('.check_one_galaxy').each(function() {
-                    if ($(this).is(':checked')) {selected_datasets.push($(this).attr('value'));}
-                });
-                //upload files
-                let service2 = new RestServiceJs('upload_galaxy_files');
-                let model = {'datasets': selected_datasets};
-                service2.post(model, function(data) {
-                    __ihm.manageErrorMessage(data);
-                    $("#spinner_galaxy-upload").addClass("hidden");
-                    __ihm.get_uploaded_files();
-                });
+                if (input) {
+                    // Upload selected datasets
+                    $("#spinner_galaxy-upload").removeClass("hidden");
+                    let selected_datasets = [];
+                    $('.check_one_galaxy').each(function() {
+                        if ($(this).is(':checked')) {selected_datasets.push($(this).attr('value'));}
+                    });
+                    //upload files
+                    let service2 = new RestServiceJs('upload_galaxy_files');
+                    let model = {'datasets': selected_datasets};
+                    service2.post(model, function(data) {
+                        __ihm.manageErrorMessage(data);
+                        $("#spinner_galaxy-upload").addClass("hidden");
+                        __ihm.get_uploaded_files();
+                    });
+                }else{
+                    // Import query file
+                    console.log('upload query file');
+                    // get the file's content
+                    $("#spinner_galaxy-upload").removeClass("hidden");
+                    let dataset = $('input[name=upload-galaxy]:checked').val();
+                    console.log('gid');
+                    console.log(dataset);
+                    let service2 = new RestServiceJs('get_galaxy_file_content');
+                    let model = {'dataset': dataset};
+                    service2.post(model, function(data) {
+                        __ihm.startSession(data.json_query);
+                    });
+                }
             });
 
             // On select change, reload
             $('#change_history').on('change', function() {
-                __ihm.set_upload_galaxy_form(this.value);
+                __ihm.set_upload_galaxy_form(this.value, input);
             });
         });
     }

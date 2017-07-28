@@ -1580,6 +1580,7 @@ class AskView(object):
 
         body = self.request.json_body
         history = body['history']
+        allowed_files = body['allowed_files']
 
         self.data = {}
 
@@ -1604,7 +1605,7 @@ class AskView(object):
         self.data['galaxy'] = True
 
         # Then, get the datasets
-        results = galaxy.get_datasets_and_histories(history_id=history)
+        results = galaxy.get_datasets_and_histories(allowed_files, history_id=history)
 
         # Boolean values for handlebars
         for dataset in results['datasets']:
@@ -1646,6 +1647,32 @@ class AskView(object):
             return self.data
 
         self.data['success'] = 'Success'
+        return self.data
+
+    @view_config(route_name='get_galaxy_file_content', request_method='POST')
+    def get_galaxy_file_content(self):
+
+        self.data = {}
+        body = self.request.json_body
+        dataset_id = body['dataset']
+
+        # get galaxy infos
+        security = Security(self.settings, self.request.session, self.request.session['username'], '', '', '')
+
+        galaxy_auth = security.get_galaxy_infos()
+
+        if not galaxy_auth:
+            self.data['error'] = 'No Galaxy'
+            return self.data
+
+        # Get the file content
+        try:
+            galaxy = GalaxyConnector(self.settings, self.request.session, galaxy_auth['url'], galaxy_auth['key'])
+            self.data['json_query'] = galaxy.get_file_content(dataset_id)
+        except Exception as e:
+            self.data['error'] = 'Error during galaxy upload: ' + str(e)
+            return self.data
+
         return self.data
 
     @view_config(route_name='send_to_galaxy', request_method='POST')

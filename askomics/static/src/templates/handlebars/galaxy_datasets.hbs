@@ -12,14 +12,18 @@
 
 <table class='table'>
     <tr>
-        <th><input class="check_galaxy check_all_galaxy" type="checkbox"></th>
+        <th>
+        {{#if radio}}
+            <input class="check_galaxy check_all_galaxy" type="checkbox">
+        {{/if}}
+        </th>
         <th>Id</th>
         <th>File</th>
         <th>Type</th>
     </tr>
     {{#each datasets}}
     <tr>
-        <td><input class="check_galaxy check_one_galaxy" type="checkbox" value="{{this.id}}" {{#if this.notick}} class='disabled'{{/if}}></td>
+        <td><input class="check_galaxy check_one_galaxy" type="{{../input_type}}" name="upload-galaxy" value="{{this.id}}" {{#if this.notick}} class='disabled'{{/if}}></td>
         {{#if this.success}}
         <td><i class="text-success">{{this.hid}}</i></td>
         <td><i class="text-success">{{this.name}}</i></td>
