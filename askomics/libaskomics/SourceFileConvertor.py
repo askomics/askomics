@@ -6,6 +6,7 @@ from askomics.libaskomics.ParamManager import ParamManager
 from askomics.libaskomics.source_file.SourceFileGff import SourceFileGff
 from askomics.libaskomics.source_file.SourceFileTsv import SourceFileTsv
 from askomics.libaskomics.source_file.SourceFileTtl import SourceFileTtl
+from askomics.libaskomics.source_file.SourceFileBed import SourceFileBed
 
 class SourceFileConvertor(ParamManager):
     """
@@ -44,6 +45,8 @@ class SourceFileConvertor(ParamManager):
                 files.append(SourceFileTsv(self.settings, self.session, path, int(self.settings["askomics.overview_lines_limit"]), uri=uri))
             elif file_type == 'ttl' or forced_type == 'ttl':
                 files.append(SourceFileTtl(self.settings, self.session, path))
+            elif file_type == 'bed' or forced_type == 'bed':
+                files.append(SourceFileBed(self.settings, self.session, path, uri=uri))
 
         return files
 
@@ -61,6 +64,8 @@ class SourceFileConvertor(ParamManager):
             return 'gff'
         elif extension.lower() in ('.ttl', '.rdf'):
             return 'ttl'
+        elif extension.lower() in ('.bed', ):
+            return 'bed'
         else:
             return 'csv'
 

@@ -393,6 +393,8 @@ class SourceFileGff(SourceFile):
                     if category == 'position_taxon' and self.taxon == '':
                         continue
                     for cat in cat_list:
+                        if self.getLabelFromUri[cat] == '':
+                            continue
                         ttl += ':' + str(category.replace('position_', '')) + 'Category displaySetting:category ' + str(cat) + ' .\n'
                         ttl += str(cat) + ' rdf:type :' + str(category.replace('position_', '')) + ' ;\n'
                         indent = len(str(cat)) * ' ' + ' '

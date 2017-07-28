@@ -23,7 +23,8 @@ requires = [
     'bcbio-gff',
     'validate_email',
     'bioblend==0.9.0',
-    'humanize'
+    'humanize',
+    'pybedtools==0.7.10'
     ]
 
 setup(name='Askomics',
