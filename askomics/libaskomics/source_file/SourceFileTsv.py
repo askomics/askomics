@@ -411,8 +411,8 @@ class SourceFileTsv(SourceFile):
                                              +" - (last valid entity "+entity_label+")")
 
                 entity_id = self.key_id(row)
-                indent = (len(entity_id) + 1) * " "
-                ttl += ":" + self.encode_to_rdf_uri(entity_id) + " rdf:type :" + self.encode_to_rdf_uri(self.headers[0]) + " ;\n"
+                indent = (len(self.uri + entity_id) + 3) * " "
+                ttl += '<' + self.uri + self.encode_to_rdf_uri(entity_id) + "> rdf:type :" + self.encode_to_rdf_uri(self.headers[0]) + " ;\n"
                 ttl += indent + " rdfs:label " + self.escape['text'](entity_label) + "^^xsd:string ;\n"
                 startFaldo = None
                 endFaldo = None
