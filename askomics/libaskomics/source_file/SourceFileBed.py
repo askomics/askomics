@@ -67,7 +67,7 @@ class SourceFileBed(SourceFile):
 
         taxon_entity = ':unknown'
         if self.taxon != '':
-            taxon_entity = ':' + self.encodeToRDFURI(self.taxon.strip())
+            taxon_entity = ':' + self.encode_to_rdf_uri(self.taxon.strip())
 
         self.get_label_from_uri[taxon_entity] = self.taxon.strip()
         self.get_label_from_uri[':plus'] = 'plus'
@@ -101,7 +101,7 @@ class SourceFileBed(SourceFile):
 
 
             # Reference
-            ref_entity = self.encodeToRDFURI(str(feature.chrom))
+            ref_entity = self.encode_to_rdf_uri(str(feature.chrom))
             if ref_entity not in self.get_label_from_uri:
                 self.get_label_from_uri[ref_entity] = str(feature.chrom)
 
@@ -210,7 +210,7 @@ class SourceFileBed(SourceFile):
         for entity, attribute_dict in self.abstraction_dict.items():
             ttl += ':'+entity + ' ' + 'rdf:type owl:Class ;\n'
             indent = len(entity) * ' ' + ' '
-            ttl += indent + 'rdfs:label \"' + self.decodeToRDFURI(entity.replace(':', '')) + "\"^^xsd:string ;\n"
+            ttl += indent + 'rdfs:label \"' + self.decode_to_rdf_uri(entity.replace(':', '')) + "\"^^xsd:string ;\n"
             ttl += indent + 'displaySetting:startPoint \"true\"^^xsd:boolean ;\n\n'
             ttl += indent + 'displaySetting:entity \"true\"^^xsd:boolean .\n\n'
 
