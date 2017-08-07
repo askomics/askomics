@@ -46,7 +46,7 @@ $(function () {
         let headers = [];
         let form = $(event.target).closest('.template-source_file');
         form.find($('.header-text')).each(function(){
-            headers.push($(this).text());
+            headers.push($(this).val());
         });
         loadSourceFile($(event.target).closest('.template-source_file'), true, headers);
     });
