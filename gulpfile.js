@@ -2,26 +2,14 @@ var gulp = require('gulp');
 var util = require('gulp-util');
 var jshint = require('gulp-jshint');
 var concat = require('gulp-concat');
-//version 1.7.1 with bug
-//var sourcemaps = require('gulp-sourcemaps');
 var babel = require('gulp-babel');
-//var mocha = require('gulp-mocha');
-var inject = require('gulp-inject');
-//var rename = require('gulp-rename');
-var istanbul = require('gulp-istanbul');
-var mochaPhantomJS = require('gulp-mocha-phantomjs');
-var istanbulReport = require('gulp-istanbul-report');
 var uglify = require('gulp-uglify');
 var uglifycss = require('gulp-uglifycss');
 var handlebars = require('gulp-handlebars');
 var wrap = require('gulp-wrap');
 var declare = require('gulp-declare');
 var pump = require('pump');
-//var remapIstanbul = require('remap-istanbul/lib/gulpRemapIstanbul');
 
-//console.log(require('istanbul').Report.getReportList());
-
-// var askomicsSourceFiles = ['askomics/static/js/app/**/*.js','!askomics/static/js/app/third-party/**/*.js'];
 var askomicsSourceFiles = [
         'askomics/static/src/js/help/AskomicsHelp.js',
         'askomics/static/src/js/services/AskomicsRestManagement.js',
@@ -138,6 +126,7 @@ var mochaPhantomOpts = {
 
 //https://github.com/willembult/gulp-istanbul-report
 gulp.task('pre-test', function () {
+  var istanbul = require('gulp-istanbul');
   return gulp.src(askomicsSourceFiles, {base: "askomics/static/js"})
   //  .pipe(sourcemaps.init())
     .pipe(babel({presets: ['es2015']}))
@@ -178,6 +167,9 @@ askomicsInstrumentedSourceFiles.forEach(function(element, index) {
 
 
 gulp.task('test', ['default','pre-test','pre-test-srctest'],function () {
+    var inject = require('gulp-inject');
+    var mochaPhantomJS = require('gulp-mocha-phantomjs');
+    var istanbulReport = require('gulp-istanbul-report');
     return gulp
     .src('askomics/test/client/index_tpl.html')
     .pipe(inject(gulp.src(testFrameworkFiles, {read: false}) , {relative: true, name: 'testFramework'}))
