@@ -16,10 +16,12 @@ dist/
 
 # Javascript & utils
 node_modules
-askomics/test/client/js/istanbul
-.coverage-js
-output_test.log
 askomics/test/client/index_tpl.html
+.coverage-js
+askomics/test/client/js/istanbul
+askomics/test/client/js/src/
+coverage
+output_test.log
 
 # Editors & tooling
 *.orig

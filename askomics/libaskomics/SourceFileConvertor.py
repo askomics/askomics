@@ -62,12 +62,12 @@ class SourceFileConvertor(ParamManager):
         extension = os.path.splitext(filepath)[1]
         if extension.lower() in ('.gff', '.gff2', '.gff3'):
             return 'gff'
-        elif extension.lower() in ('.ttl', '.rdf'):
+        if extension.lower() in ('.ttl', '.rdf'):
             return 'ttl'
-        elif extension.lower() in ('.bed', ):
+        if extension.lower() in ('.bed', ):
             return 'bed'
-        else:
-            return 'csv'
+
+        return 'csv'
 
     def get_source_file(self, name, forced_type=None, uri=None):
         """
