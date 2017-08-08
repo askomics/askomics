@@ -35,11 +35,11 @@ class ParamManager(object):
         }
 
         self.userfilesdir = 'askomics/static/results/'
-        if not 'user.files.dir' in self.settings:
-            self.log.warning(" ******* 'user.files.dir' is not defined ! ********* "
+        if not 'askomics.files_dir' in self.settings:
+            self.log.warning(" ******* 'askomics.files_dir' is not defined ! ********* "
                              "\n Csv are saved in "+self.userfilesdir)
         else:
-            self.userfilesdir = self.settings['user.files.dir']+"/"
+            self.userfilesdir = self.settings['askomics.files_dir']+"/"
 
         self.ASKOMICS_html_template = 'askomics/templates/integration.pt'
 
@@ -221,24 +221,24 @@ class ParamManager(object):
         self.log.debug(" == Security.py:send_mails == ")
         # Don't send mail if the smtp server is not in
         # the config file
-        if not self.get_param('smtp.host'):
+        if not self.get_param('askomics.smtp_host'):
             return
-        if not self.get_param('smtp.port'):
+        if not self.get_param('askomics.smtp_port'):
             return
-        if not self.get_param('smtp.login'):
+        if not self.get_param('askomics.smtp_login'):
             return
-        if not self.get_param('smtp.password'):
+        if not self.get_param('askomics.smtp_password'):
             return
         starttls = False
-        if self.get_param('smtp.starttls'):
-            starttls = self.get_param('smtp.starttls').lower() == 'yes' or \
-                       self.get_param('smtp.starttls').lower() == 'ok' or \
-                       self.get_param('smtp.starttls').lower() == 'true'
+        if self.get_param('askomics.smtp_starttls'):
+            starttls = self.get_param('askomics.smtp_starttls').lower() == 'yes' or \
+                       self.get_param('askomics.smtp_starttls').lower() == 'ok' or \
+                       self.get_param('askomics.smtp_starttls').lower() == 'true'
 
-        host = self.get_param('smtp.host')
-        port = self.get_param('smtp.port')
-        login = self.get_param('smtp.login')
-        password = self.get_param('smtp.password')
+        host = self.get_param('askomics.smtp_host')
+        port = self.get_param('askomics.smtp_port')
+        login = self.get_param('askomics.smtp_login')
+        password = self.get_param('askomics.smtp_password')
 
         msg = MIMEMultipart()
         msg['From'] = 'AskoMics@'+host_url
@@ -251,8 +251,8 @@ class ParamManager(object):
             smtp.set_debuglevel(1)
             if starttls:
                 smtp.ehlo()
-                smtp.starttls()
-            smtp.login(login, password)
+                askomics.smtp_starttls()
+            askomics.smtp_login(login, password)
             smtp.sendmail(dests[0], dests, msg.as_string())
             smtp.quit()
             self.log.debug("Successfully sent email")
