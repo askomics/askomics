@@ -223,24 +223,24 @@ class ParamManager(object):
         self.log.debug(" == Security.py:send_mails == ")
         # Don't send mail if the smtp server is not in
         # the config file
-        if not self.get_param('smtp.host'):
+        if not self.get_param('askomics.smtp_host'):
             return
-        if not self.get_param('smtp.port'):
+        if not self.get_param('askomics.smtp_port'):
             return
-        if not self.get_param('smtp.login'):
+        if not self.get_param('askomics.smtp_login'):
             return
-        if not self.get_param('smtp.password'):
+        if not self.get_param('askomics.smtp_password'):
             return
         starttls = False
-        if self.get_param('smtp.starttls'):
-            starttls = self.get_param('smtp.starttls').lower() == 'yes' or \
-                       self.get_param('smtp.starttls').lower() == 'ok' or \
-                       self.get_param('smtp.starttls').lower() == 'true'
+        if self.get_param('askomics.smtp_starttls'):
+            starttls = self.get_param('askomics.smtp_starttls').lower() == 'yes' or \
+                       self.get_param('askomics.smtp_starttls').lower() == 'ok' or \
+                       self.get_param('askomics.smtp_starttls').lower() == 'true'
 
-        host = self.get_param('smtp.host')
-        port = self.get_param('smtp.port')
-        login = self.get_param('smtp.login')
-        password = self.get_param('smtp.password')
+        host = self.get_param('askomics.smtp_host')
+        port = self.get_param('askomics.smtp_port')
+        login = self.get_param('askomics.smtp_login')
+        password = self.get_param('askomics.smtp_password')
 
         msg = MIMEMultipart()
         msg['From'] = 'AskoMics@'+host_url
@@ -253,8 +253,8 @@ class ParamManager(object):
             smtp.set_debuglevel(1)
             if starttls:
                 smtp.ehlo()
-                smtp.starttls()
-            smtp.login(login, password)
+                askomics.smtp_starttls()
+            askomics.smtp_login(login, password)
             smtp.sendmail(dests[0], dests, msg.as_string())
             smtp.quit()
             self.log.debug("Successfully sent email")

@@ -100,14 +100,14 @@ class QueryLauncher(ParamManager):
                 print(self.settings)
                 raise ValueError("askomics.endpoint")
 
-            if self.is_defined("askomics.endpoint.username") and self.is_defined("askomics.endpoint.passwd"):
-                user = self.get_param("askomics.endpoint.username")
-                passwd = self.get_param("askomics.endpoint.passwd")
+            if self.is_defined("askomics.endpoint_username") and self.is_defined("askomics.endpoint_passwd"):
+                user = self.get_param("askomics.endpoint_username")
+                passwd = self.get_param("askomics.endpoint_passwd")
                 data_endpoint.setCredentials(user, passwd)
-            elif self.is_defined("askomics.endpoint.username"):
-                raise ValueError("askomics.endpoint.username")
-            elif self.is_defined("askomics.endpoint.passwd"):
-                raise ValueError("askomics.endpoint.passwd")
+            elif self.is_defined("askomics.endpoint_username"):
+                raise ValueError("askomics.endpoint_username")
+            elif self.is_defined("askomics.endpoint_passwd"):
+                raise ValueError("askomics.endpoint_passwd")
 
             if self.is_defined("askomics.endpoint.auth"):
                 data_endpoint.setHTTPAuth(self.get_param("askomics.endpoint.auth")) # Basic or Digest
