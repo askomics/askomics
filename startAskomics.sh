@@ -69,68 +69,6 @@ case $depmode in
         exit 1
 esac
 
-#set property on custom.ini file
-function set_property() {
-    local newline="$1 = $2"
-    # replace the line
-    sed -i "/^$1/d" "$dir_config/custom.ini"
-    sed -i "/app:main/a $newline" "$dir_config/custom.ini"
-}
-# Get config file -----------------------------------------
-echo " === use config base : $dir_config/custom.ini "
-cp "$dir_config/$depmode.$triplestore.ini" "$dir_config/custom.ini"
-
-if [[ ! -z $TRIPLESTORE_ENDPOINT ]]; then
-    echo "Custom triplestore endpoint: $TRIPLESTORE_ENDPOINT"
-    set_property "askomics.endpoint" $TRIPLESTORE_ENDPOINT
-fi
-
-if [[ ! -z $TRIPLESTORE_UPDATEPOINT ]]; then
-    echo "Custom triplestore updatepoint: $TRIPLESTORE_UPDATEPOINT"
-    set_property "askomics.updatepoint" $TRIPLESTORE_UPDATEPOINT
-fi
-
-if [[ ! -z $TRIPLESTORE_ENDPOINT_USERNAME || ! -z $TRIPLESTORE_ENDPOINT_PASSWD  ]]; then
-    if [[ -z $TRIPLESTORE_ENDPOINT_USERNAME || -z $TRIPLESTORE_ENDPOINT_PASSWD ]]; then
-        >&2 echo "Bad definition of triplestore administration auth. You must defined TRIPLESTORE_ENDPOINT_USERNAME, TRIPLESTORE_ENDPOINT_PASSWD."
-        exit 1
-    fi
-
-    echo "Defined triplestore auth with username $TRIPLESTORE_ENDPOINT_USERNAME"
-    set_property "askomics.endpoint.username" $TRIPLESTORE_ENDPOINT_USERNAME
-    set_property "askomics.endpoint.passwd" $TRIPLESTORE_ENDPOINT_PASSWD
-fi
-
-if [[ ! -z $ASKOMICS_LOAD_URL ]]; then
-    echo "Custom load url: $ASKOMICS_LOAD_URL"
-    set_property "askomics.load_url" $ASKOMICS_LOAD_URL
-fi
-
-if [[ ! -z $ASKOMICS_SMTP_HOST ]]; then
-    if [[ -z $ASKOMICS_SMTP_PORT || -z $ASKOMICS_SMTP_LOGIN || -z $ASKOMICS_SMTP_PASSWORD ]]; then
-        >&2 echo "Bad definition of smpt configuration. You must defined ASKOMICS_SMTP_HOST, ASKOMICS_SMTP_PORT, ASKOMICS_SMTP_LOGIN, ASKOMICS_SMTP_PASSWORD."
-        exit 1
-    fi
-    echo "-- SMTP definition --"
-    set_property "smtp.host" $ASKOMICS_SMTP_HOST
-    set_property "smtp.port" $ASKOMICS_SMTP_PORT
-    set_property "smtp.login" $ASKOMICS_SMTP_LOGIN
-    set_property "smtp.password" $ASKOMICS_SMTP_PASSWORD
-    if [[ ! -z $ASKOMICS_SMTP_STARTTLS ]]; then
-        set_property "smtp.starttls" $ASKOMICS_SMTP_STARTTLS
-    fi
-
-fi
-
-config_name="custom.ini"
-config_path="$dir_config/$config_name"
-
-if [[ ! -f $config_path ]]; then
-    echo "Config file $config_name not found in $dir_config"
-    usage
-    exit 1
-fi
-
 # Build python virtual environment ------------------------
 activate="$dir_venv/bin/activate"
 
@@ -143,6 +81,19 @@ if [[ ! -f $activate ]]; then
 else
     source $activate
 fi
+
+# Build config file ---------------------------------------
+config_name="custom.ini"
+config_path="$dir_config/$config_name"
+
+echo "Convert environment variables to ini file ..."
+cp "$dir_config/$depmode.$triplestore.ini" "$config_path"
+printenv | egrep "^ASKO_" | while read setting
+do
+    key="askomics."$(echo $setting | egrep -o "^ASKO_[^=]+" | sed 's/^.\{5\}//g')
+    value=$(echo $setting | egrep -o "=.*$" | sed 's/^=//g')
+    $python_ex -c "import configparser; config = configparser.ConfigParser(); config.read('"$config_path"'); config['app:main']['"$key"'] = '"$value"'; config.write(open('"$config_path"', 'w'))"
+done
 
 # Build Javascript ----------------------------------------
 askojs="$dir_askomics/askomics/static/dist/askomics.js"

@@ -23,6 +23,7 @@ requires = [
     'bcbio-gff',
     'validate_email',
     'pybedtools==0.7.10',
+    'configparser'
     ]
 
 setup(name='Askomics',
