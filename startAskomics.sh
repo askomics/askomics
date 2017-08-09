@@ -90,7 +90,7 @@ echo "Convert environment variables to ini file ..."
 cp "$dir_config/$depmode.$triplestore.ini" "$config_path"
 printenv | egrep "^ASKO_" | while read setting
 do
-    key="askomics."$(echo $setting | egrep -o "^ASKO_[^=]+" | sed 's/^.\{5\}//g')
+    key="askomics."$(echo $setting | tr '[:upper:]' '[:lower:]' | egrep -o "^ASKO_[^=]+" | sed 's/^.\{5\}//g')
     value=$(echo $setting | egrep -o "=.*$" | sed 's/^=//g')
     $python_ex -c "import configparser; config = configparser.ConfigParser(); config.read('"$config_path"'); config['app:main']['"$key"'] = '"$value"'; config.write(open('"$config_path"', 'w'))"
 done
