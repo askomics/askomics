@@ -41,12 +41,12 @@ class SourceFileConvertor(ParamManager):
             file_type = self.guess_file_type(path)
             if file_type == 'gff' or forced_type == 'gff':
                 files.append(SourceFileGff(self.settings, self.session, path, uri=uri))
-            elif file_type == 'csv' or forced_type == 'csv':
-                files.append(SourceFileTsv(self.settings, self.session, path, int(self.settings["askomics.overview_lines_limit"]), uri=uri))
             elif file_type == 'ttl' or forced_type == 'ttl':
                 files.append(SourceFileTtl(self.settings, self.session, path))
             elif file_type == 'bed' or forced_type == 'bed':
                 files.append(SourceFileBed(self.settings, self.session, path, uri=uri))
+            elif file_type == 'csv' or forced_type == 'csv':
+                files.append(SourceFileTsv(self.settings, self.session, path, int(self.settings["askomics.overview_lines_limit"]), uri=uri))
 
         return files
 
