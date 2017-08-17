@@ -86,7 +86,7 @@ fi
 
 if [[ ! -d $dir_node_modules ]]; then
     echo "javascript dependancies : npm install"
-    # check binaries dependancies
+    # check binary dependancies
     npm -v >/dev/null 2>&1 || { echo "npm is required but it's not installed.  Aborting." >&2; exit 1; }
     npm install
 fi
