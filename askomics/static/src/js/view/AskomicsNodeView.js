@@ -226,7 +226,7 @@ class AskomicsNodeView extends AskomicsObjectView {
     /* value */
     v = $('<input></input>').attr("type","text").addClass("form-control").attr("id",attribute.id);
     v.val(inputValue);
-    tr.append($("<td></td>").append(v));
+    tr.append($("<td></td>").attr('class', 'field').append(v));
 
     inp.append(tr);
 
@@ -235,17 +235,101 @@ class AskomicsNodeView extends AskomicsObjectView {
       let value = $(this).find('input').val();
       let sparlid = $(this).find('select').attr('sparqlid');
       if (! $.isNumeric(value) ) {
-          value = $(this).find('input').val(null);
+          $(this).find('td.field').addClass('has-error');
           mythis.node.setFilterAttributes(sparlid,'','');
           mythis.node.setFilterAttributes("op_"+sparlid,'','');
           if ( op != '=' && op != '<' && op != '<=' && op != '>' && op != '>=' && op != '!=') {
             $(this).find('option[value="="]').prop('selected', true);
           }
+          if (value == "") {
+            $(this).find('td.field').removeClass('has-error');
+          }
           return;
       } else {
+        $(this).find('td.field').removeClass('has-error');
         mythis.node.setFilterAttributes(sparlid,value,'FILTER ( ?'+sparlid+' '+op+' '+value+' )');
         mythis.node.setFilterAttributes("op_"+sparlid,op,'');
       }
+      mythis.updateNodeView();
+    });
+    return inp ;
+  }
+
+
+  buildDate(idDate, attribute) {
+    let mythis = this;
+
+    let labelSparqlVarId = attribute.SPARQLid;
+
+    let inputValue       = "";
+    let selectedOpValue  = "";
+
+    let inp = $("<table></table>").addClass("table").attr("id","date_"+attribute.SPARQLid+"_"+idDate);
+    if ('op_'+labelSparqlVarId in this.node.values) {
+      selectedOpValue = this.node.values['op_'+labelSparqlVarId];
+    }
+    if (labelSparqlVarId in this.node.values) {
+      inputValue = this.node.values[labelSparqlVarId];
+    }
+
+    let v = $("<select></select>")
+                  .addClass("form-control")
+                  .attr("sparqlid",labelSparqlVarId);
+    let t;
+    t=$("<option></option>").attr("value", '=').append('=');
+    if ( selectedOpValue=='=') t.attr("selected", "selected");
+    v.append(t);
+    t=$("<option></option>").attr("value", '<').append('<');
+    if ( selectedOpValue=='<') t.attr("selected", "selected");
+    v.append(t);
+    t=$("<option></option>").attr("value", '<=').append('<=');
+    if ( selectedOpValue=='<=') t.attr("selected", "selected");
+    v.append(t);
+    t=$("<option></option>").attr("value", '>').append('>');
+    if ( selectedOpValue=='>') t.attr("selected", "selected");
+    v.append(t);
+    t=$("<option></option>").attr("value", '>=').append('>=');
+    if ( selectedOpValue=='>=') t.attr("selected", "selected");
+    v.append(t);
+    t=$("<option></option>").attr("value", '!=').append('!=');
+    if ( selectedOpValue=='!=') t.attr("selected", "selected");
+    v.append(t);
+
+    /* operator */
+    let tr = $("<tr></tr>");
+    tr.append($("<td></td>").append(v));
+
+    /* value */
+    v = $('<input></input>').attr("type","text").addClass("form-control").attr("id", attribute.id);
+    v.val(inputValue);
+
+    tr.append($("<td></td>").attr('class', 'field').append(v));
+
+    inp.append(tr);
+
+    inp.change(function(d) {
+      let op = $(this).find("option:selected").text();
+      let value = $(this).find('input').val();
+      let sparlid = $(this).find('select').attr('sparqlid');
+      let date_regex = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}/;
+      if (! date_regex.test(value)) {
+        $(this).find('td.field').addClass('has-error');
+          mythis.node.setFilterAttributes(sparlid,'','');
+          mythis.node.setFilterAttributes("op_"+sparlid,'','');
+          if ( op != '=' && op != '<' && op != '<=' && op != '>' && op != '>=' && op != '!=') {
+            $(this).find('option[value="="]').prop('selected', true);
+          }
+          if (value == "") {
+            $(this).find('td.field').removeClass('has-error');
+          }
+          return;
+      } else {
+        $(this).find('td.field').removeClass('has-error');
+        mythis.node.setFilterAttributes(sparlid,value,'FILTER ( ?'+sparlid+' '+op+' "'+value+'"^^xsd:dateTime )');
+        mythis.node.setFilterAttributes("op_"+sparlid,op,'');
+      }
+      // console.log(value);
+
       mythis.updateNodeView();
     });
     return inp ;
@@ -751,6 +835,23 @@ class AskomicsNodeView extends AskomicsObjectView {
                    .append(mythis.makeLinkVariableIcon(attribute.SPARQLid))
                    .append(mythis.buildString(attribute.SPARQLid))
                    .append(mythis.buildLinkVariable(attribute)));
+          } else if (attribute.basic_type == "date") {
+            // dateTime here
+            console.log('datetime');
+            let order = attribute.order;
+            mythis.addPanel(order, $('<div></div>').append(lab)
+                   .attr("id", attribute.id)
+                   .attr("sparqlid", attribute.SPARQLid)
+                   .attr("uri", attribute.uri)
+                   .attr("basic_type", attribute.basic_type)
+                   .append(mythis.makeRemoveIcon())
+                   .append(mythis.makeEyeIcon(attribute))
+                   .append(mythis.makeNegativeMatchIcon(attribute.SPARQLid))
+                   .append(mythis.makeLinkVariableIcon(attribute.SPARQLid))
+                   .append(mythis.buildDate(1,attribute))
+                   .append(mythis.buildLinkVariable(attribute))
+            );
+
           } else {
             throw typeof this + "::create . Unknown type attribute:"+ attribute.basic_type;
           }

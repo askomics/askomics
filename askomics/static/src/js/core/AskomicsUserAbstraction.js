@@ -117,6 +117,9 @@ class AskomicsUserAbstraction {
       if (attributeForUritype === this.longRDF("xsd:language")) {
         return "string";
       }
+      if (attributeForUritype === this.longRDF("xsd:dateTime")) {
+        return "date";
+      }
       return attributeForUritype;
     }
     /*
