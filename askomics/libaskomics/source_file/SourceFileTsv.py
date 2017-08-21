@@ -514,14 +514,14 @@ class SourceFileTsv(SourceFile):
                                 else:
                                     pref = self.delims[current_type][0]
                                     suf = self.delims[current_type][1]
-                                ttl += indent + " "+ relationName + " " + pref + self.escape[current_type](row[i]) + suf + " ;\n"
+                                ttl += indent + " "+ relation_name + " " + pref + self.escape[current_type](row[i]) + suf + " ;\n"
 
                         if current_type == 'entitySym':
                             pref = self.prefix_uri_entity(i)
                             suf = self.suffix_uri_entity()
                             ttlSym += pref+\
                                       self.escape[current_type](row[i])+\
-                                      suf+" "+relationName+" :"+\
+                                      suf+" "+relation_name+" :"+\
                                       self.encodeToRDFURI(entity_label)  + " .\n"
 
                 # Faldo position management
