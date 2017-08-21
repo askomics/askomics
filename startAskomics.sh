@@ -3,6 +3,8 @@
 dir_askomics=$(dirname "$0")
 dir_config="$dir_askomics/configs"
 dir_venv="$dir_askomics/venv"
+dir_node_modules="$dir_askomics/node_modules"
+
 
 python_ex="python3"
 pyvenv="$python_ex -m venv"
@@ -80,6 +82,13 @@ if [[ ! -f $activate ]]; then
     $pip install -e .
 else
     source $activate
+fi
+
+if [[ ! -d $dir_node_modules ]]; then
+    echo "javascript dependancies : npm install"
+    # check binaries dependancies
+    npm -v >/dev/null 2>&1 || { echo "npm is required but it's not installed.  Aborting." >&2; exit 1; }
+    npm install
 fi
 
 # Build config file ---------------------------------------
