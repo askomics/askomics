@@ -479,8 +479,6 @@ class AskView(object):
         if self.request.session['blocked']:
             return 'blocked'
 
-
-        self.log.debug("prefix_uri")
         try:
             body = self.request.json_body
             tse = TripleStoreExplorer(self.settings, self.request.session)
