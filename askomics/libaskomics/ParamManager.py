@@ -55,7 +55,8 @@ class ParamManager(object):
             'entity'  : self.encodeToRDFURI,
             'entitySym'  : self.encodeToRDFURI,
             'entity_start'  : self.encodeToRDFURI,
-            'goterm': lambda str: str.replace("GO:", "")
+            'goterm': lambda str: str.replace("GO:", ""),
+            'date': json.dumps
             }
 
     def getUploadDirectory(self):
