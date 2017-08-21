@@ -57,6 +57,28 @@ class SparqlQueryGraph(SparqlQueryBuilder):
                      "}"
         }, True)
 
+    def get_prefix_uri(self):
+        """
+        Get list of uri defined as metadata for a entities list
+        """
+        self.log.debug('---> get_prefix_uri')
+        return self.build_query_on_the_fly({
+            'select': '?nodeLabel ?prefUri',
+            'query': 'GRAPH ?g {\n'+
+                     '\t?nodeUri displaySetting:entity "true"^^xsd:boolean .\n' +
+                     '\t?nodeUri rdfs:label ?nodeLabel.\n'+
+                     '\t?nodeUri displaySetting:prefixUri ?prefUri.\n'+
+                     "\t{\n"+
+                     "\t\t{ ?g :accessLevel ?accesLevel.\n"+
+                     "\t\t\tVALUES ?accesLevel { 'public' }."+
+                     "\t\t}\n"+
+                     "\t\tUNION\n"+
+                     "\t\t{ ?g :accessLevel ?accesLevel.\n "+
+                     "\t\t?g dc:creator '" + self.session['username'] + "' }\n"+
+                     "\t}\n."+
+                     "}"
+        }, True)
+
     def get_isa_relation_entities(self):
         """
         Get the association list of entities and subclass

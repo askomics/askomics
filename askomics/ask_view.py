@@ -421,8 +421,9 @@ class AskView(object):
                     infos['headers'] = src_file.get_headers_by_file
                     infos['preview_data'] = src_file.get_preview_data()
                     infos['column_types'] = []
-                    header_num = 0
-                    for ih in range(0, len(infos['headers'])):
+                    header_num = 1
+                    infos['column_types'].append('entity_start')
+                    for ih in range(1, len(infos['headers'])):
                         #if infos['headers'][ih].find("@")>0:
                         #    infos['column_types'].append("entity")
                         #else:
@@ -464,6 +465,34 @@ class AskView(object):
         return self.data
 
 
+    @view_config(route_name='prefix_uri', request_method='POST')
+    def prefix_uri(self):
+        """
+        get prefix uri for each entities finded in he header file
+        """
+
+        # Denny access for non loged users
+        if self.request.session['username'] == '':
+            return 'forbidden'
+
+        # Denny for blocked users
+        if self.request.session['blocked']:
+            return 'blocked'
+
+
+        self.log.debug("prefix_uri")
+        try:
+            body = self.request.json_body
+            tse = TripleStoreExplorer(self.settings, self.request.session)
+            self.data = tse.get_prefix_uri()
+            self.data['__default__'] = tse.get_param("askomics.prefix")
+        except Exception as e:
+            traceback.print_exc(file=sys.stdout)
+            self.data['error'] = str(e)
+            return self.data
+
+        return self.data
+
     @view_config(route_name='preview_ttl', request_method='POST')
     def preview_ttl(self):
         """
@@ -486,10 +515,13 @@ class AskView(object):
             col_types = body["col_types"]
             disabled_columns = body["disabled_columns"]
             key_columns = body["key_columns"]
+            uris = None
+            if 'uris' in body:
+                uris = body['uris']
 
             sfc = SourceFileConvertor(self.settings, self.request.session)
 
-            src_file = sfc.get_source_file(file_name)
+            src_file = sfc.get_source_file(file_name, uri_set=uris)
             src_file.set_forced_column_types(col_types)
             src_file.set_disabled_columns(disabled_columns)
             src_file.set_key_columns(key_columns)
@@ -549,9 +581,9 @@ class AskView(object):
         key_columns = body["key_columns"]
         public = body['public']
         headers = body['headers']
-        uri = None
-        if 'uri' in body:
-            uri = body['uri']
+        uris = None
+        if 'uris' in body:
+            uris = body['uris']
 
         method = 'load'
         if 'method' in body:
@@ -567,7 +599,7 @@ class AskView(object):
             return self.data
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
-        src_file = sfc.get_source_file(file_name, forced_type, uri=uri)
+        src_file = sfc.get_source_file(file_name, forced_type, uri_set=uris)
         src_file.set_headers(headers)
         src_file.set_forced_column_types(col_types)
         src_file.set_disabled_columns(disabled_columns)
@@ -583,7 +615,7 @@ class AskView(object):
             query_laucher.execute_query(sqb.get_delete_metadatas_of_graph(src_file.graph).query)
 
             traceback.print_exc(file=sys.stdout)
-            self.data['error'] = 'Probleme with user data file ?</br>'+str(e)
+            self.data['error'] = 'Problem with user data file ?</br>'+str(e)
             self.log.error(str(e))
 
         return self.data
@@ -629,7 +661,7 @@ class AskView(object):
             public = False
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
-        src_file_gff = sfc.get_source_file(file_name, forced_type, uri=uri)
+        src_file_gff = sfc.get_source_file(file_name, forced_type, uri_set={ 0 : uri } )
 
         src_file_gff.set_taxon(taxon)
         src_file_gff.set_entities(entities)
@@ -741,7 +773,7 @@ class AskView(object):
             public = False
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
-        src_file_bed = sfc.get_source_file(file_name, forced_type, uri=uri)
+        src_file_bed = sfc.get_source_file(file_name, forced_type, uri_set={ 0 : uri })
 
         src_file_bed.set_taxon(taxon)
         src_file_bed.set_entity_name(entity)

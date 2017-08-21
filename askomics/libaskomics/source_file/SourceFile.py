@@ -27,7 +27,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
     Class representing a source file.
     """
 
-    def __init__(self, settings, session, path, uri=None):
+    def __init__(self, settings, session, path, uri_set=None):
 
         ParamManager.__init__(self, settings, session)
 
@@ -53,13 +53,16 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         self.reset_cache()
 
-        if uri:
-            # uri have to end with # or /
-            if not uri.endswith('#') and not uri.endswith('/'):
-                uri = uri + "/"
-            self.uri = uri
-        else:
-            self.uri = self.get_param("askomics.prefix")
+        self.uri = {}
+        if uri_set != None:
+            for idx,uri in uri_set.items():
+                if uri:
+                    # uri have to end with # or /
+                    if not uri.endswith('#') and not uri.endswith('/'):
+                        uri = uri + "/"
+                    self.uri[int(idx)] = uri
+                else:
+                    self.uri[int(idx)] = self.get_param("askomics.prefix")
 
     def setGraph(self,graph):
         self.graph = graph
@@ -124,14 +127,13 @@ class SourceFile(ParamManager, HaveCachedProperties):
         self.insert_metadatas(public)
 
         content_ttl = self.get_turtle()
-
         ql = QueryLauncher(self.settings, self.session)
 
         # use insert data instead of load sparql procedure when the dataset is small
         total_triple_count = 0
         chunk_count = 1
         chunk = ""
-        pathttl = self.getRdfUserDirectory() 
+        pathttl = self.getRdfUserDirectory()
         if method == 'load':
 
             fp = None
@@ -301,7 +303,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
             if self.settings["askomics.debug"]:
                 data['url'] = url
             else:
-                self.log.debug("source file : load_data_from_file delete =>"+fp.name)
+                self.log.debug("3source file : load_data_from_file delete =>"+fp.name)
                 os.remove(fp.name) # Everything ok, remove temp file
 
         return data
