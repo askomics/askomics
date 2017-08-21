@@ -50,7 +50,8 @@ class SourceFileTsv(SourceFile):
             'entity'  : ':',
             'entitySym'  : ':',
             'entity_start'  : ':',
-            'goterm': ''
+            'goterm': '',
+            'date': 'xsd:dateTime'
             }
 
         self.delims = {
@@ -65,7 +66,8 @@ class SourceFileTsv(SourceFile):
             'entity'  : (':', ''),
             'entitySym'  : (':', ''),
             'entity_start'  : (':', ''),
-            'goterm': ('<http://purl.obolibrary.org/obo/GO_', '>')
+            'goterm': ('<http://purl.obolibrary.org/obo/GO_', '>'),
+            'date': ('', '^^xsd:dateTime')
             }
 
     @cached_property
@@ -78,7 +80,7 @@ class SourceFileTsv(SourceFile):
             # and we restrict to a list of allowed delimiters to avoid strange results
             contents = tabfile.readline()
             dialect = csv.Sniffer().sniff(contents, delimiters=';,\t ')
-            self.log.debug("CSV dialect in %r: %s" % (self.path, pformat_generic_object(dialect)))
+            self.log.debug('CSV dialect in ' + str(self.path) + ': ' + str(pformat_generic_object(dialect)))
             return dialect
 
     @cached_property
@@ -151,11 +153,20 @@ class SourceFileTsv(SourceFile):
         """
 
         # check if relationShip with an other local entity
-        if header.find("@")>0:
+        if header.find("@") > 0:
             #general relation by default
             return "entity"
 
-        types = {'ref':('chrom',), 'taxon':('taxon', 'species'), 'strand':('strand',), 'start':('start', 'begin'), 'end':('end', 'stop')}
+        types = {
+            'ref': ('chrom', ),
+            'taxon': ('taxon', 'species'),
+            'strand': ('strand', ),
+            'start': ('start', 'begin'),
+            'end': ('end', 'stop'),
+            'date': ('date', 'time', 'datetime', 'birthday')
+        }
+
+        date_regex = re.compile(r'^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}')
 
         # First check if it is specific type
         self.log.debug('header: '+header)
@@ -170,21 +181,23 @@ class SourceFileTsv(SourceFile):
                     # Test if strand is a category with only 2 elements max
                     if typ == 'strand' and len(set(values)) != 2:
                         break
-
+                    # test if date respect the datetime regexp
+                    if typ == 'date' and not all(date_regex.match(val) for val in values):
+                        break
                     return typ
 
         #check goterm
-        if all( (val.startswith("GO:") and val[3:].isdigit() ) for val in values):
+        if all((val.startswith("GO:") and val[3:].isdigit()) for val in values):
             return 'goterm'
 
         # Then, check if category
-        threshold=10
-        if len(values)<30:
-            threshold=5
+        threshold = 10
+        if len(values) < 30:
+            threshold = 5
 
         #if all(re.match(r'^\w+$', val) for val in values):#check if no scape chararcter
         if all(self.is_decimal(val) for val in values): # Then numeric
-            if all(val=='' for val in values):
+            if all(val == '' for val in values):
                 return 'text'
             return 'numeric'
         elif len(set(values)) < threshold:
@@ -243,23 +256,30 @@ class SourceFileTsv(SourceFile):
 
         self.key_columns = key_columns
 
-    def key_id(self,row):
+    def key_id(self, row):
+        """
+        Get the key id by concatenate all key selected
+        """
 
         retval = None
 
         for key in self.key_columns:
-            if retval == None:
+            if retval is None:
                 retval = row[int(key)]
             else:
                 retval += "_"+ row[int(key)]
 
-        #by default the first element is index
-        if retval == None:
+        # By default the first element is index
+        if retval is None:
             retval = row[0]
 
         return retval
 
-    def getStrandFaldo(self,strand):
+    @staticmethod
+    def get_strand_faldo(strand):
+        """
+        Get the faldo strand in function of the strand
+        """
 
         if strand is None:
             return "faldo:BothStrandPosition"
@@ -273,13 +293,15 @@ class SourceFileTsv(SourceFile):
         return "faldo:BothStrandPosition"
 
     def get_abstraction(self):
-        # TODO use rdflib or other abstraction layer to create rdf
         """
         Get the abstraction representing the source file in ttl format
 
         :return: ttl content for the abstraction
         """
-        if len(self.forced_column_types)<=0:
+
+        # TODO use rdflib or other abstraction layer to create rdf
+
+        if len(self.forced_column_types) <= 0:
             raise ValueError("forced_column_types is not defined !")
 
         ttl = ''
@@ -299,7 +321,7 @@ class SourceFileTsv(SourceFile):
             #
             # ==> IHM detect position_ attribute and transforme all query with faldo:location/faldo:begin/faldo:reference
             #
-            if key > 0 and not key_type.startswith('entity') :
+            if key > 0 and not key_type.startswith('entity'):
                 if key_type in ('taxon', 'ref', 'strand', 'start', 'end'):
                     uri = 'position_'+key_type
                 # elif key_type == 'taxon':
@@ -310,9 +332,8 @@ class SourceFileTsv(SourceFile):
                 # store the order of attrbutes in order to display attributes in the right order
                 ttl += ":" + uri + ' displaySetting:attributeOrder "' + str(key) + '"^^xsd:decimal .\n'
 
-            if key > 0 :
+            if key > 0:
                 ttl += AbstractedRelation(key_type, self.headers[key], ref_entity, self.type_dict[key_type]).get_turtle()
-
         # Store the startpoint status
         if self.forced_column_types[0] == 'entity_start':
             ttl += ":" + self.encodeToRDFURI(ref_entity) + ' displaySetting:startPoint "true"^^xsd:boolean .\n'
@@ -320,12 +341,13 @@ class SourceFileTsv(SourceFile):
         return ttl
 
     def get_domain_knowledge(self):
-        # TODO use rdflib or other abstraction layer to create rdf
         """
         Get the domain knowledge representing the source file in ttl format
 
         :return: ttl content for the domain knowledge
         """
+
+        #TODO use rdflib or other abstraction layer to create rdf
 
         ttl = ''
 
@@ -337,7 +359,7 @@ class SourceFileTsv(SourceFile):
         for header, categories in self.category_values.items():
             indent = len(header) * " " + len("displaySetting:category") * " " + 3 * " "
             ttl += ":" + self.encodeToRDFURI(header+"Category") + " displaySetting:category :"
-            ttl += (" , \n" + indent + ":").join(map(self.encodeToRDFURI,categories)) + " .\n"
+            ttl += (" , \n" + indent + ":").join(map(self.encodeToRDFURI, categories)) + " .\n"
 
             for item in categories:
                 if item.strip() != "":
@@ -362,12 +384,12 @@ class SourceFileTsv(SourceFile):
             # Loop on lines
             for row_number, row in enumerate(tabreader):
                 #blanck line
-                if len(row) == 0:
+                if not row:
                     continue
                 if len(row) != len(self.headers):
-                    exc = SourceFileSyntaxError('Invalid line found: '+str(self.headers)+
-                                                ' columns expected, found '+str(len(row))+
-                                                " - (last valid entity "+entity_label+")")
+                    exc = SourceFileSyntaxError('Invalid line found: ' + str(self.headers) +
+                                                ' columns expected, found ' + str(len(row)) +
+                                                " - (last valid entity " + entity_label + ")")
                     exc.filename = self.path
                     exc.lineno = row_number
                     self.log.error(repr(exc))
@@ -381,6 +403,10 @@ class SourceFileTsv(SourceFile):
         return category_values
 
     def get_turtle(self, preview_only=False):
+        """
+        Get the turtle string of a tsv file
+        """
+
         # TODO use rdflib or other abstraction layer to create rdf
 
         self.category_values = defaultdict(set) # key=name of a column of 'category' type -> list of found values
@@ -393,12 +419,12 @@ class SourceFileTsv(SourceFile):
 
             # Loop on lines
             for row_number, row in enumerate(tabreader):
-                ttl    = ""
-                ttlSym = ""
+                ttl = ""
+                ttl_sym = ""
                 #if len(row)>0:
                 #    self.log.debug(row[0]+' '+str(row_number))
                 #blanck line
-                if len(row) == 0:
+                if not row:
                     continue
 
                 # Create the entity (first column)
@@ -414,34 +440,33 @@ class SourceFileTsv(SourceFile):
                 indent = (len(self.uri + entity_id) + 2) * " "
                 ttl += "<" + self.uri + self.encodeToRDFURI(entity_id) + "> rdf:type :" + self.encodeToRDFURI(self.headers[0]) + " ;\n"
                 ttl += indent + " rdfs:label " + self.escape['text'](entity_label) + "^^xsd:string ;\n"
-                startFaldo = None
-                endFaldo = None
-                referenceFaldo = None
-                strandFaldo = None
+                start_faldo = None
+                end_faldo = None
+                reference_faldo = None
+                strand_faldo = None
 
                 # check positionable
                 positionable = False
                 if 'start' in self.forced_column_types and 'end' in self.forced_column_types and 'strand' in self.forced_column_types and 'ref' in self.forced_column_types:
                     # its a positionable entity
                     positionable = True
-
                 # Add data from other columns
                 for i, header in enumerate(self.headers): # Skip the first column
                     if i > 0 and i not in self.disabled_columns:
                         current_type = self.forced_column_types[i]
                         #OFI : manage new header with relation@type_entity
-                        #relationName = ":has_" + header # manage old way
-                        havePrefix = False
-                        relationName = ":" + self.encodeToRDFURI(header) # manage old way
+                        #relation_name = ":has_" + header # manage old way
+                        have_prefix = False
+                        relation_name = ":" + self.encodeToRDFURI(header) # manage old way
                         if current_type.startswith('entity'):
                             idx = header.find("@")
 
                             if idx > 0:
-                                relationName = ":"+self.encodeToRDFURI(header[0:idx])
-                                typeEnt = header[idx+1:]
-                                clause1 = typeEnt.find(":")>0
-                                if  clause1 or (header[idx+1] == '<' and header[len(header)-1] == '>') :
-                                    havePrefix = True
+                                relation_name = ":"+self.encodeToRDFURI(header[0:idx])
+                                type_ent = header[idx+1:]
+                                clause1 = type_ent.find(":") > 0
+                                if clause1 or (header[idx+1] == '<' and header[len(header)-1] == '>'):
+                                    have_prefix = True
                         # Create link to value
                         if row[i]: # Empty values are just ignored
                             if current_type in ('category', 'taxon', 'ref', 'strand'):
@@ -458,62 +483,62 @@ class SourceFileTsv(SourceFile):
                             if positionable:
                                 # positionable attributes
                                 if current_type == 'start':
-                                    startFaldo = row[i]
+                                    start_faldo = row[i]
                                 elif current_type == 'end':
-                                    endFaldo = row[i]
+                                    end_faldo = row[i]
                                 elif current_type == 'taxon':
                                     ttl += indent + " " + ':position_taxon' + " " + self.delims[current_type][0] + self.encodeToRDFURI(row[i]) + self.delims[current_type][1] + " ;\n"
                                 elif current_type == 'ref':
-                                    referenceFaldo = self.encodeToRDFURI(row[i])
+                                    reference_faldo = self.encodeToRDFURI(row[i])
                                 elif current_type == 'strand':
-                                    strandFaldo = row[i]
+                                    strand_faldo = row[i]
                                     ttl += indent + " " + ':position_strand' + " " + self.delims[current_type][0] + self.encodeToRDFURI(row[i]) + self.delims[current_type][1] + " ;\n"
-                                elif havePrefix:
-                                    ttl += indent + " "+ relationName + " " + row[i] + " ;\n"
+                                elif have_prefix:
+                                    ttl += indent + " "+ relation_name + " " + row[i] + " ;\n"
                                 else:
-                                    ttl += indent + " "+ relationName + " " + self.delims[current_type][0] + self.escape[current_type](row[i]) + self.delims[current_type][1] + " ;\n"
+                                    ttl += indent + " "+ relation_name + " " + self.delims[current_type][0] + self.escape[current_type](row[i]) + self.delims[current_type][1] + " ;\n"
 
                             else:
-                                # Not positionable
-                                ttl += indent + " "+ relationName + " " + self.delims[current_type][0] + self.escape[current_type](row[i]) + self.delims[current_type][1] + " ;\n"
+                                ttl += indent + " "+ relation_name + " " + self.delims[current_type][0] + self.escape[current_type](row[i]) + self.delims[current_type][1] + " ;\n"
+                                self.log.debug('3')
 
                         if current_type == 'entitySym':
-                            ttlSym += self.delims[current_type][0]+\
+                            ttl_sym += self.delims[current_type][0]+\
                                       self.escape[current_type](row[i])+\
-                                      self.delims[current_type][1]+" "+relationName+" :"+\
+                                      self.delims[current_type][1]+" "+relation_name+" :"+\
                                       self.encodeToRDFURI(entity_label)  + " .\n"
 
                 # Faldo position management
                 if positionable:
-                    blockbase=10000
-                    block_idxstart = int(startFaldo) // blockbase
-                    block_idxend  = int(endFaldo) // blockbase
+                    blockbase = 10000
+                    block_idxstart = int(start_faldo) // blockbase
+                    block_idxend = int(end_faldo) // blockbase
 
                     ttl += indent + ' :blockstart ' + str(block_idxstart*blockbase) +';\n'
                     ttl += indent + ' :blockend ' + str(block_idxend*blockbase) +';\n'
 
-                    for sliceb in range(block_idxstart,block_idxend+1):
-                        ttl += indent + ' :IsIncludeInRef ' + referenceFaldo+"_"+str(sliceb) +' ;\n'
+                    for sliceb in range(block_idxstart, block_idxend + 1):
+                        ttl += indent + ' :IsIncludeInRef ' + reference_faldo+"_"+str(sliceb) +' ;\n'
                         ttl += indent + ' :IsIncludeIn ' + str(sliceb) +' ;\n'
 
-                    faldo_strand = self.getStrandFaldo(strandFaldo)
+                    faldo_strand = self.get_strand_faldo(strand_faldo)
 
                     ttl += indent +    " faldo:location [ a faldo:Region ;\n"+\
                               indent + "                  faldo:begin [ a faldo:ExactPosition;\n"+\
                               indent + "                                a "+faldo_strand+";\n"+\
-                              indent + "                                faldo:position "+str(startFaldo)+";\n"+\
-                              indent + "                                faldo:reference :"+referenceFaldo+" ];\n"+\
+                              indent + "                                faldo:position "+str(start_faldo)+";\n"+\
+                              indent + "                                faldo:reference :"+reference_faldo+" ];\n"+\
                               indent + "                  faldo:end [ a faldo:ExactPosition;\n"+\
                               indent + "                              a "+faldo_strand+";\n"+\
-                              indent + "                              faldo:position "+str(endFaldo)+";\n"+\
-                              indent + "                              faldo:reference :"+referenceFaldo+" ]] ;\n"
+                              indent + "                              faldo:position "+str(end_faldo)+";\n"+\
+                              indent + "                              faldo:reference :"+reference_faldo+" ]] ;\n"
 
                 ttl = ttl[:-2] + "."
 
 
                 #manage symmetric relation
-                if ttlSym != "":
-                    yield ttlSym
+                if ttl_sym != "":
+                    yield ttl_sym
 
                 yield ttl
                 # Stop after x lines
