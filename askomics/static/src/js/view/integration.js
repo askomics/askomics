@@ -106,12 +106,14 @@ function cols2rows(items) {
 
 function displayIntegrationForm(data) {
     $("#content_integration").empty();
-
     if ( data.files === undefined ) return ;
+
+    let dataprefix = updatePrefixListFromDatabase();
     for (var i = data.files.length - 1; i >= 0; i--) {
         switch (data.files[i].type) {
             case 'tsv':
                 displayTSVForm(data.files[i]);
+                updatePrefixListUriCsvForm(data.files[i],dataprefix);
             break;
             case 'gff':
                 displayGffForm(data.files[i], data.taxons);
@@ -129,6 +131,19 @@ function displayIntegrationForm(data) {
 function getIdFile(file) {
     // replace non a-z A-Z 0-9 char to _
     return file.name.replace(/[^a-zA-Z0-9]/g, '_');
+}
+
+function updatePrefixListFromDatabase() {
+  console.log('----> updatePrefixListFromDatabase <---- ');
+  // we proposed all uri finded in database
+  let service = new RestServiceJs("prefix_uri");
+  let model = { };
+  let results ;
+
+  service.postsync(model, function(data) {
+      results = data ;
+  });
+  return results;
 }
 
 function displayTSVForm(file) {
@@ -202,120 +217,116 @@ function displayBedForm(file, taxons) {
     $('#content_integration').append(html);
 }
 
-function updatePrefixListUri(file) {
+function updatePrefixListUriCsvForm(file,data) {
+  if ( data.length <= 0 ) {
+    throw Exception("Bad use of updatePrefixListUriCsvForm  data ==>"+JSON.stringify(data));
+  }
+
   let idfile = getIdFile(file) ;
-  /* import prefix uri */
-
-  // we proposed all uri finded in database
-  let service = new RestServiceJs("prefix_uri");
-  let model = { };
-
-  service.post(model, function(data) {
-
-    let filter = 'div#content_integration ';
+  let filter = 'div#content_integration ';
     filter += 'form#source-file-tsv-' + idfile ;
     filter += ' select.uri_entity' ;
 
-    let selectbox = $( filter ).each(function(i) {
-    let curSelect = $(this);
-    curSelect.empty();
+  let selectbox = $( filter ).each(function(i) {
+  let curSelect = $(this);
+  curSelect.empty();
 
-    /*
+  /*
     special input tag for the first column which defined the entity
     user can choose from the database list or create a new one.
     we use the autocomplete functionnality from jquery-ui
-    */
+  */
 
 
-    if ( i === 0 ) {
-        let inp = $('<input type="text"/>')
+  if ( i === 0 ) {
+      let inp = $('<input type="text"/>')
                      .attr("id","def-uri-entity-"+idfile)
                      .addClass('uri_entity')
                      .addClass('form-control')
                      .addClass('input-sm');
 
-        curSelect.after(inp);
-        curSelect.remove();
+      curSelect.after(inp);
+      curSelect.remove();
 
-        let availableTags = [];
-        let listAvailableTags = {} ;
-        let base = data.__default__;
-        availableTags.push(base);
+      let availableTags = [];
+      let listAvailableTags = {} ;
 
-        listAvailableTags[base] = 0;
-        inp.val(base);
+      let base = data.__default__;
+      availableTags.push(base);
 
-        for (let key in data ) {
-          if (key == '__default__') continue;
-          for (let element in data[key] ) {
-            if (! (data[key][element] in listAvailableTags) ) {
-              let v = data[key][element];
-              listAvailableTags[v] = 0;
-              availableTags.push(v);
-            }
+      listAvailableTags[base] = 0;
+      inp.val(base);
+
+      for (let key in data ) {
+        if (key == '__default__') continue;
+        for (let element in data[key] ) {
+          if (! (data[key][element] in listAvailableTags) ) {
+            let v = data[key][element];
+            listAvailableTags[v] = 0;
+            availableTags.push(v);
           }
         }
-
-        inp.autocomplete({
-          source: availableTags
-        }).change(function() {
-          let val = $(this).val();
-          if (val.trim().substring(0, 7) != "http://")
-            $(this).val( "http://" + val.trim()) ;
-        }).click(function() {
-          /* add potential */
-          $('input[id^="def-uri-entity"]').map(function() {
-            if ( !( $(this).val() in listAvailableTags) ) {
-              listAvailableTags[$(this).val()] = 0;
-              availableTags.push($(this).val());
-            }
-          });
-          $(this).autocomplete({
-            source: availableTags
-          });
-        });
-
-      } else {
-        if ( file.column_types[i] != 'entity_start' &&
-             file.column_types[i] != 'entity' &&
-             file.column_types[i] != 'entitySym') {
-          curSelect.attr('disabled', true);
-          curSelect.hide();
-          return ;
-        }
-        let entity = file.headers[i].substring(file.headers[i].indexOf("@")+1);
-
-        if (entity in data ) {
-            data[entity].forEach(function(element) {
-              curSelect.append($("<option></option>").val(element).html(element));
-            });
-        } else { /* this entity does not exist in database */
-           curSelect.append($("<option></option>").val(data.__default__).html(data.__default__));
-        }
-        /* if same type entity than the first column maybe a new uri exist... */
-        let first_entity = file.headers[0].substring(file.headers[0].indexOf("@")+1);
-        if (first_entity == entity ) {
-          curSelect.click(function() {
-            /* check input uri tag of the current entity definition and propose  */
-            let newuri = $('#def-uri-entity-' +idfile).val();
-            /* remove unconsistent uri */
-            curSelect.find('option[volatile="true"]').map(function() {
-              if ( $(this).val() != newuri ) $(this).remove();
-            });
-
-            let exist = false ;
-            curSelect.find('option').map(function() {
-              if ($(this).val() == newuri ) exist = true ;
-            });
-            if (! exist ) {
-              curSelect.append($("<option></option>").val(newuri)
-                                                     .html(newuri)
-                                                     .attr('volatile','true'));
-            }
-          });
-        }
       }
-    });
+
+      inp.autocomplete({
+        source: availableTags
+      }).change(function() {
+        let val = $(this).val();
+        if (val.trim().substring(0, 7) != "http://")
+          $(this).val( "http://" + val.trim()) ;
+      }).click(function() {
+      /* add potential */
+        $('input[id^="def-uri-entity"]').map(function() {
+          if ( !( $(this).val() in listAvailableTags) ) {
+            listAvailableTags[$(this).val()] = 0;
+            availableTags.push($(this).val());
+          }
+        });
+        $(this).autocomplete({
+          source: availableTags
+        });
+      });
+
+    } else {
+      if ( file.column_types[i] != 'entity_start' &&
+           file.column_types[i] != 'entity' &&
+           file.column_types[i] != 'entitySym') {
+        curSelect.attr('disabled', true);
+        curSelect.hide();
+        return ;
+      }
+      let entity = file.headers[i].substring(file.headers[i].indexOf("@")+1);
+
+      if (entity in data ) {
+          data[entity].forEach(function(element) {
+            curSelect.append($("<option></option>").val(element).html(element));
+          });
+      } else { /* this entity does not exist in database */
+         curSelect.append($("<option></option>").val(data.__default__).html(data.__default__));
+      }
+      /* if same type entity than the first column maybe a new uri exist... */
+      let first_entity = file.headers[0].substring(file.headers[0].indexOf("@")+1);
+      if (first_entity == entity ) {
+        curSelect.click(function() {
+          /* check input uri tag of the current entity definition and propose  */
+          let newuri = $('#def-uri-entity-' +idfile).val();
+          /* remove unconsistent uri */
+          curSelect.find('option[volatile="true"]').map(function() {
+            if ( $(this).val() != newuri ) $(this).remove();
+          });
+
+          let exist = false ;
+          curSelect.find('option').map(function() {
+            if ($(this).val() == newuri ) exist = true ;
+          });
+          if (! exist ) {
+            curSelect.append($("<option></option>").val(newuri)
+                                                   .html(newuri)
+                                                   .attr('volatile','true'));
+          }
+        });
+      }
+    }
   });
 }
 
@@ -337,8 +348,6 @@ function setCorrectType(file) {
         }
         $(this).val(typ);
       });
-      // set list Prefix Uri
-      updatePrefixListUri(file);
       // Check what is in the db
       checkData($('div#content_integration form#source-file-tsv-' + idfile));
     }
@@ -517,8 +526,6 @@ function loadSourceFile(file_elem, pub, headers) {
   let tags = getIhmTtlElements(file_elem);
 
   __ihm.displayModal('Please wait', '', 'Close');
-  console.log("=============================");
-  console.log(JSON.stringify(tags.uris));
 
   let service = new RestServiceJs("load_data_into_graph");
   let model = { 'file_name': $("#"+tags.idfile).attr("filename"),
@@ -598,7 +605,7 @@ function loadSourceFile(file_elem, pub, headers) {
  * Load a GFF source_file into the triplestore
  */
 function loadSourceFileGff(idfile, pub) {
-    console.log('-----> loadSourceFileGff <----- :');
+    console.log('-----> loadSourceFileGff <----- ');
     // get taxon
     let taxon = '';
 
@@ -675,7 +682,7 @@ function loadSourceFileGff(idfile, pub) {
 }
 
 function loadSourceFileTtl(idfile, pub) {
-    console.log('--- loadSourceFileTtl ---');
+    console.log('---> loadSourceFileTtl <---');
     __ihm.displayModal('Please wait', '', 'Close');
 
     let file_elem = $("#source-file-ttl-" + idfile);
@@ -687,7 +694,7 @@ function loadSourceFileTtl(idfile, pub) {
     };
 
     service.post(model, function(data) {
-        console.log('---> ttl insert');
+        console.log('---> ttl insert <---');
         if (data == 'forbidden') {
           showLoginForm();
           return;
