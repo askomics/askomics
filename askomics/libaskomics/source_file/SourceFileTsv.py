@@ -23,10 +23,8 @@ class SourceFileTsv(SourceFile):
     Class representing a Gff3 Source file
     """
 
-    def __init__(self, settings, session, path, preview_limit, uri=None):
-
-        SourceFile.__init__(self, settings, session, path, uri=uri)
-
+    def __init__(self, settings, session, path, preview_limit, uri_set=None):
+        SourceFile.__init__(self, settings, session, path, uri_set=uri_set)
         self.type = 'tsv'
 
         self.preview_limit = preview_limit
@@ -69,6 +67,15 @@ class SourceFileTsv(SourceFile):
             'goterm': ('<http://purl.obolibrary.org/obo/GO_', '>'),
             'date': ('', '^^xsd:dateTime')
             }
+
+    def prefix_uri_entity(self,idx):
+
+        if idx in self.uri:
+            return '<'+self.uri[idx]
+        return '<'+self.get_param("askomics.prefix")
+
+    def suffix_uri_entity(self):
+        return '>';
 
     @cached_property
     def dialect(self):
@@ -321,7 +328,7 @@ class SourceFileTsv(SourceFile):
             #
             # ==> IHM detect position_ attribute and transforme all query with faldo:location/faldo:begin/faldo:reference
             #
-            if key > 0 and not key_type.startswith('entity'):
+            if key > 0 and not key_type.startswith('entity') :
                 if key_type in ('taxon', 'ref', 'strand', 'start', 'end'):
                     uri = 'position_'+key_type
                 # elif key_type == 'taxon':
@@ -331,6 +338,13 @@ class SourceFileTsv(SourceFile):
                 ttl += ":" + uri + ' displaySetting:attribute "true"^^xsd:boolean .\n'
                 # store the order of attrbutes in order to display attributes in the right order
                 ttl += ":" + uri + ' displaySetting:attributeOrder "' + str(key) + '"^^xsd:decimal .\n'
+            elif key == 0 :
+                uri_pref = self.get_param("askomics.prefix")
+
+                if key in self.uri:
+                    uri_pref = self.uri[key]
+
+                ttl += ":" + self.encodeToRDFURI(self.headers[key]) + ' displaySetting:prefixUri "'+uri_pref+'"^^xsd:string .\n\n'
 
             if key > 0:
                 ttl += AbstractedRelation(key_type, self.headers[key], ref_entity, self.type_dict[key_type]).get_turtle()
@@ -429,7 +443,7 @@ class SourceFileTsv(SourceFile):
 
                 # Create the entity (first column)
                 entity_label = row[0]
-                
+
                 if len(row) != len(self.headers):
                     self.log.warning("*"+', '.join(row)+"*")
                     raise Exception('Invalid line found: '+str(len(self.headers))
@@ -437,8 +451,10 @@ class SourceFileTsv(SourceFile):
                                              +" - (last valid entity "+entity_label+")")
 
                 entity_id = self.key_id(row)
-                indent = (len(self.uri + entity_id) + 2) * " "
-                ttl += "<" + self.uri + self.encodeToRDFURI(entity_id) + "> rdf:type :" + self.encodeToRDFURI(self.headers[0]) + " ;\n"
+                pref = self.prefix_uri_entity(0)
+                suf = self.suffix_uri_entity()
+                indent = (len(pref)+2) * " "
+                ttl += pref + self.encodeToRDFURI(entity_id) + suf + " rdf:type :" + self.encodeToRDFURI(self.headers[0]) + " ;\n"
                 ttl += indent + " rdfs:label " + self.escape['text'](entity_label) + "^^xsd:string ;\n"
                 start_faldo = None
                 end_faldo = None
@@ -499,13 +515,21 @@ class SourceFileTsv(SourceFile):
                                     ttl += indent + " "+ relation_name + " " + self.delims[current_type][0] + self.escape[current_type](row[i]) + self.delims[current_type][1] + " ;\n"
 
                             else:
-                                ttl += indent + " "+ relation_name + " " + self.delims[current_type][0] + self.escape[current_type](row[i]) + self.delims[current_type][1] + " ;\n"
-                                self.log.debug('3')
+                                # Not positionable
+                                if current_type == 'entity':
+                                    pref = self.prefix_uri_entity(i)
+                                    suf = self.suffix_uri_entity()
+                                else:
+                                    pref = self.delims[current_type][0]
+                                    suf = self.delims[current_type][1]
+                                ttl += indent + " "+ relation_name + " " + pref + self.escape[current_type](row[i]) + suf + " ;\n"
 
                         if current_type == 'entitySym':
-                            ttl_sym += self.delims[current_type][0]+\
+                            pref = self.prefix_uri_entity(i)
+                            suf = self.suffix_uri_entity()
+                            ttlSym += pref+\
                                       self.escape[current_type](row[i])+\
-                                      self.delims[current_type][1]+" "+relation_name+" :"+\
+                                      suf+" "+relation_name+" :"+\
                                       self.encodeToRDFURI(entity_label)  + " .\n"
 
                 # Faldo position management

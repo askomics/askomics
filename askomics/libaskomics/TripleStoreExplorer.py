@@ -67,7 +67,7 @@ class TripleStoreExplorer(ParamManager):
         """
         data = {}
         self.log.debug(" =========== TripleStoreExplorer:getUserAbstraction ===========")
-        
+
         sqg = SparqlQueryGraph(self.settings, self.session)
         ql = QueryLauncher(self.settings, self.session)
 
@@ -171,3 +171,26 @@ class TripleStoreExplorer(ParamManager):
             query = "# endpoint = "+self.get_param("askomics.endpoint") + "\n" + query
 
         return results, query
+
+    def get_prefix_uri(self):
+        sqg = SparqlQueryGraph(self.settings, self.session)
+        ql = QueryLauncher(self.settings, self.session)
+        rs = ql.process_query(sqg.get_prefix_uri().query)
+        results = {}
+        r_buf = {}
+
+        for r in rs:
+            label = r['nodeLabel']
+            prefix = r['prefUri']
+
+            if label not in results:
+                results[label] = []
+                r_buf[label] = {}
+                results[label].append(self.get_param("askomics.prefix"))
+                r_buf[label][self.get_param("askomics.prefix")]=0
+
+            if prefix not in r_buf[label]:
+                results[label].append(prefix);
+                r_buf [label][prefix]=0;
+
+        return results

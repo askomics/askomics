@@ -222,7 +222,7 @@ class AskViewTests(unittest.TestCase):
 
         assert {
             'g': 'urn:sparql:test_askomics:jdoe:people_tsv_' + timestamp_people,
-            'count': '77',
+            'count': '78',
             'access': 'public',
             'date': timestamp_people,
             'readable_date': readable_date_people,
@@ -233,7 +233,7 @@ class AskViewTests(unittest.TestCase):
         assert {
             'g':
             'urn:sparql:test_askomics:jdoe:instruments_tsv_' + timestamp_instrument,
-            'count': '68',
+            'count': '69',
             'access': 'private',
             'date': timestamp_instrument,
             'readable_date': readable_date_instrument,
