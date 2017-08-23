@@ -26,11 +26,9 @@ class AskomicsObjectView {
 
     if ('actif' in this.objet ) {
       if ( this.objet.actif ) {
-        $("#showNode").removeClass('glyphicon-eye-close');
-        $("#showNode").addClass('glyphicon-eye-open');
+        this.activeView();
       } else {
-        $("#showNode").removeClass('glyphicon-eye-open');
-        $("#showNode").addClass('glyphicon-eye-close');
+        this.unactiveView();
       }
     } else {
         $("#showNode").removeClass('glyphicon-eye-close');
@@ -59,6 +57,16 @@ class AskomicsObjectView {
   hide() {
     AskomicsObjectView.cleanTitleObjectView();
     $("#"+AskomicsObjectView_prefix+this.objet.id).hide();
+  }
+
+  unactiveView() {
+    $("#showNode").removeClass('glyphicon-eye-open');
+    $("#showNode").addClass('glyphicon-eye-close');
+  }
+
+  activeView(){
+    $("#showNode").removeClass('glyphicon-eye-close');
+    $("#showNode").addClass('glyphicon-eye-open');
   }
 
   divPanel () {
@@ -129,6 +137,8 @@ class AskomicsObjectView {
 
         let node = __ihm.getGraphBuilder().getInstanciedNode(id);
         if ( node ) {
+          if ( ! node.sparqlgen ) // do nothing....
+            return;
           if ( node.actif ) {
             let countActif = 0;
             for(let i=0;i<__ihm.getGraphBuilder().nodes().length;i++) {
@@ -151,7 +161,7 @@ class AskomicsObjectView {
             $(this).addClass('glyphicon-eye-close');
           }
         }
-        // link is not manage
+        // link is not managed
     });
 
     // Node deletion

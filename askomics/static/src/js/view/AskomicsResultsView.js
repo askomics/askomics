@@ -30,6 +30,7 @@ class AskomicsResultsView {
 
     for (let i=0;i<__ihm.getGraphBuilder().nodes().length;i++ ) {
       let node = __ihm.getGraphBuilder().nodes()[i];
+      if ( ! node.sparqlgen ) continue;
       if ( ! node.actif ) continue;
       let attr_disp = node.getAttributesDisplaying();
       this.activesAttributes[node.id] = attr_disp.id;

@@ -239,12 +239,12 @@ class AskomicsForceLayoutManager {
     return true;
   }
 
-  selectObject(prefix,id) {
-    $(prefix+id).css("stroke", "firebrick");
+  selectObject(prefix,obj) {
+    $(prefix+obj.id).css("stroke", "firebrick");
   }
 
-  unSelectObject(prefix,id) {
-    $(prefix+id).css("stroke", "grey");
+  unSelectObject(prefix,obj) {
+    $(prefix+obj.id).css("stroke", obj.getStrokeColor());
   }
 
   updateInstanciedNode() {
@@ -382,17 +382,25 @@ class AskomicsForceLayoutManager {
     manageSelectedNodes(node) {
       if (! this.ctrlPressed) {
         $("[id*='node_']").each(function (index, value) {
-            $(this).css("stroke", "grey");
+          let id = $(this).attr("id").replace("node_","");
+          let lnodes = __ihm.getGraphBuilder().nodes();
+          for (let inode in lnodes ) {
+            if (lnodes[inode].id == id ) {
+              $(this).css("stroke", lnodes[inode].getStrokeColor());
+              break;
+            }
+          }
+
         });
 
         /* if several node were selected or a diffente node were selected so select only the current node */
         if ( this.selectNodes.length > 1 || (this.selectNodes.length===0) || (this.selectNodes[0].id != node.id) ) {
           this.selectNodes = [] ;
           this.selectNodes.push(node);
-          this.selectObject("#node_",node.id);
+          this.selectObject("#node_",node);
         } else { /* deselection of node */
           this.selectNodes = [] ;
-          this.unSelectObject("#node_",node.id);
+          this.unSelectObject("#node_",node);
         }
 
       } else {
@@ -402,12 +410,12 @@ class AskomicsForceLayoutManager {
             // remove the current node from the selected node list !
             this.selectNodes.splice(n,1);
              //$("#node_"+node.id).css("stroke", "grey");
-            this.unSelectObject("#node_",node.id);
+            this.unSelectObject("#node_",node);
              return;
           }
         }
         this.selectNodes.push(node);
-        this.selectObject("#node_",node.id);
+        this.selectObject("#node_",node);
       }
 
       if (this.selectNodes.length === 0) {
@@ -893,8 +901,8 @@ class AskomicsForceLayoutManager {
     arrow.enter().append("svg:defs").append("svg:marker")
                      .attr("id", function(d) {return 'end-marker-'+d.id;})
                      .attr("class", function(d) { return "arrow"+d.getClassSVG();} )
-                     .style('stroke', function (d) {return d.getLinkColor();})
-                     .style('fill', function (d) {return d.getLinkColor();})
+                     .style('stroke', function (d) {return d.getStrokeColor();})
+                     .style('fill', function (d) {return d.getStrokeColor();})
                      .style('display', function(d){ return currentFL.displayObject(d);})
                      .attr("viewBox", "0 -5 10 10")
                      .attr("refX", 15)
@@ -909,8 +917,8 @@ class AskomicsForceLayoutManager {
     arrow.enter().append("svg:defs").append("svg:marker")
                      .attr("id", function(d) {return 'start-marker-'+d.id;})
                      .attr("class", function(d) { return "arrow"+d.getClassSVG();} )
-                     .style('stroke', function (d) { return d.getLinkColor();})
-                     .style('fill', function (d) { return d.getLinkColor();})
+                     .style('stroke', function (d) { return d.getStrokeColor();})
+                     .style('fill', function (d) { return d.getStrokeColor();})
                      .style('display', function(d){ return currentFL.displayObject(d);})
                      .attr("viewBox", "0 -5 10 10")
                      .attr("refX", -5)
@@ -928,8 +936,8 @@ class AskomicsForceLayoutManager {
           .attr("class", function(d) { return "link"+d.getClassSVG();} )
           .attr("marker-end", function(d) {return "url(#end-marker-"+d.id+")";})
           .attr("marker-start", function(d) {return d.type == 'overlap'?"url(#start-marker-"+d.id+")":"";})
-          .style('stroke', function (d) {return d.getLinkColor();})
-          .style('fill', function (d) {return d.getLinkColor();})
+          .style('stroke', function (d) {return d.getStrokeColor();})
+          .style('fill', function (d) {return d.getStrokeColor();})
           .style('display', function(d){ return currentFL.displayObject(d);})
           .style("stroke-dasharray",function(d) {return d.suggested?"2":"";})
           .style("opacity", function(d) {return d.suggested?"0.3":"1";})
@@ -953,7 +961,7 @@ class AskomicsForceLayoutManager {
               .attr("uri", function (d)     { return d.uri; })
               .attr("class", "node")
               .attr("class", function(d) { return "node"+d.getClassSVG();})
-              .style('stroke', function (d) { return d.getNodeStrokeColor(); })
+              .style('stroke', function (d) { return d.getStrokeColor(); })
               .style('stroke-width','2px')
               .style("fill", function (d)   { return d.getColorInstanciatedNode(); })
               .style("opacity", function(d) { return d.getOpacity();})
