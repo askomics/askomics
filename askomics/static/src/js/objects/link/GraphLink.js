@@ -77,9 +77,9 @@ class GraphLink extends GraphObject {
     }
     this.target = t[1];
   }
-
-  getLinkColor() { return 'grey'; }
+  
   getTextFillColor() { return 'grey'; }
+  getStrokeColor() { return 'grey'; }
 
   toString() {
     let s = super.toString();

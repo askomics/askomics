@@ -319,7 +319,7 @@ class AskomicsNodeView extends AskomicsObjectView {
           if ( op != '=' && op != '<' && op != '<=' && op != '>' && op != '>=' && op != '!=') {
             $(this).find('option[value="="]').prop('selected', true);
           }
-          if (value == "") {
+          if (value === "") {
             $(this).find('td.field').removeClass('has-error');
           }
           return;
