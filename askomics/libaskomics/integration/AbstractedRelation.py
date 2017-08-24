@@ -39,8 +39,10 @@ class AbstractedRelation(object):
         else:
             self.label = identifier
 
-        identifier =  ParamManager.encodeToRDFURI(self.label)
-        self.uri = ":"+identifier
+        if self.label.find(":")<0:
+            self.uri = ":"+ParamManager.encodeToRDFURI(self.label)
+        else:
+            self.uri = self.label
 
         self.col_type = relation_type
 
