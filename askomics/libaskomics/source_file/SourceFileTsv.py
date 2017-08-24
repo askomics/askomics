@@ -478,7 +478,12 @@ class SourceFileTsv(SourceFile):
                             idx = header.find("@")
 
                             if idx > 0:
-                                relation_name = ":"+self.encodeToRDFURI(header[0:idx])
+                                idx2 = header.find(":")
+                                if idx2 > 0:
+                                    relation_name = header[0:idx]
+                                else:
+                                    relation_name = ":"+self.encodeToRDFURI(header[0:idx])
+
                                 type_ent = header[idx+1:]
                                 clause1 = type_ent.find(":") > 0
                                 if clause1 or (header[idx+1] == '<' and header[len(header)-1] == '>'):
