@@ -315,7 +315,7 @@ class ModulesManager(ParamManager):
             sft.setGraph(graph)
         else:
             mo['graph'] = sft.graph
-        sft.persist(host_url, 'public','load')
+        sft.persist(host_url, 'public')
 
 
     def manageModules(self,host_url,urimodule,namemodule,active):
@@ -349,7 +349,7 @@ class ModulesManager(ParamManager):
         ql = QueryLauncher(self.settings, self.session)
 
         if active:
-            
+
             try:
                 self.importRDF(mo,namemodule,host_url)
                 #loading owl file

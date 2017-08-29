@@ -97,7 +97,6 @@ class QueryLauncher(ParamManager):
             if self.is_defined("askomics.endpoint"):
                 data_endpoint = SPARQLWrapper(self.get_param("askomics.endpoint"), urlupdate)
             else:
-                print(self.settings)
                 raise ValueError("askomics.endpoint")
 
             if self.is_defined("askomics.endpoint_username") and self.is_defined("askomics.endpoint_passwd"):
@@ -152,7 +151,7 @@ class QueryLauncher(ParamManager):
         '''
             parse answer results from TPS
         '''
-        
+
         if json_res is None:
             return []
         if "results" not in json_res:
@@ -186,7 +185,7 @@ class QueryLauncher(ParamManager):
             Execute query and parse the results if exist
         '''
         json_query = self.execute_query(query, log_raw_results=False)
-        
+
         results = self.parse_results(json_query)
         return results
 
