@@ -112,7 +112,8 @@ class SparqlQueryGraph(SparqlQueryBuilder):
                      '\t?g prov:generatedAtTime ?date .\n' +
                      '\t?g prov:wasDerivedFrom ?name .\n'+
                      '\t?g :accessLevel ?access .\n' +
-                     '}'
+                     '}',
+            'post_action': 'GROUP BY ?g ?name ?date ?access'
         }, True)
 
     def get_if_positionable(self, uri):
