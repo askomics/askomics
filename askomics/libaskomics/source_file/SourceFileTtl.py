@@ -45,7 +45,7 @@ class SourceFileTtl(SourceFile):
         formatter = HtmlFormatter(cssclass='preview_field', nowrap=True, nobackground=True)
         return highlight(ttl, TurtleLexer(), formatter) # Formated html
 
-    def persist(self, urlbase, public, method):
+    def persist(self, urlbase, public):
         """
         insert the ttl sourcefile in the TS
 
@@ -53,6 +53,10 @@ class SourceFileTtl(SourceFile):
         pathttl = self.getRdfUserDirectory()
         shutil.copy(self.path, pathttl)
         data = None
+
+        method = 'load'
+        if self.get_param("askomics.upload_user_data_method"):
+            method = self.get_param("askomics.upload_user_data_method")
 
         if method == 'load':
             fil_open = open(pathttl + '/' + os.path.basename(self.path))
