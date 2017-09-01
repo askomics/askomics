@@ -245,6 +245,10 @@ class SourceFileTsv(SourceFile):
         if len(self.forced_column_types) != len(self.headers):
             raise ValueError("forced_column_types hve a different size that headers ! forced_column_types:"+str(self.forced_column_types)+" headers:"+str(self.headers))
 
+        for typ in self.forced_column_types:
+            if typ not in self.delims :
+                raise ValueError("Bad init of forced_column_filter unknown type :"+typ)
+
     def set_disabled_columns(self, disabled_columns):
         """
         Set manually curated types for column

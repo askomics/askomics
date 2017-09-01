@@ -63,7 +63,7 @@ class ModulesManager(ParamManager):
 
         if not os.path.isdir(self.modulesdir):
             self.log.debug('ca not find module directory: '+self.modulesdir)
-            self.data['error'] = 'ca not find module directory ['+self.modulesdir+'] on server !'
+            self.data['error'] = 'can not find module directory ['+self.modulesdir+'] on server !'
             return
 
         lfiles = glob.glob(self.modulesdir+"*.mo")
@@ -74,8 +74,7 @@ class ModulesManager(ParamManager):
                 a = json.loads(open(fil).read())
                 self.moduleFiles[a['module']] = a
             except Exception as e:
-                traceback.print_exc(file=sys.stdout)
-                self.log.error(str(e))
+                raise ValueError("Error in the module file ["+fil+"] : "+str(e))
 
 
     def saveMo(self,modulename):
@@ -88,21 +87,26 @@ class ModulesManager(ParamManager):
             return
 
         lfiles = glob.glob(self.modulesdir+"*.mo")
-
+        allfilesnames = []
         for fil in lfiles:
             try:
                 self.log.debug('reading  '+fil)
                 a = json.loads(open(fil).read())
+                allfilesnames.append(a['module'])
                 if a['module'] == modulename:
                     with open(fil, 'w') as outfile:
+                        if not a['module'] in self.moduleFiles:
+                            raise ValueError("Devel error : "+a['module']+" is not in moduleFiles :"+self.moduleFiles)
                         json.dump(self.moduleFiles[a['module']],outfile, sort_keys=True,indent=4,separators=(',', ': '))
                     #json.dumps(self.moduleFiles[a['module']])
                     return
 
             except Exception as e:
-                traceback.print_exc(file=sys.stdout)
-                self.log.error(str(e))
+                #traceback.print_exc(file=sys.stdout)
+                #self.log.error(str(e))
+                raise ValueError("Error in the module file ["+fil+"] : "+str(e))
 
+        raise ValueError("Can not find module ["+ modulename +"]  present in "+self.modulesdir+" ->"+' '.join(allfilesnames))
 
 
     def checkMo(self):
@@ -116,7 +120,7 @@ class ModulesManager(ParamManager):
                 self.moduleFiles[module] = None
                 raise ValueError("Module ["+ module +"] Miss one of these keys :"+str(self.latt))
 
-    def deleteMoState(self,urimo,mo):
+    def deleteMoState(self,urimo):
         self.log.debug(' ***** Delete module '+urimo+' on TPS ***** ')
         sqb = SparqlQueryBuilder(self.settings, self.session)
         ql = QueryLauncher(self.settings, self.session)
@@ -307,6 +311,10 @@ class ModulesManager(ParamManager):
 
     def importRDF(self,mo,namemodule,host_url,graph=None):
         self.log.debug("=============> importRDF <===================")
+
+        if namemodule not in self.moduleFiles:
+            raise ValueError(namemodule+" does not exist.")
+
         fp = tempfile.NamedTemporaryFile(prefix="module_"+self.escape['entity'](namemodule), suffix=".ttl", mode="w", delete=False)
         fp.write('\n'.join(self.moduleFiles[namemodule]['rdf']))
         fp.close()
@@ -343,7 +351,7 @@ class ModulesManager(ParamManager):
             return
 
         self.log.debug(" delete MO state :" + urimodule)
-        self.deleteMoState(urimodule,mo)
+        self.deleteMoState(urimodule)
         self.log.debug(" insert new MO state :"+urimodule)
         self.importMoSate(mo,"wait")
         ql = QueryLauncher(self.settings, self.session)
@@ -358,13 +366,13 @@ class ModulesManager(ParamManager):
             except Exception as e:
                 self.log.error('failed: ' + str(e))
                 self.log.debug(" delete MO state :" + urimodule)
-                self.deleteMoState(urimodule,mo)
+                self.deleteMoState(urimodule)
                 self.log.debug(" insert new MO state :"+urimodule)
                 self.importMoSate(mo,"off")
                 raise e
 
             self.log.debug(" delete MO state :" + urimodule)
-            self.deleteMoState(urimodule,mo)
+            self.deleteMoState(urimodule)
             self.log.debug(" insert new MO state :"+urimodule)
             self.importMoSate(mo,"ok")
             ##########################################################################################
@@ -377,10 +385,12 @@ class ModulesManager(ParamManager):
                 self.saveMo(namemodule)
 
         else:
-            sqb = SparqlQueryBuilder(self.settings, self.session)
-            ql.execute_query(sqb.get_drop_named_graph(mo['graph']).query)
-            ql.execute_query(sqb.get_delete_metadatas_of_graph(mo['graph']).query)
+            if 'graph' in mo:
+                sqb = SparqlQueryBuilder(self.settings, self.session)
+                ql.execute_query(sqb.get_drop_named_graph(mo['graph']).query)
+                ql.execute_query(sqb.get_delete_metadatas_of_graph(mo['graph']).query)
+
             self.log.debug(" delete MO state :" + urimodule)
-            self.deleteMoState(urimodule,mo)
+            self.deleteMoState(urimodule)
             self.log.debug(" insert new MO state :"+urimodule)
             self.importMoSate(mo,"off")
