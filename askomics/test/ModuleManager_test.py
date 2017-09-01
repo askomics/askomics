@@ -212,6 +212,9 @@ class ModulesManagerTests(unittest.TestCase):
 
         m.manageModules(host_url,"http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Test","Test",False)
         m.manageModules(host_url,"http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Test","Test",True)
-        m.manageModules(host_url,"http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Test","Test111",True)
+        try:
+            m.manageModules(host_url,"http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Test","Test111",True)
+        except ValueError:
+            assert True
         m.moduleFiles["Test"]['rdf'] = None
         m.manageModules(host_url,"http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Test","Test",True)
