@@ -83,6 +83,9 @@ class ParamManager(object):
             os.makedirs(mdir)
         return mdir
 
+    def set_param(self, key,value):
+        self.settings[key] = value
+
     def get_param(self, key):
         if key in self.settings:
             return self.settings[key]
@@ -116,17 +119,17 @@ class ParamManager(object):
         url = "http://prefix.cc/reverse?format=json&uri="
 
         for prefix in self.ASKOMICS_prefix:
-            print("URI..... uri:"+uri+" rec:"+self.ASKOMICS_prefix[prefix])
             if uri.startswith(self.ASKOMICS_prefix[prefix]):
                 return prefix
 
         response = requests.get(url+uri)
         if response.status_code != 200:
-            self.log.error("request:"+str(url+item+ext))
+            self.log.error("request:"+str(url+uri))
             self.log.error("status_code:"+str(response.status_code))
             self.log.error(response)
             self.ASKOMICS_prefix[uri]=uri
-            return
+            return ""
+            
         dic = json.loads(response.text)
         if (len(dic)>0):
             v = list(dic.values())[0]
@@ -192,7 +195,7 @@ class ParamManager(object):
         obj = obj.replace("_s1_", ":")
         obj = obj.replace("_s2_","/")
         obj = obj.replace("_s3_","%")
-        
+
         obj = urllib.parse.unquote(obj)
 
         return obj

@@ -1,27 +1,26 @@
-# import os
-# import unittest
-# import json
-# import tempfile, shutil
+import os
+import unittest
+import json
+import tempfile, shutil
 
-# from pyramid import testing
-# from pyramid.paster import get_appsettings
+from pyramid import testing
+from pyramid.paster import get_appsettings
 
-# from askomics.libaskomics.source_file.SourceFile import SourceFile
-# from askomics.libaskomics.source_file.SourceFileTsv import SourceFileTsv
+from askomics.libaskomics.source_file.SourceFile import SourceFile
+from askomics.libaskomics.source_file.SourceFileTsv import SourceFileTsv
 
-# SIMPLE_SOURCE_FILE = os.path.join( os.path.dirname( __file__ ), "..", "test-data", "sourcefile.tsv.simple" )
+SIMPLE_SOURCE_FILE = os.path.join( os.path.dirname( __file__ ), "..", "test-data", "sourcefile.tsv.simple" )
 
-# class SourceFileTests(unittest.TestCase):
+class SourceFileTests(unittest.TestCase):
 
-#     def setUp( self ):
-#         self.temp_directory = tempfile.mkdtemp()
-#         self.settings = get_appsettings('configs/development.ini', name='main')
+    def setUp( self ):
+        self.temp_directory = tempfile.mkdtemp()
+        self.settings = get_appsettings('configs/development.ini', name='main')
+        self.request = testing.DummyRequest()
+        self.request.session['username'] = 'jdoe'
+        self.request.session['group']    = 'base'
 
-#         self.request = testing.DummyRequest()
-#         self.request.session['username'] = 'jdoe'
-#         self.request.session['group']    = 'base'
-
-#         self.srcfile = SourceFileTsv(self.settings, self.request.session, SIMPLE_SOURCE_FILE, 10)
+        self.srcfile = SourceFileTsv(self.settings, self.request.session, SIMPLE_SOURCE_FILE, 10)
 
 #     def tearDown( self ):
 #         shutil.rmtree( self.temp_directory )

@@ -116,7 +116,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         return existing_relations
 
-    def persist(self, urlbase, method, public):
+    def persist(self, urlbase, public):
         """
         Store the current source file in the triple store
 
@@ -134,6 +134,11 @@ class SourceFile(ParamManager, HaveCachedProperties):
         chunk_count = 1
         chunk = ""
         pathttl = self.getRdfUserDirectory()
+
+        method = 'load'
+        if self.get_param("askomics.upload_user_data_method"):
+            method = self.get_param("askomics.upload_user_data_method")
+
         if method == 'load':
 
             fp = None

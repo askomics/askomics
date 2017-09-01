@@ -324,7 +324,11 @@ class AskView(object):
         named_graphs = []
 
         for index_result in range(len(res['results']['bindings'])):
-
+            if not 'date' in res['results']['bindings'][index_result]:
+                self.log.warn('============= bad results user graph =================')
+                self.log.warn(res['results']['bindings'][index_result])
+                self.log.warn("============================================================")
+                continue
             dat = datetime.datetime.strptime(res['results']['bindings'][index_result]['date']['value'], "%Y-%m-%dT%H:%M:%S.%f")
             self.log.debug(dat)
 
@@ -583,10 +587,6 @@ class AskView(object):
         if 'uris' in body:
             uris = body['uris']
 
-        method = 'load'
-        if 'method' in body:
-            method = body['method']
-
         forced_type = None
         if 'forced_type' in body:
             forced_type = body['forced_type']
@@ -604,7 +604,7 @@ class AskView(object):
         src_file.set_key_columns(key_columns)
 
         try:
-            self.data = src_file.persist(self.request.host_url, method, public)
+            self.data = src_file.persist(self.request.host_url, public)
         except Exception as e:
             #rollback
             sqb = SparqlQueryBuilder(self.settings, self.request.session)
@@ -645,10 +645,6 @@ class AskView(object):
         if 'uri' in body:
             uri = body['uri']
 
-        method = 'load'
-        if 'method' in body:
-            method = body['method']
-
         forced_type = None
         if 'forced_type' in body:
             forced_type = body['forced_type']
@@ -666,7 +662,7 @@ class AskView(object):
 
         try:
             self.log.debug('--> Parsing GFF')
-            src_file_gff.persist(self.request.host_url, method, public)
+            src_file_gff.persist(self.request.host_url, public)
         except Exception as e:
             #rollback
             sqb = SparqlQueryBuilder(self.settings, self.request.session)
@@ -701,9 +697,6 @@ class AskView(object):
         body = self.request.json_body
         file_name = body['file_name']
         public = body['public']
-        method = 'load'
-        if 'method' in body:
-            method = body['method']
 
         forced_type = None
         if 'forced_type' in body:
@@ -718,7 +711,7 @@ class AskView(object):
         src_file_ttl = sfc.get_source_file(file_name, forced_type)
 
         try:
-            self.data = src_file_ttl.persist(self.request.host_url, public, method)
+            self.data = src_file_ttl.persist(self.request.host_url, public)
 
         except Exception as e:
             #rollback
@@ -757,10 +750,6 @@ class AskView(object):
         if 'uri' in body:
             uri = body['uri']
 
-        method = 'load'
-        if 'method' in body:
-            method = body['method']
-
         forced_type = None
         if 'forced_type' in body:
             forced_type = body['forced_type']
@@ -778,7 +767,7 @@ class AskView(object):
 
         try:
             self.log.debug('--> Parsing BED')
-            src_file_bed.persist(self.request.host_url, method, public)
+            src_file_bed.persist(self.request.host_url, public)
         except Exception as e:
             #rollback
             sqb = SparqlQueryBuilder(self.settings, self.request.session)
