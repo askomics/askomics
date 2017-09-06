@@ -156,7 +156,7 @@ class SourceFileGff(SourceFile):
                 listSliceRef = []
                 listSlice = []
                 for sliceb in range(block_idxstart,block_idxend+1):
-                        listSliceRef.append(self.encodeToRDFURI(str(rec.id))+"_"+str(sliceb))
+                        listSliceRef.append(":"+self.encodeToRDFURI(str(rec.id))+"_"+str(sliceb))
                         listSlice.append(str(sliceb))
 
                 attribute_dict = {
