@@ -177,11 +177,11 @@ class SparqlQueryGraph(SparqlQueryBuilder):
                      '\t           rdfs:domain ?entity ;\n' +
                      '\t           rdfs:range ?typeAttribute .\n\n' +
                      '\tOPTIONAL {?attribute displaySetting:attributeOrder ?order .}\n' +
+                     '\t}'+
                      '\t{'+
                      '\t\t{ ?g :accessLevel "public". }'+
                      '\t\tUNION '+
                      '\t\t{ ?g dc:creator "'+self.session['username']+'".}'+
-                     '\t}'+
                      '}'
         }, True)
 
@@ -244,11 +244,11 @@ class SparqlQueryGraph(SparqlQueryBuilder):
                      '\t            rdfs:range ?typeCategory.\n' +
                      '\tOPTIONAL {?category displaySetting:attributeOrder ?order .}\n' +
                      '\t?typeCategory displaySetting:category [] .\n' +
+                     '\t}'+
                      '\t{'+
                      '\t\t{ ?g :accessLevel "public". }'+
                      '\t\tUNION '+
                      '\t\t{?g dc:creator "'+self.session['username']+'" .}'+
-                     '\t}'+
                      '\t}'
             }, True)
 
