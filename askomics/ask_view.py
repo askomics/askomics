@@ -319,7 +319,7 @@ class AskView(object):
         sqg = SparqlQueryGraph(self.settings, self.request.session)
         query_launcher = QueryLauncher(self.settings, self.request.session)
 
-        res = query_launcher.execute_query(sqg.get_user_graph_infos().query)
+        res = query_launcher.execute_query(sqg.get_user_graph_infos_with_count().query)
 
         named_graphs = []
 

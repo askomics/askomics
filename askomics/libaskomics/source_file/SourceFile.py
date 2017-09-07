@@ -265,8 +265,11 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
             data = {}
 
-            self.metadatas['server'] = queryResults.info()['server']
-
+            if 'server' in queryResults.info():
+                self.metadatas['server'] = queryResults.info()['server']
+            else:
+                self.metadatas['server'] = 'unknown'
+                
             data['status'] = 'ok'
             data['total_triple_count'] = total_triple_count
 
