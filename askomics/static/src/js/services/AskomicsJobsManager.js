@@ -37,13 +37,14 @@ let instanceAskomicsJobsViewManager ;
       return curId;
     }
 
-    changeOkState(id,data,preview_func) {
-      function addZero(x, n) {
-        while (x.toString().length < n) {
-          x = "0" + x;
-        }
-        return x;
+    addZero(x, n) {
+      while (x.toString().length < n) {
+        x = "0" + x;
       }
+      return x;
+    }
+
+    changeOkState(id,data,preview_func) {
 
       let time = $.now() ;
 
@@ -54,9 +55,9 @@ let instanceAskomicsJobsViewManager ;
 
             let elp  = new Date(this.jobs[ij].tend - this.jobs[ij].tstart);
             //let h = addZero(elp.getHours(), 2);
-            let m = addZero(elp.getMinutes(), 2);
-            let s = addZero(elp.getSeconds(), 2);
-            let ms = addZero(elp.getMilliseconds(), 3);
+            let m = this.addZero(elp.getMinutes(), 2);
+            let s = this.addZero(elp.getSeconds(), 2);
+            let ms = this.addZero(elp.getMilliseconds(), 3);
 
             this.jobs[ij].end   = new Date(time).toLocaleString();
             this.jobs[ij].wait  = false;
@@ -78,10 +79,18 @@ let instanceAskomicsJobsViewManager ;
     changeKoState(id,messErr) {
       for ( let ij in this.jobs ) {
           if (this.jobs[ij].jobid === id) {
-            this.jobs[ij].end = $.now() ;
+            this.jobs[ij].tend = $.now() ;
             this.jobs[ij].wait  = false;
+            this.jobs[ij].end   = new Date(this.jobs[ij].tend).toLocaleString();
+
+            let elp  = new Date(this.jobs[ij].tend - this.jobs[ij].tstart);
+            //let h = addZero(elp.getHours(), 2);
+            let m = this.addZero(elp.getMinutes(), 2);
+            let s = this.addZero(elp.getSeconds(), 2);
+            let ms = this.addZero(elp.getMilliseconds(), 3);
+            this.jobs[ij].duration = m + " m:" + s + " s:" + ms +" ms";
+
             this.jobs[ij].state = messErr ;
-            this.jobs[ij].duration = this.jobs.end - this.jobs.start ;
             this.jobs[ij].classtr = "bg-danger";
           }
       }
@@ -146,27 +155,18 @@ let instanceAskomicsJobsViewManager ;
       $("#jobsview").trigger( "click" );
     }
 
-    createModuleJob(bool,urimo,name) {
+    insertQueue(trigger) {
       //create state view
       let curId = new AskomicsJobsViewManager().createWaitState();
-      let service = new RestServiceJs("manage_module");
 
-      let param = {
-        'checked' : bool,
-        'uri'     : urimo,
-        'name'    : name
-      } ;
-
-      service.post(param,function(data) {
-        if ('error' in data) {
-          //alert(data.error);
-          new AskomicsJobsViewManager().changeKoState(curId,data.error);
-          return;
-        }
-
-        new AskomicsJobsViewManager().changeOkState(curId,data,function(d) { return "<p>Import "+name+" is done !</p>";});
-        new ModulesParametersView().updateModules();
+      trigger(
+        function (message,data) {
+          new AskomicsJobsViewManager().changeOkState(curId,data,function(d) { return message;});
+      },
+        function (errorMessage) {
+          new AskomicsJobsViewManager().changeKoState(curId,errorMessage);
       });
+
       /* position on job list view */
       $("#jobsview").trigger( "click" );
     }

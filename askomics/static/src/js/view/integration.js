@@ -106,6 +106,12 @@ function cols2rows(items) {
 
 function displayIntegrationForm(data) {
     $("#content_integration").empty();
+    if ( 'error' in data ) {
+      let template = AskOmics.templates.error_message;
+      let context = { message: data.error };
+      let html = template(context);
+      $("#content_integration").append(html);
+    }
     if ( data.files === undefined ) return ;
 
     let dataprefix = updatePrefixListFromDatabase();
@@ -175,6 +181,14 @@ function displayGffForm(file, taxons) {
     let admin = false;
     if ($('#administration').length) {
         admin = true;
+    }
+
+    if ( ! ('entities' in file) ) {
+      let template = AskOmics.templates.error_message;
+      let context = { message: '['+file.name +']: None entities are defined in this Gff File !' };
+      let html = template(context);
+      $("#content_integration").append(html);
+      return;
     }
 
     file.entities = file.entities.sort();
@@ -522,13 +536,12 @@ function checkData(file_elem) {
  * Load a source_file into the triplestore
  */
 function loadSourceFile(file_elem, pub, headers) {
-  let idfile,col_types,disabled_columns,key_columns,uri;
-  let tags = getIhmTtlElements(file_elem);
+  new AskomicsJobsViewManager().insertQueue(function (resolve,reject) {
+    let idfile,col_types,disabled_columns,key_columns,uri;
+    let tags = getIhmTtlElements(file_elem);
 
-  __ihm.displayModal('Please wait', '', 'Close');
-
-  let service = new RestServiceJs("load_data_into_graph");
-  let model = { 'file_name': $("#"+tags.idfile).attr("filename"),
+    let service = new RestServiceJs("load_data_into_graph");
+    let model = { 'file_name': $("#"+tags.idfile).attr("filename"),
                   'headers': headers,
                   'col_types': tags.col_types,
                   'disabled_columns': tags.disabled_columns,
@@ -547,64 +560,30 @@ function loadSourceFile(file_elem, pub, headers) {
           displayBlockedPage($('.username').attr('id'));
           return;
         }
-
-        let insert_status_elem = file_elem.find(".insert_status").first();
-        let insert_warning_elem = file_elem.find(".insert_warning").first();
         if (data.status != "ok") {
-            insert_warning_elem.empty();
-            insert_warning_elem.removeClass('hidden alert-success')
-                              .addClass('show alert-danger');
-
-            insert_warning_elem.append($('<span class="glyphicon glyphicon glyphicon-exclamation-sign"></span>')).
-                               append($('<p></p>').html(data.error).addClass('show alert-danger'));
-            if ('url' in data) {
-                insert_warning_elem.append("<br>ttl file are available here: <a href=\""+data.url+"\">"+data.url+"</a>");
-            }
-
+          if ('error' in data) {
+            reject(data.error);
+          }
+          else {
+            reject("Unknown error !");
+          }
         }
         else {
-            if($.inArray('entitySym', tags.col_types) != -1) {
-                if (data.expected_lines_number*2 == data.total_triple_count) {
-                    insert_status_elem.html('<strong><span class="glyphicon glyphicon-ok"></span> Success:</strong> inserted '+ data.total_triple_count + " lines of "+(data.expected_lines_number*2))
-                                      .removeClass('hidden alert-danger')
-                                      .removeClass('hidden alert-warning')
-                                      .addClass('show alert-success');
-
-                }else{
-                    insert_status_elem.html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> Warning:</strong> inserted '+ data.total_triple_count*2 + " lines of "+data.expected_lines_number)
-                                      .removeClass('hidden alert-success')
-                                      .removeClass('hidden alert-warning')
-                                      .addClass('show alert-danger');
-                }
-            }else{
-                if (data.expected_lines_number == data.total_triple_count) {
-                    insert_status_elem.html('<strong><span class="glyphicon glyphicon-ok"></span> Success:</strong> inserted '+ data.total_triple_count + " lines of "+data.expected_lines_number)
-                                      .removeClass('hidden alert-danger')
-                                      .removeClass('hidden alert-warning')
-                                      .addClass('show alert-success');
-                }else{
-                    insert_status_elem.html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> Warning:</strong> inserted '+ data.total_triple_count + " lines of "+data.expected_lines_number)
-                                      .removeClass('hidden alert-success')
-                                      .removeClass('hidden alert-warning')
-                                      .addClass('show alert-danger');
-                }
-
-            }
+            resolve("OK",{ nrow : data.total_triple_count });
         }
-
-        // Check what is in the db now
-        $('.template-source_file').each(function( index ) {
-            checkData(file_elem);
-        });
     });
-
     __ihm.resetStats();
+  });
+
+  new ModulesParametersView().updateModules();
 }
 
 /**
  * Load a GFF source_file into the triplestore
  */
 function loadSourceFileGff(idfile, pub) {
+
+  new AskomicsJobsViewManager().insertQueue(function (resolve,reject) {
     console.log('-----> loadSourceFileGff <----- ');
     // get taxon
     let taxon = '';
@@ -629,8 +608,6 @@ function loadSourceFileGff(idfile, pub) {
     // custom uri
     let uri = file_elem.find('#def-uri-entity-'+idfile).val();
 
-    __ihm.displayModal('Please wait', '', 'Close');
-
     let service = new RestServiceJs("load_gff_into_graph");
 
     let model = { 'file_name': $("#"+idfile).attr("filename"),
@@ -648,6 +625,12 @@ function loadSourceFileGff(idfile, pub) {
           displayBlockedPage($('.username').attr('id'));
           return;
         }
+
+        if (data.error) {
+            reject(data.error);
+            return;
+        }
+
         // Show a success message isertion is OK
         let div_entity = $("#" + idfile);
         let entities_string = '';
@@ -660,30 +643,16 @@ function loadSourceFileGff(idfile, pub) {
                 entities_string += ' and ';
             }
         }
-
-        let insert_status_elem = file_elem.find(".insert_status").first();
-        let insert_warning_elem = file_elem.find(".insert_warning").first();
-
-        //TODO: check if insertion is ok and then, display the success message or a warning message
-        if (data.error) {
-            insert_status_elem.html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> ERROR:</strong> ' + JSON.stringify(data.error))
-                              .removeClass('hidden alert-success')
-                              .removeClass('hidden alert-warning')
-                              .addClass('show alert-danger');
-        }else{
-            insert_status_elem.html('<span class="glyphicon glyphicon-ok"></span> ' + entities_string + ' inserted with success.')
-                                                  .removeClass('hidden alert-danger')
-                                                  .removeClass('hidden alert-warning')
-                                                  .addClass('show alert-success');
-        }
-
-        __ihm.hideModal();
+        let header_mess = "<b>"+div_entity.attr("filename")+"</b><br/>" ;
+        resolve(header_mess + entities_string, { });
     });
+  });
 }
 
 function loadSourceFileTtl(idfile, pub) {
+
+  new AskomicsJobsViewManager().insertQueue(function (resolve,reject) {
     console.log('---> loadSourceFileTtl <---');
-    __ihm.displayModal('Please wait', '', 'Close');
 
     let file_elem = $("#source-file-ttl-" + idfile);
 
@@ -704,25 +673,18 @@ function loadSourceFileTtl(idfile, pub) {
           return;
         }
 
-        let insert_status_elem = file_elem.find(".insert_status").first();
-        let insert_warning_elem = file_elem.find(".insert_warning").first();
-
         if (data.error) {
-            insert_status_elem.html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> ERROR:</strong> ' + JSON.stringify(data.error))
-                              .removeClass('hidden alert-success')
-                              .removeClass('hidden alert-warning')
-                              .addClass('show alert-danger');
-        }else{
-            insert_status_elem.html('<span class="glyphicon glyphicon-ok"></span> ' + idfile + ' inserted with success.')
-                                                  .removeClass('hidden alert-danger')
-                                                  .removeClass('hidden alert-warning')
-                                                  .addClass('show alert-success');
+            reject(data.error);
+            return;
         }
-        __ihm.hideModal();
+
+        resolve($("#" + idfile).attr("filename")+ ' inserted with success.', { });
     });
+  });
 }
 
 function loadSourceFileBed(idfile, pub) {
+  new AskomicsJobsViewManager().insertQueue(function (resolve,reject) {
     // get taxon
     let taxon = '';
 
@@ -739,8 +701,6 @@ function loadSourceFileBed(idfile, pub) {
 
     // custom uri
     let uri = file_elem.find('#def-uri-entity-'+idfile).val();
-
-    __ihm.displayModal('Please wait', '', 'Close');
 
     let service = new RestServiceJs("load_bed_into_graph");
 
@@ -760,23 +720,12 @@ function loadSourceFileBed(idfile, pub) {
           return;
         }
 
-        let insert_status_elem = file_elem.find(".insert_status").first();
-        let insert_warning_elem = file_elem.find(".insert_warning").first();
-
-        //TODO: check if insertion is ok and then, display the success message or a warning message
         if (data.error) {
-            insert_status_elem.html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> ERROR:</strong> ' + JSON.stringify(data.error))
-                              .removeClass('hidden alert-success')
-                              .removeClass('hidden alert-warning')
-                              .addClass('show alert-danger');
-        }else{
-            insert_status_elem.html('<span class="glyphicon glyphicon-ok"></span> bed file inserted with success.')
-                                                  .removeClass('hidden alert-danger')
-                                                  .removeClass('hidden alert-warning')
-                                                  .addClass('show alert-success');
+            reject(data.error);
+            return;
         }
 
-        __ihm.hideModal();
-
+      resolve($("#" + idfile).attr("filename")+ ' inserted with success.', { });
     });
+  });
 }
