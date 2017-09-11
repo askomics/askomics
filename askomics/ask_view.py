@@ -400,71 +400,74 @@ class AskView(object):
         if self.request.session['blocked']:
             return 'blocked'
 
-        self.log.debug(" ========= Askview:source_files_overview =============")
-        sfc = SourceFileConvertor(self.settings, self.request.session)
+        try:
+            self.log.debug(" ========= Askview:source_files_overview =============")
+            sfc = SourceFileConvertor(self.settings, self.request.session)
 
-        source_files = sfc.get_source_files()
+            source_files = sfc.get_source_files()
 
-        self.data['files'] = []
+            self.data['files'] = []
 
-        # get all taxon in the TS
-        sqg = SparqlQueryGraph(self.settings, self.request.session)
-        ql = QueryLauncher(self.settings, self.request.session)
-        res = ql.execute_query(sqg.get_all_taxons().query)
-        taxons_list = []
-        for elem in res['results']['bindings']:
-            taxons_list.append(elem['taxon']['value'])
-        self.data['taxons'] = taxons_list
+            # get all taxon in the TS
+            sqg = SparqlQueryGraph(self.settings, self.request.session)
+            ql = QueryLauncher(self.settings, self.request.session)
+            res = ql.execute_query(sqg.get_all_taxons().query)
+            taxons_list = []
+            for elem in res['results']['bindings']:
+                taxons_list.append(elem['taxon']['value'])
+            self.data['taxons'] = taxons_list
 
-        for src_file in source_files:
-            infos = {}
-            infos['name'] = src_file.name
-            infos['type'] = src_file.type
-            if src_file.type == 'tsv':
-                try:
-                    infos['headers'] = src_file.get_headers_by_file
-                    infos['preview_data'] = src_file.get_preview_data()
-                    infos['column_types'] = []
-                    header_num = 1
-                    infos['column_types'].append('entity_start')
-                    for ih in range(1, len(infos['headers'])):
-                        #if infos['headers'][ih].find("@")>0:
-                        #    infos['column_types'].append("entity")
-                        #else:
-                        infos['column_types'].append(src_file.guess_values_type(infos['preview_data'][ih], infos['headers'][header_num]))
-                        header_num += 1
-                except Exception as e:
-                    traceback.print_exc(file=sys.stdout)
-                    infos['error'] = 'Could not read input file, are you sure it is a valid tabular file?'
-                    self.log.error(str(e))
+            for src_file in source_files:
+                infos = {}
+                infos['name'] = src_file.name
+                infos['type'] = src_file.type
+                if src_file.type == 'tsv':
+                    try:
+                        infos['headers'] = src_file.get_headers_by_file
+                        infos['preview_data'] = src_file.get_preview_data()
+                        infos['column_types'] = []
+                        header_num = 1
+                        infos['column_types'].append('entity_start')
+                        for ih in range(1, len(infos['headers'])):
+                            #if infos['headers'][ih].find("@")>0:
+                            #    infos['column_types'].append("entity")
+                            #else:
+                            infos['column_types'].append(src_file.guess_values_type(infos['preview_data'][ih], infos['headers'][header_num]))
+                            header_num += 1
+                    except Exception as e:
+                        traceback.print_exc(file=sys.stdout)
+                        infos['error'] = 'Could not read input file, are you sure it is a valid tabular file?'
+                        self.log.error(str(e))
 
-                self.data['files'].append(infos)
+                    self.data['files'].append(infos)
+                elif src_file.type == 'gff':
+                    try:
+                        entities = src_file.get_entities()
+                        infos['entities'] = entities
+                    except Exception as e:
+                        self.log.debug('error !!')
+                        traceback.print_exc(file=sys.stdout)
+                        infos['error'] = 'Could not parse the file, are you sure it is a valid GFF3 file?'
+                        self.log.error('error with gff examiner: ' + str(e))
 
-            elif src_file.type == 'gff':
-                try:
-                    entities = src_file.get_entities()
-                    infos['entities'] = entities
-                except Exception as e:
-                    self.log.debug('error !!')
-                    traceback.print_exc(file=sys.stdout)
-                    infos['error'] = 'Could not parse the file, are you sure it is a valid GFF3 file?'
-                    self.log.error('error with gff examiner: ' + str(e))
+                    self.data['files'].append(infos)
 
-                self.data['files'].append(infos)
+                elif src_file.type == 'ttl':
+                    infos['preview'] = src_file.get_preview_ttl()
+                    self.data['files'].append(infos)
 
-            elif src_file.type == 'ttl':
-                infos['preview'] = src_file.get_preview_ttl()
-                self.data['files'].append(infos)
-
-            elif src_file.type == 'bed':
-                try:
-                    src_file.open_bed
-                    infos['test'] = 'OK'
-                except Exception as e:
-                    self.log.error(str(e))
-                    infos['error'] = 'Could not read input file, are you sure it is a valid BED file ?'
-                self.data['files'].append(infos)
-
+                elif src_file.type == 'bed':
+                    try:
+                        src_file.open_bed
+                        infos['test'] = 'OK'
+                    except Exception as e:
+                        self.log.error(str(e))
+                        infos['error'] = 'Could not read input file, are you sure it is a valid BED file ?'
+                    self.data['files'].append(infos)
+        except Exception as e:
+             traceback.print_exc(file=sys.stdout)
+             self.data['error'] = str(e)
+             self.log.error(str(e))
 
         return self.data
 
