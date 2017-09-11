@@ -225,8 +225,8 @@ class SourceFileGff(SourceFile):
                                 #build later
                                 buildLater = True
                                 if not qualifier_key in attribute_dict:
-                                    attribute_dict[qualifier_key] = []
-                                attribute_dict[qualifier_key].append(valuri)
+                                    attribute_dict[":"+qualifier_key] = []
+                                attribute_dict[":"+qualifier_key].append(":"+valuri)
                             else:
 
                                 keyuri = self.encodeToRDFURI(qualifier_key+"_"+type_entities[valuri])
