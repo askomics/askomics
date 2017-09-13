@@ -211,6 +211,8 @@ function displayBedForm(file, taxons) {
         admin = true;
     }
 
+    file.label = file.name.replace(/\.[^/.]+$/, "")
+
     let context = {idfile: getIdFile(file),file: file, taxons: taxons.sort(), admin: admin};
     let html = template(context);
 
