@@ -7,6 +7,7 @@
             <th><input class="check_ds check_all_datasets" type="checkbox"></th>
             <th>Name</th>
             <th>Creation date</th>
+            <th>Owner</th>
             <th>Access level</th>
             <th>Number of triples</th>
         </tr>
@@ -17,6 +18,7 @@
             <td><input class="check_ds check_dataset" name="{{this.g}}" type="checkbox"></td>
             <td>{{this.name}}</td>
             <td>{{this.readable_date}}</td>
+            <td>{{this.owner}}</td>
             <td>{{#if this.access_bool}}<i class="fa fa-globe text-warning"></i> <em class="text-warning">{{this.access}}</em>
                 {{else}}<i class="fa fa-lock text-primary"></i> <strong class="text-primary">{{this.access}}</strong>
                 {{/if}}

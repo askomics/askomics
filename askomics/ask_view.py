@@ -341,6 +341,7 @@ class AskView(object):
                 'date': res['results']['bindings'][index_result]['date']['value'],
                 'readable_date': readable_date,
                 'access': res['results']['bindings'][index_result]['access']['value'],
+                'owner': res['results']['bindings'][index_result]['owner']['value'],
                 'access_bool': bool(res['results']['bindings'][index_result]['access']['value'] == 'public')
             })
 
