@@ -559,6 +559,7 @@ class AskView(object):
                     domain_knowledge_ttl = src_file.get_domain_knowledge()
                     )
         except Exception as e:
+            traceback.print_exc(file=sys.stdout)
             self.data['error'] = str(e)
             return self.data
 
@@ -966,6 +967,121 @@ class AskView(object):
             self.log.error(str(e))
 
         return self.data
+
+    @view_config(route_name='savejob', request_method='POST')
+    def savejob(self):
+        import tempfile,sqlite3
+        """ Save Job state inside a sqlite database. Each user have his own database """
+
+        body = self.request.json_body
+
+        db = "file:"+tempfile.gettempdir() + "/" + self.request.session['username'] +"jobs.db"
+        conn = sqlite3.connect(db,uri=True)
+        c = conn.cursor()
+        reqSql = '''CREATE TABLE IF NOT EXISTS jobs
+             (
+             jobID int NOT NULL,
+             state text,
+             start text,
+             tstart int,
+             end text ,
+             tend int ,
+             duration text,
+             classtr text,
+             datable_preview string,
+             stateToReload string,
+             nr int,
+             PRIMARY KEY (jobid))'''
+        c.execute(reqSql)
+        conn.commit()
+
+        jobid = body['jobid']
+        state = body['state']
+        start = body['start']
+        tstart = body['tstart']
+        end = body['end']
+        tend = body['tend']
+        nr = body['nr']
+        duration = body['duration']
+        classtr = body['classtr']
+        datable_preview = body['datable_preview']
+        stateToReload = body['stateToReload']
+
+        #delete Job if exist
+        reqSql = "DELETE FROM jobs WHERE jobid = "+ str(jobid)
+
+        try:
+            c.execute(reqSql)
+        except sqlite3.OperationalError as e :
+            self.log.info("Jobs database does not exist .")
+
+
+        reqSql = "INSERT INTO jobs VALUES ("+str(jobid)+",'"+state+"','" + start +"','"+str(tstart)+"','"
+        reqSql += end + "','" + str(tend)+ "','" + duration + "','"+ classtr + "','"+ datable_preview + "','"+stateToReload+"',"+str(nr)+")"
+
+        c.execute(reqSql)
+        conn.commit()
+        conn.close()
+
+
+    @view_config(route_name='listjob', request_method='POST')
+    def listjob(self):
+        import tempfile,sqlite3
+        """ Get Job list from a sqlite database """
+
+        data = []
+        body = self.request.json_body
+        db = "file:"+tempfile.gettempdir() + "/" + self.request.session['username'] +"jobs.db"
+        conn = sqlite3.connect(db,uri=True)
+        conn.row_factory = sqlite3.Row
+
+        c = conn.cursor()
+        reqSql = """ SELECT jobid, state, start, tstart, end, tend, duration, classtr, datable_preview, stateToReload, nr FROM jobs"""
+        try:
+            c.execute(reqSql)
+            rows = c.fetchall()
+
+            for row in rows:
+                d = {}
+                d['jobid'] = row['jobid']
+                d['state'] = row['state']
+                d['start'] = row['start']
+                d['tstart'] = row['tstart']
+                d['end'] = row['end']
+                d['tend'] = row['tend']
+                d['duration'] = row['duration']
+                d['classtr'] = row['classtr']
+                d['datable_preview'] = row['datable_preview']
+                d['stateToReload'] = row['stateToReload']
+                d['nr'] = row['nr']
+                data.append(d)
+
+        except sqlite3.OperationalError as e :
+            self.log.info("Jobs database does not exist .")
+
+        conn.close()
+        return data
+
+
+    @view_config(route_name='deljob', request_method='POST')
+    def deljob(self):
+        import tempfile,sqlite3
+        """ Delte a Job state from a sqlite database """
+        body = self.request.json_body
+
+        db = "file:"+tempfile.gettempdir() + "/" + self.request.session['username'] +"jobs.db"
+        conn = sqlite3.connect(db,uri=True)
+        c = conn.cursor()
+        reqSql = "DELETE FROM jobs WHERE jobid = "+ str(body['jobid'])
+
+        try:
+            c.execute(reqSql)
+        except sqlite3.OperationalError as e :
+            self.log.info("Jobs database does not exist .")
+
+        conn.commit()
+        conn.close()
+
 
     @view_config(route_name='getSparqlQueryInTextFormat', request_method='POST')
     def getSparqlQueryInTextFormat(self):

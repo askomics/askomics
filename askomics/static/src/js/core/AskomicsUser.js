@@ -6,6 +6,8 @@ class AskomicsUser {
         this.username = username===undefined?"":username ;
         this.admin    = admin===undefined?false:admin;
         this.blocked  = blocked===undefined?true:blocked;
+
+        new AskomicsJobsViewManager().loadjob();
     }
 
     isAdmin() {

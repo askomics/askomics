@@ -33,6 +33,12 @@ def main(global_config, **settings):
     config.add_route('sparqlquery', '/sparqlquery')
     config.add_route('getSparqlQueryInTextFormat', '/getSparqlQueryInTextFormat')
 
+    # Job persistance management
+    config.add_route('savejob', '/savejob')
+    config.add_route('listjob', '/listjob')
+    config.add_route('deljob', '/deljob')
+
+
     # Upload/integration routes
     config.add_route('source_files_overview', '/source_files_overview')
     config.add_route('guess_csv_header_type', '/guess_csv_header_type')

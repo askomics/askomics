@@ -46,10 +46,7 @@ class AskomicsResultsView {
     }
   }
 
-  getPreviewResults(dump) {
-    //TODO : manage new AskomicsGraph
-    //let struct = JSON.parse(dump);
-
+  getPreviewResults() {
     /* new presentation by entity */
     let table = $('<table></table>')
                   .addClass('table')
