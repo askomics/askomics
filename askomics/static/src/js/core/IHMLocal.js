@@ -530,7 +530,7 @@ class IHMLocal {
         });
     }
 
-    set_upload_galaxy_form(history_id, input) {
+    set_upload_galaxy_form(history_id, input, histories={}) {
 
         let title;
         let radio;
@@ -538,25 +538,30 @@ class IHMLocal {
         let allowed_files;
         if (input) {
             // Input file upload
-            title = 'Upload Galaxy files';
+            title = 'Get a dataset from Galaxy';
             radio = true;
             input_type = 'checkbox';
             allowed_files = ['tabular', 'ttl', 'gff', 'gff3', 'gff2'];
         }else{
             // Query file upload
-            title = 'Upload a Galaxy query file';
+            title = 'Get a query from Galaxy';
             radio = false;
             input_type = 'radio';
             allowed_files = ['json'];
         }
 
+        let template = AskOmics.templates.galaxy_datasets;
+        let context = {datasets: {}, histories: histories, radio: radio, input_type: input_type};
+        let html = template(context);
 
         $('#modalTitle').text(title);
         $('.modal-sm').css('width', '50%');
         $('.modal-body').show();
         $('#modalButton').text('Close');
         $('#modal').modal('show');
-        $('#modalMessage').html($('<i></i>').attr('class', 'fa fa-2x fa-spinner pulse'));
+        $('#modalMessage').html(html);
+        $('#spinner_loading_galaxy').removeClass('hidden');
+        $('.galaxy-table').hide();
 
         if (typeof history_id === 'undefined' || history_id === null) {
             history_id = false;
@@ -626,7 +631,7 @@ class IHMLocal {
 
             // On select change, reload
             $('#change_history').on('change', function() {
-                __ihm.set_upload_galaxy_form(this.value, input);
+                __ihm.set_upload_galaxy_form(this.value, input, histories=data.histories);
             });
         });
     }
