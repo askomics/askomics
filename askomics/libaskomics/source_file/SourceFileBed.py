@@ -13,9 +13,9 @@ class SourceFileBed(SourceFile):
     Class representing a BED Source file
     """
 
-    def __init__(self, settings, session, path, uri=None):
+    def __init__(self, settings, session, path, uri_set=None):
 
-        SourceFile.__init__(self, settings, session, path, uri=uri)
+        SourceFile.__init__(self, settings, session, path, uri_set=uri_set)
 
         self.type = 'bed'
 
@@ -131,8 +131,8 @@ class SourceFileBed(SourceFile):
             block_idxend = end_entity // blockbase
 
             # Write turtle string
-            indent = len(self.uri) * ' ' + '   '
-            ttl = '<' + self.uri + name_entity + '> rdf:type :' + type_entity + ' ;\n'
+            indent = len(self.uri[0]) * ' ' + '   '
+            ttl = '<' + self.uri[0] + name_entity + '> rdf:type :' + type_entity + ' ;\n'
             ttl += indent + 'rdfs:label "' + name_entity + '"^^xsd:string ;\n'
             ttl += indent + ':position_taxon ' + taxon_entity + ' ;\n'
             ttl += indent + ':position_strand ' + strand_entity + ' ;\n'

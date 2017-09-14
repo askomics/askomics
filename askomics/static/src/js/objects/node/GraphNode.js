@@ -16,6 +16,7 @@ class GraphNode extends GraphObject {
     this.x = x+scaleX*sc;
     this.y = y+scaleY*sc;
 
+
     return this;
   }
 
@@ -24,14 +25,33 @@ class GraphNode extends GraphObject {
   }
 
   init() {
+    this.sparqlgen = true ;
     this.actif        = false ;
     this.weight       = 0;
     this.x            = 0;
     this.y            = 0;
     this.nlink        = {}; // number of relation with a node.
+    this.colorStroke  = 'grey';
   }
 
-  set actif  (__actif) { this._actif = __actif; }
+  set sparqlgen  (__sparqlgen) {
+    this._sparqlgen = __sparqlgen;
+    if ( this._sparqlgen ) {
+      this.colorStroke = 'grey';
+    }else {
+      this.colorStroke = 'Navy';
+    }
+  }
+  get sparqlgen () { return this._sparqlgen; }
+
+  set actif  (__actif) {
+    this._actif = __actif;
+    if ( this._actif ) {
+      $("#node_" + this.id).css("opacity","1");
+    } else {
+      $("#node_" + this.id).css("opacity","0.1");
+    }
+  }
   get actif () { return this._actif; }
 
   set weight  (__weight) { this._weight = __weight; }
@@ -48,7 +68,7 @@ class GraphNode extends GraphObject {
 
   setjson(obj) {
     super.setjson(obj);
-
+    this._sparqlgen = obj._sparqlgen;
     this._actif = obj._actif;
     this._x = obj._x;
     this._y = obj._y;
@@ -101,7 +121,7 @@ class GraphNode extends GraphObject {
     }
   }
 
-  getNodeStrokeColor() { return 'grey'; }
+  getStrokeColor() { return this.colorStroke; }
 
   getClassSVG() { return "Class"; }
 

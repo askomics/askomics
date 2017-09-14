@@ -103,14 +103,14 @@ class AskomicsNode extends GraphNode {
         if ( this.attributes[uri].actif  ) {
           return this.attributes[uri].SPARQLid;
         }
-      } 
+      }
     }
     for (let uri in this.categories) {
       if ( uri.indexOf("position_"+attpos) > 0 ) {
         if ( this.categories[uri].actif  ) {
           return this.categories[uri].SPARQLid;
         }
-      } 
+      }
     }
     return null;
   }
@@ -118,6 +118,10 @@ class AskomicsNode extends GraphNode {
   buildConstraintsSPARQL() {
 
     let blockConstraintByNode = [];
+
+    if (! this.sparqlgen)
+      return [blockConstraintByNode,''];
+
     /* add node inside */
     blockConstraintByNode.push("?"+'URI'+this.SPARQLid+" "+'rdf:type'+" "+this.URI());
     if ( this.rdfslabel.actif ) {
@@ -239,13 +243,13 @@ class AskomicsNode extends GraphNode {
   }
 
   instanciateVariateSPARQL(variates) {
-    /* adding variable node name if asked by the user */
-    if (this.actif) {
-      variates.push("?"+this.SPARQLid);
-      variates.push("?URI"+this.SPARQLid);
-    } else {
-      return ; /* Attribute are not instanciate too */
-    }
+    /* no sparql had been generated ... */
+    if ( (!this.sparqlgen) || (!this.actif) )
+      return ;
+
+    variates.push("?"+this.SPARQLid);
+    variates.push("?URI"+this.SPARQLid);
+
     for (let uri in this.attributes) {
       let SparqlId = this.attributes[uri].SPARQLid;
       if ( this.attributes[uri].actif ) {

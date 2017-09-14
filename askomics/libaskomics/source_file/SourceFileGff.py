@@ -18,9 +18,9 @@ class SourceFileGff(SourceFile):
     Class representing a Gff3 Source file
     """
 
-    def __init__(self, settings, session, path, uri=None):
+    def __init__(self, settings, session, path, uri_set=None):
 
-        SourceFile.__init__(self, settings, session, path, uri=uri)
+        SourceFile.__init__(self, settings, session, path, uri_set=uri_set)
 
         self.type = 'gff'
 
@@ -287,8 +287,8 @@ class SourceFileGff(SourceFile):
         for id_entity, attribute_dict in entity.items():
             first = True
 
-            ttl = '<' + self.uri + str(id_entity) + '>'
-            indent = len(str(id_entity + self.uri + '<>')) * ' ' + ' '
+            ttl = '<' + self.uri[0] + str(id_entity) + '>'
+            indent = len(str(id_entity + self.uri[0] + '<>')) * ' ' + ' '
             for key, attr in attribute_dict.items():
                 if len(attr) <= 0 : # empty attr, dont insert triple
                     continue

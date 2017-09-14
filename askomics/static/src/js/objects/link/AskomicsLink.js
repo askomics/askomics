@@ -7,7 +7,7 @@ class AskomicsLink extends GraphLink {
     super(link,sourceN,targetN);
     this._positionable = false;
     this._transitive = false ;
-    this._negative   = false ;
+    this._absentrel   = false ;
     this._subclassof = false ;
   }
 
@@ -17,14 +17,14 @@ class AskomicsLink extends GraphLink {
   set transitive (transitive) { this._transitive = transitive; }
   get transitive () { return this._transitive; }
 
-  set negative (negative) { this._negative = negative; }
-  get negative () { return this._negative; }
+  set absentrel (absentrel) { this._absentrel = absentrel; }
+  get absentrel () { return this._absentrel; }
 
   setjson(obj) {
     super.setjson(obj);
 
     this._transitive = obj._transitive ;
-    this._negative = obj._negative ;
+    this._absentrel = obj._absentrel ;
 
   }
 
@@ -46,9 +46,12 @@ class AskomicsLink extends GraphLink {
       }
 
       if ( this.transitive ) rel += "+";
-
       blockConstraintByNode.push("?"+'URI'+this.source.SPARQLid+" "+rel+" "+"?"+target);
-      if ( this.negative ) {
+
+      if ( this.absentrel ) {
+        this.target.sparqlgen = true ;
+        blockConstraintByNode.push(this.target.buildConstraintsSPARQL());
+        this.target.sparqlgen = false;
         blockConstraintByNode = [blockConstraintByNode,'FILTER NOT EXISTS'];
       }
     }

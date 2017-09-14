@@ -24,7 +24,7 @@ class SourceFileConvertor(ParamManager):
         ParamManager.__init__(self, settings, session)
         self.log = logging.getLogger(__name__)
 
-    def get_source_files(self, forced_type=None, uri=None):
+    def get_source_files(self, forced_type=None, uri_set=None):
         """Get all source files
 
 
@@ -40,13 +40,13 @@ class SourceFileConvertor(ParamManager):
         for path in paths:
             file_type = self.guess_file_type(path)
             if file_type == 'gff' or forced_type == 'gff':
-                files.append(SourceFileGff(self.settings, self.session, path, uri=uri))
+                files.append(SourceFileGff(self.settings, self.session, path, uri_set=uri_set))
             elif file_type == 'ttl' or forced_type == 'ttl':
                 files.append(SourceFileTtl(self.settings, self.session, path))
             elif file_type == 'bed' or forced_type == 'bed':
-                files.append(SourceFileBed(self.settings, self.session, path, uri=uri))
+                files.append(SourceFileBed(self.settings, self.session, path, uri_set=uri_set))
             elif file_type == 'csv' or forced_type == 'csv':
-                files.append(SourceFileTsv(self.settings, self.session, path, int(self.settings["askomics.overview_lines_limit"]), uri=uri))
+                files.append(SourceFileTsv(self.settings, self.session, path, int(self.settings["askomics.overview_lines_limit"]), uri_set=uri_set))
 
         return files
 
@@ -69,7 +69,7 @@ class SourceFileConvertor(ParamManager):
 
         return 'csv'
 
-    def get_source_file(self, name, forced_type=None, uri=None):
+    def get_source_file(self, name, forced_type=None, uri_set=None):
         """
         Return an object representing a source file
 
@@ -78,7 +78,7 @@ class SourceFileConvertor(ParamManager):
         :rtype: SourceFile
         """
         # As the name can be different than the on-disk filename (extension are removed), we loop on all SourceFile objects
-        files = self.get_source_files(forced_type, uri=uri)
+        files = self.get_source_files(forced_type, uri_set=uri_set)
 
         for file in files:
             if file.name == name:

@@ -24,16 +24,16 @@ class AskomicsLinkView extends AskomicsObjectView {
   }
 
   getTextColorLabel() {
-    if ( this.link.negative && this.link.transitive ) return LINKVIEW_TRANSITIVE_NEGATIVE_COLOR_TEXT;
-    if ( this.link.negative ) return LINKVIEW_NEGATIVE_COLOR_TEXT;
+    if ( this.link.absentrel && this.link.transitive ) return LINKVIEW_TRANSITIVE_NEGATIVE_COLOR_TEXT;
+    if ( this.link.absentrel ) return LINKVIEW_NEGATIVE_COLOR_TEXT;
     if ( this.link.transitive ) return LINKVIEW_TRANSITIVE_COLOR_TEXT;
     if ( this.link.subclassof ) return LINKVIEW_SUBCLASSOF_COLOR_TEXT;
     return this.link.getTextFillColor();
   }
 
   getTextLabel() {
-    if ( this.link.negative && this.link.transitive ) return 'NOT '+this.link.label+"+";
-    if ( this.link.negative ) return 'NOT '+this.link.label;
+    if ( this.link.absentrel && this.link.transitive ) return 'NOT '+this.link.label+"+";
+    if ( this.link.absentrel ) return 'NOT '+this.link.label;
     if ( this.link.transitive ) return this.link.label+"+";
     if ( this.link.subclassof ) return "subclassof "+this.link.label;
     return this.link.label;
@@ -83,13 +83,17 @@ class AskomicsLinkView extends AskomicsObjectView {
 
       let inpNeg = this.makeCheckBox(
         function (l) {
-          return l.negative;
+          return l.absentrel;
         } ,
         function (l) {
-          l.negative = true ;
+          l.absentrel = true ;
+          l.target.sparqlgen = false ;
+          l.target.actif = false ;
         } ,
         function (l) {
-          l.negative = false ;
+          l.absentrel = false ;
+          l.target.sparqlgen = true ;
+          l.target.actif = true ;
         } ) ;
 
         let inpSub = this.makeCheckBox(

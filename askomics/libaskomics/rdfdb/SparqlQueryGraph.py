@@ -57,6 +57,28 @@ class SparqlQueryGraph(SparqlQueryBuilder):
                      "}"
         }, True)
 
+    def get_prefix_uri(self):
+        """
+        Get list of uri defined as metadata for a entities list
+        """
+        self.log.debug('---> get_prefix_uri')
+        return self.build_query_on_the_fly({
+            'select': '?nodeLabel ?prefUri',
+            'query': 'GRAPH ?g {\n'+
+                     '\t?nodeUri displaySetting:entity "true"^^xsd:boolean .\n' +
+                     '\t?nodeUri rdfs:label ?nodeLabel.\n'+
+                     '\t?nodeUri displaySetting:prefixUri ?prefUri.\n'+
+                     "\t{\n"+
+                     "\t\t{ ?g :accessLevel ?accesLevel.\n"+
+                     "\t\t\tVALUES ?accesLevel { 'public' }."+
+                     "\t\t}\n"+
+                     "\t\tUNION\n"+
+                     "\t\t{ ?g :accessLevel ?accesLevel.\n "+
+                     "\t\t?g dc:creator '" + self.session['username'] + "' }\n"+
+                     "\t}\n."+
+                     "}"
+        }, True)
+
     def get_isa_relation_entities(self):
         """
         Get the association list of entities and subclass
@@ -84,13 +106,26 @@ class SparqlQueryGraph(SparqlQueryBuilder):
     def get_user_graph_infos(self):
         """Get infos of all datasets owned by a user"""
         return self.build_query_on_the_fly({
+            'select': '?g ?name ?date ?access',
+            'query': 'GRAPH ?g {\n' +
+                     '\t?g prov:generatedAtTime ?date .\n' +
+                     '\t?g prov:wasDerivedFrom ?name .\n'+
+                     '\t?g :accessLevel ?access .\n' +
+                     '}',
+            'post_action': 'GROUP BY ?g ?name ?date ?access'
+        }, True)
+
+    def get_user_graph_infos_with_count(self):
+        """Get infos of all datasets owned by a user"""
+        return self.build_query_on_the_fly({
             'select': '?g ?name ?date ?access (count(*) as ?co)',
             'query': 'GRAPH ?g {\n' +
                      '\t?s ?p ?o .\n' +
                      '\t?g prov:generatedAtTime ?date .\n' +
                      '\t?g prov:wasDerivedFrom ?name .\n'+
                      '\t?g :accessLevel ?access .\n' +
-                     '}'
+                     '}',
+            'post_action': 'GROUP BY ?g ?name ?date ?access'
         }, True)
 
     def get_if_positionable(self, uri):
@@ -142,11 +177,11 @@ class SparqlQueryGraph(SparqlQueryBuilder):
                      '\t           rdfs:domain ?entity ;\n' +
                      '\t           rdfs:range ?typeAttribute .\n\n' +
                      '\tOPTIONAL {?attribute displaySetting:attributeOrder ?order .}\n' +
+                     '\t}'+
                      '\t{'+
                      '\t\t{ ?g :accessLevel "public". }'+
                      '\t\tUNION '+
                      '\t\t{ ?g dc:creator "'+self.session['username']+'".}'+
-                     '\t}'+
                      '}'
         }, True)
 
@@ -209,11 +244,11 @@ class SparqlQueryGraph(SparqlQueryBuilder):
                      '\t            rdfs:range ?typeCategory.\n' +
                      '\tOPTIONAL {?category displaySetting:attributeOrder ?order .}\n' +
                      '\t?typeCategory displaySetting:category [] .\n' +
+                     '\t}'+
                      '\t{'+
                      '\t\t{ ?g :accessLevel "public". }'+
                      '\t\tUNION '+
                      '\t\t{?g dc:creator "'+self.session['username']+'" .}'+
-                     '\t}'+
                      '\t}'
             }, True)
 

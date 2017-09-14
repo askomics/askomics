@@ -8,7 +8,7 @@ from askomics.libaskomics.SourceFileConvertor import SourceFileConvertor
 
 class InterfaceTPS(object):
     """Allow communication with the triplestore
-    
+
     This class allow the communication with the triplestore
     during the tests
     """
@@ -16,7 +16,7 @@ class InterfaceTPS(object):
 
     def __init__(self, settings, request):
         """constructor
-        
+
         :param settings: settings dicct
         :type settings: dict
         :param request: pyramid request dict
@@ -64,7 +64,7 @@ class InterfaceTPS(object):
 
     def list_public_graphs(self):
         """list the public graphs
-        
+
         :returns: description of the public graph
         :rtype: dict
         """
@@ -102,13 +102,14 @@ class InterfaceTPS(object):
 
         src_file.set_forced_column_types(col_types)
         src_file.set_disabled_columns(disabled_columns)
-        src_file.persist('', 'noload', public)
+        src_file.set_param("askomics.upload_user_data_method",'insert')
+        src_file.persist('', public)
 
         return src_file.get_timestamp()
 
     def load_people(self):
         """Load the file people.tsv
-        
+
         :returns: the timestamp associated
         :rtype: string
         """
@@ -118,7 +119,7 @@ class InterfaceTPS(object):
 
     def load_instruments(self):
         """Load the file instruments.tsv
-        
+
         :returns: the timestamp associated
         :rtype: string
         """
@@ -128,7 +129,7 @@ class InterfaceTPS(object):
 
     def load_play_instrument(self):
         """Load the file play_instruments.tsv
-        
+
         :returns: the timestamp associated
         :rtype: string
         """
@@ -138,7 +139,7 @@ class InterfaceTPS(object):
 
     def load_public_people(self):
         """Load the file people.tsv as public data
-        
+
         :returns: the timestamp associated
         :rtype: string
         """
@@ -148,7 +149,7 @@ class InterfaceTPS(object):
 
     def load_transcript(self):
         """Load the file transcript.tsv
-        
+
         :returns: the timestamp associated
         :rtype: string
         """
@@ -158,7 +159,7 @@ class InterfaceTPS(object):
 
     def load_qtl(self):
         """Load the file qtl.tsv
-        
+
         :returns: the timestamp associated
         :rtype: string
         """
@@ -168,7 +169,7 @@ class InterfaceTPS(object):
 
     def clean_up(self):
         """Delete all tests data
-        
+
         Delete the users graph and all public and private
         data used for the tests
         """

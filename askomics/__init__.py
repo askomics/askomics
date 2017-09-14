@@ -41,6 +41,7 @@ def main(global_config, **settings):
     config.add_route('load_ttl_into_graph', '/load_ttl_into_graph')
     config.add_route('load_bed_into_graph', '/load_bed_into_graph')
 
+    config.add_route('prefix_uri', '/prefix_uri')
     config.add_route('preview_ttl', '/preview_ttl')
     config.add_route('ttl', '/ttl/{name:.*}')
     config.add_route('csv', '/csv/{name:.*}')

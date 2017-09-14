@@ -15,6 +15,7 @@ class AskomicsUserAbstraction {
       this.prefix.rdfg = "http://www.w3.org/2004/03/trix/rdfg-1/";
 
       this.prefix_error = {};
+      this.longprefix_error = {};
       /* Ontology is save locally to avoid request with TPS  */
       /* --------------------------------------------------- */
       this.tripletSubjectRelationObject = [];
@@ -116,6 +117,9 @@ class AskomicsUserAbstraction {
       }
       if (attributeForUritype === this.longRDF("xsd:language")) {
         return "string";
+      }
+      if (attributeForUritype === this.longRDF("xsd:dateTime")) {
+        return "date";
       }
       return attributeForUritype;
     }
@@ -223,7 +227,7 @@ class AskomicsUserAbstraction {
         }
         for (let entry in resultListTripletSubjectRelationObject.subclassof){
           let duo = resultListTripletSubjectRelationObject.subclassof[entry] ;
-          console.log(JSON.stringify(duo));
+        //  console.log(JSON.stringify(duo));
           if ( ! (duo.uri in instanceUserAbstraction.entitySubclassof) ) {
             instanceUserAbstraction.entitySubclassof[duo.uri] = [];
           }
@@ -265,6 +269,32 @@ class AskomicsUserAbstraction {
       }
 
       return this.prefix[ns];
+    }
+
+    getReversePrefix(uri) {
+
+      if ( uri in this.longprefix_error) {
+        return "";
+      }
+
+      for (let ns in this.prefix) {
+        if ( this.prefix[ns] == uri ) return ns ;
+      }
+
+      let instanceUserAbstraction = this;
+
+      $.ajaxSetup({async: false});
+      let pref = "" ;
+      $.get( "http://prefix.cc/reverse", { uri:uri.trim() ,format: "json"} )
+          .done(function( data ) {
+            pref = Object.keys(data)[0];
+            instanceUserAbstraction.prefix[pref] = uri ;
+          })
+          .fail( function() {
+            instanceUserAbstraction.longprefix_error[uri] = true ;
+          });
+      $.ajaxSetup({async: true});
+      return pref ;
     }
 
     getAttribEntity(uriEntity,attrib) {
@@ -350,7 +380,6 @@ class AskomicsUserAbstraction {
       for ( let i in subjectsTarget ) {
         subjectsTarget[i] = Object.keys(subjectsTarget[i]);
       }
-
       return [objectsTarget, subjectsTarget];
     }
 

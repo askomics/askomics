@@ -24,7 +24,7 @@ class SparqlQueryBuilder(ParamManager):
         self.log.debug("=== setGraphUser ===")
         settings = {}
         #finding all private graph graph
-       
+
         qu = self.build_query_on_the_fly({
             'select': '?g',
             'query': 'GRAPH ?g {\n'+\
@@ -136,6 +136,9 @@ class SparqlQueryBuilder(ParamManager):
         """
         Delte metadata linkd to a graph
         """
+
+        if 'graph' not in self.session:
+            raise Exception("graph key is not initialized in this askomics session.")
 
         return self.prepare_query(
             """

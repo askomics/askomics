@@ -31,6 +31,8 @@ class AskViewTests(unittest.TestCase):
         """
 
         self.settings = get_appsettings('configs/test.virtuoso.ini', name='main')
+        self.settings['askomics.upload_user_data_method'] = 'insert'
+
         self.request = testing.DummyRequest()
 
         self.config = testing.setUp(request=self.request)
@@ -224,7 +226,7 @@ class AskViewTests(unittest.TestCase):
 
         assert {
             'g': 'urn:sparql:test_askomics:jdoe:people_tsv_' + timestamp_people,
-            'count': '77',
+            'count': '78',
             'access': 'public',
             'date': timestamp_people,
             'readable_date': readable_date_people,
@@ -235,7 +237,7 @@ class AskViewTests(unittest.TestCase):
         assert {
             'g':
             'urn:sparql:test_askomics:jdoe:instruments_tsv_' + timestamp_instrument,
-            'count': '68',
+            'count': '69',
             'access': 'private',
             'date': timestamp_instrument,
             'readable_date': readable_date_instrument,
@@ -348,9 +350,9 @@ class AskViewTests(unittest.TestCase):
         }
 
         data = self.askview.load_gff_into_graph()
-        #The test can no be OK because no Askomics serveur is available and so the 
+        #The test can no be OK because no Askomics serveur is available and so the
         # command LOAD <http://localhost:6543/ttl/jdoe/tmp_small_data.gff3sebeuo2e.ttl> INTO GRAPH <urn:sparql:test_askomics:jdoe:small_data.gff3_2017-04-27T14:58:59.676364>
-        # can no be work ! 
+        # can no be work !
         #assert data == {'status': 'ok'}
 
 
@@ -370,7 +372,7 @@ class AskViewTests(unittest.TestCase):
 
         #The load can not be work because none server http run and virtuoso can not find file to http://localhost:6543/file/xxxx.ttl
         #data = self.askview.load_ttl_into_graph()
-        
+
         #assert data == {'status': 'ok'}
 
 

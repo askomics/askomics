@@ -107,10 +107,13 @@ function cols2rows(items) {
 function displayIntegrationForm(data) {
     $("#content_integration").empty();
     if ( data.files === undefined ) return ;
+
+    let dataprefix = updatePrefixListFromDatabase();
     for (var i = data.files.length - 1; i >= 0; i--) {
         switch (data.files[i].type) {
             case 'tsv':
                 displayTSVForm(data.files[i]);
+                updatePrefixListUriCsvForm(data.files[i],dataprefix);
             break;
             case 'gff':
                 displayGffForm(data.files[i], data.taxons);
@@ -128,6 +131,19 @@ function displayIntegrationForm(data) {
 function getIdFile(file) {
     // replace non a-z A-Z 0-9 char to _
     return file.name.replace(/[^a-zA-Z0-9]/g, '_');
+}
+
+function updatePrefixListFromDatabase() {
+  console.log('----> updatePrefixListFromDatabase <---- ');
+  // we proposed all uri finded in database
+  let service = new RestServiceJs("prefix_uri");
+  let model = { };
+  let results ;
+
+  service.postsync(model, function(data) {
+      results = data ;
+  });
+  return results;
 }
 
 function displayTSVForm(file) {
@@ -160,7 +176,7 @@ function displayGffForm(file, taxons) {
     if ($('#administration').length) {
         admin = true;
     }
-    
+
     file.entities = file.entities.sort();
 
     let context = {idfile: getIdFile(file),file: file, taxons: taxons.sort(), admin: admin};
@@ -201,73 +217,201 @@ function displayBedForm(file, taxons) {
     $('#content_integration').append(html);
 }
 
-function setCorrectType(file) {
-    function mapCallback() {
-        return $(this).val();
-    }
+function updatePrefixListUriCsvForm(file,data) {
+  if ( data.length <= 0 ) {
+    throw Exception("Bad use of updatePrefixListUriCsvForm  data ==>"+JSON.stringify(data));
+  }
 
-    function getSelectCallback(index, value) {
-        selectbox.find("option[value="+value+"]").hide();
+  let idfile = getIdFile(file) ;
+  let filter = 'div#content_integration ';
+    filter += 'form#source-file-tsv-' + idfile ;
+    filter += ' select.uri_entity' ;
+
+  let selectbox = $( filter ).each(function(i) {
+  let curSelect = $(this);
+  curSelect.empty();
+
+  /*
+    special input tag for the first column which defined the entity
+    user can choose from the database list or create a new one.
+    we use the autocomplete functionnality from jquery-ui
+  */
+
+
+  if ( i === 0 ) {
+      let inp = $('<input type="text"/>')
+                     .attr("id","def-uri-entity-"+idfile)
+                     .addClass('uri_entity')
+                     .addClass('form-control')
+                     .addClass('input-sm');
+
+      curSelect.after(inp);
+      curSelect.remove();
+
+      let availableTags = [];
+      let listAvailableTags = {} ;
+
+      let base = data.__default__;
+      availableTags.push(base);
+
+      listAvailableTags[base] = 0;
+      inp.val(base);
+
+      for (let key in data ) {
+        if (key == '__default__') continue;
+        for (let element in data[key] ) {
+          if (! (data[key][element] in listAvailableTags) ) {
+            let v = data[key][element];
+            listAvailableTags[v] = 0;
+            availableTags.push(v);
+          }
+        }
+      }
+
+      inp.autocomplete({
+        source: availableTags
+      }).change(function() {
+        let val = $(this).val();
+        if (val.trim().substring(0, 7) != "http://")
+          $(this).val( "http://" + val.trim()) ;
+      }).click(function() {
+      /* add potential */
+        $('input[id^="def-uri-entity"]').map(function() {
+          if ( !( $(this).val() in listAvailableTags) ) {
+            listAvailableTags[$(this).val()] = 0;
+            availableTags.push($(this).val());
+          }
+        });
+        $(this).autocomplete({
+          source: availableTags
+        });
+      });
+
+    } else {
+      if ( file.column_types[i] != 'entity_start' &&
+           file.column_types[i] != 'entity' &&
+           file.column_types[i] != 'entitySym') {
+        curSelect.attr('disabled', true);
+        curSelect.hide();
+        return ;
+      }
+      let entity = file.headers[i].substring(file.headers[i].indexOf("@")+1);
+
+      if (entity in data ) {
+          data[entity].forEach(function(element) {
+            curSelect.append($("<option></option>").val(element).html(element));
+          });
+      } else { /* this entity does not exist in database */
+         curSelect.append($("<option></option>").val(data.__default__).html(data.__default__));
+      }
+      /* if same type entity than the first column maybe a new uri exist... */
+      let first_entity = file.headers[0].substring(file.headers[0].indexOf("@")+1);
+      if (first_entity == entity ) {
+        curSelect.click(function() {
+          /* check input uri tag of the current entity definition and propose  */
+          let newuri = $('#def-uri-entity-' +idfile).val();
+          /* remove unconsistent uri */
+          curSelect.find('option[volatile="true"]').map(function() {
+            if ( $(this).val() != newuri ) $(this).remove();
+          });
+
+          let exist = false ;
+          curSelect.find('option').map(function() {
+            if ($(this).val() == newuri ) exist = true ;
+          });
+          if (! exist ) {
+            curSelect.append($("<option></option>").val(newuri)
+                                                   .html(newuri)
+                                                   .attr('volatile','true'));
+          }
+        });
+      }
     }
+  });
+}
+
+function setCorrectType(file) {
 
     if ('column_types' in file) {
-        var cols = file.column_types;
-        for(let i=0; i<cols.length; i++) {
-            var selectbox = $('div#content_integration form#source-file-tsv-' + getIdFile(file) + ' select.column_type:eq(' + i + ')');
-            var values = selectbox.find("option").map(mapCallback);
 
-            if ($.inArray(cols[i], ['start', 'end', 'numeric']) == -1) {
-                $.each(['start', 'end', 'numeric'],getSelectCallback);
-            }
+      /* set the associate column type in IHM and remove numeric type as proposition if needed */
+      /* ----------- */
+      let idfile = getIdFile(file) ;
+      let filter = 'div#content_integration ';
+      filter += 'form#source-file-tsv-' + idfile ;
+      filter += ' select.column_type' ;
 
-            if ($.inArray( cols[i], values) >= 0) {
-                selectbox.val(cols[i]);
-            }
-
-            // Check what is in the db
-            checkData($('div#content_integration form#source-file-tsv-' + getIdFile(file)));
+      let selectbox = $( filter ).each(function(i) {
+        let typ = file.column_types[i];
+        if (! (typ in ['start', 'end', 'numeric']) ){
+          $(this).find("option[value=start][value=end][value=numeric]").hide();
         }
+        $(this).val(typ);
+      });
+      // Check what is in the db
+      checkData($('div#content_integration form#source-file-tsv-' + idfile));
     }
+}
 
+function getIhmTtlElements(file_elem) {
+  let idfile = file_elem.find('.file_name').attr('id');
 
+  // Get column types
+  let col_types = file_elem.find('.column_type').map(function() {
+    return $(this).val();
+  }).get();
+
+  // Find which column is disabled
+  let disabled_columns = [];
+  file_elem.find('.toggle_column_present').each(function( index ) {
+      if (!$(this).is(':checked')) {
+          disabled_columns.push(index + 1); // +1 to take into account the first non-disablable column
+        }
+  });
+
+  let key_columns = [];
+  file_elem.find('.toggle_column_key').each(function( index ) {
+    if ($(this).is(':checked')) {
+        key_columns.push(index); // +1 to take into account the first non-disablable column
+    }
+  });
+
+  // custom uri
+  let uri = file_elem.find('#def-uri-entity-'+idfile).val();
+
+  let uri_def = {} ;
+  file_elem.find('.uri_entity').map(function(idx) {
+    let v = $(this).val() ;
+    uri_def[idx] = v;
+  });
+
+  if ( key_columns.length <= 0 ) {
+    __ihm.displayModal('Select one column to define a unique key', '', 'Close');
+    return;
+  }
+
+  return {
+        idfile: idfile,
+        col_types: col_types,
+        disabled_columns: disabled_columns,
+        key_columns: key_columns,
+        uris: uri_def
+    };
 }
 
 /**
  * Get ttl representation of preview data
  */
 function previewTtl(file_elem) {
-    var idfile = file_elem.find('.file_name').attr('id');
+    let idfile,col_types,disabled_columns,key_columns,uri;
+    let tags = getIhmTtlElements(file_elem);
 
-    // Get column types
-    var col_types = file_elem.find('.column_type').map(function() {
-        return $(this).val();
-    }).get();
-
-    // Find which column is disabled
-    var disabled_columns = [];
-    file_elem.find('.toggle_column_present').each(function( index ) {
-        if (!$(this).is(':checked')) {
-            disabled_columns.push(index + 1); // +1 to take into account the first non-disablable column
-        }
-    });
-
-    let key_columns = [];
-    file_elem.find('.toggle_column_key').each(function( index ) {
-        if ($(this).is(':checked')) {
-            key_columns.push(index); // +1 to take into account the first non-disablable column
-        }
-    });
-
-    if ( key_columns.length <= 0 ) {
-        __ihm.displayModal('Select one column to define a unique key', '', 'Close');
-        return;
-    }
-
-    var service = new RestServiceJs("preview_ttl");
-    var model = { 'file_name': $("#"+idfile).attr("filename"),
-                  'col_types': col_types,
-                  'key_columns' : key_columns,
-                  'disabled_columns': disabled_columns };
+    let service = new RestServiceJs("preview_ttl");
+    let model = { 'file_name': $("#"+tags.idfile).attr("filename"),
+                  'col_types': tags.col_types,
+                  'key_columns' : tags.key_columns,
+                  'disabled_columns': tags.disabled_columns,
+                  'uris': tags.uris };
 
     service.post(model, function(data) {
         if (data == 'forbidden') {
@@ -378,56 +522,19 @@ function checkData(file_elem) {
  * Load a source_file into the triplestore
  */
 function loadSourceFile(file_elem, pub, headers) {
+  let idfile,col_types,disabled_columns,key_columns,uri;
+  let tags = getIhmTtlElements(file_elem);
 
-    let idfile = file_elem.find('.file_name').attr('id');
+  __ihm.displayModal('Please wait', '', 'Close');
 
-    // Get column types
-    let col_types = file_elem.find('.column_type').map(function() {
-        return $(this).val();
-    }).get();
-
-    // Find which column is disabled
-    let disabled_columns = [];
-    file_elem.find('.toggle_column_present').each(function( index ) {
-        if (!$(this).is(':checked')) {
-            disabled_columns.push(index + 1); // +1 to take into account the first non-disablable column
-        }
-    });
-
-    let key_columns = [];
-    file_elem.find('.toggle_column_key').each(function( index ) {
-        if ($(this).is(':checked')) {
-            key_columns.push(index); // +1 to take into account the first non-disablable column
-        }
-    });
-
-
-    // custom uri
-    let uri = file_elem.find('.div-radio-uri').map(function() {
-        // get the custom uri if set
-        let uri_type = $('input[name=radio-uri]:checked', $(this)).val();
-        let uri;
-        if (uri_type == 'custom') {
-            uri = $('#custom-uri', $(this)).val();
-        }
-        return uri;
-    }).get()[0];
-
-    if ( key_columns.length <= 0 ) {
-        __ihm.displayModal('Select one column to define a unique key', '', 'Close');
-        return;
-    }
-
-    __ihm.displayModal('Please wait', '', 'Close');
-
-    var service = new RestServiceJs("load_data_into_graph");
-    var model = { 'file_name': $("#"+idfile).attr("filename"),
+  let service = new RestServiceJs("load_data_into_graph");
+  let model = { 'file_name': $("#"+tags.idfile).attr("filename"),
                   'headers': headers,
-                  'col_types': col_types,
-                  'disabled_columns': disabled_columns,
-                  'key_columns':key_columns,
+                  'col_types': tags.col_types,
+                  'disabled_columns': tags.disabled_columns,
+                  'key_columns':tags.key_columns,
                   'public': pub,
-                  'uri': uri};
+                  'uris': tags.uris};
 
     service.post(model, function(data) {
         __ihm.hideModal();
@@ -456,7 +563,7 @@ function loadSourceFile(file_elem, pub, headers) {
 
         }
         else {
-            if($.inArray('entitySym', col_types) != -1) {
+            if($.inArray('entitySym', tags.col_types) != -1) {
                 if (data.expected_lines_number*2 == data.total_triple_count) {
                     insert_status_elem.html('<strong><span class="glyphicon glyphicon-ok"></span> Success:</strong> inserted '+ data.total_triple_count + " lines of "+(data.expected_lines_number*2))
                                       .removeClass('hidden alert-danger')
@@ -498,7 +605,7 @@ function loadSourceFile(file_elem, pub, headers) {
  * Load a GFF source_file into the triplestore
  */
 function loadSourceFileGff(idfile, pub) {
-    console.log('-----> loadSourceFileGff <----- :');
+    console.log('-----> loadSourceFileGff <----- ');
     // get taxon
     let taxon = '';
 
@@ -520,15 +627,7 @@ function loadSourceFileGff(idfile, pub) {
     });
 
     // custom uri
-    let uri = file_elem.find('.div-radio-uri').map(function() {
-        // get the custom uri if set
-        let uri_type = $('input[name=radio-uri]:checked', $(this)).val();
-        let uri;
-        if (uri_type == 'custom') {
-            uri = $('#custom-uri', $(this)).val();
-        }
-        return uri;
-    }).get()[0];
+    let uri = file_elem.find('#def-uri-entity-'+idfile).val();
 
     __ihm.displayModal('Please wait', '', 'Close');
 
@@ -583,7 +682,7 @@ function loadSourceFileGff(idfile, pub) {
 }
 
 function loadSourceFileTtl(idfile, pub) {
-    console.log('--- loadSourceFileTtl ---');
+    console.log('---> loadSourceFileTtl <---');
     __ihm.displayModal('Please wait', '', 'Close');
 
     let file_elem = $("#source-file-ttl-" + idfile);
@@ -595,7 +694,7 @@ function loadSourceFileTtl(idfile, pub) {
     };
 
     service.post(model, function(data) {
-        console.log('---> ttl insert');
+        console.log('---> ttl insert <---');
         if (data == 'forbidden') {
           showLoginForm();
           return;
@@ -639,15 +738,7 @@ function loadSourceFileBed(idfile, pub) {
     let entity = $('#entity-' + idfile).val();
 
     // custom uri
-    let uri = file_elem.find('.div-radio-uri').map(function() {
-        // get the custom uri if set
-        let uri_type = $('input[name=radio-uri]:checked', $(this)).val();
-        let uri;
-        if (uri_type == 'custom') {
-            uri = $('#custom-uri', $(this)).val();
-        }
-        return uri;
-    }).get()[0];
+    let uri = file_elem.find('#def-uri-entity-'+idfile).val();
 
     __ihm.displayModal('Please wait', '', 'Close');
 

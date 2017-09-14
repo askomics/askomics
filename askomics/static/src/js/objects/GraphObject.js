@@ -19,7 +19,7 @@ class GraphObject {
     if ( obj.label ) {
       this._label   = obj.label ;
     } else {
-      this._label   = this.removePrefix() ;
+      this._label   = this.removePrefix();
     }
   }
 
@@ -56,9 +56,9 @@ class GraphObject {
     if ( typeof(uribase) !== "string" ) {
       throw "removePrefix: uri is not a string :"+JSON.stringify(uribase);
     }
-    
+
     let idx = uribase.indexOf('position_');
-   
+
     if ( idx>0 ) {
       let property = uribase.substring(idx+'position_'.length);
       if (property == "start") return "faldo:location/faldo:begin/faldo:position";
@@ -73,16 +73,21 @@ class GraphObject {
 
   /* Get value of an attribut with RDF format like rdfs:label */
   removePrefix() {
-    if (typeof(this.uri) !== 'string')
-      throw "removePrefix: uri is not a string :"+JSON.stringify(this.uri);
-
-    var idx =  this.uri.indexOf("#");
-    if ( idx == -1 ) {
-      idx =  this.uri.indexOf(":");
-      if ( idx == -1 ) return this.uri;
-    }
-    var res = this.uri.substr(idx+1,this.uri.length);
-    return res;
+      if (typeof(this.uri) !== 'string') {
+        throw new Exception("uri is not a string :"+JSON.stringify(this.uri));
+      }
+      let idx =  this.uri.indexOf("#");
+      if ( idx == -1 ) {
+        idx =  this.uri.indexOf(":");
+        if ( idx == -1 ) {
+          return this.uri;
+        }
+      }
+      let name = this.uri.substr(idx+1,this.uri.length);
+      let longPref = this.uri.substr(0,idx);
+      let shortPref = __ihm.getAbstraction().getReversePrefix(longPref);
+      if ( shortPref !== '' ) shortPref = shortPref + ":" ;
+      return shortPref + name;
   }
 
   formatInHtmlLabelEntity() {

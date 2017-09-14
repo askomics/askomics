@@ -27,7 +27,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
     Class representing a source file.
     """
 
-    def __init__(self, settings, session, path, uri=None):
+    def __init__(self, settings, session, path, uri_set=None):
 
         ParamManager.__init__(self, settings, session)
 
@@ -53,13 +53,16 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         self.reset_cache()
 
-        if uri:
-            # uri have to end with # or /
-            if not uri.endswith('#') and not uri.endswith('/'):
-                uri = uri + "/"
-            self.uri = uri
-        else:
-            self.uri = self.get_param("askomics.prefix")
+        self.uri = {}
+        if uri_set != None:
+            for idx,uri in uri_set.items():
+                if uri:
+                    # uri have to end with # or /
+                    if not uri.endswith('#') and not uri.endswith('/'):
+                        uri = uri + "/"
+                    self.uri[int(idx)] = uri
+                else:
+                    self.uri[int(idx)] = self.get_param("askomics.prefix")
 
     def setGraph(self,graph):
         self.graph = graph
@@ -113,7 +116,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         return existing_relations
 
-    def persist(self, urlbase, method, public):
+    def persist(self, urlbase, public):
         """
         Store the current source file in the triple store
 
@@ -124,14 +127,18 @@ class SourceFile(ParamManager, HaveCachedProperties):
         self.insert_metadatas(public)
 
         content_ttl = self.get_turtle()
-
         ql = QueryLauncher(self.settings, self.session)
 
         # use insert data instead of load sparql procedure when the dataset is small
         total_triple_count = 0
         chunk_count = 1
         chunk = ""
-        pathttl = self.get_rdf_user_directory() 
+        pathttl = self.get_rdf_user_directory()
+
+        method = 'load'
+        if self.get_param("askomics.upload_user_data_method"):
+            method = self.get_param("askomics.upload_user_data_method")
+
         if method == 'load':
 
             fp = None
@@ -258,8 +265,11 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
             data = {}
 
-            self.metadatas['server'] = queryResults.info()['server']
-
+            if 'server' in queryResults.info():
+                self.metadatas['server'] = queryResults.info()['server']
+            else:
+                self.metadatas['server'] = 'unknown'
+                
             data['status'] = 'ok'
             data['total_triple_count'] = total_triple_count
 
@@ -301,7 +311,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
             if self.settings["askomics.debug"]:
                 data['url'] = url
             else:
-                self.log.debug("source file : load_data_from_file delete =>"+fp.name)
+                self.log.debug("3source file : load_data_from_file delete =>"+fp.name)
                 os.remove(fp.name) # Everything ok, remove temp file
 
         return data

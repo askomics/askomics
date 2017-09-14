@@ -22,7 +22,7 @@ class AskomicsIsALink extends GraphLink {
     return 'blue';
   }
 
-  getLinkColor() {
+  getStrokeColor() {
     return 'blue';
   }
 
