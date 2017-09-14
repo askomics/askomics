@@ -99,8 +99,6 @@ class IHMLocal {
     start() {
       $("#init").show();
       $("#queryBuilder").hide();
-
-      this.user.checkUser();
       this.loadStartPoints();
     }
 
@@ -381,14 +379,6 @@ class IHMLocal {
       return { 'date' : date , 'name' : new_name } ;
     }
 
-    showLoginForm() {
-      $(".container:not(#navbar_content)").hide();
-      $('#content_login').show();
-      $('.nav li.active').removeClass('active');
-      $("#login").addClass('active');
-      __ihm.displayNavbar(false, '');
-    }
-
     loadStatistics() {
         console.log('-+-+- loadStatistics -+-+-');
 
@@ -396,14 +386,6 @@ class IHMLocal {
 
         __ihm.displayModal('Loading statistics...', '', 'Close');
         service.getAll(function(stats) {
-          if (stats == 'forbidden') {
-            __ihm.showLoginForm();
-            return;
-          }
-          if (stats == 'blocked') {
-              __ihm.displayBlockedPage($('.username').attr('id'));
-              return;
-          }
 
           $('#content_statistics').empty();
           let template = AskOmics.templates.stats;
@@ -526,20 +508,6 @@ class IHMLocal {
       });
     }
 
-    displayBlockedPage(username) {
-      console.log('-+-+- displayBlockedPage -+-+-');
-      $('#content_blocked').empty();
-      let template = AskOmics.templates.blocked;
-      let context = {name: username};
-      let html = template(context);
-
-      __ihm.hideModal();
-
-      $('.container').hide();
-      $('.container#navbar_content').show();
-      $('#content_blocked').append(html).show();
-    }
-
     loadUsers() {
       console.log('-+-+- loadUsers -+-+-');
 
@@ -614,14 +582,6 @@ class IHMLocal {
           if (!__ihm.manageErrorMessage(d)) {
             return;
           }
-          if (d == 'forbidden') {
-            __ihm.showLoginForm();
-            return;
-          }
-          if (d == 'blocked') {
-            __ihm.displayBlockedPage($('.username').attr('id'));
-            return;
-          }
 
           // Reload the page
           if (d == 'success') {
@@ -648,14 +608,6 @@ class IHMLocal {
       }
 
       service.post(data, function(d) {
-        if (d == 'forbidden') {
-          __ihm.showLoginForm();
-          return;
-        }
-        if (d == 'blocked') {
-          __ihm.displayBlockedPage($('.username').attr('id'));
-          return;
-        }
         // Reload users
         if (d == 'success') {
           __ihm.loadUsers();
@@ -681,14 +633,6 @@ class IHMLocal {
       }
 
       service.post(data, function(d) {
-        if (d == 'forbidden') {
-          __ihm.showLoginForm();
-          return;
-        }
-        if (d == 'blocked') {
-          __ihm.displayBlockedPage($('.username').attr('id'));
-          return;
-        }
         // Reload users
         if (d == 'success') {
           __ihm.loadUsers();
@@ -1000,16 +944,10 @@ class IHMLocal {
                 $('#login_error').append(data.error[i] + '<br>');
               }
               // Error
-              $('#login_error').show();
-              $('#spinner_login').addClass('hidden');
-              $('#tick_login').addClass('hidden');
-              $('#cross_login').removeClass('hidden');
+              AskomicsUser.errorHtmlLogin();
             }else{
               //Success
-              $('#login_error').hide();
-              $('#spinner_login').addClass('hidden');
-              $('#tick_login').removeClass('hidden');
-              $('#cross_login').addClass('hidden');
+              AskomicsUser.cleanHtmlLogin();
               __ihm.user = new AskomicsUser(data.username, data.admin);
               __ihm.user.logUser();
             }

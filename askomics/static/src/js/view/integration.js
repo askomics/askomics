@@ -428,15 +428,6 @@ function previewTtl(file_elem) {
                   'uris': tags.uris };
 
     service.post(model, function(data) {
-        if (data == 'forbidden') {
-          __ihm.showLoginForm();
-          return;
-        }
-        if (data == 'blocked') {
-          __ihm.displayBlockedPage();
-          return;
-        }
-
         let insert_warning_elem = file_elem.find(".insert_warning").first();
         if (data.error) {
 
@@ -552,14 +543,6 @@ function loadSourceFile(file_elem, pub, headers) {
     service.post(model, function(data) {
         __ihm.hideModal();
 
-        if (data == 'forbidden') {
-          showLoginForm();
-          return;
-        }
-        if (data == 'blocked') {
-          displayBlockedPage($('.username').attr('id'));
-          return;
-        }
         if (data.status != "ok") {
           if ('error' in data) {
             reject(data.error);
@@ -617,15 +600,6 @@ function loadSourceFileGff(idfile, pub) {
                   'uri': uri};
 
     service.post(model, function(data) {
-        if (data == 'forbidden') {
-          showLoginForm();
-          return;
-        }
-        if (data == 'blocked') {
-          displayBlockedPage($('.username').attr('id'));
-          return;
-        }
-
         if (data.error) {
             reject(data.error);
             return;
@@ -664,14 +638,6 @@ function loadSourceFileTtl(idfile, pub) {
 
     service.post(model, function(data) {
         console.log('---> ttl insert <---');
-        if (data == 'forbidden') {
-          showLoginForm();
-          return;
-        }
-        if (data == 'blocked') {
-          displayBlockedPage($('.username').attr('id'));
-          return;
-        }
 
         if (data.error) {
             reject(data.error);
@@ -711,15 +677,6 @@ function loadSourceFileBed(idfile, pub) {
                   'uri': uri};
 
     service.post(model, function(data) {
-        if (data == 'forbidden') {
-          showLoginForm();
-          return;
-        }
-        if (data == 'blocked') {
-          displayBlockedPage($('.username').attr('id'));
-          return;
-        }
-
         if (data.error) {
             reject(data.error);
             return;

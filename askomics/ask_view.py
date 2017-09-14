@@ -47,7 +47,7 @@ class AskView(object):
         self.log = logging.getLogger(__name__)
         self.request = request
         self.settings = request.registry.settings
-        self.log.debug("==============================================================")
+        self.log.debug("============================= SESSION =================================")
         self.log.debug(self.request.session)
         self.log.debug("==============================================================")
         try:
@@ -73,6 +73,24 @@ class AskView(object):
         if 'error' in self.data :
             return True
         return False
+
+    def checkAuthSession(self):
+        #https://fr.wikipedia.org/wiki/Liste_des_codes_HTTP
+
+        import pyramid.httpexceptions as exc
+        # Denny access for non loged users
+        if self.request.session['username'] == '':
+            raise exc.exception_response(401)
+
+        # Denny for blocked users
+        if self.request.session['blocked']:
+            raise exc.exception_response(423)
+
+
+    def checkAdminSession(self):
+        #Deny access for non admin session
+        if not self.request.session['admin'] :
+            raise exc.exception_response(403)
 
     def setGraphUser(self,removeGraph=[]):
 
@@ -134,13 +152,7 @@ class AskView(object):
         """
         Get stats
         """
-        # Denny access for non loged users
-        if self.request.session['username'] == '':
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
+        self.checkAuthSession()
 
         self.log.debug('=== stats ===')
 
@@ -245,13 +257,7 @@ class AskView(object):
         Delete all named graphs and their metadatas
         """
 
-        # Denny access for non loged users
-        if self.request.session['username'] == '':
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
+        self.checkAuthSession()
 
         self.log.debug("=== DELETE ALL NAMED GRAPHS ===")
 
@@ -281,13 +287,7 @@ class AskView(object):
         Delete selected named graphs and their metadatas
         """
 
-        # Denny access for non loged users
-        if self.request.session['username'] == '':
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
+        self.checkAuthSession()
 
         sqb = SparqlQueryBuilder(self.settings, self.request.session)
         ql = QueryLauncher(self.settings, self.request.session)
@@ -308,13 +308,7 @@ class AskView(object):
         Return a list with all the named graphs of a user.
         """
 
-        # Denny access for non loged users
-        if self.request.session['username'] == '':
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
+        self.checkAuthSession()
 
         sqg = SparqlQueryGraph(self.settings, self.request.session)
         query_launcher = QueryLauncher(self.settings, self.request.session)
@@ -356,13 +350,7 @@ class AskView(object):
         :rtype: dict
         """
 
-        # Denny access for non loged users
-        if self.request.session['username'] == '':
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
+        self.checkAuthSession()
 
         body = self.request.json_body
         filename = body['filename']
@@ -392,13 +380,7 @@ class AskView(object):
         Get preview data for all the available files
         """
 
-        # Denny access for non loged users
-        if self.request.session['username'] == '':
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
+        self.checkAuthSession()
 
         try:
             self.log.debug(" ========= Askview:source_files_overview =============")
@@ -478,13 +460,7 @@ class AskView(object):
         get prefix uri for each entities finded in he header file
         """
 
-        # Denny access for non loged users
-        if self.request.session['username'] == '':
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
+        self.checkAuthSession()
 
         try:
             body = self.request.json_body
@@ -504,14 +480,7 @@ class AskView(object):
         Convert tabulated files to turtle according to the type of the columns set by the user
         """
 
-        # Denny access for non loged users
-        if self.request.session['username'] == '':
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
-
+        self.checkAuthSession()
 
         self.log.debug("preview_ttl")
         try:
@@ -572,13 +541,7 @@ class AskView(object):
         Load tabulated files to triple store according to the type of the columns set by the user
         """
 
-        # Denny access for non loged users
-        if self.request.session['username'] == '':
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
+        self.checkAuthSession()
 
         body = self.request.json_body
         file_name = body["file_name"]
@@ -628,14 +591,7 @@ class AskView(object):
         Load GFF file into the triplestore
         """
 
-        # Denny access for non loged users
-        if self.request.session['username'] == '':
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
-
+        self.checkAuthSession()
 
         self.log.debug("== load_gff_into_graph ==")
 
@@ -687,14 +643,7 @@ class AskView(object):
         Load TTL file into the triplestore
         """
 
-        # Denny access for non loged users
-        if self.request.session['username'] == '':
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
-
+        self.checkAuthSession()
 
         self.log.debug('*** load_ttl_into_graph ***')
 
@@ -736,13 +685,7 @@ class AskView(object):
         Load a BED file into the triplestore
         """
 
-        # Denny access for non loged users
-        if self.request.session['username'] == '':
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
+        self.checkAuthSession()
 
         body = self.request.json_body
         self.log.debug('===> body: '+str(body))
@@ -808,13 +751,8 @@ class AskView(object):
         """
         Import a shortcut definition into the triplestore
         """
-        # Denny access for non loged users
-        if self.request.session['username'] == '' or not self.request.session['admin'] :
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
+        self.checkAuthSession()
+        self.checkAdminSession()
 
         self.log.debug('*** importShortcut ***')
 
@@ -840,13 +778,8 @@ class AskView(object):
         """
         Delete a shortcut definition into the triplestore
         """
-        # Denny access for non loged users
-        if self.request.session['username'] == '' or not self.request.session['admin'] :
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
+        self.checkAuthSession()
+        self.checkAdminSession()
 
         self.log.debug('*** importShortcut ***')
 
@@ -1205,10 +1138,9 @@ class AskView(object):
     @view_config(route_name='checkuser', request_method='GET')
     def checkuser(self):
 
-        if self.request.session['username'] != '':
-            self.data['username'] = self.request.session['username']
-            self.data['admin'] = self.request.session['admin']
-            self.data['blocked'] = self.request.session['blocked']
+        self.data['username'] = self.request.session['username']
+        self.data['admin'] = self.request.session['admin']
+        self.data['blocked'] = self.request.session['blocked']
 
         return self.data
 
@@ -1305,13 +1237,7 @@ class AskView(object):
     @view_config(route_name='api_key', request_method='POST')
     def api_key(self):
 
-        # Denny access for non loged users or non admin users
-        if self.request.session['username'] == '':
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
+        self.checkAuthSession()
 
         body = self.request.json_body
         self.log.debug(body)
@@ -1334,9 +1260,7 @@ class AskView(object):
     @view_config(route_name='del_apikey', request_method='POST')
     def del_apikey(self):
 
-        # Denny access for non loged users or non admin users
-        if self.request.session['username'] == '':
-            return 'forbidden'
+        self.checkAuthSession()
 
         body = self.request.json_body
         key = body['key']
@@ -1398,13 +1322,8 @@ class AskView(object):
         and admin status
         """
 
-        # Denny access for non loged users or non admin users
-        if self.request.session['username'] == '' or not self.request.session['admin']:
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
+        self.checkAuthSession()
+        self.checkAdminSession()
 
         sqa = SparqlQueryAuth(self.settings, self.request.session)
         ql = QueryLauncher(self.settings, self.request.session)
@@ -1432,13 +1351,8 @@ class AskView(object):
         Change a user lock status
         """
 
-        # Denny access for non loged users or non admin users
-        if self.request.session['username'] == '' or not self.request.session['admin']:
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
+        self.checkAuthSession()
+        self.checkAdminSession()
 
         body = self.request.json_body
 
@@ -1468,13 +1382,8 @@ class AskView(object):
         Change a user admin status
         """
 
-        # Denny access for non loged users or non admin users
-        if self.request.session['username'] == '' or not self.request.session['admin']:
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
+        self.checkAuthSession()
+        self.checkAdminSession()
 
         body = self.request.json_body
 
@@ -1505,13 +1414,10 @@ class AskView(object):
         Delete a user from the user graphs, and remove all his data
         """
 
-        # Denny access for non loged users
-        if self.request.session['username'] == '':
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
+        self.checkAuthSession()
+        # Non admin can only delete himself
+        if self.request.session['username'] != username and not self.request.session['admin']:
+            raise Exception('forbidden')
 
         body = self.request.json_body
 
@@ -1519,9 +1425,7 @@ class AskView(object):
         passwd = body['passwd']
         confirmation = body['passwd_conf']
 
-        # Non admin can only delete himself
-        if self.request.session['username'] != username and not self.request.session['admin']:
-            return 'forbidden'
+
 
         # If confirmation, check the user passwd
         if confirmation:

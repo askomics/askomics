@@ -6,15 +6,58 @@ function RestServiceJs(newurl) {
   //} else { // TEST MODE IF FILE PATH WE SEARCH FOR A LOCAL SERVER on 6543 port
   //  this.myurl = "http://localhost:6543/" + newurl;
   //}
+  this.displayBlockedPage = function (username) {
+    console.log('-+-+- displayBlockedPage -+-+-');
+    $('#content_blocked').empty();
+    let template = AskOmics.templates.blocked;
+    let context = {name: username};
+    let html = template(context);
+
+    $('.container').hide();
+    $('.container#navbar_content').show();
+    $('#content_blocked').append(html).show();
+    __ihm.hideModal();
+  } ;
+
+  this.showLoginForm = function () {
+    $(".container:not(#navbar_content)").hide();
+    $('#content_login').show();
+    $('.nav li.active').removeClass('active');
+    $("#login").addClass('active');
+    __ihm.displayNavbar(false, '');
+    __ihm.hideModal();
+    __ihm.user.logout();
+  } ;
 
   this.error_management = function(req, status, ex) {
-    let template = AskOmics.templates.error_message;
-    let context = {
-      message: ex
-    };
+    console.debug("req:"+JSON.stringify(req));
+    console.debug("status:"+JSON.stringify(status));
+    console.debug("ex:"+JSON.stringify(ex));
+    //https://fr.wikipedia.org/wiki/Liste_des_codes_HTTP
+    if ( ex == 'Locked' ) {
+      this.displayBlockedPage(__ihm.user.username);
+    }
+    if ( ex == 'Unauthorized' ) {
+      this.showLoginForm('');
+    }
+    if ( ex == 'Forbidden' ) {
+      __ihm.hideModal();
+    }
 
+    /* This kind of exception is not catched by Askomics */
+    if ( ex == "Internal Server Error") {
+      $('body').html(req.responseText);
+      return ;
+    }
+
+    let context = {
+      message:ex
+    };
+    let template = AskOmics.templates.error_message;
     let html = template(context);
     $('body').append(html);
+    __ihm.hideModal();
+
   };
 
   this.post = function(model, callback) {
