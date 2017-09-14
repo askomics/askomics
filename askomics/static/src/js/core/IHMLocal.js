@@ -583,6 +583,15 @@ class IHMLocal {
             $('#modal').modal('show');
             $('#modalMessage').html(html);
 
+            // sorted dataTable
+            $('.galaxy-table').DataTable({
+                'order': [[1, 'asc']],
+                'columnDefs': [
+                    { 'orderable': false, 'targets': 0 }//,
+                    // { "type": "file-size", targets: 2 }
+                ]
+            });
+
             // check all
             $(".check_all_galaxy").change(function () {
                 $(".check_one_galaxy").prop('checked', $(this).prop("checked"));
