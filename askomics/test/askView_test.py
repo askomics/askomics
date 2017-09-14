@@ -265,7 +265,7 @@ class AskViewTests(unittest.TestCase):
                  ['Mike', 'Jean-Michel', 'Roger', 'Matthew', 'Ellen', 'Richard'],
                  ['Oldfield', 'Jarre', 'Waters', 'Bellamy', 'Fraatz', 'Melville'],
                  ['M', 'M', 'M', 'M', 'F', 'M'], ['63', '68', '73', '38', '39', '51']],
-                'column_types': ['text', 'text', 'text', 'category', 'numeric']
+                'column_types': ['entity_start', 'text', 'text', 'category', 'numeric']
             }, {
                 'type': 'tsv',
                 'name': 'instruments.tsv',
@@ -278,7 +278,7 @@ class AskViewTests(unittest.TestCase):
                     'Percussion', 'String', 'String', 'String', 'String', 'String',
                     'Electro-analog', 'Electro-analog', 'String'
                 ]],
-                'column_types': ['text', 'text', 'category']
+                'column_types': ['entity_start', 'text', 'category']
             }]
         }
 
