@@ -332,7 +332,7 @@ class SourceFileTsv(SourceFile):
             #
             # ==> IHM detect position_ attribute and transforme all query with faldo:location/faldo:begin/faldo:reference
             #
-            if key > 0 and not key_type.startswith('entity') :
+            if key > 0 and not key_type.startswith('entity'):
                 if key_type in ('taxon', 'ref', 'strand', 'start', 'end'):
                     uri = 'position_'+key_type
                 # elif key_type == 'taxon':
@@ -342,7 +342,7 @@ class SourceFileTsv(SourceFile):
                 ttl += ":" + uri + ' displaySetting:attribute "true"^^xsd:boolean .\n'
                 # store the order of attrbutes in order to display attributes in the right order
                 ttl += ":" + uri + ' displaySetting:attributeOrder "' + str(key) + '"^^xsd:decimal .\n'
-            elif key == 0 :
+            elif key == 0:
                 uri_pref = self.get_param("askomics.prefix")
 
                 if key in self.uri:
@@ -377,7 +377,7 @@ class SourceFileTsv(SourceFile):
         for header, categories in self.category_values.items():
             indent = len(header) * " " + len("displaySetting:category") * " " + 3 * " "
             ttl += ":" + self.encode_to_rdf_uri(header+"Category") + " displaySetting:category :"
-            ttl += (" , \n" + indent + ":").join(map(self.encode_to_rdf_uri,categories)) + " .\n"
+            ttl += (" , \n" + indent + ":").join(map(self.encode_to_rdf_uri, categories)) + " .\n"
 
             for item in categories:
                 if item.strip() != "":
@@ -476,7 +476,7 @@ class SourceFileTsv(SourceFile):
                         current_type = self.forced_column_types[i]
                         #OFI : manage new header with relation@type_entity
                         #relation_name = ":has_" + header # manage old way
-                        havePrefix = False
+                        have_prefix = False
                         relation_name = ":"+self.encode_to_rdf_uri(header) # manage old way
                         if current_type.startswith('entity'):
                             idx = header.find("@")
@@ -536,7 +536,7 @@ class SourceFileTsv(SourceFile):
                         if current_type == 'entitySym':
                             pref = self.prefix_uri_entity(i)
                             suf = self.suffix_uri_entity()
-                            ttlSym += pref+\
+                            ttl_sym += pref+\
                                       self.escape[current_type](row[i])+\
                                       suf+" "+relation_name+" :"+\
                                       self.encode_to_rdf_uri(entity_label)  + " .\n"

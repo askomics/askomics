@@ -359,7 +359,7 @@ class IHMLocal {
             });
 
             // sorted dataTable
-            $('.data-table').DataTable({
+            $('.datasets-table').DataTable({
                 'order': [[1, 'asc']],
                 'columnDefs': [
                     { 'orderable': false, 'targets': 0 },
@@ -541,7 +541,7 @@ class IHMLocal {
             title = 'Get a dataset from Galaxy';
             radio = true;
             input_type = 'checkbox';
-            allowed_files = ['tabular', 'ttl', 'gff', 'gff3', 'gff2'];
+            allowed_files = ['tabular', 'ttl', 'gff', 'gff3', 'gff2', 'bed'];
         }else{
             // Query file upload
             title = 'Get a query from Galaxy';
