@@ -33,7 +33,9 @@ install:
 #  - gem install coveralls-lcov
 before_script:
   - docker pull tenforce/virtuoso
+  - docker pull bgruening/galaxy-stable
   - sudo docker run -d --name virtuoso -p 127.0.0.1:8890:8890 -p 127.0.0.1:1111:1111  -e DBA_PASSWORD=dba -e SPARQL_UPDATE=true -e DEFAULT_GRAPH=http://localhost:8890/DAV --net="host" -t tenforce/virtuoso
+  - sudo docker run -d --name galaxy -p 8080:8080 --net="host" -e "GALAXY_CONFIG_MASTER_API_KEY=e5dfa90bd0ef70917d61ff8b8b30c1ca" bgruening/galaxy-stable
   - docker ps -a
   - sleep 45
 script:
