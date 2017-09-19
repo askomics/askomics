@@ -4,8 +4,10 @@ This file contain all test for the GalaxyConnector class.
 This test need a Galaxy instance to be executed
 """
 
+import os
 import time
 import unittest
+from shutil import copyfile
 from bioblend import galaxy
 from pyramid.paster import get_appsettings
 from pyramid import testing
@@ -34,6 +36,7 @@ class GalaxyConnectorTests(unittest.TestCase):
         self.request.session['blocked'] = True
         self.request.session['graph'] = "test/nosetest/jdoe"
 
+        # Galaxy
         self.interface_galaxy = InterfaceGalaxy(self.settings, self.request)
         self.galaxy = self.interface_galaxy.get_galaxy_credentials()
         self.interface_galaxy.delete_testing_histories()
@@ -43,6 +46,14 @@ class GalaxyConnectorTests(unittest.TestCase):
         self.interface_galaxy.upload_string_into_history('hello_world.txt', 'hello world')
         self.interface_galaxy.wait_until_datasets_ready()
         self.datasets = self.interface_galaxy.get_datasets_id()
+
+        # copy the test files into the temp dir
+        files = ['people.tsv', 'instruments.tsv', 'play_instrument.tsv', 'transcript.tsv', 'qtl.tsv', 'small_data.gff3', 'turtle_data.ttl']
+        for file in files:
+            src = os.path.join(os.path.dirname(__file__), "..", "test-data") + '/' + file
+            dst = self.request.session['upload_directory'] + '/' + file
+            copyfile(src, dst)
+
 
     def test_check_galaxy_instance(self):
         """Test the check_galaxy_instance method"""
