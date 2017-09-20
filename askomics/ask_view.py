@@ -1787,7 +1787,7 @@ class AskView(object):
                 param_manager = ParamManager(self.settings, self.request.session)
                 path = param_manager.get_user_csv_directory() + body['path']
                 name = body['name']
-                galaxy.send_to_history(path, name)
+                galaxy.send_to_history(path, name, body['type'])
         except Exception as e:
             self.data['error'] = 'Error during sending: ' + str(e)
             return self.data

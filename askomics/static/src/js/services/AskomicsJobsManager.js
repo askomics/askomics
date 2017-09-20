@@ -153,10 +153,10 @@ let instanceAskomicsJobsViewManager ;
 
     send2galaxy(index) {
       let job = this.jobs[index];
-      let galaxy_dataset_name = 'AskOmics_query_' + job.jobid + '_' + job.tstart + '.tsv';
+      let galaxy_dataset_name = 'askomics_result' + job.jobid + '_' + job.tstart + '.tsv';
       let file = job.csv;
       let service = new RestServiceJs('send_to_galaxy');
-      let model = {'path': file, 'name': galaxy_dataset_name};
+      let model = {'path': file, 'name': galaxy_dataset_name, 'type': 'tabular'};
       $("#spinner_send_galaxy").removeClass('hidden');
       $("#check_send_galaxy").addClass('hidden');
       $("#cross_send_galaxy").addClass('hidden');

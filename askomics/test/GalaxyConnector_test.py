@@ -116,7 +116,7 @@ class GalaxyConnectorTests(unittest.TestCase):
         src_file = param_manager.get_upload_directory()
         filepath = src_file + 'play_instrument.tsv'
 
-        galaxy_connector.send_to_history(filepath, 'play_instrument.tsv')
+        galaxy_connector.send_to_history(filepath, 'play_instrument.tsv', 'tabular')
 
         assert self.interface_galaxy.check_dataset_presence('play_instrument.tsv') is True
 

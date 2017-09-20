@@ -1,4 +1,5 @@
 import os
+import time
 import tempfile
 import logging
 from bioblend import galaxy
@@ -107,7 +108,7 @@ class GalaxyConnector(ParamManager):
         return dataset
 
 
-    def send_to_history(self, path, name):
+    def send_to_history(self, path, name, filetype):
         """Send a file into the most recent Galaxy history
 
         :param path: path of file to load into Galaxy
@@ -116,7 +117,7 @@ class GalaxyConnector(ParamManager):
 
         galaxy_instance = galaxy.GalaxyInstance(self.url, self.apikey)
         last_history = galaxy_instance.histories.get_most_recently_used_history()
-        galaxy_instance.tools.upload_file(path, last_history['id'], file_name=name)
+        galaxy_instance.tools.upload_file(path, last_history['id'], file_name=name, file_type=filetype)
 
 
     def send_json_to_history(self, json):
@@ -125,16 +126,12 @@ class GalaxyConnector(ParamManager):
         :param json: json data to send
         :type json: string
         """
+
         galaxy_instance = galaxy.GalaxyInstance(self.url, self.apikey)
         last_history_id = galaxy_instance.histories.get_most_recently_used_history()['id']
 
-        # Write json in a temp file
-        temp_file = tempfile.NamedTemporaryFile(dir=self.get_json_user_directory(), prefix='askomics_query_', suffix=".json", mode="w", delete=False)
-        temp_file.write(json)
-        temp_file.close()
+        # Name of the json file
+        name = 'askomics_query_' + str(time.time()).split('.')[0] + '.json'
 
         # Load the file into Galaxy
-        galaxy_instance.tools.upload_file(temp_file.name, last_history_id, file_type='json')
-
-        # Remove the temp file
-        os.remove(temp_file.name)
+        galaxy_instance.tools.paste_content(json, last_history_id, file_type='json', file_name=name)
