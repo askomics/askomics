@@ -98,7 +98,7 @@ class InterfaceGalaxy(object):
 
         return datasets
 
-    def check_dataset_presence(self, name):
+    def check_dataset_presence(self, name, start_with=False):
         """Check if a dataset name is present in the testing history
 
         :param name: the name of the dataset to check
@@ -108,8 +108,13 @@ class InterfaceGalaxy(object):
 
         history = self.galaxy_instance.histories.show_history(self.history_id, contents=True)
 
-        for dataset in history:
-            if dataset['name'] == name:
-                return True
+        if start_with:
+            for dataset in history:
+                if dataset['name'].startswith(name):
+                    return True
+        else:
+            for dataset in history:
+                if dataset['name'] == name:
+                    return True
 
         return False

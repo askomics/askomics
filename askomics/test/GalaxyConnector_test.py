@@ -126,3 +126,5 @@ class GalaxyConnectorTests(unittest.TestCase):
         galaxy_connector = GalaxyConnector(self.settings, self.request.session, self.galaxy['url'], self.galaxy['key'])
 
         galaxy_connector.send_json_to_history('hello world')
+
+        assert self.interface_galaxy.check_dataset_presence('askomics_query_', start_with=True) is True
