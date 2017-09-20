@@ -34,7 +34,21 @@ class GalaxyConnectorTests(unittest.TestCase):
         self.request.session['group'] = 'base'
         self.request.session['admin'] = False
         self.request.session['blocked'] = True
-        self.request.session['graph'] = "test/nosetest/jdoe"
+
+        # Files
+        # Create the user dir if not exist
+        self.temp_directory = self.settings['askomics.files_dir'] + '/upload/' + self.request.session['username']
+        if not os.path.isdir(self.temp_directory):
+            os.makedirs(self.temp_directory)
+        # Set the upload dir
+        self.request.session['upload_directory'] = self.temp_directory
+        # Copy files if directory is empty
+        if not os.listdir(self.temp_directory):
+            files = ['people.tsv', 'instruments.tsv', 'play_instrument.tsv', 'transcript.tsv', 'qtl.tsv', 'small_data.gff3', 'turtle_data.ttl']
+            for file in files:
+                src = os.path.join(os.path.dirname(__file__), "..", "test-data") + '/' + file
+                dst = self.request.session['upload_directory'] + '/' + file
+                copyfile(src, dst)
 
         # Galaxy
         self.interface_galaxy = InterfaceGalaxy(self.settings, self.request)
@@ -46,14 +60,6 @@ class GalaxyConnectorTests(unittest.TestCase):
         self.interface_galaxy.upload_string_into_history('hello_world.txt', 'hello world')
         self.interface_galaxy.wait_until_datasets_ready()
         self.datasets = self.interface_galaxy.get_datasets_id()
-
-        # copy the test files into the temp dir
-        files = ['people.tsv', 'instruments.tsv', 'play_instrument.tsv', 'transcript.tsv', 'qtl.tsv', 'small_data.gff3', 'turtle_data.ttl']
-        for file in files:
-            src = os.path.join(os.path.dirname(__file__), "..", "test-data") + '/' + file
-            dst = self.request.session['upload_directory'] + '/' + file
-            copyfile(src, dst)
-
 
     def test_check_galaxy_instance(self):
         """Test the check_galaxy_instance method"""

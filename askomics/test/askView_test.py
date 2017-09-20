@@ -46,19 +46,19 @@ class AskViewTests(unittest.TestCase):
 
         self.request.host_url = 'http://localhost:6543'
 
-        # Create the user dir
+        # Create the user dir if not exist
         self.temp_directory = self.settings['askomics.files_dir'] + '/upload/' + self.request.session['username']
         if not os.path.isdir(self.temp_directory):
             os.makedirs(self.temp_directory)
         # Set the upload dir
         self.request.session['upload_directory'] = self.temp_directory
-
-        # copy the test files into the temp dir
-        files = ['people.tsv', 'instruments.tsv', 'play_instrument.tsv', 'transcript.tsv', 'qtl.tsv', 'small_data.gff3', 'turtle_data.ttl']
-        for file in files:
-            src = os.path.join(os.path.dirname(__file__), "..", "test-data") + '/' + file
-            dst = self.request.session['upload_directory'] + '/' + file
-            copyfile(src, dst)
+        # Copy files if directory is empty
+        if not os.listdir(self.temp_directory):
+            files = ['people.tsv', 'instruments.tsv', 'play_instrument.tsv', 'transcript.tsv', 'qtl.tsv', 'small_data.gff3', 'turtle_data.ttl']
+            for file in files:
+                src = os.path.join(os.path.dirname(__file__), "..", "test-data") + '/' + file
+                dst = self.request.session['upload_directory'] + '/' + file
+                copyfile(src, dst)
 
         self.tps = InterfaceTPS(self.settings, self.request)
 
