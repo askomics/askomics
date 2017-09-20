@@ -44,7 +44,7 @@ class GalaxyConnectorTests(unittest.TestCase):
         self.request.session['upload_directory'] = self.temp_directory
         # Copy files if directory is empty
         if not os.listdir(self.temp_directory):
-            files = ['people.tsv', 'instruments.tsv', 'play_instrument.tsv', 'transcript.tsv', 'qtl.tsv', 'small_data.gff3', 'turtle_data.ttl']
+            files = ['people.tsv', 'instruments.tsv', 'play_instrument.tsv', 'transcript.tsv', 'qtl.tsv', 'small_data.gff3', 'turtle_data.ttl', 'bed_example.bed']
             for file in files:
                 src = os.path.join(os.path.dirname(__file__), "..", "test-data") + '/' + file
                 dst = self.request.session['upload_directory'] + '/' + file
