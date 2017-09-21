@@ -50,7 +50,7 @@ class GalaxyConnector(ParamManager):
 
         # get current history
         if not history_id:
-            history_id = galaxy_instance.histories.get_current_history()['id']
+            history_id = galaxy_instance.histories. get_most_recently_used_history()['id']
 
         # Get all available history id and name
         histories = galaxy_instance.histories.get_histories()
