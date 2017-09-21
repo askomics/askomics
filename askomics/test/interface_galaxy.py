@@ -1,5 +1,7 @@
 """Contain InterfaceGalaxy class"""
 
+import os
+import re
 import time
 from bioblend import galaxy
 from askomics.libaskomics.ParamManager import ParamManager
@@ -116,5 +118,25 @@ class InterfaceGalaxy(object):
             for dataset in history:
                 if dataset['name'] == name:
                     return True
+
+        return False
+
+    @staticmethod
+    def check_uploaded_files(directory):
+        """Check if a file is present in a directory, and remove it
+
+        :param directory: the directory to check
+        :return: True if the file is present
+        :rtype: boolean
+        """
+
+        list_files = os.listdir(directory)
+
+        print(list_files)
+
+        for file in list_files:
+            if re.match(r'.*hello_world.*', file):
+                os.remove(directory + '/' + file)
+                return True
 
         return False

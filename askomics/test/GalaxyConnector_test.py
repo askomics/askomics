@@ -68,13 +68,16 @@ class GalaxyConnectorTests(unittest.TestCase):
 
         assert galaxy_connector.check_galaxy_instance() is True
 
+        #FIXME: Don't raise the ConnectionError
+        # with self.assertRaises(ConnectionError):
+            # GalaxyConnector(self.settings, self.request.session, self.galaxy['url'], 'fake_api_key')
+
     def test_get_datasets_and_histories(self):
         """Test the get_datasets_and_histories method"""
         galaxy_connector = GalaxyConnector(self.settings, self.request.session, self.galaxy['url'], self.galaxy['key'])
 
+        # Test with history id
         result = galaxy_connector.get_datasets_and_histories(['tabular'], history_id=self.history_id)
-
-        print(result)
 
         created_history = {
             'name': 'askomics_test',
@@ -88,12 +91,29 @@ class GalaxyConnectorTests(unittest.TestCase):
         assert 'histories' in result
         assert created_history in result['histories']
 
-        #TODO: more assert
+        # Test without history id
+        result = galaxy_connector.get_datasets_and_histories(['tabular'])
+
+        created_history = {
+            'name': 'askomics_test',
+            'id': self.history_id,
+            'selected': True
+        }
+
+        assert isinstance(result, dict)
+        assert len(result) == 2
+        assert 'datasets' in result
+        assert 'histories' in result
+        assert created_history in result['histories']
 
     def test_upload_files(self):
         """Test upload_files method"""
 
-        #TODO
+        galaxy_connector = GalaxyConnector(self.settings, self.request.session, self.galaxy['url'], self.galaxy['key'])
+
+        galaxy_connector.upload_files([self.datasets['hello']['dataset_id']])
+
+        assert self.interface_galaxy.check_uploaded_files(self.temp_directory) is True
 
 
     def test_get_file_content(self):
