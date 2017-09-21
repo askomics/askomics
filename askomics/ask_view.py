@@ -18,6 +18,7 @@ from pygments.formatters import HtmlFormatter
 
 from askomics.libaskomics.ParamManager import ParamManager
 from askomics.libaskomics.ModulesManager import ModulesManager
+from askomics.libaskomics.JobManager import JobManager
 from askomics.libaskomics.TripleStoreExplorer import TripleStoreExplorer
 from askomics.libaskomics.SourceFileConvertor import SourceFileConvertor
 from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
@@ -88,6 +89,7 @@ class AskView(object):
 
 
     def checkAdminSession(self):
+        import pyramid.httpexceptions as exc
         #Deny access for non admin session
         if not self.request.session['admin'] :
             raise exc.exception_response(403)
@@ -558,10 +560,12 @@ class AskView(object):
         if 'forced_type' in body:
             forced_type = body['forced_type']
 
+        jm = JobManager(self.settings, self.request.session)
+        jobid = jm.saveStartSparqlJob(file_name)
+
         # Allow data integration in public graph only if user is an admin
         if public and not self.request.session['admin']:
-            self.data['error'] = ('/!\\ --> NOT ALLOWED TO INSERT IN PUBLIC GRAPH <-- /!\\')
-            return self.data
+            return 'forbidden'
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
         src_file = sfc.get_source_file(file_name, forced_type, uri_set=uris)
@@ -572,6 +576,8 @@ class AskView(object):
 
         try:
             self.data = src_file.persist(self.request.host_url, public)
+            jm.updateEndSparqlJob(jobid,"Done",nr=0)
+            jm.updatePreviewJob(jobid,"TSV/CSV integration done. ")
         except Exception as e:
             #rollback
             sqb = SparqlQueryBuilder(self.settings, self.request.session)
@@ -580,8 +586,8 @@ class AskView(object):
             query_laucher.execute_query(sqb.get_delete_metadatas_of_graph(src_file.graph).query)
 
             traceback.print_exc(file=sys.stdout)
-            self.data['error'] = 'Problem with user data file ?</br>'+str(e)
-            self.log.error(str(e))
+            jm.updateEndSparqlJob(jobid,"Error")
+            jm.updatePreviewJob(jobid,str(e))
 
         return self.data
 
@@ -609,10 +615,12 @@ class AskView(object):
         if 'forced_type' in body:
             forced_type = body['forced_type']
 
+        jm = JobManager(self.settings, self.request.session)
+        jobid = jm.saveStartSparqlJob(file_name)
+
         # Allow data integration in public graph only if user is an admin
         if public and not self.request.session['admin']:
-            self.log.debug('/!\\ --> NOT ALLOWED TO INSERT IN PUBLIC GRAPH <-- /!\\')
-            public = False
+            return 'forbidden'
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
         src_file_gff = sfc.get_source_file(file_name, forced_type, uri_set={ 0 : uri } )
@@ -623,6 +631,9 @@ class AskView(object):
         try:
             self.log.debug('--> Parsing GFF')
             src_file_gff.persist(self.request.host_url, public)
+            jm.updateEndSparqlJob(jobid,"Done",nr=0)
+            jm.updatePreviewJob(jobid,"GFF integration done. ")
+
         except Exception as e:
             #rollback
             sqb = SparqlQueryBuilder(self.settings, self.request.session)
@@ -631,7 +642,9 @@ class AskView(object):
             query_laucher.execute_query(sqb.get_delete_metadatas_of_graph(src_file_gff.graph).query)
 
             traceback.print_exc(file=sys.stdout)
-            self.data['error'] = 'Problem when integration of '+file_name+'.</br>'+str(e)
+            jm.updateEndSparqlJob(jobid,"Error")
+            jm.updatePreviewJob(jobid,'Problem when integration of '+file_name+'.</br>'+str(e))
+
             self.log.error(str(e))
 
         self.data['status'] = 'ok'
@@ -655,16 +668,20 @@ class AskView(object):
         if 'forced_type' in body:
             forced_type = body['forced_type']
 
+        jm = JobManager(self.settings, self.request.session)
+        jobid = jm.saveStartSparqlJob(file_name)
+
         # Allow data integration in public graph only if user is an admin
         if public and not self.request.session['admin']:
-            self.log.debug('/!\\ --> NOT ALLOWED TO INSERT IN PUBLIC GRAPH <-- /!\\')
-            public = False
+            return 'forbidden'
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
         src_file_ttl = sfc.get_source_file(file_name, forced_type)
 
         try:
             self.data = src_file_ttl.persist(self.request.host_url, public)
+            jm.updateEndSparqlJob(jobid,"Done",nr=0)
+            jm.updatePreviewJob(jobid,"TTL file integration done. ")
 
         except Exception as e:
             #rollback
@@ -673,7 +690,8 @@ class AskView(object):
             query_laucher.execute_query(sqb.get_drop_named_graph(src_file_ttl.graph).query)
             query_laucher.execute_query(sqb.get_delete_metadatas_of_graph(src_file_ttl.graph).query)
 
-            self.data['error'] = 'Problem when integration of ' + file_name + '</br>' + str(e)
+            jm.updateEndSparqlJob(jobid,"Error")
+            jm.updatePreviewJob(jobid,'Problem when integration of '+file_name+'.</br>'+str(e))
             self.log.error('ERROR: ' + str(e))
 
         self.data['status'] = 'ok'
@@ -703,8 +721,7 @@ class AskView(object):
 
         # Allow data integration in public graph only if user is an admin
         if public and not self.request.session['admin']:
-            self.log.debug('/!\\ --> NOT ALLOWED TO INSERT IN PUBLIC GRAPH <-- /!\\')
-            public = False
+            return 'forbidden'
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
         src_file_bed = sfc.get_source_file(file_name, forced_type, uri_set={ 0 : uri })
@@ -712,9 +729,15 @@ class AskView(object):
         src_file_bed.set_taxon(taxon)
         src_file_bed.set_entity_name(entity)
 
+        jm = JobManager(self.settings, self.request.session)
+        jobid = jm.saveStartSparqlJob(file_name)
+
         try:
             self.log.debug('--> Parsing BED')
             src_file_bed.persist(self.request.host_url, public)
+            jm.updateEndSparqlJob(jobid,"Done",nr=0)
+            jm.updatePreviewJob(jobid,"BED file integration done. ")
+
         except Exception as e:
             #rollback
             sqb = SparqlQueryBuilder(self.settings, self.request.session)
@@ -723,7 +746,8 @@ class AskView(object):
             query_laucher.execute_query(sqb.get_delete_metadatas_of_graph(src_file_bed.graph).query)
 
             traceback.print_exc(file=sys.stdout)
-            self.data['error'] = 'Problem when integration of '+file_name+'.</br>'+str(e)
+            jm.updateEndSparqlJob(jobid,"Error")
+            jm.updatePreviewJob(jobid,'Problem when integration of '+file_name+'.</br>'+str(e))
             self.log.error(str(e))
 
         self.data['status'] = 'ok'
@@ -841,19 +865,29 @@ class AskView(object):
         if self.request.session['blocked']:
             return 'blocked'
 
+        body = self.request.json_body
+
+        jm = JobManager(self.settings, self.request.session)
+        jobid = jm.saveStartSparqlJob("Module "+body['name'])
+
         try:
-            body = self.request.json_body
+
             mm = ModulesManager(self.settings, self.request.session)
+            check = bool(body['checked'])
 
             mm.manageModules(
                     self.request.host_url,
                     body['uri'],
                     body['name'],
-                    bool(body['checked']))
+                    check)
+
+            jm.updateEndSparqlJob(jobid,"Done",nr=0)
+            jm.updatePreviewJob(jobid,body['name'] + " ["+ str(body['checked'])+ "] done.")
 
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
-            self.data['error'] = str(e)
+            jm.updateEndSparqlJob(jobid,"Error")
+            jm.updatePreviewJob(jobid,'Problem whith module '+body['name']+'.</br>'+str(e))
             self.log.error(str(e))
 
         return self.data
@@ -868,12 +902,27 @@ class AskView(object):
         if 'headers' in body:
             ordered_headers = body['headers']
 
+        persist = False
+        if 'jobManager' in body :
+            if body['jobManager']:
+                persist = True
+
+        jobid = -1
+        if persist:
+            jm = JobManager(self.settings, self.request.session)
+            rg = ""
+            if 'requestGraph' in body:
+                rg = body['requestGraph']
+            jobid = jm.saveStartSparqlJob("SPARQL Request",requestGraph=rg)
+
         try:
             tse = TripleStoreExplorer(self.settings, self.request.session)
             lfrom = []
             if 'from' in body:
                 lfrom = body['from']
+
             results, query = tse.build_sparql_query_from_json(lfrom, body["variates"], body["constraintesRelations"], True)
+
 
             #body["limit"]
             # Remove prefixes in the results table
@@ -883,7 +932,8 @@ class AskView(object):
             else:
                 self.data['values'] = results
 
-            self.data['nrow'] = len(results)
+            if persist:
+                jm.updateEndSparqlJob(jobid,"Ok",nr=len(results),data=self.data['values'])
 
             # Provide results file
             if (not 'nofile' in body) or body['nofile']:
@@ -898,122 +948,27 @@ class AskView(object):
             self.data['file'] = ""
             self.data['error'] = str(e)
             self.log.error(str(e))
+            if persist:
+                jm.updateEndSparqlJob(jobid,"Error")
+                jm.updatePreviewJob(jobid,str(e))
 
         return self.data
 
-    @view_config(route_name='savejob', request_method='POST')
-    def savejob(self):
-        import tempfile,sqlite3
-        """ Save Job state inside a sqlite database. Each user have his own database """
-
-        body = self.request.json_body
-
-        db = "file:"+tempfile.gettempdir() + "/" + self.request.session['username'] +"jobs.db"
-        conn = sqlite3.connect(db,uri=True)
-        c = conn.cursor()
-        reqSql = '''CREATE TABLE IF NOT EXISTS jobs
-             (
-             jobID int NOT NULL,
-             state text,
-             start text,
-             tstart int,
-             end text ,
-             tend int ,
-             duration text,
-             classtr text,
-             datable_preview string,
-             stateToReload string,
-             nr int,
-             PRIMARY KEY (jobid))'''
-        c.execute(reqSql)
-        conn.commit()
-
-        jobid = body['jobid']
-        state = body['state']
-        start = body['start']
-        tstart = body['tstart']
-        end = body['end']
-        tend = body['tend']
-        nr = body['nr']
-        duration = body['duration']
-        classtr = body['classtr']
-        datable_preview = body['datable_preview']
-        stateToReload = body['stateToReload']
-
-        #delete Job if exist
-        reqSql = "DELETE FROM jobs WHERE jobid = "+ str(jobid)
-
-        try:
-            c.execute(reqSql)
-        except sqlite3.OperationalError as e :
-            self.log.info("Jobs database does not exist .")
-
-
-        reqSql = "INSERT INTO jobs VALUES ("+str(jobid)+",'"+state+"','" + start +"','"+str(tstart)+"','"
-        reqSql += end + "','" + str(tend)+ "','" + duration + "','"+ classtr + "','"+ datable_preview + "','"+stateToReload+"',"+str(nr)+")"
-
-        c.execute(reqSql)
-        conn.commit()
-        conn.close()
-
-
     @view_config(route_name='listjob', request_method='POST')
     def listjob(self):
-        import tempfile,sqlite3
-        """ Get Job list from a sqlite database """
+        ''' Get all jobs recorded in database '''
 
-        data = []
-        body = self.request.json_body
-        db = "file:"+tempfile.gettempdir() + "/" + self.request.session['username'] +"jobs.db"
-        conn = sqlite3.connect(db,uri=True)
-        conn.row_factory = sqlite3.Row
-
-        c = conn.cursor()
-        reqSql = """ SELECT jobid, state, start, tstart, end, tend, duration, classtr, datable_preview, stateToReload, nr FROM jobs"""
-        try:
-            c.execute(reqSql)
-            rows = c.fetchall()
-
-            for row in rows:
-                d = {}
-                d['jobid'] = row['jobid']
-                d['state'] = row['state']
-                d['start'] = row['start']
-                d['tstart'] = row['tstart']
-                d['end'] = row['end']
-                d['tend'] = row['tend']
-                d['duration'] = row['duration']
-                d['classtr'] = row['classtr']
-                d['datable_preview'] = row['datable_preview']
-                d['stateToReload'] = row['stateToReload']
-                d['nr'] = row['nr']
-                data.append(d)
-
-        except sqlite3.OperationalError as e :
-            self.log.info("Jobs database does not exist .")
-
-        conn.close()
-        return data
+        jm = JobManager(self.settings, self.request.session)
+        return jm.listJobs()
 
 
     @view_config(route_name='deljob', request_method='POST')
     def deljob(self):
-        import tempfile,sqlite3
-        """ Delte a Job state from a sqlite database """
+        ''' Remove job from database '''
+
         body = self.request.json_body
-
-        db = "file:"+tempfile.gettempdir() + "/" + self.request.session['username'] +"jobs.db"
-        conn = sqlite3.connect(db,uri=True)
-        c = conn.cursor()
-        reqSql = "DELETE FROM jobs WHERE jobid = "+ str(body['jobid'])
-
-        try:
-            c.execute(reqSql)
-        except sqlite3.OperationalError as e :
-            self.log.info("Jobs database does not exist .")
-
-        conn.commit()
-        conn.close()
+        jm = JobManager(self.settings, self.request.session)
+        jm.removeJob(body['jobid'])
 
 
     @view_config(route_name='getSparqlQueryInTextFormat', request_method='POST')

@@ -527,7 +527,6 @@ function checkData(file_elem) {
  * Load a source_file into the triplestore
  */
 function loadSourceFile(file_elem, pub, headers) {
-  new AskomicsJobsViewManager().insertQueue(function (resolve,reject) {
     let idfile,col_types,disabled_columns,key_columns,uri;
     let tags = getIhmTtlElements(file_elem);
 
@@ -542,21 +541,9 @@ function loadSourceFile(file_elem, pub, headers) {
 
     service.post(model, function(data) {
         __ihm.hideModal();
-
-        if (data.status != "ok") {
-          if ('error' in data) {
-            reject(data.error);
-          }
-          else {
-            reject("Unknown error !");
-          }
-        }
-        else {
-            resolve("OK",{ nrow : data.total_triple_count });
-        }
     });
+    
     __ihm.resetStats();
-  });
 
   new ModulesParametersView().updateModules();
 }

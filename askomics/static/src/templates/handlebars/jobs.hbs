@@ -4,6 +4,7 @@
 <table class="table table-striped">
     <tr>
         <th>Job-ID</th>
+        <th>Type</th>
         <th>State</th>
         <th>Start</th>
         <th>End</th>
@@ -14,6 +15,7 @@
     {{#each jobs}}
     <tr class="{{this.classtr}}" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}" class="clickable">
         <td>{{this.jobid}}</td>
+        <td>{{this.type}}</td>
         {{#if this.wait}}
         <td><i class="fa fa-spinner pulse"></i></td>
         {{else}}
@@ -31,7 +33,7 @@
 
         <div class="btn-group pull-right">
             <span style="font-size:1.5em;color:blue" onclick="location.href='csv/{{this.csv}}';" alt="save"  class="glyphicon glyphicon glyphicon-floppy-save" aria-hidden="true" ></span>
-            <span style="font-size:1.5em;color:blue" onclick="__ihm.stopSession();__ihm.startSession({{this.stateToReload}});$('#interrogation').trigger( 'click' );"
+            <span style="font-size:1.5em;color:blue" onclick="let st = atob('{{this.stateToReload}}') ; __ihm.stopSession();__ihm.startSession(st);$('#interrogation').trigger( 'click' );"
                   alt="reload" class="glyphicon glyphicon-repeat" aria-hidden="true"></span>
         </div>
         <hr/>

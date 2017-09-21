@@ -580,11 +580,12 @@ class AskViewTests(unittest.TestCase):
             'admin': True
         }
 
-        data = self.askview.set_admin()
-
-        # first test with non admin
-        assert data == 'forbidden'
-
+        try:
+            data = self.askview.set_admin()
+            assert False
+        except Exception e:
+            assert True
+            
         # then, is user is admin
         self.request.session['admin'] = True
 

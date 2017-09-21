@@ -7,22 +7,21 @@ class AskomicsUser {
         this.admin    = admin===undefined?false:admin;
         this.blocked  = blocked===undefined?true:blocked;
 
-        /* navbar according if user is logged */
-        if (this.username != "" ) {
-           __ihm.displayNavbar(true, self.username, self.admin, self.blocked);
-         } else {
-           __ihm.displayNavbar(false, '');
-         }
-         /* load job user */
-        new AskomicsJobsViewManager().loadjob();
+        /* check if a session is open */
+        this.checkUser();
 
-        /* set timeout to chck if session is expired */
-          if ( this.isLogin() ) {
-            let user = this;
-            setInterval(function(){
-              user.checkUser();
+
+        /* set timeout to check if session is expired */
+        if ( this.isLogin() ) {
+          let user = this;
+          this.intervalListener = setInterval(function(){
+            user.checkUser();
           }, 15000);
-      }
+        } else {
+          if ( this.intervalListener != undefined ) {
+            clearInterval(this.intervalListener);
+          }
+        }
     }
 
     isAdmin() {
@@ -46,25 +45,25 @@ class AskomicsUser {
         let self = this;
 
         service.getAll(function(data) {
-          let change = false;
+          let expired = false;
 
           if ( (self.username != data.username)|| (self.admin != data.admin)| (self.blocked != data.blocked) ) {
-                self.username = data.username;
-                self.admin = data.admin;
-                self.blocked = data.blocked;
-                change = true;
+              if ( self.username != "" && data.username == "" ) {
+                expired = true;
+              }
+              self.username = data.username;
+              self.admin = data.admin;
+              self.blocked = data.blocked;
           }
           if ((data.username != undefined) && (data.username != '') ) {
-              if (change) __ihm.displayNavbar(true, self.username, self.admin, self.blocked);
+              __ihm.displayNavbar(true, self.username, self.admin, self.blocked);
           }else{
-              if (change) {
-                AskomicsUser.cleanHtmlLogin();
-                __ihm.displayNavbar(false, '');
-                 //location.reload();
-                __ihm.displayModal('Session Expired', '', 'Close');
-
-                __ihm.start();
-               }
+            AskomicsUser.cleanHtmlLogin();
+            __ihm.displayNavbar(false, '');
+            if (expired) {
+              __ihm.displayModal('Session Expired', '', 'Close');
+            }
+            __ihm.start();
           }
         });
     }
