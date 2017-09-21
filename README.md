@@ -78,7 +78,7 @@ docker run -d --name virtuoso \
 + Run `startAskomics.sh`
 
 ```
-$ ./startAskomics -t <triplestore> -d <mode>
+./startAskomics -t <triplestore> -d <mode>
 ```
 
 with:
@@ -93,12 +93,22 @@ AskOmics comes with some unit and functional tests.
 
 #### Python tests
 
+To run tests, AskOmics need a triplestore and a Galaxy instance.
+
+The testing configuration is set in the `test.virtuoso.ini` file.
+
+To get a Galaxy instance, you can run a docker galaxy with the following lines
+
+    docker pull bgruening/galaxy-stable
+    docker run -d -p 8080:80 -p 8021:21 -p 8022:22 bgruening/galaxy-stable
+
+Then, test can be run with
+
 ```
-$ ./venv/bin/python setup.py nosetests
+./venv/bin/python setup.py nosetests
 ```
 #### Javascript tests
 
 ```
-$ gulp test
+gulp test
 ```
-
