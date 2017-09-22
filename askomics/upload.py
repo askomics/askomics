@@ -53,8 +53,8 @@ class FileUpload(object):
             new_file['error'] = 'File is too small'
         elif new_file['size'] > self.max_size:
             new_file['error'] = 'File is too large'
-        #elif new_file['type'] not in self.allowed_types: # FIXME commented for tests
-        #    new_file['error'] = 'File type '+new_file['type']+' not allowed' # FIXME commented for tests
+        elif new_file['type'] not in self.allowed_types: # FIXME commented for tests
+           new_file['error'] = 'File type '+new_file['type']+' not allowed' # FIXME commented for tests
         else:
             return True
         return False

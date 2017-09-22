@@ -81,7 +81,7 @@ class SourceFileBed(SourceFile):
             bedfile = BedTool(self.path)
         except Exception as e:
             self.log.error(str(e))
-            return
+            raise e
 
         count = 0
 

@@ -70,6 +70,7 @@ class SourceFileBedTests(unittest.TestCase):
         """Test get_turtle method"""
 
         source_file_bed = SourceFileBed(self.settings, self.request.session, self.request.session['upload_directory'] + '/bed_example.bed')
+        # source_file_bed.taxon = 'test_taxon'
         turtle = source_file_bed.get_turtle()
 
         self.assertIsInstance(turtle, types.GeneratorType)
