@@ -510,7 +510,7 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.checkuser()
 
-        assert data == {'admin': False, 'username': 'jdoe', 'blocked': False}
+        assert data == {'admin': False, 'username': 'jdoe', 'blocked': False, 'galaxy': False}
 
 
     def test_logout(self):
