@@ -157,19 +157,19 @@ let instanceAskomicsJobsViewManager ;
       let file = job.csv;
       let service = new RestServiceJs('send_to_galaxy');
       let model = {'path': file, 'name': galaxy_dataset_name, 'type': 'tabular'};
-      $("#spinner_send_galaxy").removeClass('hidden');
-      $("#check_send_galaxy").addClass('hidden');
-      $("#cross_send_galaxy").addClass('hidden');
+      $("#spinner_send_galaxy_" + index).removeClass('hidden');
+      $("#check_send_galaxy_" + index).addClass('hidden');
+      $("#cross_send_galaxy_" + index).addClass('hidden');
       service.post(model, function(data) {
         __ihm.manageErrorMessage(data);
         if (data.error) {
-          $("#spinner_send_galaxy").addClass('hidden');
-          $("#check_send_galaxy").addClass('hidden');
-          $("#cross_send_galaxy").removeClass('hidden');
+          $("#spinner_send_galaxy_" + index).addClass('hidden');
+          $("#check_send_galaxy_" + index).addClass('hidden');
+          $("#cross_send_galaxy_" + index).removeClass('hidden');
         }else{
-          $("#spinner_send_galaxy").addClass('hidden');
-          $("#check_send_galaxy").removeClass('hidden');
-          $("#cross_send_galaxy").addClass('hidden');
+          $("#spinner_send_galaxy_" + index).addClass('hidden');
+          $("#check_send_galaxy_" + index).removeClass('hidden');
+          $("#cross_send_galaxy_" + index).addClass('hidden');
         }
       });
     }
