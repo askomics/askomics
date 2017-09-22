@@ -1103,6 +1103,7 @@ class AskView(object):
             self.data['username'] = self.request.session['username']
             self.data['admin'] = self.request.session['admin']
             self.data['blocked'] = self.request.session['blocked']
+            self.data['galaxy'] = self.request.session['galaxy']
 
         return self.data
 

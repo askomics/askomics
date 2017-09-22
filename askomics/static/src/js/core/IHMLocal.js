@@ -111,6 +111,13 @@ class IHMLocal {
         $("#init").hide();
         $("#queryBuilder").show();
 
+        // Show a galaxy dropdown if user have a galaxy connected
+        __ihm.user.checkUser();
+        if (__ihm.user.haveGalaxy()) {
+          console.log('user have galaxy');
+          $('.send2galaxy-li').removeClass('hidden');
+        }
+
         /* load local abtraction  */
         this.localUserAbstraction.loadUserAbstraction();
 
