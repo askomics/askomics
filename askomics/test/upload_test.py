@@ -77,8 +77,8 @@ class FileUploadTests(unittest.TestCase):
         assert result == {
             'delete_type': 'DELETE',
             'size': 174,
-            'delete_url': '/home/imx/Workspace/askomics/askomics/test/../test-data/people.tsv',
-            'name': '/home/imx/Workspace/askomics/askomics/test/../test-data/people.tsv'
+            'delete_url': self.request.session['upload_directory'] + '/people.tsv',
+            'name': self.request.session['upload_directory'] + '/people.tsv'
         }
 
         result = file_upload.fileinfo(self.request.session['upload_directory'] + '/people.type')
@@ -89,8 +89,8 @@ class FileUploadTests(unittest.TestCase):
         assert result == {
             'delete_type': 'OTHER',
             'size': 174,
-            'delete_url': '/home/imx/Workspace/askomics/askomics/test/../test-data/people.tsv&_method=DELETE',
-            'name': '/home/imx/Workspace/askomics/askomics/test/../test-data/people.tsv'
+            'delete_url': self.request.session['upload_directory'] + '/people.tsv' + '&_method=DELETE',
+            'name': self.request.session['upload_directory'] + '/people.tsv'
         }
 
     def test_options(self):
