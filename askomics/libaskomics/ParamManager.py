@@ -60,6 +60,8 @@ class ParamManager(object):
             }
 
     def getUploadDirectory(self):
+        if 'username' not in self.session:
+            self.session['upload_directory'] = tempfile.mkdtemp(suffix='_tmp', prefix='____')
         dir_string = '__' + self.session['username'] + '__'
         if 'upload_directory' not in self.session.keys() or dir_string not in self.session['upload_directory'] or not os.path.isdir(self.session['upload_directory']):
             self.session['upload_directory'] = tempfile.mkdtemp(suffix='_tmp', prefix='__' + self.session['username'] + '__')
@@ -129,7 +131,7 @@ class ParamManager(object):
             self.log.error(response)
             self.ASKOMICS_prefix[uri]=uri
             return ""
-            
+
         dic = json.loads(response.text)
         if (len(dic)>0):
             v = list(dic.values())[0]
