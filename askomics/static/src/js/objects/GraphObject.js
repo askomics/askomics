@@ -4,10 +4,6 @@ class GraphObject {
   constructor(obj) {
 
     if ( !obj || (! ('uri' in obj)) ) {
-    /*  if ( obj && ('_uri' in obj) ) {
-        // load json object
-        this.setjson(obj);
-      } else*/
         throw "GraphObject : Constructor need an 'uri' node:"+JSON.stringify(obj);
     }
 
