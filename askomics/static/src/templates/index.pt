@@ -303,26 +303,6 @@
             </div><!-- /.modal-content -->
           </div><!-- /.modal-dialog -->
         </div><!-- /.modal -->
-
-        <!-- Modal  -->
-        <div class="modal fade" id="modal2"  role="dialog" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true" >
-          <div class="modal-dialog modal-sm">
-            <div class="modal-content">
-              <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                <h4 class="modal-title" id="modalTitle"></h4>
-              </div>
-              <div class="modal-body">
-                <p id='modalMessage'></p>
-                <img id='help_figure' class='hidden'>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal" id="modalButton"></button>
-              </div>
-            </div><!-- /.modal-content -->
-          </div><!-- /.modal-dialog -->
-        </div><!-- /.modal -->
-
     </body>
     <script>
         new IHMLocal().start();

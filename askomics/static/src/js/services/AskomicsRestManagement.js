@@ -29,6 +29,12 @@ function RestServiceJs(newurl) {
     __ihm.user.logout();
   } ;
 
+  this.displayBadRequest = function () {
+        $('.modal-sm').hide();
+        $('#modal').modal('show');
+        return $('#modal');
+  } ;
+
   this.error_management = function(req, status, ex) {
     console.debug("req:"+JSON.stringify(req));
     console.debug("status:"+JSON.stringify(status));
@@ -36,12 +42,26 @@ function RestServiceJs(newurl) {
     //https://fr.wikipedia.org/wiki/Liste_des_codes_HTTP
     if ( ex == 'Locked' ) {
       this.displayBlockedPage(__ihm.user.username);
+      return;
     }
     if ( ex == 'Unauthorized' ) {
       this.showLoginForm('');
+      return;
     }
     if ( ex == 'Forbidden' ) {
       __ihm.hideModal();
+      let template = AskOmics.templates.error_message;
+      let context = { message: 'Forbidden' };
+      let html = template(context);
+      this.displayBadRequest().append(html);
+      return;
+    }
+    if ( ex == 'Bad Request' ) {
+      let template = AskOmics.templates.error_message;
+      let context = { message: req.responseJSON.error };
+      let html = template(context);
+      this.displayBadRequest().append(html);
+      return;
     }
 
     /* This kind of exception is not catched by Askomics */

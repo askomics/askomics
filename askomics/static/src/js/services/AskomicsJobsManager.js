@@ -71,8 +71,8 @@ let instanceAskomicsJobsViewManager ;
             }
 
             job.preview = $('<div></div>').html(data[i].preview) ;
+            job.data = undefined;
             if ( 'data' in data[i] ) job.data = data[i].data ;
-
             let idx = 0;
             for (idx;idx<ljobs.length;idx++) {
               if ( job.jobid < ljobs[idx] ) break;
@@ -127,6 +127,12 @@ let instanceAskomicsJobsViewManager ;
                };
     }
 
+    wait(ms) {
+      let defer = $.Deferred();
+      setTimeout(function() { defer.resolve(); }, ms);
+      return defer;
+    }
+
     createQueryJob() {
       //create state view
       //let curId = new AskomicsJobsViewManager().createWaitState();
@@ -151,31 +157,15 @@ let instanceAskomicsJobsViewManager ;
       jdata.headers = ordered_headers;
 
       service.post(jdata,function(data) {
-        //
         new AskomicsJobsViewManager().listJobs();
       });
 
-      $("#jobsview").trigger( "click" );
-    }
-
-    insertQueue(trigger) {
-      //create state view
-      //let curId = new AskomicsJobsViewManager().createWaitState();
-
-      trigger(
-        function (message,data) {
-        //  new AskomicsJobsViewManager().changeOkState(curId,data,function(d) { return message;});
-      },
-        function (errorMessage) {
-          //new AskomicsJobsViewManager().changeKoState(curId,errorMessage);
+      this.wait(50).then( function() {
+        $("#jobsview").trigger( "click" );
       });
-
-      /* position on job list view */
-      $("#jobsview").trigger( "click" );
     }
 
     listJobs() {
-
       this.loadjob().then(function () {
         let __inst = new AskomicsJobsViewManager();
         let template = AskOmics.templates.jobs;

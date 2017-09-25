@@ -70,11 +70,6 @@ class AskView(object):
                 self.data['error'] = str(e)
                 self.log.error(str(e))
 
-    def check_error(self):
-        if 'error' in self.data :
-            return True
-        return False
-
     def checkAuthSession(self):
         #https://fr.wikipedia.org/wiki/Liste_des_codes_HTTP
 
@@ -124,27 +119,31 @@ class AskView(object):
         """ Get the nodes being query starters """
         self.log.debug("== START POINT ==")
 
-        if self.check_error():
-            return self.data
+        try:
 
-        self.setGraphUser([])
+            self.setGraphUser([])
 
-        tse = TripleStoreExplorer(self.settings, self.request.session)
-        nodes = tse.get_start_points()
+            tse = TripleStoreExplorer(self.settings, self.request.session)
+            nodes = tse.get_start_points()
 
-        self.data['nodes'] = {}
+            self.data['nodes'] = {}
 
-        for node in nodes:
-            if node['uri'] in self.data['nodes'].keys():
-                if node['public'] and not self.data['nodes'][node['uri']]['public']:
-                    self.data['nodes'][node['uri']]['public'] = True
-                if node['private'] and not self.data['nodes'][node['uri']]['private']:
-                    self.data['nodes'][node['uri']]['private'] = True
-                self.data['nodes'][node['uri']]['public_and_private'] = bool(
-                    self.data['nodes'][node['uri']]['public'] and
-                    self.data['nodes'][node['uri']]['private'])
-            else:
-                self.data['nodes'][node['uri']] = node
+            for node in nodes:
+                if node['uri'] in self.data['nodes'].keys():
+                    if node['public'] and not self.data['nodes'][node['uri']]['public']:
+                        self.data['nodes'][node['uri']]['public'] = True
+                    if node['private'] and not self.data['nodes'][node['uri']]['private']:
+                        self.data['nodes'][node['uri']]['private'] = True
+                    self.data['nodes'][node['uri']]['public_and_private'] = bool(
+                        self.data['nodes'][node['uri']]['public'] and
+                        self.data['nodes'][node['uri']]['private'])
+                else:
+                    self.data['nodes'][node['uri']] = node
+
+        except Exception as e:
+            self.request.response.status = 400
+            traceback.print_exc(file=sys.stdout)
+            self.data['error'] = str(e)
 
         return self.data
 
@@ -279,7 +278,7 @@ class AskView(object):
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
             self.data['error'] = str(e)
-            self.log.error(str(e))
+            self.request.response.status = 400
 
         return self.data
 
@@ -451,7 +450,7 @@ class AskView(object):
         except Exception as e:
              traceback.print_exc(file=sys.stdout)
              self.data['error'] = str(e)
-             self.log.error(str(e))
+             self.request.response.status = 400
 
         return self.data
 
@@ -472,7 +471,7 @@ class AskView(object):
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
             self.data['error'] = str(e)
-            return self.data
+            self.request.response.status = 400
 
         return self.data
 
@@ -532,7 +531,7 @@ class AskView(object):
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
             self.data['error'] = str(e)
-            return self.data
+            self.request.response.status = 400
 
         formatter = HtmlFormatter(cssclass='preview_field', nowrap=True, nobackground=True)
         return highlight(self.data, TurtleLexer(), formatter) # Formated html
@@ -632,7 +631,7 @@ class AskView(object):
             self.log.debug('--> Parsing GFF')
             src_file_gff.persist(self.request.host_url, public)
             jm.updateEndSparqlJob(jobid,"Done",nr=0)
-            jm.updatePreviewJob(jobid,"GFF integration done. ")
+            jm.updatePreviewJob(jobid,"GFF integration done. <br/>"+"entities :"+', '.join(entities)+"<br/>"+"taxon :"+taxon)
 
         except Exception as e:
             #rollback
@@ -706,7 +705,6 @@ class AskView(object):
         self.checkAuthSession()
 
         body = self.request.json_body
-        self.log.debug('===> body: '+str(body))
         file_name = body['file_name']
         taxon = body['taxon']
         entity = body['entity_name']
@@ -755,6 +753,7 @@ class AskView(object):
 
     @view_config(route_name='getUserAbstraction', request_method='POST')
     def getUserAbstraction(self):
+
         """ Get the user asbtraction to manage relation inside javascript """
         self.log.debug("== getUserAbstraction ==")
         body = self.request.json_body
@@ -793,7 +792,7 @@ class AskView(object):
             #traceback.print_exc(limit=8)
             traceback.print_exc(file=sys.stdout)
             self.data['error'] = str(e)
-            self.log.error(str(e))
+            self.request.response.status = 400
 
         return self.data
 
@@ -830,7 +829,7 @@ class AskView(object):
             #traceback.print_exc(limit=8)
             traceback.print_exc(file=sys.stdout)
             self.data['error'] = str(e)
-            self.log.error(str(e))
+            self.request.response.status = 400
 
         return self.data
 
@@ -851,7 +850,7 @@ class AskView(object):
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
             self.data['error'] = str(e)
-            self.log.error(str(e))
+            self.request.response.status = 400
 
         return self.data
 
@@ -888,7 +887,6 @@ class AskView(object):
             traceback.print_exc(file=sys.stdout)
             jm.updateEndSparqlJob(jobid,"Error")
             jm.updatePreviewJob(jobid,'Problem whith module '+body['name']+'.</br>'+str(e))
-            self.log.error(str(e))
 
         return self.data
 
@@ -923,14 +921,14 @@ class AskView(object):
 
             results, query = tse.build_sparql_query_from_json(lfrom, body["variates"], body["constraintesRelations"], True)
 
-
-            #body["limit"]
             # Remove prefixes in the results table
             limit = int(body["limit"]) + 1
             if body["limit"] != -1 and limit < len(results):
                 self.data['values'] = results[1:limit+1]
             else:
                 self.data['values'] = results
+
+            self.data['nrow'] = len(results)
 
             if persist:
                 jm.updateEndSparqlJob(jobid,"Ok",nr=len(results),data=self.data['values'])
@@ -946,8 +944,7 @@ class AskView(object):
             traceback.print_exc(file=sys.stdout)
             self.data['values'] = ""
             self.data['file'] = ""
-            self.data['error'] = str(e)
-            self.log.error(str(e))
+
             if persist:
                 jm.updateEndSparqlJob(jobid,"Error")
                 jm.updatePreviewJob(jobid,str(e))
@@ -990,7 +987,7 @@ class AskView(object):
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
             self.data['error'] = str(e)
-            self.log.error(str(e))
+            self.request.response.status = 400
 
         return self.data
 
@@ -1085,8 +1082,8 @@ class AskView(object):
             self.data['blocked'] = admin_blocked['blocked']
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
-            self.data['error'] = ["Bad server configuration!"]
-            self.log.error(str(e))
+            self.data['error'] = "Bad server configuration!"
+            self.request.response.status = 400
 
         return self.data
 
@@ -1182,7 +1179,8 @@ class AskView(object):
 
         except Exception as e:
             self.data['error'] = str(e)
-            self.log.error(str(e))
+            self.request.response.status = 400
+            return self.data
 
         param_manager = ParamManager(self.settings, self.request.session)
         param_manager.getUploadDirectory()
@@ -1207,6 +1205,7 @@ class AskView(object):
         except Exception as e:
             self.log.debug(str(e))
             self.data['error'] = str(e)
+            self.request.response.status = 400
             return self.data
 
         self.data['sucess'] = 'success'
@@ -1262,6 +1261,7 @@ class AskView(object):
         except Exception as e:
             self.data['error'] = str(e)
             self.log.error(str(e))
+            self.request.response.status = 400
             return self.data
 
         param_manager = ParamManager(self.settings, self.request.session)
@@ -1326,7 +1326,10 @@ class AskView(object):
         try:
             query_laucher.process_query(sqb.update_blocked_status(new_status, username).query)
         except Exception as e:
-            return 'failed: ' + str(e)
+            self.data['error'] = str(e)
+            self.log.error(str(e))
+            self.request.response.status = 400
+            return self.data
 
 
         return 'success'
@@ -1357,7 +1360,10 @@ class AskView(object):
         try:
             query_laucher.process_query(sqb.update_admin_status(new_status, username).query)
         except Exception as e:
-            return 'failed: ' + str(e)
+            self.data['error'] = str(e)
+            self.log.error(str(e))
+            self.request.response.status = 400
+            return self.data
 
 
         return 'success'
@@ -1370,9 +1376,6 @@ class AskView(object):
         """
 
         self.checkAuthSession()
-        # Non admin can only delete himself
-        if self.request.session['username'] != username and not self.request.session['admin']:
-            raise Exception('forbidden')
 
         body = self.request.json_body
 
@@ -1380,13 +1383,16 @@ class AskView(object):
         passwd = body['passwd']
         confirmation = body['passwd_conf']
 
-
+        # Non admin can only delete himself
+        if self.request.session['username'] != username and not self.request.session['admin']:
+            raise Exception('forbidden')
 
         # If confirmation, check the user passwd
         if confirmation:
             security = Security(self.settings, self.request.session, username, '', passwd, passwd)
             if not security.check_username_password():
                 self.data['error'] = 'Wrong password'
+                self.request.response.status = 400
                 return self.data
 
 
@@ -1406,7 +1412,10 @@ class AskView(object):
                 query_laucher.execute_query(sqb.get_drop_named_graph(graph).query)
                 query_laucher.execute_query(sqb.get_delete_metadatas_of_graph(graph).query)
             except Exception as e:
-                return 'failed: ' + str(e)
+                self.data['error'] = str(e)
+                self.log.error(str(e))
+                self.request.response.status = 400
+                return self.data
 
 
         # Delete user infos
@@ -1436,7 +1445,10 @@ class AskView(object):
         try:
             result = query_laucher.process_query(sqa.get_user_infos(self.request.session['username']).query)
         except Exception as e:
-            return 'failed: ' + str(e)
+            self.data['error'] = str(e)
+            self.log.error(str(e))
+            self.request.response.status = 400
+            return self.data
 
 
         apikey_list = []

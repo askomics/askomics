@@ -54,7 +54,7 @@ class JobManager(ParamManager):
                 +"'"+typeJob+"'," \
                 + "'Wait',"     \
                 + "strftime('%s','now'),"\
-                + "-1,"\
+                + "0,"\
                 + "NULL,"\
                 + "''," \
                 + "'"+requestGraph+"'," \
@@ -122,8 +122,6 @@ class JobManager(ParamManager):
 
             for row in rows:
                 d = {}
-                print("============================================")
-                print(row['requestGraph'])
                 d['jobid'] = row['jobid']
                 d['type'] = row['type']
                 d['state'] = row['state']
