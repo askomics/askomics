@@ -21,8 +21,8 @@ class AskomicsPositionableLink extends AskomicsLink {
 
   }
 
-  setjson(obj) {
-    super.setjson(obj);
+  setjson(obj,nodes) {
+    super.setjson(obj,nodes);
     this.type     = obj.type ;
     this.label    = obj.label;
     this.same_tax  =  obj.same_tax ;
