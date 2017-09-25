@@ -49,36 +49,43 @@ $(function () {
             headers.push($(this).val());
         });
         loadSourceFile($(event.target).closest('.template-source_file'), true, headers);
+        __ihm.displayModal('Upload TSV file.', '', 'Close');
     });
 
     $("#content_integration").on('click', '.load_data_gff', function() {
         let idfile = $(this).attr('id');
         loadSourceFileGff(idfile, false);
+        __ihm.displayModal('Upload GFF file.', '', 'Close');
     });
 
     $("#content_integration").on('click', '.load_data_gff_public', function() {
         let idfile = $(this).attr('id');
         loadSourceFileGff(idfile, true);
+        __ihm.displayModal('Upload GFF file.', '', 'Close');
     });
 
     $("#content_integration").on('click', '.load_data_ttl', function() {
         let idfile = $(this).attr('id');
         loadSourceFileTtl(idfile, false);
+        __ihm.displayModal('Upload TTL file.', '', 'Close');
     });
 
     $("#content_integration").on('click', '.load_data_ttl_public', function() {
         let idfile = $(this).attr('id');
         loadSourceFileTtl(idfile, true);
+        __ihm.displayModal('Upload TTL file.', '', 'Close');
     });
 
     $("#content_integration").on('click', '.load_data_bed', function() {
         let idfile = $(this).attr('id');
         loadSourceFileBed(idfile, false);
+        __ihm.displayModal('Upload BED file.', '', 'Close');
     });
 
     $("#content_integration").on('click', '.load_data_bed_public', function() {
         let idfile = $(this).attr('id');
         loadSourceFileBed(idfile, true);
+        __ihm.displayModal('Upload BED file.', '', 'Close');
     });
 });
 
@@ -540,9 +547,9 @@ function loadSourceFile(file_elem, pub, headers) {
                   'uris': tags.uris};
 
     service.post(model, function(data) {
-        __ihm.hideModal();
+        new AskomicsJobsViewManager().listJobs();
     });
-    
+
     __ihm.resetStats();
 
   new ModulesParametersView().updateModules();
@@ -553,123 +560,84 @@ function loadSourceFile(file_elem, pub, headers) {
  */
 function loadSourceFileGff(idfile, pub) {
 
-  new AskomicsJobsViewManager().insertQueue(function (resolve,reject) {
-    console.log('-----> loadSourceFileGff <----- ');
-    // get taxon
-    let taxon = '';
+  console.log('-----> loadSourceFileGff <----- ');
+  // get taxon
+  let taxon = '';
 
-    let file_elem = $("#source-file-gff-" + idfile);
+  let file_elem = $("#source-file-gff-" + idfile);
 
-    // get the taxon in the selector or in the input field
-    taxon = $('#' + idfile + '-selector').val();
-    if ( taxon === null || taxon === undefined) {
-        taxon = $('#tax-'+idfile).val();
-    }
+  // get the taxon in the selector or in the input field
+  taxon = $('#' + idfile + '-selector').val();
+  if ( taxon === null || taxon === undefined) {
+      taxon = $('#tax-'+idfile).val();
+  }
 
-    // get entities
-    let entities = [];
+  // get entities
+  let entities = [];
 
-    $("#"+idfile+" > label > input").each(function() {
-        if ($(this).is(":checked")) {
-            entities.push($(this).attr('id'));
-        }
-    });
+  $("#"+idfile+" > label > input").each(function() {
+      if ($(this).is(":checked")) {
+          entities.push($(this).attr('id'));
+      }
+  });
 
-    // custom uri
-    let uri = file_elem.find('#def-uri-entity-'+idfile).val();
+  // custom uri
+  let uri = file_elem.find('#def-uri-entity-'+idfile).val();
 
-    let service = new RestServiceJs("load_gff_into_graph");
+  let service = new RestServiceJs("load_gff_into_graph");
 
-    let model = { 'file_name': $("#"+idfile).attr("filename"),
+  let model = { 'file_name': $("#"+idfile).attr("filename"),
                   'taxon': taxon,
                   'entities': entities,
                   'public': pub,
                   'uri': uri};
 
-    service.post(model, function(data) {
-        if (data.error) {
-            reject(data.error);
-            return;
-        }
-
-        // Show a success message isertion is OK
-        let div_entity = $("#" + idfile);
-        let entities_string = '';
-        for (var i = 0; i < entities.length; i++) {
-            entities_string += '<b>' + entities[i] + '</b>';
-            if (i != entities.length - 2 && i != entities.length -1) {
-                entities_string += ', ';
-            }
-            if (i == entities.length - 2) {
-                entities_string += ' and ';
-            }
-        }
-        let header_mess = "<b>"+div_entity.attr("filename")+"</b><br/>" ;
-        resolve(header_mess + entities_string, { });
-    });
+  service.post(model, function(data) {
+    new AskomicsJobsViewManager().listJobs();
   });
 }
 
 function loadSourceFileTtl(idfile, pub) {
 
-  new AskomicsJobsViewManager().insertQueue(function (resolve,reject) {
-    console.log('---> loadSourceFileTtl <---');
+  let file_elem = $("#source-file-ttl-" + idfile);
 
-    let file_elem = $("#source-file-ttl-" + idfile);
-
-    let service = new RestServiceJs('load_ttl_into_graph');
-    let model = {
+  let service = new RestServiceJs('load_ttl_into_graph');
+  let model = {
       'file_name' : $("#"+idfile).attr("filename"),
       'public': pub
-    };
+  };
 
-    service.post(model, function(data) {
-        console.log('---> ttl insert <---');
-
-        if (data.error) {
-            reject(data.error);
-            return;
-        }
-
-        resolve($("#" + idfile).attr("filename")+ ' inserted with success.', { });
-    });
+  service.post(model, function(data) {
+    new AskomicsJobsViewManager().listJobs();
   });
 }
 
 function loadSourceFileBed(idfile, pub) {
-  new AskomicsJobsViewManager().insertQueue(function (resolve,reject) {
-    // get taxon
-    let taxon = '';
+  // get taxon
+  let taxon = '';
 
-    let file_elem = $("#source-file-bed-" + idfile);
+  let file_elem = $("#source-file-bed-" + idfile);
 
-    // get the taxon in the selector or in the input field
-    taxon = $('#' + idfile + '-selector').val();
-    if ( taxon === null || taxon === undefined) {
-        taxon = $('#tax-'+idfile).val();
-    }
+  // get the taxon in the selector or in the input field
+  taxon = $('#' + idfile + '-selector').val();
+  if ( taxon === null || taxon === undefined) {
+      taxon = $('#tax-'+idfile).val();
+  }
 
-    // get entity name
-    let entity = $('#entity-' + idfile).val();
+  // get entity name
+  let entity = $('#entity-' + idfile).val();
+  // custom uri
+  let uri = file_elem.find('#def-uri-entity-'+idfile).val();
 
-    // custom uri
-    let uri = file_elem.find('#def-uri-entity-'+idfile).val();
+  let service = new RestServiceJs("load_bed_into_graph");
 
-    let service = new RestServiceJs("load_bed_into_graph");
+  let model = { 'file_name': $("#"+idfile).attr("filename"),
+                'taxon': taxon,
+                'entity_name': entity,
+                'public': pub,
+                'uri': uri};
 
-    let model = { 'file_name': $("#"+idfile).attr("filename"),
-                  'taxon': taxon,
-                  'entity_name': entity,
-                  'public': pub,
-                  'uri': uri};
-
-    service.post(model, function(data) {
-        if (data.error) {
-            reject(data.error);
-            return;
-        }
-
-      resolve($("#" + idfile).attr("filename")+ ' inserted with success.', { });
-    });
+  service.post(model, function(data) {
+    new AskomicsJobsViewManager().listJobs();
   });
 }
