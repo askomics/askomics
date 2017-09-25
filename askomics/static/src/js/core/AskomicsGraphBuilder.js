@@ -64,10 +64,10 @@
     extractNodesAndLinks(nodes,links) {
       let retNodes = [];
       let retLink = [];
-      console.log(JSON.stringify(nodes));
+
       //setup nodes
       for (let i=0;i<nodes.length;i++) {
-        console.log(JSON.stringify(nodes[i]));
+
         let className = nodes[i][0];
         let jsonObj = nodes[i][1];
         let n;
@@ -90,7 +90,7 @@
         }else{
           l = new AskomicsLink({uri:"undefined"});
         }
-        l.setjson(jsonObj);
+        l.setjson(jsonObj,retNodes);
         retLink.push(l);
       }
 
