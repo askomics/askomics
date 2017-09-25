@@ -413,6 +413,7 @@ class IHMLocal {
         }
         $('#modalButton').text(button);
         $('#modal').modal('show');
+        return $('#modal');
     }
 
     displayModalHtml(title, message, button) {
