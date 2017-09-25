@@ -71,6 +71,16 @@ var fileFuncMenu = function(menu) {
     });
 
   });
+
+  $('#send-query-galaxy').on('click', function(d) {
+    let service = new RestServiceJs('send_to_galaxy');
+    let model = {};
+    model.json =  __ihm.getGraphBuilder().getInternalState();
+    service.post(model, function(data) {
+      __ihm.manageErrorMessage(data);
+    });
+  });
+
 };
 
 

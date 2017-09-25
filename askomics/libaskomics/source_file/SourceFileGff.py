@@ -96,7 +96,7 @@ class SourceFileGff(SourceFile):
 
         taxon_entity = ':unknown'
         if self.taxon != '' :
-            taxon_entity = ':' + self.encodeToRDFURI(self.taxon.strip())
+            taxon_entity = ':' + self.encode_to_rdf_uri(self.taxon.strip())
 
         self.getLabelFromUri[taxon_entity] = self.taxon.strip()
         self.getLabelFromUri[':plus'] = 'plus'
@@ -106,21 +106,21 @@ class SourceFileGff(SourceFile):
         blockbase=10000
 
         for rec in GFF.parse(handle, limit_info=limit, target_lines=1):
-            # ref_entity = taxon_entity+'_ref_'+self.encodeToRDFURI(str(rec.id))
-            ref_entity =  ':' + self.encodeToRDFURI(str(rec.id))
+            # ref_entity = taxon_entity+'_ref_'+self.encode_to_rdf_uri(str(rec.id))
+            ref_entity =  ':' + self.encode_to_rdf_uri(str(rec.id))
             if ref_entity not in self.getLabelFromUri:
                 self.getLabelFromUri[ref_entity] = str(rec.id)
 
             for feat in rec.features:
                 # if there is no ID field, take the entity type as id
-                type_entity = self.encodeToRDFURI(feat.type)
+                type_entity = self.encode_to_rdf_uri(feat.type)
                 if type_entity not in self.getLabelFromUri:
                     self.getLabelFromUri[type_entity] = str(feat.type)
                 build_entity_id = False
 
 
                 if feat.id != '':
-                    id_entity = self.encodeToRDFURI(feat.id)
+                    id_entity = self.encode_to_rdf_uri(feat.id)
                     self.getLabelFromUri[id_entity] = str(feat.id)
                 else:
                     if not type_entity in icount:
@@ -133,7 +133,7 @@ class SourceFileGff(SourceFile):
                     else:
                         id_entity = type_entity + "_"+ suffixURI +"_"+ self.timestamp + "_"+ str(icount[type_entity])
 
-                    id_entity = self.encodeToRDFURI(id_entity)
+                    id_entity = self.encode_to_rdf_uri(id_entity)
                     build_entity_id = True
                     self.getLabelFromUri[id_entity] = str(feat.type) + "_" + str(icount[type_entity])
 
@@ -156,7 +156,7 @@ class SourceFileGff(SourceFile):
                 listSliceRef = []
                 listSlice = []
                 for sliceb in range(block_idxstart,block_idxend+1):
-                        listSliceRef.append(":"+self.encodeToRDFURI(str(rec.id))+"_"+str(sliceb))
+                        listSliceRef.append(self.encode_to_rdf_uri(str(rec.id))+"_"+str(sliceb))
                         listSlice.append(str(sliceb))
 
                 attribute_dict = {
@@ -208,11 +208,11 @@ class SourceFileGff(SourceFile):
                 # ---------------------------------------------------------------------------------
                 buildLater = False
                 for qualifier_key, qualifier_value in feat.qualifiers.items():
-                    keyuri = self.encodeToRDFURI(qualifier_key)
+                    keyuri = self.encode_to_rdf_uri(qualifier_key)
                     attribute_dict[':'+keyuri] = []
 
                     for val in qualifier_value:
-                        valuri = self.encodeToRDFURI(val)
+                        valuri = self.encode_to_rdf_uri(val)
                         if qualifier_key == 'ID':
                             if (valuri not in type_entities) and type_entity != '':
                                 type_entities[valuri] = type_entity
@@ -229,14 +229,14 @@ class SourceFileGff(SourceFile):
                                 attribute_dict[qualifier_key].append(valuri)
                             else:
 
-                                keyuri = self.encodeToRDFURI(qualifier_key+"_"+type_entities[valuri])
+                                keyuri = self.encode_to_rdf_uri(qualifier_key+"_"+type_entities[valuri])
 
                                 if not ':'+keyuri in  attribute_dict:
                                     attribute_dict[':'+keyuri] = []
 
                                 attribute_dict[':'+keyuri].append(str(':' + valuri))
                                 # Store the parent relation in abstraction
-                                DomAndRange = {keyuri : self.encodeToRDFURI(type_entities[valuri]) }
+                                DomAndRange = {keyuri : self.encode_to_rdf_uri(type_entities[valuri]) }
                                 if DomAndRange not in self.abstraction_dict[type_entity]['normal_attr']:
                                     self.abstraction_dict[type_entity]['normal_attr'].append(DomAndRange)
                         else:
@@ -265,11 +265,12 @@ class SourceFileGff(SourceFile):
                 if qualifier_key in attribute_dict:
                     for valuri in attribute_dict[qualifier_key]:
                         if not valuri in type_entities:
+                            self.log.warning("Unknown "+qualifier_key+" ID ["+self.decode_to_rdf_uri(valuri)+"]. Certainly because this element have not been selected.")
                             continue
-                        keyuri = self.encodeToRDFURI(qualifier_key+"_"+type_entities[valuri])
+                        keyuri = self.encode_to_rdf_uri(qualifier_key+"_"+type_entities[valuri])
                         attribute_dict[':'+keyuri] = str(':' + valuri)
                         # Store the parent relation in abstraction
-                        DomAndRange = {keyuri : self.encodeToRDFURI(type_entities[valuri]) }
+                        DomAndRange = {keyuri : self.encode_to_rdf_uri(type_entities[valuri]) }
                         if DomAndRange not in self.abstraction_dict[type_entity]['normal_attr']:
                             self.abstraction_dict[type_entity]['normal_attr'].append(DomAndRange)
                         del attribute_dict[qualifier_key]
@@ -324,7 +325,7 @@ class SourceFileGff(SourceFile):
         for entity, attribute_dict in self.abstraction_dict.items():
             ttl += ':'+entity + ' ' + 'rdf:type owl:Class ;\n'
             indent = len(entity) * ' ' + ' '
-            ttl += indent + 'rdfs:label \"' + self.decodeToRDFURI(entity.replace(':', '')) + "\"^^xsd:string ;\n"
+            ttl += indent + 'rdfs:label \"' + self.decode_to_rdf_uri(entity.replace(':', '')) + "\"^^xsd:string ;\n"
             ttl += indent + 'displaySetting:startPoint \"true\"^^xsd:boolean ;\n\n'
             ttl += indent + 'displaySetting:entity \"true\"^^xsd:boolean .\n\n'
 

@@ -141,13 +141,13 @@ class AskomicsNode extends GraphNode {
         if ( isLinked || isFiltered || isInversedMatch || this.attributes[uri].actif ) {
           let subBlockConstraint = [];
           subBlockConstraint.push("?"+'URI'+this.SPARQLid+" "+this.URI(uri)+" "+"?"+SparqlId);
-          subBlockConstraint.push("FILTER isLiteral(?"+SparqlId+")");
+          // subBlockConstraint.push("FILTER isLiteral(?"+SparqlId+")");
           /* check filter if exist */
 
           let subBlockNegativeConstraint = [];
           if ( isInversedMatch ) {
             subBlockNegativeConstraint.push("?"+'URI'+this.SPARQLid+" "+this.URI(uri)+" "+"?negative"+SparqlId);
-            subBlockNegativeConstraint.push("FILTER isLiteral(?negative"+SparqlId+")");
+            // subBlockNegativeConstraint.push("FILTER isLiteral(?negative"+SparqlId+")");
           }
           /* If Inverse Match we have to build a block */
           if ( isFiltered  ) {

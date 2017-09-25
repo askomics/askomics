@@ -6,6 +6,7 @@ class AskomicsUser {
         this.username = username===undefined?"":username ;
         this.admin    = admin===undefined?false:admin;
         this.blocked  = blocked===undefined?true:blocked;
+        this.galaxy = false;
     }
 
     isAdmin() {
@@ -14,6 +15,10 @@ class AskomicsUser {
 
     isBlocked() {
         return this.blocked;
+    }
+
+    haveGalaxy() {
+        return this.galaxy;
     }
 
     logUser() {
@@ -31,6 +36,7 @@ class AskomicsUser {
                 self.username = data.username;
                 self.admin = data.admin;
                 self.blocked = data.blocked;
+                self.galaxy = data.galaxy;
                 __ihm.displayNavbar(true, self.username, self.admin, self.blocked);
             }else{
                 __ihm.displayNavbar(false, '');

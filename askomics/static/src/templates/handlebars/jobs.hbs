@@ -1,40 +1,47 @@
 <hr/>
 <h3 class="header-div">Jobs</h3>
 <hr/>
+
 <table class="table table-striped">
     <tr>
-        <th>Job-ID</th>
+        <th>Job ID</th>
         <th>State</th>
         <th>Start</th>
         <th>End</th>
         <th>Duration</th>
-        <th>NRows</th>
-        <th></th>
+        <th>Number of rows</th>
+        <th>Actions</th>
     </tr>
     {{#each jobs}}
-    <tr class="{{this.classtr}}" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}" class="clickable">
-        <td>{{this.jobid}}</td>
+    <tr class="{{this.classtr}}" class="clickable">
+        <td style="cursor: pointer;" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}">{{this.jobid}}</td>
         {{#if this.wait}}
-        <td><i class="fa fa-spinner pulse"></i></td>
+        <td style="cursor: pointer;" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}"><i class="fa fa-spinner pulse"></i></td>
         {{else}}
-        <td>{{this.state}}</td>
+        <td style="cursor: pointer;" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}">{{this.state}}</td>
         {{/if}}
-        <td>{{this.start}}</td>
-        <td>{{this.end}}</td>
-        <td>{{this.duration}}</td>
-        <td>{{this.nr}}</td>
-        <td><span onclick="new AskomicsJobsViewManager().removeJob({{@index}});event.stopPropagation();" alt="delete" class="glyphicon glyphicon-remove" aria-hidden="true"></td>
+        <td style="cursor: pointer;" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}">{{this.start}}</td>
+        <td style="cursor: pointer;" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}">{{this.end}}</td>
+        <td style="cursor: pointer;" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}">{{this.duration}}</td>
+        <td style="cursor: pointer;" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}">{{this.nr}}</td>
+        {{!-- Actions --}}
+        <td>
+            <div class="btn-group" role="group">
+              <button onclick="new AskomicsJobsViewManager().removeJob({{@index}});event.stopPropagation();" type="button" class="btn btn-default btn-xs"><i class="fa fa-times text-danger"></i> Del</button>
+              <button onclick="__ihm.stopSession();__ihm.startSession({{this.stateToReload}});$('#interrogation').trigger( 'click' );" type="button" class="btn btn-default btn-xs"><i class="fa fa-repeat text-warning"></i> Redo</button>
+              <button onclick="location.href='csv/{{this.csv}}';" type="button" class="btn btn-default btn-xs"><i class="fa fa-floppy-o text-primary"></i> Save</button>
+              {{#if ../galaxy}}
+              <button onclick="new AskomicsJobsViewManager().send2galaxy({{@index}});" type="button" class="btn btn-default btn-xs"><i class="fa fa-arrow-right text-success"></i> Send to Galaxy</button>
+              {{/if}}
+            </div>
+            <i class="hidden fa fa-spinner pulse" id="spinner_send_galaxy_{{@index}}"></i>
+            <i class="hidden fa fa-check text-success" id="check_send_galaxy_{{@index}}"></i>
+            <i class="hidden fa fa-times text-danger" id="cross_send_galaxy_{{@index}}"></i>
+        </td>
     </tr>
     <tr>
      <td colspan="7">
       <div id="jobview_accordion_{{@index}}" class="collapse">
-
-        <div class="btn-group pull-right">
-            <span style="font-size:1.5em;color:blue" onclick="location.href='csv/{{this.csv}}';" alt="save"  class="glyphicon glyphicon glyphicon-floppy-save" aria-hidden="true" ></span>
-            <span style="font-size:1.5em;color:blue" onclick="__ihm.stopSession();__ihm.startSession({{this.stateToReload}});$('#interrogation').trigger( 'click' );"
-                  alt="reload" class="glyphicon glyphicon-repeat" aria-hidden="true"></span>
-        </div>
-        <hr/>
         <div id="results_table_{{@index}}">
         </div>
       </div>

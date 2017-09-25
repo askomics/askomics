@@ -26,6 +26,10 @@ output_test.log
 # Editors & tooling
 *.orig
 *~
+.*rc
 
 # custom config file
 configs/custom.ini
+
+# docker file
+Dockerfile

@@ -47,6 +47,9 @@ def main(global_config, **settings):
     config.add_route('csv', '/csv/{name:.*}')
     config.add_route('del_csv', '/del_csv/{name:.*}')
 
+    config.add_route('get_uploaded_files', '/get_uploaded_files')
+    config.add_route('delete_uploaded_files', '/delete_uploaded_files')
+
     # Shortcuts and modules routes
     config.add_route('importShortcut', '/importShortcut')
     config.add_route('deleteShortcut', '/deleteShortcut')
@@ -62,12 +65,15 @@ def main(global_config, **settings):
     # Galaxy route
     config.add_route('connect_galaxy', '/connect_galaxy')
     config.add_route('get_data_from_galaxy', '/get_data_from_galaxy')
+    config.add_route('get_galaxy_file_content', '/get_galaxy_file_content')
     config.add_route('upload_galaxy_files', '/upload_galaxy_files')
+    config.add_route('send_to_galaxy', '/send_to_galaxy')
 
     # Authentication routes
     config.add_route('signup', '/signup')
     config.add_route('login', '/login')
     config.add_route('login_api', '/login_api')
+    config.add_route('login_api_gie', '/login_api_gie')
     config.add_route('logout', '/logout')
     config.add_route('checkuser', '/checkuser')
 

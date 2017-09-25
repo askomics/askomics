@@ -34,51 +34,53 @@ class ParamManager(object):
             "faldo": """http://biohackathon.org/resource/faldo#"""
         }
 
-        self.userfilesdir = 'askomics/static/results/'
-        if not 'askomics.files_dir' in self.settings:
-            self.log.warning(" ******* 'askomics.files_dir' is not defined ! ********* "
-                             "\n Csv are saved in "+self.userfilesdir)
-        else:
-            self.userfilesdir = self.settings['askomics.files_dir']+"/"
-
-        self.ASKOMICS_html_template = 'askomics/templates/integration.pt'
+        self.userfilesdir = self.get_param('askomics.files_dir') + '/'
 
         self.escape = {
             'numeric' : lambda str: str,
             'text'    : json.dumps,
-            'category': self.encodeToRDFURI,
+            'category': self.encode_to_rdf_uri,
             'taxon': lambda str: str,
             'ref': lambda str: str,
             'strand': lambda str: str,
             'start' : lambda str: str,
             'end' : lambda str: str,
-            'entity'  : self.encodeToRDFURI,
-            'entitySym'  : self.encodeToRDFURI,
-            'entity_start'  : self.encodeToRDFURI,
+            'entity'  : self.encode_to_rdf_uri,
+            'entitySym'  : self.encode_to_rdf_uri,
+            'entity_start'  : self.encode_to_rdf_uri,
             'goterm': lambda str: str.replace("GO:", ""),
             'date': json.dumps
             }
 
-    def getUploadDirectory(self):
-        dir_string = '__' + self.session['username'] + '__'
-        if 'upload_directory' not in self.session.keys() or dir_string not in self.session['upload_directory'] or not os.path.isdir(self.session['upload_directory']):
-            self.session['upload_directory'] = tempfile.mkdtemp(suffix='_tmp', prefix='__' + self.session['username'] + '__')
+    def get_upload_directory(self):
+        """Get the upload directory of a user, create it if not exist
 
-        self.log.debug('--- upload dir ---')
-        self.log.debug(self.session['upload_directory'])
-        return self.session['upload_directory']
+        :returns: The path of the user upload directory
+        :rtype: string
+        """
 
-    def getUserResultsCsvDirectory(self):
+        path = self.userfilesdir + 'upload/' + self.session['username'] + '/'
+        if not os.path.isdir(path):
+            os.makedirs(path)
+        return path
+
+    def get_user_csv_directory(self):
         mdir = self.userfilesdir+"csv"+"/"+self.session['username'] + '/'
         if not os.path.isdir(mdir):
             os.makedirs(mdir)
         return mdir
 
-    def getRdfDirectory(self):
+    def get_rdf_directory(self):
         return self.userfilesdir+"rdf/"
 
-    def getRdfUserDirectory(self):
+    def get_rdf_user_directory(self):
         mdir = self.userfilesdir+"rdf"+"/"+self.session['username'] + '/'
+        if not os.path.isdir(mdir):
+            os.makedirs(mdir)
+        return mdir
+
+    def get_json_user_directory(self):
+        mdir = self.userfilesdir+"json"+"/"+self.session['username'] + '/'
         if not os.path.isdir(mdir):
             os.makedirs(mdir)
         return mdir
@@ -95,8 +97,8 @@ class ParamManager(object):
     def is_defined(self, key):
         return key in self.settings.keys()
 
-    def updateListPrefix(self,listPrefix):
-        self.log.debug("updateListPrefix")
+    def update_list_prefix(self,listPrefix):
+        self.log.debug("update_list_prefix")
         listPrefix = list(set(listPrefix))
 
         lPrefix = {}
@@ -115,7 +117,7 @@ class ParamManager(object):
                 self.ASKOMICS_prefix[item]=dic[item]
                 self.log.info("add prefix:"+str(item)+":"+self.ASKOMICS_prefix[item])
 
-    def reversePrefix(self,uri):
+    def reverse_prefix(self,uri):
         url = "http://prefix.cc/reverse?format=json&uri="
 
         for prefix in self.ASKOMICS_prefix:
@@ -144,7 +146,7 @@ class ParamManager(object):
         header = ""
         regex = re.compile('\s(\w+):')
         listTermPref = regex.findall(sarqlrequest)
-        self.updateListPrefix(listTermPref)
+        self.update_list_prefix(listTermPref)
 
         for key, value in self.ASKOMICS_prefix.items():
             header += "PREFIX "+key+": <"+value+">\n"
@@ -166,7 +168,7 @@ class ParamManager(object):
 
         regex = re.compile('\s(\w+):')
         listTermPref = regex.findall(ttl)
-        self.updateListPrefix(listTermPref)
+        self.update_list_prefix(listTermPref)
 
         header = ["@prefix {0}: <{1}> .".format(k,v) for k,v in self.ASKOMICS_prefix.items() ]
 
@@ -176,7 +178,7 @@ class ParamManager(object):
         return '\n'.join(header)
 
     @staticmethod
-    def encodeToRDFURI(toencode):
+    def encode_to_rdf_uri(toencode):
 
         obj = urllib.parse.quote(toencode)
         obj = obj.replace(".", "_d_")
@@ -188,7 +190,7 @@ class ParamManager(object):
         return obj
 
     @staticmethod
-    def decodeToRDFURI(toencode):
+    def decode_to_rdf_uri(toencode):
 
         obj = toencode.replace("_d_", ".")
         obj = obj.replace("_t_", "-")
