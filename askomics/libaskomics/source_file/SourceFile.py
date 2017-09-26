@@ -133,7 +133,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
         total_triple_count = 0
         chunk_count = 1
         chunk = ""
-        pathttl = self.getRdfUserDirectory()
+        pathttl = self.get_rdf_user_directory()
 
         method = 'load'
         if self.get_param("askomics.upload_user_data_method"):

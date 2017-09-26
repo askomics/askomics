@@ -7,6 +7,8 @@ class GraphObject {
         throw "GraphObject : Constructor need an 'uri' node:"+JSON.stringify(obj);
     }
 
+    console.debug("GraphObject constructor:"+JSON.stringify(obj));
+
     this._id        = -1;
     this._SPARQLid  = "";
     this._suggested = true ;
@@ -70,6 +72,7 @@ class GraphObject {
   /* Get value of an attribut with RDF format like rdfs:label */
   removePrefix() {
       if (typeof(this.uri) !== 'string') {
+        console.debug("uri is not a string :"+JSON.stringify(this));
         throw new Exception("uri is not a string :"+JSON.stringify(this.uri));
       }
       let idx =  this.uri.indexOf("#");

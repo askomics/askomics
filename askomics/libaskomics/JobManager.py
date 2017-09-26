@@ -26,6 +26,7 @@ class JobManager(ParamManager):
              start int,
              end int ,
              data text,
+             file text,
              preview string,
              requestGraph string,
              nr int
@@ -57,6 +58,7 @@ class JobManager(ParamManager):
                 + "0,"\
                 + "NULL,"\
                 + "''," \
+                + "''," \
                 + "'"+requestGraph+"'," \
                 + "-1" \
                 + ");"
@@ -68,7 +70,7 @@ class JobManager(ParamManager):
         conn.close()
         return ID
 
-    def updateEndSparqlJob(self,jobid,state,nr=-1, data=None):
+    def updateEndSparqlJob(self,jobid,state,nr=-1, data=None, file=None):
         import json
 
         conn = sqlite3.connect(self.pathdb,uri=True)
@@ -76,16 +78,21 @@ class JobManager(ParamManager):
 
         d = 'NULL'
 
-        if data != None:
+        if data:
             d = "'"+json.dumps(data)+"'"
+
+        f = 'NULL'
+        if file:
+            f = "'"+file+"'"
 
         reqSql = "UPDATE jobs SET "\
                 + " state = '"+ state +"'," \
                 + " end = strftime('%s','now'),"\
                 + " nr = "+str(nr)+","\
-                + " data = "+ d \
+                + " data = "+ d +"," \
+                + " file = "+ f \
                 + " WHERE jobID = "+str(jobid)
-
+        print(reqSql)
         c.execute(reqSql)
         conn.commit()
         conn.close()
@@ -115,7 +122,7 @@ class JobManager(ParamManager):
 
         c = conn.cursor()
 
-        reqSql = """ SELECT jobid, type, state, start, end, data, preview, requestGraph, nr FROM jobs"""
+        reqSql = """ SELECT jobid, type, state, start, end, data, file, preview, requestGraph, nr FROM jobs"""
         try:
             c.execute(reqSql)
             rows = c.fetchall()
@@ -129,6 +136,8 @@ class JobManager(ParamManager):
                 d['end'] = row['end']
                 if row['data'] != None :
                     d['data'] = json.loads(row['data'])
+                if row['file'] != None :
+                    d['file'] = row['file']
                 d['preview'] = row['preview']
                 d['requestGraph'] = row['requestGraph']
                 d['nr'] = row['nr']

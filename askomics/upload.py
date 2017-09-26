@@ -3,7 +3,7 @@ from pyramid.view import view_config, view_defaults
 from pyramid.response import Response
 
 import logging
-
+import re
 import os, shutil, tempfile
 
 @view_defaults(route_name='upload')
@@ -23,7 +23,7 @@ class FileUpload(object):
         self.settings = request.registry.settings
 
         pm = ParamManager(self.settings, self.request.session)
-        self.upload_dir = pm.getUploadDirectory()
+        self.upload_dir = pm.get_upload_directory()
         #self.upload_dir = request.session['upload_directory']
         
         self.log.debug("upload_directory => "+self.upload_dir)
@@ -53,8 +53,8 @@ class FileUpload(object):
             new_file['error'] = 'File is too small'
         elif new_file['size'] > self.max_size:
             new_file['error'] = 'File is too large'
-        #elif new_file['type'] not in self.allowed_types: # FIXME commented for tests
-        #    new_file['error'] = 'File type '+new_file['type']+' not allowed' # FIXME commented for tests
+        elif new_file['type'] not in self.allowed_types: # FIXME commented for tests
+           new_file['error'] = 'File type '+new_file['type']+' not allowed' # FIXME commented for tests
         else:
             return True
         return False
@@ -136,14 +136,24 @@ class FileUpload(object):
                 #    f.write(result['type'])
                 #concat file if exist
                 with open(self.filepath(result['name'])+"_tmp", 'wb') as f:
-                    #concat file if exist
-                    if os.path.isfile(self.filepath(result['name'])):
-                        shutil.copyfileobj(open(self.filepath(result['name']), 'rb'), f)
+                    # if file exist, rename it
+                    number = 1
+                    file_exist = True
+                    new_filename = result['name']
+                    while file_exist:
+                        if os.path.isfile(self.filepath(new_filename)):
+                            filename, file_extension = os.path.splitext(result['name'])
+                            new_filename = filename + '(' + str(number) + ')' + file_extension
+                            number += 1
+                        else:
+                            file_exist = False
+
                     shutil.copyfileobj(field_storage.file, f)
 
-                shutil.copyfileobj(open(self.filepath(result['name'])+"_tmp","rb"),open(self.filepath(result['name']),"wb"))
+                shutil.copyfileobj(open(self.filepath(result['name']) + "_tmp", "rb"), open(self.filepath(new_filename), "wb"))
                 #remove tmp
                 os.remove(self.filepath(result['name'])+"_tmp")
+                result['name'] = new_filename
                 result['size'] = self.get_file_size(open(self.filepath(result['name']),"rb"))
                 result['delete_type'] = self.delete_method
                 result['delete_url'] = result['name']

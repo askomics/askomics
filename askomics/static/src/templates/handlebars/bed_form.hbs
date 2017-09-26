@@ -2,7 +2,7 @@
     <div id="{{idfile}}" filename="{{file.name}}">
         <h4>BED file: {{file.name}} </h4>
         <p>Entity name</p>
-        <input type="text" name="frame" id="entity-{{idfile}}">
+        <input type="text" name="frame" id="entity-{{idfile}}" value="{{file.label}}">
         <br>
         {{#if taxons.length}}
             <p>Select an existing taxon</p>

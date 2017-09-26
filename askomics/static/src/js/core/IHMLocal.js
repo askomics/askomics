@@ -109,6 +109,13 @@ class IHMLocal {
         $("#init").hide();
         $("#queryBuilder").show();
 
+        // Show a galaxy dropdown if user have a galaxy connected
+        
+        if (__ihm.user.haveGalaxy()) {
+          console.log('user have galaxy');
+          $('.send2galaxy-li').removeClass('hidden');
+        }
+
         /* load local abtraction  */
         this.localUserAbstraction.loadUserAbstraction();
 
@@ -126,11 +133,18 @@ class IHMLocal {
 
         AskomicsObjectView.start();
         if ( contents === undefined ) {
-
-        let uri = $('input.start_point_radio:checked').attr('id');
+        console.log("length:"+$('#spdiv .start_point_radio:checked').length);
+        console.log("length:"+$('#spdiv .start_point_radio').length);
+        console.log("length:"+$('#spdiv input.start_point_radio:checked').length);
+        console.log("length:"+$('#spdiv input.start_point_radio').length);
+        let uri = $('#spdiv input.start_point_radio:checked').attr('id');
+        console.assert(uri != undefined ,"Can not get start point URI !" );
         let label = $('input.start_point_radio:checked').attr('value');
+        console.assert(label != undefined ,"Can not get start point Label !" );
         let startPoint = {'uri': uri, 'label': label};
-
+        console.log(uri);
+        console.log(label);
+        console.log("----");
           __ihm.getSVGLayout().start(startPoint);
         } else {
           __ihm.getSVGLayout().startWithQuery(contents);
@@ -233,7 +247,6 @@ class IHMLocal {
     }
 
     managelistErrorsMessage(listE) {
-      console.log("managelistErrorsMessage - error inside => "+JSON.stringify(listE));
       // Remove last message
       $('#error_div').remove();
       // If there is an error message, how it
@@ -259,6 +272,8 @@ class IHMLocal {
             // Sort inputs
             let inputs = $("#spdiv");
             inputs.children().detach().sort(function(a, b) {
+                console.log("a:"+a);
+                console.log("a:"+b);
                 return $(a).attr("id").localeCompare($(b).attr("id"));
             }).appendTo(inputs);
 
@@ -304,6 +319,13 @@ class IHMLocal {
             $('.start_point_radio').change(function() {
                 $('#starter').removeAttr('disabled');
             });
+
+            // Galaxy upload
+            $('.import-galaxy-query').click(function(d) {
+                console.log('Display galaxy form');
+                __ihm.set_upload_galaxy_form(false, false);
+            });
+
         });
     }
 
@@ -313,7 +335,6 @@ class IHMLocal {
         service.getAll(function(data) {
             let template = AskOmics.templates.datasets;
             for (var i = data.length - 1; i >= 0; i--) {
-                data[i].count = __ihm.format_number(data[i].count);
             }
             let context = {datasets: data};
             let html = template(context);
@@ -352,25 +373,15 @@ class IHMLocal {
             });
 
             // sorted dataTable
-            $('.data-table').DataTable({
+            $('.datasets-table').DataTable({
                 'order': [[1, 'asc']],
-                'columnDefs': [{ 'orderable': false, 'targets': 0 }]
+                'columnDefs': [
+                    { 'orderable': false, 'targets': 0 },
+                    { type: 'date-euro', targets: 2 }
+                ]
             });
 
         });
-    }
-
-    format_number(number) {
-        // number = number;
-        number += '';
-        let x = number.split('.');
-        let x1 = x[0];
-        let x2 = x.length > 1 ? '.' + x[1] : '';
-        let rgx = /(\d+)(\d{3})/;
-        while (rgx.test(x1)) {
-            x1 = x1.replace(rgx, '$1' + ' ' + '$2');
-        }
-        return x1 + x2;
     }
 
     graphname(graphn) {
@@ -380,8 +391,6 @@ class IHMLocal {
     }
 
     loadStatistics() {
-        console.log('-+-+- loadStatistics -+-+-');
-
         let service = new RestServiceJs('statistics');
 
         __ihm.displayModal('Loading statistics...', '', 'Close');
@@ -434,6 +443,10 @@ class IHMLocal {
         $('#modal').modal('hide');
     }
 
+    send_query_to_galaxy() {
+        console.log('Send query to galaxy');
+    }
+
     downloadTextAsFile(filename, text) {
         // Download text as file
         var element = document.createElement('a');
@@ -448,27 +461,214 @@ class IHMLocal {
         document.body.removeChild(element);
     }
 
+    get_uploaded_files() {
+        let service = new RestServiceJs("get_uploaded_files");
+        service.getAll(function(data) {
+            let template = AskOmics.templates.uploaded_files;
+            let context = {files: data.files, galaxy: data.galaxy, allowed_upload: $.parseJSON(data.allowed_upload)};
+            let html = template(context);
+            $('#content_integration').empty();
+            $('#content_integration').append(html);
 
-    setUploadForm(content,titleForm,route_overview,callback) {
-      var service = new RestServiceJs("up/");
-      service.getAll(function(formHtmlforUploadFiles) {
-        let sizeFileMax = __ihm.user.isAdmin()?__ihm.sizeFileMaxAdmin:__ihm.sizeFileMaxUser;
+            // check all
+            $(".check_all_uploaded").change(function () {
+                $(".check_one_uploaded").prop('checked', $(this).prop("checked"));
+            });
 
-        formHtmlforUploadFiles.html = formHtmlforUploadFiles.html.replace("___TITLE_UPLOAD___",titleForm);
-        formHtmlforUploadFiles.html = formHtmlforUploadFiles.html.replace("___SIZE_UPLOAD____",(sizeFileMax/(1000*1000))+" Mo");
-        $(content).html(formHtmlforUploadFiles.html);
-        /*
+            // Show/hide upload button
+            $(".check_uploaded").change(function(){
+                if ($('.check_one_uploaded:checked').length !== 0) {
+                   $('.btn-uploaded').removeAttr('disabled');
+                }else{
+                    $('.btn-uploaded').attr('disabled', 'disabled');
+                }
+            });
 
-              MAIN UPLOAD Third party => copy from /static/js/third-party/upload/main.js (thi file is disbale in askomics)
+            // Upload selected datasets
+            $('#integrate_uploaded').click(function() {
+                $("#spinner_uploaded").removeClass("hidden");
+                let selected_files = [];
+                $('.check_one_uploaded').each(function() {
+                    if ($(this).is(':checked')) {selected_files.push($(this).attr('value'));}
+                });
+                let service = new RestServiceJs('source_files_overview');
+                service.post(selected_files, function(data) {
+                    displayIntegrationForm(data);
+                });
+            });
 
-        */
+            // Delete selected datasets
+            $("#delete_uploaded").click(function() {
+                $("#spinner_uploaded").removeClass("hidden");
+                let selected_files = [];
+                $('.check_one_uploaded').each(function() {
+                    if ($(this).is(':checked')) {selected_files.push($(this).attr('value'));}
+                });
+                let service = new RestServiceJs('delete_uploaded_files');
+                service.post(selected_files, function(data) {
+                    __ihm.get_uploaded_files();
+                });
+            });
+
+            $('#upload_from_computer').click(function() {
+                __ihm.set_upload_form();
+            });
+
+            $('#upload_from_galaxy').click(function() {
+                __ihm.set_upload_galaxy_form(false, true);
+            });
+
+            // sorted dataTable
+            $('.uploaded-data-table').DataTable({
+                'order': [[1, 'asc']],
+                'columnDefs': [
+                    { 'orderable': false, 'targets': 0 },
+                    { "type": "file-size", targets: 2 }
+                ]
+            });
+        });
+    }
+
+    set_upload_galaxy_form(history_id, input, histories={}) {
+
+        let title;
+        let radio;
+        let input_type;
+        let allowed_files;
+        if (input) {
+            // Input file upload
+            title = 'Get a dataset from Galaxy';
+            radio = true;
+            input_type = 'checkbox';
+            allowed_files = ['tabular', 'ttl', 'gff', 'gff3', 'gff2', 'bed'];
+        }else{
+            // Query file upload
+            title = 'Get a query from Galaxy';
+            radio = false;
+            input_type = 'radio';
+            allowed_files = ['json'];
+        }
+
+        let template = AskOmics.templates.galaxy_datasets;
+        let context = {datasets: {}, histories: histories, radio: radio, input_type: input_type};
+        let html = template(context);
+
+        $('#modalTitle').text(title);
+        $('.modal-sm').css('width', '50%');
+        $('.modal-body').show();
+        $('#modalButton').text('Close');
+        $('#modal').modal('show');
+        $('#modalMessage').html(html);
+        $('#spinner_loading_galaxy').removeClass('hidden');
+        $('.galaxy-table').hide();
+
+        if (typeof history_id === 'undefined' || history_id === null) {
+            history_id = false;
+        }
+
+        // If a Galaxy instance is connected, show the form to get data from the Galaxy history
+        let service = new RestServiceJs('get_data_from_galaxy');
+        let model = {history: history_id, allowed_files: allowed_files};
+        service.post(model, function(data) {
+            if (!data.galaxy) return;
+            let template = AskOmics.templates.galaxy_datasets;
+            let context = {datasets: data.datasets, histories: data.histories, radio: radio, input_type: input_type};
+            let html = template(context);
+
+            $('#modalTitle').text(title);
+            $('.modal-sm').css('width', '50%');
+            $('.modal-body').show();
+            $('#modalButton').text('Close');
+            $('#modal').modal('show');
+            $('#modalMessage').html(html);
+
+            // sorted dataTable
+            $('.galaxy-table').DataTable({
+                'order': [[1, 'asc']],
+                'columnDefs': [
+                    { 'orderable': false, 'targets': 0 }//,
+                    // { "type": "file-size", targets: 2 }
+                ]
+            });
+
+            // check all
+            $(".check_all_galaxy").change(function () {
+                $(".check_one_galaxy").prop('checked', $(this).prop("checked"));
+            });
+
+            //Show/hide upload button
+            $(".check_galaxy").change(function(){
+                if ($('.check_one_galaxy:checked').length !== 0) {
+                   $('#upload_galaxy').removeAttr('disabled');
+                }else{
+                    $('#upload_galaxy').attr('disabled', 'disabled');
+                }
+            });
+
+            $('#upload_galaxy').click(function() {
+                if (input) {
+                    // Upload selected datasets
+                    $("#spinner_galaxy-upload").removeClass("hidden");
+                    let selected_datasets = [];
+                    $('.check_one_galaxy').each(function() {
+                        if ($(this).is(':checked')) {selected_datasets.push($(this).attr('value'));}
+                    });
+                    //upload files
+                    let service2 = new RestServiceJs('upload_galaxy_files');
+                    let model = {'datasets': selected_datasets};
+                    service2.post(model, function(data) {
+                        __ihm.manageErrorMessage(data);
+                        $("#spinner_galaxy-upload").addClass("hidden");
+                        __ihm.get_uploaded_files();
+                    });
+                }else{
+                    // Import query file
+                    console.log('upload query file');
+                    // get the file's content
+                    $("#spinner_galaxy-upload").removeClass("hidden");
+                    let dataset = $('input[name=upload-galaxy]:checked').val();
+                    console.log('gid');
+                    console.log(dataset);
+                    let service2 = new RestServiceJs('get_galaxy_file_content');
+                    let model = {'dataset': dataset};
+                    service2.post(model, function(data) {
+                        __ihm.startSession(data.json_query);
+                    });
+                }
+            });
+
+            // On select change, reload
+            $('#change_history').on('change', function() {
+                __ihm.set_upload_galaxy_form(this.value, input, histories=data.histories);
+            });
+        });
+    }
+
+    set_upload_form() {
+        $('#modalTitle').text('Upload files');
+        $('.modal-sm').css('width', '55%');
+        $('.modal-body').show();
+        $('#modalButton').text('Close');
+        $('#modal').modal('show');
+        $('#modal').addClass('upload-modal');
+
+        let content = '#modalMessage';
+
+        // Upload form
+        let service = new RestServiceJs("up/");
+        service.getAll(function(html) {
+        let size_file_max = __ihm.user.isAdmin()?__ihm.sizeFileMaxAdmin:__ihm.sizeFileMaxUser;
+
+        html.html = html.html.replace("___SIZE_UPLOAD____",(size_file_max/(1000*1000))+" Mo");
+        $(content).html(html.html);
+
         // Initialize the jQuery File Upload widget
         $(content).find('#fileupload').fileupload({
             // Uncomment the following to send cross-domain cookies:
             //xhrFields: {withCredentials: true},
             url: 'up/file/',
             maxChunkSize: __ihm.chunkSize,
-            maxFileSize: sizeFileMax
+            maxFileSize: size_file_max
         });
 
         // Enable iframe cross-domain access via redirect option
@@ -479,41 +679,12 @@ class IHMLocal {
                 /\/[^\/]*$/,
                 '/cors/result.html?%s'
             )
-        );
+        ).bind('fileuploaddone', function () {__ihm.get_uploaded_files();});
 
-        // Load existing files
-        $(content).find('#fileupload').addClass('fileupload-processing');
-        $.ajax({
-            // Uncomment the following to send cross-domain cookies:
-            //xhrFields: {withCredentials: true},
-            url: $(content).find('#fileupload').fileupload('option', 'url'),
-            dataType: 'json',
-            context: $(content).find('#fileupload')[0]
-        }).always(function () {
-            $(this).removeClass('fileupload-processing');
-        }).done(function (result) {
-            $(this).fileupload('option', 'done')
-                .call(this, $.Event('done'), {result: result});
-        });
-
-        // Integrate button
-        $('.integrate-button').click(function() {
-            __ihm.displayModal('Please Wait', '', 'Close');
-            var service = new RestServiceJs(route_overview);
-            service.getAll(function(data) {
-                callback(data);
-                __ihm.hideModal();
-            });
-
-        });
       });
     }
 
     loadUsers() {
-      console.log('-+-+- loadUsers -+-+-');
-
-      // __ihm.displayModal('Please wait', '', 'Close');
-
       let service = new RestServiceJs('get_users_infos');
       service.getAll(function(data) {
         $("#Users_adm").empty();
@@ -544,7 +715,6 @@ class IHMLocal {
     }
 
     delUser(username, reload=false, passwdconf=false) {
-      console.log('-+-+-delUser ' + username + ' -+-+-');
       // display confirmations buttons
       $('.del_user#' + username).hide();
       $('.div_confirm_del_user#' + username).removeClass('hidden').show();
@@ -560,7 +730,6 @@ class IHMLocal {
 
       //if yes, delete user and all this data and reload the list
       $('.confirm_del_user#' + username).click(function(e) {
-        console.log('CONFIRM DELETE USER ' + username);
         // get the passwd if needed
         let passwd = '';
         if (passwdconf) {
@@ -596,7 +765,6 @@ class IHMLocal {
     }
 
     lockUser(username, lock) {
-      console.log('-+-+- lockUser -+-+-');
       let service = new RestServiceJs('lockUser');
       let data = {'username': username, 'lock': lock};
 
@@ -621,7 +789,6 @@ class IHMLocal {
 
 
     setAdmin(username, admin) {
-      console.log('-+-+- setAdmin -+-+-');
       let service = new RestServiceJs('setAdmin');
       let data = {'username': username, 'admin': admin};
 
@@ -645,15 +812,13 @@ class IHMLocal {
     }
 
     userForm() {
-      console.log('-+-+- userForm -+-+-');
-
       let service = new RestServiceJs('get_my_infos');
       service.getAll(function(d) {
         // console.log(JSON.stringify(d));
         console.log('keys');
         console.log(d.apikeys);
         let template = AskOmics.templates.user_managment;
-        let context = {user: d, keys: d.apikeys};
+        let context = {user: d, keys: d.apikeys, galaxy: d.galaxy};
         let html = template(context);
         $('#content_user_info').empty();
         $('#content_user_info').append(html);
@@ -669,6 +834,9 @@ class IHMLocal {
         });
         $('.get_new_apikey#' + d.username).click(function() {
           __ihm.get_apikey(d.username, $('.new_apikey_name#' + d.username).val());
+        });
+        $('.add_galaxy#' + d.username).click(function() {
+          __ihm.connect_galaxy($('.galaxy_url#' + d.username).val(), $('.galaxy_key#' + d.username).val());
         });
 
         // Active the tooltip
@@ -694,7 +862,6 @@ class IHMLocal {
     }
 
     deleteApikey(key) {
-      console.log('delete ' + key);
       let service = new RestServiceJs('del_apikey');
       let data = {'key': key};
       service.post(data, function(d) {
@@ -719,7 +886,6 @@ class IHMLocal {
     }
 
     updatePasswd(username) {
-      console.log('-+-+-+ updatePasswd -+-+-+');
       $('#tick_passwd').addClass('hidden');
       let passwd = $('.new_passwd#' + username).val();
       let passwd2 = $('.new_passwd2#' + username).val();
@@ -759,7 +925,6 @@ class IHMLocal {
     }
 
     updateMail(username) {
-      console.log('-+-+- updateMail -+-+-');
       $('#tick_mail').addClass('hidden');
       let email = $('.new_email#' + username).val();
 
@@ -787,9 +952,6 @@ class IHMLocal {
     }
 
     get_apikey(username, keyname) {
-      console.log('-+-+- get_apikey -+-+-+');
-      console.log('for ' + username);
-      console.log('keyname: ' + keyname);
       let service = new RestServiceJs('api_key');
       let data = {'username': username, 'keyname': keyname};
       $('#spinner_apikey').removeClass('hidden');
@@ -806,8 +968,49 @@ class IHMLocal {
 
     }
 
+    connect_galaxy(url, key) {
+      let service = new RestServiceJs('connect_galaxy');
+      let data = {'url': url, 'key': key};
+      // show a spinner
+      $('#spinner_galaxy').removeClass('hidden');
+      $('#tick_galaxy').addClass('hidden');
+      $('#cross_galaxy').addClass('hidden');
+
+      service.post(data, function(d) {
+        if (!__ihm.manageErrorMessage(d)) {
+          // show a red cross
+          $('#spinner_galaxy').addClass('hidden');
+          $('#tick_galaxy').addClass('hidden');
+          $('#cross_galaxy').removeClass('hidden');
+          return;
+        }
+        if (d.success == "deleted") {
+            //show a green tick
+            $('#spinner_galaxy').addClass('hidden');
+            $('#tick_galaxy').removeClass('hidden');
+            $('#cross_galaxy').addClass('hidden');
+            // update the placeholder with default values
+            $('.galaxy_url').attr('placeholder', 'Galaxy url');
+            $('.galaxy_key').attr('placeholder', 'Galaxy api key');
+            // Button name: add
+            $('.add_galaxy').html('Add');
+            return;
+        }
+        // Key updated
+        // show a green tick
+        $('#spinner_galaxy').addClass('hidden');
+        $('#tick_galaxy').removeClass('hidden');
+        $('#cross_galaxy').addClass('hidden');
+        // update the placeholder
+        $('.galaxy_url').attr('placeholder', url);
+        $('.galaxy_key').attr('placeholder', key);
+        // remove the values
+        $('.galaxy_url').val('');
+        $('.galaxy_key').val('');
+      });
+    }
+
     displayNavbar(loged, username, admin, blocked) {
-        console.log('-+-+- displayNavbar -+-+-');
         $("#navbar").empty();
         let template = AskOmics.templates.navbar;
 
@@ -829,7 +1032,7 @@ class IHMLocal {
 
         // Get the overview of files to integrate
         $("#integration").click(function() {
-            __ihm.setUploadForm('div#content_integration',"Upload User Files","source_files_overview",displayIntegrationForm);
+            __ihm.get_uploaded_files();
         });
 
         // Visual effect on active tab (Ask! / Integrate / Credits)

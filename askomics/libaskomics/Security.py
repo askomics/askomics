@@ -1,13 +1,12 @@
 import logging
 import hashlib
-from validate_email import validate_email
 import random
 import re
-
-
+from validate_email import validate_email
 from askomics.libaskomics.ParamManager import ParamManager
 from askomics.libaskomics.rdfdb.SparqlQueryAuth import SparqlQueryAuth
 from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
+from askomics.libaskomics.GalaxyConnector import GalaxyConnector
 
 
 class Security(ParamManager):
@@ -26,6 +25,7 @@ class Security(ParamManager):
         self.passwd2 = str(password2)
         self.admin = False
         self.blocked = True
+        self.galaxy = False
 
         # concatenate askmics salt, password and random salt and hash it with sha256 function
         # see --"https://en.wikipedia.org/wiki/Salt_(cryptography)"-- for more info about salt
@@ -161,6 +161,20 @@ class Security(ParamManager):
         if result:
             self.username = result[0]['username']
 
+    def ckeck_key_belong_user(self, key):
+        """Check if a key belong to a user"""
+
+        query_laucher = QueryLauncher(self.settings, self.session)
+        sqa = SparqlQueryAuth(self.settings, self.session)
+
+        result = query_laucher.process_query(sqa.ckeck_key_belong_user(self.username, key).query)
+        self.log.debug('---> result: ' + str(result))
+
+        if len(result) <= 0:
+            return False
+
+        return ParamManager.Bool(result[0]['count'])
+
     def delete_apikey(self, key):
         """delete an apikey"""
 
@@ -265,6 +279,13 @@ class Security(ParamManager):
         self.admin = admin
         self.session['admin'] = admin
 
+    def set_galaxy(self, galaxy):
+        """
+        set self.galaxy at True if user has a connected galaxy account
+        """
+        self.galaxy = galaxy
+        self.session['galaxy'] = galaxy
+
     def set_blocked(self, blocked):
         """
         set self.blocked at True if user is a blocked
@@ -321,6 +342,7 @@ class Security(ParamManager):
         session['admin'] = self.admin
         session['blocked'] = self.blocked
         session['graph'] = self.settings['askomics.graph'] + ':' + self.username
+        session['galaxy'] = self.galaxy
 
     def update_email(self):
         """
@@ -351,3 +373,57 @@ class Security(ParamManager):
         sqa = SparqlQueryAuth(self.settings, self.session)
 
         query_laucher.execute_query(sqa.add_apikey(self.username, keyname).query)
+
+    def add_galaxy(self, url, key):
+        """Connect a galaxy account to Askomics
+
+        add triples for the url of galaxy, and the user api key
+
+        :param self; url: the galaxy url
+        :type self; url: string
+        :param key: the galaxy user api key
+        :type key: string
+        """
+
+        # try to connect to the galaxy server
+        galaxy = GalaxyConnector(self.settings, self.session, url, key)
+        try:
+            galaxy.check_galaxy_instance()
+        except Exception as e:
+            raise e
+
+        query_laucher = QueryLauncher(self.settings, self.session)
+        sqa = SparqlQueryAuth(self.settings, self.session)
+
+        query_laucher.execute_query(sqa.add_galaxy(self.username, url, key).query)
+
+    def get_galaxy_infos(self):
+        """Get Galaxy url and apikey of a user"""
+
+        query_laucher = QueryLauncher(self.settings, self.session)
+        sqa = SparqlQueryAuth(self.settings, self.session)
+
+        result = query_laucher.process_query(sqa.get_galaxy_infos(self.username).query)
+
+        if result:
+            return result[0]
+        return []
+
+    def check_galaxy(self):
+        """Check if user have galaxy triples"""
+
+        query_laucher = QueryLauncher(self.settings, self.session)
+        sqa = SparqlQueryAuth(self.settings, self.session)
+
+        result = query_laucher.process_query(sqa.check_galaxy(self.username).query)
+
+        return ParamManager.Bool(result[0]['status'])
+
+    def delete_galaxy(self):
+        """Delete galaxy triple for the user"""
+
+
+        query_laucher = QueryLauncher(self.settings, self.session)
+        sqa = SparqlQueryAuth(self.settings, self.session)
+
+        query_laucher.execute_query(sqa.delete_galaxy(self.username).query)

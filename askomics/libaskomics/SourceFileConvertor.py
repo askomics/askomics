@@ -32,7 +32,7 @@ class SourceFileConvertor(ParamManager):
         :rtype: list
         """
 
-        src_dir = self.getUploadDirectory()
+        src_dir = self.get_upload_directory()
         paths = glob(src_dir + '/*')
 
         files = []

@@ -296,7 +296,7 @@ class ModulesManager(ParamManager):
                     if i>idx:
                         idx=i
                 if idx>=0:
-                    label = self.escape['text'](self.reversePrefix(label[:idx+1])+':'+label[idx+1:])
+                    label = self.escape['text'](self.reverse_prefix(label[:idx+1])+':'+label[idx+1:])
                 else:
                     label = self.escape['text'](label)
                 rdftab.append("<"+ent +"> rdfs:label "+label+"^^xsd:string.")

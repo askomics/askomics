@@ -103,7 +103,7 @@ class HaveCachedProperties(object):
     """Provide cache management for classes with @cached_property attributes."""
     @classmethod
     def get_cached_properties(cls):
-        # cached_property instances are in the class dict with other class attributes
+        """cached_property instances are in the class dict with other class attributes"""
         return (attr for attr, cp in cls.__dict__.items()
                 if isinstance(cp, cached_property))
 
@@ -136,7 +136,7 @@ class HaveCachedProperties(object):
                 self.__dict__[key] = cache
 
     def reset_cache(self):
-        "Equivalent to self.set_cache({}, reset=True) or del self.cache"
+        """Equivalent to self.set_cache({}, reset=True) or del self.cache"""
         for key in self.get_cached_properties():
             self.__dict__.pop(key, None)
 

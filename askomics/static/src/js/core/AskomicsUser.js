@@ -22,6 +22,7 @@ class AskomicsUser {
             clearInterval(this.intervalListener);
           }
         }
+        this.galaxy = false;
     }
 
     isAdmin() {
@@ -36,6 +37,10 @@ class AskomicsUser {
         return (this.username != undefined)&&(this.username != "");
     }
 
+    haveGalaxy() {
+        return this.galaxy;
+    }
+
     logUser() {
         $('#interrogation').click();
     }
@@ -45,7 +50,12 @@ class AskomicsUser {
         let self = this;
 
         service.getAll(function(data) {
+
           let expired = false;
+          console.log(self.username+","+data.username);
+          console.log(self.admin+","+data.admin);
+          console.log(self.blocked+","+data.blocked);
+          console.log(self.username+","+data.username);
 
           if ( (self.username != data.username)|| (self.admin != data.admin)| (self.blocked != data.blocked) ) {
               if ( self.username != "" && data.username == "" ) {
@@ -54,10 +64,12 @@ class AskomicsUser {
               self.username = data.username;
               self.admin = data.admin;
               self.blocked = data.blocked;
+              self.galaxy = data.galaxy;
           }
+
           if ((data.username != undefined) && (data.username != '') ) {
               __ihm.displayNavbar(true, self.username, self.admin, self.blocked);
-          }else{
+          } else{
             AskomicsUser.cleanHtmlLogin();
             __ihm.displayNavbar(false, '');
             if (expired) {

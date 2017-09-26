@@ -10,6 +10,7 @@ let instanceAskomicsJobsViewManager ;
 
       this.jobs = [];
       this.npreview=30 ; /* max data to transfert to IHM */
+      this.galaxy = false;
 
       instanceAskomicsJobsViewManager = this;
 
@@ -68,6 +69,9 @@ let instanceAskomicsJobsViewManager ;
             job.classtr = AskomicsJobsViewManager.getClassTr(job.state) ;
             if ( data[i].requestGraph != '') {
               job.stateToReload = btoa(data[i].requestGraph);
+            }
+            if ( 'file' in data[i] ) {
+              job.csv   = data[i].file;
             }
 
             job.preview = $('<div></div>').html(data[i].preview) ;
@@ -135,9 +139,9 @@ let instanceAskomicsJobsViewManager ;
 
     createQueryJob() {
       //create state view
-      //let curId = new AskomicsJobsViewManager().createWaitState();
       let service = new RestServiceJs("sparqlquery");
       let jdata = this.prepareQuery();
+      let self = this;
 
       // Get ordered headers
       let result_view = new AskomicsResultsView({});

@@ -201,7 +201,7 @@ class QueryLauncher(ParamManager):
         :rtype: string
         """
 
-        dircsv = self.getUserResultsCsvDirectory()
+        dircsv = self.get_user_csv_directory()
         if not os.path.isdir(dircsv):
             os.mkdir(dircsv)
 

@@ -11,6 +11,7 @@ import logging
 from pprint import pformat
 import textwrap
 import datetime
+import humanize
 
 from pygments import highlight
 from pygments.lexers import TurtleLexer
@@ -27,6 +28,7 @@ from askomics.libaskomics.rdfdb.SparqlQueryStats import SparqlQueryStats
 from askomics.libaskomics.rdfdb.SparqlQueryAuth import SparqlQueryAuth
 from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
 from askomics.libaskomics.source_file.SourceFile import SourceFile
+from askomics.libaskomics.GalaxyConnector import GalaxyConnector
 
 from pyramid.httpexceptions import (
     HTTPForbidden,
@@ -64,6 +66,9 @@ class AskView(object):
 
             if 'username' not in self.request.session.keys():
                 self.request.session['username'] = ''
+
+            if 'galaxy' not in self.request.session.keys():
+                self.request.session['galaxy'] = False
 
         except Exception as e:
                 traceback.print_exc(file=sys.stdout)
@@ -325,9 +330,8 @@ class AskView(object):
                 self.log.warn("============================================================")
                 continue
             dat = datetime.datetime.strptime(res['results']['bindings'][index_result]['date']['value'], "%Y-%m-%dT%H:%M:%S.%f")
-            self.log.debug(dat)
 
-            readable_date = dat.strftime("%y-%m-%d at %H:%M:%S")
+            readable_date = dat.strftime("%d/%m/%Y %H:%M:%S") #dd/mm/YYYY hh:ii:ss
 
             named_graphs.append({
                 'g': res['results']['bindings'][index_result]['g']['value'],
@@ -336,6 +340,7 @@ class AskView(object):
                 'date': res['results']['bindings'][index_result]['date']['value'],
                 'readable_date': readable_date,
                 'access': res['results']['bindings'][index_result]['access']['value'],
+                'owner': res['results']['bindings'][index_result]['owner']['value'],
                 'access_bool': bool(res['results']['bindings'][index_result]['access']['value'] == 'public')
             })
 
@@ -375,20 +380,19 @@ class AskView(object):
 
 
 
-    @view_config(route_name='source_files_overview', request_method='GET')
+    @view_config(route_name='source_files_overview', request_method='POST')
     def source_files_overview(self):
         """
         Get preview data for all the available files
         """
-
         self.checkAuthSession()
 
+        files_to_integrate = self.request.json_body
+
+        self.log.debug(" ========= Askview:source_files_overview =============")
         try:
-            self.log.debug(" ========= Askview:source_files_overview =============")
             sfc = SourceFileConvertor(self.settings, self.request.session)
-
             source_files = sfc.get_source_files()
-
             self.data['files'] = []
 
             # get all taxon in the TS
@@ -401,6 +405,9 @@ class AskView(object):
             self.data['taxons'] = taxons_list
 
             for src_file in source_files:
+                # Process only selected files
+                if src_file.name not in files_to_integrate:
+                    continue
                 infos = {}
                 infos['name'] = src_file.name
                 infos['type'] = src_file.type
@@ -930,13 +937,13 @@ class AskView(object):
 
             self.data['nrow'] = len(results)
 
-            if persist:
-                jm.updateEndSparqlJob(jobid,"Ok",nr=len(results),data=self.data['values'])
-
             # Provide results file
             if (not 'nofile' in body) or body['nofile']:
                 query_laucher = QueryLauncher(self.settings, self.request.session)
                 self.data['file'] = query_laucher.format_results_csv(results, ordered_headers)
+
+            if persist:
+                jm.updateEndSparqlJob(jobid,"Ok",nr=len(results),data=self.data['values'], file=self.data['file'])
 
         except Exception as e:
             #exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -948,6 +955,8 @@ class AskView(object):
             if persist:
                 jm.updateEndSparqlJob(jobid,"Error")
                 jm.updatePreviewJob(jobid,str(e))
+
+        self.data['galaxy'] = self.request.session['galaxy']
 
         return self.data
 
@@ -996,7 +1005,7 @@ class AskView(object):
 
         pm = ParamManager(self.settings, self.request.session)
         response = FileResponse(
-            pm.getRdfDirectory()+self.request.matchdict['name'],
+            pm.get_rdf_directory()+self.request.matchdict['name'],
             content_type='text/turtle'
             )
         return response
@@ -1005,9 +1014,8 @@ class AskView(object):
     def uploadCsv(self):
 
         pm = ParamManager(self.settings, self.request.session)
-
         response = FileResponse(
-            pm.getUserResultsCsvDirectory()+self.request.matchdict['name'],
+            pm.get_user_csv_directory()+self.request.matchdict['name'],
             content_type='text/csv'
             )
         return response
@@ -1017,7 +1025,7 @@ class AskView(object):
     def deletCsv(self):
 
         pm = ParamManager(self.settings, self.request.session)
-        os.remove(pm.getUserResultsCsvDirectory()+self.request.matchdict['name']),
+        os.remove(pm.get_user_csv_directory()+self.request.matchdict['name']),
 
 
 
@@ -1093,6 +1101,7 @@ class AskView(object):
         self.data['username'] = self.request.session['username']
         self.data['admin'] = self.request.session['admin']
         self.data['blocked'] = self.request.session['blocked']
+        self.data['galaxy'] = self.request.session['galaxy']
 
         return self.data
 
@@ -1106,6 +1115,7 @@ class AskView(object):
         self.request.session['username'] = ''
         self.request.session['admin'] = ''
         self.request.session['graph'] = ''
+        self.request.session['galaxy'] = False
         self.request.session = {}
 
         return
@@ -1164,6 +1174,10 @@ class AskView(object):
             security.set_admin(admin_blocked['admin'])
             security.set_blocked(admin_blocked['blocked'])
 
+            # Get if user has a connected Galaxy account
+            galaxy = security.check_galaxy()
+            security.set_galaxy(galaxy)
+
             password_is_correct = security.check_username_password()
 
             if not password_is_correct:
@@ -1183,7 +1197,7 @@ class AskView(object):
             return self.data
 
         param_manager = ParamManager(self.settings, self.request.session)
-        param_manager.getUploadDirectory()
+        param_manager.get_upload_directory()
 
         return self.data
 
@@ -1227,6 +1241,85 @@ class AskView(object):
         if key_belong2user:
             security.delete_apikey(key)
 
+    @view_config(route_name='connect_galaxy', request_method='POST')
+    def connect_galaxy(self):
+
+        # Denny access for non loged users or non admin users
+        if self.request.session['username'] == '':
+            return 'forbidden'
+
+        body = self.request.json_body
+        url = body['url']
+        key = body['key']
+
+        security = Security(self.settings, self.request.session, self.request.session['username'], '', '', '')
+
+
+        # Check if a galaxy is already registred
+        galaxy_already_registred = security.check_galaxy()
+
+        if galaxy_already_registred:
+            security.delete_galaxy()
+            self.request.session['galaxy'] = False
+
+        # If url or apikey are empty, do nothing (only deletion)
+        if not url or not key:
+            self.data['success'] = 'deleted'
+            return self.data
+
+        # Insert the new Galaxy
+        try:
+            security.add_galaxy(url, key)
+            self.request.session['galaxy'] = True
+        except Exception as e:
+
+            self.data['error'] = 'Connection to Galaxy failed'
+            return self.data
+
+        self.data['success'] = 'inserted'
+
+        return self.data
+
+    @view_config(route_name='login_api_gie', request_method='GET')
+    def login_api_gie(self):
+
+        apikey = self.request.GET['key']
+
+        self.data['error'] = ''
+
+        security = Security(self.settings, self.request.session, '', '', '', '')
+
+        # Check if API key exist, and if yes, get the user
+        security.get_owner_of_apikey(apikey)
+
+        if not security.get_username():
+            self.data['error'] = 'API key belong to nobody'
+            return self.data
+
+        # Get the admin and blocked status
+        admin_blocked = security.get_admin_blocked_by_username()
+        security.set_admin(admin_blocked['admin'])
+        security.set_blocked(admin_blocked['blocked'])
+        # Get if user has a connected Galaxy account
+        galaxy = security.check_galaxy()
+        security.set_galaxy(galaxy)
+
+        # Log the user
+        try:
+            security.log_user(self.request)
+            self.data['username'] = security.get_username()
+            self.data['admin'] = admin_blocked['admin']
+            self.data['blocked'] = admin_blocked['blocked']
+
+        except Exception as e:
+            self.data['error'] = str(e)
+            self.log.error(str(e))
+            return self.data
+
+        param_manager = ParamManager(self.settings, self.request.session)
+        param_manager.get_upload_directory()
+
+        return HTTPFound(self.request.application_url)
 
 
     @view_config(route_name='login_api', request_method='POST')
@@ -1250,6 +1343,9 @@ class AskView(object):
         admin_blocked = security.get_admin_blocked_by_username()
         security.set_admin(admin_blocked['admin'])
         security.set_blocked(admin_blocked['blocked'])
+        # Get if user has a connected Galaxy account
+        galaxy = security.check_galaxy()
+        security.set_galaxy(galaxy)
 
         # Log the user
         try:
@@ -1265,7 +1361,7 @@ class AskView(object):
             return self.data
 
         param_manager = ParamManager(self.settings, self.request.session)
-        param_manager.getUploadDirectory()
+        param_manager.get_upload_directory()
 
         return self.data
 
@@ -1452,6 +1548,7 @@ class AskView(object):
 
 
         apikey_list = []
+        galaxy_dict = {}
 
         for res in result:
             if 'keyname' in res:
@@ -1460,6 +1557,12 @@ class AskView(object):
                 # apikey_dict[res['keyname']] = res['apikey']
                 apikey_list.append({'name': res['keyname'], 'key': res['apikey']})
 
+        for res in result:
+            if 'Gurl' in res:
+                self.log.debug(res['Gurl'])
+                self.log.debug(res['Gkey'])
+                galaxy_dict = {'url': res['Gurl'], 'key': res['Gkey']}
+
         result = result[0]
         result['email'] = re.sub(r'^mailto:', '', result['email'])
         result['username'] = self.request.session['username']
@@ -1467,8 +1570,12 @@ class AskView(object):
         result['blocked'] = ParamManager.Bool(result['blocked'])
         result.pop('keyname', None)
         result.pop('apikey', None)
+        result.pop('Gurl', None)
+        result.pop('Gkey', None)
 
         result['apikeys'] = apikey_list
+        if galaxy_dict:
+            result['galaxy'] = galaxy_dict
 
         return result
     @view_config(route_name='update_mail', request_method='POST')
@@ -1539,3 +1646,171 @@ class AskView(object):
         self.data['success'] = 'success'
 
         return self.data
+
+
+
+    @view_config(route_name='get_data_from_galaxy', request_method='POST')
+    def get_data_from_galaxy(self):
+
+        body = self.request.json_body
+        history = body['history']
+        allowed_files = body['allowed_files']
+
+        self.data = {}
+
+        # Check if a galaxy is registered
+        security = Security(self.settings, self.request.session, self.request.session['username'], '', '', '')
+
+        galaxy_auth = security.get_galaxy_infos()
+
+        self.log.debug(galaxy_auth)
+
+        if not galaxy_auth:
+            self.data['galaxy'] = False
+            return self.data
+
+        # check if the galaxy connection is ok
+        galaxy = GalaxyConnector(self.settings, self.request.session, galaxy_auth['url'], galaxy_auth['key'])
+        if not galaxy.check_galaxy_instance():
+            self.data['error'] = 'Wrong galaxy'
+            self.data['galaxy'] = False
+            return self.data
+
+        self.data['galaxy'] = True
+
+        # Then, get the datasets
+        results = galaxy.get_datasets_and_histories(allowed_files, history_id=history)
+
+        # Boolean values for handlebars
+        for dataset in results['datasets']:
+            if dataset['state'] == 'ok':
+                dataset['success'] = True
+            elif dataset['state'] == 'queued':
+                dataset['notick'] = False
+                dataset['queued'] = True
+            else:
+                dataset['notick'] = False
+                dataset['error'] = True
+
+        self.data['datasets'] = results['datasets']
+        self.data['histories'] = results['histories']
+        return self.data
+
+    @view_config(route_name='upload_galaxy_files', request_method='POST')
+    def upload_galaxy_file(self):
+
+        self.data = {}
+
+        body = self.request.json_body
+
+        # get galaxy infos
+        security = Security(self.settings, self.request.session, self.request.session['username'], '', '', '')
+
+        galaxy_auth = security.get_galaxy_infos()
+
+        if not galaxy_auth:
+            self.data['error'] = 'No Galaxy'
+            return self.data
+
+        # Upload files
+        try:
+            galaxy = GalaxyConnector(self.settings, self.request.session, galaxy_auth['url'], galaxy_auth['key'])
+            galaxy.upload_files(body['datasets'])
+        except Exception as e:
+            self.data['error'] = 'Error during galaxy upload: ' + str(e)
+            return self.data
+
+        self.data['success'] = 'Success'
+        return self.data
+
+    @view_config(route_name='get_galaxy_file_content', request_method='POST')
+    def get_galaxy_file_content(self):
+
+        self.data = {}
+        body = self.request.json_body
+        dataset_id = body['dataset']
+
+        # get galaxy infos
+        security = Security(self.settings, self.request.session, self.request.session['username'], '', '', '')
+
+        galaxy_auth = security.get_galaxy_infos()
+
+        if not galaxy_auth:
+            self.data['error'] = 'No Galaxy'
+            return self.data
+
+        # Get the file content
+        try:
+            galaxy = GalaxyConnector(self.settings, self.request.session, galaxy_auth['url'], galaxy_auth['key'])
+            self.data['json_query'] = galaxy.get_file_content(dataset_id)
+        except Exception as e:
+            self.data['error'] = 'Error during galaxy upload: ' + str(e)
+            return self.data
+
+        return self.data
+
+    @view_config(route_name='send_to_galaxy', request_method='POST')
+    def send2galaxy(self):
+        self.data = {}
+
+        body = self.request.json_body
+
+        # get Galaxy infos
+        security = Security(self.settings, self.request.session, self.request.session['username'], '', '', '')
+
+        galaxy_auth = security.get_galaxy_infos()
+
+        if not galaxy_auth:
+            self.data['error'] = 'No Galaxy'
+            return self.data
+
+        # Send the file to Galaxy
+        try:
+            galaxy = GalaxyConnector(self.settings, self.request.session, galaxy_auth['url'], galaxy_auth['key'])
+            if 'json' in body:
+                galaxy.send_json_to_history(body['json'])
+            else:
+                param_manager = ParamManager(self.settings, self.request.session)
+                path = param_manager.get_user_csv_directory() + body['path']
+                name = body['name']
+                galaxy.send_to_history(path, name, body['type'])
+        except Exception as e:
+            self.data['error'] = 'Error during sending: ' + str(e)
+            return self.data
+
+        self.data['success'] = 'path successfully sended in Galaxy'
+        return self.data
+
+
+    @view_config(route_name='get_uploaded_files', request_method="GET")
+    def get_uploaded_files(self):
+
+        param_manager = ParamManager(self.settings, self.request.session)
+        path = param_manager.get_upload_directory()
+        allowed_upload = param_manager.get_param('askomics.allowed_upload')
+
+        self.data = {}
+        self.data['files'] = {}
+
+        files = os.listdir(path)
+
+        for file in files:
+            file_path = path + '/' + file
+            file_size = humanize.naturalsize(os.path.getsize(file_path), binary=True)
+            self.data['files'][file] = file_size
+
+        self.data['galaxy'] = self.request.session['galaxy']
+        self.data['allowed_upload'] = allowed_upload
+
+        return self.data
+
+    @view_config(route_name="delete_uploaded_files", request_method="POST")
+    def delete_uploaded_files(self):
+
+        files_to_delete = self.request.json_body
+        param_manager = ParamManager(self.settings, self.request.session)
+        path = param_manager.get_upload_directory()
+
+
+        for file in files_to_delete:
+            os.remove(path + '/' + file)

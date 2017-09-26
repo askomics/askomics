@@ -46,17 +46,19 @@ class AskViewTests(unittest.TestCase):
 
         self.request.host_url = 'http://localhost:6543'
 
-        # Create the tmp_file
-        self.temp_directory = tempfile.mkdtemp(suffix='_tmp', prefix='__' + self.request.session['username'] + '__')
+        # Create the user dir if not exist
+        self.temp_directory = self.settings['askomics.files_dir'] + '/upload/' + self.request.session['username']
+        if not os.path.isdir(self.temp_directory):
+            os.makedirs(self.temp_directory)
         # Set the upload dir
         self.request.session['upload_directory'] = self.temp_directory
-
-        # copy the test files into the temp dir
-        files = ['people.tsv', 'instruments.tsv', 'play_instrument.tsv', 'transcript.tsv', 'qtl.tsv', 'small_data.gff3', 'turtle_data.ttl']
-        for file in files:
-            src = os.path.join(os.path.dirname(__file__), "..", "test-data") + '/' + file
-            dst = self.request.session['upload_directory'] + '/' + file
-            copyfile(src, dst)
+        # Copy files if directory is empty
+        if not os.listdir(self.temp_directory):
+            files = ['people.tsv', 'instruments.tsv', 'play_instrument.tsv', 'transcript.tsv', 'qtl.tsv', 'small_data.gff3', 'turtle_data.ttl', 'bed_example.bed']
+            for file in files:
+                src = os.path.join(os.path.dirname(__file__), "..", "test-data") + '/' + file
+                dst = self.request.session['upload_directory'] + '/' + file
+                copyfile(src, dst)
 
         self.tps = InterfaceTPS(self.settings, self.request)
 
@@ -214,8 +216,8 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.list_user_graph()
 
-        readable_date_people = datetime.datetime.strptime(timestamp_people, "%Y-%m-%dT%H:%M:%S.%f").strftime("%y-%m-%d at %H:%M:%S")
-        readable_date_instrument = datetime.datetime.strptime(timestamp_instrument, "%Y-%m-%dT%H:%M:%S.%f").strftime("%y-%m-%d at %H:%M:%S")
+        readable_date_people = datetime.datetime.strptime(timestamp_people, "%Y-%m-%dT%H:%M:%S.%f").strftime("%d/%m/%Y %H:%M:%S")
+        readable_date_instrument = datetime.datetime.strptime(timestamp_instrument, "%Y-%m-%dT%H:%M:%S.%f").strftime("%d/%m/%Y %H:%M:%S")
 
         assert len(data) == 2
         assert isinstance(data, list)
@@ -226,6 +228,7 @@ class AskViewTests(unittest.TestCase):
             'g': 'urn:sparql:test_askomics:jdoe:people_tsv_' + timestamp_people,
             'count': '78',
             'access': 'public',
+            'owner': 'jdoe',
             'date': timestamp_people,
             'readable_date': readable_date_people,
             'name': 'people.tsv',
@@ -237,6 +240,7 @@ class AskViewTests(unittest.TestCase):
             'urn:sparql:test_askomics:jdoe:instruments_tsv_' + timestamp_instrument,
             'count': '69',
             'access': 'private',
+            'owner': 'jdoe',
             'date': timestamp_instrument,
             'readable_date': readable_date_instrument,
             'name': 'instruments.tsv',
@@ -248,7 +252,39 @@ class AskViewTests(unittest.TestCase):
 
         self.tps.clean_up()
 
+        self.request.json_body = ['people.tsv', 'instruments.tsv']
+
         data = self.askview.source_files_overview()
+
+        expected = {
+            'taxons': [],
+            'files': [{
+                'type': 'tsv',
+                'name': 'people.tsv',
+                'headers': ['People', 'First_name', 'Last_name', 'Sex', 'Age'],
+                'preview_data':
+                [['p1', 'p2', 'p3', 'p4', 'p5', 'p6'],
+                 ['Mike', 'Jean-Michel', 'Roger', 'Matthew', 'Ellen', 'Richard'],
+                 ['Oldfield', 'Jarre', 'Waters', 'Bellamy', 'Fraatz', 'Melville'],
+                 ['M', 'M', 'M', 'M', 'F', 'M'], ['63', '68', '73', '38', '39', '51']],
+                'column_types': ['entity_start', 'text', 'text', 'category', 'numeric']
+            }, {
+                'type': 'tsv',
+                'name': 'instruments.tsv',
+                'headers': ['Instruments', 'Name', 'Class'],
+                'preview_data':
+                [['i1', 'i2', 'i3', 'i4', 'i5', 'i6', 'i7', 'i8', 'i9'], [
+                    'Tubular_Bells', 'Mandolin', 'Electric_guitar', 'Violin',
+                    'Acoustic_guitar', 'Bass_guitar', 'MiniMoog', 'Laser_Harp', 'Piano'
+                ], [
+                    'Percussion', 'String', 'String', 'String', 'String', 'String',
+                    'Electro-analog', 'Electro-analog', 'String'
+                ]],
+                'column_types': ['entity_start', 'text', 'category']
+            }]
+        }
+
+        assert data == expected
 
 
     def test_preview_ttl(self):
@@ -409,7 +445,8 @@ class AskViewTests(unittest.TestCase):
                 'People1': 'p6'
             }],
             'file': data['file'],
-            'nrow': 6
+            'nrow': 6,
+            'galaxy': False
         }
 
     def test_get_sparql_query_text(self):
@@ -474,7 +511,7 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.checkuser()
 
-        assert data == {'admin': False, 'username': 'jdoe', 'blocked': False}
+        assert data == {'admin': False, 'username': 'jdoe', 'blocked': False, 'galaxy': False}
 
 
     def test_logout(self):

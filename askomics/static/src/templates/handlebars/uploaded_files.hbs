@@ -1,0 +1,36 @@
+<hr/ >
+<h3 class='header-div'>Uploaded files</h3>
+<hr/ >
+{{#if allowed_upload}}
+<div class="btn-group" role="group" aria-label="...">
+  <button id="upload_from_computer" type="button" class="btn btn-default"><i class="fa fa-upload"></i> Upload</button>
+  {{#if galaxy}}
+  <button id="upload_from_galaxy" type="button" class="btn btn-default"><i class="fa fa-arrow-left"></i> Get from Galaxy</button>
+  {{/if}}
+</div>
+{{/if}}
+<br/ ><br/ >
+<table class='table uploaded-data-table'>
+    <thead>
+        <tr>
+            <th><input class="check_uploaded check_all_uploaded" type="checkbox"></th>
+            <th>File</th>
+            <th>Size</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#each files}}
+        <tr>
+            <td><input class="check_uploaded check_one_uploaded" type="checkbox" value="{{@key}}"></td>
+            <td>{{@key}}</td>
+            <td>{{this}}</td>
+        </tr>
+        {{/each}}
+    </tbody>
+</table>
+
+<div class="btn-group" role="group">
+  <button id="delete_uploaded" type="button" class="btn-uploaded btn btn-default" disabled><i class="fa fa-trash text-danger"></i> Delete</button>
+  <button id="integrate_uploaded" type="button" class="btn-uploaded btn btn-default" disabled><i class="fa fa-database text-primary"></i> Integrate</button>
+</div>
+<i class="hidden fa fa-spinner pulse" id='spinner_uploaded'></i>

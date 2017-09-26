@@ -14,7 +14,7 @@ class AbstractedEntity(object):
     """
 
     def __init__(self, identifier):
-        self.uri = ":" + ParamManager.encodeToRDFURI(identifier)
+        self.uri = ":" + ParamManager.encode_to_rdf_uri(identifier)
         self.label = identifier
 
         self.log = logging.getLogger(__name__)

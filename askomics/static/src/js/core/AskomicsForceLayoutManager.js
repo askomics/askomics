@@ -295,10 +295,12 @@ class AskomicsForceLayoutManager {
 
 
   start(startPoint) {
+
+    console.assert(startPoint.uri != undefined , "Bad definition of startpoint : "+JSON.stringify(startPoint));
+
     this.initSvg();
     /* load abstraction */
     startPoint = __ihm.getAbstraction().buildBaseNode(startPoint.uri);
-
     /* Setting up an ID for the first variate */
     startPoint = __ihm.getGraphBuilder().setStartpoint(startPoint);
 
