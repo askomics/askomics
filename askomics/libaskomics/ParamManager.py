@@ -58,14 +58,30 @@ class ParamManager(object):
         :returns: The path of the user upload directory
         :rtype: string
         """
+        #if 'username' not in self.session:
+        #    self.session['upload_directory'] = tempfile.mkdtemp(suffix='_tmp', prefix='____')
+        #dir_string = '__' + self.session['username'] + '__'
 
-        path = self.userfilesdir + 'upload/' + self.session['username'] + '/'
+        #if 'upload_directory' not in self.session.keys() or dir_string not in self.session['upload_directory'] or not os.path.isdir(self.session['upload_directory']):
+        #    self.session['upload_directory'] = tempfile.mkdtemp(suffix='_tmp', prefix='__' + self.session['username'] + '__')
+
+        if 'username' not in self.session:
+            path = self.userfilesdir + 'upload/'
+        else:
+            path = self.userfilesdir + 'upload/' + self.session['username'] + '/'
+
         if not os.path.isdir(path):
             os.makedirs(path)
+
         return path
 
     def get_user_csv_directory(self):
-        mdir = self.userfilesdir+"csv"+"/"+self.session['username'] + '/'
+
+        if 'username' not in self.session:
+            mdir = self.userfilesdir+"csv/"
+        else:
+            mdir = self.userfilesdir+"csv/"+self.session['username'] + '/'
+
         if not os.path.isdir(mdir):
             os.makedirs(mdir)
         return mdir
@@ -74,13 +90,19 @@ class ParamManager(object):
         return self.userfilesdir+"rdf/"
 
     def get_rdf_user_directory(self):
-        mdir = self.userfilesdir+"rdf"+"/"+self.session['username'] + '/'
+        if 'username' not in self.session:
+            mdir = self.userfilesdir+"rdf/"
+        else:
+            mdir = self.userfilesdir+"rdf/"+self.session['username'] + '/'
         if not os.path.isdir(mdir):
             os.makedirs(mdir)
         return mdir
 
     def get_json_user_directory(self):
-        mdir = self.userfilesdir+"json"+"/"+self.session['username'] + '/'
+        if 'username' not in self.session:
+            mdir = self.userfilesdir+"json/"
+        else:
+            mdir = self.userfilesdir+"json/"+self.session['username'] + '/'
         if not os.path.isdir(mdir):
             os.makedirs(mdir)
         return mdir
@@ -131,7 +153,7 @@ class ParamManager(object):
             self.log.error(response)
             self.ASKOMICS_prefix[uri]=uri
             return ""
-            
+
         dic = json.loads(response.text)
         if (len(dic)>0):
             v = list(dic.values())[0]

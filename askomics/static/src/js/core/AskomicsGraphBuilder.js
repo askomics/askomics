@@ -61,16 +61,49 @@
       return JSON.stringify([this.AskomicsGraphBuilderVersion,nodes,links,this.SPARQLIDgeneration,this.IDgeneration],null,'\t');
     }
 
+    extractNodesAndLinks(nodes,links) {
+      let retNodes = [];
+      let retLink = [];
+
+      //setup nodes
+      for (let i=0;i<nodes.length;i++) {
+
+        let className = nodes[i][0];
+        let jsonObj = nodes[i][1];
+        let n;
+        if (jsonObj._positionable) {
+          n = new AskomicsPositionableNode({uri:"undefined"});
+        }else{
+          n = new AskomicsNode({uri:"undefined"});
+        }
+        n.setjson(jsonObj);
+        retNodes.push(n);
+      }
+
+      //setup links
+      for (let i=0;i<links.length;i++) {
+        let className = links[i][0];
+        let jsonObj = links[i][1];
+        let l;
+        if (jsonObj._positionable) {
+          l = new AskomicsPositionableLink({uri:"undefined"});
+        }else{
+          l = new AskomicsLink({uri:"undefined"});
+        }
+        l.setjson(jsonObj,retNodes);
+        retLink.push(l);
+      }
+
+      return [retNodes,retLink];
+    }
+
     /* create and return list of nodes and links to build a new grpah from a dump file */
     setNodesAndLinksFromState(dump) {
       try {
         let struct = JSON.parse(dump);
 
         let versionOfFile    = struct[0];
-        //this._instanciedNodeGraph = struct[1];
-        //this._instanciedLinkGraph = struct[2];
-        let nodes = struct[1];
-        let links = struct[2];
+
         this.SPARQLIDgeneration   = struct[3];
         this.IDgeneration         = struct[4];
 
@@ -79,39 +112,11 @@
           alert("Dump file are builded with the Askomics Graph Builder Version:"+versionOfFile+"\n"+". Current version is "+ AskomicsGraphBuilderVersion +".\nReload of dump are not guaranteed !");
         }
 
-        this._instanciedNodeGraph = [] ;
-        this._instanciedLinkGraph = [] ;
+        let t = this.extractNodesAndLinks(struct[1],struct[2]);
 
-        this.nodes().splice(0, this.nodes().length);
-        this.links().splice(0, this.links().length);
+        this._instanciedNodeGraph = t[0];
+        this._instanciedLinkGraph = t[1];
 
-        //setup nodes
-        for (let i=0;i<nodes.length;i++) {
-          let className = nodes[i][0];
-          let jsonObj = nodes[i][1];
-          let n;
-          if (jsonObj._positionable) {
-            n = new AskomicsPositionableNode({uri:"undefined"});
-          }else{
-            n = new AskomicsNode({uri:"undefined"});
-          }
-          n.setjson(jsonObj);
-          this.nodes().push(n);
-        }
-
-        //setup links
-        for (let i=0;i<links.length;i++) {
-          let className = links[i][0];
-          let jsonObj = links[i][1];
-          let l;
-          if (jsonObj._positionable) {
-            l = new AskomicsPositionableLink({uri:"undefined"});
-          }else{
-            l = new AskomicsLink({uri:"undefined"});
-          }
-          l.setjson(jsonObj,this);
-          this.links().push(l);
-        }
         return [this.nodes(),this.links()];
       } catch (ex) {
         console.error(ex);
@@ -374,8 +379,8 @@
             let blockConstraintByLink = [] ;
             let bc = dup_link_array[ilx].buildConstraintsSPARQL();
             if ( dup_link_array[ilx] instanceof AskomicsPositionableLink ) {
-              blockConstraint.splice(0, 0, bc); 
-            } else { 
+              blockConstraint.splice(0, 0, bc);
+            } else {
               blockConstraint.push(bc);
             }
             dup_link_array[ilx].instanciateVariateSPARQL(variates);

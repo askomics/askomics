@@ -9,84 +9,95 @@ let instanceAskomicsJobsViewManager ;
       }
 
       this.jobs = [];
-      this.jobGenId=0   ;
       this.npreview=30 ; /* max data to transfert to IHM */
-      this.galaxy = false;
 
       instanceAskomicsJobsViewManager = this;
+
     }
 
-    createWaitState() {
-      let time = $.now();
-      let curId = this.jobGenId++;
+    static addZero(x, n) {
+      while (x.toString().length < n) {
+        x = "0" + x;
+      }
+      return x;
+    }
 
-      /* Create Job in status wait */
-      this.jobs.push({
-          jobid    : curId ,
-          wait     : true,
-          state    : 'wait',
-          tstart   : time,
-          start    : new Date(time).toLocaleString(),
-          end      : '',
-          duration : '',
-          nr       : '' ,
-          classtr  : 'bg-info', //bg-primary,bg-success,bg-warning,bg-danger,bg-info
-          stateToReload : JSON.stringify(__ihm.getGraphBuilder().getInternalState())
+    static getDuration(tstart,tend) {
+      let elp  = new Date(tend - tstart);
+      //let h = addZero(elp.getHours(), 2);
+      let m = AskomicsJobsViewManager.addZero(elp.getMinutes(), 2);
+      let s = AskomicsJobsViewManager.addZero(elp.getSeconds(), 2);
+      let ms = AskomicsJobsViewManager.addZero(elp.getMilliseconds(), 3);
+
+      return m + " m:" + s + " s:" + ms +" ms";
+    }
+
+    static getClassTr(state) {
+      if (state == "Ok" ) return "bg-success";
+      if (state == "Done" ) return "bg-info";
+      if (state == "Error" )return "bg-danger";
+      return "bg-warning";
+    }
+
+    loadjob(resolve) {
+      return new Promise(function(resolve,reject) {
+        let service = new RestServiceJs('listjob');
+
+        let model = {};
+
+        service.post(model, function(data) {
+          let ljobs = new AskomicsJobsViewManager().jobs ;
+          ljobs.splice(0,ljobs.length);
+
+          for (let i in data ) {
+
+            let job = {} ;
+            job.jobid = data[i].jobid ;
+            job.type = data[i].type ;
+            job.wait = (data[i].state == "Wait");
+            job.state = data[i].state ;
+            job.tstart = data[i].start*1000 ;
+            job.tend = data[i].end*1000 ;
+
+            job.start = new Date(job.tstart).toLocaleString() ;
+
+            job.end = new Date(job.tend).toLocaleString() ;
+
+            job.nr = data[i].nr ;
+            job.duration = AskomicsJobsViewManager.getDuration(job.tstart,job.tend) ;
+            job.classtr = AskomicsJobsViewManager.getClassTr(job.state) ;
+            if ( data[i].requestGraph != '') {
+              job.stateToReload = btoa(data[i].requestGraph);
+            }
+            if ( 'file' in data[i] ) {
+              job.csv   = data[i].file;
+            }
+
+            job.preview = $('<div></div>').html(data[i].preview) ;
+            job.data = undefined;
+            if ( 'data' in data[i] ) job.data = data[i].data ;
+            let idx = 0;
+            for (idx;idx<ljobs.length;idx++) {
+              if ( job.jobid < ljobs[idx] ) break;
+            }
+
+            ljobs.splice(idx, 0, job);
+          }
+          resolve();
+        });
       });
-
-      this.listJobs();
-      return curId;
     }
 
-    changeOkState(id,data,preview_func) {
-      function addZero(x, n) {
-        while (x.toString().length < n) {
-          x = "0" + x;
-        }
-        return x;
-      }
+    deletejob(job) {
+      let service = new RestServiceJs('deljob');
 
-      let time = $.now() ;
+      let model = {
+        jobid : job.jobid
+      };
 
-      for ( let ij in this.jobs ) {
-          if (this.jobs[ij].jobid === id) {
-
-            this.jobs[ij].tend = time ;
-
-            let elp  = new Date(this.jobs[ij].tend - this.jobs[ij].tstart);
-            //let h = addZero(elp.getHours(), 2);
-            let m = addZero(elp.getMinutes(), 2);
-            let s = addZero(elp.getSeconds(), 2);
-            let ms = addZero(elp.getMilliseconds(), 3);
-
-            this.jobs[ij].end   = new Date(time).toLocaleString();
-            this.jobs[ij].wait  = false;
-            this.jobs[ij].state = "Ok";
-            if ( 'nrow' in data ) {
-              this.jobs[ij].nr    = data.nrow;
-            }
-            if ( 'file' in data ) {
-              this.jobs[ij].csv   = data.file;
-            }
-            this.jobs[ij].duration = m + " m:" + s + " s:" + ms +" ms";
-            this.jobs[ij].classtr = "bg-success";
-            this.jobs[ij].datable_preview = preview_func(this.jobs[ij].stateToReload) ; //new AskomicsResultsView(data).getPreviewResults(this.jobs[ij].stateToReload);
-          }
-      }
-      this.listJobs();
-    }
-
-    changeKoState(id,messErr) {
-      for ( let ij in this.jobs ) {
-          if (this.jobs[ij].jobid === id) {
-            this.jobs[ij].end = $.now() ;
-            this.jobs[ij].wait  = false;
-            this.jobs[ij].state = messErr ;
-            this.jobs[ij].duration = this.jobs.end - this.jobs.start ;
-            this.jobs[ij].classtr = "bg-danger";
-          }
-      }
-      this.listJobs();
+      service.post(model, function(data) {
+        new AskomicsJobsViewManager().listJobs();
+      });
     }
 
     removeJob(index) {
@@ -94,9 +105,10 @@ let instanceAskomicsJobsViewManager ;
         let service = new RestServiceJs('del_csv/');//location.href='del_csv/{{this.csv}}';
         service.get(this.jobs[index].csv);
       }
+      this.deletejob(this.jobs[index]);
       this.jobs.splice(index, 1);
-      this.listJobs();
       if (this.jobs.length<=0) $("#interrogation").trigger( "click" );
+
     }
 
     prepareQuery() {
@@ -112,20 +124,33 @@ let instanceAskomicsJobsViewManager ;
                   'constraintesRelations': tab[1],
                   'constraintesFilters'  : tab[2],
                   'removeGraph'          : __ihm.getAbstraction().listUnactivedGraph(),
+                  'requestGraph'         : __ihm.getGraphBuilder().getInternalState(),
+                  'jobManager'           : true,
                   'limit'                : this.npreview          // number of data preview
                };
     }
 
+    wait(ms) {
+      let defer = $.Deferred();
+      setTimeout(function() { defer.resolve(); }, ms);
+      return defer;
+    }
+
     createQueryJob() {
       //create state view
-      let curId = this.createWaitState();
       let service = new RestServiceJs("sparqlquery");
       let jdata = this.prepareQuery();
       let self = this;
 
       // Get ordered headers
       let result_view = new AskomicsResultsView({});
-      result_view.setActivesAttributes();
+
+      let struct = JSON.parse(__ihm.getGraphBuilder().getInternalState());
+      let t = __ihm.getGraphBuilder().extractNodesAndLinks(struct[1],struct[2]);
+      let nodes = t[0];
+      let links = t[1];
+
+      result_view.setActivesAttributes(nodes,links);
       let attributes = result_view.getActivesAttributes();
       let ordered_headers = [];
       $.map(attributes, function(value, key) {
@@ -135,91 +160,45 @@ let instanceAskomicsJobsViewManager ;
       jdata.headers = ordered_headers;
 
       service.post(jdata,function(data) {
-        if ('error' in data) {
-          self.changeKoState(curId,data.error);
-          return;
-        }
-
-        // Check if a galaxy is connected to display a button
-        self.galaxy = data.galaxy;
-
-        self.changeOkState(curId,data,function(d) {
-          return new AskomicsResultsView(data).getPreviewResults(d) ;
-        });
+        new AskomicsJobsViewManager().listJobs();
       });
-      /* position on job list view */
-      $("#jobsview").trigger( "click" );
-    }
 
-    send2galaxy(index) {
-      let job = this.jobs[index];
-      let galaxy_dataset_name = 'askomics_result' + job.jobid + '_' + job.tstart + '.tsv';
-      let file = job.csv;
-      let service = new RestServiceJs('send_to_galaxy');
-      let model = {'path': file, 'name': galaxy_dataset_name, 'type': 'tabular'};
-      $("#spinner_send_galaxy_" + index).removeClass('hidden');
-      $("#check_send_galaxy_" + index).addClass('hidden');
-      $("#cross_send_galaxy_" + index).addClass('hidden');
-      service.post(model, function(data) {
-        __ihm.manageErrorMessage(data);
-        if (data.error) {
-          $("#spinner_send_galaxy_" + index).addClass('hidden');
-          $("#check_send_galaxy_" + index).addClass('hidden');
-          $("#cross_send_galaxy_" + index).removeClass('hidden');
-        }else{
-          $("#spinner_send_galaxy_" + index).addClass('hidden');
-          $("#check_send_galaxy_" + index).removeClass('hidden');
-          $("#cross_send_galaxy_" + index).addClass('hidden');
-        }
+      this.wait(50).then( function() {
+        $("#jobsview").trigger( "click" );
       });
-    }
-
-    createModuleJob(bool,urimo,name) {
-      //create state view
-      let curId = this.createWaitState();
-      let service = new RestServiceJs("manage_module");
-
-      let param = {
-        'checked' : bool,
-        'uri'     : urimo,
-        'name'    : name
-      } ;
-      let self = this;
-      service.post(param,function(data) {
-        if ('error' in data) {
-          //alert(data.error);
-          self.changeKoState(curId,data.error);
-          return;
-        }
-
-        self.changeOkState(curId,data,function(d) { return "<p>Import "+name+" is done !</p>";});
-        new ModulesParametersView().updateModules();
-      });
-      /* position on job list view */
-      $("#jobsview").trigger( "click" );
     }
 
     listJobs() {
+      this.loadjob().then(function () {
+        let __inst = new AskomicsJobsViewManager();
+        let template = AskOmics.templates.jobs;
 
-      let template = AskOmics.templates.jobs;
-      let context = {jobs: this.jobs, galaxy: this.galaxy};
-      let html = template(context);
+        let context = {jobs: __inst.jobs, galaxy: __ihm.user.haveGalaxy()};
+        let html = template(context);
 
-      $("#content_jobsview").empty();
-      $("#content_jobsview").append(html);
+        $("#content_jobsview").empty();
+        $("#content_jobsview").append(html);
 
-      for ( let ij in this.jobs ) {
-        if (this.jobs[ij].datable_preview !== undefined ) {
-          let r = $("#results_table_"+ij);
-          r.append(
+        for ( let ij in __inst.jobs ) {
 
-            $("<h3></h3>").addClass("header-div")
-                          .css("text-align","center")
-                          .html("Preview ("+Math.min(this.npreview,this.jobs[ij].nr)+" rows)")
-                        );
+          if ( __inst.jobs[ij].data != undefined ) {
+            let struct = JSON.parse(atob(__inst.jobs[ij].stateToReload));
+            let prev = new AskomicsResultsView(__inst.jobs[ij].data).getPreviewResults(struct) ;
+            let r = $("#results_table_"+ij);
+            r.append(
 
-          r.append(this.jobs[ij].datable_preview);
+              $("<h3></h3>").addClass("header-div")
+                            .css("text-align","center")
+                            .html("Preview ("+Math.min(__inst.npreview,__inst.jobs[ij].nr)+" rows)")
+                          );
+
+            r.append(prev);
+          } else {
+            if ( __inst.jobs[ij].preview != undefined ) {
+              $("#results_table_"+ij).append(__inst.jobs[ij].preview);
+            }
+          }
         }
-      }
+      });
     }
 }

@@ -19,6 +19,7 @@ from pygments.formatters import HtmlFormatter
 
 from askomics.libaskomics.ParamManager import ParamManager
 from askomics.libaskomics.ModulesManager import ModulesManager
+from askomics.libaskomics.JobManager import JobManager
 from askomics.libaskomics.TripleStoreExplorer import TripleStoreExplorer
 from askomics.libaskomics.SourceFileConvertor import SourceFileConvertor
 from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
@@ -49,7 +50,7 @@ class AskView(object):
         self.log = logging.getLogger(__name__)
         self.request = request
         self.settings = request.registry.settings
-        self.log.debug("==============================================================")
+        self.log.debug("============================= SESSION =================================")
         self.log.debug(self.request.session)
         self.log.debug("==============================================================")
         try:
@@ -74,10 +75,24 @@ class AskView(object):
                 self.data['error'] = str(e)
                 self.log.error(str(e))
 
-    def check_error(self):
-        if 'error' in self.data :
-            return True
-        return False
+    def checkAuthSession(self):
+        #https://fr.wikipedia.org/wiki/Liste_des_codes_HTTP
+
+        import pyramid.httpexceptions as exc
+        # Denny access for non loged users
+        if self.request.session['username'] == '':
+            raise exc.exception_response(401)
+
+        # Denny for blocked users
+        if self.request.session['blocked']:
+            raise exc.exception_response(423)
+
+
+    def checkAdminSession(self):
+        import pyramid.httpexceptions as exc
+        #Deny access for non admin session
+        if not self.request.session['admin'] :
+            raise exc.exception_response(403)
 
     def setGraphUser(self,removeGraph=[]):
 
@@ -109,27 +124,31 @@ class AskView(object):
         """ Get the nodes being query starters """
         self.log.debug("== START POINT ==")
 
-        if self.check_error():
-            return self.data
+        try:
 
-        self.setGraphUser([])
+            self.setGraphUser([])
 
-        tse = TripleStoreExplorer(self.settings, self.request.session)
-        nodes = tse.get_start_points()
+            tse = TripleStoreExplorer(self.settings, self.request.session)
+            nodes = tse.get_start_points()
 
-        self.data['nodes'] = {}
+            self.data['nodes'] = {}
 
-        for node in nodes:
-            if node['uri'] in self.data['nodes'].keys():
-                if node['public'] and not self.data['nodes'][node['uri']]['public']:
-                    self.data['nodes'][node['uri']]['public'] = True
-                if node['private'] and not self.data['nodes'][node['uri']]['private']:
-                    self.data['nodes'][node['uri']]['private'] = True
-                self.data['nodes'][node['uri']]['public_and_private'] = bool(
-                    self.data['nodes'][node['uri']]['public'] and
-                    self.data['nodes'][node['uri']]['private'])
-            else:
-                self.data['nodes'][node['uri']] = node
+            for node in nodes:
+                if node['uri'] in self.data['nodes'].keys():
+                    if node['public'] and not self.data['nodes'][node['uri']]['public']:
+                        self.data['nodes'][node['uri']]['public'] = True
+                    if node['private'] and not self.data['nodes'][node['uri']]['private']:
+                        self.data['nodes'][node['uri']]['private'] = True
+                    self.data['nodes'][node['uri']]['public_and_private'] = bool(
+                        self.data['nodes'][node['uri']]['public'] and
+                        self.data['nodes'][node['uri']]['private'])
+                else:
+                    self.data['nodes'][node['uri']] = node
+
+        except Exception as e:
+            self.request.response.status = 400
+            traceback.print_exc(file=sys.stdout)
+            self.data['error'] = str(e)
 
         return self.data
 
@@ -139,13 +158,7 @@ class AskView(object):
         """
         Get stats
         """
-        # Denny access for non loged users
-        if self.request.session['username'] == '':
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
+        self.checkAuthSession()
 
         self.log.debug('=== stats ===')
 
@@ -250,13 +263,7 @@ class AskView(object):
         Delete all named graphs and their metadatas
         """
 
-        # Denny access for non loged users
-        if self.request.session['username'] == '':
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
+        self.checkAuthSession()
 
         self.log.debug("=== DELETE ALL NAMED GRAPHS ===")
 
@@ -276,7 +283,7 @@ class AskView(object):
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
             self.data['error'] = str(e)
-            self.log.error(str(e))
+            self.request.response.status = 400
 
         return self.data
 
@@ -286,13 +293,7 @@ class AskView(object):
         Delete selected named graphs and their metadatas
         """
 
-        # Denny access for non loged users
-        if self.request.session['username'] == '':
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
+        self.checkAuthSession()
 
         sqb = SparqlQueryBuilder(self.settings, self.request.session)
         ql = QueryLauncher(self.settings, self.request.session)
@@ -313,13 +314,7 @@ class AskView(object):
         Return a list with all the named graphs of a user.
         """
 
-        # Denny access for non loged users
-        if self.request.session['username'] == '':
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
+        self.checkAuthSession()
 
         sqg = SparqlQueryGraph(self.settings, self.request.session)
         query_launcher = QueryLauncher(self.settings, self.request.session)
@@ -361,13 +356,7 @@ class AskView(object):
         :rtype: dict
         """
 
-        # Denny access for non loged users
-        if self.request.session['username'] == '':
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
+        self.checkAuthSession()
 
         body = self.request.json_body
         filename = body['filename']
@@ -396,87 +385,79 @@ class AskView(object):
         """
         Get preview data for all the available files
         """
-
-        # Denny access for non loged users
-        if self.request.session['username'] == '':
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
+        self.checkAuthSession()
 
         files_to_integrate = self.request.json_body
 
         self.log.debug(" ========= Askview:source_files_overview =============")
-        sfc = SourceFileConvertor(self.settings, self.request.session)
+        try:
+            sfc = SourceFileConvertor(self.settings, self.request.session)
+            source_files = sfc.get_source_files()
+            self.data['files'] = []
 
-        source_files = sfc.get_source_files()
+            # get all taxon in the TS
+            sqg = SparqlQueryGraph(self.settings, self.request.session)
+            ql = QueryLauncher(self.settings, self.request.session)
+            res = ql.execute_query(sqg.get_all_taxons().query)
+            taxons_list = []
+            for elem in res['results']['bindings']:
+                taxons_list.append(elem['taxon']['value'])
+            self.data['taxons'] = taxons_list
 
-        self.data['files'] = []
+            for src_file in source_files:
+                # Process only selected files
+                if src_file.name not in files_to_integrate:
+                    continue
+                infos = {}
+                infos['name'] = src_file.name
+                infos['type'] = src_file.type
+                if src_file.type == 'tsv':
+                    try:
+                        infos['headers'] = src_file.get_headers_by_file
+                        infos['preview_data'] = src_file.get_preview_data()
+                        infos['column_types'] = []
+                        header_num = 1
+                        infos['column_types'].append('entity_start')
+                        for ih in range(1, len(infos['headers'])):
+                            #if infos['headers'][ih].find("@")>0:
+                            #    infos['column_types'].append("entity")
+                            #else:
+                            infos['column_types'].append(src_file.guess_values_type(infos['preview_data'][ih], infos['headers'][header_num]))
+                            header_num += 1
+                    except Exception as e:
+                        traceback.print_exc(file=sys.stdout)
+                        infos['error'] = 'Could not read input file, are you sure it is a valid tabular file?'
+                        self.log.error(str(e))
 
-        # get all taxon in the TS
-        sqg = SparqlQueryGraph(self.settings, self.request.session)
-        ql = QueryLauncher(self.settings, self.request.session)
-        res = ql.execute_query(sqg.get_all_taxons().query)
-        taxons_list = []
-        for elem in res['results']['bindings']:
-            taxons_list.append(elem['taxon']['value'])
-        self.data['taxons'] = taxons_list
+                    self.data['files'].append(infos)
+                elif src_file.type == 'gff':
+                    try:
+                        entities = src_file.get_entities()
+                        infos['entities'] = entities
+                    except Exception as e:
+                        self.log.debug('error !!')
+                        traceback.print_exc(file=sys.stdout)
+                        infos['error'] = 'Could not parse the file, are you sure it is a valid GFF3 file?'
+                        self.log.error('error with gff examiner: ' + str(e))
 
-        for src_file in source_files:
+                    self.data['files'].append(infos)
 
-            # Process only selected files
-            if src_file.name not in files_to_integrate:
-                continue
+                elif src_file.type == 'ttl':
+                    infos['preview'] = src_file.get_preview_ttl()
+                    self.data['files'].append(infos)
 
-            infos = {}
-            infos['name'] = src_file.name
-            infos['type'] = src_file.type
-            if src_file.type == 'tsv':
-                try:
-                    infos['headers'] = src_file.get_headers_by_file
-                    infos['preview_data'] = src_file.get_preview_data()
-                    infos['column_types'] = []
-                    header_num = 1
-                    infos['column_types'].append('entity_start')
-                    for ih in range(1, len(infos['headers'])):
-                        #if infos['headers'][ih].find("@")>0:
-                        #    infos['column_types'].append("entity")
-                        #else:
-                        infos['column_types'].append(src_file.guess_values_type(infos['preview_data'][ih], infos['headers'][header_num]))
-                        header_num += 1
-                except Exception as e:
-                    traceback.print_exc(file=sys.stdout)
-                    infos['error'] = 'Could not read input file, are you sure it is a valid tabular file?'
-                    self.log.error(str(e))
-
-                self.data['files'].append(infos)
-
-            elif src_file.type == 'gff':
-                try:
-                    entities = src_file.get_entities()
-                    infos['entities'] = entities
-                except Exception as e:
-                    self.log.debug('error !!')
-                    traceback.print_exc(file=sys.stdout)
-                    infos['error'] = 'Could not parse the file, are you sure it is a valid GFF3 file?'
-                    self.log.error('error with gff examiner: ' + str(e))
-
-                self.data['files'].append(infos)
-
-            elif src_file.type == 'ttl':
-                infos['preview'] = src_file.get_preview_ttl()
-                self.data['files'].append(infos)
-
-            elif src_file.type == 'bed':
-                try:
-                    src_file.open_bed
-                    infos['test'] = 'OK'
-                except Exception as e:
-                    self.log.error(str(e))
-                    infos['error'] = 'Could not read input file, are you sure it is a valid BED file ?'
-                self.data['files'].append(infos)
-
+                elif src_file.type == 'bed':
+                    try:
+                        src_file.open_bed
+                        infos['test'] = 'OK'
+                    except Exception as e:
+                        self.log.error(str(e))
+                        infos['error'] = 'Could not read input file, are you sure it is a valid BED file ?'
+                    self.data['files'].append(infos)
+        except Exception as e:
+             traceback.print_exc(file=sys.stdout)
+             self.data['error'] = str(e)
+             self.request.response.status = 400
 
         return self.data
 
@@ -487,13 +468,7 @@ class AskView(object):
         get prefix uri for each entities finded in he header file
         """
 
-        # Denny access for non loged users
-        if self.request.session['username'] == '':
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
+        self.checkAuthSession()
 
         try:
             body = self.request.json_body
@@ -503,7 +478,7 @@ class AskView(object):
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
             self.data['error'] = str(e)
-            return self.data
+            self.request.response.status = 400
 
         return self.data
 
@@ -513,14 +488,7 @@ class AskView(object):
         Convert tabulated files to turtle according to the type of the columns set by the user
         """
 
-        # Denny access for non loged users
-        if self.request.session['username'] == '':
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
-
+        self.checkAuthSession()
 
         self.log.debug("preview_ttl")
         try:
@@ -568,8 +536,9 @@ class AskView(object):
                     domain_knowledge_ttl = src_file.get_domain_knowledge()
                     )
         except Exception as e:
+            traceback.print_exc(file=sys.stdout)
             self.data['error'] = str(e)
-            return self.data
+            self.request.response.status = 400
 
         formatter = HtmlFormatter(cssclass='preview_field', nowrap=True, nobackground=True)
         return highlight(self.data, TurtleLexer(), formatter) # Formated html
@@ -580,13 +549,7 @@ class AskView(object):
         Load tabulated files to triple store according to the type of the columns set by the user
         """
 
-        # Denny access for non loged users
-        if self.request.session['username'] == '':
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
+        self.checkAuthSession()
 
         body = self.request.json_body
         file_name = body["file_name"]
@@ -603,10 +566,12 @@ class AskView(object):
         if 'forced_type' in body:
             forced_type = body['forced_type']
 
+        jm = JobManager(self.settings, self.request.session)
+        jobid = jm.saveStartSparqlJob(file_name)
+
         # Allow data integration in public graph only if user is an admin
         if public and not self.request.session['admin']:
-            self.data['error'] = ('/!\\ --> NOT ALLOWED TO INSERT IN PUBLIC GRAPH <-- /!\\')
-            return self.data
+            return 'forbidden'
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
         src_file = sfc.get_source_file(file_name, forced_type, uri_set=uris)
@@ -617,6 +582,8 @@ class AskView(object):
 
         try:
             self.data = src_file.persist(self.request.host_url, public)
+            jm.updateEndSparqlJob(jobid,"Done",nr=0)
+            jm.updatePreviewJob(jobid,"TSV/CSV integration done. ")
         except Exception as e:
             #rollback
             sqb = SparqlQueryBuilder(self.settings, self.request.session)
@@ -625,8 +592,8 @@ class AskView(object):
             query_laucher.execute_query(sqb.get_delete_metadatas_of_graph(src_file.graph).query)
 
             traceback.print_exc(file=sys.stdout)
-            self.data['error'] = 'Problem with user data file ?</br>'+str(e)
-            self.log.error(str(e))
+            jm.updateEndSparqlJob(jobid,"Error")
+            jm.updatePreviewJob(jobid,str(e))
 
         return self.data
 
@@ -636,14 +603,7 @@ class AskView(object):
         Load GFF file into the triplestore
         """
 
-        # Denny access for non loged users
-        if self.request.session['username'] == '':
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
-
+        self.checkAuthSession()
 
         self.log.debug("== load_gff_into_graph ==")
 
@@ -661,10 +621,12 @@ class AskView(object):
         if 'forced_type' in body:
             forced_type = body['forced_type']
 
+        jm = JobManager(self.settings, self.request.session)
+        jobid = jm.saveStartSparqlJob(file_name)
+
         # Allow data integration in public graph only if user is an admin
         if public and not self.request.session['admin']:
-            self.log.debug('/!\\ --> NOT ALLOWED TO INSERT IN PUBLIC GRAPH <-- /!\\')
-            public = False
+            return 'forbidden'
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
         src_file_gff = sfc.get_source_file(file_name, forced_type, uri_set={ 0 : uri } )
@@ -675,6 +637,9 @@ class AskView(object):
         try:
             self.log.debug('--> Parsing GFF')
             src_file_gff.persist(self.request.host_url, public)
+            jm.updateEndSparqlJob(jobid,"Done",nr=0)
+            jm.updatePreviewJob(jobid,"GFF integration done. <br/>"+"entities :"+', '.join(entities)+"<br/>"+"taxon :"+taxon)
+
         except Exception as e:
             #rollback
             sqb = SparqlQueryBuilder(self.settings, self.request.session)
@@ -683,7 +648,9 @@ class AskView(object):
             query_laucher.execute_query(sqb.get_delete_metadatas_of_graph(src_file_gff.graph).query)
 
             traceback.print_exc(file=sys.stdout)
-            self.data['error'] = 'Problem when integration of '+file_name+'.</br>'+str(e)
+            jm.updateEndSparqlJob(jobid,"Error")
+            jm.updatePreviewJob(jobid,'Problem when integration of '+file_name+'.</br>'+str(e))
+
             self.log.error(str(e))
 
         self.data['status'] = 'ok'
@@ -695,14 +662,7 @@ class AskView(object):
         Load TTL file into the triplestore
         """
 
-        # Denny access for non loged users
-        if self.request.session['username'] == '':
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
-
+        self.checkAuthSession()
 
         self.log.debug('*** load_ttl_into_graph ***')
 
@@ -714,16 +674,20 @@ class AskView(object):
         if 'forced_type' in body:
             forced_type = body['forced_type']
 
+        jm = JobManager(self.settings, self.request.session)
+        jobid = jm.saveStartSparqlJob(file_name)
+
         # Allow data integration in public graph only if user is an admin
         if public and not self.request.session['admin']:
-            self.log.debug('/!\\ --> NOT ALLOWED TO INSERT IN PUBLIC GRAPH <-- /!\\')
-            public = False
+            return 'forbidden'
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
         src_file_ttl = sfc.get_source_file(file_name, forced_type)
 
         try:
             self.data = src_file_ttl.persist(self.request.host_url, public)
+            jm.updateEndSparqlJob(jobid,"Done",nr=0)
+            jm.updatePreviewJob(jobid,"TTL file integration done. ")
 
         except Exception as e:
             #rollback
@@ -732,7 +696,8 @@ class AskView(object):
             query_laucher.execute_query(sqb.get_drop_named_graph(src_file_ttl.graph).query)
             query_laucher.execute_query(sqb.get_delete_metadatas_of_graph(src_file_ttl.graph).query)
 
-            self.data['error'] = 'Problem when integration of ' + file_name + '</br>' + str(e)
+            jm.updateEndSparqlJob(jobid,"Error")
+            jm.updatePreviewJob(jobid,'Problem when integration of '+file_name+'.</br>'+str(e))
             self.log.error('ERROR: ' + str(e))
 
         self.data['status'] = 'ok'
@@ -744,16 +709,9 @@ class AskView(object):
         Load a BED file into the triplestore
         """
 
-        # Denny access for non loged users
-        if self.request.session['username'] == '':
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
+        self.checkAuthSession()
 
         body = self.request.json_body
-        self.log.debug('===> body: '+str(body))
         file_name = body['file_name']
         taxon = body['taxon']
         entity = body['entity_name']
@@ -768,8 +726,7 @@ class AskView(object):
 
         # Allow data integration in public graph only if user is an admin
         if public and not self.request.session['admin']:
-            self.log.debug('/!\\ --> NOT ALLOWED TO INSERT IN PUBLIC GRAPH <-- /!\\')
-            public = False
+            return 'forbidden'
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
         src_file_bed = sfc.get_source_file(file_name, forced_type, uri_set={ 0 : uri })
@@ -777,9 +734,15 @@ class AskView(object):
         src_file_bed.set_taxon(taxon)
         src_file_bed.set_entity_name(entity)
 
+        jm = JobManager(self.settings, self.request.session)
+        jobid = jm.saveStartSparqlJob(file_name)
+
         try:
             self.log.debug('--> Parsing BED')
             src_file_bed.persist(self.request.host_url, public)
+            jm.updateEndSparqlJob(jobid,"Done",nr=0)
+            jm.updatePreviewJob(jobid,"BED file integration done. ")
+
         except Exception as e:
             #rollback
             sqb = SparqlQueryBuilder(self.settings, self.request.session)
@@ -788,7 +751,8 @@ class AskView(object):
             query_laucher.execute_query(sqb.get_delete_metadatas_of_graph(src_file_bed.graph).query)
 
             traceback.print_exc(file=sys.stdout)
-            self.data['error'] = 'Problem when integration of '+file_name+'.</br>'+str(e)
+            jm.updateEndSparqlJob(jobid,"Error")
+            jm.updatePreviewJob(jobid,'Problem when integration of '+file_name+'.</br>'+str(e))
             self.log.error(str(e))
 
         self.data['status'] = 'ok'
@@ -796,6 +760,7 @@ class AskView(object):
 
     @view_config(route_name='getUserAbstraction', request_method='POST')
     def getUserAbstraction(self):
+
         """ Get the user asbtraction to manage relation inside javascript """
         self.log.debug("== getUserAbstraction ==")
         body = self.request.json_body
@@ -816,13 +781,8 @@ class AskView(object):
         """
         Import a shortcut definition into the triplestore
         """
-        # Denny access for non loged users
-        if self.request.session['username'] == '' or not self.request.session['admin'] :
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
+        self.checkAuthSession()
+        self.checkAdminSession()
 
         self.log.debug('*** importShortcut ***')
 
@@ -839,7 +799,7 @@ class AskView(object):
             #traceback.print_exc(limit=8)
             traceback.print_exc(file=sys.stdout)
             self.data['error'] = str(e)
-            self.log.error(str(e))
+            self.request.response.status = 400
 
         return self.data
 
@@ -848,13 +808,8 @@ class AskView(object):
         """
         Delete a shortcut definition into the triplestore
         """
-        # Denny access for non loged users
-        if self.request.session['username'] == '' or not self.request.session['admin'] :
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
+        self.checkAuthSession()
+        self.checkAdminSession()
 
         self.log.debug('*** importShortcut ***')
 
@@ -881,7 +836,7 @@ class AskView(object):
             #traceback.print_exc(limit=8)
             traceback.print_exc(file=sys.stdout)
             self.data['error'] = str(e)
-            self.log.error(str(e))
+            self.request.response.status = 400
 
         return self.data
 
@@ -902,7 +857,7 @@ class AskView(object):
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
             self.data['error'] = str(e)
-            self.log.error(str(e))
+            self.request.response.status = 400
 
         return self.data
 
@@ -916,20 +871,29 @@ class AskView(object):
         if self.request.session['blocked']:
             return 'blocked'
 
+        body = self.request.json_body
+
+        jm = JobManager(self.settings, self.request.session)
+        jobid = jm.saveStartSparqlJob("Module "+body['name'])
+
         try:
-            body = self.request.json_body
+
             mm = ModulesManager(self.settings, self.request.session)
+            check = bool(body['checked'])
 
             mm.manageModules(
                     self.request.host_url,
                     body['uri'],
                     body['name'],
-                    bool(body['checked']))
+                    check)
+
+            jm.updateEndSparqlJob(jobid,"Done",nr=0)
+            jm.updatePreviewJob(jobid,body['name'] + " ["+ str(body['checked'])+ "] done.")
 
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
-            self.data['error'] = str(e)
-            self.log.error(str(e))
+            jm.updateEndSparqlJob(jobid,"Error")
+            jm.updatePreviewJob(jobid,'Problem whith module '+body['name']+'.</br>'+str(e))
 
         return self.data
 
@@ -943,14 +907,27 @@ class AskView(object):
         if 'headers' in body:
             ordered_headers = body['headers']
 
+        persist = False
+        if 'jobManager' in body :
+            if body['jobManager']:
+                persist = True
+
+        jobid = -1
+        if persist:
+            jm = JobManager(self.settings, self.request.session)
+            rg = ""
+            if 'requestGraph' in body:
+                rg = body['requestGraph']
+            jobid = jm.saveStartSparqlJob("SPARQL Request",requestGraph=rg)
+
         try:
             tse = TripleStoreExplorer(self.settings, self.request.session)
             lfrom = []
             if 'from' in body:
                 lfrom = body['from']
+
             results, query = tse.build_sparql_query_from_json(lfrom, body["variates"], body["constraintesRelations"], True)
 
-            #body["limit"]
             # Remove prefixes in the results table
             limit = int(body["limit"]) + 1
             if body["limit"] != -1 and limit < len(results):
@@ -965,18 +942,40 @@ class AskView(object):
                 query_laucher = QueryLauncher(self.settings, self.request.session)
                 self.data['file'] = query_laucher.format_results_csv(results, ordered_headers)
 
+            if persist:
+                jm.updateEndSparqlJob(jobid,"Ok",nr=len(results),data=self.data['values'], file=self.data['file'])
+
         except Exception as e:
             #exc_type, exc_value, exc_traceback = sys.exc_info()
             #traceback.print_exc(limit=8)
             traceback.print_exc(file=sys.stdout)
             self.data['values'] = ""
             self.data['file'] = ""
-            self.data['error'] = str(e)
-            self.log.error(str(e))
+
+            if persist:
+                jm.updateEndSparqlJob(jobid,"Error")
+                jm.updatePreviewJob(jobid,str(e))
 
         self.data['galaxy'] = self.request.session['galaxy']
 
         return self.data
+
+    @view_config(route_name='listjob', request_method='POST')
+    def listjob(self):
+        ''' Get all jobs recorded in database '''
+
+        jm = JobManager(self.settings, self.request.session)
+        return jm.listJobs()
+
+
+    @view_config(route_name='deljob', request_method='POST')
+    def deljob(self):
+        ''' Remove job from database '''
+
+        body = self.request.json_body
+        jm = JobManager(self.settings, self.request.session)
+        jm.removeJob(body['jobid'])
+
 
     @view_config(route_name='getSparqlQueryInTextFormat', request_method='POST')
     def getSparqlQueryInTextFormat(self):
@@ -997,7 +996,7 @@ class AskView(object):
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
             self.data['error'] = str(e)
-            self.log.error(str(e))
+            self.request.response.status = 400
 
         return self.data
 
@@ -1015,7 +1014,6 @@ class AskView(object):
     def uploadCsv(self):
 
         pm = ParamManager(self.settings, self.request.session)
-
         response = FileResponse(
             pm.get_user_csv_directory()+self.request.matchdict['name'],
             content_type='text/csv'
@@ -1092,19 +1090,18 @@ class AskView(object):
             self.data['blocked'] = admin_blocked['blocked']
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
-            self.data['error'] = ["Bad server configuration!"]
-            self.log.error(str(e))
+            self.data['error'] = "Bad server configuration!"
+            self.request.response.status = 400
 
         return self.data
 
     @view_config(route_name='checkuser', request_method='GET')
     def checkuser(self):
 
-        if self.request.session['username'] != '':
-            self.data['username'] = self.request.session['username']
-            self.data['admin'] = self.request.session['admin']
-            self.data['blocked'] = self.request.session['blocked']
-            self.data['galaxy'] = self.request.session['galaxy']
+        self.data['username'] = self.request.session['username']
+        self.data['admin'] = self.request.session['admin']
+        self.data['blocked'] = self.request.session['blocked']
+        self.data['galaxy'] = self.request.session['galaxy']
 
         return self.data
 
@@ -1196,7 +1193,8 @@ class AskView(object):
 
         except Exception as e:
             self.data['error'] = str(e)
-            self.log.error(str(e))
+            self.request.response.status = 400
+            return self.data
 
         param_manager = ParamManager(self.settings, self.request.session)
         param_manager.get_upload_directory()
@@ -1206,13 +1204,7 @@ class AskView(object):
     @view_config(route_name='api_key', request_method='POST')
     def api_key(self):
 
-        # Denny access for non loged users or non admin users
-        if self.request.session['username'] == '':
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
+        self.checkAuthSession()
 
         body = self.request.json_body
         self.log.debug(body)
@@ -1227,6 +1219,7 @@ class AskView(object):
         except Exception as e:
             self.log.debug(str(e))
             self.data['error'] = str(e)
+            self.request.response.status = 400
             return self.data
 
         self.data['sucess'] = 'success'
@@ -1235,9 +1228,7 @@ class AskView(object):
     @view_config(route_name='del_apikey', request_method='POST')
     def del_apikey(self):
 
-        # Denny access for non loged users or non admin users
-        if self.request.session['username'] == '':
-            return 'forbidden'
+        self.checkAuthSession()
 
         body = self.request.json_body
         key = body['key']
@@ -1366,6 +1357,7 @@ class AskView(object):
         except Exception as e:
             self.data['error'] = str(e)
             self.log.error(str(e))
+            self.request.response.status = 400
             return self.data
 
         param_manager = ParamManager(self.settings, self.request.session)
@@ -1381,13 +1373,8 @@ class AskView(object):
         and admin status
         """
 
-        # Denny access for non loged users or non admin users
-        if self.request.session['username'] == '' or not self.request.session['admin']:
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
+        self.checkAuthSession()
+        self.checkAdminSession()
 
         sqa = SparqlQueryAuth(self.settings, self.request.session)
         ql = QueryLauncher(self.settings, self.request.session)
@@ -1415,13 +1402,8 @@ class AskView(object):
         Change a user lock status
         """
 
-        # Denny access for non loged users or non admin users
-        if self.request.session['username'] == '' or not self.request.session['admin']:
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
+        self.checkAuthSession()
+        self.checkAdminSession()
 
         body = self.request.json_body
 
@@ -1440,7 +1422,10 @@ class AskView(object):
         try:
             query_laucher.process_query(sqb.update_blocked_status(new_status, username).query)
         except Exception as e:
-            return 'failed: ' + str(e)
+            self.data['error'] = str(e)
+            self.log.error(str(e))
+            self.request.response.status = 400
+            return self.data
 
 
         return 'success'
@@ -1451,13 +1436,8 @@ class AskView(object):
         Change a user admin status
         """
 
-        # Denny access for non loged users or non admin users
-        if self.request.session['username'] == '' or not self.request.session['admin']:
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
+        self.checkAuthSession()
+        self.checkAdminSession()
 
         body = self.request.json_body
 
@@ -1476,7 +1456,10 @@ class AskView(object):
         try:
             query_laucher.process_query(sqb.update_admin_status(new_status, username).query)
         except Exception as e:
-            return 'failed: ' + str(e)
+            self.data['error'] = str(e)
+            self.log.error(str(e))
+            self.request.response.status = 400
+            return self.data
 
 
         return 'success'
@@ -1488,13 +1471,7 @@ class AskView(object):
         Delete a user from the user graphs, and remove all his data
         """
 
-        # Denny access for non loged users
-        if self.request.session['username'] == '':
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
+        self.checkAuthSession()
 
         body = self.request.json_body
 
@@ -1504,13 +1481,14 @@ class AskView(object):
 
         # Non admin can only delete himself
         if self.request.session['username'] != username and not self.request.session['admin']:
-            return 'forbidden'
+            raise Exception('forbidden')
 
         # If confirmation, check the user passwd
         if confirmation:
             security = Security(self.settings, self.request.session, username, '', passwd, passwd)
             if not security.check_username_password():
                 self.data['error'] = 'Wrong password'
+                self.request.response.status = 400
                 return self.data
 
 
@@ -1530,7 +1508,10 @@ class AskView(object):
                 query_laucher.execute_query(sqb.get_drop_named_graph(graph).query)
                 query_laucher.execute_query(sqb.get_delete_metadatas_of_graph(graph).query)
             except Exception as e:
-                return 'failed: ' + str(e)
+                self.data['error'] = str(e)
+                self.log.error(str(e))
+                self.request.response.status = 400
+                return self.data
 
 
         # Delete user infos
@@ -1560,7 +1541,10 @@ class AskView(object):
         try:
             result = query_laucher.process_query(sqa.get_user_infos(self.request.session['username']).query)
         except Exception as e:
-            return 'failed: ' + str(e)
+            self.data['error'] = str(e)
+            self.log.error(str(e))
+            self.request.response.status = 400
+            return self.data
 
 
         apikey_list = []

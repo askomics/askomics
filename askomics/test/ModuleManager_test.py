@@ -1,4 +1,4 @@
-"""contain SecurityTests Class"""
+"""contain ModulesManager Class"""
 
 import unittest
 from pyramid.paster import get_appsettings

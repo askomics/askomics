@@ -20,7 +20,7 @@ class AskomicsResultsView {
     return this.activesAttributes;
   }
 
-  setActivesAttributes() {
+  setActivesAttributes(nodes,links) {
 
     this.is_valid();
 
@@ -28,8 +28,8 @@ class AskomicsResultsView {
     this.activesAttributesLabel = {} ;
     this.activesAttributesUrl   = {} ;
 
-    for (let i=0;i<__ihm.getGraphBuilder().nodes().length;i++ ) {
-      let node = __ihm.getGraphBuilder().nodes()[i];
+    for (let i=0;i<nodes.length;i++ ) {
+      let node = nodes[i];
       if ( ! node.sparqlgen ) continue;
       if ( ! node.actif ) continue;
       let attr_disp = node.getAttributesDisplaying();
@@ -46,10 +46,7 @@ class AskomicsResultsView {
     }
   }
 
-  getPreviewResults(dump) {
-    //TODO : manage new AskomicsGraph
-    //let struct = JSON.parse(dump);
-
+  getPreviewResults(struct) {
     /* new presentation by entity */
     let table = $('<table></table>')
                   .addClass('table')
@@ -61,9 +58,13 @@ class AskomicsResultsView {
                   .css("width","100%")
                   .css("overflow-y","auto");
 
-    this.setActivesAttributes();
-    table.append(this.build_simple_subheader_results(__ihm.getGraphBuilder().nodes()))
-         .append(this.build_body_results(__ihm.getGraphBuilder().nodes()));
+    let t = __ihm.getGraphBuilder().extractNodesAndLinks(struct[1],struct[2]);
+    let nodes = t[0];
+    let links = t[1];
+
+    this.setActivesAttributes(nodes,links);
+    table.append(this.build_simple_subheader_results(nodes))
+         .append(this.build_body_results(nodes));
 
       return table;
   }
@@ -251,7 +252,7 @@ class AskomicsResultsView {
                 .css("overflow-y","auto")
                 .css("height","100px");
 
-    for (let i=0;i<this.data.values.length;i++ ) {
+    for (let i=0;i<this.data.length;i++ ) {
       let row = $('<tr></tr>');
       for (let j=0;j<nodeList.length;j++ ) {
         let node = nodeList[j];
@@ -260,14 +261,14 @@ class AskomicsResultsView {
         for (let sparqlId in this.activesAttributes[node.id]) {
           let headerName = this.activesAttributes[node.id][sparqlId];
 
-          let val = this.data.values[i][this.activesAttributes[node.id][sparqlId]];
+          let val = this.data[i][this.activesAttributes[node.id][sparqlId]];
           if (val === undefined || val === '' ) { // case for rdfs label which are desactived
-            val = this.data.values[i]['URI'+this.activesAttributes[node.id][sparqlId]];
+            val = this.data[i]['URI'+this.activesAttributes[node.id][sparqlId]];
           }
 
           if ( headerName in this.activesAttributesUrl[node.id] ) {
             let valWithPrefix = __ihm.getAbstraction().shortRDF(val);
-            let url = this.data.values[i]["URI"+headerName];
+            let url = this.data[i]["URI"+headerName];
             row.append($('<td></td>').html($('<a></a>').attr('href',url).attr('target','_blank').text(valWithPrefix)));
           } else {
             row.append($('<td></td>').text(val));

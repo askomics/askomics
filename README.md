@@ -72,7 +72,7 @@ docker run -d --name virtuoso \
         -e DBA_PASSWORD=dba \
         -e SPARQL_UPDATE=true \
         -e DEFAULT_GRAPH=http://localhost:8890/DAV \
-        --net="host" -t xgaia/virtuoso
+        --net="host" -t askomics/docker-virtuoso
 ```
 
 + Run `startAskomics.sh`
@@ -104,9 +104,23 @@ To get a Galaxy instance, you can run a docker galaxy with the following lines
 
 Then, test can be run with
 
+##### All tests
+
 ```
 ./venv/bin/python setup.py nosetests
 ```
+
+##### Without Galaxy Tests
+```
+./venv/bin/python setup.py nosetests -a '!galaxy'
+```
+
+##### With a html report coverage
+
+```
+./venv/bin/python setup.py nosetests -a '!galaxy' --with-coverage --cover-erase --cover-html
+```
+
 #### Javascript tests
 
 ```

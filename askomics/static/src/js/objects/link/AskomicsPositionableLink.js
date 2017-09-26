@@ -1,5 +1,7 @@
 /*jshint esversion: 6 */
 
+var static_count_AskomicsPositionableLink = 0;
+
 class AskomicsPositionableLink extends AskomicsLink {
 
   constructor(link,sourceN,targetN) {
@@ -19,8 +21,8 @@ class AskomicsPositionableLink extends AskomicsLink {
 
   }
 
-  setjson(obj) {
-    super.setjson(obj);
+  setjson(obj,nodes) {
+    super.setjson(obj,nodes);
     this.type     = obj.type ;
     this.label    = obj.label;
     this.same_tax  =  obj.same_tax ;
@@ -38,32 +40,34 @@ class AskomicsPositionableLink extends AskomicsLink {
     let blockConstraint = [];
 
     /* block management */
+    let s = "?s"+node.id+"_"+secondNode.id+"_"+static_count_AskomicsPositionableLink;
+    static_count_AskomicsPositionableLink++;
     if (this.same_ref) {
-      blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ ":IsIncludeInRef"+" "+ "?s");
-      blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ ":IsIncludeInRef"+" "+ "?s");
+      blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ ":IsIncludeInRef"+" "+s );
+      blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ ":IsIncludeInRef"+" "+ s);
     } else {
-      blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ ":IsIncludeIn"+" "+ "?s");
-      blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ ":IsIncludeIn"+" "+ "?s");
+      blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ ":IsIncludeIn"+" "+ s);
+      blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ ":IsIncludeIn"+" "+ s);
     }
-    
+
     /* manage start and end variates */
     this.startNodeVar = node.att_position_active("start") ;
-    if ( this.startNodeVar === null  ) { 
+    if ( this.startNodeVar === null  ) {
       this.startNodeVar = "start_"+node.SPARQLid;
       blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ "faldo:location/faldo:begin/faldo:position"+" "+ "?"+this.startNodeVar);
     }
     this.endNodeVar = node.att_position_active("end") ;
-    if ( this.endNodeVar === null ) { 
+    if ( this.endNodeVar === null ) {
       this.endNodeVar = "end_"+node.SPARQLid ;
       blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ "faldo:location/faldo:end/faldo:position"+" "+ "?"+this.endNodeVar);
     }
     this.startSecondNodeVar = secondNode.att_position_active("start") ;
-    if ( this.startSecondNodeVar === null ) { 
+    if ( this.startSecondNodeVar === null ) {
       this.startSecondNodeVar = "start_"+secondNode.SPARQLid;
       blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ "faldo:location/faldo:begin/faldo:position"+" "+ "?"+this.startSecondNodeVar);
     }
     this.endSecondNodeVar =  secondNode.att_position_active("end") ;
-    if ( this.endSecondNodeVar === null ) { 
+    if ( this.endSecondNodeVar === null ) {
       this.endSecondNodeVar = "end_"+secondNode.SPARQLid;
       blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ "faldo:location/faldo:end/faldo:position"+" "+ "?"+this.endSecondNodeVar );
     }
@@ -75,7 +79,7 @@ class AskomicsPositionableLink extends AskomicsLink {
     if (this.same_ref) {
       let att1 = node.att_position_active("ref") ;
       let att2 = secondNode.att_position_active("ref") ;
-      if ( att1 === null && att2 === null) { 
+      if ( att1 === null && att2 === null) {
       } else if ( att1 === null ) {
         blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ "faldo:location/faldo:begin/faldo:reference"+" "+ "?URICat"+att2);
       } else if ( att2 === null ) {
@@ -89,7 +93,7 @@ class AskomicsPositionableLink extends AskomicsLink {
     if (this.same_tax) {
       let att1 = node.att_position_active("taxon") ;
       let att2 = secondNode.att_position_active("taxon") ;
-      if ( att1 === null && att2 === null) { 
+      if ( att1 === null && att2 === null) {
         blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ ":position_taxon"+" "+ "?taxon_"+node.SPARQLid+secondNode.SPARQLid);
         blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ ":position_taxon"+" "+ "?taxon_"+node.SPARQLid+secondNode.SPARQLid);
       } else if ( att1 === null ) {
@@ -105,7 +109,7 @@ class AskomicsPositionableLink extends AskomicsLink {
     if (this.which_strand == "same" ) {
       let att1 = node.att_position_active("strand") ;
       let att2 = secondNode.att_position_active("strand") ;
-      if ( att1 === null && att2 === null) { 
+      if ( att1 === null && att2 === null) {
         blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ ":position_strand"+" "+ "?strand_"+node.SPARQLid+secondNode.SPARQLid);
         blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ ":position_strand"+" "+ "?strand_"+node.SPARQLid+secondNode.SPARQLid);
       } else if ( att1 === null ) {

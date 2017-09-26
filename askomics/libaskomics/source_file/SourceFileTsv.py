@@ -467,7 +467,7 @@ class SourceFileTsv(SourceFile):
 
                 # check positionable
                 positionable = False
-                if 'start' in self.forced_column_types and 'end' in self.forced_column_types and 'strand' in self.forced_column_types and 'ref' in self.forced_column_types:
+                if 'start' in self.forced_column_types and 'end' in self.forced_column_types :
                     # its a positionable entity
                     positionable = True
                 # Add data from other columns
@@ -551,7 +551,8 @@ class SourceFileTsv(SourceFile):
                     ttl += indent + ' :blockend ' + str(block_idxend*blockbase) +';\n'
 
                     for sliceb in range(block_idxstart, block_idxend + 1):
-                        ttl += indent + ' :IsIncludeInRef :' + reference_faldo+"_"+str(sliceb) +' ;\n'
+                        if reference_faldo:
+                            ttl += indent + ' :IsIncludeInRef :' + reference_faldo+"_"+str(sliceb) +' ;\n'
                         ttl += indent + ' :IsIncludeIn ' + str(sliceb) +' ;\n'
 
                     faldo_strand = self.get_strand_faldo(strand_faldo)
@@ -559,12 +560,18 @@ class SourceFileTsv(SourceFile):
                     ttl += indent +    " faldo:location [ a faldo:Region ;\n"+\
                               indent + "                  faldo:begin [ a faldo:ExactPosition;\n"+\
                               indent + "                                a "+faldo_strand+";\n"+\
-                              indent + "                                faldo:position "+str(start_faldo)+";\n"+\
-                              indent + "                                faldo:reference :"+reference_faldo+" ];\n"+\
-                              indent + "                  faldo:end [ a faldo:ExactPosition;\n"+\
+                              indent + "                                faldo:position "+str(start_faldo)+";\n"
+                    if reference_faldo:
+                        ttl += indent + "                                faldo:reference :"+reference_faldo+" ;\n"
+
+                    ttl += indent + "                                    ];\n"
+
+                    ttl += indent + "                  faldo:end [ a faldo:ExactPosition;\n"+\
                               indent + "                              a "+faldo_strand+";\n"+\
-                              indent + "                              faldo:position "+str(end_faldo)+";\n"+\
-                              indent + "                              faldo:reference :"+reference_faldo+" ]] ;\n"
+                              indent + "                              faldo:position "+str(end_faldo)+";\n"
+                    if reference_faldo:
+                        ttl += indent + "                              faldo:reference :"+reference_faldo+";\n"
+                    ttl += indent + "                                  ]]   "
 
                 ttl = ttl[:-2] + "."
 

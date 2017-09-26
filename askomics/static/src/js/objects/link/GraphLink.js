@@ -48,7 +48,7 @@ class GraphLink extends GraphObject {
   set linkindex  (__linkindex) { this._linkindex = __linkindex; }
   get linkindex () { return this._linkindex; }
 
-  setjson(obj) {
+  setjson(obj,nodes) {
     super.setjson(obj);
     this.linkindex = obj._linkindex;
 
@@ -63,21 +63,21 @@ class GraphLink extends GraphObject {
     if (! ('_id' in obj._target) ) {
       throw "Devel error: setjson : obj._target have no id property : "+JSON.stringify(obj);
     }
-
-    let t = AskomicsGraphBuilder.findElt(__ihm.getGraphBuilder().nodes(),obj._source._id);
+    //__ihm.getGraphBuilder().nodes()
+    let t = AskomicsGraphBuilder.findElt(nodes,obj._source._id);
     if (t[0]<0) {
       throw "Devel error: setjson : nodes have to be initialized to define links.";
     }
 
     this.source    = t[1];
 
-    t = AskomicsGraphBuilder.findElt(__ihm.getGraphBuilder().nodes(),obj._target._id);
+    t = AskomicsGraphBuilder.findElt(nodes,obj._target._id);
     if (t[0]<0) {
       throw "Devel error: setjson : nodes have to be initialized to define links.";
     }
     this.target = t[1];
   }
-  
+
   getTextFillColor() { return 'grey'; }
   getStrokeColor() { return 'grey'; }
 

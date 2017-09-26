@@ -6,7 +6,7 @@
         <ul class="nav navbar-nav navbar-right">
             <li id="interrogation" class="active"><a href="#" onclick="__ihm.loadStartPoints();"><span class="glyphicon glyphicon-play"></span></a></li>
 
-            <li id="jobsview"><a href="#"><span class="glyphicon glyphicon-tasks"></span></a></li>
+            <li id="jobsview" onclick="new AskomicsJobsViewManager().listJobs();"><a href="#"><span class="glyphicon glyphicon-tasks"></span></a></li>
             {{#if loged}}
             {{#if nonblocked}}
             <li id="userdata" class="dropdown">

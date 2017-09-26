@@ -430,7 +430,6 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.get_value()
 
-        print(data)
         assert data == {
             'values': [{
                 'People1': 'p1'
@@ -557,11 +556,12 @@ class AskViewTests(unittest.TestCase):
         """Test get_users_infos"""
 
         self.tps.clean_up()
-
-        data = self.askview.get_users_infos()
-
         # first test with non admin
-        assert data == 'forbidden'
+        try :
+            data = self.askview.get_users_infos()
+            assert False
+        except Exception as e:
+            assert True
 
         # then, is user is admin
         self.request.session['admin'] = True
@@ -594,10 +594,13 @@ class AskViewTests(unittest.TestCase):
             'lock': True
         }
 
-        data = self.askview.lock_user()
-
         # first test with non admin
-        assert data == 'forbidden'
+
+        try:
+            data = self.askview.lock_user()
+            assert False
+        except Exception as e:
+            assert True
 
         # then, is user is admin
         self.request.session['admin'] = True
@@ -617,10 +620,10 @@ class AskViewTests(unittest.TestCase):
             'admin': True
         }
 
-        data = self.askview.set_admin()
-
-        # first test with non admin
-        assert data == 'forbidden'
+        try:
+            data = self.askview.set_admin()
+        except Exception as e:
+            assert True
 
         # then, is user is admin
         self.request.session['admin'] = True
@@ -652,6 +655,8 @@ class AskViewTests(unittest.TestCase):
         }
 
         self.request.session['blocked'] = False
+        self.request.session['admin'] = False
+        self.request.session['username'] = 'jdoe'
 
         data = self.askview.delete_user()
 

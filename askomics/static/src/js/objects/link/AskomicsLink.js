@@ -20,8 +20,8 @@ class AskomicsLink extends GraphLink {
   set absentrel (absentrel) { this._absentrel = absentrel; }
   get absentrel () { return this._absentrel; }
 
-  setjson(obj) {
-    super.setjson(obj);
+  setjson(obj,nodes) {
+    super.setjson(obj,nodes);
 
     this._transitive = obj._transitive ;
     this._absentrel = obj._absentrel ;

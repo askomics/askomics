@@ -34,8 +34,23 @@ class ModulesParametersView extends InterfaceParametersView {
   }
 
   active(urimo,name,bool) {
-    new AskomicsJobsViewManager().createModuleJob(bool,urimo,name);
+
+    let service = new RestServiceJs("manage_module");
+
+    let param = {
+        'checked' : bool,
+        'uri'     : urimo,
+        'name'    : name
+      } ;
+
+    service.post(param,function(data) {
+        new ModulesParametersView().updateModules();
+    });
+    
     new ModulesParametersView().updateModules();
+    new AskomicsJobsViewManager().wait(50).then( function() {
+      $("#jobsview").trigger( "click" );
+    });
   }
 
 }

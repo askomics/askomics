@@ -49,36 +49,43 @@ $(function () {
             headers.push($(this).val());
         });
         loadSourceFile($(event.target).closest('.template-source_file'), true, headers);
+        __ihm.displayModal('Upload TSV file.', '', 'Close');
     });
 
     $("#content_integration").on('click', '.load_data_gff', function() {
         let idfile = $(this).attr('id');
         loadSourceFileGff(idfile, false);
+        __ihm.displayModal('Upload GFF file.', '', 'Close');
     });
 
     $("#content_integration").on('click', '.load_data_gff_public', function() {
         let idfile = $(this).attr('id');
         loadSourceFileGff(idfile, true);
+        __ihm.displayModal('Upload GFF file.', '', 'Close');
     });
 
     $("#content_integration").on('click', '.load_data_ttl', function() {
         let idfile = $(this).attr('id');
         loadSourceFileTtl(idfile, false);
+        __ihm.displayModal('Upload TTL file.', '', 'Close');
     });
 
     $("#content_integration").on('click', '.load_data_ttl_public', function() {
         let idfile = $(this).attr('id');
         loadSourceFileTtl(idfile, true);
+        __ihm.displayModal('Upload TTL file.', '', 'Close');
     });
 
     $("#content_integration").on('click', '.load_data_bed', function() {
         let idfile = $(this).attr('id');
         loadSourceFileBed(idfile, false);
+        __ihm.displayModal('Upload BED file.', '', 'Close');
     });
 
     $("#content_integration").on('click', '.load_data_bed_public', function() {
         let idfile = $(this).attr('id');
         loadSourceFileBed(idfile, true);
+        __ihm.displayModal('Upload BED file.', '', 'Close');
     });
 });
 
@@ -106,6 +113,12 @@ function cols2rows(items) {
 
 function displayIntegrationForm(data) {
     $("#content_integration").empty();
+    if ( 'error' in data ) {
+      let template = AskOmics.templates.error_message;
+      let context = { message: data.error };
+      let html = template(context);
+      $("#content_integration").append(html);
+    }
     if ( data.files === undefined ) return ;
 
     let dataprefix = updatePrefixListFromDatabase();
@@ -177,6 +190,14 @@ function displayGffForm(file, taxons) {
         admin = true;
     }
 
+    if ( ! ('entities' in file) ) {
+      let template = AskOmics.templates.error_message;
+      let context = { message: '['+file.name +']: None entities are defined in this Gff File !' };
+      let html = template(context);
+      $("#content_integration").append(html);
+      return;
+    }
+
     file.entities = file.entities.sort();
 
     let context = {idfile: getIdFile(file),file: file, taxons: taxons.sort(), admin: admin};
@@ -211,7 +232,7 @@ function displayBedForm(file, taxons) {
         admin = true;
     }
 
-    file.label = file.name.replace(/\.[^/.]+$/, "")
+    file.label = file.name.replace(/\.[^/.]+$/, "");
 
     let context = {idfile: getIdFile(file),file: file, taxons: taxons.sort(), admin: admin};
     let html = template(context);
@@ -416,15 +437,6 @@ function previewTtl(file_elem) {
                   'uris': tags.uris };
 
     service.post(model, function(data) {
-        if (data == 'forbidden') {
-          __ihm.showLoginForm();
-          return;
-        }
-        if (data == 'blocked') {
-          __ihm.displayBlockedPage();
-          return;
-        }
-
         let insert_warning_elem = file_elem.find(".insert_warning").first();
         if (data.error) {
 
@@ -524,13 +536,11 @@ function checkData(file_elem) {
  * Load a source_file into the triplestore
  */
 function loadSourceFile(file_elem, pub, headers) {
-  let idfile,col_types,disabled_columns,key_columns,uri;
-  let tags = getIhmTtlElements(file_elem);
+    let idfile,col_types,disabled_columns,key_columns,uri;
+    let tags = getIhmTtlElements(file_elem);
 
-  __ihm.displayModal('Please wait', '', 'Close');
-
-  let service = new RestServiceJs("load_data_into_graph");
-  let model = { 'file_name': $("#"+tags.idfile).attr("filename"),
+    let service = new RestServiceJs("load_data_into_graph");
+    let model = { 'file_name': $("#"+tags.idfile).attr("filename"),
                   'headers': headers,
                   'col_types': tags.col_types,
                   'disabled_columns': tags.disabled_columns,
@@ -539,246 +549,97 @@ function loadSourceFile(file_elem, pub, headers) {
                   'uris': tags.uris};
 
     service.post(model, function(data) {
-        __ihm.hideModal();
-
-        if (data == 'forbidden') {
-          showLoginForm();
-          return;
-        }
-        if (data == 'blocked') {
-          displayBlockedPage($('.username').attr('id'));
-          return;
-        }
-
-        let insert_status_elem = file_elem.find(".insert_status").first();
-        let insert_warning_elem = file_elem.find(".insert_warning").first();
-        if (data.status != "ok") {
-            insert_warning_elem.empty();
-            insert_warning_elem.removeClass('hidden alert-success')
-                              .addClass('show alert-danger');
-
-            insert_warning_elem.append($('<span class="glyphicon glyphicon glyphicon-exclamation-sign"></span>')).
-                               append($('<p></p>').html(data.error).addClass('show alert-danger'));
-            if ('url' in data) {
-                insert_warning_elem.append("<br>ttl file are available here: <a href=\""+data.url+"\">"+data.url+"</a>");
-            }
-
-        }
-        else {
-            if($.inArray('entitySym', tags.col_types) != -1) {
-                if (data.expected_lines_number*2 == data.total_triple_count) {
-                    insert_status_elem.html('<strong><span class="glyphicon glyphicon-ok"></span> Success:</strong> inserted '+ data.total_triple_count + " lines of "+(data.expected_lines_number*2))
-                                      .removeClass('hidden alert-danger')
-                                      .removeClass('hidden alert-warning')
-                                      .addClass('show alert-success');
-
-                }else{
-                    insert_status_elem.html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> Warning:</strong> inserted '+ data.total_triple_count*2 + " lines of "+data.expected_lines_number)
-                                      .removeClass('hidden alert-success')
-                                      .removeClass('hidden alert-warning')
-                                      .addClass('show alert-danger');
-                }
-            }else{
-                if (data.expected_lines_number == data.total_triple_count) {
-                    insert_status_elem.html('<strong><span class="glyphicon glyphicon-ok"></span> Success:</strong> inserted '+ data.total_triple_count + " lines of "+data.expected_lines_number)
-                                      .removeClass('hidden alert-danger')
-                                      .removeClass('hidden alert-warning')
-                                      .addClass('show alert-success');
-                }else{
-                    insert_status_elem.html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> Warning:</strong> inserted '+ data.total_triple_count + " lines of "+data.expected_lines_number)
-                                      .removeClass('hidden alert-success')
-                                      .removeClass('hidden alert-warning')
-                                      .addClass('show alert-danger');
-                }
-
-            }
-        }
-
-        // Check what is in the db now
-        $('.template-source_file').each(function( index ) {
-            checkData(file_elem);
-        });
+        new AskomicsJobsViewManager().listJobs();
     });
 
     __ihm.resetStats();
+
+  new ModulesParametersView().updateModules();
 }
 
 /**
  * Load a GFF source_file into the triplestore
  */
 function loadSourceFileGff(idfile, pub) {
-    console.log('-----> loadSourceFileGff <----- ');
-    // get taxon
-    let taxon = '';
 
-    let file_elem = $("#source-file-gff-" + idfile);
+  console.log('-----> loadSourceFileGff <----- ');
+  // get taxon
+  let taxon = '';
 
-    // get the taxon in the selector or in the input field
-    taxon = $('#' + idfile + '-selector').val();
-    if ( taxon === null || taxon === undefined) {
-        taxon = $('#tax-'+idfile).val();
-    }
+  let file_elem = $("#source-file-gff-" + idfile);
 
-    // get entities
-    let entities = [];
+  // get the taxon in the selector or in the input field
+  taxon = $('#' + idfile + '-selector').val();
+  if ( taxon === null || taxon === undefined) {
+      taxon = $('#tax-'+idfile).val();
+  }
 
-    $("#"+idfile+" > label > input").each(function() {
-        if ($(this).is(":checked")) {
-            entities.push($(this).attr('id'));
-        }
-    });
+  // get entities
+  let entities = [];
 
-    // custom uri
-    let uri = file_elem.find('#def-uri-entity-'+idfile).val();
+  $("#"+idfile+" > label > input").each(function() {
+      if ($(this).is(":checked")) {
+          entities.push($(this).attr('id'));
+      }
+  });
 
-    __ihm.displayModal('Please wait', '', 'Close');
+  // custom uri
+  let uri = file_elem.find('#def-uri-entity-'+idfile).val();
 
-    let service = new RestServiceJs("load_gff_into_graph");
+  let service = new RestServiceJs("load_gff_into_graph");
 
-    let model = { 'file_name': $("#"+idfile).attr("filename"),
+  let model = { 'file_name': $("#"+idfile).attr("filename"),
                   'taxon': taxon,
                   'entities': entities,
                   'public': pub,
                   'uri': uri};
 
-    service.post(model, function(data) {
-        if (data == 'forbidden') {
-          showLoginForm();
-          return;
-        }
-        if (data == 'blocked') {
-          displayBlockedPage($('.username').attr('id'));
-          return;
-        }
-        // Show a success message isertion is OK
-        let div_entity = $("#" + idfile);
-        let entities_string = '';
-        for (var i = 0; i < entities.length; i++) {
-            entities_string += '<b>' + entities[i] + '</b>';
-            if (i != entities.length - 2 && i != entities.length -1) {
-                entities_string += ', ';
-            }
-            if (i == entities.length - 2) {
-                entities_string += ' and ';
-            }
-        }
-
-        let insert_status_elem = file_elem.find(".insert_status").first();
-        let insert_warning_elem = file_elem.find(".insert_warning").first();
-
-        //TODO: check if insertion is ok and then, display the success message or a warning message
-        if (data.error) {
-            insert_status_elem.html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> ERROR:</strong> ' + JSON.stringify(data.error))
-                              .removeClass('hidden alert-success')
-                              .removeClass('hidden alert-warning')
-                              .addClass('show alert-danger');
-        }else{
-            insert_status_elem.html('<span class="glyphicon glyphicon-ok"></span> ' + entities_string + ' inserted with success.')
-                                                  .removeClass('hidden alert-danger')
-                                                  .removeClass('hidden alert-warning')
-                                                  .addClass('show alert-success');
-        }
-
-        __ihm.hideModal();
-    });
+  service.post(model, function(data) {
+    new AskomicsJobsViewManager().listJobs();
+  });
 }
 
 function loadSourceFileTtl(idfile, pub) {
-    console.log('---> loadSourceFileTtl <---');
-    __ihm.displayModal('Please wait', '', 'Close');
 
-    let file_elem = $("#source-file-ttl-" + idfile);
+  let file_elem = $("#source-file-ttl-" + idfile);
 
-    let service = new RestServiceJs('load_ttl_into_graph');
-    let model = {
+  let service = new RestServiceJs('load_ttl_into_graph');
+  let model = {
       'file_name' : $("#"+idfile).attr("filename"),
       'public': pub
-    };
+  };
 
-    service.post(model, function(data) {
-        console.log('---> ttl insert <---');
-        if (data == 'forbidden') {
-          showLoginForm();
-          return;
-        }
-        if (data == 'blocked') {
-          displayBlockedPage($('.username').attr('id'));
-          return;
-        }
-
-        let insert_status_elem = file_elem.find(".insert_status").first();
-        let insert_warning_elem = file_elem.find(".insert_warning").first();
-
-        if (data.error) {
-            insert_status_elem.html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> ERROR:</strong> ' + JSON.stringify(data.error))
-                              .removeClass('hidden alert-success')
-                              .removeClass('hidden alert-warning')
-                              .addClass('show alert-danger');
-        }else{
-            insert_status_elem.html('<span class="glyphicon glyphicon-ok"></span> ' + idfile + ' inserted with success.')
-                                                  .removeClass('hidden alert-danger')
-                                                  .removeClass('hidden alert-warning')
-                                                  .addClass('show alert-success');
-        }
-        __ihm.hideModal();
-    });
+  service.post(model, function(data) {
+    new AskomicsJobsViewManager().listJobs();
+  });
 }
 
 function loadSourceFileBed(idfile, pub) {
-    // get taxon
-    let taxon = '';
+  // get taxon
+  let taxon = '';
 
-    let file_elem = $("#source-file-bed-" + idfile);
+  let file_elem = $("#source-file-bed-" + idfile);
 
-    // get the taxon in the selector or in the input field
-    taxon = $('#' + idfile + '-selector').val();
-    if ( taxon === null || taxon === undefined) {
-        taxon = $('#tax-'+idfile).val();
-    }
+  // get the taxon in the selector or in the input field
+  taxon = $('#' + idfile + '-selector').val();
+  if ( taxon === null || taxon === undefined) {
+      taxon = $('#tax-'+idfile).val();
+  }
 
-    // get entity name
-    let entity = $('#entity-' + idfile).val();
+  // get entity name
+  let entity = $('#entity-' + idfile).val();
+  // custom uri
+  let uri = file_elem.find('#def-uri-entity-'+idfile).val();
 
-    // custom uri
-    let uri = file_elem.find('#def-uri-entity-'+idfile).val();
+  let service = new RestServiceJs("load_bed_into_graph");
 
-    __ihm.displayModal('Please wait', '', 'Close');
+  let model = { 'file_name': $("#"+idfile).attr("filename"),
+                'taxon': taxon,
+                'entity_name': entity,
+                'public': pub,
+                'uri': uri};
 
-    let service = new RestServiceJs("load_bed_into_graph");
-
-    let model = { 'file_name': $("#"+idfile).attr("filename"),
-                  'taxon': taxon,
-                  'entity_name': entity,
-                  'public': pub,
-                  'uri': uri};
-
-    service.post(model, function(data) {
-        if (data == 'forbidden') {
-          showLoginForm();
-          return;
-        }
-        if (data == 'blocked') {
-          displayBlockedPage($('.username').attr('id'));
-          return;
-        }
-
-        let insert_status_elem = file_elem.find(".insert_status").first();
-        let insert_warning_elem = file_elem.find(".insert_warning").first();
-
-        //TODO: check if insertion is ok and then, display the success message or a warning message
-        if (data.error) {
-            insert_status_elem.html('<strong><span class="glyphicon glyphicon-exclamation-sign"></span> ERROR:</strong> ' + JSON.stringify(data.error))
-                              .removeClass('hidden alert-success')
-                              .removeClass('hidden alert-warning')
-                              .addClass('show alert-danger');
-        }else{
-            insert_status_elem.html('<span class="glyphicon glyphicon-ok"></span> bed file inserted with success.')
-                                                  .removeClass('hidden alert-danger')
-                                                  .removeClass('hidden alert-warning')
-                                                  .addClass('show alert-success');
-        }
-
-        __ihm.hideModal();
-
-    });
+  service.post(model, function(data) {
+    new AskomicsJobsViewManager().listJobs();
+  });
 }

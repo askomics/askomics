@@ -8,7 +8,7 @@ from pyramid.session import SignedCookieSessionFactory
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """
-    my_session_factory = SignedCookieSessionFactory('itsaseekreet',timeout=None)
+    my_session_factory = SignedCookieSessionFactory('itsaseekreet',timeout=1200)
 
     config = Configurator(settings=settings)
     config.set_session_factory(my_session_factory)
@@ -32,6 +32,10 @@ def main(global_config, **settings):
     config.add_route('getUserAbstraction', '/userAbstraction')
     config.add_route('sparqlquery', '/sparqlquery')
     config.add_route('getSparqlQueryInTextFormat', '/getSparqlQueryInTextFormat')
+
+    # Job persistance management
+    config.add_route('listjob', '/listjob')
+    config.add_route('deljob', '/deljob')
 
     # Upload/integration routes
     config.add_route('source_files_overview', '/source_files_overview')

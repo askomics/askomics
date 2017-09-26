@@ -7,8 +7,8 @@ class AskomicsIsALink extends GraphLink {
     super(link,sourceN,targetN);
   }
 
-  setjson(obj) {
-    super.setjson(obj);
+  setjson(obj,nodes) {
+    super.setjson(obj,nodes);
   }
 
   buildConstraintsSPARQL() {

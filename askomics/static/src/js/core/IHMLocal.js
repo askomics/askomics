@@ -56,6 +56,7 @@ class IHMLocal {
       this.graphBuilder            = new AskomicsGraphBuilder()               ;
       this.user                    = new AskomicsUser('')                     ;
       this.localUserAbstraction    = new AskomicsUserAbstraction()            ;
+      this.galaxyService           = new AskomicsGalaxyService()              ;
 
       //TODO: Manage all view in a array with a generic way
       this.shortcutsView      = new  ShortcutsParametersView();
@@ -99,8 +100,6 @@ class IHMLocal {
     start() {
       $("#init").show();
       $("#queryBuilder").hide();
-
-      this.user.checkUser();
       this.loadStartPoints();
     }
 
@@ -110,13 +109,6 @@ class IHMLocal {
         $('[data-toggle="tooltip"]').tooltip();
         $("#init").hide();
         $("#queryBuilder").show();
-
-        // Show a galaxy dropdown if user have a galaxy connected
-        __ihm.user.checkUser();
-        if (__ihm.user.haveGalaxy()) {
-          console.log('user have galaxy');
-          $('.send2galaxy-li').removeClass('hidden');
-        }
 
         /* load local abtraction  */
         this.localUserAbstraction.loadUserAbstraction();
@@ -135,11 +127,11 @@ class IHMLocal {
 
         AskomicsObjectView.start();
         if ( contents === undefined ) {
-
-        let uri = $('input.start_point_radio:checked').attr('id');
+        let uri = $('#spdiv input.start_point_radio:checked').attr('id');
+        console.assert(uri != undefined ,"Can not get start point URI !" );
         let label = $('input.start_point_radio:checked').attr('value');
+        console.assert(label != undefined ,"Can not get start point Label !" );
         let startPoint = {'uri': uri, 'label': label};
-
           __ihm.getSVGLayout().start(startPoint);
         } else {
           __ihm.getSVGLayout().startWithQuery(contents);
@@ -267,6 +259,8 @@ class IHMLocal {
             // Sort inputs
             let inputs = $("#spdiv");
             inputs.children().detach().sort(function(a, b) {
+                console.log("a:"+a);
+                console.log("a:"+b);
                 return $(a).attr("id").localeCompare($(b).attr("id"));
             }).appendTo(inputs);
 
@@ -383,27 +377,11 @@ class IHMLocal {
       return { 'date' : date , 'name' : new_name } ;
     }
 
-    showLoginForm() {
-      $(".container:not(#navbar_content)").hide();
-      $('#content_login').show();
-      $('.nav li.active').removeClass('active');
-      $("#login").addClass('active');
-      __ihm.displayNavbar(false, '');
-    }
-
     loadStatistics() {
         let service = new RestServiceJs('statistics');
 
         __ihm.displayModal('Loading statistics...', '', 'Close');
         service.getAll(function(stats) {
-          if (stats == 'forbidden') {
-            __ihm.showLoginForm();
-            return;
-          }
-          if (stats == 'blocked') {
-              __ihm.displayBlockedPage($('.username').attr('id'));
-              return;
-          }
 
           $('#content_statistics').empty();
           let template = AskOmics.templates.stats;
@@ -431,6 +409,7 @@ class IHMLocal {
         }
         $('#modalButton').text(button);
         $('#modal').modal('show');
+        return $('#modal');
     }
 
     displayModalHtml(title, message, button) {
@@ -692,19 +671,6 @@ class IHMLocal {
       });
     }
 
-    displayBlockedPage(username) {
-      $('#content_blocked').empty();
-      let template = AskOmics.templates.blocked;
-      let context = {name: username};
-      let html = template(context);
-
-      __ihm.hideModal();
-
-      $('.container').hide();
-      $('.container#navbar_content').show();
-      $('#content_blocked').append(html).show();
-    }
-
     loadUsers() {
       let service = new RestServiceJs('get_users_infos');
       service.getAll(function(data) {
@@ -773,14 +739,6 @@ class IHMLocal {
           if (!__ihm.manageErrorMessage(d)) {
             return;
           }
-          if (d == 'forbidden') {
-            __ihm.showLoginForm();
-            return;
-          }
-          if (d == 'blocked') {
-            __ihm.displayBlockedPage($('.username').attr('id'));
-            return;
-          }
 
           // Reload the page
           if (d == 'success') {
@@ -806,14 +764,6 @@ class IHMLocal {
       }
 
       service.post(data, function(d) {
-        if (d == 'forbidden') {
-          __ihm.showLoginForm();
-          return;
-        }
-        if (d == 'blocked') {
-          __ihm.displayBlockedPage($('.username').attr('id'));
-          return;
-        }
         // Reload users
         if (d == 'success') {
           __ihm.loadUsers();
@@ -838,14 +788,6 @@ class IHMLocal {
       }
 
       service.post(data, function(d) {
-        if (d == 'forbidden') {
-          __ihm.showLoginForm();
-          return;
-        }
-        if (d == 'blocked') {
-          __ihm.displayBlockedPage($('.username').attr('id'));
-          return;
-        }
         // Reload users
         if (d == 'success') {
           __ihm.loadUsers();
@@ -1193,16 +1135,10 @@ class IHMLocal {
                 $('#login_error').append(data.error[i] + '<br>');
               }
               // Error
-              $('#login_error').show();
-              $('#spinner_login').addClass('hidden');
-              $('#tick_login').addClass('hidden');
-              $('#cross_login').removeClass('hidden');
+              AskomicsUser.errorHtmlLogin();
             }else{
               //Success
-              $('#login_error').hide();
-              $('#spinner_login').addClass('hidden');
-              $('#tick_login').removeClass('hidden');
-              $('#cross_login').addClass('hidden');
+              AskomicsUser.cleanHtmlLogin();
               __ihm.user = new AskomicsUser(data.username, data.admin);
               __ihm.user.logUser();
             }
