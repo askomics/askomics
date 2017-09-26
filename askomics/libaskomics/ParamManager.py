@@ -76,7 +76,12 @@ class ParamManager(object):
         return path
 
     def get_user_csv_directory(self):
-        mdir = self.userfilesdir+"csv"+"/"+self.session['username'] + '/'
+
+        if 'username' not in self.session:
+            mdir = self.userfilesdir+"csv/"
+        else:
+            mdir = self.userfilesdir+"csv/"+self.session['username'] + '/'
+
         if not os.path.isdir(mdir):
             os.makedirs(mdir)
         return mdir
@@ -85,13 +90,19 @@ class ParamManager(object):
         return self.userfilesdir+"rdf/"
 
     def get_rdf_user_directory(self):
-        mdir = self.userfilesdir+"rdf"+"/"+self.session['username'] + '/'
+        if 'username' not in self.session:
+            mdir = self.userfilesdir+"rdf/"
+        else:
+            mdir = self.userfilesdir+"rdf/"+self.session['username'] + '/'
         if not os.path.isdir(mdir):
             os.makedirs(mdir)
         return mdir
 
     def get_json_user_directory(self):
-        mdir = self.userfilesdir+"json"+"/"+self.session['username'] + '/'
+        if 'username' not in self.session:
+            mdir = self.userfilesdir+"json/"
+        else:
+            mdir = self.userfilesdir+"json/"+self.session['username'] + '/'
         if not os.path.isdir(mdir):
             os.makedirs(mdir)
         return mdir

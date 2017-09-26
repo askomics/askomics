@@ -15,6 +15,9 @@ from askomics.libaskomics.ParamManager import ParamManager
 from askomics.libaskomics.GalaxyConnector import GalaxyConnector
 
 from interface_galaxy import InterfaceGalaxy
+from nose.plugins.attrib import attr
+
+@attr('galaxy')
 
 class GalaxyConnectorTests(unittest.TestCase):
     """

@@ -6,11 +6,13 @@ import time
 from bioblend import galaxy
 from askomics.libaskomics.ParamManager import ParamManager
 
+from nose.plugins.attrib import attr
+
+@attr('galaxy')
 class InterfaceGalaxy(object):
     """
     This class contain method to communicate with a galaxy instance
     """
-
 
     def __init__(self, settings, request):
         """constructor"""
