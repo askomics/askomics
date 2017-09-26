@@ -6,6 +6,7 @@ class AskomicsUser {
         this.username = username===undefined?"":username ;
         this.admin    = admin===undefined?false:admin;
         this.blocked  = blocked===undefined?true:blocked;
+        this.galaxy   = false ;
 
         /* check if a session is open */
         this.checkUser();
@@ -22,7 +23,6 @@ class AskomicsUser {
             clearInterval(this.intervalListener);
           }
         }
-        this.galaxy = false;
     }
 
     isAdmin() {
@@ -52,15 +52,16 @@ class AskomicsUser {
         service.getAll(function(data) {
 
           let expired = false;
-          console.log(self.username+","+data.username);
-          console.log(self.admin+","+data.admin);
-          console.log(self.blocked+","+data.blocked);
-          console.log(self.username+","+data.username);
 
-          if ( (self.username != data.username)|| (self.admin != data.admin)| (self.blocked != data.blocked) ) {
-              if ( self.username != "" && data.username == "" ) {
+          if ( (self.username != data.username) ||
+               (self.admin != data.admin) ||
+               (self.blocked != data.blocked) ||
+               (self.galaxy != data.galaxy)) {
+              if ( self.username != "" && data.username == "") {
                 expired = true;
+                console.debug("session expired !");
               }
+
               self.username = data.username;
               self.admin = data.admin;
               self.blocked = data.blocked;
@@ -76,6 +77,12 @@ class AskomicsUser {
               __ihm.displayModal('Session Expired', '', 'Close');
             }
             __ihm.start();
+          }
+          // Show a galaxy dropdown if user have a galaxy connected
+
+          if (self.haveGalaxy()) {
+            console.log('user have galaxy');
+            AskomicsGalaxyService.show();
           }
         });
     }

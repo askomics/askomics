@@ -48,9 +48,11 @@
             {{#if this.csv }}
             <button onclick="let st = atob('{{this.stateToReload}}') ; __ihm.stopSession();__ihm.startSession(st);$('#interrogation').trigger( 'click' );" type="button" class="btn btn-default btn-xs"><i class="fa fa-repeat text-warning"></i> Redo</button>
             <button onclick="location.href='csv/{{this.csv}}';event.stopPropagation();" type="button" class="btn btn-default btn-xs"><i class="fa fa-floppy-o text-primary"></i> Save</button>
-            {{#if ../galaxy}}
-            <button onclick="new AskomicsJobsViewManager().send2galaxy({{@index}});" type="button" class="btn btn-default btn-xs"><i class="fa fa-arrow-right text-success"></i> Send to Galaxy</button>
-            {{/if}}
+              {{#if ../galaxy}}
+                {{#with (lookup ../jobs @index)}}
+                  <button onclick="AskomicsGalaxyService.send2galaxy({{@index}},{{jobid}},{{tstart}},'{{csv}}');event.stopPropagation();" type="button" class="btn btn-default btn-xs"><i class="fa fa-arrow-right text-success"></i> Send to Galaxy</button>
+                {{/with}}
+              {{/if}}
             {{/if}}
 
           </div>

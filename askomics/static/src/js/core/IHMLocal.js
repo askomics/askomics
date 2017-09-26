@@ -56,6 +56,7 @@ class IHMLocal {
       this.graphBuilder            = new AskomicsGraphBuilder()               ;
       this.user                    = new AskomicsUser('')                     ;
       this.localUserAbstraction    = new AskomicsUserAbstraction()            ;
+      this.galaxyService           = new AskomicsGalaxyService()              ;
 
       //TODO: Manage all view in a array with a generic way
       this.shortcutsView      = new  ShortcutsParametersView();
@@ -109,13 +110,6 @@ class IHMLocal {
         $("#init").hide();
         $("#queryBuilder").show();
 
-        // Show a galaxy dropdown if user have a galaxy connected
-        
-        if (__ihm.user.haveGalaxy()) {
-          console.log('user have galaxy');
-          $('.send2galaxy-li').removeClass('hidden');
-        }
-
         /* load local abtraction  */
         this.localUserAbstraction.loadUserAbstraction();
 
@@ -133,18 +127,11 @@ class IHMLocal {
 
         AskomicsObjectView.start();
         if ( contents === undefined ) {
-        console.log("length:"+$('#spdiv .start_point_radio:checked').length);
-        console.log("length:"+$('#spdiv .start_point_radio').length);
-        console.log("length:"+$('#spdiv input.start_point_radio:checked').length);
-        console.log("length:"+$('#spdiv input.start_point_radio').length);
         let uri = $('#spdiv input.start_point_radio:checked').attr('id');
         console.assert(uri != undefined ,"Can not get start point URI !" );
         let label = $('input.start_point_radio:checked').attr('value');
         console.assert(label != undefined ,"Can not get start point Label !" );
         let startPoint = {'uri': uri, 'label': label};
-        console.log(uri);
-        console.log(label);
-        console.log("----");
           __ihm.getSVGLayout().start(startPoint);
         } else {
           __ihm.getSVGLayout().startWithQuery(contents);

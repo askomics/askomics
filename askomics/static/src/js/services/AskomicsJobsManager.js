@@ -10,7 +10,6 @@ let instanceAskomicsJobsViewManager ;
 
       this.jobs = [];
       this.npreview=30 ; /* max data to transfert to IHM */
-      this.galaxy = false;
 
       instanceAskomicsJobsViewManager = this;
 
@@ -174,7 +173,7 @@ let instanceAskomicsJobsViewManager ;
         let __inst = new AskomicsJobsViewManager();
         let template = AskOmics.templates.jobs;
 
-        let context = {jobs: __inst.jobs };
+        let context = {jobs: __inst.jobs, galaxy: __ihm.user.haveGalaxy()};
         let html = template(context);
 
         $("#content_jobsview").empty();
