@@ -4,7 +4,7 @@
   Manage Menu View to select and unselect proposition of element/link
 */
 
-let instanceAskomicsGalaxyService = undefined ;
+let instanceAskomicsGalaxyService  ;
 
 class AskomicsGalaxyService {
 

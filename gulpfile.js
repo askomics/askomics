@@ -16,6 +16,7 @@ var askomicsSourceFiles = [
         'askomics/static/src/js/core/AskomicsUserAbstraction.js',
         'askomics/static/src/js/services/AskomicsJobsManager.js',
         'askomics/static/src/js/services/AskomicsObjectBuilder.js',
+        'askomics/static/src/js/services/AskomicsGalaxyService.js',
         'askomics/static/src/js/view/AskomicsPanelViewBuilder.js',
         'askomics/static/src/js/view/integration.js',
         'askomics/static/src/js/view/AskomicsResultsView.js',
@@ -41,7 +42,6 @@ var askomicsSourceFiles = [
         'askomics/static/src/js/core/AskomicsGraphBuilder.js',
         'askomics/static/src/js/core/AskomicsForceLayoutManager.js',
         'askomics/static/src/js/core/AskomicsUser.js',
-        'askomics/static/src/js/core/AskomicsGalaxyService.js',
         'askomics/static/src/js/core/IHMLocal.js'
     ];
 
