@@ -215,7 +215,10 @@ class QueryLauncher(ParamManager):
             for value in data:
                 row = []
                 for header in headers:
-                    row.append(value[header])
+                    if header in value:
+                        row.append(value[header])
+                    else:
+                        row.append("")
                 writer.writerow(row)
 
         return filename
