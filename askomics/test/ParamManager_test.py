@@ -68,6 +68,14 @@ class ModulesManagerTests(unittest.TestCase):
         d = m.get_json_user_directory()
         assert os.path.isdir(d)
 
+    def test_get_database_user_directory(self):
+        m = ParamManager(self.settings, self.request.session)
+        d = m.get_database_user_directory()
+        assert os.path.isdir(d)
+        del self.request.session['username']
+        d = m.get_database_user_directory()
+        assert os.path.isdir(d)
+
     def test_set_param(self):
         m = ParamManager(self.settings, self.request.session)
         m.set_param("test","test")

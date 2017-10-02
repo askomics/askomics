@@ -107,6 +107,17 @@ class ParamManager(object):
             os.makedirs(mdir)
         return mdir
 
+    def get_database_user_directory(self):
+
+        if 'username' not in self.session:
+            mdir = self.userfilesdir+"db/"
+        else:
+            mdir = self.userfilesdir+"db/"+self.session['username'] + '/'
+        if not os.path.isdir(mdir):
+            os.makedirs(mdir)
+
+        return mdir
+
     def set_param(self, key,value):
         self.settings[key] = value
 

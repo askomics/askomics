@@ -8,11 +8,10 @@ class JobManager(ParamManager):
         Manage Askomics jobs inside a sqlite database
     """
     def __init__(self, settings, session):
+        ParamManager.__init__(self, settings, session)
         self.log = logging.getLogger(__name__)
-        self.databasename = "jobs_test.db"
-        self.pathdb = "file:"+tempfile.gettempdir() + "/" + \
-                      session['username'] + \
-                      self.databasename
+        self.databasename = "jobs.db"
+        self.pathdb = "file:"+ self.get_database_user_directory()+"/"+self.databasename
 
         self.log.info(" ==> "+ self.pathdb +"<==");
 
