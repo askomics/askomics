@@ -18,10 +18,12 @@ class AskomicsUser {
           this.intervalListener = setInterval(function(){
             user.checkUser();
           }, 15000);
+          __ihm.displayNavbar(true, this.username, this.admin, this.blocked);
         } else {
           if ( this.intervalListener != undefined ) {
             clearInterval(this.intervalListener);
           }
+          __ihm.displayNavbar(false, '');
         }
     }
 
@@ -73,13 +75,14 @@ class AskomicsUser {
           if ( change ) {
             if ((data.username != undefined) && (data.username != '') ) {
               __ihm.displayNavbar(true, self.username, self.admin, self.blocked);
-            } else{
+            } else {
               AskomicsUser.cleanHtmlLogin();
               __ihm.displayNavbar(false, '');
               if (expired) {
-                __ihm.displayModal('Session Expired', '', 'Close');
+                __ihm.displayModal('Session Expired', '', 'Close').click(function() {
+                    location.reload();
+                });
               }
-              __ihm.start();
             }
           }
           // Show a galaxy dropdown if user have a galaxy connected
