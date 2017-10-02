@@ -8,7 +8,7 @@ from pyramid import testing
 from askomics.libaskomics.ParamManager import ParamManager
 
 
-class ModulesManagerTests(unittest.TestCase):
+class ParamManagerTests(unittest.TestCase):
     """Test for the ModuleManager class"""
 
     def setUp(self):
@@ -66,6 +66,14 @@ class ModulesManagerTests(unittest.TestCase):
         assert os.path.isdir(d)
         del self.request.session['username']
         d = m.get_json_user_directory()
+        assert os.path.isdir(d)
+
+    def test_get_database_user_directory(self):
+        m = ParamManager(self.settings, self.request.session)
+        d = m.get_database_user_directory()
+        assert os.path.isdir(d)
+        del self.request.session['username']
+        d = m.get_database_user_directory()
         assert os.path.isdir(d)
 
     def test_set_param(self):
