@@ -72,7 +72,7 @@ docker run -d --name virtuoso \
         -e DBA_PASSWORD=dba \
         -e SPARQL_UPDATE=true \
         -e DEFAULT_GRAPH=http://localhost:8890/DAV \
-        --net="host" -t askomics/docker-virtuoso
+        --net="host" -t askomics/virtuoso
 ```
 
 + Run `startAskomics.sh`
