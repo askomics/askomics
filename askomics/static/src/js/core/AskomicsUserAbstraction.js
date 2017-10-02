@@ -138,18 +138,18 @@ class AskomicsUserAbstraction {
       }
       var service = new RestServiceJs("userAbstraction");
 
-      let instanceUserAbstraction = this;
+      let iua = this;
 
       service.postsync(data,function(resultListTripletSubjectRelationObject ) {
       /* All relation are stored in tripletSubjectRelationObject */
-      instanceUserAbstraction.tripletSubjectRelationObject = resultListTripletSubjectRelationObject.relations;
+      iua.tripletSubjectRelationObject = resultListTripletSubjectRelationObject.relations;
       /* == External Service can add external relation == */
-      //console.log("RELATIONS::"+JSON.stringify(instanceUserAbstraction.tripletSubjectRelationObject));
+      //console.log("RELATIONS::"+JSON.stringify(iua.tripletSubjectRelationObject));
 
-      instanceUserAbstraction.entityInformationList = {};
-      instanceUserAbstraction.entityPositionableInformationList = {};
-      instanceUserAbstraction.attributesEntityList = {};
-      instanceUserAbstraction.entitySubclassof = {} ;
+      iua.entityInformationList = {};
+      iua.entityPositionableInformationList = {};
+      iua.attributesEntityList = {};
+      iua.entitySubclassof = {} ;
 
       /* All information about an entity available in TPS are stored in entityInformationList */
       for (let entry in resultListTripletSubjectRelationObject.entities){
@@ -159,19 +159,19 @@ class AskomicsUserAbstraction {
         let rel = resultListTripletSubjectRelationObject.entities[entry].property;
         let val = resultListTripletSubjectRelationObject.entities[entry].value;
 
-        if ( ! (graph in instanceUserAbstraction.entityInformationList) ) {
-          instanceUserAbstraction.entityInformationList[graph] = {} ;
+        if ( ! (graph in iua.entityInformationList) ) {
+          iua.entityInformationList[graph] = {} ;
         }
-        if ( ! (uri in instanceUserAbstraction.entityInformationList[graph]) ) {
-          instanceUserAbstraction.entityInformationList[graph][uri] = {};
+        if ( ! (uri in iua.entityInformationList[graph]) ) {
+          iua.entityInformationList[graph][uri] = {};
         }
-        instanceUserAbstraction.entityInformationList[graph][uri][rel] = val;
+        iua.entityInformationList[graph][uri][rel] = val;
 
       }
-      //console.log("entityInformationList:"+JSON.stringify(instanceUserAbstraction.entityInformationList));
+      //console.log("entityInformationList:"+JSON.stringify(iua.entityInformationList));
 
 	    for (let entry2 in resultListTripletSubjectRelationObject.attributes){
-        //console.log("ATTRIBUTE:"+JSON.stringify(resultListTripletSubjectRelationObject.attributes[entry2]));
+        console.log("ATTRIBUTE:"+JSON.stringify(resultListTripletSubjectRelationObject.attributes[entry2]));
         let graph = resultListTripletSubjectRelationObject.attributes[entry2].g;
         let uri2 = resultListTripletSubjectRelationObject.attributes[entry2].entity;
         let attribute = {};
@@ -179,19 +179,19 @@ class AskomicsUserAbstraction {
         attribute.uri   = resultListTripletSubjectRelationObject.attributes[entry2].attribute;
         attribute.label = resultListTripletSubjectRelationObject.attributes[entry2].labelAttribute;
         attribute.type  = resultListTripletSubjectRelationObject.attributes[entry2].typeAttribute;
-        attribute.basic_type  = instanceUserAbstraction.getTypeAttribute(resultListTripletSubjectRelationObject.attributes[entry2].typeAttribute);
+        attribute.basic_type  = iua.getTypeAttribute(resultListTripletSubjectRelationObject.attributes[entry2].typeAttribute);
         attribute.order = resultListTripletSubjectRelationObject.attributes[entry2].order;
 
+        if ( ! (graph in iua.attributesEntityList) ) {
+            iua.attributesEntityList[graph] = [];
+        }
+        let graphIUA = iua.attributesEntityList[graph];
 
-        if ( ! (graph in instanceUserAbstraction.attributesEntityList) ) {
-            instanceUserAbstraction.attributesEntityList[graph] = [];
+        if ( ! (uri2 in iua.attributesEntityList[graph]) ) {
+            graphIUA[uri2] = [];
         }
 
-        if ( ! (uri2 in instanceUserAbstraction.attributesEntityList[graph]) ) {
-            instanceUserAbstraction.attributesEntityList[graph][uri2] = [];
-        }
-        instanceUserAbstraction.attributesEntityList[graph][uri2].push(attribute);
-
+        graphIUA[uri2].push(attribute);
       }
 
         for (let entry3 in resultListTripletSubjectRelationObject.categories){
@@ -205,42 +205,42 @@ class AskomicsUserAbstraction {
           attribute.basic_type  = 'category';
           attribute.order = resultListTripletSubjectRelationObject.categories[entry3].order;
 
-          if ( ! (graph in instanceUserAbstraction.attributesEntityList) ) {
-              instanceUserAbstraction.attributesEntityList[graph] = [];
+          if ( ! (graph in iua.attributesEntityList) ) {
+              iua.attributesEntityList[graph] = [];
           }
 
-          if ( ! (uri3 in instanceUserAbstraction.attributesEntityList[graph]) ) {
-              instanceUserAbstraction.attributesEntityList[graph][uri3] = [];
+          if ( ! (uri3 in iua.attributesEntityList[graph]) ) {
+              iua.attributesEntityList[graph][uri3] = [];
           }
 
-          instanceUserAbstraction.attributesEntityList[graph][uri3].push(attribute);
+          iua.attributesEntityList[graph][uri3].push(attribute);
         }
 
         for (let entry4 in resultListTripletSubjectRelationObject.positionable){
           //console.log('POSITIONABLE:'+JSON.stringify(resultListTripletSubjectRelationObject.positionable[entry4]));
           var uri4 = resultListTripletSubjectRelationObject.positionable[entry4].entity;
-          if ( ! (uri4 in instanceUserAbstraction.entityPositionableInformationList) ) {
-              instanceUserAbstraction.entityPositionableInformationList[uri4] = {};
+          if ( ! (uri4 in iua.entityPositionableInformationList) ) {
+              iua.entityPositionableInformationList[uri4] = {};
           } else {
-            throw new Error("URI:"+uri4+" have several taxon,ref, start, end labels... "+JSON.stringify(instanceUserAbstraction.entityPositionableInformationList[uri4]));
+            throw new Error("URI:"+uri4+" have several taxon,ref, start, end labels... "+JSON.stringify(iua.entityPositionableInformationList[uri4]));
           }
         }
         for (let entry in resultListTripletSubjectRelationObject.subclassof){
           let duo = resultListTripletSubjectRelationObject.subclassof[entry] ;
         //  console.log(JSON.stringify(duo));
-          if ( ! (duo.uri in instanceUserAbstraction.entitySubclassof) ) {
-            instanceUserAbstraction.entitySubclassof[duo.uri] = [];
+          if ( ! (duo.uri in iua.entitySubclassof) ) {
+            iua.entitySubclassof[duo.uri] = [];
           }
-          instanceUserAbstraction.entitySubclassof[duo.uri].push(duo.urisub);
+          iua.entitySubclassof[duo.uri].push(duo.urisub);
         }
-        console.log(JSON.stringify(instanceUserAbstraction.entitySubclassof));
+        console.log(JSON.stringify(iua.entitySubclassof));
         //console.log("=================== attributesEntityList =========================");
-        //console.log(JSON.stringify(instanceUserAbstraction.attributesEntityList));
+        //console.log(JSON.stringify(iua.attributesEntityList));
       });
     }
 
     getPrefix(ns) {
-      let instanceUserAbstraction = this;
+      let iua = this;
 
       if (ns in this.prefix_error) {
         console.log("erreur.........................");
@@ -255,10 +255,10 @@ class AskomicsUserAbstraction {
           type: 'GET',
           url: 'http://prefix.cc/'+ns.trim()+'.file.json',
           success: function( result_json ) {
-            instanceUserAbstraction.prefix[ns] = result_json[ns];
+            iua.prefix[ns] = result_json[ns];
           },
           error: function(req, status, ex) {
-            instanceUserAbstraction.prefix_error[ns] = true ;
+            iua.prefix_error[ns] = true ;
           },
           timeout:30
         });
@@ -281,17 +281,17 @@ class AskomicsUserAbstraction {
         if ( this.prefix[ns] == uri ) return ns ;
       }
 
-      let instanceUserAbstraction = this;
+      let iua = this;
 
       $.ajaxSetup({async: false});
       let pref = "" ;
       $.get( "http://prefix.cc/reverse", { uri:uri.trim() ,format: "json"} )
           .done(function( data ) {
             pref = Object.keys(data)[0];
-            instanceUserAbstraction.prefix[pref] = uri ;
+            iua.prefix[pref] = uri ;
           })
           .fail( function() {
-            instanceUserAbstraction.longprefix_error[uri] = true ;
+            iua.longprefix_error[uri] = true ;
           });
       $.ajaxSetup({async: true});
       return pref ;

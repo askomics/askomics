@@ -332,23 +332,30 @@ class SourceFileTsv(SourceFile):
             #
             # ==> IHM detect position_ attribute and transforme all query with faldo:location/faldo:begin/faldo:reference
             #
+
+            # encode uri if header do not contains ":" (otherwise it's an RDF uri)
+
+            headkey     = self.headers[key]
+            if headkey.find(":")<0:
+                headkey = ":" + self.encode_to_rdf_uri(headkey)
+
             if key > 0 and not key_type.startswith('entity'):
                 if key_type in ('taxon', 'ref', 'strand', 'start', 'end'):
                     uri = 'position_'+key_type
                 # elif key_type == 'taxon':
                 #     uri = 'position_'+key_type
                 else:
-                    uri = self.encode_to_rdf_uri(self.headers[key])
-                ttl += ":" + uri + ' displaySetting:attribute "true"^^xsd:boolean .\n'
+                    uri = headkey
+                ttl += uri + ' displaySetting:attribute "true"^^xsd:boolean .\n'
                 # store the order of attrbutes in order to display attributes in the right order
-                ttl += ":" + uri + ' displaySetting:attributeOrder "' + str(key) + '"^^xsd:decimal .\n'
+                ttl += uri + ' displaySetting:attributeOrder "' + str(key) + '"^^xsd:decimal .\n'
             elif key == 0:
                 uri_pref = self.get_param("askomics.prefix")
 
                 if key in self.uri:
                     uri_pref = self.uri[key]
 
-                ttl += ":" + self.encode_to_rdf_uri(self.headers[key]) + ' displaySetting:prefixUri "'+uri_pref+'"^^xsd:string .\n\n'
+                ttl += headkey + ' displaySetting:prefixUri "'+uri_pref+'"^^xsd:string .\n\n'
 
             if key > 0:
                 ttl += AbstractedRelation(key_type, self.headers[key], ref_entity, self.type_dict[key_type]).get_turtle()
@@ -477,7 +484,12 @@ class SourceFileTsv(SourceFile):
                         #OFI : manage new header with relation@type_entity
                         #relation_name = ":has_" + header # manage old way
                         have_prefix = False
-                        relation_name = ":"+self.encode_to_rdf_uri(header) # manage old way
+
+                        if header.find(":")<0:
+                            relation_name = ":"+self.encode_to_rdf_uri(header) # manage old way
+                        else:
+                            relation_name = header
+
                         if current_type.startswith('entity'):
                             idx = header.find("@")
 

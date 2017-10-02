@@ -423,6 +423,8 @@ class AskomicsNode extends GraphNode {
         map_url[this.SPARQLid] = "%s";
       }
       else if ( orderAttributes[uriAttI].basic_type != "category" ) {
+        /* actif could be not instancied if the data is loaded without interface */
+        if ( this.attributes[uriAtt].actif === undefined ) this.attributes[uriAtt].actif = false;
         if (this.attributes[uriAtt].actif) {
           list_id.push(this.attributes[uriAtt].SPARQLid);
           list_label.push(this.attributes[uriAtt].label);

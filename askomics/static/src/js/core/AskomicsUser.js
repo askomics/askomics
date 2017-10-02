@@ -52,6 +52,7 @@ class AskomicsUser {
         service.getAll(function(data) {
 
           let expired = false;
+          let change  = false;
 
           if ( (self.username != data.username) ||
                (self.admin != data.admin) ||
@@ -66,17 +67,20 @@ class AskomicsUser {
               self.admin = data.admin;
               self.blocked = data.blocked;
               self.galaxy = data.galaxy;
+              change  = true;
           }
 
-          if ((data.username != undefined) && (data.username != '') ) {
+          if ( change ) {
+            if ((data.username != undefined) && (data.username != '') ) {
               __ihm.displayNavbar(true, self.username, self.admin, self.blocked);
-          } else{
-            AskomicsUser.cleanHtmlLogin();
-            __ihm.displayNavbar(false, '');
-            if (expired) {
-              __ihm.displayModal('Session Expired', '', 'Close');
+            } else{
+              AskomicsUser.cleanHtmlLogin();
+              __ihm.displayNavbar(false, '');
+              if (expired) {
+                __ihm.displayModal('Session Expired', '', 'Close');
+              }
+              __ihm.start();
             }
-            __ihm.start();
           }
           // Show a galaxy dropdown if user have a galaxy connected
 
