@@ -1,5 +1,12 @@
 /*jshint esversion: 6 */
 
+window.onload = function() {
+  if ( (sessionStorage.expired !== undefined ) && sessionStorage.expired == "true" ) {
+    $("#login").click();
+    sessionStorage.expired = "false" ;
+  }
+};
+
 class AskomicsUser {
 
     constructor(username, admin, blocked) {
@@ -8,23 +15,25 @@ class AskomicsUser {
         this.blocked  = blocked===undefined?true:blocked;
         this.galaxy   = false ;
 
+        let user = this;
+
         /* check if a session is open */
-        this.checkUser();
-
-
-        /* set timeout to check if session is expired */
-        if ( this.isLogin() ) {
-          let user = this;
-          this.intervalListener = setInterval(function(){
-            user.checkUser();
-          }, 15000);
-          __ihm.displayNavbar(true, this.username, this.admin, this.blocked);
-        } else {
-          if ( this.intervalListener != undefined ) {
-            clearInterval(this.intervalListener);
-          }
-          __ihm.displayNavbar(false, '');
-        }
+        this.checkUser().then(
+          function() {
+            /* set timeout to check if session is expired */
+            if ( user.isLogin() ) {
+              user.intervalListener = setInterval(function(){
+                user.checkUser();
+              }, 15000);
+              __ihm.displayNavbar(true, user.username, user.admin, user.blocked);
+            } else {
+              if ( user.intervalListener != undefined ) {
+                clearInterval(user.intervalListener);
+              }
+              __ihm.displayNavbar(false, '');
+            }
+          })
+          .catch (function () {} );
     }
 
     isAdmin() {
@@ -48,50 +57,59 @@ class AskomicsUser {
     }
 
     checkUser() {
-        let service = new RestServiceJs("checkuser");
-        let self = this;
 
-        service.getAll(function(data) {
+      let self = this;
 
-          let expired = false;
-          let change  = false;
+      return new Promise(
+        function(resolve,reject) {
+          let service = new RestServiceJs("checkuser");
 
-          if ( (self.username != data.username) ||
-               (self.admin != data.admin) ||
-               (self.blocked != data.blocked) ||
-               (self.galaxy != data.galaxy)) {
-              if ( self.username != "" && data.username == "") {
-                expired = true;
-                console.debug("session expired !");
-              }
+          service.getAll(function(data) {
 
-              self.username = data.username;
-              self.admin = data.admin;
-              self.blocked = data.blocked;
-              self.galaxy = data.galaxy;
-              change  = true;
-          }
+            let expired = false;
+            let change  = false;
 
-          if ( change ) {
-            if ((data.username != undefined) && (data.username != '') ) {
-              __ihm.displayNavbar(true, self.username, self.admin, self.blocked);
-            } else {
-              AskomicsUser.cleanHtmlLogin();
-              __ihm.displayNavbar(false, '');
-              if (expired) {
-                __ihm.displayModal('Session Expired', '', 'Close').click(function() {
-                    location.reload();
-                });
-              }
-            }
-          }
-          // Show a galaxy dropdown if user have a galaxy connected
+            if ( (self.username != data.username) ||
+                (self.admin != data.admin) ||
+                (self.blocked != data.blocked) ||
+                (self.galaxy != data.galaxy)) {
+                  if ( self.username != "" && data.username == "") {
+                    expired = true;
+                    console.debug("session expired !");
+                  }
 
-          if (self.haveGalaxy()) {
-            console.log('user have galaxy');
-            AskomicsGalaxyService.show();
-          }
-        });
+                  self.username = data.username;
+                  self.admin = data.admin;
+                  self.blocked = data.blocked;
+                  self.galaxy = data.galaxy;
+                  change  = true;
+                }
+
+                if ( change ) {
+                  if ((data.username != undefined) && (data.username != '') ) {
+
+                    __ihm.displayNavbar(true, self.username, self.admin, self.blocked);
+                  } else {
+                    AskomicsUser.cleanHtmlLogin();
+                    __ihm.displayNavbar(false, '');
+                    if (expired) {
+                      /* redirect to login page when user is disconnect */
+                      sessionStorage.expired = "true" ;
+
+                      __ihm.displayModal('Session Expired', '', 'Close').click(function() {
+                        location.reload();
+                      });
+                    }
+                  }
+                }
+                // Show a galaxy dropdown if user have a galaxy connected
+
+                if (self.haveGalaxy()) {
+                  AskomicsGalaxyService.show();
+                }
+                resolve();
+              });
+            });
     }
 
     logout() {
