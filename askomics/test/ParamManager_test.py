@@ -8,7 +8,7 @@ from pyramid import testing
 from askomics.libaskomics.ParamManager import ParamManager
 
 
-class ModulesManagerTests(unittest.TestCase):
+class ParamManagerTests(unittest.TestCase):
     """Test for the ModuleManager class"""
 
     def setUp(self):

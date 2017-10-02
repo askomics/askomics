@@ -1,7 +1,7 @@
 from askomics.libaskomics.ParamManager import ParamManager
 
 import logging
-import tempfile,sqlite3
+import sqlite3
 
 class JobManager(ParamManager):
     """
@@ -11,11 +11,11 @@ class JobManager(ParamManager):
         ParamManager.__init__(self, settings, session)
         self.log = logging.getLogger(__name__)
         self.databasename = "jobs.db"
-        self.pathdb = "file:"+ self.get_database_user_directory()+"/"+self.databasename
+        self.pathdb = self.get_database_user_directory()+"/"+self.databasename
 
         self.log.info(" ==> "+ self.pathdb +"<==");
 
-        conn = sqlite3.connect(self.pathdb,uri=True)
+        conn = sqlite3.connect("file:"+self.pathdb,uri=True)
         c = conn.cursor()
         reqSql = '''CREATE TABLE IF NOT EXISTS jobs
              (
@@ -31,15 +31,6 @@ class JobManager(ParamManager):
              nr int
              )'''
 
-        c.execute(reqSql)
-        conn.commit()
-        conn.close()
-
-    def deljob(self,jobid):
-
-        conn = sqlite3.connect(self.pathdb,uri=True)
-        c = conn.cursor()
-        reqSql = "DELETE FROM jobs WHERE jobid = "+ str(jobid)
         c.execute(reqSql)
         conn.commit()
         conn.close()
@@ -116,13 +107,14 @@ class JobManager(ParamManager):
         import json
 
         data = []
-        conn = sqlite3.connect(self.pathdb,uri=True)
-        conn.row_factory = sqlite3.Row
-
-        c = conn.cursor()
-
-        reqSql = """ SELECT jobid, type, state, start, end, data, file, preview, requestGraph, nr FROM jobs"""
         try:
+            conn = sqlite3.connect(self.pathdb,uri=True)
+            conn.row_factory = sqlite3.Row
+
+            c = conn.cursor()
+
+            reqSql = """ SELECT jobid, type, state, start, end, data, file, preview, requestGraph, nr FROM jobs"""
+
             c.execute(reqSql)
             rows = c.fetchall()
 
@@ -157,6 +149,20 @@ class JobManager(ParamManager):
         c = conn.cursor()
 
         reqSql = "DELETE FROM jobs WHERE jobid = "+ str(jobid)
+
+        try:
+            c.execute(reqSql)
+            conn.commit()
+        except sqlite3.OperationalError as e :
+            self.log.info("Jobs database does not exist .")
+
+        conn.close()
+
+    def drop(self):
+        conn = sqlite3.connect(self.pathdb,uri=True)
+        c = conn.cursor()
+
+        reqSql = "DROP table jobs;"
 
         try:
             c.execute(reqSql)
