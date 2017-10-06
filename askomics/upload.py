@@ -136,24 +136,11 @@ class FileUpload(object):
                 #    f.write(result['type'])
                 #concat file if exist
                 with open(self.filepath(result['name'])+"_tmp", 'wb') as f:
-                    # if file exist, rename it
-                    number = 1
-                    file_exist = True
-                    new_filename = result['name']
-                    while file_exist:
-                        if os.path.isfile(self.filepath(new_filename)):
-                            filename, file_extension = os.path.splitext(result['name'])
-                            new_filename = filename + '(' + str(number) + ')' + file_extension
-                            number += 1
-                        else:
-                            file_exist = False
-
                     shutil.copyfileobj(field_storage.file, f)
 
-                shutil.copyfileobj(open(self.filepath(result['name']) + "_tmp", "rb"), open(self.filepath(new_filename), "wb"))
+                shutil.copyfileobj(open(self.filepath(result['name']) + "_tmp", "rb"), open(self.filepath(result['name']), "wb"))
                 #remove tmp
                 os.remove(self.filepath(result['name'])+"_tmp")
-                result['name'] = new_filename
                 result['size'] = self.get_file_size(open(self.filepath(result['name']),"rb"))
                 result['delete_type'] = self.delete_method
                 result['delete_url'] = result['name']
