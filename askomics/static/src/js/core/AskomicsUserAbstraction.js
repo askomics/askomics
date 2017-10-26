@@ -47,15 +47,19 @@ class AskomicsUserAbstraction {
     }
 
     getEntities() {
+
       let listE = {} ;
+
       for (let g in this.entityInformationList ) {
         if ( this.isDesactivedGraph(g) ) continue;
+
         for (let e in this.entityInformationList[g]) {
           if (! (e in listE ) ) {
             listE[e]=0;
           }
         }
       }
+
       return JSON.parse(JSON.stringify(listE)) ;
     }
 
@@ -168,10 +172,9 @@ class AskomicsUserAbstraction {
         iua.entityInformationList[graph][uri][rel] = val;
 
       }
-      //console.log("entityInformationList:"+JSON.stringify(iua.entityInformationList));
 
 	    for (let entry2 in resultListTripletSubjectRelationObject.attributes){
-        console.log("ATTRIBUTE:"+JSON.stringify(resultListTripletSubjectRelationObject.attributes[entry2]));
+        //console.log("ATTRIBUTE:"+JSON.stringify(resultListTripletSubjectRelationObject.attributes[entry2]));
         let graph = resultListTripletSubjectRelationObject.attributes[entry2].g;
         let uri2 = resultListTripletSubjectRelationObject.attributes[entry2].entity;
         let attribute = {};
@@ -233,7 +236,7 @@ class AskomicsUserAbstraction {
           }
           iua.entitySubclassof[duo.uri].push(duo.urisub);
         }
-        console.log(JSON.stringify(iua.entitySubclassof));
+        //console.log(JSON.stringify(iua.entitySubclassof));
         //console.log("=================== attributesEntityList =========================");
         //console.log(JSON.stringify(iua.attributesEntityList));
       });
@@ -243,7 +246,7 @@ class AskomicsUserAbstraction {
       let iua = this;
 
       if (ns in this.prefix_error) {
-        console.log("erreur.........................");
+        //console.log("erreur.........................");
         return ns;
       }
 
@@ -339,16 +342,17 @@ class AskomicsUserAbstraction {
      */
 
     getRelationsObjectsAndSubjectsWithURI(UriSelectedNode) {
-
       let objectsTarget = {} ;
       let subjectsTarget = {} ;
 
       let lentities = this.getEntities();
 
       for (let i in this.tripletSubjectRelationObject) {
-        if (this.isDesactivedGraph(this.tripletSubjectRelationObject[i].g) ) continue;
-
+        if (this.isDesactivedGraph(this.tripletSubjectRelationObject[i].g) ) {
+          continue;
+        }
         if ( this.tripletSubjectRelationObject[i].object == UriSelectedNode ) {
+
           /* check if graph is not removed */
           if ( !(this.tripletSubjectRelationObject[i].subject in lentities) ) continue;
 
@@ -361,6 +365,7 @@ class AskomicsUserAbstraction {
             }
         }
         if ( this.tripletSubjectRelationObject[i].subject == UriSelectedNode ) {
+
           /* check if graph is not removed */
           if ( !(this.tripletSubjectRelationObject[i].object in lentities) ) continue;
 

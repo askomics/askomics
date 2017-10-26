@@ -82,7 +82,7 @@ class JobManager(ParamManager):
                 + " data = "+ d +"," \
                 + " file = "+ f \
                 + " WHERE jobID = "+str(jobid)
-        print(reqSql)
+        
         c.execute(reqSql)
         conn.commit()
         conn.close()

@@ -52,6 +52,15 @@ class ParamManager(object):
             'date': json.dumps
             }
 
+    def get_db_directory(self):
+
+        path = self.userfilesdir+"db/"
+
+        if not os.path.isdir(path):
+            os.makedirs(path)
+
+        return path
+
     def get_upload_directory(self):
         """Get the upload directory of a user, create it if not exist
 

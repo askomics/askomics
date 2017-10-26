@@ -40,14 +40,15 @@ class TripleStoreExplorer(ParamManager):
 
         sqg = SparqlQueryGraph(self.settings, self.session)
         ql = QueryLauncher(self.settings, self.session)
-        results = ql.process_query(sqg.get_start_point().query)
+        results = ql.process_query(sqg.get_public_start_point().query)
+        results += ql.process_query(sqg.get_user_start_point().query)
 
         for result in results:
             g  = result["g"]
             uri = result["nodeUri"]
             label = result["nodeLabel"]
 
-            if 'private' in result['accesLevel']:
+            if ('accesLevel' in result) and ('private' in result['accesLevel']):
                 public = False
                 private = True
             else:
@@ -58,7 +59,7 @@ class TripleStoreExplorer(ParamManager):
 
         return nodes
 
-    def getUserAbstraction(self,service):
+    def getUserAbstraction(self):
         """
         Get the user abstraction (relation and entity as subject and object)
 
@@ -71,11 +72,15 @@ class TripleStoreExplorer(ParamManager):
         sqg = SparqlQueryGraph(self.settings, self.session)
         ql = QueryLauncher(self.settings, self.session)
 
-        data['relations'] = ql.process_query(sqg.get_abstraction_relation('owl:ObjectProperty').query)
+        data['relations'] = ql.process_query(sqg.get_public_abstraction_relation('owl:ObjectProperty').query)
+        data['relations'] += ql.process_query(sqg.get_user_abstraction_relation('owl:ObjectProperty').query)
         data['subclassof'] = ql.process_query(sqg.get_isa_relation_entities().query)
-        data['entities'] = ql.process_query(sqg.get_abstraction_entity().query)
-        data['attributes'] = ql.process_query(sqg.get_abstraction_attribute_entity().query)
-        data['categories'] = ql.process_query(sqg.get_abstraction_category_entity().query)
+        data['entities'] = ql.process_query(sqg.get_public_abstraction_entity().query)
+        data['entities'] += ql.process_query(sqg.get_user_abstraction_entity().query)
+        data['attributes'] = ql.process_query(sqg.get_public_abstraction_attribute_entity().query)
+        data['attributes'] += ql.process_query(sqg.get_user_abstraction_attribute_entity().query)
+        data['categories'] = ql.process_query(sqg.get_public_abstraction_category_entity().query)
+        data['categories'] += ql.process_query(sqg.get_user_abstraction_category_entity().query)
         data['positionable'] = ql.process_query(sqg.get_abstraction_positionable_entity().query)
         data['graph'] = sqg.getGraphUser()
 
@@ -119,58 +124,18 @@ class TripleStoreExplorer(ParamManager):
         select = ' '.join(variates)
 
         sqb = SparqlQueryBuilder(self.settings, self.session)
-        query_launcher = QueryLauncher(self.settings, self.session)
         query = self.build_recursive_block('', constraintes_relations)
 
         # if limit != None and limit > 0:
         #     query += ' LIMIT ' + str(limit)
 
         if send_request_to_tps:
+            query_launcher = QueryLauncher(self.settings, self.session,federationRequest=True,external_lendpoints=[])
             results = query_launcher.process_query(sqb.custom_query(fromgraphs, select, query).query)
         else:
             results = []
 
         return results, sqb.custom_query(fromgraphs, select, query).query
-
-    #FIXME: DEAD CODE ??
-    def build_sparql_query_from_json2(self, variates, constraintes_relations, limit, send_request_to_TPS):
-        """
-        build a sparql query from json
-        """
-        self.log.debug("variates")
-        self.log.debug(variates)
-        self.log.debug("constraintes_relations")
-        self.log.debug(constraintes_relations)
-
-        sqb = SparqlQueryBuilder(self.settings, self.session)
-        ql = QueryLauncher(self.settings, self.session)
-
-        req = ""
-        req += "SELECT DISTINCT "+' '.join(variates)+"\n"
-        #TODO OFI: External Service do not work and, anyway, graphes have to be selectionned by the user in the UI
-        #
-        #for graph in namedGraphs:
-        #    req += "FROM "+ "<"+graph+ ">"+"\n"
-        req += "WHERE \n"
-        req += self.build_recursive_block('', constraintes_relations)
-        if limit != None and limit >0 :
-            req +=" LIMIT "+str(limit)
-
-
-        sqb = SparqlQueryBuilder(self.settings, self.session)
-        prefixes = sqb.header_sparql_config(req)
-        query = prefixes+req
-
-        results = {}
-
-        if send_request_to_TPS:
-            ql = QueryLauncher(self.settings, self.session)
-            results = ql.process_query(query)
-        else:
-            # add comment inside query to inform user
-            query = "# endpoint = "+self.get_param("askomics.endpoint") + "\n" + query
-
-        return results, query
 
     def get_prefix_uri(self):
         sqg = SparqlQueryGraph(self.settings, self.session)

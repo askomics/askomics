@@ -765,13 +765,8 @@ class AskView(object):
         self.log.debug("== getUserAbstraction ==")
         body = self.request.json_body
 
-        service = ''
-        if 'service' in body :
-            service = body['service']
-
         tse = TripleStoreExplorer(self.settings, self.request.session)
-        self.data.update(tse.getUserAbstraction(service))
-
+        self.data.update(tse.getUserAbstraction())
         return self.data
 
     #TODO : this method is too generic. The build of RDF Shortucts should be here to avoid injection with bad intention...

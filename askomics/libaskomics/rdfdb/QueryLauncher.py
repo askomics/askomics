@@ -10,6 +10,7 @@ import logging
 import urllib.request
 
 from askomics.libaskomics.ParamManager import ParamManager
+from askomics.libaskomics.EndpointManager import EndpointManager
 
 class SPARQLError(RuntimeError):
     """
@@ -28,10 +29,38 @@ class QueryLauncher(ParamManager):
           from these preformated results using a ResultsBuilder instance.
     """
 
-    def __init__(self, settings, session):
+    def __init__(self, settings, session,federationRequest=False,external_lendpoints=None):
         ParamManager.__init__(self, settings, session)
-
         self.log = logging.getLogger(__name__)
+        #comments added in sparql request to get all url endpoint.
+        self.commentsForFed=""
+        em = EndpointManager(settings, session)
+        self.lendpoints = []
+
+        if federationRequest:
+            lendpoints = external_lendpoints + em.listEndpoints()
+
+            if len(lendpoints)==0 :
+                raise Exception("None endpoint are defined.")
+
+            if len(lendpoints)==1 :
+                self.lendpoints = lendpoints
+                # no need federation
+                return
+            i=0
+            for endp in lendpoints:
+                i+=1
+                #self.commentsForFed+="#endpoint,"+endp['name']+','+endp['endpoint']+',false\n'
+                self.commentsForFed+="#endpoint,"+str(i)+','+endp['endpoint']+',false\n'
+
+            d = {}
+            d['name'] = 'Federation request'
+            if not self.is_defined("askomics.fdendpoint") :
+                raise Exception("can not find askomics.fdendpoint property in the config file !")
+            d['endpoint'] = self.get_param("askomics.fdendpoint")
+            self.lendpoints.append(d)
+        else:
+            self.lendpoints = em.listEndpoints()
 
     def setup_opener(self, proxy_config):
         """
@@ -76,6 +105,10 @@ class QueryLauncher(ParamManager):
             if you're doing a select and parsing the results with parse_results.
         """
 
+        #query = "#endpoint,askomics,http://localhost:8890/sparql/,false\n"+\
+        #        "#endpoint,regine,http://openstack-192-168-100-46.genouest.org/virtuoso/sparql,false\n"+\
+        #        query
+
         # Proxy handling
         if self.is_defined("askomics.proxy"):
             proxy_config = self.get_param("askomics.proxy")
@@ -89,11 +122,13 @@ class QueryLauncher(ParamManager):
             #                      if not line.startswith('PREFIX '))
             self.log.debug("----------- QUERY --------------\n%s", query_log)
 
+        time0 = time.time()
+
         if externalService is None :
             urlupdate = None
             if self.is_defined("askomics.updatepoint"):
                 urlupdate = self.get_param("askomics.updatepoint")
-            time0 = time.time()
+
             if self.is_defined("askomics.endpoint"):
                 data_endpoint = SPARQLWrapper(self.get_param("askomics.endpoint"), urlupdate)
             else:
@@ -111,7 +146,15 @@ class QueryLauncher(ParamManager):
             if self.is_defined("askomics.endpoint.auth"):
                 data_endpoint.setHTTPAuth(self.get_param("askomics.endpoint.auth")) # Basic or Digest
         else:
-            data_endpoint = externalService
+            urlupdate = None
+            if 'updatepoint' in externalService:
+                data_endpoint = SPARQLWrapper(externalService['endpoint'], urlupdate)
+            else:
+                data_endpoint = SPARQLWrapper(externalService['endpoint'])
+            if ('user' in externalService) and ('passwd' in externalService):
+                data_endpoint.setCredentials(externalService['user'], externalService['passwd'])
+            if 'auth' in externalService:
+                data_endpoint.setHTTPAuth(externalService['auth']);
 
         data_endpoint.setQuery(query)
         data_endpoint.method = 'POST'
@@ -184,11 +227,15 @@ class QueryLauncher(ParamManager):
         '''
             Execute query and parse the results if exist
         '''
-        json_query = self.execute_query(query, log_raw_results=False)
 
-        results = self.parse_results(json_query)
+        results = []
+        query = self.commentsForFed + query
+
+        for es in self.lendpoints:
+            json_query = self.execute_query(query, externalService=es, log_raw_results=False)
+            results += self.parse_results(json_query)
+
         return results
-
 
     def format_results_csv(self, data, headers):
         """write the csv result file from a data ist

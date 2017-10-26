@@ -259,8 +259,6 @@ class IHMLocal {
             // Sort inputs
             let inputs = $("#spdiv");
             inputs.children().detach().sort(function(a, b) {
-                console.log("a:"+a);
-                console.log("a:"+b);
                 return $(a).attr("id").localeCompare($(b).attr("id"));
             }).appendTo(inputs);
 
@@ -614,8 +612,6 @@ class IHMLocal {
                     // get the file's content
                     $("#spinner_galaxy-upload").removeClass("hidden");
                     let dataset = $('input[name=upload-galaxy]:checked').val();
-                    console.log('gid');
-                    console.log(dataset);
                     let service2 = new RestServiceJs('get_galaxy_file_content');
                     let model = {'dataset': dataset};
                     service2.post(model, function(data) {
