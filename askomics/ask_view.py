@@ -20,13 +20,18 @@ from pygments.formatters import HtmlFormatter
 from askomics.libaskomics.ParamManager import ParamManager
 from askomics.libaskomics.ModulesManager import ModulesManager
 from askomics.libaskomics.JobManager import JobManager
+from askomics.libaskomics.EndpointManager import EndpointManager
+
 from askomics.libaskomics.TripleStoreExplorer import TripleStoreExplorer
 from askomics.libaskomics.SourceFileConvertor import SourceFileConvertor
+
 from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
 from askomics.libaskomics.rdfdb.SparqlQueryGraph import SparqlQueryGraph
 from askomics.libaskomics.rdfdb.SparqlQueryStats import SparqlQueryStats
 from askomics.libaskomics.rdfdb.SparqlQueryAuth import SparqlQueryAuth
+
 from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
+
 from askomics.libaskomics.source_file.SourceFile import SourceFile
 from askomics.libaskomics.GalaxyConnector import GalaxyConnector
 
@@ -290,7 +295,7 @@ class AskView(object):
     @view_config(route_name='delete_graph', request_method='POST')
     def delete_graph(self):
         """
-        Delete selected named graphs and their metadatas
+
         """
 
         self.checkAuthSession()
@@ -307,6 +312,68 @@ class AskView(object):
             ql.execute_query(sqb.get_drop_named_graph(graph).query)
             #delete metadatas
             ql.execute_query(sqb.get_delete_metadatas_of_graph(graph).query)
+
+    @view_config(route_name='delete_endpoints', request_method='POST')
+    def delete_endpoints(self):
+        """
+
+        """
+
+        self.checkAuthSession()
+
+        if 'endpoints' not in self.request.json_body:
+            raise exc.exception_response(404)
+
+        em = EndpointManager(self.settings, self.request.session)
+
+        for id in self.request.json_body['endpoints']:
+            em.remove(id)
+
+    @view_config(route_name='add_endpoint', request_method='POST')
+    def add_endpoint(self):
+        """
+
+        """
+
+        self.checkAuthSession()
+
+        if 'name' not in self.request.json_body:
+            raise exc.exception_response(404)
+        if 'url' not in self.request.json_body:
+            raise exc.exception_response(404)
+        if 'auth' not in self.request.json_body:
+            raise exc.exception_response(404)
+
+        name = self.request.json_body['name']
+        url = self.request.json_body['url']
+        auth = self.request.json_body['auth']
+
+        em = EndpointManager(self.settings, self.request.session)
+        em.saveEndpoint(name,url,auth,True)
+
+    @view_config(route_name='enable_endpoints', request_method='POST')
+    def enable_endpoints(self):
+       """
+
+       """
+
+       self.checkAuthSession()
+
+       if 'id' not in self.request.json_body:
+           raise exc.exception_response(404)
+       if 'enable' not in self.request.json_body:
+           raise exc.exception_response(404)
+
+       id = self.request.json_body['id']
+       enable = self.request.json_body['enable']
+
+       em = EndpointManager(self.settings, self.request.session)
+
+       if enable:
+           em.enable(id)
+       else:
+           em.disable(id,"")
+
 
     @view_config(route_name='list_user_graph', request_method='GET')
     def list_user_graph(self):
@@ -345,6 +412,19 @@ class AskView(object):
             })
 
         return named_graphs
+
+    @view_config(route_name='list_endpoints', request_method='GET')
+    def list_endpoints(self):
+        """
+        Return a list with all the named graphs of a user.
+        """
+
+        self.checkAuthSession()
+
+        em = EndpointManager(self.settings, self.request.session)
+
+        return em.listEndpoints()
+
 
     @view_config(route_name='guess_csv_header_type', request_method='POST')
     def guess_csv_header_type(self):

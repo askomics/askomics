@@ -188,6 +188,9 @@
         <div id="content_statistics" class="container" hidden>
         </div>
 
+        <div id="content_endpoints" class="container" hidden>
+        </div>
+
         <div id="content_user_info" class="container" hidden>
         </div>
 

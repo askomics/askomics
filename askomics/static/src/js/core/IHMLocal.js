@@ -319,8 +319,7 @@ class IHMLocal {
         let service = new RestServiceJs('list_user_graph');
         service.getAll(function(data) {
             let template = AskOmics.templates.datasets;
-            for (var i = data.length - 1; i >= 0; i--) {
-            }
+
             let context = {datasets: data};
             let html = template(context);
             $('#content_datasets').empty();
@@ -367,6 +366,97 @@ class IHMLocal {
             });
 
         });
+    }
+
+    loadEndpoints() {
+      let service = new RestServiceJs('list_endpoints');
+      service.getAll(function(data) {
+          let template = AskOmics.templates.endpoints;
+          let context = {endpoints: data};
+          let html = template(context);
+
+          $('#content_endpoints').empty();
+          $('#content_endpoints').append(html);
+
+          // hide delete button if no checkbox checked
+
+          $(".check_ep").change(function(){
+              if ($('.check_endpoint:checked').length !== 0) {
+                 $('#delete_endpoints').removeAttr('disabled');
+              }else{
+                  $('#delete_endpoints').attr('disabled', 'disabled');
+              }
+          });
+
+          // Delete selected datasets
+          $('#delete_endpoints').click(function() {
+              let selected = [];
+              $('.check_endpoint').each(function() {
+                  if ($(this).is(':checked')) {selected.push($(this).attr('name'));}
+              });
+              let service = new RestServiceJs('delete_endpoints');
+              let model = {'endpoints': selected};
+              //show the spinner
+              $('#spinner_delete').removeClass('hidden');
+              service.post(model, function(data) {
+                  __ihm.loadEndpoints();
+                  __ihm.stopSession();
+                  __ihm.resetStats();
+              });
+          });
+
+          // sorted dataTable
+          $('#data-table-endpoints').DataTable({
+              'order': [[1, 'asc']],
+              'columnDefs': [
+                  { 'orderable': false, 'targets': 0 },
+                  { type: 'date-euro', targets: 2 }
+              ]
+          });
+          $('#add_endpoint').click(function() {
+              __ihm.get_add_endpoints_form();
+          });
+
+          $('input.enable-endpoint').click(function() {
+            let service = new RestServiceJs('enable_endpoints');
+            let model = {
+              'id': $(this).closest( "tr" ).attr('id'),
+              'enable' : $(this).is(":checked")
+            };
+            service.post(model, function() {
+            });
+          });
+      });
+    }
+
+    get_add_endpoints_form() {
+        console.log(" +++ get_add_endpoints_form +++");
+
+        $('#modalTitle').text('Add Askomics endpoint');
+        $('.modal-sm').css('width', '55%');
+        $('.modal-body').show();
+
+        $('#modal').modal('show');
+        $('#modal').addClass('upload-modal');
+
+        let template = AskOmics.templates.add_endpoint;
+        let html = template();
+
+        $('#modalMessage').html(html  );
+
+        $('#modalButton').click(function()
+        {
+          let service = new RestServiceJs('add_endpoint');
+          let model = {
+            name: $('#endpoint-name').val(),
+            url:$('#endpoint-url').val(),
+            auth: $('#endpoint-auth').val()
+          };
+          service.post(model, function(data) {
+            __ihm.loadEndpoints();
+          });
+        }).text('Add');
+
     }
 
     graphname(graphn) {
@@ -1031,11 +1121,12 @@ class IHMLocal {
                 $(this).addClass('active');
             }
 
-
+            console.log("ID:"+ $(this).attr('id'));
             if ( ! ( $(this).attr('id') in { 'help' : '','admin':'', 'user_menu': '' }) ) {
 
               $('.container').hide();
               $('.container#navbar_content').show();
+              console.log("===>"+'.container#content_' + $(this).attr('id'));
               $('.container#content_' + $(this).attr('id')).show();
             } else {
               $('.container#navbar_content').show();

@@ -38,29 +38,32 @@ class QueryLauncher(ParamManager):
         self.lendpoints = []
 
         if federationRequest:
-            lendpoints = external_lendpoints + em.listEndpoints()
-
+            lendpoints = []
+            if external_lendpoints:
+                lendpoints = external_lendpoints
+            lendpoints +=  em.listActiveEndpoints()
             if len(lendpoints)==0 :
-                raise Exception("None endpoint are defined.")
-
-            if len(lendpoints)==1 :
-                self.lendpoints = lendpoints
                 # no need federation
                 return
             i=0
             for endp in lendpoints:
                 i+=1
                 #self.commentsForFed+="#endpoint,"+endp['name']+','+endp['endpoint']+',false\n'
-                self.commentsForFed+="#endpoint,"+str(i)+','+endp['endpoint']+',false\n'
+                self.commentsForFed+="#endpoint,"+endp['name']+','+endp['endpoint']+',false\n'
+            #add local TPS
+            self.commentsForFed+="#endpoint,local,"+self.get_param("askomics.endpoint")+',false\n'
 
             d = {}
             d['name'] = 'Federation request'
             if not self.is_defined("askomics.fdendpoint") :
                 raise Exception("can not find askomics.fdendpoint property in the config file !")
             d['endpoint'] = self.get_param("askomics.fdendpoint")
+            d['enable'] = True
+            d['id'] = 0
+            d['auth'] = 'basic'
             self.lendpoints.append(d)
         else:
-            self.lendpoints = em.listEndpoints()
+            self.lendpoints = em.listActiveEndpoints()
 
     def setup_opener(self, proxy_config):
         """
@@ -146,13 +149,16 @@ class QueryLauncher(ParamManager):
             if self.is_defined("askomics.endpoint.auth"):
                 data_endpoint.setHTTPAuth(self.get_param("askomics.endpoint.auth")) # Basic or Digest
         else:
+            if not externalService['enable'] :
+                self.log.debug("externalService "+externalService['name']+'('+externalService['endpoint']+') is disabled.')
+                return []
+
             urlupdate = None
             if 'updatepoint' in externalService:
                 data_endpoint = SPARQLWrapper(externalService['endpoint'], urlupdate)
             else:
                 data_endpoint = SPARQLWrapper(externalService['endpoint'])
-            if ('user' in externalService) and ('passwd' in externalService):
-                data_endpoint.setCredentials(externalService['user'], externalService['passwd'])
+
             if 'auth' in externalService:
                 data_endpoint.setHTTPAuth(externalService['auth']);
 
@@ -177,7 +183,12 @@ class QueryLauncher(ParamManager):
             try:
                 results = data_endpoint.query().convert()
             except urllib.error.URLError as URLError:
-                raise ValueError(URLError.reason)
+                #url error, we disable the endpoint
+                #raise ValueError(URLError.reason)
+                em = EndpointManager(self.settings, self.session)
+                em.disable(externalService['id'],str(URLError.reason))
+                results = []
+                #raise ValueError(URLError.reason)
 
             time1 = time.time()
 
@@ -228,9 +239,18 @@ class QueryLauncher(ParamManager):
             Execute query and parse the results if exist
         '''
 
-        results = []
-        query = self.commentsForFed + query
+        # Federation Request case
+        #------------------------------------------------------
+        if self.commentsForFed != '':
+            query = self.commentsForFed + query
+            es = self.lendpoints[0]
+            json_query = self.execute_query(query, externalService=es, log_raw_results=False)
+            return self.parse_results(json_query)
 
+        # call main usener dpoint askomics
+        json_query = self.execute_query(query, log_raw_results=False)
+        results = self.parse_results(json_query)
+        # then other askomics endpoint defined by the user
         for es in self.lendpoints:
             json_query = self.execute_query(query, externalService=es, log_raw_results=False)
             results += self.parse_results(json_query)
