@@ -10,7 +10,6 @@ import logging
 import urllib.request
 
 from askomics.libaskomics.ParamManager import ParamManager
-from askomics.libaskomics.EndpointManager import EndpointManager
 
 class SPARQLError(RuntimeError):
     """
@@ -29,41 +28,44 @@ class QueryLauncher(ParamManager):
           from these preformated results using a ResultsBuilder instance.
     """
 
-    def __init__(self, settings, session,federationRequest=False,external_lendpoints=None):
+    def __init__(self, settings, session, name = None, endpoint = None ,username=None, password=None,urlupdate=None,auth='Basic'):
         ParamManager.__init__(self, settings, session)
         self.log = logging.getLogger(__name__)
-        #comments added in sparql request to get all url endpoint.
-        self.commentsForFed=""
-        em = EndpointManager(settings, session)
-        self.lendpoints = []
 
-        if federationRequest:
-            lendpoints = []
-            if external_lendpoints:
-                lendpoints = external_lendpoints
-            lendpoints +=  em.listActiveEndpoints()
-            if len(lendpoints)==0 :
-                # no need federation
-                return
-            i=0
-            for endp in lendpoints:
-                i+=1
-                #self.commentsForFed+="#endpoint,"+endp['name']+','+endp['endpoint']+',false\n'
-                self.commentsForFed+="#endpoint,"+endp['name']+','+endp['endpoint']+',false\n'
-            #add local TPS
-            self.commentsForFed+="#endpoint,local,"+self.get_param("askomics.endpoint")+',false\n'
+        self.name = name
+        self.endpoint = endpoint
+        self.username = username
+        self.password = password
+        self.urlupdate = urlupdate
+        self.auth = auth
+        self.allowUpdate = False
 
-            d = {}
-            d['name'] = 'Federation request'
-            if not self.is_defined("askomics.fdendpoint") :
-                raise Exception("can not find askomics.fdendpoint property in the config file !")
-            d['endpoint'] = self.get_param("askomics.fdendpoint")
-            d['enable'] = True
-            d['id'] = 0
-            d['auth'] = 'basic'
-            self.lendpoints.append(d)
+        if self.auth != 'Basic' and self.auth != 'Digest':
+            raise ValueError("Invalid Auth parameter :"+self.auth)
+
+    def setUserDatastore(self):
+        """
+            initialize endpoint with user configuration file
+        """
+        self.name = 'Local'
+        self.allowUpdate = True
+
+        if self.is_defined("askomics.endpoint"):
+            self.endpoint = self.get_param("askomics.endpoint")
         else:
-            self.lendpoints = em.listActiveEndpoints()
+            raise ValueError("askomics.endpoint does not exit.")
+
+        if self.is_defined("askomics.updatepoint"):
+            self.urlupdate = self.get_param("askomics.updatepoint")
+
+        if self.is_defined("askomics.endpoint_username"):
+            self.username = self.get_param("askomics.endpoint_username")
+
+        if self.is_defined("askomics.endpoint_passwd"):
+            self.password = self.get_param("askomics.endpoint_passwd")
+
+        if self.is_defined("askomics.endpoint.auth"):
+            self.auth = self.get_param("askomics.endpoint.auth")
 
     def setup_opener(self, proxy_config):
         """
@@ -101,16 +103,29 @@ class QueryLauncher(ParamManager):
             self.opener = urllib.request.build_opener(*handlers)
             urllib.request.install_opener(self.opener)
 
-    def execute_query(self, query, log_raw_results=True, externalService=None):
+    def setupSPARQLWrapper(self):
+        """
+            Setup SPARQLWrapper to reach url endpoint
+        """
+        data_endpoint = SPARQLWrapper(self.endpoint,self.urlupdate)
+
+        if self.username and self.password:
+            data_endpoint.setCredentials(self.username, self.password)
+        elif self.username:
+            raise ValueError("passwd is not defined")
+        elif self.password:
+            raise ValueError("username is not defined")
+
+        data_endpoint.setHTTPAuth(self.auth) # Basic or Digest
+
+        return data_endpoint
+
+    def _execute_query(self, query, log_raw_results=True, externalService=None):
         """Params:
             - libaskomics.rdfdb.SparqlQuery
             - log_raw_results: if True the raw json response is logged. Set to False
             if you're doing a select and parsing the results with parse_results.
         """
-
-        #query = "#endpoint,askomics,http://localhost:8890/sparql/,false\n"+\
-        #        "#endpoint,regine,http://openstack-192-168-100-46.genouest.org/virtuoso/sparql,false\n"+\
-        #        query
 
         # Proxy handling
         if self.is_defined("askomics.proxy"):
@@ -127,48 +142,14 @@ class QueryLauncher(ParamManager):
 
         time0 = time.time()
 
-        if externalService is None :
-            urlupdate = None
-            if self.is_defined("askomics.updatepoint"):
-                urlupdate = self.get_param("askomics.updatepoint")
-
-            if self.is_defined("askomics.endpoint"):
-                data_endpoint = SPARQLWrapper(self.get_param("askomics.endpoint"), urlupdate)
-            else:
-                raise ValueError("askomics.endpoint")
-
-            if self.is_defined("askomics.endpoint_username") and self.is_defined("askomics.endpoint_passwd"):
-                user = self.get_param("askomics.endpoint_username")
-                passwd = self.get_param("askomics.endpoint_passwd")
-                data_endpoint.setCredentials(user, passwd)
-            elif self.is_defined("askomics.endpoint_username"):
-                raise ValueError("askomics.endpoint_passwd is not defined")
-            elif self.is_defined("askomics.endpoint_passwd"):
-                raise ValueError("askomics.endpoint_username is not defined")
-
-            if self.is_defined("askomics.endpoint.auth"):
-                data_endpoint.setHTTPAuth(self.get_param("askomics.endpoint.auth")) # Basic or Digest
-        else:
-            if not externalService['enable'] :
-                self.log.debug("externalService "+externalService['name']+'('+externalService['endpoint']+') is disabled.')
-                return []
-
-            urlupdate = None
-            if 'updatepoint' in externalService:
-                data_endpoint = SPARQLWrapper(externalService['endpoint'], urlupdate)
-            else:
-                data_endpoint = SPARQLWrapper(externalService['endpoint'])
-
-            if 'auth' in externalService:
-                data_endpoint.setHTTPAuth(externalService['auth']);
-
+        data_endpoint = self.setupSPARQLWrapper()
         data_endpoint.setQuery(query)
         data_endpoint.method = 'POST'
 
-        if externalService != None and data_endpoint.isSparqlUpdateRequest():
-            raise ValueError("Can not update a remote endpoint with url:"+str(externalService))
-
         if data_endpoint.isSparqlUpdateRequest():
+            if not self.allowUpdate :
+                raise ValueError("Can not perform an update sparql request on an external endpoint.")
+
             data_endpoint.setMethod('POST')
             # Hack for Virtuoso to LOAD a turtle file
             if self.is_defined("askomics.hack_virtuoso"):
@@ -208,10 +189,11 @@ class QueryLauncher(ParamManager):
         '''
 
         if json_res is None:
-            return []
+            raise ValueError("Communication was broken betwwen askomics and datastore.")
 
         if type(json_res) is not dict:
-            return []
+            self.log.debug(str(json_res))
+            raise ValueError("Invalide format response from datastore .")
 
         if "results" not in json_res:
             return []
@@ -245,21 +227,12 @@ class QueryLauncher(ParamManager):
             Execute query and parse the results if exist
         '''
 
-        # Federation Request case
-        #------------------------------------------------------
-        if self.commentsForFed != '':
-            query = self.commentsForFed + query
-            es = self.lendpoints[0]
-            json_query = self.execute_query(query, externalService=es, log_raw_results=False)
-            return self.parse_results(json_query)
+        # if no endpoint are configured, set local datastore
+        if not self.endpoint:
+            self.setUserDatastore()
 
-        # call main user endpoint askomics
-        json_query = self.execute_query(query, log_raw_results=False)
+        json_query = self._execute_query(query, log_raw_results=False)
         results = self.parse_results(json_query)
-        # then other askomics endpoint defined by the user
-        for es in self.lendpoints:
-            json_query = self.execute_query(query, externalService=es, log_raw_results=False)
-            results += self.parse_results(json_query)
 
         return results
 
@@ -307,7 +280,7 @@ class QueryLauncher(ParamManager):
         self.log.debug("Loading into triple store (LOAD method) the content of: %s", url)
 
         query_string = "LOAD <"+url+"> INTO GRAPH"+ " <" + graphName + ">"
-        res = self.execute_query(query_string)
+        res = self._execute_query(query_string)
 
         return res
 
@@ -363,6 +336,6 @@ class QueryLauncher(ParamManager):
         query_string += "\t\t}\n"
         query_string += "\t}\n"
 
-        res = self.execute_query(query_string)
+        res = self._execute_query(query_string)
 
         return res

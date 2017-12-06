@@ -6,7 +6,9 @@ from string import Template
 
 from askomics.libaskomics.rdfdb.SparqlQuery import SparqlQuery
 from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
+from askomics.libaskomics.rdfdb.MultipleQueryLauncher import MultipleQueryLauncher
 from askomics.libaskomics.ParamManager import ParamManager
+from askomics.libaskomics.EndpointManager import EndpointManager
 # from askomics.libaskomics.utils import prefix_lines
 
 class SparqlQueryBuilder(ParamManager):
@@ -44,14 +46,17 @@ class SparqlQueryBuilder(ParamManager):
             settings['private'].append(elt['g'])
         self.log.debug("setting['private']:\n"+str(settings['private']))
 
-        #finding all public graph
+        #finding all public graph on all Askomics endpoint
         qu = self.build_query_on_the_fly({
             'select': '?g',
             'query': 'GRAPH ?g {\n'+
             "?g :accessLevel 'public'. } "
         }, True)
-        ql = QueryLauncher(self.settings, self.session)
-        results = ql.process_query(qu.query)
+
+        ql = MultipleQueryLauncher(self.settings, self.session)
+        em = EndpointManager(self.settings, self.session)
+
+        results = ql.process_query(qu.query,em.listAskomicsEndpoints())
         settings['public'] = []
         for elt in results:
             if elt['g'] in removeGraph:

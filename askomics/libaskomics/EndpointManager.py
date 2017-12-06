@@ -97,6 +97,42 @@ class EndpointManager(ParamManager):
         conn.close()
         self.listEndpoints()
 
+    def listAskomicsEndpoints(self):
+        self.log.info(" == listEndpoints == ")
+        data = []
+        try:
+            conn = sqlite3.connect(self.pathdb,uri=True)
+            conn.row_factory = sqlite3.Row
+
+            c = conn.cursor()
+
+            reqSql = """SELECT id, name, url, auth, enable, message FROM endpoints WHERE enable == 1"""
+
+            c.execute(reqSql)
+            rows = c.fetchall()
+            self.log.info("nb row:"+str(len(rows)))
+            for row in rows:
+
+                d = {}
+                d['id'] = row['id']
+                d['name'] = row['name']
+                d['endpoint'] = row['url']
+                if row['auth'] != None and row['auth'] != 'NULL' :
+                    d['auth'] = row['auth']
+                else:
+                    d['auth'] = ''
+                d['message'] = row['message']
+                data.append(d)
+
+        except sqlite3.OperationalError as e :
+            self.log.info("Endpoints database does not exist .")
+
+
+        c.execute(reqSql)
+        conn.commit()
+        conn.close()
+        return data
+
     def listEndpoints(self):
         self.log.info(" == listEndpoints == ")
         data = []

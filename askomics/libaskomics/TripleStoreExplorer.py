@@ -8,8 +8,10 @@ from askomics.libaskomics.ParamManager import ParamManager
 
 from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
 from askomics.libaskomics.rdfdb.SparqlQueryGraph import SparqlQueryGraph
-from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
+from askomics.libaskomics.rdfdb.MultipleQueryLauncher import MultipleQueryLauncher
+from askomics.libaskomics.rdfdb.FederationQueryLauncher import FederationQueryLauncher
 
+from askomics.libaskomics.EndpointManager import EndpointManager
 
 class TripleStoreExplorer(ParamManager):
     """
@@ -39,9 +41,11 @@ class TripleStoreExplorer(ParamManager):
         nodes = []
 
         sqg = SparqlQueryGraph(self.settings, self.session)
-        ql = QueryLauncher(self.settings, self.session)
-        results = ql.process_query(sqg.get_public_start_point().query)
-        results += ql.process_query(sqg.get_user_start_point().query)
+        ql = MultipleQueryLauncher(self.settings, self.session)
+        em = EndpointManager(self.settings, self.session)
+
+        results = ql.process_query(sqg.get_public_start_point().query,em.listAskomicsEndpoints())
+        results += ql.process_query(sqg.get_user_start_point().query,em.listAskomicsEndpoints())
 
         for result in results:
             g  = result["g"]
@@ -70,18 +74,19 @@ class TripleStoreExplorer(ParamManager):
         self.log.debug(" =========== TripleStoreExplorer:getUserAbstraction ===========")
 
         sqg = SparqlQueryGraph(self.settings, self.session)
-        ql = QueryLauncher(self.settings, self.session)
+        ql = MultipleQueryLauncher(self.settings, self.session)
+        em = EndpointManager(self.settings, self.session)
 
-        data['relations'] = ql.process_query(sqg.get_public_abstraction_relation('owl:ObjectProperty').query)
-        data['relations'] += ql.process_query(sqg.get_user_abstraction_relation('owl:ObjectProperty').query)
-        data['subclassof'] = ql.process_query(sqg.get_isa_relation_entities().query)
-        data['entities'] = ql.process_query(sqg.get_public_abstraction_entity().query)
-        data['entities'] += ql.process_query(sqg.get_user_abstraction_entity().query)
-        data['attributes'] = ql.process_query(sqg.get_public_abstraction_attribute_entity().query)
-        data['attributes'] += ql.process_query(sqg.get_user_abstraction_attribute_entity().query)
-        data['categories'] = ql.process_query(sqg.get_public_abstraction_category_entity().query)
-        data['categories'] += ql.process_query(sqg.get_user_abstraction_category_entity().query)
-        data['positionable'] = ql.process_query(sqg.get_abstraction_positionable_entity().query)
+        data['relations'] = ql.process_query(sqg.get_public_abstraction_relation('owl:ObjectProperty').query,em.listAskomicsEndpoints())
+        data['relations'] += ql.process_query(sqg.get_user_abstraction_relation('owl:ObjectProperty').query,em.listAskomicsEndpoints())
+        data['subclassof'] = ql.process_query(sqg.get_isa_relation_entities().query,em.listAskomicsEndpoints())
+        data['entities'] = ql.process_query(sqg.get_public_abstraction_entity().query,em.listAskomicsEndpoints())
+        data['entities'] += ql.process_query(sqg.get_user_abstraction_entity().query,em.listAskomicsEndpoints())
+        data['attributes'] = ql.process_query(sqg.get_public_abstraction_attribute_entity().query,em.listAskomicsEndpoints())
+        data['attributes'] += ql.process_query(sqg.get_user_abstraction_attribute_entity().query,em.listAskomicsEndpoints())
+        data['categories'] = ql.process_query(sqg.get_public_abstraction_category_entity().query,em.listAskomicsEndpoints())
+        data['categories'] += ql.process_query(sqg.get_user_abstraction_category_entity().query,em.listAskomicsEndpoints())
+        data['positionable'] = ql.process_query(sqg.get_abstraction_positionable_entity().query,em.listAskomicsEndpoints())
         data['graph'] = sqg.getGraphUser()
 
         return data
@@ -116,7 +121,7 @@ class TripleStoreExplorer(ParamManager):
             return req
         return ""
 
-    def build_sparql_query_from_json(self, fromgraphs, variates, constraintes_relations,limit, send_request_to_tps=True):
+    def build_sparql_query_from_json(self, listEndpoints, fromgraphs, variates, constraintes_relations,limit, send_request_to_tps=True):
         """
         Build a sparql query from JSON constraints
         """
@@ -126,11 +131,12 @@ class TripleStoreExplorer(ParamManager):
         sqb = SparqlQueryBuilder(self.settings, self.session)
         query = self.build_recursive_block('', constraintes_relations)
 
+
         # if limit != None and limit > 0:
         #     query += ' LIMIT ' + str(limit)
 
         if send_request_to_tps:
-            query_launcher = QueryLauncher(self.settings, self.session,federationRequest=True,external_lendpoints=[])
+            query_launcher = FederationQueryLauncher(self.settings, self.session,listEndpoints)
             results = query_launcher.process_query(sqb.custom_query(fromgraphs, select, query).query)
         else:
             results = []
@@ -139,8 +145,9 @@ class TripleStoreExplorer(ParamManager):
 
     def get_prefix_uri(self):
         sqg = SparqlQueryGraph(self.settings, self.session)
-        ql = QueryLauncher(self.settings, self.session)
-        rs = ql.process_query(sqg.get_prefix_uri().query)
+        ql = MultipleQueryLauncher(self.settings, self.session)
+        em = EndpointManager(self.settings, self.session)
+        rs = ql.process_query(sqg.get_prefix_uri().query,em.listAskomicsEndpoints())
         results = {}
         r_buf = {}
 

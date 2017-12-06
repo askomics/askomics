@@ -30,6 +30,10 @@ from askomics.libaskomics.rdfdb.SparqlQueryStats import SparqlQueryStats
 from askomics.libaskomics.rdfdb.SparqlQueryAuth import SparqlQueryAuth
 
 from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
+from askomics.libaskomics.rdfdb.MultipleQueryLauncher import MultipleQueryLauncher
+from askomics.libaskomics.rdfdb.FederationQueryLauncher import FederationQueryLauncher
+
+from askomics.libaskomics.EndpointManager import EndpointManager
 
 from askomics.libaskomics.source_file.SourceFile import SourceFile
 from askomics.libaskomics.GalaxyConnector import GalaxyConnector
@@ -98,30 +102,6 @@ class AskView(object):
         if not self.request.session['admin'] :
             raise exc.exception_response(403)
 
-    def setGraphUser(self,removeGraph=[]):
-
-        self.settings['graph'] = {}
-
-        #finding all private graph graph
-        sqg = SparqlQueryGraph(self.settings, self.request.session)
-        ql = QueryLauncher(self.settings, self.request.session)
-
-        results = ql.process_query(sqg.get_user_graph_infos().query)
-        self.settings['graph']['private'] = []
-        for elt in results:
-            if 'g' not in elt:
-                continue
-            if elt['g'] in removeGraph:
-                continue
-            self.settings['graph']['private'].append(elt['g'])
-
-        #finding all public graph
-        results = ql.process_query(sqg.get_public_graphs().query)
-        self.settings['graph']['public'] = []
-        for elt in results:
-            if elt['g'] in removeGraph:
-                continue
-            self.settings['graph']['public'].append(elt['g'])
 
     @view_config(route_name='start_point', request_method='GET')
     def start_points(self):
@@ -130,7 +110,8 @@ class AskView(object):
 
         try:
 
-            self.setGraphUser([])
+            sqb = SparqlQueryBuilder(self.settings, self.request.session)
+            self.settings['graph'] = sqb.getGraphUser([])
 
             tse = TripleStoreExplorer(self.settings, self.request.session)
             nodes = tse.get_start_points()
@@ -170,47 +151,49 @@ class AskView(object):
 
         sqs = SparqlQueryStats(self.settings, self.request.session)
         qlaucher = QueryLauncher(self.settings, self.request.session)
+        qmlaucher = MultipleQueryLauncher(self.settings, self.request.session)
+        em = EndpointManager(self.settings, self.request.session)
 
         public_stats = {}
         private_stats = {}
 
         # Number of triples
-        results_pub = qlaucher.process_query(sqs.get_number_of_triples('public').query)
+        results_pub = qmlaucher.process_query(sqs.get_number_of_triples('public').query,em.listAskomicsEndpoints())
         results_priv = qlaucher.process_query(sqs.get_number_of_triples('private').query)
 
         public_stats['ntriples'] = results_pub[0]['number']
         private_stats['ntriples'] = results_priv[0]['number']
 
         # Number of entities
-        results_pub = qlaucher.process_query(sqs.get_number_of_entities('public').query)
+        results_pub = qmlaucher.process_query(sqs.get_number_of_entities('public').query,em.listAskomicsEndpoints())
         results_priv = qlaucher.process_query(sqs.get_number_of_entities('private').query)
 
         public_stats['nentities'] = results_pub[0]['number']
         private_stats['nentities'] = results_priv[0]['number']
 
         # Number of classes
-        results_pub = qlaucher.process_query(sqs.get_number_of_classes('public').query)
+        results_pub = qmlaucher.process_query(sqs.get_number_of_classes('public').query,em.listAskomicsEndpoints())
         results_priv = qlaucher.process_query(sqs.get_number_of_classes('private').query)
 
         public_stats['nclasses'] = results_pub[0]['number']
         private_stats['nclasses'] = results_priv[0]['number']
 
         # Number of graphs
-        results_pub = qlaucher.process_query(sqs.get_number_of_subgraph('public').query)
+        results_pub = qmlaucher.process_query(sqs.get_number_of_subgraph('public').query,em.listAskomicsEndpoints())
         results_priv = qlaucher.process_query(sqs.get_number_of_subgraph('private').query)
 
         public_stats['ngraphs'] = results_pub[0]['number']
         private_stats['ngraphs'] = results_priv[0]['number']
 
         # Graphs info
-        results_pub = qlaucher.process_query(sqs.get_subgraph_infos('public').query)
+        results_pub = qmlaucher.process_query(sqs.get_subgraph_infos('public').query,em.listAskomicsEndpoints())
         results_priv = qlaucher.process_query(sqs.get_subgraph_infos('private').query)
 
         public_stats['graphs'] = results_pub
         private_stats['graphs'] = results_priv
 
         # Classes and relations
-        results_pub = qlaucher.process_query(sqs.get_rel_of_classes('public').query)
+        results_pub = qmlaucher.process_query(sqs.get_rel_of_classes('public').query,em.listAskomicsEndpoints())
         results_priv = qlaucher.process_query(sqs.get_rel_of_classes('private').query)
 
         public_stats['class_rel'] = results_pub
@@ -235,7 +218,7 @@ class AskView(object):
         private_stats['class_rel'] = tmp
 
         # class and attributes
-        results_pub = qlaucher.process_query(sqs.get_attr_of_classes('public').query)
+        results_pub = qmlaucher.process_query(sqs.get_attr_of_classes('public').query,em.listAskomicsEndpoints())
         results_priv = qlaucher.process_query(sqs.get_attr_of_classes('private').query)
 
         tmp = {}
@@ -280,9 +263,9 @@ class AskView(object):
             for graph in named_graphs:
 
                 self.log.debug("--- DELETE GRAPH : %s", graph['g'])
-                ql.execute_query(sqb.get_drop_named_graph(graph['g']).query)
+                ql.process_query(sqb.get_drop_named_graph(graph['g']).query)
                 #delete metadatas
-                ql.execute_query(sqb.get_delete_metadatas_of_graph(graph['g']).query)
+                ql.process_query(sqb.get_delete_metadatas_of_graph(graph['g']).query)
 
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
@@ -308,9 +291,9 @@ class AskView(object):
 
         for graph in graphs:
             self.log.debug("--- DELETE GRAPH : %s", graph)
-            ql.execute_query(sqb.get_drop_named_graph(graph).query)
+            ql.process_query(sqb.get_drop_named_graph(graph).query)
             #delete metadatas
-            ql.execute_query(sqb.get_delete_metadatas_of_graph(graph).query)
+            ql.process_query(sqb.get_delete_metadatas_of_graph(graph).query)
 
 
     @view_config(route_name='delete_endpoints', request_method='POST')
@@ -389,29 +372,31 @@ class AskView(object):
         sqg = SparqlQueryGraph(self.settings, self.request.session)
         query_launcher = QueryLauncher(self.settings, self.request.session)
 
-        res = query_launcher.execute_query(sqg.get_user_graph_infos_with_count().query)
+        res = query_launcher.process_query(sqg.get_user_graph_infos_with_count().query)
 
         named_graphs = []
-
-        for index_result in range(len(res['results']['bindings'])):
-            if not 'date' in res['results']['bindings'][index_result]:
+        print(res)
+        for index_result in range(len(res)):
+            if not 'date' in res[index_result]:
                 self.log.warn('============= bad results user graph =================')
-                self.log.warn(res['results']['bindings'][index_result])
+                self.log.warn(res[index_result])
                 self.log.warn("============================================================")
                 continue
-            dat = datetime.datetime.strptime(res['results']['bindings'][index_result]['date']['value'], "%Y-%m-%dT%H:%M:%S.%f")
+            print("=============")
+            print(res[index_result])
+            dat = datetime.datetime.strptime(res[index_result]['date'], "%Y-%m-%dT%H:%M:%S.%f")
 
             readable_date = dat.strftime("%d/%m/%Y %H:%M:%S") #dd/mm/YYYY hh:ii:ss
 
             named_graphs.append({
-                'g': res['results']['bindings'][index_result]['g']['value'],
-                'name': res['results']['bindings'][index_result]['name']['value'],
-                'count': res['results']['bindings'][index_result]['co']['value'],
-                'date': res['results']['bindings'][index_result]['date']['value'],
+                'g': res[index_result]['g'],
+                'name': res[index_result]['name'],
+                'count': res[index_result]['co'],
+                'date': res[index_result]['date'],
                 'readable_date': readable_date,
-                'access': res['results']['bindings'][index_result]['access']['value'],
-                'owner': res['results']['bindings'][index_result]['owner']['value'],
-                'access_bool': bool(res['results']['bindings'][index_result]['access']['value'] == 'public')
+                'access': res[index_result]['access'],
+                'owner': res[index_result]['owner'],
+                'access_bool': bool(res[index_result]['access'] == 'public')
             })
 
         return named_graphs
@@ -480,8 +465,9 @@ class AskView(object):
 
             # get all taxon in the TS
             sqg = SparqlQueryGraph(self.settings, self.request.session)
-            ql = QueryLauncher(self.settings, self.request.session)
-            res = ql.execute_query(sqg.get_all_taxons().query)
+            ql = MultipleQueryLauncher(self.settings, self.request.session)
+            em = EndpointManager(self.settings, self.session)
+            res = ql.process_query(sqg.get_all_taxons().query,em.listAskomicsEndpoints())
             taxons_list = []
             for elem in res['results']['bindings']:
                 taxons_list.append(elem['taxon']['value'])
@@ -671,8 +657,8 @@ class AskView(object):
             #rollback
             sqb = SparqlQueryBuilder(self.settings, self.request.session)
             query_laucher = QueryLauncher(self.settings, self.request.session)
-            query_laucher.execute_query(sqb.get_drop_named_graph(src_file.graph).query)
-            query_laucher.execute_query(sqb.get_delete_metadatas_of_graph(src_file.graph).query)
+            query_laucher.proecess_query(sqb.get_drop_named_graph(src_file.graph).query)
+            query_laucher.proecess_query(sqb.get_delete_metadatas_of_graph(src_file.graph).query)
 
             traceback.print_exc(file=sys.stdout)
             jm.updateEndSparqlJob(jobid,"Error")
@@ -727,8 +713,8 @@ class AskView(object):
             #rollback
             sqb = SparqlQueryBuilder(self.settings, self.request.session)
             query_laucher = QueryLauncher(self.settings, self.request.session)
-            query_laucher.execute_query(sqb.get_drop_named_graph(src_file_gff.graph).query)
-            query_laucher.execute_query(sqb.get_delete_metadatas_of_graph(src_file_gff.graph).query)
+            query_laucher.process_query(sqb.get_drop_named_graph(src_file_gff.graph).query)
+            query_laucher.process_query(sqb.get_delete_metadatas_of_graph(src_file_gff.graph).query)
 
             traceback.print_exc(file=sys.stdout)
             jm.updateEndSparqlJob(jobid,"Error")
@@ -776,8 +762,8 @@ class AskView(object):
             #rollback
             sqb = SparqlQueryBuilder(self.settings, self.request.session)
             query_laucher = QueryLauncher(self.settings, self.request.session)
-            query_laucher.execute_query(sqb.get_drop_named_graph(src_file_ttl.graph).query)
-            query_laucher.execute_query(sqb.get_delete_metadatas_of_graph(src_file_ttl.graph).query)
+            query_laucher.process_query(sqb.get_drop_named_graph(src_file_ttl.graph).query)
+            query_laucher.process_query(sqb.get_delete_metadatas_of_graph(src_file_ttl.graph).query)
 
             jm.updateEndSparqlJob(jobid,"Error")
             jm.updatePreviewJob(jobid,'Problem when integration of '+file_name+'.</br>'+str(e))
@@ -830,8 +816,8 @@ class AskView(object):
             #rollback
             sqb = SparqlQueryBuilder(self.settings, self.request.session)
             query_laucher = QueryLauncher(self.settings, self.request.session)
-            query_laucher.execute_query(sqb.get_drop_named_graph(src_file_bed.graph).query)
-            query_laucher.execute_query(sqb.get_delete_metadatas_of_graph(src_file_bed.graph).query)
+            query_laucher.process_query(sqb.get_drop_named_graph(src_file_bed.graph).query)
+            query_laucher.process_query(sqb.get_delete_metadatas_of_graph(src_file_bed.graph).query)
 
             traceback.print_exc(file=sys.stdout)
             jm.updateEndSparqlJob(jobid,"Error")
@@ -908,7 +894,7 @@ class AskView(object):
             query_string += "<"+body["shortcut"]+">" + " ?r ?a.\n"
             query_string += "\t}\n"
 
-            res = ql.execute_query(query_string)
+            res = ql.process_query(query_string)
         except Exception as e:
             #exc_type, exc_value, exc_traceback = sys.exc_info()
             #traceback.print_exc(limit=8)
@@ -947,7 +933,10 @@ class AskView(object):
             if 'from' in body:
                 lfrom = body['from']
 
-            results, query = tse.build_sparql_query_from_json(lfrom, body["variates"], body["constraintesRelations"], True)
+            #TODO: Faire une interface pour selectionnerles endpoints compatibles avec les graphes selectionnées
+
+            em = EndpointManager(self.settings, self.request.session)
+            results, query = tse.build_sparql_query_from_json(em.listAskomicsEndpoints(),lfrom, body["variates"], body["constraintesRelations"], True)
 
             # Remove prefixes in the results table
             limit = int(body["limit"]) + 1
@@ -1528,8 +1517,8 @@ class AskView(object):
         # Drop all this graph
         for graph in list_graph:
             try:
-                query_laucher.execute_query(sqb.get_drop_named_graph(graph).query)
-                query_laucher.execute_query(sqb.get_delete_metadatas_of_graph(graph).query)
+                query_laucher.process_query(sqb.get_drop_named_graph(graph).query)
+                query_laucher.process_query(sqb.get_delete_metadatas_of_graph(graph).query)
             except Exception as e:
                 self.data['error'] = str(e)
                 self.log.error(str(e))
@@ -1539,7 +1528,7 @@ class AskView(object):
 
         # Delete user infos
         try:
-            query_laucher.execute_query(sqb.delete_user(username).query)
+            query_laucher.process_query(sqb.delete_user(username).query)
         except Exception as e:
             return 'failed: ' + str(e)
 
