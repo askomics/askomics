@@ -553,8 +553,6 @@ function loadSourceFile(file_elem, pub, headers) {
     });
 
     __ihm.resetStats();
-
-  new ModulesParametersView().updateModules();
 }
 
 /**

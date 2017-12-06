@@ -2,7 +2,7 @@
 "module"  : "Gene Ontology",
 "comment" : "Description avalaible on http://geneontology.org/page/download-ontology",
 "version" : "1.0",
-"owl"     : "http://purl.obolibrary.org/obo/go.owl",
+"owl"     : "",
 "rdf"     : [
 "@prefix : <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#> .",
 "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .",

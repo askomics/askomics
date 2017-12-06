@@ -60,8 +60,6 @@ class IHMLocal {
 
       //TODO: Manage all view in a array with a generic way
       this.shortcutsView      = new  ShortcutsParametersView();
-      this.moduleView      = new  ModulesParametersView();
-
       this.menus = {} ;
 
       this.menus.menuFile = new AskomicsMenu("menuFile","buttonViewFile","viewMenuFile",fileFuncMenu,false);
@@ -430,6 +428,7 @@ class IHMLocal {
     }
 
     get_add_endpoints_form() {
+
         console.log(" +++ get_add_endpoints_form +++");
 
         $('#modalTitle').text('Add Askomics endpoint');
@@ -442,7 +441,7 @@ class IHMLocal {
         let template = AskOmics.templates.add_endpoint;
         let html = template();
 
-        $('#modalMessage').html(html  );
+        $('#modalMessage').html(html);
 
         $('#modalButton').click(function()
         {
@@ -455,6 +454,7 @@ class IHMLocal {
           service.post(model, function(data) {
             __ihm.loadEndpoints();
           });
+          $(this).unbind( "click" );
         }).text('Add');
 
     }

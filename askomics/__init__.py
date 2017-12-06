@@ -61,8 +61,6 @@ def main(global_config, **settings):
     # Shortcuts and modules routes
     config.add_route('importShortcut', '/importShortcut')
     config.add_route('deleteShortcut', '/deleteShortcut')
-    config.add_route('modules', '/modules')
-    config.add_route('manage_module', '/manage_module')
 
     # Data upload routes
     # Inspired from https://github.com/blueimp/jQuery-File-Upload/ and https://github.com/grooverdan/pyramid-jQuery-File-Upload-demo/

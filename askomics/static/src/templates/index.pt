@@ -206,12 +206,10 @@
              <ul class="nav nav-tabs">
               <li class="active"><a data-toggle="tab" href="#Users_adm">Users</a></li>
               <li><a data-toggle="tab" href="#Shortcuts_adm">Shortcuts</a></li>
-              <li><a data-toggle="tab" href="#Modules_adm">Modules</a></li>
              </ul>
              <div id="admin_page_tab_content" class="tab-content">
                   <div id="Users_adm" class="tab-pane fade in active"></div>
                   <div id="Shortcuts_adm" class="tab-pane fade"></div>
-                  <div id="Modules_adm" class="tab-pane fade"></div>
              </div>
             </div>
          </div>

@@ -185,8 +185,9 @@ class QueryLauncher(ParamManager):
             except urllib.error.URLError as URLError:
                 #url error, we disable the endpoint
                 #raise ValueError(URLError.reason)
-                em = EndpointManager(self.settings, self.session)
-                em.disable(externalService['id'],str(URLError.reason))
+                if externalService != None :
+                    em = EndpointManager(self.settings, self.session)
+                    em.disable(externalService['id'],str(URLError.reason))
                 results = []
                 #raise ValueError(URLError.reason)
 
@@ -208,8 +209,13 @@ class QueryLauncher(ParamManager):
 
         if json_res is None:
             return []
+
+        if type(json_res) is not dict:
+            return []
+
         if "results" not in json_res:
             return []
+
         if "bindings" not in json_res["results"]:
             return []
 
@@ -247,7 +253,7 @@ class QueryLauncher(ParamManager):
             json_query = self.execute_query(query, externalService=es, log_raw_results=False)
             return self.parse_results(json_query)
 
-        # call main usener dpoint askomics
+        # call main user endpoint askomics
         json_query = self.execute_query(query, log_raw_results=False)
         results = self.parse_results(json_query)
         # then other askomics endpoint defined by the user

@@ -225,7 +225,7 @@ class AskomicsUserAbstraction {
           if ( ! (uri4 in iua.entityPositionableInformationList) ) {
               iua.entityPositionableInformationList[uri4] = {};
           } else {
-            throw new Error("URI:"+uri4+" have several taxon,ref, start, end labels... "+JSON.stringify(iua.entityPositionableInformationList[uri4]));
+          //  throw new Error("URI:"+uri4+" have several taxon,ref, start, end labels... "+JSON.stringify(iua.entityPositionableInformationList[uri4]));
           }
         }
         for (let entry in resultListTripletSubjectRelationObject.subclassof){

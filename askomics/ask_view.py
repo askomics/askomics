@@ -18,7 +18,6 @@ from pygments.lexers import TurtleLexer
 from pygments.formatters import HtmlFormatter
 
 from askomics.libaskomics.ParamManager import ParamManager
-from askomics.libaskomics.ModulesManager import ModulesManager
 from askomics.libaskomics.JobManager import JobManager
 from askomics.libaskomics.EndpointManager import EndpointManager
 
@@ -313,8 +312,10 @@ class AskView(object):
             #delete metadatas
             ql.execute_query(sqb.get_delete_metadatas_of_graph(graph).query)
 
+
     @view_config(route_name='delete_endpoints', request_method='POST')
     def delete_endpoints(self):
+        import pyramid.httpexceptions as exc
         """
 
         """
@@ -331,6 +332,7 @@ class AskView(object):
 
     @view_config(route_name='add_endpoint', request_method='POST')
     def add_endpoint(self):
+        import pyramid.httpexceptions as exc
         """
 
         """
@@ -353,25 +355,26 @@ class AskView(object):
 
     @view_config(route_name='enable_endpoints', request_method='POST')
     def enable_endpoints(self):
-       """
+        import pyramid.httpexceptions as exc
+        """
 
-       """
+        """
 
-       self.checkAuthSession()
+        self.checkAuthSession()
 
-       if 'id' not in self.request.json_body:
+        if 'id' not in self.request.json_body:
            raise exc.exception_response(404)
-       if 'enable' not in self.request.json_body:
+        if 'enable' not in self.request.json_body:
            raise exc.exception_response(404)
 
-       id = self.request.json_body['id']
-       enable = self.request.json_body['enable']
+        id = self.request.json_body['id']
+        enable = self.request.json_body['enable']
 
-       em = EndpointManager(self.settings, self.request.session)
+        em = EndpointManager(self.settings, self.request.session)
 
-       if enable:
+        if enable:
            em.enable(id)
-       else:
+        else:
            em.disable(id,"")
 
 
@@ -915,63 +918,6 @@ class AskView(object):
 
         return self.data
 
-    @view_config(route_name='modules', request_method='POST')
-    def modules(self):
-
-        # Denny access for non loged users
-        if not self.request.session['admin'] :
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
-
-        try:
-            mm = ModulesManager(self.settings, self.request.session)
-            self.data =  mm.getListModules()
-        except Exception as e:
-            traceback.print_exc(file=sys.stdout)
-            self.data['error'] = str(e)
-            self.request.response.status = 400
-
-        return self.data
-
-    @view_config(route_name='manage_module', request_method='POST')
-    def manageModules(self):
-        # Denny access for non loged users
-        if not self.request.session['admin'] :
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
-
-        body = self.request.json_body
-
-        jm = JobManager(self.settings, self.request.session)
-        jobid = jm.saveStartSparqlJob("Module "+body['name'])
-
-        try:
-
-            mm = ModulesManager(self.settings, self.request.session)
-            check = bool(body['checked'])
-
-            mm.manageModules(
-                    self.request.host_url,
-                    body['uri'],
-                    body['name'],
-                    check)
-
-            jm.updateEndSparqlJob(jobid,"Done",nr=0)
-            jm.updatePreviewJob(jobid,body['name'] + " ["+ str(body['checked'])+ "] done.")
-
-        except Exception as e:
-            traceback.print_exc(file=sys.stdout)
-            jm.updateEndSparqlJob(jobid,"Error")
-            jm.updatePreviewJob(jobid,'Problem whith module '+body['name']+'.</br>'+str(e))
-
-        return self.data
-
     @view_config(route_name='sparqlquery', request_method='POST')
     def get_value(self):
         """ Build a request from a json whith the following contents :variates,constraintesRelations,constraintesFilters"""
@@ -1100,8 +1046,10 @@ class AskView(object):
     def deletCsv(self):
 
         pm = ParamManager(self.settings, self.request.session)
-        os.remove(pm.get_user_csv_directory()+self.request.matchdict['name']),
-
+        try:
+            os.remove(pm.get_user_csv_directory()+self.request.matchdict['name']),
+        except Exception as e:
+            self.log.warn(str(e))
 
 
     @view_config(route_name='signup', request_method='POST')
