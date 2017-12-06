@@ -136,7 +136,8 @@ class SparqlQueryGraph(SparqlQueryBuilder):
                      '\t?g dc:creator ?owner .\n' +
                      '\t?g prov:wasDerivedFrom ?name .\n'+
                      '\t?g :accessLevel ?access .\n' +
-                     '}'
+                     '}',
+            'post_action': 'GROUP BY ?g'
         }, True)
 
     def get_if_positionable(self, uri):
