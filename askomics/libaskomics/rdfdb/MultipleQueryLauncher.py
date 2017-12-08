@@ -22,8 +22,7 @@ class MultipleQueryLauncher(QueryLauncher):
         self.log = logging.getLogger(__name__)
         self.log.info(" =================== Multiple Query Lancher Request ====================");
 
-
-    def process_query(self,query,lendpoints):
+    def process_query(self,query,lendpoints,indexByEndpoint=False):
         '''
             Execute query and parse the results if exist
         '''
@@ -31,7 +30,11 @@ class MultipleQueryLauncher(QueryLauncher):
         # Request on local Askomics
         self.setUserDatastore()
         json_query = self._execute_query(query, log_raw_results=False)
-        results = self.parse_results(json_query)
+        if indexByEndpoint:
+            results = {}
+            results[self.endpoint] = self.parse_results(json_query)
+        else:
+            results = self.parse_results(json_query)
 
         # then other askomics endpoint defined by the user
         for es in lendpoints:
@@ -59,6 +62,10 @@ class MultipleQueryLauncher(QueryLauncher):
             self.allowUpdate = False
 
             json_query = self._execute_query(query,log_raw_results=False)
-            results += self.parse_results(json_query)
+
+            if indexByEndpoint:
+                results[self.endpoint] = self.parse_results(json_query)
+            else:
+                results += self.parse_results(json_query)
 
         return results

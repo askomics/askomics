@@ -78,18 +78,22 @@ class AskomicsNodeView extends AskomicsObjectView {
     let listForceFrom = listGraphsWithAtt;
     if (contextDependancy) {
       tab = this.node.buildConstraintsGraphForCategory(attribute.id,true);
-      let tab2 = __ihm.getGraphBuilder().buildConstraintsGraph();
-      tab[1][0] = [].concat.apply([], [tab[1][0], tab2[1][0]]);
+//      let tab2 = __ihm.getGraphBuilder().buildConstraintsGraph();
+//      tab[1][0] = [].concat.apply([], [tab[1][0], tab2[1][0]]);
       listForceFrom = []; /* unactive if query concern a user query */
     } else {
       tab = this.node.buildConstraintsGraphForCategory(attribute.id,false);
     }
+    console.log(attribute.uri);
+    let endpAndGraphs = __ihm.getGraphBuilder().getEndpointAndGraphCategory(this.node.uri) ;
 
     inp.attr("list", "opt_" + labelSparqlVarId)
        .attr("sparqlid",URISparqlVarId);
     //console.log(JSON.stringify(nameDiv));
     var service = new RestServiceJs("sparqlquery");
     var model = {
+      'endpoints'            : endpAndGraphs[0],
+      'graphs'               : endpAndGraphs[1],
       'variates'             : tab[0],
       'constraintesRelations': tab[1],
       'limit'                :-1,

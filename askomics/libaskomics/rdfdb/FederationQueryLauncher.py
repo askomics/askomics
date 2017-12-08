@@ -32,7 +32,7 @@ class FederationQueryLauncher(QueryLauncher):
         for endp in lendpoints:
             self.commentsForFed+="#endpoint,"+endp['name']+','+endp['endpoint']+',false\n'
         #add local TPS
-        self.commentsForFed+="#endpoint,local,"+self.get_param("askomics.endpoint")+',false\n'
+        #self.commentsForFed+="#endpoint,local,"+self.get_param("askomics.endpoint")+',false\n'
 
         if not self.is_defined("askomics.fdendpoint") :
             raise ValueError("can not find askomics.fdendpoint property in the config file !")

@@ -501,7 +501,8 @@ class AskomicsForceLayoutManager {
         let tab = __ihm.getAbstraction().getRelationsObjectsAndSubjectsWithURI(slt_node.uri);
         let objectsTarget = tab[0];  /* All triplets which slt_node URI are the subject */
         let subjectsTarget = tab[1]; /* All triplets which slt_node URI are the object */
-
+        //console.log("insertSuggestionsWithNewNode");
+        //console.log(JSON.stringify(objectsTarget));
         let link;
 
         for (var uri in objectsTarget ) {
@@ -745,7 +746,7 @@ class AskomicsForceLayoutManager {
           /* increment the number of link between the two nodes */
           let linkbase     = {} ;
           linkbase.uri     = "is a" ;
-          console.log(JSON.stringify(suggestedNode));
+          //console.log(JSON.stringify(suggestedNode));
           //link = new AskomicsLink(linkbase,source,target);
           let link = new AskomicsIsALink(linkbase,source,suggestedNode);
           link.id = __ihm.getGraphBuilder().getId();

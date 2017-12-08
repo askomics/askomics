@@ -8,6 +8,7 @@ from askomics.libaskomics.ParamManager import ParamManager
 
 from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
 from askomics.libaskomics.rdfdb.SparqlQueryGraph import SparqlQueryGraph
+from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
 from askomics.libaskomics.rdfdb.MultipleQueryLauncher import MultipleQueryLauncher
 from askomics.libaskomics.rdfdb.FederationQueryLauncher import FederationQueryLauncher
 
@@ -87,8 +88,9 @@ class TripleStoreExplorer(ParamManager):
         data['categories'] = ql.process_query(sqg.get_public_abstraction_category_entity().query,em.listAskomicsEndpoints())
         data['categories'] += ql.process_query(sqg.get_user_abstraction_category_entity().query,em.listAskomicsEndpoints())
         data['positionable'] = ql.process_query(sqg.get_abstraction_positionable_entity().query,em.listAskomicsEndpoints())
-        data['graph'] = sqg.getGraphUser()
-
+        data['endpoints'] = sqg.getGraphUser()
+        self.log.debug("============== ENDPOINTS AND GRAPH =====================================")
+        self.log.debug(data['endpoints'])
         return data
 
     def build_recursive_block(self, tabul, constraints):
@@ -134,14 +136,39 @@ class TripleStoreExplorer(ParamManager):
 
         # if limit != None and limit > 0:
         #     query += ' LIMIT ' + str(limit)
-
+        print("============ build_sparql_query_from_json ========")
+        print("endpoints:"+str(listEndpoints))
+        print("graphs"+str(fromgraphs))
         if send_request_to_tps:
-            query_launcher = FederationQueryLauncher(self.settings, self.session,listEndpoints)
+            if len(listEndpoints)==0:
+                print("============ QueryLauncher1 ========")
+                typeQuery = ''
+                query_launcher = QueryLauncher(self.settings, self.session)
+            elif len(listEndpoints)==1:
+                print("============ QueryLauncher ========")
+                typeQuery = ''
+                query_launcher = QueryLauncher(self.settings, self.session,name = listEndpoints[0], endpoint = listEndpoints[0])
+            else:
+                print("============ FederationQueryLauncher ========")
+                typeQuery = '(Federation)'
+                lE = []
+                iCount = 0
+                for ul in listEndpoints:
+                    iCount+=1
+                    end = {}
+                    end['name'] = "endpoint"+str(iCount)
+                    end['endpoint'] =  ul
+                    end['auth'] = 'Basic'
+                    end['username'] = None
+                    end['password'] = None
+                    lE.append(end)
+                query_launcher = FederationQueryLauncher(self.settings, self.session,lE)
+
             results = query_launcher.process_query(sqb.custom_query(fromgraphs, select, query).query)
         else:
             results = []
 
-        return results, sqb.custom_query(fromgraphs, select, query).query
+        return results, sqb.custom_query(fromgraphs, select, query).query,typeQuery
 
     def get_prefix_uri(self):
         sqg = SparqlQueryGraph(self.settings, self.session)

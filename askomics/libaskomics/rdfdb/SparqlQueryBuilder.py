@@ -30,40 +30,47 @@ class SparqlQueryBuilder(ParamManager):
         qu = self.build_query_on_the_fly({
             'select': '?g',
             'query': 'GRAPH ?g {\n'+\
-            "?g dc:creator '" + self.session['username'] + "' . } ",
+            "?g dc:creator '" + self.session['username'] + "' .\n"+
+            " } ",
             'post_action': 'GROUP BY ?g'
         }, True)
 
         ql = QueryLauncher(self.settings, self.session)
         results = ql.process_query(qu.query)
-        settings['private'] = []
+        endpoint = self.get_param("askomics.endpoint")
+        settings[endpoint] = {}
+        settings[endpoint]['private'] = []
 
         for elt in results:
             if 'g' not in elt:
                 continue
             if elt['g'] in removeGraph:
                 continue
-            settings['private'].append(elt['g'])
-        self.log.debug("setting['private']:\n"+str(settings['private']))
+            settings[endpoint]['private'].append(elt['g'])
 
         #finding all public graph on all Askomics endpoint
         qu = self.build_query_on_the_fly({
             'select': '?g',
             'query': 'GRAPH ?g {\n'+
-            "?g :accessLevel 'public'. } "
+            "?g :accessLevel 'public'. \n"+
+            "} ",
+            'post_action': 'GROUP BY ?g'
         }, True)
 
         ql = MultipleQueryLauncher(self.settings, self.session)
         em = EndpointManager(self.settings, self.session)
 
-        results = ql.process_query(qu.query,em.listAskomicsEndpoints())
-        settings['public'] = []
-        for elt in results:
-            if elt['g'] in removeGraph:
-                continue
-            settings['public'].append(elt['g'])
+        results = ql.process_query(qu.query,em.listAskomicsEndpoints(),indexByEndpoint=True)
 
-        self.log.debug("setting['public']:\n"+str(settings['public']))
+        for endpoint in results:
+            settings[endpoint] = {}
+            settings[endpoint]['public'] = []
+            for elt in results[endpoint]:
+                if elt['g'] in removeGraph:
+                    continue
+                settings[endpoint]['public'].append(elt['g'])
+
+        self.log.debug("setting:\n"+str(settings))
         return settings
 
     def build_query_on_the_fly(self, replacement, adminrequest=False):
@@ -90,13 +97,17 @@ class SparqlQueryBuilder(ParamManager):
             #add ALL GRAPHS user only if from is not defined !!
             if 'from' not in set(replacement) or \
                 len(replacement['from']) == 0:
-                graphs = self.getGraphUser()
-                listfrom = graphs['public'] + graphs['private']
+                endpoints = self.getGraphUser()
+                for graphs in endpoints:
+                    listfrom = endpoints[graphs]['public']
+                    if 'private' in endpoints[graphs]:
+                        endpoints[graphs]['private']
             else:
                 listfrom = replacement['from']
 
             if len(listfrom) > 0:
                 for elt in set(listfrom):
+                    self.log.info(elt)
                     query += "FROM <"+elt+">\n"
 
         query += "WHERE {"+"\n"

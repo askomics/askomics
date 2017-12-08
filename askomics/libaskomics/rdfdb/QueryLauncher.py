@@ -189,11 +189,11 @@ class QueryLauncher(ParamManager):
         '''
 
         if json_res is None:
-            raise ValueError("Communication was broken betwwen askomics and datastore.")
+            raise ValueError("Unable to get a response from the datastore.")
 
         if type(json_res) is not dict:
             self.log.debug(str(json_res))
-            raise ValueError("Invalide format response from datastore .")
+            return []
 
         if "results" not in json_res:
             return []
@@ -279,6 +279,8 @@ class QueryLauncher(ParamManager):
         """
         self.log.debug("Loading into triple store (LOAD method) the content of: %s", url)
 
+        self.setUserDatastore()
+
         query_string = "LOAD <"+url+"> INTO GRAPH"+ " <" + graphName + ">"
         res = self._execute_query(query_string)
 
@@ -326,6 +328,8 @@ class QueryLauncher(ParamManager):
         """
 
         self.log.debug("Loading into triple store (INSERT DATA method) the content: "+ttl_string[:50]+"[...]")
+
+        self.setUserDatastore()
 
         query_string = ttl_header
         query_string += "\n"

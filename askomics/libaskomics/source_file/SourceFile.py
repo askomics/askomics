@@ -87,6 +87,11 @@ class SourceFile(ParamManager, HaveCachedProperties):
         ttl += '<' + self.graph + '> dc:hasVersion "' + get_distribution('Askomics').version + '" .\n'
         ttl += '<' + self.graph + '> prov:describesService "' + os.uname()[1] + '" .\n'
 
+        if self.is_defined("askomics.endpoint"):
+            ttl += '<' + self.graph + '> prov:atLocation "' + self.get_param("askomics.endpoint") + '" .\n'
+        else:
+            raise ValueError("askomics.endpoint does not exit.")
+
         sparql_header = sqb.header_sparql_config('')
 
         query_laucher.insert_data(ttl, self.graph, sparql_header)
@@ -269,7 +274,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
                 self.metadatas['server'] = queryResults.info()['server']
             else:
                 self.metadatas['server'] = 'unknown'
-                
+
             data['status'] = 'ok'
             data['total_triple_count'] = total_triple_count
 

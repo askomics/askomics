@@ -38,6 +38,7 @@ $(function () {
             headers.push($(this).val());
         });
         loadSourceFile($(event.target).closest('.template-source_file'), false, headers);
+        __ihm.displayModal('Upload TSV file.', '', 'Close');
     });
 
     // Load the tsv file into the public graph

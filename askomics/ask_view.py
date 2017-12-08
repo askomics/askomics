@@ -387,8 +387,13 @@ class AskView(object):
             dat = datetime.datetime.strptime(res[index_result]['date'], "%Y-%m-%dT%H:%M:%S.%f")
 
             readable_date = dat.strftime("%d/%m/%Y %H:%M:%S") #dd/mm/YYYY hh:ii:ss
+            endpt = ''
+
+            if 'endpoint' in res[index_result].keys():
+                endpt = res[index_result]['endpoint'],
 
             named_graphs.append({
+                'endpoint' : endpt,
                 'g': res[index_result]['g'],
                 'name': res[index_result]['name'],
                 'count': res[index_result]['co'],
@@ -466,10 +471,10 @@ class AskView(object):
             # get all taxon in the TS
             sqg = SparqlQueryGraph(self.settings, self.request.session)
             ql = MultipleQueryLauncher(self.settings, self.request.session)
-            em = EndpointManager(self.settings, self.session)
+            em = EndpointManager(self.settings, self.request.session)
             res = ql.process_query(sqg.get_all_taxons().query,em.listAskomicsEndpoints())
             taxons_list = []
-            for elem in res['results']['bindings']:
+            for elem in res:
                 taxons_list.append(elem['taxon']['value'])
             self.data['taxons'] = taxons_list
 
@@ -657,8 +662,8 @@ class AskView(object):
             #rollback
             sqb = SparqlQueryBuilder(self.settings, self.request.session)
             query_laucher = QueryLauncher(self.settings, self.request.session)
-            query_laucher.proecess_query(sqb.get_drop_named_graph(src_file.graph).query)
-            query_laucher.proecess_query(sqb.get_delete_metadatas_of_graph(src_file.graph).query)
+            query_laucher.process_query(sqb.get_drop_named_graph(src_file.graph).query)
+            query_laucher.process_query(sqb.get_delete_metadatas_of_graph(src_file.graph).query)
 
             traceback.print_exc(file=sys.stdout)
             jm.updateEndSparqlJob(jobid,"Error")
@@ -929,15 +934,18 @@ class AskView(object):
 
         try:
             tse = TripleStoreExplorer(self.settings, self.request.session)
-            lfrom = []
-            if 'from' in body:
-                lfrom = body['from']
-
-            #TODO: Faire une interface pour selectionnerles endpoints compatibles avec les graphes selectionnées
-
-            em = EndpointManager(self.settings, self.request.session)
-            results, query = tse.build_sparql_query_from_json(em.listAskomicsEndpoints(),lfrom, body["variates"], body["constraintesRelations"], True)
-
+            #lfrom = []
+            #if 'from' in body:
+            #    lfrom = body['from']
+            self.log.info("********************* sparqlquery ***************************");
+            self.log.info("ENDPOINTS:"+str(body["endpoints"]))
+            self.log.info("GRAPHS:"+str(body["graphs"]))
+            results, query, typeRequest = tse.build_sparql_query_from_json(
+                                                 body["endpoints"],
+                                                 body["graphs"],
+                                                 body["variates"],
+                                                 body["constraintesRelations"],
+                                                 True)
             # Remove prefixes in the results table
             limit = int(body["limit"]) + 1
             if body["limit"] != -1 and limit < len(results):
@@ -953,7 +961,7 @@ class AskView(object):
                 self.data['file'] = query_laucher.format_results_csv(results, ordered_headers)
 
             if persist:
-                jm.updateEndSparqlJob(jobid,"Ok",nr=len(results),data=self.data['values'], file=self.data['file'])
+                jm.updateEndSparqlJob(jobid,"Ok "+typeRequest,nr=len(results),data=self.data['values'], file=self.data['file'])
 
         except Exception as e:
             #exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -963,7 +971,7 @@ class AskView(object):
             self.data['file'] = ""
 
             if persist:
-                jm.updateEndSparqlJob(jobid,"Error")
+                jm.updateEndSparqlJob(jobid,"Error "+typeRequest)
                 jm.updatePreviewJob(jobid,str(e))
 
         self.data['galaxy'] = self.request.session['galaxy']

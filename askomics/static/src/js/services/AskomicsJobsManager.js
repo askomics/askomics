@@ -33,9 +33,9 @@ let instanceAskomicsJobsViewManager ;
     }
 
     static getClassTr(state) {
-      if (state == "Ok" ) return "bg-success";
+      if (state.startsWith("Ok") ) return "bg-success";
       if (state == "Done" ) return "bg-info";
-      if (state == "Error" )return "bg-danger";
+      if (state.startsWith("Error") )return "bg-danger";
       return "bg-warning";
     }
 
@@ -119,7 +119,11 @@ let instanceAskomicsJobsViewManager ;
         console.log('+++ prepareQuery +++');
 
         let tab = __ihm.getGraphBuilder().buildConstraintsGraph();
+        let tab2 = __ihm.getGraphBuilder().getEndpointAndGraph();
+
         return {
+                  'endpoints'            : tab2[0],
+                  'graphs'               : tab2[1],
                   'variates'             : tab[0],
                   'constraintesRelations': tab[1],
                   'constraintesFilters'  : tab[2],
