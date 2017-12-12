@@ -103,7 +103,7 @@ printenv | egrep "^ASKO_" | while read setting
 do
     key="askomics."$(echo $setting | egrep -o "^ASKO_[^=]+" | sed 's/^.\{5\}//g' | tr '[:upper:]' '[:lower:]')
     value=$(echo $setting | egrep -o "=.*$" | sed 's/^=//g')
-    $python_ex -c "import configparser; config = configparser.ConfigParser(); config.read('"$config_path"'); config['app:main']['"$key"'] = '"$value"'; config.write(open('"$config_path"', 'w'))"
+    $python_ex config_updater.py -p $config_path -s "app:main" -k $key -v $value
 done
 
 # This take ASKOCONFIG_ env to update config in any sections
@@ -113,7 +113,7 @@ do
     section=$(echo $sed_setting | egrep -o "^ASKOCONFIG_[^=]+" | sed 's/^.\{11\}//g' | cut -d "_" -f 1 | tr '[:upper:]' '[:lower:]')
     key=$(echo $sed_setting | egrep -o "^ASKOCONFIG_[^=]+" | sed 's/^.\{11\}//g' | sed "s/$section\_//g" | tr '[:upper:]' '[:lower:]')
     value=$(echo $sed_setting | egrep -o "=.*$" | sed 's/^=//g' | tr '[:upper:]' '[:lower:]')
-    $python_ex -c "import configparser; config = configparser.ConfigParser(); config.read('"$config_path"'); config.add_section('"$section"') if '"$section"' not in config.sections() else None; config['"$section"']['"$key"'] = '"$value"'; config.write(open('"$config_path"', 'w'))"
+    $python_ex config_updater.py -p $config_path -s $section -k $key -v $value
 done
 
 # Build Javascript ----------------------------------------
