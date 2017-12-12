@@ -99,9 +99,11 @@ echo "Convert environment variables to ini file ..."
 cp "$dir_config/$depmode.$triplestore.ini" "$config_path"
 printenv | egrep "^ASKO_" | while read setting
 do
-    key="askomics."$(echo $setting | egrep -o "^ASKO_[^=]+" | sed 's/^.\{5\}//g' | tr '[:upper:]' '[:lower:]')
-    value=$(echo $setting | egrep -o "=.*$" | sed 's/^=//g')
-    $python_ex -c "import configparser; config = configparser.ConfigParser(); config.read('"$config_path"'); config['app:main']['"$key"'] = '"$value"'; config.write(open('"$config_path"', 'w'))"
+    sed_setting=$(echo $setting | sed 's/\_colon\_/\:/g' | sed 's/\_hyphen\_/\-/g' | sed 's/\_dot\_/\./g')
+    section=$(echo $sed_setting | egrep -o "^ASKO_[^=]+" | sed 's/^.\{5\}//g' | cut -d "_" -f 1 | tr '[:upper:]' '[:lower:]')
+    key=$(echo $sed_setting | egrep -o "^ASKO_[^=]+" | sed 's/^.\{5\}//g' | sed "s/$section\_//g" | tr '[:upper:]' '[:lower:]')
+    value=$(echo $sed_setting | egrep -o "=.*$" | sed 's/^=//g' | tr '[:upper:]' '[:lower:]')
+    $python_ex -c "import configparser; config = configparser.ConfigParser(); config.read('"$config_path"'); config['"$section"']['"$key"'] = '"$value"'; config.write(open('"$config_path"', 'w'))"
 done
 
 # Build Javascript ----------------------------------------
