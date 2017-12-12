@@ -25,7 +25,8 @@ requires = [
     'bioblend==0.9.0',
     'humanize',
     'pybedtools==0.7.10',
-    'configparser'
+    'configparser',
+    'argparse'
     ]
 
 setup(name='Askomics',
