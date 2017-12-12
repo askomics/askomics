@@ -100,20 +100,20 @@ cp "$dir_config/$depmode.$triplestore.ini" "$config_path"
 
 # This take ASKO_ env to update config in app:main section, only askomics. key
 printenv | egrep "^ASKO_" | while read setting
+do
     key="askomics."$(echo $setting | egrep -o "^ASKO_[^=]+" | sed 's/^.\{5\}//g' | tr '[:upper:]' '[:lower:]')
     value=$(echo $setting | egrep -o "=.*$" | sed 's/^=//g')
     $python_ex -c "import configparser; config = configparser.ConfigParser(); config.read('"$config_path"'); config['app:main']['"$key"'] = '"$value"'; config.write(open('"$config_path"', 'w'))"
-
 done
 
 # This take ASKOCONFIG_ env to update config in any sections
 printenv | egrep "^ASKOCONFIG_" | while read setting
 do
     sed_setting=$(echo $setting | sed 's/\_colon\_/\:/g' | sed 's/\_hyphen\_/\-/g' | sed 's/\_dot\_/\./g')
-    section=$(echo $sed_setting | egrep -o "^ASKOCONFIG_[^=]+" | sed 's/^.\{5\}//g' | cut -d "_" -f 1 | tr '[:upper:]' '[:lower:]')
-    key=$(echo $sed_setting | egrep -o "^ASKOCONFIG_[^=]+" | sed 's/^.\{5\}//g' | sed "s/$section\_//g" | tr '[:upper:]' '[:lower:]')
+    section=$(echo $sed_setting | egrep -o "^ASKOCONFIG_[^=]+" | sed 's/^.\{11\}//g' | cut -d "_" -f 1 | tr '[:upper:]' '[:lower:]')
+    key=$(echo $sed_setting | egrep -o "^ASKOCONFIG_[^=]+" | sed 's/^.\{11\}//g' | sed "s/$section\_//g" | tr '[:upper:]' '[:lower:]')
     value=$(echo $sed_setting | egrep -o "=.*$" | sed 's/^=//g' | tr '[:upper:]' '[:lower:]')
-    $python_ex -c "import configparser; config = configparser.ConfigParser(); config.read('"$config_path"'); config['"$section"']['"$key"'] = '"$value"'; config.write(open('"$config_path"', 'w'))"
+    $python_ex -c "import configparser; config = configparser.ConfigParser(); config.read('"$config_path"'); config.add_section('"$section"') if '"$section"' not in config.sections() else None; config['"$section"']['"$key"'] = '"$value"'; config.write(open('"$config_path"', 'w'))"
 done
 
 # Build Javascript ----------------------------------------
