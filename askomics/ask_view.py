@@ -413,10 +413,14 @@ class AskView(object):
         """
 
         self.checkAuthSession()
+        session = {}
 
         em = EndpointManager(self.settings, self.request.session)
+        session['askomics'] = em.listEndpoints()
 
-        return em.listEndpoints()
+        sqb = SparqlQueryBuilder(self.settings, self.request.session)
+        session['external'] = sqb.getExternalServiceEndpoint()
+        return session
 
 
     @view_config(route_name='guess_csv_header_type', request_method='POST')
@@ -933,14 +937,15 @@ class AskView(object):
             jobid = jm.saveStartSparqlJob("SPARQL Request",requestGraph=rg)
 
         try:
+            typeRequest = ''
             tse = TripleStoreExplorer(self.settings, self.request.session)
-            #lfrom = []
-            #if 'from' in body:
-            #    lfrom = body['from']
-            self.log.info("********************* sparqlquery ***************************");
-            self.log.info("ENDPOINTS:"+str(body["endpoints"]))
-            self.log.info("GRAPHS:"+str(body["graphs"]))
+
+            endpoints_ext = []
+            if 'endpoints_ext' in body:
+                endpoints_ext = body["endpoints_ext"]
+
             results, query, typeRequest = tse.build_sparql_query_from_json(
+                                                 endpoints_ext,
                                                  body["endpoints"],
                                                  body["graphs"],
                                                  body["variates"],
@@ -1020,7 +1025,6 @@ class AskView(object):
 
     @view_config(route_name='ttl', request_method='GET')
     def uploadTtl(self):
-
         pm = ParamManager(self.settings, self.request.session)
         response = FileResponse(
             pm.get_rdf_directory()+self.request.matchdict['name'],
@@ -1804,13 +1808,11 @@ class AskView(object):
 
     @view_config(route_name='get_uploaded_files', request_method="GET")
     def get_uploaded_files(self):
-
         param_manager = ParamManager(self.settings, self.request.session)
         path = param_manager.get_upload_directory()
 
         self.data = {}
         self.data['files'] = {}
-
         files = os.listdir(path)
 
         for file in files:
@@ -1819,7 +1821,6 @@ class AskView(object):
             self.data['files'][file] = file_size
 
         self.data['galaxy'] = self.request.session['galaxy']
-
         return self.data
 
     @view_config(route_name="delete_uploaded_files", request_method="POST")

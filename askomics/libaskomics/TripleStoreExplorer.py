@@ -89,6 +89,8 @@ class TripleStoreExplorer(ParamManager):
         data['categories'] += ql.process_query(sqg.get_user_abstraction_category_entity().query,em.listAskomicsEndpoints())
         data['positionable'] = ql.process_query(sqg.get_abstraction_positionable_entity().query,em.listAskomicsEndpoints())
         data['endpoints'] = sqg.getGraphUser()
+        data['endpoints_ext'] = sqg.getExternalServiceEndpoint()
+
         self.log.debug("============== ENDPOINTS AND GRAPH =====================================")
         self.log.debug(data['endpoints'])
         return data
@@ -123,7 +125,7 @@ class TripleStoreExplorer(ParamManager):
             return req
         return ""
 
-    def build_sparql_query_from_json(self, listEndpoints, fromgraphs, variates, constraintes_relations,limit, send_request_to_tps=True):
+    def build_sparql_query_from_json(self, listExternalEndpoints,listEndpoints, fromgraphs, variates, constraintes_relations,limit, send_request_to_tps=True):
         """
         Build a sparql query from JSON constraints
         """
@@ -136,20 +138,26 @@ class TripleStoreExplorer(ParamManager):
 
         # if limit != None and limit > 0:
         #     query += ' LIMIT ' + str(limit)
-        print("============ build_sparql_query_from_json ========")
-        print("endpoints:"+str(listEndpoints))
-        print("graphs"+str(fromgraphs))
+        self.log.debug("============ build_sparql_query_from_json ========")
+        self.log.debug("endpoints_ext:"+str(listExternalEndpoints))
+        self.log.debug("endpoints:"+str(listEndpoints))
+        self.log.debug("graphs"+str(fromgraphs))
         if send_request_to_tps:
-            if len(listEndpoints)==0:
-                print("============ QueryLauncher1 ========")
+            if len(listEndpoints)+len(listExternalEndpoints)==0:
+                self.log.debug("============ QueryLauncher1 ========")
                 typeQuery = ''
                 query_launcher = QueryLauncher(self.settings, self.session)
-            elif len(listEndpoints)==1:
-                print("============ QueryLauncher ========")
+            elif len(listEndpoints)+len(listExternalEndpoints)==1:
+                self.log.debug("============ QueryLauncher ========")
                 typeQuery = ''
-                query_launcher = QueryLauncher(self.settings, self.session,name = listEndpoints[0], endpoint = listEndpoints[0])
+                endpoint = ''
+                if len(listEndpoints) == 1 :
+                    endpoint = listEndpoints[0]
+                else:
+                    endpoint = listExternalEndpoints[0]
+                query_launcher = QueryLauncher(self.settings, self.session,name = endpoint, endpoint = endpoint)
             else:
-                print("============ FederationQueryLauncher ========")
+                self.log.debug("============ FederationQueryLauncher ========")
                 typeQuery = '(Federation)'
                 lE = []
                 iCount = 0
@@ -158,10 +166,31 @@ class TripleStoreExplorer(ParamManager):
                     end = {}
                     end['name'] = "endpoint"+str(iCount)
                     end['endpoint'] =  ul
+                    end['askomics'] =  True
                     end['auth'] = 'Basic'
                     end['username'] = None
                     end['password'] = None
                     lE.append(end)
+
+                for ul in listExternalEndpoints:
+                    iCount+=1
+                    end = {}
+                    end['name'] = "endpoint"+str(iCount)
+                    end['endpoint'] =  ul
+                    end['askomics'] =  False
+                    end['auth'] = 'Basic'
+                    end['username'] = None
+                    end['password'] = None
+                    lE.append(end)
+
+                print("listEndpoints")
+                print(listEndpoints)
+                print("listExternalEndpoints")
+                print(listExternalEndpoints)
+
+                print("==================================")
+                print(lE)
+
                 query_launcher = FederationQueryLauncher(self.settings, self.session,lE)
 
             results = query_launcher.process_query(sqb.custom_query(fromgraphs, select, query).query)

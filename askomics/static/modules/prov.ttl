@@ -1,41 +1,64 @@
 @prefix displaySetting: <http://www.irisa.fr/dyliss/rdfVisualization/display>.
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
-<http://www.w3.org/ns/prov#Usage> displaySetting:entity "true"^^xsd:boolean.
-<http://www.w3.org/ns/prov#Agent> displaySetting:entity "true"^^xsd:boolean.
-<http://www.w3.org/ns/prov#Agent> displaySetting:startPoint "true"^^xsd:boolean.
-<http://www.w3.org/ns/prov#ActivityInfluence> displaySetting:entity "true"^^xsd:boolean.
-<http://www.w3.org/ns/prov#ActivityInfluence> displaySetting:startPoint "true"^^xsd:boolean.
-<http://www.w3.org/ns/prov#AgentInfluence> displaySetting:entity "true"^^xsd:boolean.
-<http://www.w3.org/ns/prov#AgentInfluence> displaySetting:startPoint "true"^^xsd:boolean.
-<http://www.w3.org/ns/prov#Derivation> displaySetting:entity "true"^^xsd:boolean.
-<http://www.w3.org/ns/prov#Derivation> displaySetting:startPoint "true"^^xsd:boolean.
-<http://www.w3.org/ns/prov#Influence> displaySetting:entity "true"^^xsd:boolean.
-<http://www.w3.org/ns/prov#Influence> displaySetting:startPoint "true"^^xsd:boolean.
-<http://www.w3.org/ns/prov#Activity> displaySetting:entity "true"^^xsd:boolean.
-<http://www.w3.org/ns/prov#Activity> displaySetting:startPoint "true"^^xsd:boolean.
-<http://www.w3.org/ns/prov#endedAtTime> displaySetting:attribute "true"^^xsd:boolean.
-<http://www.w3.org/ns/prov#startedAtTime> displaySetting:attribute "true"^^xsd:boolean.
-<http://www.w3.org/ns/prov#EntityInfluence> displaySetting:entity "true"^^xsd:boolean.
-<http://www.w3.org/ns/prov#EntityInfluence> displaySetting:startPoint "true"^^xsd:boolean.
-<http://www.w3.org/ns/prov#Invalidation> displaySetting:entity "true"^^xsd:boolean.
-<http://www.w3.org/ns/prov#Collection> displaySetting:entity "true"^^xsd:boolean.
-<http://www.w3.org/ns/prov#Collection> displaySetting:startPoint "true"^^xsd:boolean.
-<http://www.w3.org/ns/prov#Start> displaySetting:entity "true"^^xsd:boolean.
-<http://www.w3.org/ns/prov#PrimarySource> displaySetting:entity "true"^^xsd:boolean.
-<http://www.w3.org/2002/07/owl#Thing> displaySetting:entity "true"^^xsd:boolean.
-<http://www.w3.org/2002/07/owl#Thing> rdfs:label "http://www.w3.org/2002/07/owl#Thing"^^xsd:string.
-<http://www.w3.org/ns/prov#Role> displaySetting:entity "true"^^xsd:boolean.
-<http://www.w3.org/ns/prov#Plan> displaySetting:entity "true"^^xsd:boolean.
-<http://www.w3.org/ns/prov#Attribution> displaySetting:entity "true"^^xsd:boolean.
-<http://www.w3.org/ns/prov#End> displaySetting:entity "true"^^xsd:boolean.
-<http://www.w3.org/ns/prov#Entity> displaySetting:entity "true"^^xsd:boolean.
-<http://www.w3.org/ns/prov#Entity> displaySetting:startPoint "true"^^xsd:boolean.
-<http://www.w3.org/ns/prov#generatedAtTime> displaySetting:attribute "true"^^xsd:boolean.
-<http://www.w3.org/ns/prov#invalidatedAtTime> displaySetting:attribute "true"^^xsd:boolean.
-<http://www.w3.org/ns/prov#Association> displaySetting:entity "true"^^xsd:boolean.
-<http://www.w3.org/ns/prov#Association> displaySetting:startPoint "true"^^xsd:boolean.
-<http://www.w3.org/ns/prov#Generation> displaySetting:entity "true"^^xsd:boolean.
-<http://www.w3.org/ns/prov#Revision> displaySetting:entity "true"^^xsd:boolean.
-<http://www.w3.org/ns/prov#Quotation> displaySetting:entity "true"^^xsd:boolean.
-<http://www.w3.org/ns/prov#Communication> displaySetting:entity "true"^^xsd:boolean.
-<http://www.w3.org/ns/prov#Delegation> displaySetting:entity "true"^^xsd:boolean.
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
+@prefix void: <http://www.w3.org/ns/sparql-service-description#> .
+
+@prefix prov: <http://www.w3.org/ns/prov#>.
+
+
+[] a sd:Service ;
+    sd:endpoint <https://???????????????????/sparql> ;
+    dcterms:title "Linked Open Data platform for EBI data";
+    dcterms:description "The platform provides a set of stable services.";
+    sd:supportedLanguage sd:SPARQL11Query ;
+    sd:defaultDataset [
+        a sd:Dataset ;
+        sd:defaultGraph [
+            a sd:Graph ;
+            void:classPartition [ void:class prov:Usage; ];
+            void:classPartition [ void:class prov:Agent; ].
+        ].
+  ].
+
+prov:Usage displaySetting:entity "true"^^xsd:boolean.
+prov:Agent displaySetting:entity "true"^^xsd:boolean.
+prov:Agent displaySetting:startPoint "true"^^xsd:boolean.
+prov:ActivityInfluence displaySetting:entity "true"^^xsd:boolean.
+prov:ActivityInfluence displaySetting:startPoint "true"^^xsd:boolean.
+prov:AgentInfluence displaySetting:entity "true"^^xsd:boolean.
+prov:AgentInfluence displaySetting:startPoint "true"^^xsd:boolean.
+prov:Derivation displaySetting:entity "true"^^xsd:boolean.
+prov:Derivation displaySetting:startPoint "true"^^xsd:boolean.
+prov:Influence displaySetting:entity "true"^^xsd:boolean.
+prov:Influence displaySetting:startPoint "true"^^xsd:boolean.
+prov:Activity displaySetting:entity "true"^^xsd:boolean.
+prov:Activity displaySetting:startPoint "true"^^xsd:boolean.
+prov:endedAtTime displaySetting:attribute "true"^^xsd:boolean.
+prov:startedAtTime displaySetting:attribute "true"^^xsd:boolean.
+prov:EntityInfluence displaySetting:entity "true"^^xsd:boolean.
+prov:EntityInfluence displaySetting:startPoint "true"^^xsd:boolean.
+prov:Invalidation displaySetting:entity "true"^^xsd:boolean.
+prov:Collection displaySetting:entity "true"^^xsd:boolean.
+prov:Collection displaySetting:startPoint "true"^^xsd:boolean.
+prov:Start displaySetting:entity "true"^^xsd:boolean.
+prov:PrimarySource displaySetting:entity "true"^^xsd:boolean.
+owl:Thing displaySetting:entity "true"^^xsd:boolean.
+owl:Thing rdfs:label "http://www.w3.org/2002/07/owl#Thing"^^xsd:string.
+prov:Role displaySetting:entity "true"^^xsd:boolean.
+prov:Plan displaySetting:entity "true"^^xsd:boolean.
+prov:Attribution displaySetting:entity "true"^^xsd:boolean.
+prov:End displaySetting:entity "true"^^xsd:boolean.
+prov:Entity displaySetting:entity "true"^^xsd:boolean.
+prov:Entity displaySetting:startPoint "true"^^xsd:boolean.
+prov:generatedAtTime displaySetting:attribute "true"^^xsd:boolean.
+prov:invalidatedAtTime displaySetting:attribute "true"^^xsd:boolean.
+prov:Association displaySetting:entity "true"^^xsd:boolean.
+prov:Association displaySetting:startPoint "true"^^xsd:boolean.
+prov:Generation displaySetting:entity "true"^^xsd:boolean.
+prov:Revision displaySetting:entity "true"^^xsd:boolean.
+prov:Quotation displaySetting:entity "true"^^xsd:boolean.
+prov:Communication displaySetting:entity "true"^^xsd:boolean.
+prov:Delegation displaySetting:entity "true"^^xsd:boolean.

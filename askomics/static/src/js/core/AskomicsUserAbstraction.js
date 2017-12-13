@@ -174,6 +174,24 @@ class AskomicsUserAbstraction {
           iua.graphToEndpoint[graph] = endpoint ;
         }
       }
+      //console.log("ASKOMICS ENDPOINT:"+JSON.stringify(iua.graphToEndpoint));
+      /***************************** ENTITIES EXTERNAL ENDPOINT **************************/
+      // [uri] --> list[ external endpoint ].
+      iua.uriToExternalEndpoint = {} ;
+      //console.log("EXTERNAL ENDPOINT:"+JSON.stringify(resultListTripletSubjectRelationObject.endpoints_ext.entities));
+      for (let endpoint in resultListTripletSubjectRelationObject.endpoints_ext.entities){
+
+        for (let entity in resultListTripletSubjectRelationObject.endpoints_ext.entities[endpoint]){
+          let ent =  resultListTripletSubjectRelationObject.endpoints_ext.entities[endpoint][entity];
+
+          if ( !(ent in iua.uriToExternalEndpoint )) {
+            iua.uriToExternalEndpoint[ent] = [];
+          }
+          iua.uriToExternalEndpoint[ent].push(endpoint);
+        }
+      }
+
+      //console.log("EXTERNAL ENDPOINT:"+JSON.stringify(iua.uriToExternalEndpoint));
 
       /***************************** ENTITIES **************************************/
       /* All information about an entity available in TPS are stored in entityInformationList */

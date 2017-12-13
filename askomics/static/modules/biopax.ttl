@@ -1,124 +1,191 @@
 ### suprimer cette premiere ligne
-@prefix displaySetting: <http://www.irisa.fr/dyliss/rdfVisualization/display>.
-
+@prefix  displaySetting: <http://www.irisa.fr/dyliss/rdfVisualization/display>.
+@prefix biopax: <http://www.biopax.org/release/biopax-level3.owl#> .
 
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
-<http://www.biopax.org/release/biopax-level3.owl#GeneticInteraction> displaySetting:entity "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#GeneticInteraction> rdfs:label "biopax:GeneticInteraction"^^xsd:string.
-<http://www.biopax.org/release/biopax-level3.owl#GeneticInteraction> displaySetting:startPoint "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#PathwayStep> displaySetting:entity "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#PathwayStep> rdfs:label "biopax:PathwayStep"^^xsd:string.
-<http://www.biopax.org/release/biopax-level3.owl#PathwayStep> displaySetting:startPoint "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#EntityFeature> displaySetting:entity "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#EntityFeature> rdfs:label "biopax:EntityFeature"^^xsd:string.
-<http://www.biopax.org/release/biopax-level3.owl#EntityFeature> displaySetting:startPoint "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#Pathway> displaySetting:entity "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#Pathway> rdfs:label "biopax:Pathway"^^xsd:string.
-<http://www.biopax.org/release/biopax-level3.owl#Pathway> displaySetting:startPoint "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#KPrime> displaySetting:entity "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#KPrime> rdfs:label "biopax:KPrime"^^xsd:string.
-<http://www.biopax.org/release/biopax-level3.owl#kPrime> displaySetting:attribute "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#EntityReferenceTypeVocabulary> displaySetting:entity "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#EntityReferenceTypeVocabulary> rdfs:label "biopax:EntityReferenceTypeVocabulary"^^xsd:string.
-<http://www.biopax.org/release/biopax-level3.owl#Conversion> displaySetting:entity "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#Conversion> rdfs:label "biopax:Conversion"^^xsd:string.
-<http://www.biopax.org/release/biopax-level3.owl#Conversion> displaySetting:startPoint "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#spontaneous> displaySetting:attribute "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#CellVocabulary> displaySetting:entity "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#CellVocabulary> rdfs:label "biopax:CellVocabulary"^^xsd:string.
-<http://www.biopax.org/release/biopax-level3.owl#SmallMoleculeReference> displaySetting:entity "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#SmallMoleculeReference> rdfs:label "biopax:SmallMoleculeReference"^^xsd:string.
-<http://www.biopax.org/release/biopax-level3.owl#SmallMoleculeReference> displaySetting:startPoint "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#chemicalFormula> displaySetting:attribute "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#molecularWeight> displaySetting:attribute "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#ModificationFeature> displaySetting:entity "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#ModificationFeature> rdfs:label "biopax:ModificationFeature"^^xsd:string.
-<http://www.biopax.org/release/biopax-level3.owl#ModificationFeature> displaySetting:startPoint "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#Complex> displaySetting:entity "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#Complex> rdfs:label "biopax:Complex"^^xsd:string.
-<http://www.biopax.org/release/biopax-level3.owl#Complex> displaySetting:startPoint "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#SequenceModificationVocabulary> displaySetting:entity "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#SequenceModificationVocabulary> rdfs:label "biopax:SequenceModificationVocabulary"^^xsd:string.
-<http://www.biopax.org/release/biopax-level3.owl#Provenance> displaySetting:entity "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#Provenance> rdfs:label "biopax:Provenance"^^xsd:string.
-<http://www.biopax.org/release/biopax-level3.owl#ChemicalStructure> displaySetting:entity "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#ChemicalStructure> rdfs:label "biopax:ChemicalStructure"^^xsd:string.
-<http://www.biopax.org/release/biopax-level3.owl#structureData> displaySetting:attribute "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#EntityReference> displaySetting:entity "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#EntityReference> rdfs:label "biopax:EntityReference"^^xsd:string.
-<http://www.biopax.org/release/biopax-level3.owl#EntityReference> displaySetting:startPoint "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#SequenceSite> displaySetting:entity "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#SequenceSite> rdfs:label "biopax:SequenceSite"^^xsd:string.
-<http://www.biopax.org/release/biopax-level3.owl#sequencePosition> displaySetting:attribute "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#RelationshipXref> displaySetting:entity "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#RelationshipXref> rdfs:label "biopax:RelationshipXref"^^xsd:string.
-<http://www.biopax.org/release/biopax-level3.owl#RelationshipXref> displaySetting:startPoint "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#Evidence> displaySetting:entity "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#Evidence> rdfs:label "biopax:Evidence"^^xsd:string.
-<http://www.biopax.org/release/biopax-level3.owl#Evidence> displaySetting:startPoint "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#InteractionVocabulary> displaySetting:entity "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#InteractionVocabulary> rdfs:label "biopax:InteractionVocabulary"^^xsd:string.
-<http://www.biopax.org/release/biopax-level3.owl#SequenceLocation> displaySetting:entity "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#SequenceLocation> rdfs:label "biopax:SequenceLocation"^^xsd:string.
-<http://www.biopax.org/release/biopax-level3.owl#BiochemicalReaction> displaySetting:entity "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#BiochemicalReaction> rdfs:label "biopax:BiochemicalReaction"^^xsd:string.
-<http://www.biopax.org/release/biopax-level3.owl#BiochemicalReaction> displaySetting:startPoint "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#eCNumber> displaySetting:attribute "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#deltaH> displaySetting:attribute "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#deltaS> displaySetting:attribute "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#Interaction> displaySetting:entity "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#Interaction> rdfs:label "biopax:Interaction"^^xsd:string.
-<http://www.biopax.org/release/biopax-level3.owl#Interaction> displaySetting:startPoint "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#TissueVocabulary> displaySetting:entity "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#TissueVocabulary> rdfs:label "biopax:TissueVocabulary"^^xsd:string.
-<http://www.biopax.org/release/biopax-level3.owl#SequenceInterval> displaySetting:entity "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#SequenceInterval> rdfs:label "biopax:SequenceInterval"^^xsd:string.
-<http://www.biopax.org/release/biopax-level3.owl#SequenceInterval> displaySetting:startPoint "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#Stoichiometry> displaySetting:entity "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#Stoichiometry> rdfs:label "biopax:Stoichiometry"^^xsd:string.
-<http://www.biopax.org/release/biopax-level3.owl#Stoichiometry> displaySetting:startPoint "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#stoichiometricCoefficient> displaySetting:attribute "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#RelationshipTypeVocabulary> displaySetting:entity "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#RelationshipTypeVocabulary> rdfs:label "biopax:RelationshipTypeVocabulary"^^xsd:string.
-<http://www.biopax.org/release/biopax-level3.owl#ExperimentalForm> displaySetting:entity "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#ExperimentalForm> rdfs:label "biopax:ExperimentalForm"^^xsd:string.
-<http://www.biopax.org/release/biopax-level3.owl#ExperimentalForm> displaySetting:startPoint "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#PhysicalEntity> displaySetting:entity "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#PhysicalEntity> rdfs:label "biopax:PhysicalEntity"^^xsd:string.
-<http://www.biopax.org/release/biopax-level3.owl#PhysicalEntity> displaySetting:startPoint "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#EvidenceCodeVocabulary> displaySetting:entity "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#EvidenceCodeVocabulary> rdfs:label "biopax:EvidenceCodeVocabulary"^^xsd:string.
-<http://www.biopax.org/release/biopax-level3.owl#BioSource> displaySetting:entity "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#BioSource> rdfs:label "biopax:BioSource"^^xsd:string.
-<http://www.biopax.org/release/biopax-level3.owl#BioSource> displaySetting:startPoint "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#DeltaG> displaySetting:entity "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#DeltaG> rdfs:label "biopax:DeltaG"^^xsd:string.
-<http://www.biopax.org/release/biopax-level3.owl#deltaGPrime0> displaySetting:attribute "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#CellularLocationVocabulary> displaySetting:entity "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#CellularLocationVocabulary> rdfs:label "biopax:CellularLocationVocabulary"^^xsd:string.
-<http://www.biopax.org/release/biopax-level3.owl#BindingFeature> displaySetting:entity "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#BindingFeature> rdfs:label "biopax:BindingFeature"^^xsd:string.
-<http://www.biopax.org/release/biopax-level3.owl#BindingFeature> displaySetting:startPoint "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#intraMolecular> displaySetting:attribute "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#PhenotypeVocabulary> displaySetting:entity "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#PhenotypeVocabulary> rdfs:label "biopax:PhenotypeVocabulary"^^xsd:string.
-<http://www.biopax.org/release/biopax-level3.owl#patoData> displaySetting:attribute "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#SequenceRegionVocabulary> displaySetting:entity "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#SequenceRegionVocabulary> rdfs:label "biopax:SequenceRegionVocabulary"^^xsd:string.
-<http://www.biopax.org/release/biopax-level3.owl#Entity> displaySetting:entity "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#Entity> rdfs:label "biopax:Entity"^^xsd:string.
-<http://www.biopax.org/release/biopax-level3.owl#Entity> displaySetting:startPoint "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#availability> displaySetting:attribute "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#Catalysis> displaySetting:entity "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#Catalysis> rdfs:label "biopax:Catalysis"^^xsd:string.
-<http://www.biopax.org/release/biopax-level3.owl#Catalysis> displaySetting:startPoint "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#ExperimentalFormVocabulary> displaySetting:entity "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#ExperimentalFormVocabulary> rdfs:label "biopax:ExperimentalFormVocabulary"^^xsd:string.
-<http://www.biopax.org/release/biopax-level3.owl#Score> displaySetting:entity "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#Score> rdfs:label "biopax:Score"^^xsd:string.
-<http://www.biopax.org/release/biopax-level3.owl#Score> displaySetting:startPoint "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#value> displaySetting:attribute "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#BiochemicalPathwayStep> displaySetting:entity "true"^^xsd:boolean.
-<http://www.biopax.org/release/biopax-level3.owl#BiochemicalPathwayStep> rdfs:label "biopax:BiochemicalPathwayStep"^^xsd:string.
-<http://www.biopax.org/release/biopax-level3.owl#BiochemicalPathwayStep> displaySetting:startPoint "true"^^xsd:boolean."
+
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+@prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
+@prefix void: <http://rdfs.org/ns/void#> .
+
+[] a sd:Service ;
+    sd:endpoint <https://www.ebi.ac.uk/rdf/services/sparql> ;
+    dcterms:title "Linked Open Data platform for EBI data";
+    dcterms:description "The EBI RDF platform: linked open data for the life sciences - NCBI - NIH.";
+    sd:supportedLanguage sd:SPARQL11Query ;
+    sd:defaultDataset [
+        a sd:Dataset ;
+        sd:defaultGraph [
+            a sd:Graph ;
+            void:classPartition
+              [
+                void:class biopax:GeneticInteraction  ;
+                void:class biopax:PathwayStep         ;
+                void:class biopax:CellVocabulary      .
+              ].
+        ].
+    ].
+
+biopax:GeneticInteraction displaySetting:entity "true"^^xsd:boolean.
+biopax:GeneticInteraction rdfs:label "biopax:GeneticInteraction"^^xsd:string.
+biopax:GeneticInteraction displaySetting:startPoint "true"^^xsd:boolean.
+
+biopax:PathwayStep displaySetting:entity "true"^^xsd:boolean.
+biopax:PathwayStep rdfs:label "biopax:PathwayStep"^^xsd:string.
+biopax:PathwayStep displaySetting:startPoint "true"^^xsd:boolean.
+
+biopax:EntityFeature displaySetting:entity "true"^^xsd:boolean.
+biopax:EntityFeature rdfs:label "biopax:EntityFeature"^^xsd:string.
+biopax:EntityFeature displaySetting:startPoint "true"^^xsd:boolean.
+
+biopax:Pathway displaySetting:entity "true"^^xsd:boolean.
+biopax:Pathway rdfs:label "biopax:Pathway"^^xsd:string.
+biopax:Pathway displaySetting:startPoint "true"^^xsd:boolean.
+
+biopax:KPrime displaySetting:entity "true"^^xsd:boolean.
+biopax:KPrime rdfs:label "biopax:KPrime"^^xsd:string.
+biopax:kPrime displaySetting:attribute "true"^^xsd:boolean.
+
+biopax:EntityReferenceTypeVocabulary displaySetting:entity "true"^^xsd:boolean.
+biopax:EntityReferenceTypeVocabulary rdfs:label "biopax:EntityReferenceTypeVocabulary"^^xsd:string.
+
+biopax:Conversion displaySetting:entity "true"^^xsd:boolean.
+biopax:Conversion rdfs:label "biopax:Conversion"^^xsd:string.
+biopax:Conversion displaySetting:startPoint "true"^^xsd:boolean.
+
+biopax:spontaneous displaySetting:attribute "true"^^xsd:boolean.
+
+biopax:CellVocabulary displaySetting:entity "true"^^xsd:boolean.
+biopax:CellVocabulary rdfs:label "biopax:CellVocabulary"^^xsd:string.
+
+biopax:SmallMoleculeReference displaySetting:entity "true"^^xsd:boolean.
+biopax:SmallMoleculeReference rdfs:label "biopax:SmallMoleculeReference"^^xsd:string.
+biopax:SmallMoleculeReference displaySetting:startPoint "true"^^xsd:boolean.
+
+biopax:chemicalFormula displaySetting:attribute "true"^^xsd:boolean.
+
+biopax:molecularWeight displaySetting:attribute "true"^^xsd:boolean.
+
+biopax:ModificationFeature displaySetting:entity "true"^^xsd:boolean.
+biopax:ModificationFeature rdfs:label "biopax:ModificationFeature"^^xsd:string.
+biopax:ModificationFeature displaySetting:startPoint "true"^^xsd:boolean.
+
+biopax:Complex displaySetting:entity "true"^^xsd:boolean.
+biopax:Complex rdfs:label "biopax:Complex"^^xsd:string.
+biopax:Complex displaySetting:startPoint "true"^^xsd:boolean.
+
+biopax:SequenceModificationVocabulary displaySetting:entity "true"^^xsd:boolean.
+biopax:SequenceModificationVocabulary rdfs:label "biopax:SequenceModificationVocabulary"^^xsd:string.
+
+biopax:Provenance displaySetting:entity "true"^^xsd:boolean.
+biopax:Provenance rdfs:label "biopax:Provenance"^^xsd:string.
+
+biopax:ChemicalStructure displaySetting:entity "true"^^xsd:boolean.
+biopax:ChemicalStructure rdfs:label "biopax:ChemicalStructure"^^xsd:string.
+
+biopax:structureData displaySetting:attribute "true"^^xsd:boolean.
+
+biopax:EntityReference displaySetting:entity "true"^^xsd:boolean.
+biopax:EntityReference rdfs:label "biopax:EntityReference"^^xsd:string.
+biopax:EntityReference displaySetting:startPoint "true"^^xsd:boolean.
+
+biopax:SequenceSite displaySetting:entity "true"^^xsd:boolean.
+biopax:SequenceSite rdfs:label "biopax:SequenceSite"^^xsd:string.
+biopax:sequencePosition displaySetting:attribute "true"^^xsd:boolean.
+
+biopax:RelationshipXref displaySetting:entity "true"^^xsd:boolean.
+biopax:RelationshipXref rdfs:label "biopax:RelationshipXref"^^xsd:string.
+biopax:RelationshipXref displaySetting:startPoint "true"^^xsd:boolean.
+
+biopax:Evidence displaySetting:entity "true"^^xsd:boolean.
+biopax:Evidence rdfs:label "biopax:Evidence"^^xsd:string.
+biopax:Evidence displaySetting:startPoint "true"^^xsd:boolean.
+
+biopax:InteractionVocabulary displaySetting:entity "true"^^xsd:boolean.
+biopax:InteractionVocabulary rdfs:label "biopax:InteractionVocabulary"^^xsd:string.
+
+biopax:SequenceLocation displaySetting:entity "true"^^xsd:boolean.
+biopax:SequenceLocation rdfs:label "biopax:SequenceLocation"^^xsd:string.
+
+biopax:BiochemicalReaction displaySetting:entity "true"^^xsd:boolean.
+biopax:BiochemicalReaction rdfs:label "biopax:BiochemicalReaction"^^xsd:string.
+biopax:BiochemicalReaction displaySetting:startPoint "true"^^xsd:boolean.
+
+biopax:eCNumber displaySetting:attribute "true"^^xsd:boolean.
+biopax:deltaH displaySetting:attribute "true"^^xsd:boolean.
+biopax:deltaS displaySetting:attribute "true"^^xsd:boolean.
+biopax:Interaction displaySetting:entity "true"^^xsd:boolean.
+biopax:Interaction rdfs:label "biopax:Interaction"^^xsd:string.
+biopax:Interaction displaySetting:startPoint "true"^^xsd:boolean.
+biopax:TissueVocabulary displaySetting:entity "true"^^xsd:boolean.
+biopax:TissueVocabulary rdfs:label "biopax:TissueVocabulary"^^xsd:string.
+biopax:SequenceInterval displaySetting:entity "true"^^xsd:boolean.
+biopax:SequenceInterval rdfs:label "biopax:SequenceInterval"^^xsd:string.
+biopax:SequenceInterval displaySetting:startPoint "true"^^xsd:boolean.
+biopax:Stoichiometry displaySetting:entity "true"^^xsd:boolean.
+biopax:Stoichiometry rdfs:label "biopax:Stoichiometry"^^xsd:string.
+biopax:Stoichiometry displaySetting:startPoint "true"^^xsd:boolean.
+biopax:stoichiometricCoefficient displaySetting:attribute "true"^^xsd:boolean.
+biopax:RelationshipTypeVocabulary displaySetting:entity "true"^^xsd:boolean.
+biopax:RelationshipTypeVocabulary rdfs:label "biopax:RelationshipTypeVocabulary"^^xsd:string.
+biopax:ExperimentalForm displaySetting:entity "true"^^xsd:boolean.
+biopax:ExperimentalForm rdfs:label "biopax:ExperimentalForm"^^xsd:string.
+biopax:ExperimentalForm displaySetting:startPoint "true"^^xsd:boolean.
+biopax:PhysicalEntity displaySetting:entity "true"^^xsd:boolean.
+biopax:PhysicalEntity rdfs:label "biopax:PhysicalEntity"^^xsd:string.
+biopax:PhysicalEntity displaySetting:startPoint "true"^^xsd:boolean.
+biopax:EvidenceCodeVocabulary displaySetting:entity "true"^^xsd:boolean.
+biopax:EvidenceCodeVocabulary rdfs:label "biopax:EvidenceCodeVocabulary"^^xsd:string.
+
+biopax:BioSource displaySetting:entity "true"^^xsd:boolean.
+biopax:BioSource rdfs:label "biopax:BioSource"^^xsd:string.
+biopax:BioSource displaySetting:startPoint "true"^^xsd:boolean.
+
+biopax:DeltaG displaySetting:entity "true"^^xsd:boolean.
+
+biopax:DeltaG rdfs:label "biopax:DeltaG"^^xsd:string.
+
+biopax:deltaGPrime0 displaySetting:attribute "true"^^xsd:boolean.
+
+biopax:CellularLocationVocabulary displaySetting:entity "true"^^xsd:boolean.
+biopax:CellularLocationVocabulary rdfs:label "biopax:CellularLocationVocabulary"^^xsd:string.
+
+biopax:BindingFeature displaySetting:entity "true"^^xsd:boolean.
+biopax:BindingFeature rdfs:label "biopax:BindingFeature"^^xsd:string.
+biopax:BindingFeature displaySetting:startPoint "true"^^xsd:boolean.
+
+biopax:intraMolecular displaySetting:attribute "true"^^xsd:boolean.
+
+biopax:PhenotypeVocabulary displaySetting:entity "true"^^xsd:boolean.
+biopax:PhenotypeVocabulary rdfs:label "biopax:PhenotypeVocabulary"^^xsd:string.
+
+biopax:patoData displaySetting:attribute "true"^^xsd:boolean.
+
+biopax:SequenceRegionVocabulary displaySetting:entity "true"^^xsd:boolean.
+biopax:SequenceRegionVocabulary rdfs:label "biopax:SequenceRegionVocabulary"^^xsd:string.
+
+biopax:Entity displaySetting:entity "true"^^xsd:boolean.
+biopax:Entity rdfs:label "biopax:Entity"^^xsd:string.
+biopax:Entity displaySetting:startPoint "true"^^xsd:boolean.
+
+biopax:availability displaySetting:attribute "true"^^xsd:boolean.
+
+biopax:Catalysis displaySetting:entity "true"^^xsd:boolean.
+biopax:Catalysis rdfs:label "biopax:Catalysis"^^xsd:string.
+biopax:Catalysis displaySetting:startPoint "true"^^xsd:boolean.
+
+biopax:ExperimentalFormVocabulary displaySetting:entity "true"^^xsd:boolean.
+biopax:ExperimentalFormVocabulary rdfs:label "biopax:ExperimentalFormVocabulary"^^xsd:string.
+
+biopax:Score displaySetting:entity "true"^^xsd:boolean.
+biopax:Score rdfs:label "biopax:Score"^^xsd:string.
+biopax:Score displaySetting:startPoint "true"^^xsd:boolean.
+
+biopax:value displaySetting:attribute "true"^^xsd:boolean.
+
+biopax:BiochemicalPathwayStep displaySetting:entity "true"^^xsd:boolean.
+biopax:BiochemicalPathwayStep rdfs:label "biopax:BiochemicalPathwayStep"^^xsd:string.
+
+biopax:BiochemicalPathwayStep displaySetting:startPoint "true"^^xsd:boolean.

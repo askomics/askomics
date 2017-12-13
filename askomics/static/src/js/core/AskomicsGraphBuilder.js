@@ -403,14 +403,50 @@
 
       /* endpoints */
       for (let g in graphs) {
-        let endp = __ihm.localUserAbstraction.graphToEndpoint[g];
-        if (! (endp in endpoints)) {
-          endpoints[endp] = 1;
+        if (g in __ihm.localUserAbstraction.graphToEndpoint ) {
+          let endp = __ihm.localUserAbstraction.graphToEndpoint[g];
+          if (! (endp in endpoints)) {
+            endpoints[endp] = 1;
+          }
         }
       }
       //console.log("endpoints:"+JSON.stringify(endpoints));
       //console.log("graphs:"+JSON.stringify(graphs));
+      
       return [Object.keys(endpoints),Object.keys(graphs)];
+    }
+
+    getExternalEndpoint() {
+
+      /* copy arrays to avoid to removed nodes and links instancied */
+      let dup_node_array = $.extend(true, [], this._instanciedNodeGraph);
+      let dup_link_array = $.extend(true, [], this._instanciedLinkGraph);
+
+      let endpoints = {} ;
+
+      for (let idx=0;idx<dup_node_array.length;idx++) {
+        let node = dup_node_array[idx];
+
+        for (let end in __ihm.localUserAbstraction.uriToExternalEndpoint[node.uri]) {
+          let endpoint = __ihm.localUserAbstraction.uriToExternalEndpoint[node.uri][end];
+          if (! (endpoint in endpoints)) {
+            endpoints[endpoint] = 1;
+          }
+        }
+      }
+
+      for (let idx=0;idx<dup_link_array.length;idx++) {
+        let link = dup_link_array[idx];
+
+        for (let end in __ihm.localUserAbstraction.uriToExternalEndpoint[link.uri]) {
+          let endpoint = __ihm.localUserAbstraction.uriToExternalEndpoint[link.uri][end];
+          if (! (endpoint in endpoints)) {
+            endpoints[endpoint] = 1;
+          }
+        }
+      }
+
+      return Object.keys(endpoints);
     }
 
     buildConstraintsGraph() {

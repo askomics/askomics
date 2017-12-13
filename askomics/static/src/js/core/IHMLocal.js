@@ -354,15 +354,17 @@ class IHMLocal {
                 });
             });
 
-            // sorted dataTable
-            $('.datasets-table').DataTable({
+            if ( ! $.fn.dataTable.isDataTable( '.datasets-table' ) ) {
+              // sorted dataTable
+              $('.datasets-table').DataTable({
+                'retrieve': true,
                 'order': [[1, 'asc']],
                 'columnDefs': [
                     { 'orderable': false, 'targets': 0 },
                     { type: 'date-euro', targets: 2 }
                 ]
-            });
-
+              });
+            }
         });
     }
 
@@ -370,7 +372,7 @@ class IHMLocal {
       let service = new RestServiceJs('list_endpoints');
       service.getAll(function(data) {
           let template = AskOmics.templates.endpoints;
-          let context = {endpoints: data};
+          let context = { endpoints: data.askomics , endpoints_ext: data.external.endpoints};
           let html = template(context);
 
           $('#content_endpoints').empty();

@@ -30,7 +30,10 @@ class FederationQueryLauncher(QueryLauncher):
         #comments added in sparql request to get all url endpoint.
         self.commentsForFed=""
         for endp in lendpoints:
-            self.commentsForFed+="#endpoint,"+endp['name']+','+endp['endpoint']+',false\n'
+            if endp['askomics']:
+                self.commentsForFed+="#endpoint,askomics,"+endp['name']+','+endp['endpoint']+',false\n'
+            else:
+                self.commentsForFed+="#endpoint,external,"+endp['name']+','+endp['endpoint']+',false\n'
         #add local TPS
         #self.commentsForFed+="#endpoint,local,"+self.get_param("askomics.endpoint")+',false\n'
 

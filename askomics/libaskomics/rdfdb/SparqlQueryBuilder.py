@@ -73,6 +73,49 @@ class SparqlQueryBuilder(ParamManager):
         self.log.debug("setting:\n"+str(settings))
         return settings
 
+    def getExternalServiceEndpoint(self):
+        """
+            Get all external endpoint finding in all askomics endpoint
+        """
+        qu = self.build_query_on_the_fly({
+            'select': '?name ?url ?description ?class',
+            'query': ''+
+            "?service a sd:Service .\n"+
+            "?service sd:endpoint ?url .\n"+
+            "?service dcterms:title ?name .\n"+
+            "?service dcterms:description ?description .\n"+
+            "?service sd:defaultDataset ?dataset.\n"+
+            "?dataset sd:defaultGraph ?graph.\n"+
+            "?graph void:classPartition ?partition.\n"+
+            "?partition void:class ?class. \n",
+            'post_action': 'GROUP BY ?name ?url ?description ?class'
+        }, True)
+
+        ql = MultipleQueryLauncher(self.settings, self.session)
+        em = EndpointManager(self.settings, self.session)
+
+        results = ql.process_query(qu.query,em.listAskomicsEndpoints())
+
+        settings = {}
+        settings['endpoints'] = {}
+        settings['entities'] = {}
+
+        for r in results:
+            if r['url'] not in settings['endpoints']:
+                endpoint_ext = {}
+                endpoint_ext['name'] = r['name']
+                endpoint_ext['url'] = r['url']
+                endpoint_ext['description'] = r['description']
+                settings['endpoints'][endpoint_ext['url']] = endpoint_ext
+                settings['entities'][endpoint_ext['url']] = []
+            settings['entities'][endpoint_ext['url']].append(r['class'])
+
+
+        self.log.debug("==================== EXTERNAL ENDPOINT ========================")
+        self.log.debug(settings)
+        return settings
+
+
     def build_query_on_the_fly(self, replacement, adminrequest=False):
         """
         Build a query from the private or public template
