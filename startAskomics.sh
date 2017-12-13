@@ -110,9 +110,9 @@ done
 printenv | egrep "^ASKOCONFIG_" | while read setting
 do
     sed_setting=$(echo $setting | sed 's/\_colon\_/\:/g' | sed 's/\_hyphen\_/\-/g' | sed 's/\_dot\_/\./g')
-    section=$(echo $sed_setting | egrep -o "^ASKOCONFIG_[^=]+" | sed 's/^.\{11\}//g' | cut -d "_" -f 1 | tr '[:upper:]' '[:lower:]')
-    key=$(echo $sed_setting | egrep -o "^ASKOCONFIG_[^=]+" | sed 's/^.\{11\}//g' | sed "s/$section\_//g" | tr '[:upper:]' '[:lower:]')
-    value=$(echo $sed_setting | egrep -o "=.*$" | sed 's/^=//g' | tr '[:upper:]' '[:lower:]')
+    section=$(echo $sed_setting | egrep -o "^ASKOCONFIG_[^=]+" | sed 's/^.\{11\}//g' | cut -d "_" -f 1)
+    key=$(echo $sed_setting | egrep -o "^ASKOCONFIG_[^=]+" | sed 's/^.\{11\}//g' | sed "s/$section\_//g")
+    value=$(echo $sed_setting | egrep -o "=.*$" | sed 's/^=//g')
     $python_ex config_updater.py -p $config_path -s $section -k $key -v $value
 done
 
