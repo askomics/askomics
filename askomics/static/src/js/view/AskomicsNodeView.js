@@ -93,7 +93,8 @@ class AskomicsNodeView extends AskomicsObjectView {
     var service = new RestServiceJs("sparqlquery");
     var model = {
       'endpoints'            : endpAndGraphs[0],
-      'graphs'               : endpAndGraphs[1],
+      'type_endpoints'       : endpAndGraphs[1],
+      'graphs'               : endpAndGraphs[2],
       'variates'             : tab[0],
       'constraintesRelations': tab[1],
       'limit'                :-1,

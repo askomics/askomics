@@ -375,15 +375,14 @@ class AskView(object):
         res = query_launcher.process_query(sqg.get_user_graph_infos_with_count().query)
 
         named_graphs = []
-        print(res)
+
         for index_result in range(len(res)):
             if not 'date' in res[index_result]:
                 self.log.warn('============= bad results user graph =================')
                 self.log.warn(res[index_result])
                 self.log.warn("============================================================")
                 continue
-            print("=============")
-            print(res[index_result])
+            
             dat = datetime.datetime.strptime(res[index_result]['date'], "%Y-%m-%dT%H:%M:%S.%f")
 
             readable_date = dat.strftime("%d/%m/%Y %H:%M:%S") #dd/mm/YYYY hh:ii:ss
@@ -967,7 +966,7 @@ class AskView(object):
                 npreview = 30
                 if "limit" in body:
                     npreview = body["limit"]
-                
+
                 jm.updateEndSparqlJob(jobid,"Ok "+typeRequest,nr=len(results),data=self.data['values'][0:npreview], file=self.data['file'])
 
         except Exception as e:

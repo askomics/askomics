@@ -367,11 +367,11 @@
       for (let g in graphs) {
         let endp = __ihm.localUserAbstraction.graphToEndpoint[g];
         if (! (endp in endpoints)) {
-          endpoints[endp] = 1;
+          endpoints[endp] = __ihm.localUserAbstraction.typeEndpoint[endp];
         }
       }
 
-      return [Object.keys(endpoints),Object.keys(graphs)];
+      return [Object.keys(endpoints),Object.values(endpoints),Object.keys(graphs)];
     }
 
     /* browse nodes and edges to get graph and endpoints involved */

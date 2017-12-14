@@ -372,7 +372,7 @@ class IHMLocal {
       let service = new RestServiceJs('list_endpoints');
       service.getAll(function(data) {
           let template = AskOmics.templates.endpoints;
-          let context = { endpoints: data.askomics , endpoints_ext: data.external.endpoints};
+          let context = { admin: __ihm.user.isAdmin() , endpoints: data.askomics , endpoints_ext: data.external.endpoints};
           let html = template(context);
 
           $('#content_endpoints').empty();

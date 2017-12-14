@@ -118,15 +118,21 @@ class SparqlQueryGraph(SparqlQueryBuilder):
 
     def get_user_graph_infos_with_count(self):
         """Get infos of all datasets owned by a user"""
+
+        strbind = "BIND('" + self.session['username'] + "' AS ?owner). \n"
+        if self.session['admin']:
+            strbind =""
+
         return self.build_query_on_the_fly({
             'select': '?g ?name ?date ?access ?owner (count(*) as ?co)',
             'query': 'GRAPH ?g {\n' +
-                     '\t?s ?p ?o .\n' +
-                     '\t?g prov:generatedAtTime ?date .\n' +
-                     '\t?g dc:creator ?owner .\n' +
-                     '\t?g prov:wasDerivedFrom ?name .\n'+
-                     '\t?g :accessLevel ?access .\n' +
-                     '}',
+                 '\t?s ?p ?o .\n' +
+                 '\t?g prov:generatedAtTime ?date .\n' +
+                 '\t?g prov:wasDerivedFrom ?name .\n'+
+                 '\t?g :accessLevel ?access .\n' +
+                 strbind +
+                 "\t?g dc:creator ?owner .\n" +
+                 '}',
             'post_action': 'GROUP BY ?g ?name ?date ?access ?owner'
         }, True)
 
