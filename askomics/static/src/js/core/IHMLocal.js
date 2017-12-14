@@ -1112,6 +1112,7 @@ class IHMLocal {
 
         // Visual effect on active tab (Ask! / Integrate / Credits)
         $('.nav li').click(function(e) {
+          $(this).off();
 
           //TODO : We can not defined nav li inside otherwise this function apply (define for the min nav ASKOMIS ).....
           // for now, to avoid a bad behaviours, we need to not defined id in sub nav tag
@@ -1123,12 +1124,12 @@ class IHMLocal {
                 $(this).addClass('active');
             }
 
-            console.log("ID:"+ $(this).attr('id'));
+            //console.log("ID:"+ $(this).attr('id'));
             if ( ! ( $(this).attr('id') in { 'help' : '','admin':'', 'user_menu': '' }) ) {
 
               $('.container').hide();
               $('.container#navbar_content').show();
-              console.log("===>"+'.container#content_' + $(this).attr('id'));
+              //console.log("===>"+'.container#content_' + $(this).attr('id'));
               $('.container#content_' + $(this).attr('id')).show();
             } else {
               $('.container#navbar_content').show();
@@ -1150,14 +1151,14 @@ class IHMLocal {
         });
 
         // 'enter' key when password2 was filled !
-        $('#signup_password2').keypress(function (e) {
+        $('#signup_password2').off().keypress(function (e) {
           if(e.which == 13)  // the enter key code
           {
             $('#signup_button').click();
           }
         });
 
-        $('#signup_button').click(function(e) {
+        $('#signup_button').off().click(function(e) {
           let username = $('#signup_username').val();
           let email = $('#signup_email').val();
           let password = $('#signup_password').val();
