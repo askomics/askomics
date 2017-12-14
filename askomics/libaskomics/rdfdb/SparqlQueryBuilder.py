@@ -81,7 +81,9 @@ class SparqlQueryBuilder(ParamManager):
         qu = self.build_query_on_the_fly({
             'select': '?g ?endpoint',
             'query': 'GRAPH ?g {\n'+
-            "?g :accessLevel 'public'. \n"+
+            " { { ?g :accessLevel 'public'. } \n"+
+            " UNION "+
+            " { ?g dc:creator '" + self.session['username'] + "'} } .\n"+
             "\t?service a sd:Service.  \n" +
             "\t?service sd:endpoint ?endpoint.\n"+
             "} ",
