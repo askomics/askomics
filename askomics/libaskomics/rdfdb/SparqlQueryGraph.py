@@ -37,7 +37,7 @@ class SparqlQueryGraph(SparqlQueryBuilder):
 
     def get_public_start_point(self):
         """
-        Get the start point and in which graph they are
+        Get the start point and in which public graph they are
         """
         self.log.debug('---> get_start_point')
 
@@ -47,13 +47,13 @@ class SparqlQueryGraph(SparqlQueryBuilder):
                      '\t?nodeUri displaySetting:entity "true"^^xsd:boolean .\n' +
                      '\t?nodeUri displaySetting:startPoint "true"^^xsd:boolean .\n' +
                      '\t?nodeUri rdfs:label ?nodeLabel.\n'+
-                     "\t?g :accessLevel 'public'.\n"+
-                     "}"
+                     '\t?g :accessLevel "public".\n'+
+                     '}'
         }, True)
 
     def get_user_start_point(self):
         """
-        Get the start point and in which graph they are
+        Get the start point and in which private graph they are
         """
         self.log.debug('---> get_start_point')
 
@@ -65,7 +65,7 @@ class SparqlQueryGraph(SparqlQueryBuilder):
                      '\t?nodeUri rdfs:label ?nodeLabel.\n'+
                      "\t?g :accessLevel ?accesLevel.\n "+
                      "\t?g dc:creator '" + self.session['username'] + "'\n"+
-                     "}"
+                     '}'
         }, True)
 
     def get_prefix_uri(self):

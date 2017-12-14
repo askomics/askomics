@@ -413,7 +413,7 @@ class IHMLocal {
                   { type: 'date-euro', targets: 2 }
               ]
           });
-          $('#add_endpoint').click(function() {
+          $('#add_endpoint').off().click(function() {
               __ihm.get_add_endpoints_form();
           });
 
@@ -453,6 +453,12 @@ class IHMLocal {
             url:$('#endpoint-url').val(),
             auth: $('#endpoint-auth').val()
           };
+
+          if (model.name == "" || model.url == "http://") {
+            alert('Bad definition of AskOmics endpoint :'+ JSON.stringify(model));
+            return ;
+          }
+
           service.post(model, function(data) {
             __ihm.loadEndpoints();
           });
@@ -1112,7 +1118,7 @@ class IHMLocal {
 
         // Visual effect on active tab (Ask! / Integrate / Credits)
         $('.nav li').click(function(e) {
-          $(this).off();
+          //$(this).off();
 
           //TODO : We can not defined nav li inside otherwise this function apply (define for the min nav ASKOMIS ).....
           // for now, to avoid a bad behaviours, we need to not defined id in sub nav tag

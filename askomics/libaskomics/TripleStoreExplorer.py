@@ -125,10 +125,14 @@ class TripleStoreExplorer(ParamManager):
             return req
         return ""
 
-    def build_sparql_query_from_json(self, listExternalEndpoints,listEndpoints, fromgraphs, variates, constraintes_relations,limit, send_request_to_tps=True):
+    def build_sparql_query_from_json(self,listEndpoints, typeEndpoints, fromgraphs, variates, constraintes_relations,limit, send_request_to_tps=True):
         """
         Build a sparql query from JSON constraints
         """
+        if len(typeEndpoints) != len(listEndpoints):
+            self.log.warn("listEndpoints:"+str(listEndpoints))
+            self.log.warn("typeEndpoints:"+str(typeEndpoints))
+            raise ValueError("Devel error. Different size for List Endpoints and List type Endpoints. ")
 
         select = ' '.join(variates)
 
@@ -139,61 +143,50 @@ class TripleStoreExplorer(ParamManager):
         # if limit != None and limit > 0:
         #     query += ' LIMIT ' + str(limit)
         self.log.debug("============ build_sparql_query_from_json ========")
-        self.log.debug("endpoints_ext:"+str(listExternalEndpoints))
+        self.log.debug("type_endpoints:"+str(typeEndpoints))
         self.log.debug("endpoints:"+str(listEndpoints))
         self.log.debug("graphs"+str(fromgraphs))
+
+        extreq = False
+
         if send_request_to_tps:
-            if len(listEndpoints)+len(listExternalEndpoints)==0:
-                self.log.debug("============ QueryLauncher1 ========")
-                typeQuery = ''
-                query_launcher = QueryLauncher(self.settings, self.session)
-            elif len(listEndpoints)+len(listExternalEndpoints)==1:
+            if len(listEndpoints) == 0:
+                raise ValueError("None endpoint are defined fo the current SPARLQ query !")
+            elif len(listEndpoints)==1:
                 self.log.debug("============ QueryLauncher ========")
                 typeQuery = ''
                 endpoint = ''
+                type_endpoint='askomics'
                 if len(listEndpoints) == 1 :
                     endpoint = listEndpoints[0]
-                else:
-                    endpoint = listExternalEndpoints[0]
+
+                if typeEndpoints[0] != 'askomics':
+                    extreq = True
+
                 query_launcher = QueryLauncher(self.settings, self.session,name = endpoint, endpoint = endpoint)
             else:
+
                 self.log.debug("============ FederationQueryLauncher ========")
+
                 typeQuery = '(Federation)'
                 lE = []
                 iCount = 0
-                for ul in listEndpoints:
+
+                for i in range(0, len(listEndpoints)):
                     iCount+=1
                     end = {}
                     end['name'] = "endpoint"+str(iCount)
-                    end['endpoint'] =  ul
-                    end['askomics'] =  True
+                    end['endpoint'] =  listEndpoints[i]
+                    end['askomics'] =  (typeEndpoints == 'askomics')
                     end['auth'] = 'Basic'
                     end['username'] = None
                     end['password'] = None
                     lE.append(end)
 
-                for ul in listExternalEndpoints:
-                    iCount+=1
-                    end = {}
-                    end['name'] = "endpoint"+str(iCount)
-                    end['endpoint'] =  ul
-                    end['askomics'] =  False
-                    end['auth'] = 'Basic'
-                    end['username'] = None
-                    end['password'] = None
-                    lE.append(end)
-
-                print("listEndpoints")
-                print(listEndpoints)
-                print("listExternalEndpoints")
-                print(listExternalEndpoints)
-
-                print("==================================")
-                print(lE)
 
                 query_launcher = FederationQueryLauncher(self.settings, self.session,lE)
 
-            results = query_launcher.process_query(sqb.custom_query(fromgraphs, select, query).query)
+            results = query_launcher.process_query(sqb.custom_query(fromgraphs, select, query,externalrequest=extreq).query)
         else:
             results = []
 

@@ -88,7 +88,9 @@ class AskomicsUserAbstraction {
       if ( attributeForUritype.indexOf(this.getPrefix("xsd")) === -1 ) {
           return "category";
       }
-
+      if (attributeForUritype === this.longRDF("xsd:double")) {
+        return "decimal";
+      }
       if (attributeForUritype === this.longRDF("xsd:decimal")) {
         return "decimal";
       }
@@ -159,8 +161,11 @@ class AskomicsUserAbstraction {
       // [uri]-->list([graph] -> list[endpoint])
       iua.uriToGraph = {} ;
       iua.graphToEndpoint = {} ;
+      iua.typeEndpoint = {} ;
 
       for (let endpoint in resultListTripletSubjectRelationObject.endpoints){
+        iua.typeEndpoint[endpoint] = resultListTripletSubjectRelationObject.endpoints[endpoint].type ;
+        //console.log(endpoint+"=>"+iua.typeEndpoint[endpoint]);
         if ( 'private' in resultListTripletSubjectRelationObject.endpoints[endpoint]) {
           for (let igraph in resultListTripletSubjectRelationObject.endpoints[endpoint]['private']){
             let graph = resultListTripletSubjectRelationObject.endpoints[endpoint]['private'][igraph];
@@ -175,23 +180,7 @@ class AskomicsUserAbstraction {
         }
       }
       //console.log("ASKOMICS ENDPOINT:"+JSON.stringify(iua.graphToEndpoint));
-      /***************************** ENTITIES EXTERNAL ENDPOINT **************************/
-      // [uri] --> list[ external endpoint ].
-      iua.uriToExternalEndpoint = {} ;
-      //console.log("EXTERNAL ENDPOINT:"+JSON.stringify(resultListTripletSubjectRelationObject.endpoints_ext.entities));
-      for (let endpoint in resultListTripletSubjectRelationObject.endpoints_ext.entities){
 
-        for (let entity in resultListTripletSubjectRelationObject.endpoints_ext.entities[endpoint]){
-          let ent =  resultListTripletSubjectRelationObject.endpoints_ext.entities[endpoint][entity];
-
-          if ( !(ent in iua.uriToExternalEndpoint )) {
-            iua.uriToExternalEndpoint[ent] = [];
-          }
-          iua.uriToExternalEndpoint[ent].push(endpoint);
-        }
-      }
-
-      //console.log("EXTERNAL ENDPOINT:"+JSON.stringify(iua.uriToExternalEndpoint));
 
       /***************************** ENTITIES **************************************/
       /* All information about an entity available in TPS are stored in entityInformationList */

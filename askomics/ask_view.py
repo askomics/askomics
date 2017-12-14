@@ -479,7 +479,7 @@ class AskView(object):
             res = ql.process_query(sqg.get_all_taxons().query,em.listAskomicsEndpoints())
             taxons_list = []
             for elem in res:
-                taxons_list.append(elem['taxon']['value'])
+                taxons_list.append(elem['taxon'])
             self.data['taxons'] = taxons_list
 
             for src_file in source_files:
@@ -940,13 +940,9 @@ class AskView(object):
             typeRequest = ''
             tse = TripleStoreExplorer(self.settings, self.request.session)
 
-            endpoints_ext = []
-            if 'endpoints_ext' in body:
-                endpoints_ext = body["endpoints_ext"]
-
             results, query, typeRequest = tse.build_sparql_query_from_json(
-                                                 endpoints_ext,
                                                  body["endpoints"],
+                                                 body["type_endpoints"],
                                                  body["graphs"],
                                                  body["variates"],
                                                  body["constraintesRelations"],
@@ -964,9 +960,15 @@ class AskView(object):
             if (not 'nofile' in body) or body['nofile']:
                 query_laucher = QueryLauncher(self.settings, self.request.session)
                 self.data['file'] = query_laucher.format_results_csv(results, ordered_headers)
+            print("---------------------")
+            print(self.data['file'])
 
             if persist:
-                jm.updateEndSparqlJob(jobid,"Ok "+typeRequest,nr=len(results),data=self.data['values'], file=self.data['file'])
+                npreview = 30
+                if "limit" in body:
+                    npreview = body["limit"]
+                
+                jm.updateEndSparqlJob(jobid,"Ok "+typeRequest,nr=len(results),data=self.data['values'][0:npreview], file=self.data['file'])
 
         except Exception as e:
             #exc_type, exc_value, exc_traceback = sys.exc_info()

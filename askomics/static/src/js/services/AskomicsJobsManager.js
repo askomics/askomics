@@ -122,9 +122,9 @@ let instanceAskomicsJobsViewManager ;
         let tab2 = __ihm.getGraphBuilder().getEndpointAndGraph();
 
         return {
-                  'endpoints_ext'        : __ihm.getGraphBuilder().getExternalEndpoint(),
                   'endpoints'            : tab2[0],
-                  'graphs'               : tab2[1],
+                  'type_endpoints'       : tab2[1],
+                  'graphs'               : tab2[2],
                   'variates'             : tab[0],
                   'constraintesRelations': tab[1],
                   'constraintesFilters'  : tab[2],

@@ -115,6 +115,7 @@ class AskomicsUser {
     logout() {
         let service = new RestServiceJs('logout');
         service.getAll(function() {
+            AskomicsUser.cleanHtmlLogin();
             location.reload();
         });
 
