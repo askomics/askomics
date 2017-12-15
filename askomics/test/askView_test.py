@@ -552,6 +552,71 @@ class AskViewTests(unittest.TestCase):
 
         assert data == {'blocked': False, 'admin': True, 'error': [], 'username': 'jdoe'}
 
+    def test_login_api(self):
+        """Test login_api method"""
+
+        self.tps.clean_up()
+        # First, create a user
+        self.request.json_body = {
+            'username': 'jdoe',
+            'email': 'jdoe@exemple.com',
+            'password': 'iamjohndoe',
+            'password2': 'iamjohndoe'
+        }
+
+        self.askview.signup()
+
+        # Then, create an API key
+
+        self.request.json_body = {
+            'username': 'jdoe',
+            'keyname': 'test'
+        }
+
+        self.askview.api_key()
+
+        # then, get infos
+        infos = self.askview.get_my_infos()
+
+        # then, try to log with API key
+        self.request.json_body = {
+            'apikey': infos['apikeys'][0]['key']
+        }
+
+        data = self.askview.login_api()
+
+        assert data == {'admin': True, 'blocked': False, 'username': 'jdoe', 'sucess': 'success', 'error': ''}
+
+    def test_login_api_gie(self):
+        """Test login_api method"""
+
+        self.tps.clean_up()
+        # First, create a user
+        self.request.json_body = {
+            'username': 'jdoe',
+            'email': 'jdoe@exemple.com',
+            'password': 'iamjohndoe',
+            'password2': 'iamjohndoe'
+        }
+
+        self.askview.signup()
+
+        # Then, create an API key
+        self.request.json_body = {
+            'username': 'jdoe',
+            'keyname': 'test'
+        }
+
+        self.askview.api_key()
+
+        # then, get infos
+        infos = self.askview.get_my_infos()
+
+        # then, try to log with API key
+        self.request.GET['key'] = infos['apikeys'][0]['key']
+
+        self.askview.login_api_gie()
+
     def test_get_users_infos(self):
         """Test get_users_infos"""
 
