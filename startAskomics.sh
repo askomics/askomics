@@ -97,11 +97,23 @@ config_path="$dir_config/$config_name"
 
 echo "Convert environment variables to ini file ..."
 cp "$dir_config/$depmode.$triplestore.ini" "$config_path"
+
+# This take ASKO_ env to update config in app:main section, only askomics. key
 printenv | egrep "^ASKO_" | while read setting
 do
     key="askomics."$(echo $setting | egrep -o "^ASKO_[^=]+" | sed 's/^.\{5\}//g' | tr '[:upper:]' '[:lower:]')
     value=$(echo $setting | egrep -o "=.*$" | sed 's/^=//g')
-    $python_ex -c "import configparser; config = configparser.ConfigParser(); config.read('"$config_path"'); config['app:main']['"$key"'] = '"$value"'; config.write(open('"$config_path"', 'w'))"
+    $python_ex config_updater.py -p $config_path -s "app:main" -k $key -v $value
+done
+
+# This take ASKOCONFIG_ env to update config in any sections
+printenv | egrep "^ASKOCONFIG_" | while read setting
+do
+    sed_setting=$(echo $setting | sed 's/\_colon\_/\:/g' | sed 's/\_hyphen\_/\-/g' | sed 's/\_dot\_/\./g')
+    section=$(echo $sed_setting | egrep -o "^ASKOCONFIG_[^=]+" | sed 's/^.\{11\}//g' | cut -d "_" -f 1)
+    key=$(echo $sed_setting | egrep -o "^ASKOCONFIG_[^=]+" | sed 's/^.\{11\}//g' | sed "s/$section\_//g")
+    value=$(echo $sed_setting | egrep -o "=.*$" | sed 's/^=//g')
+    $python_ex config_updater.py -p $config_path -s $section -k $key -v $value
 done
 
 # Build Javascript ----------------------------------------
