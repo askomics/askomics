@@ -12,7 +12,7 @@ class EndpointManager(ParamManager):
         ParamManager.__init__(self, settings, session)
         self.log = logging.getLogger(__name__)
         self.databasename = "endpoints.db"
-        self.pathdb = self.get_db_directory()+"/"+self.databasename
+        self.pathdb = self.get_common_user_directory()+"/"+self.databasename
         self.log.info(" ==> "+ self.pathdb +"<==");
 
         conn = sqlite3.connect("file:"+self.pathdb,uri=True)

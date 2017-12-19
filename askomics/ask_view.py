@@ -514,7 +514,7 @@ class AskView(object):
                     except Exception as e:
                         self.log.debug('error !!')
                         traceback.print_exc(file=sys.stdout)
-                        infos['error'] = 'Could not parse the file, are you sure it is a valid GFF3 file?'
+                        infos['error'] = 'Can not parse the file GFF File :'+ str(e)
                         self.log.error('error with gff examiner: ' + str(e))
 
                     self.data['files'].append(infos)

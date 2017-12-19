@@ -127,6 +127,17 @@ class ParamManager(object):
 
         return mdir
 
+    def get_common_user_directory(self):
+
+        if 'username' not in self.session:
+            mdir = self.userfilesdir+"common/"
+        else:
+            mdir = self.userfilesdir+"common/"+self.session['username'] + '/'
+        if not os.path.isdir(mdir):
+            os.makedirs(mdir)
+
+        return mdir
+
     def set_param(self, key,value):
         self.settings[key] = value
 
