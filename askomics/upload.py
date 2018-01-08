@@ -3,7 +3,7 @@ from pyramid.view import view_config, view_defaults
 from pyramid.response import Response
 
 import logging
-import re
+
 import os, shutil, tempfile
 
 @view_defaults(route_name='upload')
@@ -54,8 +54,7 @@ class FileUpload(object):
         elif new_file['size'] > self.max_size:
             new_file['error'] = 'File is too large (See askomics.upload_max_size).'
         elif new_file['type'] not in self.allowed_types: # FIXME commented for tests
-           new_file['error'] = 'File type '+new_file['type']+' not allowed (See askomics.allowed_file_types).' # FIXME commented for tests
-        else:
+           new_file['error'] = 'File type '+new_file['type']+' not allowed (See askomics.allowed_file_types).' # FIXME commented for tests        else:
             return True
         return False
 

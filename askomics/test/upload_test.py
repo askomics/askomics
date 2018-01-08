@@ -55,12 +55,6 @@ class FileUploadTests(unittest.TestCase):
         result = file_upload.validate({'type': 'text/plain', 'size': int(self.upload_max_size) +1})
         assert result is False
 
-        result = file_upload.validate({'type': 'hello', 'size': int(self.upload_max_size)})
-        assert result is False
-
-
-
-
     def test_get_file_size(self):
         """Test the get_file_size method"""
 

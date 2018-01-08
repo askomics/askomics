@@ -1,5 +1,7 @@
 /*jshint esversion: 6 */
 
+let prefix_user = null ;
+
 class GraphObject {
   constructor(obj) {
 
@@ -11,6 +13,14 @@ class GraphObject {
     this._SPARQLid  = "";
     this._suggested = true ;
     this._uri       = obj.uri ;
+
+    if (prefix_user == null) {
+      let service = new RestServiceJs("prefix_uri");
+      service.postsync({},function(data) {
+        prefix_user = data.__default__ ;
+      });
+      console.log("prefix="+prefix_user);
+    }
 
     if ( obj.label ) {
       this._label   = obj.label ;
@@ -73,18 +83,15 @@ class GraphObject {
         console.debug("uri is not a string :"+JSON.stringify(this));
         throw new Exception("uri is not a string :"+JSON.stringify(this.uri));
       }
-      let idx =  this.uri.indexOf("#");
-      if ( idx == -1 ) {
-        idx =  this.uri.indexOf(":");
-        if ( idx == -1 ) {
-          return this.uri;
-        }
+
+      let shorturi = this.uri.replace(prefix_user, "");
+
+      if ( this.uri != shorturi ) {
+          return shorturi;
       }
-      let name = this.uri.substr(idx+1,this.uri.length);
-      let longPref = this.uri.substr(0,idx);
-      let shortPref = __ihm.getAbstraction().getReversePrefix(longPref);
-      if ( shortPref !== '' ) shortPref = shortPref + ":" ;
-      return shortPref + name;
+
+      let shortPref = __ihm.getAbstraction().getReversePrefix(this.uri);
+      return shortPref ;
   }
 
   formatInHtmlLabelEntity() {

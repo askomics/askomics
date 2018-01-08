@@ -24,8 +24,9 @@ requires = [
     'validate_email',
     'bioblend',
     'humanize',
-    'pybedtools',
-    'configparser'
+    'pybedtools==0.7.10',
+    'configparser',
+    'argparse'
     ]
 
 setup(name='Askomics',

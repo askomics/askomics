@@ -1344,7 +1344,10 @@ class AskView(object):
         param_manager = ParamManager(self.settings, self.request.session)
         param_manager.get_upload_directory()
 
-        return HTTPFound(self.request.application_url)
+        if self.request.application_url.endswith('/'):
+            return HTTPFound(self.request.application_url)
+
+        return HTTPFound(self.request.application_url + '/')
 
 
     @view_config(route_name='login_api', request_method='POST')
