@@ -410,8 +410,8 @@
           }
         }
       }
-      //console.log("endpoints:"+JSON.stringify(endpoints));
-      //console.log("graphs:"+JSON.stringify(graphs));
+      console.log("endpoints:"+JSON.stringify(endpoints));
+      console.log("graphs:"+JSON.stringify(graphs));
 
       return [Object.keys(endpoints),Object.values(endpoints),Object.keys(graphs)];
     }

@@ -49,13 +49,16 @@ class FileUpload(object):
         return os.path.join(self.upload_dir, name)
 
     def validate(self, new_file):
+
         if new_file['size'] < self.min_size:
             new_file['error'] = 'File is too small (See askomics.upload_min_size).'
         elif new_file['size'] > self.max_size:
             new_file['error'] = 'File is too large (See askomics.upload_max_size).'
         elif new_file['type'] not in self.allowed_types: # FIXME commented for tests
-           new_file['error'] = 'File type '+new_file['type']+' not allowed (See askomics.allowed_file_types).' # FIXME commented for tests        else:
+            new_file['error'] = 'File type '+new_file['type']+' not allowed (See askomics.allowed_file_types).' # FIXME commented for tests        else:
+        else:
             return True
+
         return False
 
     def get_file_size(self, new_file):
