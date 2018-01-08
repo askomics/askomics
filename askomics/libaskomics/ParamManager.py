@@ -96,7 +96,12 @@ class ParamManager(object):
         return mdir
 
     def get_rdf_directory(self):
-        return self.userfilesdir+"rdf/"
+
+        mdir = self.userfilesdir+"rdf/"
+        if not os.path.isdir(mdir):
+            os.makedirs(mdir)
+
+        return mdir
 
     def get_rdf_user_directory(self):
         if 'username' not in self.session:
