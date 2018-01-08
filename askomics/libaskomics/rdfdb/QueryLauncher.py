@@ -28,10 +28,44 @@ class QueryLauncher(ParamManager):
           from these preformated results using a ResultsBuilder instance.
     """
 
-    def __init__(self, settings, session):
+    def __init__(self, settings, session, name = None, endpoint = None ,username=None, password=None,urlupdate=None,auth='Basic'):
         ParamManager.__init__(self, settings, session)
-
         self.log = logging.getLogger(__name__)
+
+        self.name = name
+        self.endpoint = endpoint
+        self.username = username
+        self.password = password
+        self.urlupdate = urlupdate
+        self.auth = auth
+        self.allowUpdate = False
+
+        if self.auth != 'Basic' and self.auth != 'Digest':
+            raise ValueError("Invalid Auth parameter :"+self.auth)
+
+    def setUserDatastore(self):
+        """
+            initialize endpoint with user configuration file
+        """
+        self.name = 'Local'
+        self.allowUpdate = True
+
+        if self.is_defined("askomics.endpoint"):
+            self.endpoint = self.get_param("askomics.endpoint")
+        else:
+            raise ValueError("askomics.endpoint does not exit.")
+
+        if self.is_defined("askomics.updatepoint"):
+            self.urlupdate = self.get_param("askomics.updatepoint")
+
+        if self.is_defined("askomics.endpoint_username"):
+            self.username = self.get_param("askomics.endpoint_username")
+
+        if self.is_defined("askomics.endpoint_passwd"):
+            self.password = self.get_param("askomics.endpoint_passwd")
+
+        if self.is_defined("askomics.endpoint.auth"):
+            self.auth = self.get_param("askomics.endpoint.auth")
 
     def setup_opener(self, proxy_config):
         """
@@ -69,7 +103,24 @@ class QueryLauncher(ParamManager):
             self.opener = urllib.request.build_opener(*handlers)
             urllib.request.install_opener(self.opener)
 
-    def execute_query(self, query, log_raw_results=True, externalService=None):
+    def setupSPARQLWrapper(self):
+        """
+            Setup SPARQLWrapper to reach url endpoint
+        """
+        data_endpoint = SPARQLWrapper(self.endpoint,self.urlupdate)
+
+        if self.username and self.password:
+            data_endpoint.setCredentials(self.username, self.password)
+        elif self.username:
+            raise ValueError("passwd is not defined")
+        elif self.password:
+            raise ValueError("username is not defined")
+
+        data_endpoint.setHTTPAuth(self.auth) # Basic or Digest
+
+        return data_endpoint
+
+    def _execute_query(self, query, log_raw_results=True, externalService=None):
         """Params:
             - libaskomics.rdfdb.SparqlQuery
             - log_raw_results: if True the raw json response is logged. Set to False
@@ -89,37 +140,16 @@ class QueryLauncher(ParamManager):
             #                      if not line.startswith('PREFIX '))
             self.log.debug("----------- QUERY --------------\n%s", query_log)
 
-        if externalService is None :
-            urlupdate = None
-            if self.is_defined("askomics.updatepoint"):
-                urlupdate = self.get_param("askomics.updatepoint")
-            time0 = time.time()
-            if self.is_defined("askomics.endpoint"):
-                data_endpoint = SPARQLWrapper(self.get_param("askomics.endpoint"), urlupdate)
-            else:
-                raise ValueError("askomics.endpoint")
+        time0 = time.time()
 
-            if self.is_defined("askomics.endpoint_username") and self.is_defined("askomics.endpoint_passwd"):
-                user = self.get_param("askomics.endpoint_username")
-                passwd = self.get_param("askomics.endpoint_passwd")
-                data_endpoint.setCredentials(user, passwd)
-            elif self.is_defined("askomics.endpoint_username"):
-                raise ValueError("askomics.endpoint_passwd is not defined")
-            elif self.is_defined("askomics.endpoint_passwd"):
-                raise ValueError("askomics.endpoint_username is not defined")
-
-            if self.is_defined("askomics.endpoint.auth"):
-                data_endpoint.setHTTPAuth(self.get_param("askomics.endpoint.auth")) # Basic or Digest
-        else:
-            data_endpoint = externalService
-
+        data_endpoint = self.setupSPARQLWrapper()
         data_endpoint.setQuery(query)
         data_endpoint.method = 'POST'
 
-        if externalService != None and data_endpoint.isSparqlUpdateRequest():
-            raise ValueError("Can not update a remote endpoint with url:"+str(externalService))
-
         if data_endpoint.isSparqlUpdateRequest():
+            if not self.allowUpdate :
+                raise ValueError("Can not perform an update sparql request on an external endpoint.")
+
             data_endpoint.setMethod('POST')
             # Hack for Virtuoso to LOAD a turtle file
             if self.is_defined("askomics.hack_virtuoso"):
@@ -134,7 +164,13 @@ class QueryLauncher(ParamManager):
             try:
                 results = data_endpoint.query().convert()
             except urllib.error.URLError as URLError:
-                raise ValueError(URLError.reason)
+                #url error, we disable the endpoint
+                #raise ValueError(URLError.reason)
+                if externalService != None :
+                    em = EndpointManager(self.settings, self.session)
+                    em.disable(externalService['id'],str(URLError.reason))
+                results = []
+                #raise ValueError(URLError.reason)
 
             time1 = time.time()
 
@@ -153,9 +189,15 @@ class QueryLauncher(ParamManager):
         '''
 
         if json_res is None:
+            raise ValueError("Unable to get a response from the datastore.")
+
+        if type(json_res) is not dict:
+            self.log.debug(str(json_res))
             return []
+
         if "results" not in json_res:
             return []
+
         if "bindings" not in json_res["results"]:
             return []
 
@@ -184,11 +226,15 @@ class QueryLauncher(ParamManager):
         '''
             Execute query and parse the results if exist
         '''
-        json_query = self.execute_query(query, log_raw_results=False)
 
+        # if no endpoint are configured, set local datastore
+        if not self.endpoint:
+            self.setUserDatastore()
+
+        json_query = self._execute_query(query, log_raw_results=False)
         results = self.parse_results(json_query)
-        return results
 
+        return results
 
     def format_results_csv(self, data, headers):
         """write the csv result file from a data ist
@@ -233,8 +279,10 @@ class QueryLauncher(ParamManager):
         """
         self.log.debug("Loading into triple store (LOAD method) the content of: %s", url)
 
+        self.setUserDatastore()
+
         query_string = "LOAD <"+url+"> INTO GRAPH"+ " <" + graphName + ">"
-        res = self.execute_query(query_string)
+        res = self._execute_query(query_string)
 
         return res
 
@@ -281,6 +329,8 @@ class QueryLauncher(ParamManager):
 
         self.log.debug("Loading into triple store (INSERT DATA method) the content: "+ttl_string[:50]+"[...]")
 
+        self.setUserDatastore()
+
         query_string = ttl_header
         query_string += "\n"
         query_string += "INSERT DATA {\n"
@@ -290,6 +340,6 @@ class QueryLauncher(ParamManager):
         query_string += "\t\t}\n"
         query_string += "\t}\n"
 
-        res = self.execute_query(query_string)
+        res = self._execute_query(query_string)
 
         return res

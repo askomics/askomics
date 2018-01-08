@@ -60,8 +60,6 @@ class IHMLocal {
 
       //TODO: Manage all view in a array with a generic way
       this.shortcutsView      = new  ShortcutsParametersView();
-      this.moduleView      = new  ModulesParametersView();
-
       this.menus = {} ;
 
       this.menus.menuFile = new AskomicsMenu("menuFile","buttonViewFile","viewMenuFile",fileFuncMenu,false);
@@ -259,8 +257,6 @@ class IHMLocal {
             // Sort inputs
             let inputs = $("#spdiv");
             inputs.children().detach().sort(function(a, b) {
-                console.log("a:"+a);
-                console.log("a:"+b);
                 return $(a).attr("id").localeCompare($(b).attr("id"));
             }).appendTo(inputs);
 
@@ -321,8 +317,7 @@ class IHMLocal {
         let service = new RestServiceJs('list_user_graph');
         service.getAll(function(data) {
             let template = AskOmics.templates.datasets;
-            for (var i = data.length - 1; i >= 0; i--) {
-            }
+
             let context = {datasets: data};
             let html = template(context);
             $('#content_datasets').empty();
@@ -359,16 +354,117 @@ class IHMLocal {
                 });
             });
 
-            // sorted dataTable
-            $('.datasets-table').DataTable({
+            if ( ! $.fn.dataTable.isDataTable( '.datasets-table' ) ) {
+              // sorted dataTable
+              $('.datasets-table').DataTable({
+                'retrieve': true,
                 'order': [[1, 'asc']],
                 'columnDefs': [
                     { 'orderable': false, 'targets': 0 },
                     { type: 'date-euro', targets: 2 }
                 ]
-            });
-
+              });
+            }
         });
+    }
+
+    loadEndpoints() {
+      let service = new RestServiceJs('list_endpoints');
+      service.getAll(function(data) {
+          let template = AskOmics.templates.endpoints;
+          let context = { admin: __ihm.user.isAdmin() , endpoints: data.askomics , endpoints_ext: data.external.endpoints};
+          let html = template(context);
+
+          $('#content_endpoints').empty();
+          $('#content_endpoints').append(html);
+
+          // hide delete button if no checkbox checked
+
+          $(".check_ep").change(function(){
+              if ($('.check_endpoint:checked').length !== 0) {
+                 $('#delete_endpoints').removeAttr('disabled');
+              }else{
+                  $('#delete_endpoints').attr('disabled', 'disabled');
+              }
+          });
+
+          // Delete selected datasets
+          $('#delete_endpoints').click(function() {
+              let selected = [];
+              $('.check_endpoint').each(function() {
+                  if ($(this).is(':checked')) {selected.push($(this).attr('name'));}
+              });
+              let service = new RestServiceJs('delete_endpoints');
+              let model = {'endpoints': selected};
+              //show the spinner
+              $('#spinner_delete').removeClass('hidden');
+              service.post(model, function(data) {
+                  __ihm.loadEndpoints();
+                  __ihm.stopSession();
+                  __ihm.resetStats();
+              });
+          });
+
+          // sorted dataTable
+          $('#data-table-endpoints').DataTable({
+              'order': [[1, 'asc']],
+              'columnDefs': [
+                  { 'orderable': false, 'targets': 0 },
+                  { type: 'date-euro', targets: 2 }
+              ]
+          });
+          $('#add_endpoint').off().click(function() {
+              __ihm.get_add_endpoints_form();
+          });
+
+          $('input.enable-endpoint').click(function() {
+            let service = new RestServiceJs('enable_endpoints');
+            let model = {
+              'id': $(this).closest( "tr" ).attr('id'),
+              'enable' : $(this).is(":checked")
+            };
+            service.post(model, function() {
+            });
+          });
+      });
+    }
+
+    get_add_endpoints_form() {
+
+        console.log(" +++ get_add_endpoints_form +++");
+
+        $('#modalTitle').text('Add Askomics endpoint');
+        $('.modal-sm').css('width', '55%');
+        $('.modal-body').show();
+
+        $('#modal').modal('show');
+        $('#modal').addClass('upload-modal');
+
+        let template = AskOmics.templates.add_endpoint;
+        let html = template();
+
+        $('#modalMessage').html(html);
+
+        $('#modalButton').click(function()
+        {
+          let service = new RestServiceJs('add_endpoint');
+          let model = {
+            name: $('#endpoint-name').val(),
+            url:$('#endpoint-url').val(),
+            auth: $('#endpoint-auth').val()
+          };
+
+          if (model.name == "" || model.url == "http://") {
+            alert('Bad definition of AskOmics endpoint :'+ JSON.stringify(model));
+            return ;
+          }
+
+          service.post(model, function(data) {
+            __ihm.loadEndpoints();
+          });
+          $(this).unbind( "click" );
+        }).text('Add');
+
     }
 
     graphname(graphn) {
@@ -452,7 +548,7 @@ class IHMLocal {
         let service = new RestServiceJs("get_uploaded_files");
         service.getAll(function(data) {
             let template = AskOmics.templates.uploaded_files;
-            let context = {files: data.files, galaxy: data.galaxy, allowed_upload: $.parseJSON(data.allowed_upload)};
+            let context = { files: data.files, galaxy: data.galaxy };
             let html = template(context);
             $('#content_integration').empty();
             $('#content_integration').append(html);
@@ -614,8 +710,6 @@ class IHMLocal {
                     // get the file's content
                     $("#spinner_galaxy-upload").removeClass("hidden");
                     let dataset = $('input[name=upload-galaxy]:checked').val();
-                    console.log('gid');
-                    console.log(dataset);
                     let service2 = new RestServiceJs('get_galaxy_file_content');
                     let model = {'dataset': dataset};
                     service2.post(model, function(data) {
@@ -1024,6 +1118,7 @@ class IHMLocal {
 
         // Visual effect on active tab (Ask! / Integrate / Credits)
         $('.nav li').click(function(e) {
+          //$(this).off();
 
           //TODO : We can not defined nav li inside otherwise this function apply (define for the min nav ASKOMIS ).....
           // for now, to avoid a bad behaviours, we need to not defined id in sub nav tag
@@ -1035,11 +1130,12 @@ class IHMLocal {
                 $(this).addClass('active');
             }
 
-
+            //console.log("ID:"+ $(this).attr('id'));
             if ( ! ( $(this).attr('id') in { 'help' : '','admin':'', 'user_menu': '' }) ) {
 
               $('.container').hide();
               $('.container#navbar_content').show();
+              //console.log("===>"+'.container#content_' + $(this).attr('id'));
               $('.container#content_' + $(this).attr('id')).show();
             } else {
               $('.container#navbar_content').show();
@@ -1061,14 +1157,14 @@ class IHMLocal {
         });
 
         // 'enter' key when password2 was filled !
-        $('#signup_password2').keypress(function (e) {
+        $('#signup_password2').off().keypress(function (e) {
           if(e.which == 13)  // the enter key code
           {
             $('#signup_button').click();
           }
         });
 
-        $('#signup_button').click(function(e) {
+        $('#signup_button').off().click(function(e) {
           let username = $('#signup_username').val();
           let email = $('#signup_email').val();
           let password = $('#signup_password').val();

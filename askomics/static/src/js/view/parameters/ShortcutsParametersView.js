@@ -21,7 +21,7 @@ class ShortcutsParametersView extends InterfaceParametersView {
   }
 
   setShortcut(sparql_res) {
-    
+
       if ( ! (sparql_res.shortcut in this.shortcuts) ) {
         this.shortcuts[sparql_res.shortcut] = {};
         this.shortcuts[sparql_res.shortcut].label = sparql_res.label;
@@ -150,6 +150,8 @@ class ShortcutsParametersView extends InterfaceParametersView {
     let service = new RestServiceJs("sparqlquery");
     let param = {
       'export'               : false,
+      'endpoints'            : [], // TODO manage endpoint from IHM ?
+      'graphs'               : ['askomics:graph:shortcut'],
       'variates'             : ["?graph","?shortcut","?label","?comment","?version","?in","?out","?output_var","?output_varname","?prefix_string","?sparql_string"],
       'constraintesRelations': [[["?shortcut a :shortcuts",
                                  "?shortcut rdfs:label ?label",

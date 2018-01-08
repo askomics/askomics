@@ -18,15 +18,23 @@ from pygments.lexers import TurtleLexer
 from pygments.formatters import HtmlFormatter
 
 from askomics.libaskomics.ParamManager import ParamManager
-from askomics.libaskomics.ModulesManager import ModulesManager
 from askomics.libaskomics.JobManager import JobManager
+from askomics.libaskomics.EndpointManager import EndpointManager
+
 from askomics.libaskomics.TripleStoreExplorer import TripleStoreExplorer
 from askomics.libaskomics.SourceFileConvertor import SourceFileConvertor
+
 from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
 from askomics.libaskomics.rdfdb.SparqlQueryGraph import SparqlQueryGraph
 from askomics.libaskomics.rdfdb.SparqlQueryStats import SparqlQueryStats
 from askomics.libaskomics.rdfdb.SparqlQueryAuth import SparqlQueryAuth
+
 from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
+from askomics.libaskomics.rdfdb.MultipleQueryLauncher import MultipleQueryLauncher
+from askomics.libaskomics.rdfdb.FederationQueryLauncher import FederationQueryLauncher
+
+from askomics.libaskomics.EndpointManager import EndpointManager
+
 from askomics.libaskomics.source_file.SourceFile import SourceFile
 from askomics.libaskomics.GalaxyConnector import GalaxyConnector
 
@@ -94,30 +102,6 @@ class AskView(object):
         if not self.request.session['admin'] :
             raise exc.exception_response(403)
 
-    def setGraphUser(self,removeGraph=[]):
-
-        self.settings['graph'] = {}
-
-        #finding all private graph graph
-        sqg = SparqlQueryGraph(self.settings, self.request.session)
-        ql = QueryLauncher(self.settings, self.request.session)
-
-        results = ql.process_query(sqg.get_user_graph_infos().query)
-        self.settings['graph']['private'] = []
-        for elt in results:
-            if 'g' not in elt:
-                continue
-            if elt['g'] in removeGraph:
-                continue
-            self.settings['graph']['private'].append(elt['g'])
-
-        #finding all public graph
-        results = ql.process_query(sqg.get_public_graphs().query)
-        self.settings['graph']['public'] = []
-        for elt in results:
-            if elt['g'] in removeGraph:
-                continue
-            self.settings['graph']['public'].append(elt['g'])
 
     @view_config(route_name='start_point', request_method='GET')
     def start_points(self):
@@ -126,7 +110,8 @@ class AskView(object):
 
         try:
 
-            self.setGraphUser([])
+            sqb = SparqlQueryBuilder(self.settings, self.request.session)
+            self.settings['graph'] = sqb.getGraphUser([])
 
             tse = TripleStoreExplorer(self.settings, self.request.session)
             nodes = tse.get_start_points()
@@ -166,47 +151,49 @@ class AskView(object):
 
         sqs = SparqlQueryStats(self.settings, self.request.session)
         qlaucher = QueryLauncher(self.settings, self.request.session)
+        qmlaucher = MultipleQueryLauncher(self.settings, self.request.session)
+        em = EndpointManager(self.settings, self.request.session)
 
         public_stats = {}
         private_stats = {}
 
         # Number of triples
-        results_pub = qlaucher.process_query(sqs.get_number_of_triples('public').query)
+        results_pub = qmlaucher.process_query(sqs.get_number_of_triples('public').query,em.listAskomicsEndpoints())
         results_priv = qlaucher.process_query(sqs.get_number_of_triples('private').query)
 
         public_stats['ntriples'] = results_pub[0]['number']
         private_stats['ntriples'] = results_priv[0]['number']
 
         # Number of entities
-        results_pub = qlaucher.process_query(sqs.get_number_of_entities('public').query)
+        results_pub = qmlaucher.process_query(sqs.get_number_of_entities('public').query,em.listAskomicsEndpoints())
         results_priv = qlaucher.process_query(sqs.get_number_of_entities('private').query)
 
         public_stats['nentities'] = results_pub[0]['number']
         private_stats['nentities'] = results_priv[0]['number']
 
         # Number of classes
-        results_pub = qlaucher.process_query(sqs.get_number_of_classes('public').query)
+        results_pub = qmlaucher.process_query(sqs.get_number_of_classes('public').query,em.listAskomicsEndpoints())
         results_priv = qlaucher.process_query(sqs.get_number_of_classes('private').query)
 
         public_stats['nclasses'] = results_pub[0]['number']
         private_stats['nclasses'] = results_priv[0]['number']
 
         # Number of graphs
-        results_pub = qlaucher.process_query(sqs.get_number_of_subgraph('public').query)
+        results_pub = qmlaucher.process_query(sqs.get_number_of_subgraph('public').query,em.listAskomicsEndpoints())
         results_priv = qlaucher.process_query(sqs.get_number_of_subgraph('private').query)
 
         public_stats['ngraphs'] = results_pub[0]['number']
         private_stats['ngraphs'] = results_priv[0]['number']
 
         # Graphs info
-        results_pub = qlaucher.process_query(sqs.get_subgraph_infos('public').query)
+        results_pub = qmlaucher.process_query(sqs.get_subgraph_infos('public').query,em.listAskomicsEndpoints())
         results_priv = qlaucher.process_query(sqs.get_subgraph_infos('private').query)
 
         public_stats['graphs'] = results_pub
         private_stats['graphs'] = results_priv
 
         # Classes and relations
-        results_pub = qlaucher.process_query(sqs.get_rel_of_classes('public').query)
+        results_pub = qmlaucher.process_query(sqs.get_rel_of_classes('public').query,em.listAskomicsEndpoints())
         results_priv = qlaucher.process_query(sqs.get_rel_of_classes('private').query)
 
         public_stats['class_rel'] = results_pub
@@ -231,7 +218,7 @@ class AskView(object):
         private_stats['class_rel'] = tmp
 
         # class and attributes
-        results_pub = qlaucher.process_query(sqs.get_attr_of_classes('public').query)
+        results_pub = qmlaucher.process_query(sqs.get_attr_of_classes('public').query,em.listAskomicsEndpoints())
         results_priv = qlaucher.process_query(sqs.get_attr_of_classes('private').query)
 
         tmp = {}
@@ -276,9 +263,9 @@ class AskView(object):
             for graph in named_graphs:
 
                 self.log.debug("--- DELETE GRAPH : %s", graph['g'])
-                ql.execute_query(sqb.get_drop_named_graph(graph['g']).query)
+                ql.process_query(sqb.get_drop_named_graph(graph['g']).query)
                 #delete metadatas
-                ql.execute_query(sqb.get_delete_metadatas_of_graph(graph['g']).query)
+                ql.process_query(sqb.get_delete_metadatas_of_graph(graph['g']).query)
 
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
@@ -290,7 +277,7 @@ class AskView(object):
     @view_config(route_name='delete_graph', request_method='POST')
     def delete_graph(self):
         """
-        Delete selected named graphs and their metadatas
+
         """
 
         self.checkAuthSession()
@@ -304,9 +291,75 @@ class AskView(object):
 
         for graph in graphs:
             self.log.debug("--- DELETE GRAPH : %s", graph)
-            ql.execute_query(sqb.get_drop_named_graph(graph).query)
+            ql.process_query(sqb.get_drop_named_graph(graph).query)
             #delete metadatas
-            ql.execute_query(sqb.get_delete_metadatas_of_graph(graph).query)
+            ql.process_query(sqb.get_delete_metadatas_of_graph(graph).query)
+
+
+    @view_config(route_name='delete_endpoints', request_method='POST')
+    def delete_endpoints(self):
+        import pyramid.httpexceptions as exc
+        """
+
+        """
+
+        self.checkAuthSession()
+
+        if 'endpoints' not in self.request.json_body:
+            raise exc.exception_response(404)
+
+        em = EndpointManager(self.settings, self.request.session)
+
+        for id in self.request.json_body['endpoints']:
+            em.remove(id)
+
+    @view_config(route_name='add_endpoint', request_method='POST')
+    def add_endpoint(self):
+        import pyramid.httpexceptions as exc
+        """
+
+        """
+
+        self.checkAuthSession()
+
+        if 'name' not in self.request.json_body:
+            raise exc.exception_response(404)
+        if 'url' not in self.request.json_body:
+            raise exc.exception_response(404)
+        if 'auth' not in self.request.json_body:
+            raise exc.exception_response(404)
+
+        name = self.request.json_body['name']
+        url = self.request.json_body['url']
+        auth = self.request.json_body['auth']
+
+        em = EndpointManager(self.settings, self.request.session)
+        em.saveEndpoint(name,url,auth,True)
+
+    @view_config(route_name='enable_endpoints', request_method='POST')
+    def enable_endpoints(self):
+        import pyramid.httpexceptions as exc
+        """
+
+        """
+
+        self.checkAuthSession()
+
+        if 'id' not in self.request.json_body:
+           raise exc.exception_response(404)
+        if 'enable' not in self.request.json_body:
+           raise exc.exception_response(404)
+
+        id = self.request.json_body['id']
+        enable = self.request.json_body['enable']
+
+        em = EndpointManager(self.settings, self.request.session)
+
+        if enable:
+           em.enable(id)
+        else:
+           em.disable(id,"")
+
 
     @view_config(route_name='list_user_graph', request_method='GET')
     def list_user_graph(self):
@@ -319,32 +372,55 @@ class AskView(object):
         sqg = SparqlQueryGraph(self.settings, self.request.session)
         query_launcher = QueryLauncher(self.settings, self.request.session)
 
-        res = query_launcher.execute_query(sqg.get_user_graph_infos_with_count().query)
+        res = query_launcher.process_query(sqg.get_user_graph_infos_with_count().query)
 
         named_graphs = []
 
-        for index_result in range(len(res['results']['bindings'])):
-            if not 'date' in res['results']['bindings'][index_result]:
+        for index_result in range(len(res)):
+            if not 'date' in res[index_result]:
                 self.log.warn('============= bad results user graph =================')
-                self.log.warn(res['results']['bindings'][index_result])
+                self.log.warn(res[index_result])
                 self.log.warn("============================================================")
                 continue
-            dat = datetime.datetime.strptime(res['results']['bindings'][index_result]['date']['value'], "%Y-%m-%dT%H:%M:%S.%f")
+            
+            dat = datetime.datetime.strptime(res[index_result]['date'], "%Y-%m-%dT%H:%M:%S.%f")
 
             readable_date = dat.strftime("%d/%m/%Y %H:%M:%S") #dd/mm/YYYY hh:ii:ss
+            endpt = ''
+
+            if 'endpoint' in res[index_result].keys():
+                endpt = res[index_result]['endpoint'],
 
             named_graphs.append({
-                'g': res['results']['bindings'][index_result]['g']['value'],
-                'name': res['results']['bindings'][index_result]['name']['value'],
-                'count': res['results']['bindings'][index_result]['co']['value'],
-                'date': res['results']['bindings'][index_result]['date']['value'],
+                'endpoint' : endpt,
+                'g': res[index_result]['g'],
+                'name': res[index_result]['name'],
+                'count': res[index_result]['co'],
+                'date': res[index_result]['date'],
                 'readable_date': readable_date,
-                'access': res['results']['bindings'][index_result]['access']['value'],
-                'owner': res['results']['bindings'][index_result]['owner']['value'],
-                'access_bool': bool(res['results']['bindings'][index_result]['access']['value'] == 'public')
+                'access': res[index_result]['access'],
+                'owner': res[index_result]['owner'],
+                'access_bool': bool(res[index_result]['access'] == 'public')
             })
 
         return named_graphs
+
+    @view_config(route_name='list_endpoints', request_method='GET')
+    def list_endpoints(self):
+        """
+        Return a list with all the named graphs of a user.
+        """
+
+        self.checkAuthSession()
+        session = {}
+
+        em = EndpointManager(self.settings, self.request.session)
+        session['askomics'] = em.listEndpoints()
+
+        sqb = SparqlQueryBuilder(self.settings, self.request.session)
+        session['external'] = sqb.getExternalServiceEndpoint()
+        return session
+
 
     @view_config(route_name='guess_csv_header_type', request_method='POST')
     def guess_csv_header_type(self):
@@ -397,11 +473,12 @@ class AskView(object):
 
             # get all taxon in the TS
             sqg = SparqlQueryGraph(self.settings, self.request.session)
-            ql = QueryLauncher(self.settings, self.request.session)
-            res = ql.execute_query(sqg.get_all_taxons().query)
+            ql = MultipleQueryLauncher(self.settings, self.request.session)
+            em = EndpointManager(self.settings, self.request.session)
+            res = ql.process_query(sqg.get_all_taxons().query,em.listAskomicsEndpoints())
             taxons_list = []
-            for elem in res['results']['bindings']:
-                taxons_list.append(elem['taxon']['value'])
+            for elem in res:
+                taxons_list.append(elem['taxon'])
             self.data['taxons'] = taxons_list
 
             for src_file in source_files:
@@ -437,7 +514,7 @@ class AskView(object):
                     except Exception as e:
                         self.log.debug('error !!')
                         traceback.print_exc(file=sys.stdout)
-                        infos['error'] = 'Could not parse the file, are you sure it is a valid GFF3 file?'
+                        infos['error'] = 'Can not parse the file GFF File :'+ str(e)
                         self.log.error('error with gff examiner: ' + str(e))
 
                     self.data['files'].append(infos)
@@ -588,8 +665,8 @@ class AskView(object):
             #rollback
             sqb = SparqlQueryBuilder(self.settings, self.request.session)
             query_laucher = QueryLauncher(self.settings, self.request.session)
-            query_laucher.execute_query(sqb.get_drop_named_graph(src_file.graph).query)
-            query_laucher.execute_query(sqb.get_delete_metadatas_of_graph(src_file.graph).query)
+            query_laucher.process_query(sqb.get_drop_named_graph(src_file.graph).query)
+            query_laucher.process_query(sqb.get_delete_metadatas_of_graph(src_file.graph).query)
 
             traceback.print_exc(file=sys.stdout)
             jm.updateEndSparqlJob(jobid,"Error")
@@ -644,8 +721,8 @@ class AskView(object):
             #rollback
             sqb = SparqlQueryBuilder(self.settings, self.request.session)
             query_laucher = QueryLauncher(self.settings, self.request.session)
-            query_laucher.execute_query(sqb.get_drop_named_graph(src_file_gff.graph).query)
-            query_laucher.execute_query(sqb.get_delete_metadatas_of_graph(src_file_gff.graph).query)
+            query_laucher.process_query(sqb.get_drop_named_graph(src_file_gff.graph).query)
+            query_laucher.process_query(sqb.get_delete_metadatas_of_graph(src_file_gff.graph).query)
 
             traceback.print_exc(file=sys.stdout)
             jm.updateEndSparqlJob(jobid,"Error")
@@ -693,8 +770,8 @@ class AskView(object):
             #rollback
             sqb = SparqlQueryBuilder(self.settings, self.request.session)
             query_laucher = QueryLauncher(self.settings, self.request.session)
-            query_laucher.execute_query(sqb.get_drop_named_graph(src_file_ttl.graph).query)
-            query_laucher.execute_query(sqb.get_delete_metadatas_of_graph(src_file_ttl.graph).query)
+            query_laucher.process_query(sqb.get_drop_named_graph(src_file_ttl.graph).query)
+            query_laucher.process_query(sqb.get_delete_metadatas_of_graph(src_file_ttl.graph).query)
 
             jm.updateEndSparqlJob(jobid,"Error")
             jm.updatePreviewJob(jobid,'Problem when integration of '+file_name+'.</br>'+str(e))
@@ -747,8 +824,8 @@ class AskView(object):
             #rollback
             sqb = SparqlQueryBuilder(self.settings, self.request.session)
             query_laucher = QueryLauncher(self.settings, self.request.session)
-            query_laucher.execute_query(sqb.get_drop_named_graph(src_file_bed.graph).query)
-            query_laucher.execute_query(sqb.get_delete_metadatas_of_graph(src_file_bed.graph).query)
+            query_laucher.process_query(sqb.get_drop_named_graph(src_file_bed.graph).query)
+            query_laucher.process_query(sqb.get_delete_metadatas_of_graph(src_file_bed.graph).query)
 
             traceback.print_exc(file=sys.stdout)
             jm.updateEndSparqlJob(jobid,"Error")
@@ -765,13 +842,8 @@ class AskView(object):
         self.log.debug("== getUserAbstraction ==")
         body = self.request.json_body
 
-        service = ''
-        if 'service' in body :
-            service = body['service']
-
         tse = TripleStoreExplorer(self.settings, self.request.session)
-        self.data.update(tse.getUserAbstraction(service))
-
+        self.data.update(tse.getUserAbstraction())
         return self.data
 
     #TODO : this method is too generic. The build of RDF Shortucts should be here to avoid injection with bad intention...
@@ -830,70 +902,13 @@ class AskView(object):
             query_string += "<"+body["shortcut"]+">" + " ?r ?a.\n"
             query_string += "\t}\n"
 
-            res = ql.execute_query(query_string)
+            res = ql.process_query(query_string)
         except Exception as e:
             #exc_type, exc_value, exc_traceback = sys.exc_info()
             #traceback.print_exc(limit=8)
             traceback.print_exc(file=sys.stdout)
             self.data['error'] = str(e)
             self.request.response.status = 400
-
-        return self.data
-
-    @view_config(route_name='modules', request_method='POST')
-    def modules(self):
-
-        # Denny access for non loged users
-        if not self.request.session['admin'] :
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
-
-        try:
-            mm = ModulesManager(self.settings, self.request.session)
-            self.data =  mm.getListModules()
-        except Exception as e:
-            traceback.print_exc(file=sys.stdout)
-            self.data['error'] = str(e)
-            self.request.response.status = 400
-
-        return self.data
-
-    @view_config(route_name='manage_module', request_method='POST')
-    def manageModules(self):
-        # Denny access for non loged users
-        if not self.request.session['admin'] :
-            return 'forbidden'
-
-        # Denny for blocked users
-        if self.request.session['blocked']:
-            return 'blocked'
-
-        body = self.request.json_body
-
-        jm = JobManager(self.settings, self.request.session)
-        jobid = jm.saveStartSparqlJob("Module "+body['name'])
-
-        try:
-
-            mm = ModulesManager(self.settings, self.request.session)
-            check = bool(body['checked'])
-
-            mm.manageModules(
-                    self.request.host_url,
-                    body['uri'],
-                    body['name'],
-                    check)
-
-            jm.updateEndSparqlJob(jobid,"Done",nr=0)
-            jm.updatePreviewJob(jobid,body['name'] + " ["+ str(body['checked'])+ "] done.")
-
-        except Exception as e:
-            traceback.print_exc(file=sys.stdout)
-            jm.updateEndSparqlJob(jobid,"Error")
-            jm.updatePreviewJob(jobid,'Problem whith module '+body['name']+'.</br>'+str(e))
 
         return self.data
 
@@ -921,13 +936,16 @@ class AskView(object):
             jobid = jm.saveStartSparqlJob("SPARQL Request",requestGraph=rg)
 
         try:
+            typeRequest = ''
             tse = TripleStoreExplorer(self.settings, self.request.session)
-            lfrom = []
-            if 'from' in body:
-                lfrom = body['from']
 
-            results, query = tse.build_sparql_query_from_json(lfrom, body["variates"], body["constraintesRelations"], True)
-
+            results, query, typeRequest = tse.build_sparql_query_from_json(
+                                                 body["endpoints"],
+                                                 body["type_endpoints"],
+                                                 body["graphs"],
+                                                 body["variates"],
+                                                 body["constraintesRelations"],
+                                                 True)
             # Remove prefixes in the results table
             limit = int(body["limit"]) + 1
             if body["limit"] != -1 and limit < len(results):
@@ -941,9 +959,15 @@ class AskView(object):
             if (not 'nofile' in body) or body['nofile']:
                 query_laucher = QueryLauncher(self.settings, self.request.session)
                 self.data['file'] = query_laucher.format_results_csv(results, ordered_headers)
+            print("---------------------")
+            print(self.data['file'])
 
             if persist:
-                jm.updateEndSparqlJob(jobid,"Ok",nr=len(results),data=self.data['values'], file=self.data['file'])
+                npreview = 30
+                if "limit" in body:
+                    npreview = body["limit"]
+
+                jm.updateEndSparqlJob(jobid,"Ok "+typeRequest,nr=len(results),data=self.data['values'][0:npreview], file=self.data['file'])
 
         except Exception as e:
             #exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -953,7 +977,7 @@ class AskView(object):
             self.data['file'] = ""
 
             if persist:
-                jm.updateEndSparqlJob(jobid,"Error")
+                jm.updateEndSparqlJob(jobid,"Error "+typeRequest)
                 jm.updatePreviewJob(jobid,str(e))
 
         self.data['galaxy'] = self.request.session['galaxy']
@@ -1002,7 +1026,6 @@ class AskView(object):
 
     @view_config(route_name='ttl', request_method='GET')
     def uploadTtl(self):
-
         pm = ParamManager(self.settings, self.request.session)
         response = FileResponse(
             pm.get_rdf_directory()+self.request.matchdict['name'],
@@ -1025,8 +1048,10 @@ class AskView(object):
     def deletCsv(self):
 
         pm = ParamManager(self.settings, self.request.session)
-        os.remove(pm.get_user_csv_directory()+self.request.matchdict['name']),
-
+        try:
+            os.remove(pm.get_user_csv_directory()+self.request.matchdict['name']),
+        except Exception as e:
+            self.log.warn(str(e))
 
 
     @view_config(route_name='signup', request_method='POST')
@@ -1508,8 +1533,8 @@ class AskView(object):
         # Drop all this graph
         for graph in list_graph:
             try:
-                query_laucher.execute_query(sqb.get_drop_named_graph(graph).query)
-                query_laucher.execute_query(sqb.get_delete_metadatas_of_graph(graph).query)
+                query_laucher.process_query(sqb.get_drop_named_graph(graph).query)
+                query_laucher.process_query(sqb.get_delete_metadatas_of_graph(graph).query)
             except Exception as e:
                 self.data['error'] = str(e)
                 self.log.error(str(e))
@@ -1519,7 +1544,7 @@ class AskView(object):
 
         # Delete user infos
         try:
-            query_laucher.execute_query(sqb.delete_user(username).query)
+            query_laucher.process_query(sqb.delete_user(username).query)
         except Exception as e:
             return 'failed: ' + str(e)
 
@@ -1787,14 +1812,11 @@ class AskView(object):
 
     @view_config(route_name='get_uploaded_files', request_method="GET")
     def get_uploaded_files(self):
-
         param_manager = ParamManager(self.settings, self.request.session)
         path = param_manager.get_upload_directory()
-        allowed_upload = param_manager.get_param('askomics.allowed_upload')
 
         self.data = {}
         self.data['files'] = {}
-
         files = os.listdir(path)
 
         for file in files:
@@ -1803,8 +1825,6 @@ class AskView(object):
             self.data['files'][file] = file_size
 
         self.data['galaxy'] = self.request.session['galaxy']
-        self.data['allowed_upload'] = allowed_upload
-
         return self.data
 
     @view_config(route_name="delete_uploaded_files", request_method="POST")

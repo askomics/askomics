@@ -69,8 +69,9 @@ class JobManager(ParamManager):
         d = 'NULL'
 
         if data:
-            d = "'"+json.dumps(data)+"'"
+            d = "'"+ParamManager.encode_to_rdf_uri(json.dumps(data, ensure_ascii=False))+"'"
 
+        print(d)
         f = 'NULL'
         if file:
             f = "'"+file+"'"
@@ -82,7 +83,7 @@ class JobManager(ParamManager):
                 + " data = "+ d +"," \
                 + " file = "+ f \
                 + " WHERE jobID = "+str(jobid)
-        print(reqSql)
+
         c.execute(reqSql)
         conn.commit()
         conn.close()
@@ -126,7 +127,7 @@ class JobManager(ParamManager):
                 d['start'] = row['start']
                 d['end'] = row['end']
                 if row['data'] != None :
-                    d['data'] = json.loads(row['data'])
+                    d['data'] = json.loads(ParamManager.decode_to_rdf_uri(row['data']))
                 if row['file'] != None :
                     d['file'] = row['file']
                 d['preview'] = row['preview']

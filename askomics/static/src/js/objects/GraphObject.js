@@ -9,8 +9,6 @@ class GraphObject {
         throw "GraphObject : Constructor need an 'uri' node:"+JSON.stringify(obj);
     }
 
-    console.debug("GraphObject constructor:"+JSON.stringify(obj));
-
     this._id        = -1;
     this._SPARQLid  = "";
     this._suggested = true ;

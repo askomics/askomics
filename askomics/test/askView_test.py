@@ -137,7 +137,7 @@ class AskViewTests(unittest.TestCase):
         self.tps.clean_up()
 
         # load a test
-        self.tps.load_people()
+        timestamp_people = self.tps.load_people()
         self.tps.load_instruments()
 
         data = self.askview.empty_database()
@@ -222,29 +222,33 @@ class AskViewTests(unittest.TestCase):
         assert len(data) == 2
         assert isinstance(data, list)
 
+        print("-- PRINT data --")
         print(data)
+        print("--")
 
         assert {
             'g': 'urn:sparql:test_askomics:jdoe:people_tsv_' + timestamp_people,
-            'count': '78',
+            'count': '79',
             'access': 'public',
             'owner': 'jdoe',
             'date': timestamp_people,
             'readable_date': readable_date_people,
             'name': 'people.tsv',
-            'access_bool': True
+            'access_bool': True,
+            'endpoint': ''
         } in data
 
         assert {
             'g':
             'urn:sparql:test_askomics:jdoe:instruments_tsv_' + timestamp_instrument,
-            'count': '69',
+            'count': '70',
             'access': 'private',
             'owner': 'jdoe',
             'date': timestamp_instrument,
             'readable_date': readable_date_instrument,
             'name': 'instruments.tsv',
-            'access_bool': False
+            'access_bool': False,
+            'endpoint': ''
         } in data
 
     def test_source_files_overview(self):
@@ -390,9 +394,21 @@ class AskViewTests(unittest.TestCase):
         self.request.json_body = {}
 
         data = self.askview.getUserAbstraction()
+        print("-- data --")
+        for k in data:
+            print(k)
+        print(" -- ")
 
         #FIXME hard to compare wih expected result cause there is a timestamp
-        assert len(data) == 7
+        assert len(data) == 8
+        assert 'categories' in data
+        assert 'endpoints' in data
+        assert 'endpoints_ext' in data
+        assert 'attributes' in data
+        assert 'entities' in data
+        assert 'subclassof' in data
+        assert 'relations' in data
+        assert 'positionable' in data
 
     def test_importShortcut(self):
         """
@@ -415,9 +431,12 @@ class AskViewTests(unittest.TestCase):
         self.tps.clean_up()
 
         # load a test
-        self.tps.load_people()
+        timestamp_people = self.tps.load_people()
 
         self.request.json_body = {
+            'type_endpoints'       : [ "askomics" ],
+            'endpoints'            : [ "http://localhost:8890/sparql" ],
+            'graphs'               : [ 'urn:sparql:test_askomics:jdoe:people_tsv_' + timestamp_people ],
             'limit': 30,
             'constraintesRelations': [[[[
                 '?URIPeople1 rdf:type <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#People>',
@@ -455,9 +474,12 @@ class AskViewTests(unittest.TestCase):
         self.tps.clean_up()
 
         # load a test
-        self.tps.load_people()
+        timestamp_people = self.tps.load_people()
 
         self.request.json_body = {
+            'type_endpoints'       : [ "askomics" ],
+            'endpoints'            : [ "http://localhost:8890/sparql" ],
+            'graphs'               : [ 'urn:sparql:test_askomics:jdoe:people_tsv_' + timestamp_people ],
             'export': False,
             'limit': 500,
             'constraintesRelations': [[[[

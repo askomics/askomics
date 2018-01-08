@@ -52,6 +52,15 @@ class ParamManager(object):
             'date': json.dumps
             }
 
+    def get_db_directory(self):
+
+        path = self.userfilesdir+"db/"
+
+        if not os.path.isdir(path):
+            os.makedirs(path)
+
+        return path
+
     def get_upload_directory(self):
         """Get the upload directory of a user, create it if not exist
 
@@ -87,7 +96,12 @@ class ParamManager(object):
         return mdir
 
     def get_rdf_directory(self):
-        return self.userfilesdir+"rdf/"
+
+        mdir = self.userfilesdir+"rdf/"
+        if not os.path.isdir(mdir):
+            os.makedirs(mdir)
+
+        return mdir
 
     def get_rdf_user_directory(self):
         if 'username' not in self.session:
@@ -113,6 +127,17 @@ class ParamManager(object):
             mdir = self.userfilesdir+"db/"
         else:
             mdir = self.userfilesdir+"db/"+self.session['username'] + '/'
+        if not os.path.isdir(mdir):
+            os.makedirs(mdir)
+
+        return mdir
+
+    def get_common_user_directory(self):
+
+        if 'username' not in self.session:
+            mdir = self.userfilesdir+"common/"
+        else:
+            mdir = self.userfilesdir+"common/"+self.session['username'] + '/'
         if not os.path.isdir(mdir):
             os.makedirs(mdir)
 

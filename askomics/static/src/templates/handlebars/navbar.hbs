@@ -17,12 +17,14 @@
                 <ul class="dropdown-menu">
                   <li id="datasets" onclick="__ihm.loadNamedGraphs()"><a href="#">Datasets</a></li>
                   <li id="statistics" onclick="__ihm.loadStatistics()"><a href="#">Statistics</a></li>
+                  <li id="endpoints" onclick="__ihm.loadEndpoints()"><a href="#">Endpoints</a></li>
                 </ul>
               </li>
             {{/if}}
             {{/if}}
             <li id="about"><a href="#"><span class="glyphicon glyphicon-info-sign"></span></a></li>
-            <li id="help"><a href="#" onclick="AskomicsHelp.start();"><span class="glyphicon glyphicon-question-sign"></span></a></li>
+          <!--  <li id="help"><a href="#" onclick="AskomicsHelp.start();"><span class="glyphicon glyphicon-question-sign"></span></a></li>-->
+            <li id="help"><a onclick="window.open('https://github.com/askomics/askomics/wiki', 'test').focus();"><span class="glyphicon glyphicon-question-sign"></span></a></li>
             {{#if loged}}
 
             <li id="user_menu" class="dropdown">

@@ -38,6 +38,7 @@ $(function () {
             headers.push($(this).val());
         });
         loadSourceFile($(event.target).closest('.template-source_file'), false, headers);
+        __ihm.displayModal('Upload TSV file.', '', 'Close');
     });
 
     // Load the tsv file into the public graph
@@ -192,7 +193,14 @@ function displayGffForm(file, taxons) {
 
     if ( ! ('entities' in file) ) {
       let template = AskOmics.templates.error_message;
-      let context = { message: '['+file.name +']: None entities are defined in this Gff File !' };
+
+      let context = {} ;
+      if ( 'error' in file ) {
+        context = { message: '['+file.name +']: '+file.error };
+      }
+      else
+        context = { message: '['+file.name +']: None entities are defined in this Gff File ' };
+
       let html = template(context);
       $("#content_integration").append(html);
       return;
@@ -553,8 +561,6 @@ function loadSourceFile(file_elem, pub, headers) {
     });
 
     __ihm.resetStats();
-
-  new ModulesParametersView().updateModules();
 }
 
 /**

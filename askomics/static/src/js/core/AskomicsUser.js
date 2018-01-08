@@ -24,7 +24,7 @@ class AskomicsUser {
             if ( user.isLogin() ) {
               user.intervalListener = setInterval(function(){
                 user.checkUser();
-              }, 15000);
+              }, 30000);
               __ihm.displayNavbar(true, user.username, user.admin, user.blocked);
             } else {
               if ( user.intervalListener != undefined ) {
@@ -115,6 +115,7 @@ class AskomicsUser {
     logout() {
         let service = new RestServiceJs('logout');
         service.getAll(function() {
+            AskomicsUser.cleanHtmlLogin();
             location.reload();
         });
 

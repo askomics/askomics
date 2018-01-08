@@ -8,7 +8,7 @@ from pyramid.session import SignedCookieSessionFactory
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """
-    my_session_factory = SignedCookieSessionFactory('itsaseekreet',timeout=1200)
+    my_session_factory = SignedCookieSessionFactory('itsaseekreet',timeout=1800)
 
     config = Configurator(settings=settings)
     config.set_session_factory(my_session_factory)
@@ -29,6 +29,10 @@ def main(global_config, **settings):
     config.add_route('empty_user_database', '/empty_user_database')
     config.add_route('list_user_graph', '/list_user_graph')
     config.add_route('delete_graph', '/delete_graph')
+    config.add_route('list_endpoints', '/list_endpoints')
+    config.add_route('delete_endpoints', '/delete_endpoints')
+    config.add_route('add_endpoint', '/add_endpoint')
+    config.add_route('enable_endpoints', '/enable_endpoints')
     config.add_route('getUserAbstraction', '/userAbstraction')
     config.add_route('sparqlquery', '/sparqlquery')
     config.add_route('getSparqlQueryInTextFormat', '/getSparqlQueryInTextFormat')
@@ -57,8 +61,6 @@ def main(global_config, **settings):
     # Shortcuts and modules routes
     config.add_route('importShortcut', '/importShortcut')
     config.add_route('deleteShortcut', '/deleteShortcut')
-    config.add_route('modules', '/modules')
-    config.add_route('manage_module', '/manage_module')
 
     # Data upload routes
     # Inspired from https://github.com/blueimp/jQuery-File-Upload/ and https://github.com/grooverdan/pyramid-jQuery-File-Upload-demo/

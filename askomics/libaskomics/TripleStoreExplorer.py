@@ -9,7 +9,10 @@ from askomics.libaskomics.ParamManager import ParamManager
 from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
 from askomics.libaskomics.rdfdb.SparqlQueryGraph import SparqlQueryGraph
 from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
+from askomics.libaskomics.rdfdb.MultipleQueryLauncher import MultipleQueryLauncher
+from askomics.libaskomics.rdfdb.FederationQueryLauncher import FederationQueryLauncher
 
+from askomics.libaskomics.EndpointManager import EndpointManager
 
 class TripleStoreExplorer(ParamManager):
     """
@@ -39,15 +42,18 @@ class TripleStoreExplorer(ParamManager):
         nodes = []
 
         sqg = SparqlQueryGraph(self.settings, self.session)
-        ql = QueryLauncher(self.settings, self.session)
-        results = ql.process_query(sqg.get_start_point().query)
+        ql = MultipleQueryLauncher(self.settings, self.session)
+        em = EndpointManager(self.settings, self.session)
+
+        results = ql.process_query(sqg.get_public_start_point().query,em.listAskomicsEndpoints())
+        results += ql.process_query(sqg.get_user_start_point().query,em.listAskomicsEndpoints())
 
         for result in results:
             g  = result["g"]
             uri = result["nodeUri"]
             label = result["nodeLabel"]
 
-            if 'private' in result['accesLevel']:
+            if ('accesLevel' in result) and ('private' in result['accesLevel']):
                 public = False
                 private = True
             else:
@@ -58,7 +64,7 @@ class TripleStoreExplorer(ParamManager):
 
         return nodes
 
-    def getUserAbstraction(self,service):
+    def getUserAbstraction(self):
         """
         Get the user abstraction (relation and entity as subject and object)
 
@@ -69,16 +75,24 @@ class TripleStoreExplorer(ParamManager):
         self.log.debug(" =========== TripleStoreExplorer:getUserAbstraction ===========")
 
         sqg = SparqlQueryGraph(self.settings, self.session)
-        ql = QueryLauncher(self.settings, self.session)
+        ql = MultipleQueryLauncher(self.settings, self.session)
+        em = EndpointManager(self.settings, self.session)
 
-        data['relations'] = ql.process_query(sqg.get_abstraction_relation('owl:ObjectProperty').query)
-        data['subclassof'] = ql.process_query(sqg.get_isa_relation_entities().query)
-        data['entities'] = ql.process_query(sqg.get_abstraction_entity().query)
-        data['attributes'] = ql.process_query(sqg.get_abstraction_attribute_entity().query)
-        data['categories'] = ql.process_query(sqg.get_abstraction_category_entity().query)
-        data['positionable'] = ql.process_query(sqg.get_abstraction_positionable_entity().query)
-        data['graph'] = sqg.getGraphUser()
+        data['relations'] = ql.process_query(sqg.get_public_abstraction_relation('owl:ObjectProperty').query,em.listAskomicsEndpoints())
+        data['relations'] += ql.process_query(sqg.get_user_abstraction_relation('owl:ObjectProperty').query,em.listAskomicsEndpoints())
+        data['subclassof'] = ql.process_query(sqg.get_isa_relation_entities().query,em.listAskomicsEndpoints())
+        data['entities'] = ql.process_query(sqg.get_public_abstraction_entity().query,em.listAskomicsEndpoints())
+        data['entities'] += ql.process_query(sqg.get_user_abstraction_entity().query,em.listAskomicsEndpoints())
+        data['attributes'] = ql.process_query(sqg.get_public_abstraction_attribute_entity().query,em.listAskomicsEndpoints())
+        data['attributes'] += ql.process_query(sqg.get_user_abstraction_attribute_entity().query,em.listAskomicsEndpoints())
+        data['categories'] = ql.process_query(sqg.get_public_abstraction_category_entity().query,em.listAskomicsEndpoints())
+        data['categories'] += ql.process_query(sqg.get_user_abstraction_category_entity().query,em.listAskomicsEndpoints())
+        data['positionable'] = ql.process_query(sqg.get_abstraction_positionable_entity().query,em.listAskomicsEndpoints())
+        data['endpoints'] = sqg.getGraphUser()
+        data['endpoints_ext'] = sqg.getExternalServiceEndpoint()
 
+        self.log.debug("============== ENDPOINTS AND GRAPH =====================================")
+        self.log.debug(data['endpoints'])
         return data
 
     def build_recursive_block(self, tabul, constraints):
@@ -111,71 +125,78 @@ class TripleStoreExplorer(ParamManager):
             return req
         return ""
 
-    def build_sparql_query_from_json(self, fromgraphs, variates, constraintes_relations,limit, send_request_to_tps=True):
+    def build_sparql_query_from_json(self,listEndpoints, typeEndpoints, fromgraphs, variates, constraintes_relations,limit, send_request_to_tps=True):
         """
         Build a sparql query from JSON constraints
         """
+        if len(typeEndpoints) != len(listEndpoints):
+            self.log.warn("listEndpoints:"+str(listEndpoints))
+            self.log.warn("typeEndpoints:"+str(typeEndpoints))
+            raise ValueError("Devel error. Different size for List Endpoints and List type Endpoints. ")
 
         select = ' '.join(variates)
 
         sqb = SparqlQueryBuilder(self.settings, self.session)
-        query_launcher = QueryLauncher(self.settings, self.session)
         query = self.build_recursive_block('', constraintes_relations)
+
 
         # if limit != None and limit > 0:
         #     query += ' LIMIT ' + str(limit)
+        self.log.debug("============ build_sparql_query_from_json ========")
+        self.log.debug("type_endpoints:"+str(typeEndpoints))
+        self.log.debug("endpoints:"+str(listEndpoints))
+        self.log.debug("graphs"+str(fromgraphs))
+
+        extreq = False
 
         if send_request_to_tps:
-            results = query_launcher.process_query(sqb.custom_query(fromgraphs, select, query).query)
+            if len(listEndpoints) == 0:
+                raise ValueError("None endpoint are defined fo the current SPARLQ query !")
+            elif len(listEndpoints)==1:
+                self.log.debug("============ QueryLauncher ========")
+                typeQuery = ''
+                endpoint = ''
+                type_endpoint='askomics'
+                if len(listEndpoints) == 1 :
+                    endpoint = listEndpoints[0]
+
+                if typeEndpoints[0] != 'askomics':
+                    extreq = True
+
+                query_launcher = QueryLauncher(self.settings, self.session,name = endpoint, endpoint = endpoint)
+            else:
+
+                self.log.debug("============ FederationQueryLauncher ========")
+
+                typeQuery = '(Federation)'
+                lE = []
+                iCount = 0
+
+                for i in range(0, len(listEndpoints)):
+                    iCount+=1
+                    end = {}
+                    end['name'] = "endpoint"+str(iCount)
+                    end['endpoint'] =  listEndpoints[i]
+                    end['askomics'] =  (typeEndpoints == 'askomics')
+                    end['auth'] = 'Basic'
+                    end['username'] = None
+                    end['password'] = None
+                    lE.append(end)
+
+
+                query_launcher = FederationQueryLauncher(self.settings, self.session,lE)
+
+            results = query_launcher.process_query(sqb.custom_query(fromgraphs, select, query,externalrequest=extreq).query)
         else:
             results = []
 
-        return results, sqb.custom_query(fromgraphs, select, query).query
-
-    #FIXME: DEAD CODE ??
-    def build_sparql_query_from_json2(self, variates, constraintes_relations, limit, send_request_to_TPS):
-        """
-        build a sparql query from json
-        """
-        self.log.debug("variates")
-        self.log.debug(variates)
-        self.log.debug("constraintes_relations")
-        self.log.debug(constraintes_relations)
-
-        sqb = SparqlQueryBuilder(self.settings, self.session)
-        ql = QueryLauncher(self.settings, self.session)
-
-        req = ""
-        req += "SELECT DISTINCT "+' '.join(variates)+"\n"
-        #TODO OFI: External Service do not work and, anyway, graphes have to be selectionned by the user in the UI
-        #
-        #for graph in namedGraphs:
-        #    req += "FROM "+ "<"+graph+ ">"+"\n"
-        req += "WHERE \n"
-        req += self.build_recursive_block('', constraintes_relations)
-        if limit != None and limit >0 :
-            req +=" LIMIT "+str(limit)
-
-
-        sqb = SparqlQueryBuilder(self.settings, self.session)
-        prefixes = sqb.header_sparql_config(req)
-        query = prefixes+req
-
-        results = {}
-
-        if send_request_to_TPS:
-            ql = QueryLauncher(self.settings, self.session)
-            results = ql.process_query(query)
-        else:
-            # add comment inside query to inform user
-            query = "# endpoint = "+self.get_param("askomics.endpoint") + "\n" + query
-
-        return results, query
+        return results, sqb.custom_query(fromgraphs, select, query).query,typeQuery
 
     def get_prefix_uri(self):
         sqg = SparqlQueryGraph(self.settings, self.session)
-        ql = QueryLauncher(self.settings, self.session)
-        rs = ql.process_query(sqg.get_prefix_uri().query)
+        ql = MultipleQueryLauncher(self.settings, self.session)
+        em = EndpointManager(self.settings, self.session)
+        rs = ql.process_query(sqg.get_prefix_uri().query,em.listAskomicsEndpoints())
         results = {}
         r_buf = {}
 

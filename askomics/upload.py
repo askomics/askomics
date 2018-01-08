@@ -25,7 +25,7 @@ class FileUpload(object):
         pm = ParamManager(self.settings, self.request.session)
         self.upload_dir = pm.get_upload_directory()
         #self.upload_dir = request.session['upload_directory']
-        
+
         self.log.debug("upload_directory => "+self.upload_dir)
 
         self.allowed_types = self.settings["askomics.allowed_file_types"]
@@ -49,14 +49,16 @@ class FileUpload(object):
         return os.path.join(self.upload_dir, name)
 
     def validate(self, new_file):
+
         if new_file['size'] < self.min_size:
-            new_file['error'] = 'File is too small'
+            new_file['error'] = 'File is too small (See askomics.upload_min_size).'
         elif new_file['size'] > self.max_size:
-            new_file['error'] = 'File is too large'
-        #elif new_file['type'] not in self.allowed_types: # FIXME commented for tests
-        #    new_file['error'] = 'File type '+new_file['type']+' not allowed' # FIXME commented for tests
+            new_file['error'] = 'File is too large (See askomics.upload_max_size).'
+        elif new_file['type'] not in self.allowed_types: # FIXME commented for tests
+            new_file['error'] = 'File type '+new_file['type']+' not allowed (See askomics.allowed_file_types).' # FIXME commented for tests        else:
         else:
             return True
+
         return False
 
     def get_file_size(self, new_file):
@@ -92,7 +94,7 @@ class FileUpload(object):
     @view_config(request_method='GET', renderer="json")
     def get(self):
         p = self.request.matchdict.get('name')
-
+        print("GET:"+p)
         if p:
             return self.fileinfo(p)
         else:
@@ -132,19 +134,26 @@ class FileUpload(object):
             #self.check_file(field_storage.filename)
             result['size'] = self.get_file_size(field_storage.file)
             if self.validate(result):
-                #with open( self.filepath(result['name'] + '.type'), 'w') as f:
-                #    f.write(result['type'])
-                #concat file if exist
+
                 with open(self.filepath(result['name'])+"_tmp", 'wb') as f:
                     #concat file if exist
                     if os.path.isfile(self.filepath(result['name'])):
-                        shutil.copyfileobj(open(self.filepath(result['name']), 'rb'), f)
+                        shutil.copyfileobj(open(self.filepath(result['name']), "rb"), f)
                     shutil.copyfileobj(field_storage.file, f)
+                    f.close()
 
-                shutil.copyfileobj(open(self.filepath(result['name'])+"_tmp","rb"),open(self.filepath(result['name']),"wb"))
+                f1 = open(self.filepath(result['name']) + "_tmp", "rb")
+                f2 = open(self.filepath(result['name']), "wb")
+
+                shutil.copyfileobj(f1,f2)
+                f2.close()
+                f2 = open(self.filepath(result['name']), "rb")
+
+                f1.close()
                 #remove tmp
                 os.remove(self.filepath(result['name'])+"_tmp")
-                result['size'] = self.get_file_size(open(self.filepath(result['name']),"rb"))
+                result['size'] = self.get_file_size(f2)
+
                 result['delete_type'] = self.delete_method
                 result['delete_url'] = result['name']
                 if self.delete_method != 'DELETE':

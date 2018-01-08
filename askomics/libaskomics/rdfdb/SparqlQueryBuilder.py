@@ -6,7 +6,9 @@ from string import Template
 
 from askomics.libaskomics.rdfdb.SparqlQuery import SparqlQuery
 from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
+from askomics.libaskomics.rdfdb.MultipleQueryLauncher import MultipleQueryLauncher
 from askomics.libaskomics.ParamManager import ParamManager
+from askomics.libaskomics.EndpointManager import EndpointManager
 # from askomics.libaskomics.utils import prefix_lines
 
 class SparqlQueryBuilder(ParamManager):
@@ -28,40 +30,129 @@ class SparqlQueryBuilder(ParamManager):
         qu = self.build_query_on_the_fly({
             'select': '?g',
             'query': 'GRAPH ?g {\n'+\
-            "?g dc:creator '" + self.session['username'] + "' . } ",
+            "?g dc:creator '" + self.session['username'] + "' .\n"+
+            '\tFILTER NOT EXISTS { ?service a sd:Service. }\n' +
+            " } ",
             'post_action': 'GROUP BY ?g'
         }, True)
 
         ql = QueryLauncher(self.settings, self.session)
         results = ql.process_query(qu.query)
-        settings['private'] = []
+        endpoint = self.get_param("askomics.endpoint")
+        settings[endpoint] = {}
+        settings[endpoint]['private'] = []
+        settings[endpoint]['type'] = 'askomics'
 
         for elt in results:
             if 'g' not in elt:
                 continue
             if elt['g'] in removeGraph:
                 continue
-            settings['private'].append(elt['g'])
-        self.log.debug("setting['private']:\n"+str(settings['private']))
+            settings[endpoint]['private'].append(elt['g'])
 
-        #finding all public graph
+        #finding all public graph on all Askomics endpoint
         qu = self.build_query_on_the_fly({
             'select': '?g',
             'query': 'GRAPH ?g {\n'+
-            "?g :accessLevel 'public'. } "
+            "?g :accessLevel 'public'. \n"+
+            '\tFILTER NOT EXISTS { ?service a sd:Service. }\n' +
+            "} ",
+            'post_action': 'GROUP BY ?g'
         }, True)
-        ql = QueryLauncher(self.settings, self.session)
-        results = ql.process_query(qu.query)
-        settings['public'] = []
-        for elt in results:
-            if elt['g'] in removeGraph:
-                continue
-            settings['public'].append(elt['g'])
 
-        self.log.debug("setting['public']:\n"+str(settings['public']))
+        ql = MultipleQueryLauncher(self.settings, self.session)
+        em = EndpointManager(self.settings, self.session)
+
+        results = ql.process_query(qu.query,em.listAskomicsEndpoints(),indexByEndpoint=True)
+
+        for endpoint in results:
+            if endpoint not in settings:
+                settings[endpoint] = {}
+                settings[endpoint]['type'] = 'askomics'
+
+            settings[endpoint]['public'] = []
+            for elt in results[endpoint]:
+                if elt['g'] in removeGraph:
+                    continue
+                settings[endpoint]['public'].append(elt['g'])
+
+
+        #finding all external graph on all remote endpoint
+        qu = self.build_query_on_the_fly({
+            'select': '?g ?endpoint',
+            'query': 'GRAPH ?g {\n'+
+            " { { ?g :accessLevel 'public'. } \n"+
+            " UNION "+
+            " { ?g dc:creator '" + self.session['username'] + "'} } .\n"+
+            "\t?service a sd:Service.  \n" +
+            "\t?service sd:endpoint ?endpoint.\n"+
+            "} ",
+            'post_action': 'GROUP BY ?endpoint ?g'
+        }, True)
+
+        ql = MultipleQueryLauncher(self.settings, self.session)
+        em = EndpointManager(self.settings, self.session)
+
+        results = ql.process_query(qu.query,em.listAskomicsEndpoints(),indexByEndpoint=True)
+
+        for endpoint in results:
+            for elt in results[endpoint]:
+                if elt['g'] in removeGraph:
+                    continue
+                if elt['endpoint'] not in settings:
+                    settings[elt['endpoint']] = {}
+                    settings[elt['endpoint']]['type'] = 'external'
+                    settings[elt['endpoint']]['public'] = []
+
+                settings[elt['endpoint']]['public'].append(elt['g'])
+
+        self.log.debug("setting:\n"+str(settings))
         return settings
 
-    def build_query_on_the_fly(self, replacement, adminrequest=False):
+    def getExternalServiceEndpoint(self):
+        """
+            Get all external endpoint finding in all askomics endpoint
+        """
+        qu = self.build_query_on_the_fly({
+            'select': '?name ?url ?description ?class',
+            'query': ''+
+            "?service a sd:Service .\n"+
+            "?service sd:endpoint ?url .\n"+
+            "?service dcterms:title ?name .\n"+
+            "?service dcterms:description ?description .\n"+
+            "?service sd:defaultDataset ?dataset.\n"+
+            "?dataset sd:defaultGraph ?graph.\n"+
+            "?graph void:classPartition ?partition.\n"+
+            "?partition void:class ?class. \n",
+            'post_action': 'GROUP BY ?name ?url ?description ?class'
+        }, True)
+
+        ql = MultipleQueryLauncher(self.settings, self.session)
+        em = EndpointManager(self.settings, self.session)
+
+        results = ql.process_query(qu.query,em.listAskomicsEndpoints())
+
+        settings = {}
+        settings['endpoints'] = {}
+        settings['entities'] = {}
+
+        for r in results:
+            if r['url'] not in settings['endpoints']:
+                endpoint_ext = {}
+                endpoint_ext['name'] = r['name']
+                endpoint_ext['url'] = r['url']
+                endpoint_ext['description'] = r['description']
+                settings['endpoints'][endpoint_ext['url']] = endpoint_ext
+                settings['entities'][endpoint_ext['url']] = []
+            settings['entities'][endpoint_ext['url']].append(r['class'])
+
+
+        self.log.debug("==================== EXTERNAL ENDPOINT ========================")
+        self.log.debug(settings)
+        return settings
+
+
+    def build_query_on_the_fly(self, replacement, adminrequest=False, externalrequest= False):
         """
         Build a query from the private or public template
         """
@@ -81,17 +172,21 @@ class SparqlQueryBuilder(ParamManager):
         if not 'admin' in self.session or not isinstance(self.session['admin'], bool):
             self.session['admin'] = False
         # ADM can query on all database !
-        if not isinstance(adminrequest, bool) or not adminrequest:
+        if not externalrequest and (not isinstance(adminrequest, bool) or not adminrequest):
             #add ALL GRAPHS user only if from is not defined !!
             if 'from' not in set(replacement) or \
                 len(replacement['from']) == 0:
-                graphs = self.getGraphUser()
-                listfrom = graphs['public'] + graphs['private']
+                endpoints = self.getGraphUser()
+                for graphs in endpoints:
+                    listfrom = endpoints[graphs]['public']
+                    if 'private' in endpoints[graphs]:
+                        endpoints[graphs]['private']
             else:
                 listfrom = replacement['from']
 
             if len(listfrom) > 0:
                 for elt in set(listfrom):
+                    self.log.info(elt)
                     query += "FROM <"+elt+">\n"
 
         query += "WHERE {"+"\n"
@@ -106,7 +201,7 @@ class SparqlQueryBuilder(ParamManager):
         return SparqlQuery(prefixes + query)
 
 
-    def custom_query(self, fromgraph, select, query):
+    def custom_query(self, fromgraph, select, query,externalrequest=False):
         """
         launch a custom query.
         """
@@ -115,7 +210,7 @@ class SparqlQueryBuilder(ParamManager):
             'from' : fromgraph,
             'select': select,
             'query': query
-        })
+        },externalrequest)
 
     def get_delete_query_string(self, graph):
         """

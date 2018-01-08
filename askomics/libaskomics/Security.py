@@ -181,7 +181,7 @@ class Security(ParamManager):
         query_laucher = QueryLauncher(self.settings, self.session)
         sqa = SparqlQueryAuth(self.settings, self.session)
 
-        query_laucher.execute_query(sqa.delete_apikey(key).query)
+        query_laucher.process_query(sqa.delete_apikey(key).query)
 
 
     def get_number_of_users(self):
@@ -372,7 +372,7 @@ class Security(ParamManager):
         query_laucher = QueryLauncher(self.settings, self.session)
         sqa = SparqlQueryAuth(self.settings, self.session)
 
-        query_laucher.execute_query(sqa.add_apikey(self.username, keyname).query)
+        query_laucher.process_query(sqa.add_apikey(self.username, keyname).query)
 
     def add_galaxy(self, url, key):
         """Connect a galaxy account to Askomics
@@ -395,7 +395,7 @@ class Security(ParamManager):
         query_laucher = QueryLauncher(self.settings, self.session)
         sqa = SparqlQueryAuth(self.settings, self.session)
 
-        query_laucher.execute_query(sqa.add_galaxy(self.username, url, key).query)
+        query_laucher.process_query(sqa.add_galaxy(self.username, url, key).query)
 
     def get_galaxy_infos(self):
         """Get Galaxy url and apikey of a user"""
@@ -426,4 +426,4 @@ class Security(ParamManager):
         query_laucher = QueryLauncher(self.settings, self.session)
         sqa = SparqlQueryAuth(self.settings, self.session)
 
-        query_laucher.execute_query(sqa.delete_galaxy(self.username).query)
+        query_laucher.process_query(sqa.delete_galaxy(self.username).query)
