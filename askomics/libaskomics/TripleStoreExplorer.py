@@ -151,7 +151,8 @@ class TripleStoreExplorer(ParamManager):
 
         if send_request_to_tps:
             if len(listEndpoints) == 0:
-                raise ValueError("None endpoint are defined fo the current SPARLQ query !")
+                #raise ValueError("None endpoint are defined fo the current SPARLQ query !")
+                query_launcher = QueryLauncher(self.settings, self.session)
             elif len(listEndpoints)==1:
                 self.log.debug("============ QueryLauncher ========")
                 typeQuery = ''

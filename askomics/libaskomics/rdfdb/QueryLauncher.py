@@ -138,7 +138,8 @@ class QueryLauncher(ParamManager):
             # Prefixes should always be the same, so drop them for logging
             query_log = query #'\n'.join(line for line in query.split('\n')
             #                      if not line.startswith('PREFIX '))
-            self.log.debug("----------- QUERY --------------\n%s", query_log)
+            if len(query_log)<4000:
+                self.log.debug("----------- QUERY --------------\n%s", query_log)
 
         time0 = time.time()
 

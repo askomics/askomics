@@ -150,7 +150,7 @@ class AskomicsUserAbstraction {
       /* All relation are stored in tripletSubjectRelationObject */
       iua.tripletSubjectRelationObject = resultListTripletSubjectRelationObject.relations;
       /* == External Service can add external relation == */
-      //console.log("relations::"+JSON.stringify(iua.tripletSubjectRelationObject));
+      //console.log("ALL::"+JSON.stringify(resultListTripletSubjectRelationObject));
 
       iua.entityInformationList = {};
       iua.entityPositionableInformationList = {};

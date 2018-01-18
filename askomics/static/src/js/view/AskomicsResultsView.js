@@ -58,6 +58,8 @@ class AskomicsResultsView {
                   .css("width","100%")
                   .css("overflow-y","auto");
 
+    console.log("1===>"+JSON.stringify(struct[1]));
+
     let t = __ihm.getGraphBuilder().extractNodesAndLinks(struct[1],struct[2]);
     let nodes = t[0];
     let links = t[1];

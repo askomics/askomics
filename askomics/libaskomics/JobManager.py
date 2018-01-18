@@ -71,7 +71,6 @@ class JobManager(ParamManager):
         if data:
             d = "'"+ParamManager.encode_to_rdf_uri(json.dumps(data, ensure_ascii=False))+"'"
 
-        print(d)
         f = 'NULL'
         if file:
             f = "'"+file+"'"
