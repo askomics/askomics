@@ -382,7 +382,7 @@ class AskView(object):
                 self.log.warn(res[index_result])
                 self.log.warn("============================================================")
                 continue
-            
+
             dat = datetime.datetime.strptime(res[index_result]['date'], "%Y-%m-%dT%H:%M:%S.%f")
 
             readable_date = dat.strftime("%d/%m/%Y %H:%M:%S") #dd/mm/YYYY hh:ii:ss
@@ -408,10 +408,9 @@ class AskView(object):
     @view_config(route_name='list_endpoints', request_method='GET')
     def list_endpoints(self):
         """
-        Return a list with all the named graphs of a user.
+        Return a list with all endpoint using by a askomics session.
         """
 
-        self.checkAuthSession()
         session = {}
 
         em = EndpointManager(self.settings, self.request.session)
@@ -544,8 +543,6 @@ class AskView(object):
         """
         get prefix uri for each entities finded in he header file
         """
-
-        self.checkAuthSession()
 
         try:
             body = self.request.json_body

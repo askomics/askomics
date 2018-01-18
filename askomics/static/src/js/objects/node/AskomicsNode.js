@@ -424,12 +424,26 @@ class AskomicsNode extends GraphNode {
       }
       else if ( orderAttributes[uriAttI].basic_type != "category" ) {
         /* actif could be not instancied if the data is loaded without interface */
+        if (! ( uriAtt in this.attributes) ) {
+          this.attributes[uriAtt] = {};
+          console.error("Bad match attribut");
+          console.error("uriAtt:"+uriAtt);
+          console.error("this.attributes:"+JSON.stringify(this.attributes));
+        }
         if ( this.attributes[uriAtt].actif === undefined ) this.attributes[uriAtt].actif = false;
         if (this.attributes[uriAtt].actif) {
           list_id.push(this.attributes[uriAtt].SPARQLid);
           list_label.push(this.attributes[uriAtt].label);
         }
       } else {
+
+        if (! ( uriAtt in this.categories) ) {
+          this.categories[uriAtt] = {};
+          console.error("Bad match categories");
+          console.error("uriAtt:"+uriAtt);
+          console.error("this.categories:"+JSON.stringify(this.categories));
+        }
+        if ( this.categories[uriAtt].actif === undefined ) this.categories[uriAtt].actif = false;
         if (this.categories[uriAtt].actif) {
           list_id.push(this.categories[uriAtt].SPARQLid);
           list_label.push(this.categories[uriAtt].label);
