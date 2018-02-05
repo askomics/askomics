@@ -349,7 +349,9 @@ class AskomicsUserAbstraction {
       }
 
       for (let ns in this.prefix) {
-        if ( this.prefix[ns] == uri ) return ns ;
+        if ( uri.startsWith(this.prefix[ns]) ) {
+          return ns+":"+uri.replace(this.prefix[ns],"");
+        }
       }
 
       let iua = this;
