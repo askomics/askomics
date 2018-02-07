@@ -239,6 +239,7 @@ class ParamManager(object):
     def encode_to_rdf_uri(toencode):
 
         obj = urllib.parse.quote(toencode)
+        obj = obj.replace("'", "_qu_")
         obj = obj.replace(".", "_d_")
         obj = obj.replace("-", "_t_")
         obj = obj.replace(":", "_s1_")
@@ -255,6 +256,7 @@ class ParamManager(object):
         obj = obj.replace("_s1_", ":")
         obj = obj.replace("_s2_","/")
         obj = obj.replace("_s3_","%")
+        obj = obj.replace("_qu_","'")
 
         obj = urllib.parse.unquote(obj)
 
