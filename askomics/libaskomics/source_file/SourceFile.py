@@ -316,7 +316,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
             if self.settings["askomics.debug"]:
                 data['url'] = url
             else:
-                self.log.debug("3source file : load_data_from_file delete =>"+fp.name)
+                self.log.info("Source file : load_data_from_file delete =>"+fp.name)
                 os.remove(fp.name) # Everything ok, remove temp file
 
         return data
