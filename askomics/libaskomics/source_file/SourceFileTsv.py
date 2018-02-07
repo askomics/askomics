@@ -494,7 +494,7 @@ class SourceFileTsv(SourceFile):
                             idx = header.find("@")
 
                             if idx > 0:
-                                idx2 = header.find(":")
+                                idx2 = header[0:idx].find(":")
                                 if idx2 > 0:
                                     relation_name = header[0:idx]
                                 else:
