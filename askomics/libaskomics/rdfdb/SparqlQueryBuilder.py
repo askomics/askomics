@@ -144,7 +144,8 @@ class SparqlQueryBuilder(ParamManager):
                 endpoint_ext['description'] = r['description']
                 settings['endpoints'][endpoint_ext['url']] = endpoint_ext
                 settings['entities'][endpoint_ext['url']] = []
-            settings['entities'][endpoint_ext['url']].append(r['class'])
+
+            settings['entities'][r['url']].append(r['class'])
 
 
         self.log.debug("==================== EXTERNAL ENDPOINT ========================")
