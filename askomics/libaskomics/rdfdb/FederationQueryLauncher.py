@@ -25,7 +25,7 @@ class FederationQueryLauncher(QueryLauncher):
         self.log = logging.getLogger(__name__)
 
 
-        self.log.info(" =================== Federation Request ====================");
+        self.log.info(" =================== Federation Request ====================")
 
         #comments added in sparql request to get all url endpoint.
         self.commentsForFed=""
@@ -52,10 +52,12 @@ class FederationQueryLauncher(QueryLauncher):
         '''
             Execute query and parse the results if exist
         '''
-
+        self.log.info("================================================================================")
+        self.log.info(" =================== Federation Request : process_query  ====================")
+        self.log.info("================================================================================")
+        
         # Federation Request case
         #------------------------------------------------------
-
         query = self.commentsForFed + query
         json_query = self._execute_query(query,log_raw_results=False)
         return self.parse_results(json_query)

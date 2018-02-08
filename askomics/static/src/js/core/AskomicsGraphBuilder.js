@@ -356,6 +356,7 @@
     }
 
     getEndpointAndGraphCategory(uri) {
+
       let graphs = {} ;
       let endpoints = {} ;
       for (let g in __ihm.localUserAbstraction.uriToGraph[uri]) {
@@ -369,6 +370,13 @@
         if (! (endp in endpoints)) {
           endpoints[endp] = __ihm.localUserAbstraction.typeEndpoint[endp];
         }
+      }
+
+      /* Service endpoints */
+      for ( let urlendp in __ihm.localUserAbstraction.classToEndpoint ) {
+          if ( uri in __ihm.localUserAbstraction.classToEndpoint[urlendp]) {
+            endpoints[urlendp] = urlendp;
+          }
       }
 
       return [Object.keys(endpoints),Object.values(endpoints),Object.keys(graphs)];
@@ -390,6 +398,18 @@
             graphs[g] = 1;
           }
         }
+
+        /* Check External Service endpoints */
+        for ( let urlendp in __ihm.localUserAbstraction.classToEndpoint ) {
+            if ( node.uri in __ihm.localUserAbstraction.classToEndpoint[urlendp]) {
+              //console.log("==>"+node.uri);
+              //console.log("APPARTIENT A : "+JSON.stringify(__ihm.localUserAbstraction.classToEndpoint[urlendp]));
+              if (! (urlendp in endpoints)) {
+                //console.log("1add External Service endpoints:"+urlendp);
+                endpoints[urlendp] = urlendp;
+              }
+            }
+        }
       }
 
       for (let idx=0;idx<dup_link_array.length;idx++) {
@@ -399,17 +419,30 @@
             graphs[g] = 1;
           }
         }
+
+        /* Check External Service endpoints */
+        for ( let urlendp in __ihm.localUserAbstraction.classToEndpoint ) {
+            if ( link.uri in __ihm.localUserAbstraction.classToEndpoint[urlendp]) {
+              //console.log("==>"+link.uri);
+              if (! (urlendp in endpoints)) {
+              //console.log("2add External Service endpoints:"+urlendp);
+              endpoints[urlendp] = urlendp;
+              }
+            }
+        }
       }
 
-      /* endpoints */
+      /* Graphs associate with endpoints */
       for (let g in graphs) {
         if (g in __ihm.localUserAbstraction.graphToEndpoint ) {
           let endp = __ihm.localUserAbstraction.graphToEndpoint[g];
           if (! (endp in endpoints)) {
+            //console.log("add Graph endpoints:"+endp);
             endpoints[endp] = __ihm.localUserAbstraction.typeEndpoint[endp];
           }
         }
       }
+
       console.log("endpoints:"+JSON.stringify(endpoints));
       console.log("graphs:"+JSON.stringify(graphs));
 

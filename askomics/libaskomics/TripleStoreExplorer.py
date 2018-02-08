@@ -148,14 +148,15 @@ class TripleStoreExplorer(ParamManager):
         self.log.debug("graphs"+str(fromgraphs))
 
         extreq = False
-
+        typeQuery = ''
+        
         if send_request_to_tps:
             if len(listEndpoints) == 0:
                 #raise ValueError("None endpoint are defined fo the current SPARLQ query !")
                 query_launcher = QueryLauncher(self.settings, self.session)
             elif len(listEndpoints)==1:
                 self.log.debug("============ QueryLauncher ========")
-                typeQuery = ''
+
                 endpoint = ''
                 type_endpoint='askomics'
                 if len(listEndpoints) == 1 :

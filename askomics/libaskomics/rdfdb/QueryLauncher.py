@@ -107,6 +107,11 @@ class QueryLauncher(ParamManager):
         """
             Setup SPARQLWrapper to reach url endpoint
         """
+        self.log.info("================================================================================")
+        self.log.info(" Query ON : " + str(self.endpoint))
+        self.log.info(" update   : " + str(self.urlupdate))
+        self.log.info("================================================================================")
+
         data_endpoint = SPARQLWrapper(self.endpoint,self.urlupdate)
 
         if self.username and self.password:
@@ -195,6 +200,7 @@ class QueryLauncher(ParamManager):
         if type(json_res) is not dict:
             self.log.debug(str(json_res))
             return []
+            #raise ValueError("Unable to get a response from the datastore.<br/>"+str(json_res))
 
         if "results" not in json_res:
             return []
@@ -223,7 +229,7 @@ class QueryLauncher(ParamManager):
         return parsed
 
 
-    def process_query(self, query):
+    def process_query(self, query, parseResults=True):
         '''
             Execute query and parse the results if exist
         '''
@@ -233,7 +239,11 @@ class QueryLauncher(ParamManager):
             self.setUserDatastore()
 
         json_query = self._execute_query(query, log_raw_results=False)
-        results = self.parse_results(json_query)
+        results = []
+
+        if parseResults:
+            results = self.parse_results(json_query)
+
 
         return results
 

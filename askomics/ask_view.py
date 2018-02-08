@@ -291,9 +291,9 @@ class AskView(object):
 
         for graph in graphs:
             self.log.debug("--- DELETE GRAPH : %s", graph)
-            ql.process_query(sqb.get_drop_named_graph(graph).query)
+            ql.process_query(sqb.get_drop_named_graph(graph).query,parseResults=False)
             #delete metadatas
-            ql.process_query(sqb.get_delete_metadatas_of_graph(graph).query)
+            ql.process_query(sqb.get_delete_metadatas_of_graph(graph).query,parseResults=False)
 
 
     @view_config(route_name='delete_endpoints', request_method='POST')
@@ -1011,7 +1011,10 @@ class AskView(object):
             if 'from' in body:
                 lfrom = body['from']
 
-            results,query = tse.build_sparql_query_from_json(lfrom,body["variates"],body["constraintesRelations"],-1,False)
+            typeRequest = ''
+            endp = []
+            typeEnd = []
+            results,query, typeRequest = tse.build_sparql_query_from_json(endp,typeEnd,lfrom,body["variates"],body["constraintesRelations"],-1,send_request_to_tps=False)
 
             self.data['query'] = query
         except Exception as e:

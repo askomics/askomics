@@ -344,7 +344,8 @@ class AskomicsNodeView extends AskomicsObjectView {
     if ( ! this.node.isRegexpMode(sparqlid) ) {
       this.node.setFilterAttributes(sparqlid,value,'FILTER ( ?'+sparqlid+' = "'+value+'"^^xsd:string )');
     } else {
-      this.node.setFilterAttributes(sparqlid,value,'FILTER ( regex(str(?'+sparqlid+'), "'+value+'", "i" ))');
+      //this.node.setFilterAttributes(sparqlid,value,'FILTER ( regex(str(?'+sparqlid+'), "'+value+'", "i" ))');
+      this.node.setFilterAttributes(sparqlid,value,'FILTER ( contains(?'+sparqlid+', "'+value+'"))');
     }
   }
 
