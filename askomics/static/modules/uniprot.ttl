@@ -1,0 +1,37 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfg: <http://www.w3.org/2004/03/trix/rdfg-1/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix displaySetting: <http://www.irisa.fr/dyliss/rdfVisualization/display> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
+@prefix void: <http://rdfs.org/ns/void#> .
+
+@prefix up:<http://purl.uniprot.org/core/> .
+
+[] a sd:Service ;
+    sd:endpoint <http://sparql.uniprot.org/sparql> ;
+    dcterms:title "Linked Open Data platform for UniProt data";
+    dcterms:description "The Universal Protein Resource (UniProt) is a comprehensive resource for protein sequence and annotation data.";
+    sd:supportedLanguage sd:SPARQL11Query ;
+    sd:defaultDataset [
+        a sd:Dataset ;
+        sd:defaultGraph [
+            a sd:Graph ;
+            void:classPartition [ void:class up:Protein . ].
+        ].
+    ].
+
+
+up:Protein displaySetting:entity "true"^^xsd:boolean ;
+           displaySetting:startPoint "true"^^xsd:boolean ;
+           rdfs:label "up:Protein".
+
+up:mnemonic displaySetting:attribute "true"^^xsd:boolean .
+up:mnemonic rdf:type owl:DatatypeProperty ;
+   rdfs:label "mnemonic" ;
+   rdfs:domain up:Protein ;
+   rdfs:range xsd:string .
