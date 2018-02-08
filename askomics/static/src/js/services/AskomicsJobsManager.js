@@ -67,7 +67,7 @@ let instanceAskomicsJobsViewManager ;
             job.duration = AskomicsJobsViewManager.getDuration(job.tstart,job.tend) ;
             job.classtr = AskomicsJobsViewManager.getClassTr(job.state) ;
             if ( data[i].requestGraph != '') {
-              console.log("requestGraph======>"+JSON.stringify(data[i].requestGraph));
+              //console.log("requestGraph======>"+JSON.stringify(data[i].requestGraph));
               job.stateToReload = btoa(data[i].requestGraph);
             }
             if ( 'file' in data[i] ) {
@@ -151,17 +151,19 @@ let instanceAskomicsJobsViewManager ;
       // Get ordered headers
       let result_view = new AskomicsResultsView({});
 
-      console.log();
-      console.log("getInternalState======>"+JSON.stringify(__ihm.getGraphBuilder().getInternalState()));
+      //console.log();
+      //console.log("getInternalState======>"+JSON.stringify(__ihm.getGraphBuilder().getInternalState()));
       //if (true)return {};
 
       let struct = JSON.parse(__ihm.getGraphBuilder().getInternalState());
       let t = __ihm.getGraphBuilder().extractNodesAndLinks(struct[1],struct[2]);
       let nodes = t[0];
       let links = t[1];
+      /*
       console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
       console.log("NODE======>"+JSON.stringify(nodes));
       console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+      */
       result_view.setActivesAttributes(nodes,links);
       let attributes = result_view.getActivesAttributes();
       let ordered_headers = [];

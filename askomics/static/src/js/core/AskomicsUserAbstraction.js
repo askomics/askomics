@@ -8,11 +8,26 @@
 class AskomicsUserAbstraction {
     constructor() {
       this.prefix = {};
-      this.prefix.xsd = "http://www.w3.org/2001/XMLSchema#";
-      this.prefix.rdf = "http://www.w3.org/2001/XMLSchema#";
-      this.prefix.rdfs = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-      this.prefix.owl = "http://www.w3.org/2002/07/owl#";
-      this.prefix.rdfg = "http://www.w3.org/2004/03/trix/rdfg-1/";
+      this.prefix.xsd          = "http://www.w3.org/2001/XMLSchema#";
+      this.prefix.rdf          = "http://www.w3.org/2001/XMLSchema#";
+      this.prefix.rdfs         = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+      this.prefix.rdfs         = "http://www.w3.org/2000/01/rdf-schema";
+      this.prefix.owl          = "http://www.w3.org/2002/07/owl#";
+      this.prefix.rdfg         = "http://www.w3.org/2004/03/trix/rdfg-1/";
+      this.prefix.obo          = "http://purl.obolibrary.org/obo/";
+      this.prefix.pobo         = "http://purl.obolibrary.org/obo/";
+      this.prefix.oboInOwl     = "http://www.geneontology.org/formats/oboInOwl#";
+      this.prefix.up           = "http://purl.uniprot.org/core/";
+      this.prefix.database     = "http://purl.uniprot.org/database/";
+      this.prefix.taxonomy     = "http://purl.uniprot.org/taxonomy/";
+      this.prefix.biopax       = "http://www.biopax.org/release/biopax-level3.owl#";
+      this.prefix.ensemblterms = "http://rdf.ebi.ac.uk/terms/ensembl/";
+      this.prefix.ensembl      = "http://rdf.ebi.ac.uk/resource/ensembl/";
+      this.prefix.dbpedia      = "http://dbpedia.org/ontology/";
+      this.prefix.dbpediaprop  = "http://dbpedia.org/property/";
+      this.prefix.go           = "http://purl.org/obo/owl/GO#";
+      this.prefix.np           = "http://nextprot.org/rdf#";
+
 
       this.prefix_error = {};
       this.longprefix_error = {};
@@ -150,8 +165,26 @@ class AskomicsUserAbstraction {
       /* All relation are stored in tripletSubjectRelationObject */
       iua.tripletSubjectRelationObject = resultListTripletSubjectRelationObject.relations;
       /* == External Service can add external relation == */
-      //console.log("ALL::"+JSON.stringify(resultListTripletSubjectRelationObject));
 
+      // See TripleStoreExplorer to check which/where/how informations is generated
+      /*
+      console.log(" ================ RELATIONS =======================");
+      console.log("relations::"+JSON.stringify(resultListTripletSubjectRelationObject.relations));
+      console.log("\n ================ SUBCLASSOF =======================");
+      console.log("subclassof::"+JSON.stringify(resultListTripletSubjectRelationObject.subclassof));
+      console.log("\n ================ ENTITIES =======================");
+      console.log("entities::"+JSON.stringify(resultListTripletSubjectRelationObject.entities));
+      console.log("\n ================ ATTRIBUTES =======================");
+      console.log("attributes::"+JSON.stringify(resultListTripletSubjectRelationObject.attributes));
+      console.log("\n ================ CATEGORIES =======================");
+      console.log("categories::"+JSON.stringify(resultListTripletSubjectRelationObject.categories));
+      console.log("\n ================ POSITIONNABLE =======================");
+      console.log("positionable::"+JSON.stringify(resultListTripletSubjectRelationObject.positionable));
+      console.log("\n ================ ENDPOINTS =======================");
+      console.log("endpoints::"+JSON.stringify(resultListTripletSubjectRelationObject.endpoints));
+      console.log("\n ================ ENDPOINT_EXT =======================");
+      console.log("endpoints_ext::"+JSON.stringify(resultListTripletSubjectRelationObject.endpoints_ext));
+      */
       iua.entityInformationList = {};
       iua.entityPositionableInformationList = {};
       iua.attributesEntityList = {};
@@ -179,9 +212,18 @@ class AskomicsUserAbstraction {
           iua.graphToEndpoint[graph] = endpoint ;
         }
       }
+
+      iua.classToEndpoint = {} ;
       //console.log("ASKOMICS ENDPOINT:"+JSON.stringify(iua.graphToEndpoint));
-
-
+      for (let iservice in resultListTripletSubjectRelationObject.endpoints_ext.entities){
+        let service = resultListTripletSubjectRelationObject.endpoints_ext.entities[iservice];
+        //console.log("iservice:"+iservice + "===>"+JSON.stringify(service))
+        iua.classToEndpoint[iservice] = {};
+        for (let classe in service) {
+            iua.classToEndpoint[iservice][service[classe]] = 1;
+        }
+      }
+      //console.log("iua.classToEndpoint::"+JSON.stringify(iua.classToEndpoint));
       /***************************** ENTITIES **************************************/
       /* All information about an entity available in TPS are stored in entityInformationList */
       for (let entry in resultListTripletSubjectRelationObject.entities){
@@ -343,28 +385,41 @@ class AskomicsUserAbstraction {
     }
 
     getReversePrefix(uri) {
-
-      if ( uri in this.longprefix_error) {
-        return "";
-      }
-
+      //console.log(JSON.stringify(this.prefix));
       for (let ns in this.prefix) {
         if ( uri.startsWith(this.prefix[ns]) ) {
           return ns+":"+uri.replace(this.prefix[ns],"");
         }
       }
 
-      let iua = this;
+      let uriprefix = uri ;
+      let pref = "";
 
+      if (uri.lastIndexOf("#")>0) {
+        uriprefix = uri.substring(0,uri.lastIndexOf("#")+1);
+        pref = uri.substring(uri.lastIndexOf("#")+1,uri.length) ;
+      } else if (uri.lastIndexOf("/")>0) {
+        uriprefix = uri.substring(0,uri.lastIndexOf("/")+1);
+        pref = uri.substring(uri.lastIndexOf("/")+1,uri.length) ;
+      }
+
+      if ( uriprefix in this.longprefix_error) {
+        return pref ;
+      }
+
+      //console.log("uri:"+uri);
+      //console.log("prefix:"+uriprefix);
+
+      let iua = this;
       $.ajaxSetup({async: false});
-      let pref = "" ;
-      $.get( "http://prefix.cc/reverse", { uri:uri.trim() ,format: "json"} )
+
+      $.get( "http://prefix.cc/reverse", { uri:uriprefix.trim() ,format: "json"} )
           .done(function( data ) {
             pref = Object.keys(data)[0];
-            iua.prefix[pref] = uri ;
+            iua.prefix[pref] = uriprefix ;
           })
           .fail( function() {
-            iua.longprefix_error[uri] = true ;
+            iua.longprefix_error[uriprefix] = true ;
           });
       $.ajaxSetup({async: true});
       return pref ;
