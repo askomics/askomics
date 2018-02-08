@@ -187,7 +187,7 @@ class SparqlQueryBuilder(ParamManager):
 
             if len(listfrom) > 0:
                 for elt in set(listfrom):
-                    self.log.info(elt)
+                    self.log.debug(elt)
                     query += "FROM <"+elt+">\n"
 
         query += "WHERE {"+"\n"
