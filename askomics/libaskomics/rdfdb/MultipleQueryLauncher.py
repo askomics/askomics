@@ -20,15 +20,15 @@ class MultipleQueryLauncher(QueryLauncher):
     def __init__(self, settings, session):
         QueryLauncher.__init__(self, settings, session)
         self.log = logging.getLogger(__name__)
-        self.log.info(" =================== Multiple Query Lancher Request ====================")
+        self.log.debug(" =================== Multiple Query Lancher Request ====================")
 
     def process_query(self,query,lendpoints,indexByEndpoint=False):
         '''
             Execute query and parse the results if exist
         '''
-        self.log.info("================================================================================")
-        self.log.info(" =================== MultipleQueryLauncher : process_query  ====================")
-        self.log.info("================================================================================")
+        self.log.debug("================================================================================")
+        self.log.debug(" =================== MultipleQueryLauncher : process_query  ====================")
+        self.log.debug("================================================================================")
         # Request on local Askomics
         self.setUserDatastore()
         json_query = self._execute_query(query, log_raw_results=False)
@@ -45,7 +45,7 @@ class MultipleQueryLauncher(QueryLauncher):
             if 'endpoint' not in es :
                 raise ValueError("Devel error : define 'endpoint' Attribute :"+str(es))
 
-            self.log.info(es['name']+"::"+es['endpoint'])
+            self.log.debug(es['name']+"::"+es['endpoint'])
             self.name = es['name']
             self.endpoint = es['endpoint']
             self.auth = 'Basic'

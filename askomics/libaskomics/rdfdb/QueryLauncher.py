@@ -107,10 +107,10 @@ class QueryLauncher(ParamManager):
         """
             Setup SPARQLWrapper to reach url endpoint
         """
-        self.log.info("================================================================================")
-        self.log.info(" Query ON : " + str(self.endpoint))
-        self.log.info(" update   : " + str(self.urlupdate))
-        self.log.info("================================================================================")
+        self.log.debug("================================================================================")
+        self.log.debug(" Query ON : " + str(self.endpoint))
+        self.log.debug(" update   : " + str(self.urlupdate))
+        self.log.debug("================================================================================")
 
         data_endpoint = SPARQLWrapper(self.endpoint,self.urlupdate)
 
