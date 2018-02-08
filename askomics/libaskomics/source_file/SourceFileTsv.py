@@ -483,7 +483,7 @@ class SourceFileTsv(SourceFile):
                         current_type = self.forced_column_types[i]
                         #OFI : manage new header with relation@type_entity
                         #relation_name = ":has_" + header # manage old way
-                        have_prefix = False
+                        have_external_prefix = False
 
                         if header.find(":")<0:
                             relation_name = ":"+self.encode_to_rdf_uri(header) # manage old way
@@ -503,7 +503,8 @@ class SourceFileTsv(SourceFile):
                                 type_ent = header[idx+1:]
                                 clause1 = type_ent.find(":") > 0
                                 if clause1 or (header[idx+1] == '<' and header[len(header)-1] == '>'):
-                                    have_prefix = True
+                                    have_external_prefix = True
+
                         # Create link to value
                         if row[i]: # Empty values are just ignored
                             if current_type in ('category', 'taxon', 'ref', 'strand'):
@@ -530,7 +531,7 @@ class SourceFileTsv(SourceFile):
                                 elif current_type == 'strand':
                                     strand_faldo = row[i]
                                     ttl += indent + " " + ':position_strand' + " " + self.delims[current_type][0] + self.encode_to_rdf_uri(row[i]) + self.delims[current_type][1] + " ;\n"
-                                elif have_prefix:
+                                elif have_external_prefix:
                                     ttl += indent + " "+ relation_name + " " + row[i] + " ;\n"
                                 else:
                                     ttl += indent + " "+ relation_name + " " + self.delims[current_type][0] + self.escape[current_type](row[i]) + self.delims[current_type][1] + " ;\n"
@@ -543,7 +544,11 @@ class SourceFileTsv(SourceFile):
                                 else:
                                     pref = self.delims[current_type][0]
                                     suf = self.delims[current_type][1]
-                                ttl += indent + " "+ relation_name + " " + pref + self.escape[current_type](row[i]) + suf + " ;\n"
+                                
+                                if have_external_prefix:
+                                    ttl += indent + " "+ relation_name + " " + row[i] + " ;\n"
+                                else:
+                                    ttl += indent + " "+ relation_name + " " + pref + self.escape[current_type](row[i]) + suf + " ;\n"
 
                         if current_type == 'entitySym':
                             pref = self.prefix_uri_entity(i)
