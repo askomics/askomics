@@ -505,7 +505,7 @@ class AskomicsForceLayoutManager {
         //console.log(JSON.stringify(objectsTarget));
         let link;
 
-        for (var uri in objectsTarget ) {
+        for (let uri in objectsTarget ) {
           /* Filter if node are not desired by the user */
           if (! this.isProposedUri("node",uri)) continue ;
           /* creating node */
@@ -532,11 +532,13 @@ class AskomicsForceLayoutManager {
             //link = new AskomicsLink(linkbase,source,target);
             link = AskomicsObjectBuilder.instanceLink(linkbase,source,target);
             link.id = __ihm.getGraphBuilder().getId();
+            console.log("1URI SUG:"+JSON.stringify(link));
+
             this.links.push(link);
           }
         }
 
-        for (uri in subjectsTarget ) {
+        for (let uri in subjectsTarget ) {
           /* Filter if node are not desired by the user */
           if (! this.isProposedUri("node",uri)) continue ;
           let suggestedNode;
@@ -564,6 +566,7 @@ class AskomicsForceLayoutManager {
             //link = new AskomicsLink(linkbase,source,target);
             link = AskomicsObjectBuilder.instanceLink(linkbase,source,target);
             link.id = __ihm.getGraphBuilder().getId();
+            console.log("2 URI SUG:"+JSON.stringify(link));
             this.links.push(link);
           }
         }
@@ -572,7 +575,7 @@ class AskomicsForceLayoutManager {
         // Manage positionnable entities
         let positionableEntities = __ihm.getAbstraction().getPositionableEntities();
 
-        for (uri in positionableEntities) {
+        for (let uri in positionableEntities) {
           // if selected node is not a positionable node, donc create a positionable
           // link with an other positionable node
           if (! (slt_node.uri in positionableEntities)) continue;
@@ -843,7 +846,7 @@ class AskomicsForceLayoutManager {
                 .attr("style", "text-anchor:middle; font: 10px sans-serif; cursor: pointer;")
                 .attr("class", function(d) { return "text"+d.getClassSVG();} )
                 .attr("dy", "-5")
-                .attr('id', function(d) { return d.getSvgLabelId();})
+                .attr('id', function(d) { console.log("-------------IDDDIII:"+d.id);return d.getSvgLabelId();})
                 .style("opacity", function(d) {return d.getTextOpacity();})
                 .append("textPath")
                 .attr("xlink:href",function(d) {return "#"+d.id;})
@@ -852,6 +855,11 @@ class AskomicsForceLayoutManager {
                 .text(function(d){return d.label;})
                 .style('display', function(d){ return currentFL.displayObject(d);})
                 .on('click', function(d) { // Mouse down on a link label
+                  console.log("ID D:"+d.id);
+                  for (let u in currentFL.links) {
+                    console.log("-------------");
+                    console.log(JSON.stringify(currentFL.links[u].id));
+                  }
                   if (d != currentFL.selectLink) { //if link is not selected
                     /* user want a new relation contraint betwwenn two node*/
                     //deselect all nodes and links
@@ -861,6 +869,9 @@ class AskomicsForceLayoutManager {
                     //select link
                     currentFL.setSelectLink(d);
                     if ( d.suggested ) {
+
+                      console.log("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD target sug:"+d.target.suggested);
+                      console.log(JSON.stringify(d));
                       let ll = [d];
                       __ihm.getGraphBuilder().instanciateLink(ll);
 
@@ -938,7 +949,7 @@ class AskomicsForceLayoutManager {
           .attr("label", function (d) { return d.label ; })
           .attr("class", function(d) { return "link"+d.getClassSVG();} )
           .attr("marker-end", function(d) {return "url(#end-marker-"+d.id+")";})
-          .attr("marker-start", function(d) {return d.type == 'overlap'?"url(#start-marker-"+d.id+")":"";})
+          .attr("marker-start", function(d) {return d.type == 'overlap'?"url(#start-marker-"+d.id+")":"none";})
           .style('stroke', function (d) {return d.getStrokeColor();})
           .style('fill', function (d) {return d.getStrokeColor();})
           .style('display', function(d){ return currentFL.displayObject(d);})
