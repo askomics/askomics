@@ -116,6 +116,11 @@ class AskomicsLinkView extends AskomicsObjectView {
                                 .append($('<label></label>').append(inpSub).append('Subclassof relation'));
     }
 
+    /* purpose to reverse direcyion if uri are the same between source and target */
+    if (this.link.source.uri === this.link.target.uri ) {
+      this.details.append(this.getReverseDirection());
+    }
+
     this.details.append($('<hr>'))
                 .append(listProperties)
                 .append($('<hr>'));
