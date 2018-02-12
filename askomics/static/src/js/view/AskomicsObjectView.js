@@ -77,6 +77,39 @@ class AskomicsObjectView {
                  .addClass('div-details');
   }
 
+  getReverseDirection() {
+    let linkView = this;
+    let reverseArrow = $('<div></div>').attr('id', 'change_dir-div-'+linkView.link.id).append($('<span><span>').attr('class', 'glyphicon glyphicon-resize-horizontal')
+                                                              .attr('aria-hidden', 'true')
+                                                              .attr('id', 'change_dir-'+linkView.link.id));
+    reverseArrow.click(function() {
+
+        // remove rightview
+        //this.remove();
+
+        // remove link
+        let id = linkView.link.id;
+
+        $('#'+id).remove(); // link
+        $('#'+GraphObject.getSvgLabelPrefix()+id).remove(); // link label
+        $('#marker-'+id).remove(); // arrow
+
+        // swap target and source
+        var buf = linkView.link.source ;
+        linkView.link.source = linkView.link.target;
+        linkView.link.target = buf;
+
+        // reload graph (it will recreate the link)
+        __ihm.getSVGLayout().update();
+        //select the link
+        __ihm.getSVGLayout().setSelectLink(linkView.link);
+    });
+
+    reverseArrow.append('Reverse direction');
+
+    return reverseArrow;
+  }
+
   /* Build a Panel for attribute with attribute movable to change order of the attribute view display */
   divPanelUlSortable () {
 

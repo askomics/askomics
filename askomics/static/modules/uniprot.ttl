@@ -21,7 +21,11 @@
         a sd:Dataset ;
         sd:defaultGraph [
             a sd:Graph ;
-            void:classPartition [ void:class up:Protein . ].
+            void:classPartition [
+              void:class up:Protein ;
+              void:class up:Taxon ;
+              void:class up:Simple_Sequence ;
+             ].
         ].
     ].
 
@@ -30,8 +34,32 @@ up:Protein displaySetting:entity "true"^^xsd:boolean ;
            displaySetting:startPoint "true"^^xsd:boolean ;
            rdfs:label "up:Protein".
 
-up:mnemonic displaySetting:attribute "true"^^xsd:boolean .
-up:mnemonic rdf:type owl:DatatypeProperty ;
-   rdfs:label "mnemonic" ;
-   rdfs:domain up:Protein ;
-   rdfs:range xsd:string .
+up:Taxon displaySetting:entity "true"^^xsd:boolean ;
+         displaySetting:startPoint "true"^^xsd:boolean ;
+                      rdfs:label "up:Taxon".
+
+up:Simple_Sequence displaySetting:entity "true"^^xsd:boolean ;
+         displaySetting:startPoint "true"^^xsd:boolean ;
+                      rdfs:label "up:Simple_Sequence".
+
+up:scientificName displaySetting:attribute "true"^^xsd:boolean;
+            rdf:type owl:DatatypeProperty ;
+            rdfs:label "up:scientificName" ;
+            rdfs:domain up:Taxon ;
+            rdfs:range xsd:string .
+
+rdf:value displaySetting:attribute "true"^^xsd:boolean;
+            rdf:type owl:DatatypeProperty ;
+            rdfs:label "rdf:value" ;
+            rdfs:domain up:Simple_Sequence ;
+            rdfs:range xsd:string .
+
+up:organism rdf:type owl:ObjectProperty ;
+                     rdfs:label ":organism"^^xsd:string ;
+                     rdfs:domain up:Protein ;
+                     rdfs:range up:Taxon .
+
+up:sequence rdf:type owl:ObjectProperty ;
+                     rdfs:label ":sequence"^^xsd:string ;
+                     rdfs:domain up:Protein ;
+                     rdfs:range up:Simple_Sequence .

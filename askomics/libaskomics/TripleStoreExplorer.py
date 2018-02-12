@@ -179,7 +179,7 @@ class TripleStoreExplorer(ParamManager):
                     end = {}
                     end['name'] = "endpoint"+str(iCount)
                     end['endpoint'] =  listEndpoints[i]
-                    end['askomics'] =  (typeEndpoints == 'askomics')
+                    end['askomics'] =  (typeEndpoints[i] == 'askomics')
                     end['auth'] = 'Basic'
                     end['username'] = None
                     end['password'] = None

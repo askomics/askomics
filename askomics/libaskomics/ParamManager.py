@@ -200,10 +200,10 @@ class ParamManager(object):
 
         return uri
 
-    def header_sparql_config(self,sarqlrequest):
+    def header_sparql_config(self,sparqlrequest):
         header = ""
         regex = re.compile('\s(\w+):')
-        listTermPref = regex.findall(sarqlrequest)
+        listTermPref = regex.findall(sparqlrequest)
         self.update_list_prefix(listTermPref)
 
         for key, value in self.ASKOMICS_prefix.items():

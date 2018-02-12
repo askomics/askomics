@@ -375,7 +375,7 @@
       /* Service endpoints */
       for ( let urlendp in __ihm.localUserAbstraction.classToEndpoint ) {
           if ( uri in __ihm.localUserAbstraction.classToEndpoint[urlendp]) {
-            endpoints[urlendp] = urlendp;
+            endpoints[urlendp] = __ihm.localUserAbstraction.typeEndpoint[urlendp];
           }
       }
 
@@ -405,8 +405,8 @@
               //console.log("==>"+node.uri);
               //console.log("APPARTIENT A : "+JSON.stringify(__ihm.localUserAbstraction.classToEndpoint[urlendp]));
               if (! (urlendp in endpoints)) {
-                //console.log("1add External Service endpoints:"+urlendp);
-                endpoints[urlendp] = urlendp;
+                console.log("1add External Service endpoints:"+urlendp);
+                endpoints[urlendp] = __ihm.localUserAbstraction.typeEndpoint[urlendp];
               }
             }
         }
@@ -425,8 +425,8 @@
             if ( link.uri in __ihm.localUserAbstraction.classToEndpoint[urlendp]) {
               //console.log("==>"+link.uri);
               if (! (urlendp in endpoints)) {
-              //console.log("2add External Service endpoints:"+urlendp);
-              endpoints[urlendp] = urlendp;
+              console.log("2add External Service endpoints:"+urlendp);
+              endpoints[urlendp] = __ihm.localUserAbstraction.typeEndpoint[urlendp];
               }
             }
         }
