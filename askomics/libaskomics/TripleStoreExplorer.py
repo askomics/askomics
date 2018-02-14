@@ -45,22 +45,23 @@ class TripleStoreExplorer(ParamManager):
         ql = MultipleQueryLauncher(self.settings, self.session)
         em = EndpointManager(self.settings, self.session)
 
-        results = ql.process_query(sqg.get_public_start_point().query,em.listAskomicsEndpoints())
-        results += ql.process_query(sqg.get_user_start_point().query,em.listAskomicsEndpoints())
+        results = ql.process_query(sqg.get_public_start_point().query,em.listAskomicsEndpoints(),indexByEndpoint=True)
+        results.update(ql.process_query(sqg.get_user_start_point().query,em.listAskomicsEndpoints(),indexByEndpoint=True))
 
-        for result in results:
-            g  = result["g"]
-            uri = result["nodeUri"]
-            label = result["nodeLabel"]
+        for endpoint in results:
+            for result in results[endpoint]:
+                g  = result["g"]
+                uri = result["nodeUri"]
+                label = result["nodeLabel"]
 
-            if ('accesLevel' in result) and ('private' in result['accesLevel']):
-                public = False
-                private = True
-            else:
-                public = True
-                private = False
+                if ('accesLevel' in result) and ('private' in result['accesLevel']):
+                    public = False
+                    private = True
+                else:
+                    public = True
+                    private = False
 
-            nodes.append({'g': g, 'uri': uri, 'label': label, 'public': public, 'private': private})
+                nodes.append({'endpoint' : endpoint,'g': g, 'uri': uri, 'label': label, 'public': public, 'private': private})
 
         return nodes
 
@@ -149,7 +150,7 @@ class TripleStoreExplorer(ParamManager):
 
         extreq = False
         typeQuery = ''
-        
+
         if send_request_to_tps:
             if len(listEndpoints) == 0:
                 #raise ValueError("None endpoint are defined fo the current SPARLQ query !")
