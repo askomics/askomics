@@ -236,7 +236,7 @@ class ParamManager(object):
         return '\n'.join(header)
 
     @staticmethod
-    def encode_to_rdf_uri(toencode):
+    def encode(toencode):
 
         obj = urllib.parse.quote(toencode)
         obj = obj.replace("'", "_qu_")
@@ -249,7 +249,26 @@ class ParamManager(object):
         return obj
 
     @staticmethod
-    def decode_to_rdf_uri(toencode):
+    def encode_to_rdf_uri(toencode,prefix=None):
+
+        if toencode.startswith("<") and toencode.endswith(">"):
+            return toencode
+
+        idx = toencode.find(":")
+        if idx > -1:
+            return toencode[:idx+1]+ParamManager.encode(toencode[idx+1:])
+
+        pref = ":"
+        suf  = ""
+        if prefix:
+            pref = "<" + prefix
+            suf  = ">"
+
+        v = pref+ParamManager.encode(toencode)+suf
+        return v
+
+    @staticmethod
+    def decode(toencode):
 
         obj = toencode.replace("_d_", ".")
         obj = obj.replace("_t_", "-")
@@ -261,6 +280,23 @@ class ParamManager(object):
         obj = urllib.parse.unquote(obj)
 
         return obj
+
+
+    @staticmethod
+    def decode_to_rdf_uri(todecode, prefix=""):
+
+        obj = todecode.strip()
+
+        if obj.startswith("<") and obj.endswith(">"):
+            obj = obj[1:len(obj)-1]
+            if prefix != "":
+                obj = obj.replace(prefix,"")
+
+        idx = obj.find(":")
+        if idx > -1 :
+            obj = obj[idx+1:]
+
+        return ParamManager.decode(obj)
 
     @staticmethod
     def Bool(result):
