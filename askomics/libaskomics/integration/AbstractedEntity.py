@@ -13,8 +13,8 @@ class AbstractedEntity(object):
     It is defined by an uri and a label.
     """
 
-    def __init__(self, identifier):
-        self.uri = ":" + ParamManager.encode_to_rdf_uri(identifier)
+    def __init__(self, identifier,prefix):
+        self.uri = ParamManager.encode_to_rdf_uri(identifier,prefix)
         self.label = identifier
 
         self.log = logging.getLogger(__name__)
