@@ -27,7 +27,7 @@ class AbstractedRelation(object):
     specified class (xsd:string or xsd:numeric) in case of DatatypeProperty.
     """
 
-    def __init__(self, relation_type, identifier, rdfs_domain, rdfs_range):
+    def __init__(self, relation_type, identifier, identifier_prefix,rdfs_domain, prefixDomain, rdfs_range, prefixRange):
         idx = identifier.find("@")
         type_range =  identifier
 
@@ -39,19 +39,16 @@ class AbstractedRelation(object):
         else:
             self.label = identifier
 
-        if self.label.find(":")<0:
-            self.uri = ":"+ParamManager.encode_to_rdf_uri(self.label)
-        else:
-            self.uri = self.label
+
+        self.uri = ParamManager.encode_to_rdf_uri(self.label,prefix=identifier_prefix)
+
 
         self.col_type = relation_type
 
         if relation_type.startswith("entity"):
             self.relation_type = "owl:ObjectProperty"
-            if type_range.find(":")<0:
-                self.rdfs_range = ":" + ParamManager.encode_to_rdf_uri(type_range)
-            else:
-                self.rdfs_range = type_range
+            self.rdfs_range = ParamManager.encode_to_rdf_uri(type_range,prefixRange)
+
 
         elif relation_type == "goterm":
             self.relation_type = "owl:ObjectProperty"
@@ -59,12 +56,12 @@ class AbstractedRelation(object):
 
         elif relation_type.lower() in ('category', 'taxon', 'ref', 'strand'):
             self.relation_type = "owl:ObjectProperty"
-            self.rdfs_range = ":" + ParamManager.encode_to_rdf_uri(type_range+"Category")
+            self.rdfs_range = ParamManager.encode_to_rdf_uri(type_range+"Category",prefixRange)
         else:
             self.relation_type = "owl:DatatypeProperty"
             self.rdfs_range = rdfs_range
 
-        self.rdfs_domain = ":" + ParamManager.encode_to_rdf_uri(rdfs_domain)
+        self.rdfs_domain = ParamManager.encode_to_rdf_uri(rdfs_domain,prefixDomain)
         self.log = logging.getLogger(__name__)
 
     def get_uri(self):
