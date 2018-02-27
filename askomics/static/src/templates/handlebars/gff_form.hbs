@@ -32,12 +32,12 @@
               </div>
               <div id="advanced-{{idfile}}" class="panel-collapse collapse">
                 <div class="panel-body">
-                    <div class="form-group form-inlines div-radio-uri" id="advanced-{{idfile}}">
-                        <input type="radio" name="radio-uri" value="default" id="default-{{idfile}}" checked="checked" />
+                    <div class="form-group form-inlines div-radio-uri" id="radio-advanced-{{idfile}}">
+                        <input type="radio" name="radio-uri-{{idfile}}" value="default" checked="checked" />
                         <label for="default-{{idfile}}">Use default URI</label><br/ >
-                        <input type="radio" name="radio-uri" value="custom" id="custom-{{idfile}}" />
+                        <input type="radio" name="radio-uri-{{idfile}}" value="custom" />
                         <label for="custom-{{idfile}}">Use custom URI </label>
-                        <i>http://</i><input id='custom-uri' type="text"></input>
+                        <i>http://</i><input id='custom-uri-{{idfile}}' type="text"></input>
                     </div>
                 </div>
               </div>
