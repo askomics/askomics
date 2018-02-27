@@ -31,20 +31,23 @@ class AbstractedRelation(object):
         idx = identifier.find("@")
         type_range =  identifier
 
-        self.label = relation_type
-        self.uri = ParamManager.encode_to_rdf_uri(identifier,prefix=identifier_prefix)
+        if idx > 0:
+            self.label = identifier[0:idx]
+        else:
+            self.label = identifier
 
-        self.col_type = relation_type
+        self.uri = ParamManager.encode_to_rdf_uri(self.label,prefix="askomics:")
+
+        self.rdfs_range = rdfs_range
 
         if relation_type.startswith("entity"):
             self.relation_type = "owl:ObjectProperty"
-            self.rdfs_range = ParamManager.encode_to_rdf_uri(type_range,prefixRange)
+
         elif relation_type == "goterm":
             self.relation_type = "owl:ObjectProperty"
             self.rdfs_range = "owl:Class"
         else:
             self.relation_type = "owl:DatatypeProperty"
-            self.rdfs_range = rdfs_range
 
         self.rdfs_domain = ParamManager.encode_to_rdf_uri(rdfs_domain,prefixDomain)
         self.log = logging.getLogger(__name__)
@@ -64,9 +67,6 @@ class AbstractedRelation(object):
     def get_range(self):
         return self.rdfs_range
 
-    def get_col_type(self):
-        return self.col_type
-
     def get_turtle(self):
         """
         return the turtle code describing an AbstractedRelation
@@ -74,7 +74,7 @@ class AbstractedRelation(object):
         """
 
         uri = self.get_uri()
-       
+
         indent = (len(uri)) * " "
         turtle = uri + " rdf:type " + self.get_relation_type() + " ;\n"
         turtle += indent + ' rdfs:label ' + json.dumps(self.get_label()) + '^^xsd:string ;\n'

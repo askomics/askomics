@@ -367,21 +367,28 @@ class SourceFileTsv(SourceFile):
 
             if key > 0:
                 uriPref = "askomics:"
+                rangeRdfs = self.encode_to_rdf_uri(self.type_dict[key_type],prefix="askomics:")
+
                 if key_type.startswith('entity'):
                     uriPref = self.uri[key]
+                    idx = self.headers[key].find("@")
+
+                    if idx > 0:
+                        rangeRdfs = self.headers[key][idx+1:]
+                    else:
+                        rangeRdfs = self.headers[key]
+
+                    rangeRdfs = self.encode_to_rdf_uri(rangeRdfs,prefix=self.uri[key])
+
                 relation_uri = self.headers[key]
                 if key_type in ('taxon', 'ref', 'strand', 'start', 'end'):
                     relation_uri = 'position_'+key_type
-
-                rangeRdfs = self.encode_to_rdf_uri(self.type_dict[key_type],prefix="askomics:")
-                print("keytype:"+key_type)
-                if key_type == 'category' :
+                elif key_type == 'category' :
                     rangeRdfs = self.encode_to_rdf_uri(self.headers[key]+"Category",prefix="askomics:")
                 elif key_type == 'taxon' or key_type == 'ref' or key_type == 'strand':
-                    print("OKKKK")
                     rangeRdfs = self.encode_to_rdf_uri(key_type+"Category",prefix="askomics:")
-                print("===>"+rangeRdfs)
-                ttl += AbstractedRelation(self.headers[key] , relation_uri , uriPref, ref_entity, self.uri[0],rangeRdfs,"askomics:").get_turtle()
+
+                ttl += AbstractedRelation(key_type , relation_uri , uriPref, ref_entity, self.uri[0],rangeRdfs,"askomics:").get_turtle()
 
         # Store the startpoint status
         if self.forced_column_types[0] == 'entity_start':
@@ -418,7 +425,7 @@ class SourceFileTsv(SourceFile):
             for item in categories:
                 if item.strip() != "":
                     ttl += self.encode_to_rdf_uri(item,prefix="askomics:") + " rdf:type " + self.encode_to_rdf_uri(header,prefix="askomics:") + " ;\n" + len(item) * " " + "  rdfs:label " + self.escape['text'](item,'') + "^^xsd:string .\n"
-        print(ttl)
+    
         return ttl
 
 
