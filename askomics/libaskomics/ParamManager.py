@@ -37,19 +37,19 @@ class ParamManager(object):
         self.userfilesdir = self.get_param('askomics.files_dir') + '/'
 
         self.escape = {
-            'numeric' : lambda str: str,
-            'text'    : json.dumps,
+            'numeric' : lambda str,str2: str,
+            'text'    : lambda str,str2: json.dumps(str),
             'category': self.encode_to_rdf_uri,
-            'taxon': lambda str: str,
-            'ref': lambda str: str,
-            'strand': lambda str: str,
-            'start' : lambda str: str,
-            'end' : lambda str: str,
+            'taxon': lambda str,str2: str,
+            'ref': lambda str,str2: str,
+            'strand': lambda str,str2: str,
+            'start' : lambda str,str2: str,
+            'end' : lambda str,str2: str,
             'entity'  : self.encode_to_rdf_uri,
             'entitySym'  : self.encode_to_rdf_uri,
             'entity_start'  : self.encode_to_rdf_uri,
-            'goterm': lambda str: str.replace("GO:", ""),
-            'date': json.dumps
+            'goterm': lambda str,str2: str.replace("GO:", ""),
+            'date': lambda str,str2: json.dumps(str)
             }
 
     def get_db_directory(self):
@@ -261,8 +261,11 @@ class ParamManager(object):
         pref = ":"
         suf  = ""
         if prefix:
-            pref = "<" + prefix
-            suf  = ">"
+            if prefix[len(prefix)-1] == ":":
+                pref = prefix
+            else:
+                pref = "<" + prefix
+                suf  = ">"
 
         v = pref+ParamManager.encode(toencode)+suf
         return v
