@@ -63,3 +63,9 @@ up:sequence rdf:type owl:ObjectProperty ;
                      rdfs:label ":sequence"^^xsd:string ;
                      rdfs:domain up:Protein ;
                      rdfs:range up:Simple_Sequence .
+
+# 
+#rdfs:subClassOf rdf:type owl:ObjectProperty ;
+#                     rdfs:label ":subClassOf"^^xsd:string ;
+#                     rdfs:domain up:Taxon ;
+#                     rdfs:range up:Taxon .
