@@ -953,11 +953,9 @@ class AskView(object):
             self.data['nrow'] = len(results)
 
             # Provide results file
-            if (not 'nofile' in body) or body['nofile']:
+            if (not 'nofile' in body) or not body['nofile']:
                 query_laucher = QueryLauncher(self.settings, self.request.session)
                 self.data['file'] = query_laucher.format_results_csv(results, ordered_headers)
-            print("---------------------")
-            print(self.data['file'])
 
             if persist:
                 npreview = 30
