@@ -368,7 +368,7 @@ class SourceFileTsv(SourceFile):
             if key > 0:
                 uriPref = "displaySetting:"
                 if key_type.startswith('entity'):
-                    uriPref = self.uri[i]
+                    uriPref = self.uri[key]
                 relation_uri = self.headers[key]
                 if key_type in ('taxon', 'ref', 'strand', 'start', 'end'):
                     relation_uri = 'position_'+key_type
