@@ -427,6 +427,7 @@ class SourceFileTsv(SourceFile):
         """
         A (lazily cached) dictionary mapping from column name (header) to the set of unique values.
         """
+
         self.log.warning("category_values will be computed independently, get_turtle should be used to generate both at once (better performances)")
         category_values = defaultdict(set) # key=name of a column of 'category' type -> list of found values
 
@@ -451,8 +452,9 @@ class SourceFileTsv(SourceFile):
 
                 for i, (header, current_type) in enumerate(zip(self.headers, self.forced_column_types)):
                     if current_type in ('category', 'taxon', 'ref', 'strand'):
-                        # This is a category, keep track of allowed values for this column
-                        self.category_values.setdefault(header, set()).add(row[i])
+                        if len(row[i].strip()) != 0:
+                            # This is a category, keep track of allowed values for this column
+                            self.category_values.setdefault(header, set()).add(row[i])
 
         return category_values
 
@@ -518,7 +520,8 @@ class SourceFileTsv(SourceFile):
 
                         elif current_type in ('category', 'taxon', 'ref', 'strand'):
                             # This is a category, keep track of allowed values for this column
-                            self.category_values[header].add(row[i])
+                            if len(row[i].strip()) != 0:
+                                self.category_values[header].add(row[i].strip())
                             cur_prefix_uri = "askomics:"
 
 
