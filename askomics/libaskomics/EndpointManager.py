@@ -13,7 +13,6 @@ class EndpointManager(ParamManager):
         self.log = logging.getLogger(__name__)
         self.databasename = "endpoints.db"
         self.pathdb = self.get_common_user_directory()+"/"+self.databasename
-        self.log.info(" ==> "+ self.pathdb +"<==");
 
         conn = sqlite3.connect("file:"+self.pathdb,uri=True)
         c = conn.cursor()
@@ -41,7 +40,6 @@ class EndpointManager(ParamManager):
         conn.close()
 
     def saveEndpoint(self,name,url,auth,isenable):
-        print("========================== SAVE ENDPOINT ===============================")
         conn = sqlite3.connect(self.pathdb,uri=True)
         c = conn.cursor()
 
@@ -98,7 +96,7 @@ class EndpointManager(ParamManager):
         self.listEndpoints()
 
     def listAskomicsEndpoints(self):
-        self.log.info(" == listEndpoints == ")
+
         data = []
         try:
             conn = sqlite3.connect(self.pathdb,uri=True)
@@ -110,7 +108,7 @@ class EndpointManager(ParamManager):
 
             c.execute(reqSql)
             rows = c.fetchall()
-            self.log.info("nb row:"+str(len(rows)))
+
             for row in rows:
 
                 d = {}
@@ -125,7 +123,7 @@ class EndpointManager(ParamManager):
                 data.append(d)
 
         except sqlite3.OperationalError as e :
-            self.log.info("Endpoints database does not exist .")
+            self.log.warn("Endpoints database does not exist .")
 
 
         c.execute(reqSql)
@@ -134,7 +132,6 @@ class EndpointManager(ParamManager):
         return data
 
     def listEndpoints(self):
-        self.log.info(" == listEndpoints == ")
         data = []
         try:
             conn = sqlite3.connect(self.pathdb,uri=True)
@@ -146,7 +143,7 @@ class EndpointManager(ParamManager):
 
             c.execute(reqSql)
             rows = c.fetchall()
-            self.log.info("nb row:"+str(len(rows)))
+
             for row in rows:
 
                 d = {}
@@ -162,7 +159,7 @@ class EndpointManager(ParamManager):
                 data.append(d)
 
         except sqlite3.OperationalError as e :
-            self.log.info("Endpoints database does not exist .")
+            self.log.warn("Endpoints database does not exist .")
 
 
         c.execute(reqSql)
@@ -182,7 +179,7 @@ class EndpointManager(ParamManager):
 
             c.execute(reqSql)
             rows = c.fetchall()
-            self.log.info("nb row:"+str(len(rows)))
+
             for row in rows:
 
                 d = {}
@@ -199,7 +196,7 @@ class EndpointManager(ParamManager):
                 data.append(d)
 
         except sqlite3.OperationalError as e :
-            self.log.info("Endpoints database does not exist .")
+            self.log.warn("Endpoints database does not exist .")
 
 
         c.execute(reqSql)
@@ -218,7 +215,7 @@ class EndpointManager(ParamManager):
             c.execute(reqSql)
             conn.commit()
         except sqlite3.OperationalError as e :
-            self.log.info("Jobs database does not exist .")
+            self.log.warn("Jobs database does not exist .")
 
         conn.close()
 
@@ -232,6 +229,6 @@ class EndpointManager(ParamManager):
             c.execute(reqSql)
             conn.commit()
         except sqlite3.OperationalError as e :
-            self.log.info("Jobs database does not exist .")
+            self.log.warn("Jobs database does not exist .")
 
         conn.close()
