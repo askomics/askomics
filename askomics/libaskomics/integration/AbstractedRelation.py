@@ -31,32 +31,17 @@ class AbstractedRelation(object):
         idx = identifier.find("@")
         type_range =  identifier
 
-        #Keep compatibility with old version
-        if idx  != -1:
-            type_range = identifier[idx+1:len(identifier)]
-            self.label = identifier[0:idx]
-
-        else:
-            self.label = identifier
-
-
-        self.uri = ParamManager.encode_to_rdf_uri(self.label,prefix=identifier_prefix)
-
+        self.label = relation_type
+        self.uri = ParamManager.encode_to_rdf_uri(identifier,prefix=identifier_prefix)
 
         self.col_type = relation_type
 
         if relation_type.startswith("entity"):
             self.relation_type = "owl:ObjectProperty"
             self.rdfs_range = ParamManager.encode_to_rdf_uri(type_range,prefixRange)
-
-
         elif relation_type == "goterm":
             self.relation_type = "owl:ObjectProperty"
             self.rdfs_range = "owl:Class"
-
-        elif relation_type.lower() in ('category', 'taxon', 'ref', 'strand'):
-            self.relation_type = "owl:ObjectProperty"
-            self.rdfs_range = ParamManager.encode_to_rdf_uri(type_range+"Category",prefixRange)
         else:
             self.relation_type = "owl:DatatypeProperty"
             self.rdfs_range = rdfs_range
@@ -88,12 +73,8 @@ class AbstractedRelation(object):
         for the abstraction file generation.
         """
 
-        if self.get_col_type() in ('start', 'end', 'taxon', 'ref', 'strand'):
-            self.log.debug('---> POSITIONABLE ATTRIBUTE <---')
-            uri = ':position_'+self.get_col_type()
-        else:
-            uri = self.get_uri()
-
+        uri = self.get_uri()
+       
         indent = (len(uri)) * " "
         turtle = uri + " rdf:type " + self.get_relation_type() + " ;\n"
         turtle += indent + ' rdfs:label ' + json.dumps(self.get_label()) + '^^xsd:string ;\n'
