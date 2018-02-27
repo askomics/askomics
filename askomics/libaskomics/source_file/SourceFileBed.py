@@ -67,12 +67,12 @@ class SourceFileBed(SourceFile):
 
         taxon_entity = ':unknown'
         if self.taxon != '':
-            taxon_entity = self.encode_to_rdf_uri(self.taxon.strip(),prefix='displaySetting:')
+            taxon_entity = self.encode_to_rdf_uri(self.taxon.strip(),prefix='askomics:')
 
         self.get_label_from_uri[taxon_entity] = self.taxon.strip()
-        self.get_label_from_uri['displaySetting:plus'] = 'plus'
-        self.get_label_from_uri['displaySetting:minus'] = 'minus'
-        self.get_label_from_uri['displaySetting:none'] = ''
+        self.get_label_from_uri['askomics:plus'] = 'plus'
+        self.get_label_from_uri['askomics:minus'] = 'minus'
+        self.get_label_from_uri['askomics:none'] = ''
 
         blockbase = 10000
 
@@ -113,13 +113,13 @@ class SourceFileBed(SourceFile):
             # Strand
             faldo_strand = ''
             if feature.strand == '+':
-                strand_entity = 'displaySetting:plus'
+                strand_entity = 'askomics:plus'
                 faldo_strand = "faldo:ForwardStrandPosition"
             elif feature.strand == '-':
-                strand_entity = 'displaySetting:minus'
+                strand_entity = 'askomics:minus'
                 faldo_strand = "faldo:ReverseStrandPosition"
             else:
-                strand_entity = 'displaySetting:none'
+                strand_entity = 'askomics:none'
                 faldo_strand = "faldo:BothStrandPosition"
 
             # Score
@@ -135,17 +135,17 @@ class SourceFileBed(SourceFile):
             indent = len(self.uri[0]) * ' ' + '   '
             ttl = self.encode_to_rdf_uri(name_entity) + ' rdf:type ' + type_entity + ' ;\n'
             ttl += indent + 'rdfs:label "' + name_entity + '"^^xsd:string ;\n'
-            ttl += indent + 'displaySetting:position_taxon ' + taxon_entity + ' ;\n'
-            ttl += indent + 'displaySetting:position_strand ' + strand_entity + ' ;\n'
+            ttl += indent + 'askomics:position_taxon ' + taxon_entity + ' ;\n'
+            ttl += indent + 'askomics:position_strand ' + strand_entity + ' ;\n'
 
             if score_entity is not None:
                 ttl += indent + ':score ' + score_entity + ' ;\n'
 
-            ttl += indent + 'displaySetting:blockstart ' + str(block_idxstart * blockbase) + ' ;\n'
-            ttl += indent + 'displaySetting:blockend ' + str(block_idxend * blockbase) + ' ;\n'
+            ttl += indent + 'askomics:blockstart ' + str(block_idxstart * blockbase) + ' ;\n'
+            ttl += indent + 'askomics:blockend ' + str(block_idxend * blockbase) + ' ;\n'
             for sliceb in range(block_idxstart, block_idxend + 1):
-                ttl += indent + 'displaySetting:IsIncludeInRef ' + ref_entity + '_' + str(sliceb) + ' ;\n'
-                ttl += indent + 'displaySetting:IsIncludeIn ' + str(sliceb)+ ' ;\n'
+                ttl += indent + 'askomics:IsIncludeInRef ' + ref_entity + '_' + str(sliceb) + ' ;\n'
+                ttl += indent + 'askomics:IsIncludeIn ' + str(sliceb)+ ' ;\n'
 
             ttl += indent + " faldo:location [ a faldo:Region ;\n" + \
                    indent + "                  faldo:begin [ a faldo:ExactPosition;\n" + \
@@ -212,31 +212,31 @@ class SourceFileBed(SourceFile):
             ttl += entity + ' ' + 'rdf:type owl:Class ;\n'
             indent = len(entity) * ' ' + ' '
             ttl += indent + 'rdfs:label \"' + self.decode_to_rdf_uri(entity) + "\"^^xsd:string ;\n"
-            ttl += indent + 'displaySetting:startPoint \"true\"^^xsd:boolean ;\n\n'
-            ttl += indent + 'displaySetting:entity \"true\"^^xsd:boolean .\n\n'
+            ttl += indent + 'askomics:startPoint \"true\"^^xsd:boolean ;\n\n'
+            ttl += indent + 'askomics:entity \"true\"^^xsd:boolean .\n\n'
 
             for type_attr, attr_list in attribute_dict.items():
                 if type_attr == 'pos_attr': # positionable attributes
                     for pos_attr in attr_list:
                         if pos_attr in ('position_start', 'position_end'):
-                            ttl += self.encode_to_rdf_uri("displaySetting:"+pos_attr) + ' displaySetting:attribute \"true\"^^xsd:boolean ;\n'
+                            ttl += self.encode_to_rdf_uri("askomics:"+pos_attr) + ' askomics:attribute \"true\"^^xsd:boolean ;\n'
                             indent = len(pos_attr) * ' ' + '  '
                             ttl += indent + 'rdf:type owl:DatatypeProperty ;\n'
                             ttl += indent + 'rdfs:label \"' + pos_attr.replace('position_', '') + '\"^^xsd:string ;\n'
                             ttl += indent + 'rdfs:domain ' + entity + ' ;\n'
                             ttl += indent + 'rdfs:range xsd:decimal .\n\n'
-                            ttl += self.encode_to_rdf_uri("displaySetting:"+pos_attr) + ' displaySetting:attributeOrder "' + order_dict[pos_attr] + '"^^xsd:decimal .\n'
+                            ttl += self.encode_to_rdf_uri("askomics:"+pos_attr) + ' askomics:attributeOrder "' + order_dict[pos_attr] + '"^^xsd:decimal .\n'
                         else:
                             # No taxon, don't write triple and continue loop
                             if pos_attr == 'position_taxon' and self.taxon == '':
                                 continue
-                            ttl += self.encode_to_rdf_uri("displaySetting:"+pos_attr) + ' displaySetting:attribute \"true\"^^xsd:boolean ;\n'
+                            ttl += self.encode_to_rdf_uri("askomics:"+pos_attr) + ' askomics:attribute \"true\"^^xsd:boolean ;\n'
                             indent = len(pos_attr) * ' ' + '  '
                             ttl += indent + 'rdf:type owl:ObjectProperty ;\n'
                             ttl += indent + 'rdfs:label \"' + pos_attr.replace('position_', '') + '\"^^xsd:string ;\n'
                             ttl += indent + 'rdfs:domain ' + entity + ' ;\n'
-                            ttl += indent + 'rdfs:range ' + "displaySetting:"+pos_attr.replace('position_', '') + "Category .\n\n"
-                            ttl += self.encode_to_rdf_uri("displaySetting:"+pos_attr) + ' displaySetting:attributeOrder "' + order_dict[pos_attr] + '"^^xsd:decimal .\n'
+                            ttl += indent + 'rdfs:range ' + "askomics:"+pos_attr.replace('position_', '') + "Category .\n\n"
+                            ttl += self.encode_to_rdf_uri("askomics:"+pos_attr) + ' askomics:attributeOrder "' + order_dict[pos_attr] + '"^^xsd:decimal .\n'
                 else: # other attributes
                     for attr in attr_list:
                         if isinstance(attr, dict): # Parent relation
@@ -247,7 +247,7 @@ class SourceFileBed(SourceFile):
                                 ttl += indent + 'rdfs:domain ' + entity + " ;\n"
                                 ttl += indent + 'rdfs:range ' + value + ' .\n\n'
                         else: # normal attributes
-                            ttl += attr + ' displaySetting:attribute \"true\"^^xsd:boolean ;\n'
+                            ttl += attr + ' askomics:attribute \"true\"^^xsd:boolean ;\n'
                             indent = len(attr) * ' ' + '  '
                             ttl += indent + 'rdf:type owl:DatatypeProperty ;\n'
                             ttl += indent + 'rdfs:label \"' + attr + '\"^^xsd:string ;\n'
@@ -257,9 +257,9 @@ class SourceFileBed(SourceFile):
                             else:
                                 ttl += indent + 'rdfs:range xsd:string .\n\n'
                             if attr == 'Name':
-                                ttl += attr + ' displaySetting:attributeOrder "' + order_dict[attr] + '"^^xsd:decimal .\n'
+                                ttl += attr + ' askomics:attributeOrder "' + order_dict[attr] + '"^^xsd:decimal .\n'
                             if attr == 'score':
-                                ttl += attr + ' displaySetting:attributeOrder "' + order_dict[attr] + '"^^xsd:decimal .\n'
+                                ttl += attr + ' askomics:attributeOrder "' + order_dict[attr] + '"^^xsd:decimal .\n'
         return ttl
 
     def get_domain_knowledge(self):
@@ -275,9 +275,9 @@ class SourceFileBed(SourceFile):
 
         for entity, dk_dict in self.domain_knowledge_dict.items():
             # Positionable entity
-            ttl += entity + ' displaySetting:is_positionable \"true\"^^xsd:boolean .\n'
-            ttl += 'displaySetting:is_positionable rdfs:label \'is_positionable\'^^xsd:string .\n'
-            ttl += 'displaySetting:is_positionable rdf:type owl:ObjectProperty .\n\n'
+            ttl += entity + ' askomics:is_positionable \"true\"^^xsd:boolean .\n'
+            ttl += 'askomics:is_positionable rdfs:label \'is_positionable\'^^xsd:string .\n'
+            ttl += 'askomics:is_positionable rdf:type owl:ObjectProperty .\n\n'
 
             for category_dict in dk_dict.values():
                 for category, cat_list in category_dict.items():
@@ -287,8 +287,8 @@ class SourceFileBed(SourceFile):
                     for cat in cat_list:
                         if self.get_label_from_uri[cat] == '':
                             continue
-                        ttl += 'displaySetting:'+str(category.replace('position_', '')) + 'Category displaySetting:category ' + str(cat) + ' .\n'
-                        ttl += str(cat) + ' rdf:type ' + 'displaySetting:'+str(category.replace('position_', '')) + ' ;\n'
+                        ttl += 'askomics:'+str(category.replace('position_', '')) + 'Category askomics:category ' + str(cat) + ' .\n'
+                        ttl += str(cat) + ' rdf:type ' + 'askomics:'+str(category.replace('position_', '')) + ' ;\n'
                         indent = len(str(cat)) * ' ' + ' '
                         ttl += indent + 'rdfs:label \"' + self.get_label_from_uri[cat] + '\"^^xsd:string .\n'
 

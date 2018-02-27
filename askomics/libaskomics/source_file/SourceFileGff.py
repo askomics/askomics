@@ -99,20 +99,20 @@ class SourceFileGff(SourceFile):
         lEntities = {}
         toBuild = []
 
-        taxon_entity = 'displaySetting:unknown'
+        taxon_entity = 'askomics:unknown'
         if self.taxon != '' :
-            taxon_entity = self.encode_to_rdf_uri(self.taxon.strip(),'displaySetting:')
+            taxon_entity = self.encode_to_rdf_uri(self.taxon.strip(),'askomics:')
 
         self.getLabelFromUri[taxon_entity] = self.taxon.strip()
-        self.getLabelFromUri['displaySetting:plus'] = 'plus'
-        self.getLabelFromUri['displaySetting:minus'] = 'minus'
-        self.getLabelFromUri['displaySetting:none'] = ''
+        self.getLabelFromUri['askomics:plus'] = 'plus'
+        self.getLabelFromUri['askomics:minus'] = 'minus'
+        self.getLabelFromUri['askomics:none'] = ''
 
         blockbase=10000
 
         for rec in GFF.parse(handle, limit_info=limit, target_lines=1):
-            # Reference have to be common with other reference of other taxon => displaySetting:
-            ref_entity =  self.encode_to_rdf_uri(str(rec.id),prefix='displaySetting:')
+            # Reference have to be common with other reference of other taxon => askomics:
+            ref_entity =  self.encode_to_rdf_uri(str(rec.id),prefix='askomics:')
             if ref_entity not in self.getLabelFromUri:
                 self.getLabelFromUri[ref_entity] = str(rec.id)
 
@@ -148,13 +148,13 @@ class SourceFileGff(SourceFile):
                 faldo_strand =""
 
                 if int(feat.location.strand == 1):
-                    strand_entity = 'displaySetting:plus'
+                    strand_entity = 'askomics:plus'
                     faldo_strand = "faldo:ForwardStrandPosition"
                 elif int(feat.location.strand == -1):
-                    strand_entity = 'displaySetting:minus'
+                    strand_entity = 'askomics:minus'
                     faldo_strand = "faldo:ReverseStrandPosition"
                 else:
-                    strand_entity = 'displaySetting:none'
+                    strand_entity = 'askomics:none'
                     faldo_strand = "faldo:BothStrandPosition"
 
                 block_idxstart = int(start_entity) // blockbase
@@ -162,20 +162,20 @@ class SourceFileGff(SourceFile):
                 listSliceRef = []
                 listSlice = []
                 for sliceb in range(block_idxstart,block_idxend+1):
-                        listSliceRef.append(self.encode_to_rdf_uri("displaySetting:"+str(rec.id)+"_"+str(sliceb)))
+                        listSliceRef.append(self.encode_to_rdf_uri("askomics:"+str(rec.id)+"_"+str(sliceb)))
                         listSlice.append(str(sliceb))
 
                 attribute_dict = {
                     'rdf:type':  [type_entity],
-                    'displaySetting:position_taxon' : [taxon_entity],
-                    'displaySetting:position_ref'   : [ref_entity],
-                    'displaySetting:position_start' : [start_entity],
-                    'displaySetting:position_end'   : [end_entity],
-                    'displaySetting:position_strand': [strand_entity],
-                    'displaySetting:blockstart'     : [str(block_idxstart*blockbase)],
-                    'displaySetting:blockend'       : [str(block_idxend*blockbase)],
-                    'displaySetting:IsIncludeInRef' : listSliceRef,
-                    'displaySetting:IsIncludeIn'    : listSlice,
+                    'askomics:position_taxon' : [taxon_entity],
+                    'askomics:position_ref'   : [ref_entity],
+                    'askomics:position_start' : [start_entity],
+                    'askomics:position_end'   : [end_entity],
+                    'askomics:position_strand': [strand_entity],
+                    'askomics:blockstart'     : [str(block_idxstart*blockbase)],
+                    'askomics:blockend'       : [str(block_idxend*blockbase)],
+                    'askomics:IsIncludeInRef' : listSliceRef,
+                    'askomics:IsIncludeIn'    : listSlice,
                     'faldo:location' : ["[ a faldo:Region ;\n"+
                                         "    faldo:begin [ a faldo:ExactPosition;\n"+
                                         "                  a "+faldo_strand+";\n"+
@@ -335,31 +335,31 @@ class SourceFileGff(SourceFile):
             ttl += entity + ' ' + 'rdf:type owl:Class ;\n'
             indent = len(entity) * ' ' + ' '
             ttl += indent + 'rdfs:label \"' + self.decode_to_rdf_uri(entity,prefix=self.prefix) + "\"^^xsd:string ;\n"
-            ttl += indent + 'displaySetting:startPoint \"true\"^^xsd:boolean ;\n'
-            ttl += indent + 'displaySetting:entity \"true\"^^xsd:boolean .\n\n'
+            ttl += indent + 'askomics:startPoint \"true\"^^xsd:boolean ;\n'
+            ttl += indent + 'askomics:entity \"true\"^^xsd:boolean .\n\n'
 
             for type_attr, attr_list in attribute_dict.items():
                 if type_attr == 'pos_attr': # positionable attributes
                     for pos_attr in attr_list:
                         if pos_attr in ('position_start', 'position_end'):
-                            ttl += self.encode_to_rdf_uri('displaySetting:'+pos_attr) + ' displaySetting:attribute \"true\"^^xsd:boolean ;\n'
+                            ttl += self.encode_to_rdf_uri('askomics:'+pos_attr) + ' askomics:attribute \"true\"^^xsd:boolean ;\n'
                             indent = len(pos_attr) * ' ' + '  '
                             ttl += indent + 'rdf:type owl:DatatypeProperty ;\n'
                             ttl += indent + 'rdfs:label \"' + pos_attr.replace('position_', '') + '\"^^xsd:string ;\n'
                             ttl += indent + 'rdfs:domain ' + entity + ' ;\n'
                             ttl += indent + 'rdfs:range xsd:decimal .\n\n'
-                            ttl += self.encode_to_rdf_uri('displaySetting:'+pos_attr) + ' displaySetting:attributeOrder "' + order_dict[pos_attr] + '"^^xsd:decimal .\n'
+                            ttl += self.encode_to_rdf_uri('askomics:'+pos_attr) + ' askomics:attributeOrder "' + order_dict[pos_attr] + '"^^xsd:decimal .\n'
                         else:
                             # No taxon, don't write triple and continue loop
                             if pos_attr == 'position_taxon' and self.taxon == '':
                                 continue
-                            ttl += self.encode_to_rdf_uri('displaySetting:'+pos_attr) + ' displaySetting:attribute \"true\"^^xsd:boolean ;\n'
+                            ttl += self.encode_to_rdf_uri('askomics:'+pos_attr) + ' askomics:attribute \"true\"^^xsd:boolean ;\n'
                             indent = len(pos_attr) * ' ' + '  '
                             ttl += indent + 'rdf:type owl:ObjectProperty ;\n'
                             ttl += indent + 'rdfs:label \"' + pos_attr.replace('position_', '') + '\"^^xsd:string ;\n'
                             ttl += indent + 'rdfs:domain ' + entity + ' ;\n'
-                            ttl += indent + 'rdfs:range ' + self.encode_to_rdf_uri('displaySetting:'+pos_attr.replace('position_', '')+ "Category") + ".\n\n"
-                            ttl += self.encode_to_rdf_uri('displaySetting:'+pos_attr) + ' displaySetting:attributeOrder "' + order_dict[pos_attr] + '"^^xsd:decimal .\n'
+                            ttl += indent + 'rdfs:range ' + self.encode_to_rdf_uri('askomics:'+pos_attr.replace('position_', '')+ "Category") + ".\n\n"
+                            ttl += self.encode_to_rdf_uri('askomics:'+pos_attr) + ' askomics:attributeOrder "' + order_dict[pos_attr] + '"^^xsd:decimal .\n'
                 else: # other attributes
                     for attr in attr_list:
                         if isinstance(attr, dict): # Parent relation
@@ -370,14 +370,14 @@ class SourceFileGff(SourceFile):
                                 ttl += indent + 'rdfs:domain ' + entity + " ;\n"
                                 ttl += indent + 'rdfs:range ' + value + ' .\n\n'
                         else: # normal attributes
-                            ttl += attr + ' displaySetting:attribute \"true\"^^xsd:boolean ;\n'
+                            ttl += attr + ' askomics:attribute \"true\"^^xsd:boolean ;\n'
                             indent = len(attr) * ' ' + '  '
                             ttl += indent + 'rdf:type owl:DatatypeProperty ;\n'
                             ttl += indent + 'rdfs:label \"' + self.decode_to_rdf_uri(attr,prefix=self.prefix) + '\"^^xsd:string ;\n'
                             ttl += indent + 'rdfs:domain ' + entity + " ;\n"
                             ttl += indent + 'rdfs:range xsd:string .\n\n'
                             if attr == 'Name':
-                                ttl += attr + ' displaySetting:attributeOrder "' + order_dict[attr] + '"^^xsd:decimal .\n'
+                                ttl += attr + ' askomics:attributeOrder "' + order_dict[attr] + '"^^xsd:decimal .\n'
         #print(ttl)
         return ttl
 
@@ -392,9 +392,9 @@ class SourceFileGff(SourceFile):
 
         for entity, dk_dict in self.domain_knowledge_dict.items():
             # Positionable entity
-            ttl += self.encode_to_rdf_uri(entity,prefix=self.prefix) + ' displaySetting:is_positionable \"true\"^^xsd:boolean .\n'
-            ttl += 'displaySetting:is_positionable rdfs:label \'is_positionable\'^^xsd:string .\n'
-            ttl += 'displaySetting:is_positionable rdf:type owl:ObjectProperty .\n\n'
+            ttl += self.encode_to_rdf_uri(entity,prefix=self.prefix) + ' askomics:is_positionable \"true\"^^xsd:boolean .\n'
+            ttl += 'askomics:is_positionable rdfs:label \'is_positionable\'^^xsd:string .\n'
+            ttl += 'askomics:is_positionable rdf:type owl:ObjectProperty .\n\n'
 
             for category_dict in dk_dict.values():
                 for category, cat_list in category_dict.items():
@@ -404,8 +404,8 @@ class SourceFileGff(SourceFile):
                     for cat in cat_list:
                         if self.getLabelFromUri[cat] == '':
                             continue
-                        ttl += self.encode_to_rdf_uri('displaySetting:'+str(category.replace('position_', ''))+'Category') + ' displaySetting:category ' + str(cat) + ' .\n'
-                        ttl += str(cat) + ' rdf:type ' + self.encode_to_rdf_uri('displaySetting:'+str(category.replace('position_', ''))) + ' ;\n'
+                        ttl += self.encode_to_rdf_uri('askomics:'+str(category.replace('position_', ''))+'Category') + ' askomics:category ' + str(cat) + ' .\n'
+                        ttl += str(cat) + ' rdf:type ' + self.encode_to_rdf_uri('askomics:'+str(category.replace('position_', ''))) + ' ;\n'
                         indent = len(str(cat)) * ' ' + ' '
                         ttl += indent + 'rdfs:label \"' + self.getLabelFromUri[cat] + '\"^^xsd:string .\n'
 

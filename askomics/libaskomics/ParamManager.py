@@ -22,7 +22,7 @@ class ParamManager(object):
 
         self.ASKOMICS_prefix = {
             "": self.get_param("askomics.prefix"),
-            "displaySetting": self.get_param("askomics.display_setting"),
+            "askomics": self.get_param("askomics.namespace"),
             "xsd": """http://www.w3.org/2001/XMLSchema#""",
             "rdfs": """http://www.w3.org/2000/01/rdf-schema#""",
             "rdf": """http://www.w3.org/1999/02/22-rdf-syntax-ns#""",
