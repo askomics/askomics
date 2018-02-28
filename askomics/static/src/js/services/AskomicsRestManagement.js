@@ -100,7 +100,7 @@ function RestServiceJs(newurl) {
 
   this.postsync = function(model, callback) {
     let mythis = this;
-    $.ajax({
+    return $.ajax({
       async: false,
       type: 'POST',
       url: this.myurl,
@@ -116,7 +116,7 @@ function RestServiceJs(newurl) {
 
   this.update = function(model, callback) {
     let mythis = this;
-    $.ajax({
+    return $.ajax({
       type: 'PUT',
       url: this.myurl,
       data: JSON.stringify(model), // '{"name":"' + model.name + '"}',
@@ -131,7 +131,7 @@ function RestServiceJs(newurl) {
 
   this.get = function(id, callback) {
     let mythis = this;
-    $.ajax({
+    return $.ajax({
       type: 'GET',
       url: this.myurl + '/' + id,
       contentType: 'application/json',
@@ -143,7 +143,7 @@ function RestServiceJs(newurl) {
 
   this.getsync = function(callback) {
     let mythis = this;
-    $.ajax({
+    return $.ajax({
       async: false,
       type: 'GET',
       url: this.myurl,
@@ -156,7 +156,7 @@ function RestServiceJs(newurl) {
 
   this.getAll = function(callback) {
     let mythis = this;
-    $.ajax({
+    return $.ajax({
       type: 'GET',
       url: this.myurl,
       contentType: 'application/json',
@@ -168,7 +168,7 @@ function RestServiceJs(newurl) {
 
   this.remove = function(id, callback) {
     let mythis = this;
-    $.ajax({
+    return $.ajax({
       type: 'DELETE',
       url: this.myurl + '/' + id,
       contentType: 'application/json',

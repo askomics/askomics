@@ -1230,7 +1230,6 @@ class IHMLocal {
             'password': password
           };
           $('#spinner_login').removeClass('hidden');
-          $('#tick_login').addClass('hidden');
           $('#cross_login').addClass('hidden');
           service.post(model, function(data) {
             if (data.error.length !== 0) {
