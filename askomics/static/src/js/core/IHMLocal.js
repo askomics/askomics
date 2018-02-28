@@ -575,8 +575,12 @@ class IHMLocal {
                     if ($(this).is(':checked')) {selected_files.push($(this).attr('value'));}
                 });
                 let service = new RestServiceJs('source_files_overview');
-                service.post(selected_files, function(data) {
+                service.post(selected_files)
+                .done(function(data) {
                     displayIntegrationForm(data);
+                })
+                .fail(function(value) {
+                    $("#spinner_uploaded").addClass("hidden");
                 });
             });
 
@@ -588,8 +592,12 @@ class IHMLocal {
                     if ($(this).is(':checked')) {selected_files.push($(this).attr('value'));}
                 });
                 let service = new RestServiceJs('delete_uploaded_files');
-                service.post(selected_files, function(data) {
+                service.post(selected_files)
+                .done(function(data) {
                     __ihm.get_uploaded_files();
+                })
+                .fail(function(value) {
+                    $("#spinner_uploaded").addClass("hidden");
                 });
             });
 

@@ -40,6 +40,9 @@ function RestServiceJs(newurl) {
     console.debug("status:"+JSON.stringify(status));
     console.debug("ex:"+JSON.stringify(ex));
     //https://fr.wikipedia.org/wiki/Liste_des_codes_HTTP
+
+    $('#error_div').remove();
+
     if ( ex == 'Locked' ) {
       this.displayBlockedPage(__ihm.user.username);
       return;
@@ -82,7 +85,7 @@ function RestServiceJs(newurl) {
 
   this.post = function(model, callback) {
     let mythis = this;
-    $.ajax({
+    return $.ajax({
       type: 'POST',
       url: this.myurl,
       data: JSON.stringify(model), // '{"name":"' + model.name + '"}',
