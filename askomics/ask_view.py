@@ -1128,6 +1128,27 @@ class AskView(object):
 
         return self.data
 
+    @view_config(route_name='nbUsers', request_method='GET')
+    def nbUsers(self):
+
+        self.data = {}
+
+        sqa = SparqlQueryAuth(self.settings, self.request.session)
+        ql = QueryLauncher(self.settings, self.request.session)
+
+        try:
+
+            self.data['count'] =  0
+            res = ql.process_query(sqa.get_number_of_users().query)
+            if len(res)>0 and 'count' in res[0]:
+                self.data['count'] = res[0]['count']
+
+        except Exception as e:
+            self.data['error'] = str(e)
+            self.log.error(str(e))
+
+        return self.data
+
 
     @view_config(route_name='logout', request_method='GET')
     def logout(self):

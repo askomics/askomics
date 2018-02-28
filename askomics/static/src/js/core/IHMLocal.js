@@ -98,7 +98,16 @@ class IHMLocal {
     start() {
       $("#init").show();
       $("#queryBuilder").hide();
-      this.loadStartPoints();
+
+      this.loadStartPoints()
+      .then(function(nbStartPoints) {
+        AskomicsHelp.checkFirstUseAskomics(nbStartPoints);
+      })
+      .catch(function (reason) {
+        // File read error or JSON SyntaxError
+        console.error('An error occurred', reason);
+      });
+
     }
 
     startSession(contents) {
@@ -162,7 +171,15 @@ class IHMLocal {
 
       // show the start point selector
       $("#init").show();
-      this.loadStartPoints();
+
+      this.loadStartPoints()
+      .then(function(nbStartPoints) {
+          AskomicsHelp.checkFirstUseAskomics(nbStartPoints);
+      })
+      .catch(function (reason) {
+        // File read error or JSON SyntaxError
+        console.error('An error occurred', reason);
+      });
     }
 
 
@@ -245,15 +262,23 @@ class IHMLocal {
     }
 
     loadStartPoints() {
+
+      return new Promise(function (resolve, reject) {
+
         let service = new RestServiceJs('startpoints');
         service.getAll(function(start_points) {
-            if (! __ihm.manageErrorMessage(start_points)) return;
+
+            if (! __ihm.manageErrorMessage(start_points)) {
+              reject();
+              return;
+            }
+
             $("#init").empty();
             let template = AskOmics.templates.startpoints;
             let context = {startpoints: start_points.nodes};
             let html = template(context);
             $('#init').append(html);
-
+            let nbStartPoints = Object.keys(start_points.nodes).length;
             // Sort inputs
             let inputs = $("#spdiv");
             inputs.children().detach().sort(function(a, b) {
@@ -309,7 +334,9 @@ class IHMLocal {
                 __ihm.set_upload_galaxy_form(false, false);
             });
 
+            resolve(nbStartPoints);
         });
+      });
     }
 
 
