@@ -46,7 +46,14 @@ class TripleStoreExplorer(ParamManager):
         em = EndpointManager(self.settings, self.session)
 
         results = ql.process_query(sqg.get_public_start_point().query,em.listAskomicsEndpoints(),indexByEndpoint=True)
-        results.update(ql.process_query(sqg.get_user_start_point().query,em.listAskomicsEndpoints(),indexByEndpoint=True))
+        r2 = ql.process_query(sqg.get_user_start_point().query,em.listAskomicsEndpoints(),indexByEndpoint=True)
+        
+        for key, value in r2.items():
+            if key in results:
+                for elt in value:
+                    results[key].append(elt)
+            else:
+                results[key] = r2[key]
 
         for endpoint in results:
             for result in results[endpoint]:
