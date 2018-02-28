@@ -437,7 +437,7 @@ class AskView(object):
         filename = body['filename']
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
-        source_file = sfc.get_source_file(filename)
+        source_file = sfc.get_source_files([filename])[0]
         headers = source_file.headers
         preview = source_file.get_preview_data()
 
@@ -467,7 +467,7 @@ class AskView(object):
         self.log.debug(" ========= Askview:source_files_overview =============")
         try:
             sfc = SourceFileConvertor(self.settings, self.request.session)
-            source_files = sfc.get_source_files()
+            source_files = sfc.get_source_files(files_to_integrate)
             self.data['files'] = []
 
             # get all taxon in the TS
@@ -577,7 +577,7 @@ class AskView(object):
 
             sfc = SourceFileConvertor(self.settings, self.request.session)
 
-            src_file = sfc.get_source_file(file_name, uri_set=uris)
+            src_file = sfc.get_source_files([ file_name ], uri_set=uris)[0]
             src_file.set_forced_column_types(col_types)
             src_file.set_disabled_columns(disabled_columns)
             src_file.set_key_columns(key_columns)
@@ -648,7 +648,7 @@ class AskView(object):
             return 'forbidden'
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
-        src_file = sfc.get_source_file(file_name, forced_type, uri_set=uris)
+        src_file = sfc.get_source_files([ file_name ], forced_type, uri_set=uris)[0]
         src_file.set_headers(headers)
         src_file.set_forced_column_types(col_types)
         src_file.set_disabled_columns(disabled_columns)
@@ -703,7 +703,7 @@ class AskView(object):
             return 'forbidden'
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
-        src_file_gff = sfc.get_source_file(file_name, forced_type, uri_set={ 0 : uri } )
+        src_file_gff = sfc.get_source_files( [file_name], forced_type, uri_set={ 0 : uri } )[0]
 
         src_file_gff.set_taxon(taxon)
         src_file_gff.set_entities(entities)
@@ -756,7 +756,7 @@ class AskView(object):
             return 'forbidden'
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
-        src_file_ttl = sfc.get_source_file(file_name, forced_type)
+        src_file_ttl = sfc.get_source_files( [file_name], forced_type)[0]
 
         try:
             self.data = src_file_ttl.persist(self.request.host_url, public)
@@ -803,7 +803,7 @@ class AskView(object):
             return 'forbidden'
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
-        src_file_bed = sfc.get_source_file(file_name, forced_type, uri_set={ 0 : uri })
+        src_file_bed = sfc.get_source_files( [file_name], forced_type, uri_set={ 0 : uri })[0]
 
         src_file_bed.set_taxon(taxon)
         src_file_bed.set_entity_name(entity)
