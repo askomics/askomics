@@ -13,6 +13,10 @@ class EndpointManager(ParamManager):
         self.log = logging.getLogger(__name__)
         self.databasename = "endpoints.db"
         self.pathdb = self.get_common_user_directory()+"/"+self.databasename
+        self.create_db()
+
+    def create_db(self):
+        print(self)
 
         conn = sqlite3.connect("file:"+self.pathdb,uri=True)
         c = conn.cursor()
@@ -28,23 +32,21 @@ class EndpointManager(ParamManager):
 
         c.execute(reqSql)
         conn.commit()
-
-        #test
-        #reqSql = '''
-        #INSERT OR IGNORE INTO endpoints (id,name,url,user,passwd,auth,askomics)
-        #VALUES(2,'Askomics-Regine','http://openstack-192-168-100-46.genouest.org/virtuoso/sparql','NULL','NULL','NULL',1 )
-        #'''
-
-        #c.execute(reqSql)
-        #conn.commit()
         conn.close()
 
+
     def saveEndpoint(self,name,url,auth,isenable):
+
         conn = sqlite3.connect(self.pathdb,uri=True)
         c = conn.cursor()
 
         if not auth:
-            auth = 'NULL'
+            auth = 'BASIC'
+        else:
+            auth = auth.upper()
+            if auth != 'BASIC' and auth != 'DIGEST':
+                raise ValueError("Possible value for 'auth' : Digest, Basic, None")
+
         enable = '0'
         if isenable:
             enable = '1'
@@ -65,7 +67,7 @@ class EndpointManager(ParamManager):
         conn.close()
         return ID
 
-    def enable(self,id):
+    def enable(self,name):
 
         conn = sqlite3.connect(self.pathdb,uri=True)
         c = conn.cursor()
@@ -73,14 +75,13 @@ class EndpointManager(ParamManager):
         reqSql = "UPDATE endpoints SET "\
                 + " enable = 1 ," \
                 + " message = '' " \
-                + " WHERE id = "+str(id)
+                + " WHERE name = '"+str(name)+"'"
 
         c.execute(reqSql)
         conn.commit()
         conn.close()
-        self.listEndpoints()
 
-    def disable(self,id,message):
+    def disable(self,name,message):
 
         conn = sqlite3.connect(self.pathdb,uri=True)
         c = conn.cursor()
@@ -88,50 +89,14 @@ class EndpointManager(ParamManager):
         reqSql = "UPDATE endpoints SET "\
                 + " enable = 0 , " \
                 + " message = '"+message+"' " \
-                + " WHERE id = "+str(id)
-        print(reqSql)
-        c.execute(reqSql)
-        conn.commit()
-        conn.close()
-        self.listEndpoints()
-
-    def listAskomicsEndpoints(self):
-
-        data = []
-        try:
-            conn = sqlite3.connect(self.pathdb,uri=True)
-            conn.row_factory = sqlite3.Row
-
-            c = conn.cursor()
-
-            reqSql = """SELECT id, name, url, auth, enable, message FROM endpoints WHERE enable == 1"""
-
-            c.execute(reqSql)
-            rows = c.fetchall()
-
-            for row in rows:
-
-                d = {}
-                d['id'] = row['id']
-                d['name'] = row['name']
-                d['endpoint'] = row['url']
-                if row['auth'] != None and row['auth'] != 'NULL' :
-                    d['auth'] = row['auth']
-                else:
-                    d['auth'] = ''
-                d['message'] = row['message']
-                data.append(d)
-
-        except sqlite3.OperationalError as e :
-            self.log.warn("Endpoints database does not exist .")
-
+                + " WHERE name = '"+str(name)+"'"
 
         c.execute(reqSql)
         conn.commit()
         conn.close()
-        return data
 
     def listEndpoints(self):
+
         data = []
         try:
             conn = sqlite3.connect(self.pathdb,uri=True)
@@ -147,27 +112,27 @@ class EndpointManager(ParamManager):
             for row in rows:
 
                 d = {}
+                d['auth'] = ''
+
                 d['id'] = row['id']
                 d['name'] = row['name']
                 d['endpoint'] = row['url']
+
                 if row['auth'] != None and row['auth'] != 'NULL' :
                     d['auth'] = row['auth']
-                else:
-                    d['auth'] = ''
+
                 d['enable'] = (row['enable'] == 1)
                 d['message'] = row['message']
                 data.append(d)
+            conn.close()
 
         except sqlite3.OperationalError as e :
             self.log.warn("Endpoints database does not exist .")
 
-
-        c.execute(reqSql)
-        conn.commit()
-        conn.close()
         return data
 
     def listActiveEndpoints(self):
+
         data = []
         try:
             conn = sqlite3.connect(self.pathdb,uri=True)
@@ -183,33 +148,32 @@ class EndpointManager(ParamManager):
             for row in rows:
 
                 d = {}
+                d['auth'] = ''
                 d['id'] = row['id']
                 d['name'] = row['name']
                 d['endpoint'] = row['url']
+
                 if row['auth'] != None and row['auth'] != 'NULL' :
                     d['auth'] = row['auth']
-                else:
-                    d['auth'] = ''
+
                 d['enable'] = (row['enable'] == 1)
                 d['message'] = row['message']
 
                 data.append(d)
 
+            conn.close()
+
         except sqlite3.OperationalError as e :
             self.log.warn("Endpoints database does not exist .")
 
-
-        c.execute(reqSql)
-        conn.commit()
-        conn.close()
         return data
 
+    def remove(self,name):
 
-    def remove(self,id):
         conn = sqlite3.connect(self.pathdb,uri=True)
         c = conn.cursor()
 
-        reqSql = "DELETE FROM endpoints WHERE id = "+ str(id)
+        reqSql = "DELETE FROM endpoints WHERE name = '"+ str(name)+"'"
 
         try:
             c.execute(reqSql)
@@ -220,6 +184,7 @@ class EndpointManager(ParamManager):
         conn.close()
 
     def drop(self):
+
         conn = sqlite3.connect(self.pathdb,uri=True)
         c = conn.cursor()
 

@@ -111,11 +111,6 @@ class AskViewTests(unittest.TestCase):
             }
         }
 
-
-
-        print(data)
-        print(len(data["nodes"]))
-
         assert len(data["nodes"]) == 2
         # data["nodes"] = sorted(data["nodes"], key=self.getKeyNode)
         # expected_result["nodes"] = sorted(
