@@ -98,7 +98,7 @@ class InterfaceTPS(object):
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
 
-        src_file = sfc.get_source_file(file)
+        src_file = sfc.get_source_files([file])[0]
 
         src_file.set_forced_column_types(col_types)
         src_file.set_disabled_columns(disabled_columns)
