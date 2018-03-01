@@ -4,7 +4,7 @@
 @prefix rdfg: <http://www.w3.org/2004/03/trix/rdfg-1/> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix askomics: <http://www.irisa.fr/dyliss/rdfVisualization/display> .
+@prefix askomics: <http://www.semanticweb.org/askomics/ontologies/2018/1#> .
 @prefix dc: <http://purl.org/dc/elements/1.1/> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
@@ -64,7 +64,7 @@ up:sequence rdf:type owl:ObjectProperty ;
                      rdfs:domain up:Protein ;
                      rdfs:range up:Simple_Sequence .
 
-# 
+#
 #rdfs:subClassOf rdf:type owl:ObjectProperty ;
 #                     rdfs:label ":subClassOf"^^xsd:string ;
 #                     rdfs:domain up:Taxon ;

@@ -1,4 +1,4 @@
-@prefix askomics: <http://www.irisa.fr/dyliss/rdfVisualization/display>.
+@prefix askomics: <http://www.semanticweb.org/askomics/ontologies/2018/1#>.
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 
