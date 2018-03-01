@@ -86,25 +86,27 @@ class AskViewTests(unittest.TestCase):
 
         expected_result = {
             'nodes': {
-                'http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Instruments':
+                self.settings['askomics.prefix']+'Instruments':
                 {
                     'uri':
-                    'http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Instruments',
+                    self.settings['askomics.prefix']+'Instruments',
                     'g':
                     'urn:sparql:test_askomics:jdoe:instruments_tsv_' + timestamp_instruments,
                     'public': False,
                     'label': 'Instruments',
-                    'private': True
+                    'private': True,
+                    'endpoint': 'http://localhost:8890/sparql'
                 },
-                'http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#People':
+                self.settings['askomics.prefix']+'People':
                 {
                     'uri':
-                    'http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#People',
+                    self.settings['askomics.prefix']+'People',
                     'g':
                     'urn:sparql:test_askomics:jdoe:people_tsv_' + timestamp_people,
                     'public': False,
                     'label': 'People',
-                    'private': True
+                    'private': True,
+                    'endpoint': 'http://localhost:8890/sparql'
                 }
             }
         }
@@ -185,15 +187,16 @@ class AskViewTests(unittest.TestCase):
         # test if startpoint return only instruments
         expected_result = {
             'nodes': {
-                'http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Instruments':
+                self.settings['askomics.prefix']+'Instruments':
                 {
                     'public': False,
                     'label': 'Instruments',
                     'uri':
-                    'http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#Instruments',
+                    self.settings['askomics.prefix']+'Instruments',
                     'private': True,
                     'g':
-                    'urn:sparql:test_askomics:jdoe:instruments_tsv_' + timestamp_instruments
+                    'urn:sparql:test_askomics:jdoe:instruments_tsv_' + timestamp_instruments,
+                    'endpoint': 'http://localhost:8890/sparql'
                 }
             }
         }
@@ -439,7 +442,7 @@ class AskViewTests(unittest.TestCase):
             'graphs'               : [ 'urn:sparql:test_askomics:jdoe:people_tsv_' + timestamp_people ],
             'limit': 30,
             'constraintesRelations': [[[[
-                '?URIPeople1 rdf:type <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#People>',
+                '?URIPeople1 rdf:type <'+self.settings['askomics.prefix']+'People>',
                 '?URIPeople1 rdfs:label ?People1'
             ], '']], ''],
             'variates': ['?People1'],
@@ -483,7 +486,7 @@ class AskViewTests(unittest.TestCase):
             'export': False,
             'limit': 500,
             'constraintesRelations': [[[[
-                '?URIPeople1 rdf:type <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#People>',
+                '?URIPeople1 rdf:type <'+self.settings['askomics.prefix']+'People>',
                 '?URIPeople1 rdfs:label ?People1'
             ], '']], ''],
             'variates': ['?People1']
