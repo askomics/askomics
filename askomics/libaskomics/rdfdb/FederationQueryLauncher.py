@@ -30,6 +30,8 @@ class FederationQueryLauncher(QueryLauncher):
         #comments added in sparql request to get all url endpoint.
         self.commentsForFed=""
         for endp in lendpoints:
+            if 'askomics' not in endp:
+                raise ValueError("endpoint var have to defined an 'askomics' key with a boolean value endp="+str(endp))
             if endp['askomics']:
                 self.commentsForFed+="#endpoint,askomics,"+endp['name']+','+endp['endpoint']+',false\n'
             else:

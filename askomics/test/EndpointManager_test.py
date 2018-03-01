@@ -15,14 +15,7 @@ class EndpointManagerTests(unittest.TestCase):
         """Set up the settings and session"""
 
         self.settings = get_appsettings('configs/test.virtuoso.ini', name='main')
-
         self.request = testing.DummyRequest()
-        self.request.session['username'] = 'jdoe'
-        self.request.session['group'] = 'base'
-        self.request.session['admin'] = False
-        self.request.session['blocked'] = True
-
-        self.request.session['graph'] = "test/nosetest/jdoe"
 
         jm = EndpointManager(self.settings, self.request.session)
         jm.drop()
