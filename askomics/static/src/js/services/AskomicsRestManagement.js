@@ -40,6 +40,9 @@ function RestServiceJs(newurl) {
     console.debug("status:"+JSON.stringify(status));
     console.debug("ex:"+JSON.stringify(ex));
     //https://fr.wikipedia.org/wiki/Liste_des_codes_HTTP
+
+    $('#error_div').remove();
+
     if ( ex == 'Locked' ) {
       this.displayBlockedPage(__ihm.user.username);
       return;
@@ -82,7 +85,7 @@ function RestServiceJs(newurl) {
 
   this.post = function(model, callback) {
     let mythis = this;
-    $.ajax({
+    return $.ajax({
       type: 'POST',
       url: this.myurl,
       data: JSON.stringify(model), // '{"name":"' + model.name + '"}',
@@ -97,7 +100,7 @@ function RestServiceJs(newurl) {
 
   this.postsync = function(model, callback) {
     let mythis = this;
-    $.ajax({
+    return $.ajax({
       async: false,
       type: 'POST',
       url: this.myurl,
@@ -113,7 +116,7 @@ function RestServiceJs(newurl) {
 
   this.update = function(model, callback) {
     let mythis = this;
-    $.ajax({
+    return $.ajax({
       type: 'PUT',
       url: this.myurl,
       data: JSON.stringify(model), // '{"name":"' + model.name + '"}',
@@ -128,7 +131,7 @@ function RestServiceJs(newurl) {
 
   this.get = function(id, callback) {
     let mythis = this;
-    $.ajax({
+    return $.ajax({
       type: 'GET',
       url: this.myurl + '/' + id,
       contentType: 'application/json',
@@ -140,7 +143,7 @@ function RestServiceJs(newurl) {
 
   this.getsync = function(callback) {
     let mythis = this;
-    $.ajax({
+    return $.ajax({
       async: false,
       type: 'GET',
       url: this.myurl,
@@ -153,7 +156,7 @@ function RestServiceJs(newurl) {
 
   this.getAll = function(callback) {
     let mythis = this;
-    $.ajax({
+    return $.ajax({
       type: 'GET',
       url: this.myurl,
       contentType: 'application/json',
@@ -165,7 +168,7 @@ function RestServiceJs(newurl) {
 
   this.remove = function(id, callback) {
     let mythis = this;
-    $.ajax({
+    return $.ajax({
       type: 'DELETE',
       url: this.myurl + '/' + id,
       contentType: 'application/json',

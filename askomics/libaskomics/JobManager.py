@@ -40,7 +40,7 @@ class JobManager(ParamManager):
         conn = sqlite3.connect(self.pathdb,uri=True)
         c = conn.cursor()
 
-        requestGraph = ParamManager.encode_to_rdf_uri(requestGraph)
+        requestGraph = ParamManager.encode(requestGraph)
 
         reqSql = "INSERT INTO jobs VALUES ("\
                 + "NULL,"     \
@@ -71,7 +71,7 @@ class JobManager(ParamManager):
         d = 'NULL'
 
         if data:
-            d = "'"+ParamManager.encode_to_rdf_uri(json.dumps(data, ensure_ascii=False))+"'"
+            d = "'"+ParamManager.encode(json.dumps(data, ensure_ascii=False))+"'"
 
         f = 'NULL'
         if file:
@@ -128,11 +128,11 @@ class JobManager(ParamManager):
                 d['start'] = row['start']
                 d['end'] = row['end']
                 if row['data'] != None :
-                    d['data'] = json.loads(ParamManager.decode_to_rdf_uri(row['data']))
+                    d['data'] = json.loads(ParamManager.decode(row['data']))
                 if row['file'] != None :
                     d['file'] = row['file']
                 d['preview'] = row['preview']
-                d['requestGraph'] = ParamManager.decode_to_rdf_uri(row['requestGraph'])
+                d['requestGraph'] = ParamManager.decode(row['requestGraph'])
                 d['nr'] = row['nr']
 
                 data.append(d)

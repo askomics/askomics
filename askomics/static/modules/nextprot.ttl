@@ -4,7 +4,7 @@
 @prefix rdfg: <http://www.w3.org/2004/03/trix/rdfg-1/> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix displaySetting: <http://www.irisa.fr/dyliss/rdfVisualization/display> .
+@prefix askomics: <http://www.semanticweb.org/askomics/ontologies/2018/1#> .
 @prefix dc: <http://purl.org/dc/elements/1.1/> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
@@ -33,20 +33,20 @@
 # Entities
 # -----------
 
-np:Entry displaySetting:entity "true"^^xsd:boolean ;
-           displaySetting:startPoint "true"^^xsd:boolean ;
+np:Entry askomics:entity "true"^^xsd:boolean ;
+           askomics:startPoint "true"^^xsd:boolean ;
            rdfs:label "np:Entry".
 
-np:Isoform displaySetting:entity "true"^^xsd:boolean ;
-                      displaySetting:startPoint "true"^^xsd:boolean ;
+np:Isoform askomics:entity "true"^^xsd:boolean ;
+                      askomics:startPoint "true"^^xsd:boolean ;
                       rdfs:label "np:Isoform".
 
-np:TransmembraneRegion displaySetting:entity "true"^^xsd:boolean ;
-                      displaySetting:startPoint "true"^^xsd:boolean ;
+np:TransmembraneRegion askomics:entity "true"^^xsd:boolean ;
+                      askomics:startPoint "true"^^xsd:boolean ;
                       rdfs:label "np:TransmembraneRegion".
 
-np:Gene displaySetting:entity "true"^^xsd:boolean ;
-        displaySetting:startPoint "true"^^xsd:boolean ;
+np:Gene askomics:entity "true"^^xsd:boolean ;
+        askomics:startPoint "true"^^xsd:boolean ;
         rdfs:label "np:Gene".
 
 # Attributes
@@ -54,43 +54,43 @@ np:Gene displaySetting:entity "true"^^xsd:boolean ;
 
 # _______________ Gene _____________________________
 
-np:end displaySetting:attribute "true"^^xsd:boolean .
+np:end askomics:attribute "true"^^xsd:boolean .
 np:end rdf:type owl:DatatypeProperty ;
    rdfs:label "end" ;
    rdfs:domain np:Gene ;
    rdfs:range xsd:string .
 
-np:name displaySetting:attribute "true"^^xsd:boolean .
+np:name askomics:attribute "true"^^xsd:boolean .
 np:name rdf:type owl:DatatypeProperty ;
    rdfs:label "name" ;
    rdfs:domain np:Gene ;
    rdfs:range xsd:string .
 
-np:length displaySetting:attribute "true"^^xsd:boolean .
+np:length askomics:attribute "true"^^xsd:boolean .
 np:length rdf:type owl:DatatypeProperty ;
       rdfs:label "length" ;
       rdfs:domain np:Gene ;
       rdfs:range xsd:string .
 
-np:band displaySetting:attribute "true"^^xsd:boolean .
+np:band askomics:attribute "true"^^xsd:boolean .
 np:band rdf:type owl:DatatypeProperty ;
       rdfs:label "band" ;
       rdfs:domain np:Gene ;
       rdfs:range xsd:string .
 
-np:begin displaySetting:attribute "true"^^xsd:boolean .
+np:begin askomics:attribute "true"^^xsd:boolean .
 np:begin rdf:type owl:DatatypeProperty ;
       rdfs:label "begin" ;
       rdfs:domain np:Gene ;
       rdfs:range xsd:string .
 
-np:chromosome displaySetting:attribute "true"^^xsd:boolean .
+np:chromosome askomics:attribute "true"^^xsd:boolean .
 np:chromosome rdf:type owl:DatatypeProperty ;
       rdfs:label "chromosome" ;
       rdfs:domain np:Gene ;
       rdfs:range xsd:string .
 
-np:strand displaySetting:attribute "true"^^xsd:boolean .
+np:strand askomics:attribute "true"^^xsd:boolean .
 np:strand rdf:type owl:DatatypeProperty ;
       rdfs:label "strand" ;
       rdfs:domain np:Gene ;

@@ -4,7 +4,7 @@
 @prefix rdfg: <http://www.w3.org/2004/03/trix/rdfg-1/> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix displaySetting: <http://www.irisa.fr/dyliss/rdfVisualization/display> .
+@prefix askomics: <http://www.semanticweb.org/askomics/ontologies/2018/1#> .
 @prefix dc: <http://purl.org/dc/elements/1.1/> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 
@@ -41,55 +41,55 @@
 # Entities
 # -----------
 
-ensemblterms:protein_coding displaySetting:entity "true"^^xsd:boolean ;
-           displaySetting:startPoint "true"^^xsd:boolean ;
+ensemblterms:protein_coding askomics:entity "true"^^xsd:boolean ;
+           askomics:startPoint "true"^^xsd:boolean ;
            rdfs:label "ensemblterms:protein".
 
-bpx:BioSource displaySetting:entity "true"^^xsd:boolean ;
-              displaySetting:startPoint "false"^^xsd:boolean ;
+bpx:BioSource askomics:entity "true"^^xsd:boolean ;
+              askomics:startPoint "false"^^xsd:boolean ;
               rdfs:label "bpx:BioSource".
 
 
-dc:description displaySetting:attribute "true"^^xsd:boolean .
-dc:identifier displaySetting:attribute "true"^^xsd:boolean .
-dcterms:identifier displaySetting:attribute "true"^^xsd:boolean .
-skos:altlabel displaySetting:attribute "true"^^xsd:boolean .
+dc:description askomics:attribute "true"^^xsd:boolean .
+dc:identifier askomics:attribute "true"^^xsd:boolean .
+dcterms:identifier askomics:attribute "true"^^xsd:boolean .
+skos:altlabel askomics:attribute "true"^^xsd:boolean .
 
 
-dc:description displaySetting:attribute "true"^^xsd:boolean ;
+dc:description askomics:attribute "true"^^xsd:boolean ;
    rdf:type owl:DatatypeProperty ;
    rdfs:label "dc:description" ;
    rdfs:domain ensemblterms:protein_coding ;
    rdfs:range xsd:string .
 
-dc:identifier displaySetting:attribute "true"^^xsd:boolean ;
+dc:identifier askomics:attribute "true"^^xsd:boolean ;
    rdf:type owl:DatatypeProperty ;
    rdfs:label "dc:identifier" ;
    rdfs:domain ensemblterms:protein_coding ;
    rdfs:domain bpx:BioSource ;
    rdfs:range xsd:string .
 
-dcterms:identifier displaySetting:attribute "true"^^xsd:boolean ;
+dcterms:identifier askomics:attribute "true"^^xsd:boolean ;
    rdf:type owl:DatatypeProperty ;
    rdfs:label "dcterms:identifier" ;
    rdfs:domain ensemblterms:protein_coding ;
    rdfs:range xsd:string .
 
-skos:altlabel displaySetting:attribute "true"^^xsd:boolean ;
+skos:altlabel askomics:attribute "true"^^xsd:boolean ;
    rdf:type owl:DatatypeProperty ;
    rdfs:label "skos:altlabel" ;
    rdfs:domain ensemblterms:protein_coding ;
    rdfs:domain bpx:BioSource ;
    rdfs:range xsd:string .
 
-skos:prefLabel displaySetting:attribute "true"^^xsd:boolean ;
+skos:prefLabel askomics:attribute "true"^^xsd:boolean ;
    rdf:type owl:DatatypeProperty ;
    rdfs:label "skos:prefLabel" ;
    rdfs:domain ensemblterms:protein_coding ;
    rdfs:domain bpx:BioSource ;
    rdfs:range xsd:string .
 
-bpx:name displaySetting:attribute "true"^^xsd:boolean ;
+bpx:name askomics:attribute "true"^^xsd:boolean ;
    rdf:type owl:DatatypeProperty ;
    rdfs:label "bpx:name" ;
    rdfs:domain bpx:BioSource ;

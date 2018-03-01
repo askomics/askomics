@@ -312,9 +312,9 @@ function updatePrefixListUriCsvForm(file,data) {
             listAvailableTags[$(this).val()] = 0;
             availableTags.push($(this).val());
           }
-        });
-        $(this).autocomplete({
-          source: availableTags
+          $(this).autocomplete({
+            source: availableTags
+          });
         });
       });
 
@@ -590,7 +590,14 @@ function loadSourceFileGff(idfile, pub) {
   });
 
   // custom uri
-  let uri = file_elem.find('#def-uri-entity-'+idfile).val();
+  let typeR = file_elem.find('input[name="radio-uri-'+idfile+'"]:checked').val();
+
+  let uri = null;
+  if (typeR == "custom") {
+    uri = file_elem.find('#custom-uri-'+idfile).val();
+    uri = uri.replace("http://","");
+    uri = "http://"+uri;
+  }
 
   let service = new RestServiceJs("load_gff_into_graph");
 

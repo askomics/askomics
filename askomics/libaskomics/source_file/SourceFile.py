@@ -54,6 +54,12 @@ class SourceFile(ParamManager, HaveCachedProperties):
         self.reset_cache()
 
         self.uri = {}
+        pref_uri = "http://semanticweb.org/askomics/entity/"
+        if self.is_defined('askomics.prefix'):
+            pref_uri = self.get_param("askomics.prefix")
+
+        self.uri = [ pref_uri for idx in range(20) ]    
+
         if uri_set != None:
             for idx,uri in uri_set.items():
                 if uri:

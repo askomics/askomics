@@ -22,7 +22,7 @@ class ParamManager(object):
 
         self.ASKOMICS_prefix = {
             "": self.get_param("askomics.prefix"),
-            "displaySetting": self.get_param("askomics.display_setting"),
+            "askomics": self.get_param("askomics.namespace"),
             "xsd": """http://www.w3.org/2001/XMLSchema#""",
             "rdfs": """http://www.w3.org/2000/01/rdf-schema#""",
             "rdf": """http://www.w3.org/1999/02/22-rdf-syntax-ns#""",
@@ -37,19 +37,19 @@ class ParamManager(object):
         self.userfilesdir = self.get_param('askomics.files_dir') + '/'
 
         self.escape = {
-            'numeric' : lambda str: str,
-            'text'    : json.dumps,
+            'numeric' : lambda str,str2: str,
+            'text'    : lambda str,str2: json.dumps(str),
             'category': self.encode_to_rdf_uri,
-            'taxon': lambda str: str,
-            'ref': lambda str: str,
-            'strand': lambda str: str,
-            'start' : lambda str: str,
-            'end' : lambda str: str,
+            'taxon': self.encode_to_rdf_uri,
+            'ref': self.encode_to_rdf_uri,
+            'strand': self.encode_to_rdf_uri,
+            'start' : lambda str,str2: str,
+            'end' : lambda str,str2: str,
             'entity'  : self.encode_to_rdf_uri,
             'entitySym'  : self.encode_to_rdf_uri,
             'entity_start'  : self.encode_to_rdf_uri,
-            'goterm': lambda str: str.replace("GO:", ""),
-            'date': json.dumps
+            'goterm': lambda str,str2: str.replace("GO:", ""),
+            'date': lambda str,str2: json.dumps(str)
             }
 
     def get_db_directory(self):
@@ -236,7 +236,7 @@ class ParamManager(object):
         return '\n'.join(header)
 
     @staticmethod
-    def encode_to_rdf_uri(toencode):
+    def encode(toencode):
 
         obj = urllib.parse.quote(toencode)
         obj = obj.replace("'", "_qu_")
@@ -249,7 +249,29 @@ class ParamManager(object):
         return obj
 
     @staticmethod
-    def decode_to_rdf_uri(toencode):
+    def encode_to_rdf_uri(toencode,prefix=None):
+
+        if toencode.startswith("<") and toencode.endswith(">"):
+            return toencode
+
+        idx = toencode.find(":")
+        if idx > -1:
+            return toencode[:idx+1]+ParamManager.encode(toencode[idx+1:])
+
+        pref = ":"
+        suf  = ""
+        if prefix:
+            if prefix[len(prefix)-1] == ":":
+                pref = prefix
+            else:
+                pref = "<" + prefix
+                suf  = ">"
+
+        v = pref+ParamManager.encode(toencode)+suf
+        return v
+
+    @staticmethod
+    def decode(toencode):
 
         obj = toencode.replace("_d_", ".")
         obj = obj.replace("_t_", "-")
@@ -261,6 +283,23 @@ class ParamManager(object):
         obj = urllib.parse.unquote(obj)
 
         return obj
+
+
+    @staticmethod
+    def decode_to_rdf_uri(todecode, prefix=""):
+
+        obj = todecode.strip()
+
+        if obj.startswith("<") and obj.endswith(">"):
+            obj = obj[1:len(obj)-1]
+            if prefix != "":
+                obj = obj.replace(prefix,"")
+
+        idx = obj.find(":")
+        if idx > -1 :
+            obj = obj[idx+1:]
+
+        return ParamManager.decode(obj)
 
     @staticmethod
     def Bool(result):

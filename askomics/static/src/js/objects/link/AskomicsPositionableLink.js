@@ -43,11 +43,11 @@ class AskomicsPositionableLink extends AskomicsLink {
     let s = "?s"+node.id+"_"+secondNode.id+"_"+static_count_AskomicsPositionableLink;
     static_count_AskomicsPositionableLink++;
     if (this.same_ref) {
-      blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ ":IsIncludeInRef"+" "+s );
-      blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ ":IsIncludeInRef"+" "+ s);
+      blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ "askomics:IsIncludeInRef"+" "+s );
+      blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ "askomics:IsIncludeInRef"+" "+ s);
     } else {
-      blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ ":IsIncludeIn"+" "+ s);
-      blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ ":IsIncludeIn"+" "+ s);
+      blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ "askomics:IsIncludeIn"+" "+ s);
+      blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ "askomics:IsIncludeIn"+" "+ s);
     }
 
     /* manage start and end variates */
@@ -94,12 +94,12 @@ class AskomicsPositionableLink extends AskomicsLink {
       let att1 = node.att_position_active("taxon") ;
       let att2 = secondNode.att_position_active("taxon") ;
       if ( att1 === null && att2 === null) {
-        blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ ":position_taxon"+" "+ "?taxon_"+node.SPARQLid+secondNode.SPARQLid);
-        blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ ":position_taxon"+" "+ "?taxon_"+node.SPARQLid+secondNode.SPARQLid);
+        blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ "askomics:position_taxon"+" "+ "?taxon_"+node.SPARQLid+secondNode.SPARQLid);
+        blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ "askomics:position_taxon"+" "+ "?taxon_"+node.SPARQLid+secondNode.SPARQLid);
       } else if ( att1 === null ) {
-        blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ ":position_taxon"+" "+ "?"+att2);
+        blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ "askomics:position_taxon"+" "+ "?"+att2);
       } else if ( att2 === null ) {
-        blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ ":position_taxon"+" "+ "?"+att1);
+        blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ "askomics:position_taxon"+" "+ "?"+att1);
       } else {
         blockConstraint.push("FILTER ( "+ "?"+att1+"="+"?"+att2+" )");
       }
@@ -110,12 +110,12 @@ class AskomicsPositionableLink extends AskomicsLink {
       let att1 = node.att_position_active("strand") ;
       let att2 = secondNode.att_position_active("strand") ;
       if ( att1 === null && att2 === null) {
-        blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ ":position_strand"+" "+ "?strand_"+node.SPARQLid+secondNode.SPARQLid);
-        blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ ":position_strand"+" "+ "?strand_"+node.SPARQLid+secondNode.SPARQLid);
+        blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ "askomics:position_strand"+" "+ "?strand_"+node.SPARQLid+secondNode.SPARQLid);
+        blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ "askomics:position_strand"+" "+ "?strand_"+node.SPARQLid+secondNode.SPARQLid);
       } else if ( att1 === null ) {
-        blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ ":position_strand"+" "+ "?"+att2);
+        blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ "askomics:position_strand"+" "+ "?"+att2);
       } else if ( att2 === null ) {
-        blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ ":position_strand"+" "+ "?"+att1);
+        blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ "askomics:position_strand"+" "+ "?"+att1);
       } else {
         blockConstraint.push("FILTER ( "+ "?"+att1+"="+"?"+att2+" )");
       }

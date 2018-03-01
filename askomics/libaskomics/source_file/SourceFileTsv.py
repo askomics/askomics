@@ -55,27 +55,18 @@ class SourceFileTsv(SourceFile):
         self.delims = {
             'numeric' : ('', ''),
             'text'    : ('', '^^xsd:string'),
-            'category': (':', ''),
-            'taxon': (':', ''),
-            'ref': (':', ''),
-            'strand': (':', ''),
+            'category': ('', ''),
+            'taxon': ('', ''),
+            'ref': ('', ''),
+            'strand': ('', ''),
             'start' : ('', ''),
             'end' : ('', ''),
-            'entity'  : (':', ''),
-            'entitySym'  : (':', ''),
-            'entity_start'  : (':', ''),
+            'entity'  : ('', ''),
+            'entitySym'  : ('', ''),
+            'entity_start'  : ('', ''),
             'goterm': ('<http://purl.obolibrary.org/obo/GO_', '>'),
             'date': ('', '^^xsd:dateTime')
             }
-
-    def prefix_uri_entity(self,idx):
-
-        if idx in self.uri:
-            return '<'+self.uri[idx]
-        return '<'+self.get_param("askomics.prefix")
-
-    def suffix_uri_entity(self):
-        return '>';
 
     @cached_property
     def dialect(self):
@@ -287,6 +278,23 @@ class SourceFileTsv(SourceFile):
         return retval
 
     @staticmethod
+    def get_strand(strand):
+        """
+        Get the faldo strand in function of the strand
+        """
+
+        if strand is None:
+            return "askomics:none"
+
+        if strand.lower() == "plus" or strand.startswith("+"):
+            return "askomics:plus"
+
+        if strand.lower() == "minus" or strand.startswith("-"):
+            return "askomics:minus"
+
+        return "askomics:none"
+
+    @staticmethod
     def get_strand_faldo(strand):
         """
         Get the faldo strand in function of the strand
@@ -319,7 +327,7 @@ class SourceFileTsv(SourceFile):
         ref_entity = self.headers[0]
 
         # Store the main entity
-        ttl += AbstractedEntity(ref_entity).get_turtle()
+        ttl += AbstractedEntity(ref_entity,self.uri[0]).get_turtle()
 
         # Store all the relations
         for key, key_type in enumerate(self.forced_column_types):
@@ -335,33 +343,56 @@ class SourceFileTsv(SourceFile):
 
             # encode uri if header do not contains ":" (otherwise it's an RDF uri)
 
-            headkey     = self.headers[key]
-            if headkey.find(":")<0:
-                headkey = ":" + self.encode_to_rdf_uri(headkey)
+            headkey     = self.encode_to_rdf_uri(self.headers[key],prefix="askomics:")
 
             if key > 0 and not key_type.startswith('entity'):
                 if key_type in ('taxon', 'ref', 'strand', 'start', 'end'):
-                    uri = 'position_'+key_type
+                    uri = self.encode_to_rdf_uri('askomics:position_'+key_type)
                 # elif key_type == 'taxon':
                 #     uri = 'position_'+key_type
                 else:
-                    uri = headkey
-                ttl += uri + ' displaySetting:attribute "true"^^xsd:boolean .\n'
+                    uri = self.encode_to_rdf_uri(self.headers[key],prefix="askomics:")
+                ttl += uri + ' askomics:attribute "true"^^xsd:boolean .\n'
                 # store the order of attrbutes in order to display attributes in the right order
-                ttl += uri + ' displaySetting:attributeOrder "' + str(key) + '"^^xsd:decimal .\n'
+                ttl += uri + ' askomics:attributeOrder "' + str(key) + '"^^xsd:decimal .\n'
             elif key == 0:
                 uri_pref = self.get_param("askomics.prefix")
 
                 if key in self.uri:
                     uri_pref = self.uri[key]
 
-                ttl += headkey + ' displaySetting:prefixUri "'+uri_pref+'"^^xsd:string .\n\n'
+                headkey     = self.encode_to_rdf_uri(self.headers[key],prefix=self.uri[0])
+
+                ttl += headkey + ' askomics:prefixUri "'+uri_pref+'"^^xsd:string .\n\n'
 
             if key > 0:
-                ttl += AbstractedRelation(key_type, self.headers[key], ref_entity, self.type_dict[key_type]).get_turtle()
+                uriPref = "askomics:"
+                rangeRdfs = self.encode_to_rdf_uri(self.type_dict[key_type],prefix="askomics:")
+
+                if key_type.startswith('entity'):
+                    uriPref = self.uri[key]
+                    idx = self.headers[key].find("@")
+
+                    if idx > 0:
+                        rangeRdfs = self.headers[key][idx+1:]
+                    else:
+                        rangeRdfs = self.headers[key]
+
+                    rangeRdfs = self.encode_to_rdf_uri(rangeRdfs,prefix=self.uri[key])
+
+                relation_uri = self.headers[key]
+                if key_type in ('taxon', 'ref', 'strand', 'start', 'end'):
+                    relation_uri = 'position_'+key_type
+                elif key_type == 'category' :
+                    rangeRdfs = self.encode_to_rdf_uri(self.headers[key]+"Category",prefix="askomics:")
+                elif key_type == 'taxon' or key_type == 'ref' or key_type == 'strand':
+                    rangeRdfs = self.encode_to_rdf_uri(key_type+"Category",prefix="askomics:")
+
+                ttl += AbstractedRelation(key_type , relation_uri , uriPref, ref_entity, self.uri[0],rangeRdfs,"askomics:").get_turtle()
+
         # Store the startpoint status
         if self.forced_column_types[0] == 'entity_start':
-            ttl += ":" + self.encode_to_rdf_uri(ref_entity) + ' displaySetting:startPoint "true"^^xsd:boolean .\n'
+            ttl += self.encode_to_rdf_uri(ref_entity,prefix=self.uri[0]) + ' askomics:startPoint "true"^^xsd:boolean .\n'
 
         return ttl
 
@@ -377,19 +408,24 @@ class SourceFileTsv(SourceFile):
         ttl = ''
 
         if all(types in self.forced_column_types for types in ('start', 'end')): # a positionable entity have to have a start and a end
-            ttl += ":" + self.encode_to_rdf_uri(self.headers[0]) + ' displaySetting:is_positionable "true"^^xsd:boolean .\n'
-            ttl += ":is_positionable rdfs:label 'is_positionable'^^xsd:string .\n"
-            ttl += ":is_positionable rdf:type owl:ObjectProperty .\n"
+            ttl += self.encode_to_rdf_uri(self.headers[0],prefix=self.uri[0]) + ' askomics:is_positionable "true"^^xsd:boolean .\n'
+            ttl += "askomics:is_positionable rdfs:label 'is_positionable'^^xsd:string .\n"
+            ttl += "askomics:is_positionable rdf:type owl:ObjectProperty .\n"
 
         for header, categories in self.category_values.items():
-            indent = len(header) * " " + len("displaySetting:category") * " " + 3 * " "
-            ttl += ":" + self.encode_to_rdf_uri(header+"Category") + " displaySetting:category :"
-            ttl += (" , \n" + indent + ":").join(map(self.encode_to_rdf_uri, categories)) + " .\n"
+            ic=self.headers.index(header)
+            prefUri = self.uri[ic]
+            if self.forced_column_types[ic] in ('category', 'taxon', 'ref', 'strand'):
+                prefUri = "askomics:"
 
+            indent = len(header) * " " + len("askomics:category") * " " + 3 * " "
+
+            ttl += self.encode_to_rdf_uri(header+"Category",prefix="askomics:") + " askomics:category "
+            ttl += (" , \n" + indent ).join(map(lambda category : self.encode_to_rdf_uri(category,prefix="askomics:"), categories)) + " .\n"
             for item in categories:
                 if item.strip() != "":
-                    ttl += ":" + self.encode_to_rdf_uri(item) + " rdf:type :" + self.encode_to_rdf_uri(header) + " ;\n" + len(item) * " " + "  rdfs:label " + self.escape['text'](item) + "^^xsd:string .\n"
-
+                    ttl += self.encode_to_rdf_uri(item,prefix="askomics:") + " rdf:type " + self.encode_to_rdf_uri(header,prefix="askomics:") + " ;\n" + len(item) * " " + "  rdfs:label " + self.escape['text'](item,'') + "^^xsd:string .\n"
+    
         return ttl
 
 
@@ -398,6 +434,7 @@ class SourceFileTsv(SourceFile):
         """
         A (lazily cached) dictionary mapping from column name (header) to the set of unique values.
         """
+
         self.log.warning("category_values will be computed independently, get_turtle should be used to generate both at once (better performances)")
         category_values = defaultdict(set) # key=name of a column of 'category' type -> list of found values
 
@@ -422,8 +459,9 @@ class SourceFileTsv(SourceFile):
 
                 for i, (header, current_type) in enumerate(zip(self.headers, self.forced_column_types)):
                     if current_type in ('category', 'taxon', 'ref', 'strand'):
-                        # This is a category, keep track of allowed values for this column
-                        self.category_values.setdefault(header, set()).add(row[i])
+                        if len(row[i].strip()) != 0:
+                            # This is a category, keep track of allowed values for this column
+                            self.category_values.setdefault(header, set()).add(row[i])
 
         return category_values
 
@@ -460,13 +498,11 @@ class SourceFileTsv(SourceFile):
                     raise Exception('Invalid line found: '+str(len(self.headers))
                                              +' columns expected, found '+str(len(row))
                                              +" - (last valid entity "+entity_label+")")
-
                 entity_id = self.key_id(row)
-                pref = self.prefix_uri_entity(0)
-                suf = self.suffix_uri_entity()
-                indent = (len(pref)+2) * " "
-                ttl += pref + self.encode_to_rdf_uri(entity_id) + suf + " rdf:type :" + self.encode_to_rdf_uri(self.headers[0]) + " ;\n"
-                ttl += indent + " rdfs:label " + self.escape['text'](entity_label) + "^^xsd:string ;\n"
+
+                indent = (2) * " "
+                ttl += self.encode_to_rdf_uri(entity_id,prefix=self.uri[0]) + " rdf:type " + self.encode_to_rdf_uri(self.headers[0],prefix=self.uri[0]) + " ;\n"
+                ttl += indent + " rdfs:label " + self.escape['text'](entity_label,"") + "^^xsd:string ;\n"
                 start_faldo = None
                 end_faldo = None
                 reference_faldo = None
@@ -481,35 +517,23 @@ class SourceFileTsv(SourceFile):
                 for i, header in enumerate(self.headers): # Skip the first column
                     if i > 0 and i not in self.disabled_columns:
                         current_type = self.forced_column_types[i]
-                        #OFI : manage new header with relation@type_entity
-                        #relation_name = ":has_" + header # manage old way
-                        have_external_prefix = False
-
-                        if header.find(":")<0:
-                            relation_name = ":"+self.encode_to_rdf_uri(header) # manage old way
-                        else:
-                            relation_name = header
+                        cur_prefix_uri = self.uri[i]
+                        relation_name = self.encode_to_rdf_uri(header,prefix="askomics:")
 
                         if current_type.startswith('entity'):
                             idx = header.find("@")
-
                             if idx > 0:
-                                idx2 = header[0:idx].find(":")
-                                if idx2 > 0:
-                                    relation_name = header[0:idx]
-                                else:
-                                    relation_name = ":"+self.encode_to_rdf_uri(header[0:idx])
+                                relation_name = self.encode_to_rdf_uri(header[0:idx],prefix="askomics:")
 
-                                type_ent = header[idx+1:]
-                                clause1 = type_ent.find(":") > 0
-                                if clause1 or (header[idx+1] == '<' and header[len(header)-1] == '>'):
-                                    have_external_prefix = True
+                        elif current_type in ('category', 'taxon', 'ref', 'strand'):
+                            # This is a category, keep track of allowed values for this column
+                            if len(row[i].strip()) != 0:
+                                self.category_values[header].add(row[i].strip())
+                            cur_prefix_uri = "askomics:"
+
 
                         # Create link to value
                         if row[i]: # Empty values are just ignored
-                            if current_type in ('category', 'taxon', 'ref', 'strand'):
-                                # This is a category, keep track of allowed values for this column
-                                self.category_values[header].add(row[i])
 
                              #check numeric type
                             #if current_type in ('numeric', 'start', 'end'):
@@ -519,44 +543,40 @@ class SourceFileTsv(SourceFile):
                             #        ") is not a numeric value.\n")
 
                             if positionable:
+                                value = row[i]
                                 # positionable attributes
                                 if current_type == 'start':
                                     start_faldo = row[i]
+                                    value = row[i]
+                                    relation_name = 'askomics:position_start'
                                 elif current_type == 'end':
                                     end_faldo = row[i]
+                                    relation_name = 'askomics:position_end'
+                                    value = row[i]
                                 elif current_type == 'taxon':
-                                    ttl += indent + " " + ':position_taxon' + " " + self.delims[current_type][0] + self.encode_to_rdf_uri(row[i]) + self.delims[current_type][1] + " ;\n"
+                                    relation_name = 'askomics:position_taxon'
+                                    value = self.encode_to_rdf_uri(row[i],prefix="askomics:")
                                 elif current_type == 'ref':
-                                    reference_faldo = self.encode_to_rdf_uri(row[i])
+                                    relation_name = 'askomics:position_ref'
+                                    reference_faldo = row[i]
+                                    value = self.encode_to_rdf_uri(row[i],prefix="askomics:")
                                 elif current_type == 'strand':
                                     strand_faldo = row[i]
-                                    ttl += indent + " " + ':position_strand' + " " + self.delims[current_type][0] + self.encode_to_rdf_uri(row[i]) + self.delims[current_type][1] + " ;\n"
-                                elif have_external_prefix:
-                                    ttl += indent + " "+ relation_name + " " + row[i] + " ;\n"
-                                else:
-                                    ttl += indent + " "+ relation_name + " " + self.delims[current_type][0] + self.escape[current_type](row[i]) + self.delims[current_type][1] + " ;\n"
+                                    relation_name = 'askomics:position_strand'
+                                    value = self.encode_to_rdf_uri(self.get_strand(row[i]),prefix="askomics:")
 
+
+                                ttl += indent + " "+ relation_name + " " + self.delims[current_type][0] + self.escape[current_type](value,cur_prefix_uri) + self.delims[current_type][1] + " ;\n"
                             else:
-                                # Not positionable
-                                if current_type == 'entity':
-                                    pref = self.prefix_uri_entity(i)
-                                    suf = self.suffix_uri_entity()
-                                else:
-                                    pref = self.delims[current_type][0]
-                                    suf = self.delims[current_type][1]
-                                
-                                if have_external_prefix:
-                                    ttl += indent + " "+ relation_name + " " + row[i] + " ;\n"
-                                else:
-                                    ttl += indent + " "+ relation_name + " " + pref + self.escape[current_type](row[i]) + suf + " ;\n"
+                                ttl += indent + " "+ relation_name + " " + self.delims[current_type][0] + self.escape[current_type](row[i],cur_prefix_uri) + self.delims[current_type][1] + " ;\n"
 
                         if current_type == 'entitySym':
-                            pref = self.prefix_uri_entity(i)
-                            suf = self.suffix_uri_entity()
+                            pref = self.delims[current_type][0]
+                            suf = self.delims[current_type][1]
                             ttl_sym += pref+\
-                                      self.escape[current_type](row[i])+\
-                                      suf+" "+relation_name+" :"+\
-                                      self.encode_to_rdf_uri(entity_label)  + " .\n"
+                                      self.escape[current_type](row[i],self.uri[i])+\
+                                      suf+" "+relation_name+" "+\
+                                      self.encode_to_rdf_uri(entity_label,prefix=self.uri[i])  + " .\n"
 
                 # Faldo position management
                 if positionable:
@@ -564,13 +584,16 @@ class SourceFileTsv(SourceFile):
                     block_idxstart = int(start_faldo) // blockbase
                     block_idxend = int(end_faldo) // blockbase
 
-                    ttl += indent + ' :blockstart ' + str(block_idxstart*blockbase) +';\n'
-                    ttl += indent + ' :blockend ' + str(block_idxend*blockbase) +';\n'
+                    ttl += indent + ' askomics:blockstart ' + str(block_idxstart*blockbase) +';\n'
+                    ttl += indent + ' askomics:blockend ' + str(block_idxend*blockbase) +';\n'
 
                     for sliceb in range(block_idxstart, block_idxend + 1):
                         if reference_faldo:
-                            ttl += indent + ' :IsIncludeInRef :' + reference_faldo+"_"+str(sliceb) +' ;\n'
-                        ttl += indent + ' :IsIncludeIn ' + str(sliceb) +' ;\n'
+                            uriFaldoReferenceSlice = self.encode_to_rdf_uri("askomics:"+reference_faldo+"_"+str(sliceb))
+                            uriFaldoReference = self.encode_to_rdf_uri("askomics:"+reference_faldo)
+                            ttl += indent + ' askomics:IsIncludeInRef ' +  uriFaldoReferenceSlice +' ;\n'
+
+                        ttl += indent + ' askomics:IsIncludeIn ' + str(sliceb) +' ;\n'
 
                     faldo_strand = self.get_strand_faldo(strand_faldo)
 
@@ -579,7 +602,7 @@ class SourceFileTsv(SourceFile):
                               indent + "                                a "+faldo_strand+";\n"+\
                               indent + "                                faldo:position "+str(start_faldo)+";\n"
                     if reference_faldo:
-                        ttl += indent + "                                faldo:reference :"+reference_faldo+" ;\n"
+                        ttl += indent + "                                faldo:reference "+uriFaldoReference+" ;\n"
 
                     ttl += indent + "                                    ];\n"
 
@@ -587,7 +610,7 @@ class SourceFileTsv(SourceFile):
                               indent + "                              a "+faldo_strand+";\n"+\
                               indent + "                              faldo:position "+str(end_faldo)+";\n"
                     if reference_faldo:
-                        ttl += indent + "                              faldo:reference :"+reference_faldo+";\n"
+                        ttl += indent + "                              faldo:reference "+uriFaldoReference+";\n"
                     ttl += indent + "                                  ]]   "
 
                 ttl = ttl[:-2] + "."

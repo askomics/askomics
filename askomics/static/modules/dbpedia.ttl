@@ -1,13 +1,11 @@
 ### suprimer cette premiere ligne
-@prefix : <http://www.semanticweb.org/irisa/ontologies/2016/1/igepp-ontology#> .
-
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix rdfg: <http://www.w3.org/2004/03/trix/rdfg-1/> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix displaySetting: <http://www.irisa.fr/dyliss/rdfVisualization/display> .
+@prefix askomics: <http://www.semanticweb.org/askomics/ontologies/2018/1#> .
 @prefix dc: <http://purl.org/dc/elements/1.1/> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 
@@ -43,128 +41,128 @@
     ].
 
 
-dbpedia:BiologicalDatabase displaySetting:entity "true"^^xsd:boolean ;
-              displaySetting:startPoint "true"^^xsd:boolean ;
+dbpedia:BiologicalDatabase askomics:entity "true"^^xsd:boolean ;
+              askomics:startPoint "true"^^xsd:boolean ;
               rdfs:label "dbpedia:BiologicalDatabase".
 
-dbpedia:Biomolecule displaySetting:entity "true"^^xsd:boolean ;
-              displaySetting:startPoint "true"^^xsd:boolean ;
+dbpedia:Biomolecule askomics:entity "true"^^xsd:boolean ;
+              askomics:startPoint "true"^^xsd:boolean ;
               rdfs:label "dbpedia:Biomolecule".
 
-dbpedia:Bacteria displaySetting:entity "true"^^xsd:boolean ;
-                 displaySetting:startPoint "true"^^xsd:boolean ;
+dbpedia:Bacteria askomics:entity "true"^^xsd:boolean ;
+                 askomics:startPoint "true"^^xsd:boolean ;
                  rdfs:label "dbpedia:Bacteria".
 
 
-<http://dbpedia.org/property/name> displaySetting:attribute "true"^^xsd:boolean ;
+<http://dbpedia.org/property/name> askomics:attribute "true"^^xsd:boolean ;
                 rdf:type owl:DatatypeProperty ;
                 rdfs:label "property/name" ;
                 rdfs:domain dbpedia:BiologicalDatabase ;
                 rdfs:range xsd:string .
 
-<http://xmlns.com/foaf/0.1/name> displaySetting:attribute "true"^^xsd:boolean ;
+<http://xmlns.com/foaf/0.1/name> askomics:attribute "true"^^xsd:boolean ;
                 rdf:type owl:DatatypeProperty ;
                 rdfs:label "foaf/name" ;
                 rdfs:domain dbpedia:BiologicalDatabase ;
                 rdfs:range xsd:string .
 
-<http://www.w3.org/2000/01/rdf-schema#comment> displaySetting:attribute "true"^^xsd:boolean ;
+<http://www.w3.org/2000/01/rdf-schema#comment> askomics:attribute "true"^^xsd:boolean ;
                 rdf:type owl:DatatypeProperty ;
                 rdfs:label "comment" ;
                 rdfs:domain dbpedia:BiologicalDatabase ;
                 rdfs:range xsd:string .
 
-<http://dbpedia.org/ontology/abstract> displaySetting:attribute "true"^^xsd:boolean ;
+<http://dbpedia.org/ontology/abstract> askomics:attribute "true"^^xsd:boolean ;
                 rdf:type owl:DatatypeProperty ;
                 rdfs:label "abstract" ;
                 rdfs:domain dbpedia:Bacteria ;
                 rdfs:range xsd:string .
 
-<http://dbpedia.org/ontology/synonym> displaySetting:attribute "true"^^xsd:boolean ;
+<http://dbpedia.org/ontology/synonym> askomics:attribute "true"^^xsd:boolean ;
                 rdf:type owl:DatatypeProperty ;
                 rdfs:label "synonym" ;
                 rdfs:domain dbpedia:Bacteria ;
                 rdfs:range xsd:string .
 
-<http://dbpedia.org/ontology/colourName> displaySetting:attribute "true"^^xsd:boolean ;
+<http://dbpedia.org/ontology/colourName> askomics:attribute "true"^^xsd:boolean ;
                 rdf:type owl:DatatypeProperty ;
                 rdfs:label "colourName" ;
                 rdfs:domain dbpedia:Bacteria ;
                 rdfs:range xsd:string .
 
-<http://dbpedia.org/ontology/abstract> displaySetting:attribute "true"^^xsd:boolean ;
+<http://dbpedia.org/ontology/abstract> askomics:attribute "true"^^xsd:boolean ;
                 rdf:type owl:DatatypeProperty ;
                 rdfs:label "abstract" ;
                 rdfs:domain dbpedia:Biomolecule ;
                 rdfs:range xsd:string .
 
-<http://dbpedia.org/ontology/arm> displaySetting:attribute "true"^^xsd:boolean ;
+<http://dbpedia.org/ontology/arm> askomics:attribute "true"^^xsd:boolean ;
                 rdf:type owl:DatatypeProperty ;
                 rdfs:label "arm" ;
                 rdfs:domain dbpedia:Biomolecule ;
                 rdfs:range xsd:string .
 
-<http://dbpedia.org/ontology/band> displaySetting:attribute "true"^^xsd:boolean ;
+<http://dbpedia.org/ontology/band> askomics:attribute "true"^^xsd:boolean ;
                 rdf:type owl:DatatypeProperty ;
                 rdfs:label "band" ;
                 rdfs:domain dbpedia:Biomolecule ;
                 rdfs:range xsd:string .
 
-<http://dbpedia.org/ontology/chromosome> displaySetting:attribute "true"^^xsd:boolean ;
+<http://dbpedia.org/ontology/chromosome> askomics:attribute "true"^^xsd:boolean ;
                 rdf:type owl:DatatypeProperty ;
                 rdfs:label "chromosome" ;
                 rdfs:domain dbpedia:Biomolecule ;
                 rdfs:range xsd:string .
 
-<http://dbpedia.org/ontology/ecNumber> displaySetting:attribute "true"^^xsd:boolean ;
+<http://dbpedia.org/ontology/ecNumber> askomics:attribute "true"^^xsd:boolean ;
                 rdf:type owl:DatatypeProperty ;
                 rdfs:label "ecNumber" ;
                 rdfs:domain dbpedia:Biomolecule ;
                 rdfs:range xsd:string .
 
-<http://dbpedia.org/ontology/entrezgene> displaySetting:attribute "true"^^xsd:boolean ;
+<http://dbpedia.org/ontology/entrezgene> askomics:attribute "true"^^xsd:boolean ;
                 rdf:type owl:DatatypeProperty ;
                 rdfs:label "entrezgene" ;
                 rdfs:domain dbpedia:Biomolecule ;
                 rdfs:range xsd:string .
 
-<http://dbpedia.org/ontology/hgncid> displaySetting:attribute "true"^^xsd:boolean ;
+<http://dbpedia.org/ontology/hgncid> askomics:attribute "true"^^xsd:boolean ;
                 rdf:type owl:DatatypeProperty ;
                 rdfs:label "hgncid" ;
                 rdfs:domain dbpedia:Biomolecule ;
                 rdfs:range xsd:string .
 
-<http://dbpedia.org/ontology/locusSupplementaryData> displaySetting:attribute "true"^^xsd:boolean ;
+<http://dbpedia.org/ontology/locusSupplementaryData> askomics:attribute "true"^^xsd:boolean ;
                 rdf:type owl:DatatypeProperty ;
                 rdfs:label "locusSupplementaryData" ;
                 rdfs:domain dbpedia:Biomolecule ;
                 rdfs:range xsd:string .
 
-<http://dbpedia.org/ontology/omim> displaySetting:attribute "true"^^xsd:boolean ;
+<http://dbpedia.org/ontology/omim> askomics:attribute "true"^^xsd:boolean ;
                 rdf:type owl:DatatypeProperty ;
                 rdfs:label "omim" ;
                 rdfs:domain dbpedia:Biomolecule ;
                 rdfs:range xsd:string .
 
-<http://dbpedia.org/ontology/refseq> displaySetting:attribute "true"^^xsd:boolean ;
+<http://dbpedia.org/ontology/refseq> askomics:attribute "true"^^xsd:boolean ;
                 rdf:type owl:DatatypeProperty ;
                 rdfs:label "refseq" ;
                 rdfs:domain dbpedia:Biomolecule ;
                 rdfs:range xsd:string .
 
-<http://dbpedia.org/ontology/symbol> displaySetting:attribute "true"^^xsd:boolean ;
+<http://dbpedia.org/ontology/symbol> askomics:attribute "true"^^xsd:boolean ;
                 rdf:type owl:DatatypeProperty ;
                 rdfs:label "symbol" ;
                 rdfs:domain dbpedia:Biomolecule ;
                 rdfs:range xsd:string .
 
-<http://dbpedia.org/ontology/uniprot> displaySetting:attribute "true"^^xsd:boolean ;
+<http://dbpedia.org/ontology/uniprot> askomics:attribute "true"^^xsd:boolean ;
                 rdf:type owl:DatatypeProperty ;
                 rdfs:label "uniprot" ;
                 rdfs:domain dbpedia:Biomolecule ;
                 rdfs:range xsd:string .
 
-<http://dbpedia.org/ontology/ensembl> displaySetting:attribute "true"^^xsd:boolean ;
+<http://dbpedia.org/ontology/ensembl> askomics:attribute "true"^^xsd:boolean ;
                 rdf:type owl:DatatypeProperty ;
                 rdfs:label "ensembl" ;
                 rdfs:domain dbpedia:Biomolecule ;

@@ -13,8 +13,8 @@ class AbstractedEntity(object):
     It is defined by an uri and a label.
     """
 
-    def __init__(self, identifier):
-        self.uri = ":" + ParamManager.encode_to_rdf_uri(identifier)
+    def __init__(self, identifier,prefix):
+        self.uri = ParamManager.encode_to_rdf_uri(identifier,prefix)
         self.label = identifier
 
         self.log = logging.getLogger(__name__)
@@ -29,6 +29,6 @@ class AbstractedEntity(object):
         """
         turtle = self.get_uri() + " rdf:type owl:Class ;\n"
 
-        turtle += (len(self.get_uri()) + 1) * " " + "displaySetting:entity \"true\"^^xsd:boolean ;\n"
+        turtle += (len(self.get_uri()) + 1) * " " + "askomics:entity \"true\"^^xsd:boolean ;\n"
         turtle += (len(self.get_uri()) + 1) * " " + "rdfs:label " + json.dumps(self.label) + "^^xsd:string .\n\n"
         return turtle

@@ -157,43 +157,44 @@ class AskView(object):
         public_stats = {}
         private_stats = {}
 
+        lEndp = em.listEndpoints()
         # Number of triples
-        results_pub = qmlaucher.process_query(sqs.get_number_of_triples('public').query,em.listAskomicsEndpoints())
+        results_pub = qmlaucher.process_query(sqs.get_number_of_triples('public').query,lEndp)
         results_priv = qlaucher.process_query(sqs.get_number_of_triples('private').query)
 
         public_stats['ntriples'] = results_pub[0]['number']
         private_stats['ntriples'] = results_priv[0]['number']
 
         # Number of entities
-        results_pub = qmlaucher.process_query(sqs.get_number_of_entities('public').query,em.listAskomicsEndpoints())
+        results_pub = qmlaucher.process_query(sqs.get_number_of_entities('public').query,lEndp)
         results_priv = qlaucher.process_query(sqs.get_number_of_entities('private').query)
 
         public_stats['nentities'] = results_pub[0]['number']
         private_stats['nentities'] = results_priv[0]['number']
 
         # Number of classes
-        results_pub = qmlaucher.process_query(sqs.get_number_of_classes('public').query,em.listAskomicsEndpoints())
+        results_pub = qmlaucher.process_query(sqs.get_number_of_classes('public').query,elEndp)
         results_priv = qlaucher.process_query(sqs.get_number_of_classes('private').query)
 
         public_stats['nclasses'] = results_pub[0]['number']
         private_stats['nclasses'] = results_priv[0]['number']
 
         # Number of graphs
-        results_pub = qmlaucher.process_query(sqs.get_number_of_subgraph('public').query,em.listAskomicsEndpoints())
+        results_pub = qmlaucher.process_query(sqs.get_number_of_subgraph('public').query,lEndp)
         results_priv = qlaucher.process_query(sqs.get_number_of_subgraph('private').query)
 
         public_stats['ngraphs'] = results_pub[0]['number']
         private_stats['ngraphs'] = results_priv[0]['number']
 
         # Graphs info
-        results_pub = qmlaucher.process_query(sqs.get_subgraph_infos('public').query,em.listAskomicsEndpoints())
+        results_pub = qmlaucher.process_query(sqs.get_subgraph_infos('public').query,lEndp)
         results_priv = qlaucher.process_query(sqs.get_subgraph_infos('private').query)
 
         public_stats['graphs'] = results_pub
         private_stats['graphs'] = results_priv
 
         # Classes and relations
-        results_pub = qmlaucher.process_query(sqs.get_rel_of_classes('public').query,em.listAskomicsEndpoints())
+        results_pub = qmlaucher.process_query(sqs.get_rel_of_classes('public').query,lEndp)
         results_priv = qlaucher.process_query(sqs.get_rel_of_classes('private').query)
 
         public_stats['class_rel'] = results_pub
@@ -218,7 +219,7 @@ class AskView(object):
         private_stats['class_rel'] = tmp
 
         # class and attributes
-        results_pub = qmlaucher.process_query(sqs.get_attr_of_classes('public').query,em.listAskomicsEndpoints())
+        results_pub = qmlaucher.process_query(sqs.get_attr_of_classes('public').query,lEndp)
         results_priv = qlaucher.process_query(sqs.get_attr_of_classes('private').query)
 
         tmp = {}
@@ -437,7 +438,7 @@ class AskView(object):
         filename = body['filename']
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
-        source_file = sfc.get_source_file(filename)
+        source_file = sfc.get_source_files([filename])[0]
         headers = source_file.headers
         preview = source_file.get_preview_data()
 
@@ -467,14 +468,14 @@ class AskView(object):
         self.log.debug(" ========= Askview:source_files_overview =============")
         try:
             sfc = SourceFileConvertor(self.settings, self.request.session)
-            source_files = sfc.get_source_files()
+            source_files = sfc.get_source_files(files_to_integrate)
             self.data['files'] = []
 
             # get all taxon in the TS
             sqg = SparqlQueryGraph(self.settings, self.request.session)
             ql = MultipleQueryLauncher(self.settings, self.request.session)
             em = EndpointManager(self.settings, self.request.session)
-            res = ql.process_query(sqg.get_all_taxons().query,em.listAskomicsEndpoints())
+            res = ql.process_query(sqg.get_all_taxons().query,em.listEndpoints())
             taxons_list = []
             for elem in res:
                 taxons_list.append(elem['taxon'])
@@ -577,7 +578,7 @@ class AskView(object):
 
             sfc = SourceFileConvertor(self.settings, self.request.session)
 
-            src_file = sfc.get_source_file(file_name, uri_set=uris)
+            src_file = sfc.get_source_files([ file_name ], uri_set=uris)[0]
             src_file.set_forced_column_types(col_types)
             src_file.set_disabled_columns(disabled_columns)
             src_file.set_key_columns(key_columns)
@@ -648,7 +649,7 @@ class AskView(object):
             return 'forbidden'
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
-        src_file = sfc.get_source_file(file_name, forced_type, uri_set=uris)
+        src_file = sfc.get_source_files([ file_name ], forced_type, uri_set=uris)[0]
         src_file.set_headers(headers)
         src_file.set_forced_column_types(col_types)
         src_file.set_disabled_columns(disabled_columns)
@@ -703,7 +704,7 @@ class AskView(object):
             return 'forbidden'
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
-        src_file_gff = sfc.get_source_file(file_name, forced_type, uri_set={ 0 : uri } )
+        src_file_gff = sfc.get_source_files( [file_name], forced_type, uri_set={ 0 : uri } )[0]
 
         src_file_gff.set_taxon(taxon)
         src_file_gff.set_entities(entities)
@@ -756,7 +757,7 @@ class AskView(object):
             return 'forbidden'
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
-        src_file_ttl = sfc.get_source_file(file_name, forced_type)
+        src_file_ttl = sfc.get_source_files( [file_name], forced_type)[0]
 
         try:
             self.data = src_file_ttl.persist(self.request.host_url, public)
@@ -803,7 +804,7 @@ class AskView(object):
             return 'forbidden'
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
-        src_file_bed = sfc.get_source_file(file_name, forced_type, uri_set={ 0 : uri })
+        src_file_bed = sfc.get_source_files( [file_name], forced_type, uri_set={ 0 : uri })[0]
 
         src_file_bed.set_taxon(taxon)
         src_file_bed.set_entity_name(entity)
@@ -953,11 +954,9 @@ class AskView(object):
             self.data['nrow'] = len(results)
 
             # Provide results file
-            if (not 'nofile' in body) or body['nofile']:
+            if (not 'nofile' in body) or not body['nofile']:
                 query_laucher = QueryLauncher(self.settings, self.request.session)
                 self.data['file'] = query_laucher.format_results_csv(results, ordered_headers)
-            print("---------------------")
-            print(self.data['file'])
 
             if persist:
                 npreview = 30
@@ -1127,6 +1126,27 @@ class AskView(object):
         self.data['admin'] = self.request.session['admin']
         self.data['blocked'] = self.request.session['blocked']
         self.data['galaxy'] = self.request.session['galaxy']
+
+        return self.data
+
+    @view_config(route_name='nbUsers', request_method='GET')
+    def nbUsers(self):
+
+        self.data = {}
+
+        sqa = SparqlQueryAuth(self.settings, self.request.session)
+        ql = QueryLauncher(self.settings, self.request.session)
+
+        try:
+
+            self.data['count'] =  0
+            res = ql.process_query(sqa.get_number_of_users().query)
+            if len(res)>0 and 'count' in res[0]:
+                self.data['count'] = res[0]['count']
+
+        except Exception as e:
+            self.data['error'] = str(e)
+            self.log.error(str(e))
 
         return self.data
 

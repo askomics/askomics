@@ -81,7 +81,7 @@
         <![endif]-->
 
     </head>
-    <body >
+    <body>
         <nav id='navbar' class="navbar navbar-default navbar-fixed-top"></nav>
 
         <br><br><br>
@@ -218,7 +218,7 @@
           <h3 class="header-div">About</h3>
           <hr/>
           <a target="_blank" href="https://github.com/askomics/askomics">
-            <img src="static/images/logo_band.png" height="90" alt="logo AskOmics"/>
+            <img src="static/images/logo_band.png" height="190" alt="logo AskOmics"/>
           </a>
           <p>
           AskOmics provide a visual
@@ -286,7 +286,6 @@
 
           <button type="button" class="btn btn-default" data-dismiss="modal" id="login_button"><i class="fa fa-sign-in text-primary"></i> Log in</button>
           <i class="hidden fa fa-spinner pulse" id='spinner_login'></i>
-          <i class="hidden fa fa-check text-success" id='tick_login'></i>
           <i class="hidden fa fa-times text-danger" id='cross_login'></i>
 
           <p>(or <a id='show_signup' href="#">sign up</a> if you don't have an account)</p>

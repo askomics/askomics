@@ -113,13 +113,21 @@ class ParamManagerTests(unittest.TestCase):
         d = m.remove_prefix("SELECT ?a FROM { ?a a http://www.w3.org/2002/07/owl#Class. }")
         assert d == "SELECT ?a FROM { ?a a owl:Class. }"
 
-    def test_encode_to_rdf_uri(self):
-        r = ParamManager.encode_to_rdf_uri("@&###:::123%%%%!!!")
+    def test_encode(self):
+        r = ParamManager.encode("@&###:::123%%%%!!!")
         assert r != "@&###123%%%%!!!"
 
+    def test_decode(self):
+        r = ParamManager.encode("@&###:::123%%%%!!!")
+        assert ParamManager.decode(r) == "@&###:::123%%%%!!!"
+
+    def test_encode_to_rdf_uri(self):
+        r = ParamManager.encode_to_rdf_uri("A",prefix="<http://helloworld/test/>")
+        assert r != "<http://helloworld/test/A>"
+
     def test_decode_to_rdf_uri(self):
-        r = ParamManager.encode_to_rdf_uri("@&###:::123%%%%!!!")
-        assert ParamManager.decode_to_rdf_uri(r) == "@&###:::123%%%%!!!"
+        r = ParamManager.encode_to_rdf_uri("A",prefix="<http://helloworld/test/>")
+        assert ParamManager.decode_to_rdf_uri(r,prefix="<http://helloworld/test/>") == "A"
 
     def test_send_mails(self):
         m = ParamManager(self.settings, self.request.session)

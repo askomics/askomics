@@ -82,6 +82,7 @@ def main(global_config, **settings):
     config.add_route('login_api_gie', '/login_api_gie')
     config.add_route('logout', '/logout')
     config.add_route('checkuser', '/checkuser')
+    config.add_route('nbUsers', '/nbUsers')
 
     # Administration
     config.add_route('get_users_infos', '/get_users_infos')
