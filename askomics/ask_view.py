@@ -173,7 +173,7 @@ class AskView(object):
         private_stats['nentities'] = results_priv[0]['number']
 
         # Number of classes
-        results_pub = qmlaucher.process_query(sqs.get_number_of_classes('public').query,elEndp)
+        results_pub = qmlaucher.process_query(sqs.get_number_of_classes('public').query,lEndp)
         results_priv = qlaucher.process_query(sqs.get_number_of_classes('private').query)
 
         public_stats['nclasses'] = results_pub[0]['number']
