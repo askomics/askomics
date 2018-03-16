@@ -36,7 +36,7 @@ class JobManager(ParamManager):
         conn.commit()
         conn.close()
 
-    def saveStartSparqlJob(self,typeJob,requestGraph="",variates=""):
+    def saveStartSparqlJob(self,typeJob,requestGraph="{}",variates="{}"):
 
         conn = sqlite3.connect(self.pathdb,uri=True)
         c = conn.cursor()

@@ -103,7 +103,11 @@ class AskomicsResultsView {
             let url = this.data[i]["URI"+headerName];
             row.append($('<td></td>').html($('<a></a>').attr('href',url).attr('target','_blank').text(valWithPrefix)));
           } else {
-            row.append($('<td></td>').text(val));
+            if ( val.startsWith("http://") ) {
+              let valWithPrefix = __ihm.getAbstraction().shortRDF(val);
+              row.append($('<td></td>').html($('<a></a>').attr('href',val).attr('target','_blank').text(valWithPrefix)));
+            } else
+              row.append($('<td></td>').text(val));
           }
         }
       }
