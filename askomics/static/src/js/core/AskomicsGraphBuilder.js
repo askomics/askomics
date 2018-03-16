@@ -405,7 +405,7 @@
               //console.log("==>"+node.uri);
               //console.log("APPARTIENT A : "+JSON.stringify(__ihm.localUserAbstraction.classToEndpoint[urlendp]));
               if (! (urlendp in endpoints)) {
-                console.log("1add External Service endpoints:"+urlendp);
+                //console.log("1add External Service endpoints:"+urlendp);
                 endpoints[urlendp] = __ihm.localUserAbstraction.typeEndpoint[urlendp];
               }
             }
@@ -425,7 +425,7 @@
             if ( link.uri in __ihm.localUserAbstraction.classToEndpoint[urlendp]) {
               //console.log("==>"+link.uri);
               if (! (urlendp in endpoints)) {
-              console.log("2add External Service endpoints:"+urlendp);
+              //console.log("2add External Service endpoints:"+urlendp);
               endpoints[urlendp] = __ihm.localUserAbstraction.typeEndpoint[urlendp];
               }
             }
@@ -443,8 +443,8 @@
         }
       }
 
-      console.log("endpoints:"+JSON.stringify(endpoints));
-      console.log("graphs:"+JSON.stringify(graphs));
+      //console.log("endpoints:"+JSON.stringify(endpoints));
+      //console.log("graphs:"+JSON.stringify(graphs));
 
       return [Object.keys(endpoints),Object.values(endpoints),Object.keys(graphs)];
     }

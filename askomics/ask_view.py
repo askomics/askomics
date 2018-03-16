@@ -931,7 +931,7 @@ class AskView(object):
             rg = ""
             if 'requestGraph' in body:
                 rg = body['requestGraph']
-            jobid = jm.saveStartSparqlJob("SPARQL Request",requestGraph=rg)
+            jobid = jm.saveStartSparqlJob("SPARQL Request",requestGraph=rg,variates=body["variates"])
 
         try:
             typeRequest = ''
