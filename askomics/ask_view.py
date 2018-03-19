@@ -1857,3 +1857,58 @@ class AskView(object):
 
         for file in files_to_delete:
             os.remove(path + '/' + file)
+
+    @view_config(route_name='serverinformations', request_method='GET')
+    def serverinformations(self):
+        import platform
+        import os
+        from humanize import naturalsize
+        from glob2 import iglob
+
+        import psutil
+        pid = os.getpid()
+        py = psutil.Process(pid)
+        memoryUse = py.memory_info()[0]/2.**30
+
+        infomem = psutil.virtual_memory()
+        diskinfo = psutil.disk_usage('.')
+
+        self.checkAdminSession()
+
+        pm = ParamManager(self.settings, self.request.session)
+
+        self.data = {}
+        self.data['values'] = []
+
+        self.data['values'].append({ 'key' : 'System', 'value' : platform.system() } )
+        self.data['values'].append({ 'key' : 'Release', 'value' : platform.release() } )
+        self.data['values'].append({ 'key' : 'N CPU', 'value' : str(psutil.cpu_count()) } )
+        self.data['values'].append({ 'key' : 'Memory total', 'value' : str(round(infomem.total/(1024**3),2)) + " GB" } )
+        self.data['values'].append({ 'key' : 'Memory used', 'value' : str(round(infomem.used/(1024**3),2)) + " GB" } )
+        self.data['values'].append({ 'key' : 'Memory free', 'value' : str(round(infomem.free/(1024**3),2)) + " GB" } )
+        self.data['values'].append({ 'key' : 'Disk total', 'value' : str(round(diskinfo.total/(1024**3),2)) + " GB" } )
+        self.data['values'].append({ 'key' : 'Disk used', 'value' : str(round(diskinfo.used/(1024**3),2)) + " GB" } )
+        self.data['values'].append({ 'key' : 'Disk free', 'value' : str(round(diskinfo.free/(1024**3),2)) + " GB" } )
+        self.data['values'].append({ 'key' : 'temp directory', 'value' : pm.userfilesdir } )
+        self.data['values'].append({ 'key' : 'temp directory size', 'value' : naturalsize(sum(os.path.getsize(x) for x in iglob(pm.userfilesdir+'/**'))) } )
+        self.data['values'].append({ 'key' : 'Upload directory', 'value' : pm.get_upload_directory() } )
+        self.data['values'].append({ 'key' : 'Upload directory size', 'value' : naturalsize(sum(os.path.getsize(x) for x in iglob(pm.get_upload_directory()+'/**'))) } )
+        self.data['values'].append({ 'key' : 'Rdf generated files directory', 'value' : pm.get_rdf_directory() } )
+        self.data['values'].append({ 'key' : 'Rdf generated files directory size', 'value' : naturalsize(sum(os.path.getsize(x) for x in iglob(pm.get_rdf_directory()+'/**'))) } )
+
+        return self.data
+
+    @view_config(route_name='cleantmpdirectory', request_method='POST')
+    def cleantmpdirectory(self):
+        import os
+        import glob2
+
+        self.checkAdminSession()
+        pm = ParamManager(self.settings, self.request.session)
+
+        files = glob2.glob(pm.get_rdf_directory()+'/**')
+        for f in files:
+            if os.path.isfile(f):
+                os.remove(f)
+
+        return

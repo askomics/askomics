@@ -1,0 +1,29 @@
+<hr/>
+<h4 class="header-div">Clean server</h4>
+<hr/>
+<div class="alert alert-warning">
+  <strong>Warning!</strong> Don't clean if any user is logged and load his own data
+</div>
+<br/>
+<button onclick="__ihm.serverInfosView.cleanServer()" class="btn btn-primary">Clean</button>
+<br/>
+<hr/>
+<h3 class="header-div">Server information</h3>
+<hr/>
+
+<div id="Server_adm_tab_content" class="tab-content">
+  <table class="table table-striped">
+      <tr>
+          <th>Key</th>
+          <th>Value</th>
+      </tr>
+    {{#each infos}}
+    <tr>
+        <td>{{this.key}}</td>
+        <td>{{this.value}}</td>
+    </tr>
+    {{/each}}
+    </table>
+
+
+</div>

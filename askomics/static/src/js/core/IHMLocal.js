@@ -59,9 +59,10 @@ class IHMLocal {
       this.galaxyService           = new AskomicsGalaxyService()              ;
 
       //TODO: Manage all view in a array with a generic way
-      this.shortcutsView      = new  ShortcutsParametersView();
-      this.menus = {} ;
+      this.shortcutsView           = new  ShortcutsParametersView()           ;
+      this.serverInfosView         = new  ServerInformationsView()            ;
 
+      this.menus = {} ;
       this.menus.menuFile = new AskomicsMenu("menuFile","buttonViewFile","viewMenuFile",fileFuncMenu,false);
       this.menus.menuGraph = new AskomicsMenu("menuGraph","buttonViewListGraph","viewListGraph",graphFuncMenu);
       this.menus.menuView = new AskomicsMenu("menuView","buttonViewListNodesAndLinks","viewListNodesAndLinks",entitiesAndRelationsFuncMenu);
