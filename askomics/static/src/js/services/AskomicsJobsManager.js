@@ -77,6 +77,8 @@ let instanceAskomicsJobsViewManager ;
             job.preview = $('<div></div>').html(data[i].preview) ;
             job.data = undefined;
             if ( 'data' in data[i] ) job.data = data[i].data ;
+            job.variates = data[i].variates;
+
             let idx = 0;
             for (idx;idx<ljobs.length;idx++) {
               if ( job.jobid < ljobs[idx] ) break;
@@ -117,7 +119,7 @@ let instanceAskomicsJobsViewManager ;
         //     and launch it according to given parameters.
         //
         //     :lim: LIMIT values for preview
-        console.log('+++ prepareQuery +++');
+        //console.log('+++ prepareQuery +++');
 
         let tab = __ihm.getGraphBuilder().buildConstraintsGraph();
         let tab2 = __ihm.getGraphBuilder().getEndpointAndGraph();
@@ -148,31 +150,6 @@ let instanceAskomicsJobsViewManager ;
       let jdata = this.prepareQuery();
       let self = this;
 
-      // Get ordered headers
-      let result_view = new AskomicsResultsView({});
-
-      //console.log();
-      //console.log("getInternalState======>"+JSON.stringify(__ihm.getGraphBuilder().getInternalState()));
-      //if (true)return {};
-
-      let struct = JSON.parse(__ihm.getGraphBuilder().getInternalState());
-      let t = __ihm.getGraphBuilder().extractNodesAndLinks(struct[1],struct[2]);
-      let nodes = t[0];
-      let links = t[1];
-      /*
-      console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-      console.log("NODE======>"+JSON.stringify(nodes));
-      console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-      */
-      result_view.setActivesAttributes(nodes,links);
-      let attributes = result_view.getActivesAttributes();
-      let ordered_headers = [];
-      $.map(attributes, function(value, key) {
-        $.merge(ordered_headers, value);
-      });
-
-      jdata.headers = ordered_headers;
-
       service.post(jdata,function(data) {
         new AskomicsJobsViewManager().listJobs();
       });
@@ -196,8 +173,8 @@ let instanceAskomicsJobsViewManager ;
         for ( let ij in __inst.jobs ) {
 
           if ( __inst.jobs[ij].data != undefined ) {
-            let struct = JSON.parse(atob(__inst.jobs[ij].stateToReload));
-            let prev = new AskomicsResultsView(__inst.jobs[ij].data).getPreviewResults(struct) ;
+          //  let struct = JSON.parse(atob(__inst.jobs[ij].stateToReload));
+            let prev = new AskomicsResultsView(__inst.jobs[ij].data,__inst.jobs[ij].variates).getPreviewResults() ;
             let r = $("#results_table_"+ij);
             r.append(
 

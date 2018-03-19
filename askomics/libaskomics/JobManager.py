@@ -28,6 +28,7 @@ class JobManager(ParamManager):
              file text,
              preview string,
              requestGraph string,
+             variates string,
              nr int
              )'''
 
@@ -35,12 +36,13 @@ class JobManager(ParamManager):
         conn.commit()
         conn.close()
 
-    def saveStartSparqlJob(self,typeJob,requestGraph=""):
+    def saveStartSparqlJob(self,typeJob,requestGraph="{}",variates="{}"):
 
         conn = sqlite3.connect(self.pathdb,uri=True)
         c = conn.cursor()
 
         requestGraph = ParamManager.encode(requestGraph)
+        variates = ParamManager.encode(str(variates))
 
         reqSql = "INSERT INTO jobs VALUES ("\
                 + "NULL,"     \
@@ -52,6 +54,7 @@ class JobManager(ParamManager):
                 + "''," \
                 + "''," \
                 + "'"+requestGraph+"'," \
+                + "'"+variates+"'," \
                 + "-1" \
                 + ");"
 
@@ -115,7 +118,7 @@ class JobManager(ParamManager):
 
             c = conn.cursor()
 
-            reqSql = """ SELECT jobid, type, state, start, end, data, file, preview, requestGraph, nr FROM jobs"""
+            reqSql = """ SELECT jobid, type, state, start, end, data, file, preview, requestGraph, variates, nr FROM jobs"""
 
             c.execute(reqSql)
             rows = c.fetchall()
@@ -133,6 +136,7 @@ class JobManager(ParamManager):
                     d['file'] = row['file']
                 d['preview'] = row['preview']
                 d['requestGraph'] = ParamManager.decode(row['requestGraph'])
+                d['variates'] = eval(ParamManager.decode(row['variates']))
                 d['nr'] = row['nr']
 
                 data.append(d)

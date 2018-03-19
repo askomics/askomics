@@ -26,7 +26,9 @@ requires = [
     'humanize',
     'pybedtools==0.7.10',
     'configparser',
-    'argparse'
+    'argparse',
+    'glob2',
+    'psutil'
     ]
 
 setup(name='Askomics',

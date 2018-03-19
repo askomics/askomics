@@ -332,12 +332,13 @@ function updatePrefixListUriCsvForm(file,data) {
           data[entity].forEach(function(element) {
             curSelect.append($("<option></option>").val(element).html(element));
           });
-      } else { /* this entity does not exist in database */
+      } else { // this entity does not exist in database
          curSelect.append($("<option></option>").val(data.__default__).html(data.__default__));
       }
       /* if same type entity than the first column maybe a new uri exist... */
+      // modif Mars 2018 => URI modified by user in first column is available on the other 'relation' column 
       let first_entity = file.headers[0].substring(file.headers[0].indexOf("@")+1);
-      if (first_entity == entity ) {
+      //if (first_entity == entity ) {
         curSelect.click(function() {
           /* check input uri tag of the current entity definition and propose  */
           let newuri = $('#def-uri-entity-' +idfile).val();
@@ -356,7 +357,7 @@ function updatePrefixListUriCsvForm(file,data) {
                                                    .attr('volatile','true'));
           }
         });
-      }
+      //}
     }
   });
 }

@@ -96,6 +96,9 @@ def main(global_config, **settings):
     config.add_route('api_key', '/api_key')
     config.add_route('del_apikey', '/del_apikey')
 
+    config.add_route('serverinformations', '/serverinformations')
+    config.add_route('cleantmpdirectory', '/cleantmpdirectory')
+
     # TODO no absolute path to static files
     # TODO check what is cors (iframe redirect?)
     # TODO check security (delete truc/../../../)

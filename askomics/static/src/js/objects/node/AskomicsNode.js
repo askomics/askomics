@@ -247,7 +247,9 @@ class AskomicsNode extends GraphNode {
     if ( (!this.sparqlgen) || (!this.actif) )
       return ;
 
-    variates.push("?"+this.SPARQLid);
+    if ( this.rdfslabel.actif ) {
+      variates.push("?"+this.SPARQLid);
+    }
     variates.push("?URI"+this.SPARQLid);
 
     for (let uri in this.attributes) {
@@ -416,7 +418,6 @@ class AskomicsNode extends GraphNode {
 
     for ( let uriAttI in orderAttributes ) {
       let uriAtt = orderAttributes[uriAttI].uri;
-
       if ( this.uri === uriAtt ) {
         list_id.push(this.SPARQLid);
         list_label.push(this.label);

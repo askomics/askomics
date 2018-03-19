@@ -32,6 +32,7 @@ var askomicsSourceFiles = [
         'askomics/static/src/js/objects/link/AskomicsPositionableLink.js',
         'askomics/static/src/js/view/parameters/InterfaceParametersView.js',
         'askomics/static/src/js/view/parameters/ShortcutsParametersView.js',
+        'askomics/static/src/js/view/parameters/ServerInformationsView.js',
         'askomics/static/src/js/view/AskomicsObjectView.js',
         'askomics/static/src/js/view/AskomicsLinkView.js',
         'askomics/static/src/js/view/AskomicsNodeView.js',
