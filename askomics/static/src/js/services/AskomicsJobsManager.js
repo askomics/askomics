@@ -99,7 +99,9 @@ let instanceAskomicsJobsViewManager ;
       };
 
       service.post(model, function(data) {
-        new AskomicsJobsViewManager().listJobs();
+        new AskomicsJobsViewManager().loadjob().then(function () {
+          new AskomicsJobsViewManager().update_jobview ();
+        });
       });
     }
 
@@ -130,7 +132,6 @@ let instanceAskomicsJobsViewManager ;
                   'graphs'               : tab2[2],
                   'variates'             : tab[0],
                   'constraintesRelations': tab[1],
-                  'constraintesFilters'  : tab[2],
                   'removeGraph'          : __ihm.getAbstraction().listUnactivedGraph(),
                   'requestGraph'         : __ihm.getGraphBuilder().getInternalState(),
                   'jobManager'           : true,
@@ -151,16 +152,16 @@ let instanceAskomicsJobsViewManager ;
       let self = this;
 
       service.post(jdata,function(data) {
-        new AskomicsJobsViewManager().listJobs();
+        new AskomicsJobsViewManager().loadjob().then(function () {
+          new AskomicsJobsViewManager().update_jobview ();
+        });
       });
-
-      this.wait(50).then( function() {
+      this.wait(500).then( function() {
         $("#jobsview").trigger( "click" );
       });
     }
 
-    listJobs() {
-      this.loadjob().then(function () {
+    update_jobview () {
         let __inst = new AskomicsJobsViewManager();
         let template = AskOmics.templates.jobs;
 
@@ -190,6 +191,5 @@ let instanceAskomicsJobsViewManager ;
             }
           }
         }
-      });
     }
 }

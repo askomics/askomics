@@ -912,7 +912,7 @@ class AskView(object):
 
     @view_config(route_name='sparqlquery', request_method='POST')
     def get_value(self):
-        """ Build a request from a json whith the following contents :variates,constraintesRelations,constraintesFilters"""
+        """ Build a request from a json whith the following contents :variates,constraintesRelations"""
 
         body = self.request.json_body
 
@@ -936,12 +936,13 @@ class AskView(object):
         try:
             typeRequest = ''
             tse = TripleStoreExplorer(self.settings, self.request.session)
-
+            variates = []
+            [ variates.extend(listValues) for k,listValues in body["variates"].items()]
             results, query, typeRequest = tse.build_sparql_query_from_json(
                                                  body["endpoints"],
                                                  body["type_endpoints"],
                                                  body["graphs"],
-                                                 body["variates"],
+                                                 variates,
                                                  body["constraintesRelations"],
                                                  True)
             # Remove prefixes in the results table
@@ -999,7 +1000,7 @@ class AskView(object):
 
     @view_config(route_name='getSparqlQueryInTextFormat', request_method='POST')
     def getSparqlQueryInTextFormat(self):
-        """ Build a request from a json whith the following contents :variates,constraintesRelations,constraintesFilters"""
+        """ Build a request from a json whith the following contents :variates,constraintesRelations"""
         self.log.debug("== Attribute Value ==")
 
         try:
@@ -1013,7 +1014,9 @@ class AskView(object):
             typeRequest = ''
             endp = []
             typeEnd = []
-            results,query, typeRequest = tse.build_sparql_query_from_json(endp,typeEnd,lfrom,body["variates"],body["constraintesRelations"],-1,send_request_to_tps=False)
+            variates = []
+            [ variates.extend(listValues) for k,listValues in body["variates"].items()]
+            results,query, typeRequest = tse.build_sparql_query_from_json(endp,typeEnd,lfrom,variates,body["constraintesRelations"],-1,send_request_to_tps=False)
 
             self.data['query'] = query
         except Exception as e:

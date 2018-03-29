@@ -364,6 +364,7 @@
           graphs[g] = 1;
         }
       }
+
       /* endpoints */
       for (let g in graphs) {
         let endp = __ihm.localUserAbstraction.graphToEndpoint[g];
@@ -396,18 +397,25 @@
         for (let g in __ihm.localUserAbstraction.uriToGraph[node.uri]) {
           if (! (g in graphs)) {
             graphs[g] = 1;
+            let endp = __ihm.localUserAbstraction.graphToEndpoint[g];
+           // console.log("g:"+g);
+           // console.log("endp:"+endp);
+            endpoints[endp]=endp;
           }
         }
-
+        //console.log("GRAPH--------");
+        //console.log(JSON.stringify(graphs));
         /* Check External Service endpoints */
         for ( let urlendp in __ihm.localUserAbstraction.classToEndpoint ) {
             if ( node.uri in __ihm.localUserAbstraction.classToEndpoint[urlendp]) {
-              //console.log("==>"+node.uri);
-              //console.log("APPARTIENT A : "+JSON.stringify(__ihm.localUserAbstraction.classToEndpoint[urlendp]));
+             // console.log("==>"+node.uri);
+             // console.log("APPARTIENT A : "+JSON.stringify(__ihm.localUserAbstraction.classToEndpoint[urlendp]));
               if (! (urlendp in endpoints)) {
                 //console.log("1add External Service endpoints:"+urlendp);
                 endpoints[urlendp] = __ihm.localUserAbstraction.typeEndpoint[urlendp];
               }
+            //  console.log("--------");
+             // console.log(JSON.stringify(endpoints));
             }
         }
       }
@@ -419,11 +427,13 @@
             graphs[g] = 1;
           }
         }
+       // console.log("GRAPH--------");
+       // console.log(JSON.stringify(graphs));
 
         /* Check External Service endpoints */
         for ( let urlendp in __ihm.localUserAbstraction.classToEndpoint ) {
             if ( link.uri in __ihm.localUserAbstraction.classToEndpoint[urlendp]) {
-              //console.log("==>"+link.uri);
+            //  console.log("link.uri==>"+link.uri);
               if (! (urlendp in endpoints)) {
               //console.log("2add External Service endpoints:"+urlendp);
               endpoints[urlendp] = __ihm.localUserAbstraction.typeEndpoint[urlendp];
@@ -431,26 +441,29 @@
             }
         }
       }
-
-      /* Graphs associate with endpoints */
+      /*
+      console.log("GRAPH--------");
+      console.log(JSON.stringify(graphs));
+      // Graphs associate with endpoints
       for (let g in graphs) {
         if (g in __ihm.localUserAbstraction.graphToEndpoint ) {
           let endp = __ihm.localUserAbstraction.graphToEndpoint[g];
+
           if (! (endp in endpoints)) {
-            //console.log("add Graph endpoints:"+endp);
+            console.log("add Graph endpoints:"+endp);
             endpoints[endp] = __ihm.localUserAbstraction.typeEndpoint[endp];
           }
         }
       }
-
-      //console.log("endpoints:"+JSON.stringify(endpoints));
-      //console.log("graphs:"+JSON.stringify(graphs));
+      */
+      console.log("endpoints:"+JSON.stringify(endpoints));
+      console.log("graphs:"+JSON.stringify(graphs));
 
       return [Object.keys(endpoints),Object.values(endpoints),Object.keys(graphs)];
     }
 
     buildConstraintsGraph() {
-      let variates        = [] ;
+      let variates        = {} ;
       let blockConstraint = [] ;
 
       /* copy arrays to avoid to removed nodes and links instancied */
@@ -461,7 +474,9 @@
         let node = dup_node_array[idx];
         /* adding constraints about attributs about the current node */
         blockConstraint.push(node.buildConstraintsSPARQL());
-        node.instanciateVariateSPARQL(variates);
+        let variate_loc =[] ;
+        node.instanciateVariateSPARQL(variate_loc);
+        variates[node.SPARQLid] = variate_loc;
       }
 
       for (let idx=0;idx<this._instanciedNodeGraph.length;idx++) {
@@ -477,8 +492,9 @@
             } else {
               blockConstraint.push(bc);
             }
-            dup_link_array[ilx].instanciateVariateSPARQL(variates);
-
+            let variate_loc =[] ;
+            dup_link_array[ilx].instanciateVariateSPARQL(variate_loc);
+            variates[dup_link_array[ilx].SPARQLid] = variate_loc;
             //remove link to avoid to add two same constraint
             dup_link_array.splice(ilx,1);
           }
