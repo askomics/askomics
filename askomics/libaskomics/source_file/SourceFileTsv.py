@@ -354,7 +354,7 @@ class SourceFileTsv(SourceFile):
                     uri = self.encode_to_rdf_uri(self.headers[key],prefix="askomics:")
                 ttl += uri + ' askomics:attribute "true"^^xsd:boolean .\n'
                 # store the order of attrbutes in order to display attributes in the right order
-                ttl += uri + ' askomics:attributeOrder "' + str(key) + '"^^xsd:decimal .\n'
+                ttl += uri + ' askomics:attributeOrder "' + str(key+1) + '"^^xsd:decimal .\n'
             elif key == 0:
                 uri_pref = self.get_param("askomics.prefix")
 
@@ -425,7 +425,7 @@ class SourceFileTsv(SourceFile):
             for item in categories:
                 if item.strip() != "":
                     ttl += self.encode_to_rdf_uri(item,prefix="askomics:") + " rdf:type " + self.encode_to_rdf_uri(header,prefix="askomics:") + " ;\n" + len(item) * " " + "  rdfs:label " + self.escape['text'](item,'') + "^^xsd:string .\n"
-    
+
         return ttl
 
 

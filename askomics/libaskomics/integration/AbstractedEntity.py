@@ -31,4 +31,11 @@ class AbstractedEntity(object):
 
         turtle += (len(self.get_uri()) + 1) * " " + "askomics:entity \"true\"^^xsd:boolean ;\n"
         turtle += (len(self.get_uri()) + 1) * " " + "rdfs:label " + json.dumps(self.label) + "^^xsd:string .\n\n"
+        turtle += '\n'
+        turtle += 'rdfs:label rdf:type owl:DatatypeProperty .\n'
+        turtle += 'rdfs:label askomics:attribute "true"^^xsd:boolean .\n'
+        turtle += 'rdfs:label askomics:attributeOrder "1"^^xsd:decimal .\n'
+        turtle += 'rdfs:label rdfs:label "label" .\n'
+        turtle += 'rdfs:label rdfs:domain '+self.get_uri()+' .\n'
+        turtle += 'rdfs:label rdfs:range xsd:string .\n'
         return turtle
