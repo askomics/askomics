@@ -916,10 +916,6 @@ class AskView(object):
 
         body = self.request.json_body
 
-        ordered_headers = []
-        if 'headers' in body:
-            ordered_headers = body['headers']
-
         persist = False
         if 'jobManager' in body :
             if body['jobManager']:
@@ -957,7 +953,7 @@ class AskView(object):
             # Provide results file
             if (not 'nofile' in body) or not body['nofile']:
                 query_laucher = QueryLauncher(self.settings, self.request.session)
-                self.data['file'] = query_laucher.format_results_csv(results, ordered_headers)
+                self.data['file'] = query_laucher.format_results_csv(results)
 
             if persist:
                 npreview = 30

@@ -247,13 +247,11 @@ class QueryLauncher(ParamManager):
 
         return results
 
-    def format_results_csv(self, data, headers):
+    def format_results_csv(self, data):
         """write the csv result file from a data ist
 
         :param data: the data to process
         :type data: list
-        :param headers: Ordered headers of the result file
-        :type headers: list
         :returns: The path of the created file
         :rtype: string
         """
@@ -266,16 +264,17 @@ class QueryLauncher(ParamManager):
         filename = 'data_' + str(time.time()).replace('.', '') + '.csv'
         with open(dircsv + '/' + filename, 'w') as csvfile:
             writer = csv.writer(csvfile, delimiter='\t')
-            # Write headers
-            writer.writerow(headers)
+            # Write header
+            headers = []
+            if len(data)>0:
+                for header in data[0]:
+                    headers.append(header)
+                writer.writerow(headers)
             # Write rows
             for value in data:
                 row = []
-                for header in headers:
-                    if header in value:
-                        row.append(value[header])
-                    else:
-                        row.append("")
+                for header in value:
+                    row.append(value[header])
                 writer.writerow(row)
 
         return filename
