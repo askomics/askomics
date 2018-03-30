@@ -195,18 +195,25 @@ class SourceFileBed(SourceFile):
         """
 
         order_dict = {
-            'Name': '1',
-            'position_ref': '2',
-            'position_start': '3',
-            'position_end': '4',
-            'position_strand': '5',
-            'position_taxon': '6',
-            'score': '7'
+            'Name': '2',
+            'position_ref': '3',
+            'position_start': '4',
+            'position_end': '5',
+            'position_strand': '6',
+            'position_taxon': '7',
+            'score': '8'
         }
 
         ttl =  '#################\n'
         ttl += '#  Abstraction  #\n'
         ttl += '#################\n\n'
+        ttl += '\n'
+        ttl += 'rdfs:label rdf:type owl:DatatypeProperty .\n'
+        ttl += 'rdfs:label askomics:attribute "true"^^xsd:boolean .\n'
+        ttl += 'rdfs:label askomics:attributeOrder "1"^^xsd:decimal .\n'
+        ttl += 'rdfs:label rdfs:label "label" .\n'
+        ttl += 'rdfs:label rdfs:range xsd:string .\n'
+        ttl += '\n'
 
         for entity, attribute_dict in self.abstraction_dict.items():
             ttl += entity + ' ' + 'rdf:type owl:Class ;\n'
@@ -215,6 +222,10 @@ class SourceFileBed(SourceFile):
             ttl += indent + 'askomics:startPoint \"true\"^^xsd:boolean ;\n\n'
             ttl += indent + 'askomics:entity \"true\"^^xsd:boolean .\n\n'
 
+            ttl += '\n'
+            ttl += indent + 'rdfs:label rdfs:domain '+entity+' .\n'
+            ttl += '\n'
+            
             for type_attr, attr_list in attribute_dict.items():
                 if type_attr == 'pos_attr': # positionable attributes
                     for pos_attr in attr_list:

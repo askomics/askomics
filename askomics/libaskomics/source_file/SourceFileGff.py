@@ -87,8 +87,6 @@ class SourceFileGff(SourceFile):
         # To suffix all biological element without ID and try to have unique ID
         suffixURI = os.path.splitext(os.path.basename(self.path))[0]
 
-
-
         limit = dict(gff_type=self.entities)
 
         regex = re.compile(r'.*:')
@@ -122,8 +120,8 @@ class SourceFileGff(SourceFile):
                 type_entity_label = feat.type
                 if type_entity not in self.getLabelFromUri:
                     self.getLabelFromUri[type_entity] = str(feat.type)
-                build_entity_id = False
 
+                build_entity_id = False
 
                 if feat.id != '':
                     id_entity = self.encode_to_rdf_uri(feat.id,prefix=self.prefix)
@@ -132,14 +130,15 @@ class SourceFileGff(SourceFile):
                     if not type_entity in icount:
                         icount[type_entity] = 0
                     icount[type_entity] += 1
-                    suff = os.path.basename(self.path)
+
                     #self.log.warning("can not succed get ID feat :"+type_entity+"\n"+str(feat))
                     if self.taxon != '' :
-                        id_entity = self.taxon.strip() + "_" + self.getLabelFromUri[type_entity] + "_"+ suffixURI +"_"+ self.timestamp+ "_"+ str(icount[type_entity])
+                        id_entity = self.taxon.strip() + "_" + suffixURI+ "_" + self.getLabelFromUri[type_entity] + "_"+ str(icount[type_entity])
                     else:
-                        id_entity = self.self.getLabelFromUri[type_entity] + "_"+ suffixURI +"_"+ self.timestamp + "_"+ str(icount[type_entity])
+                        id_entity = suffixURI+ "_" + self.getLabelFromUri[type_entity] + "_"+ str(icount[type_entity])
 
                     id_entity = self.encode_to_rdf_uri(id_entity,prefix=self.prefix)
+                    
                     build_entity_id = True
                     self.getLabelFromUri[id_entity] = str(feat.type) + "_" + str(icount[type_entity])
 
@@ -215,6 +214,7 @@ class SourceFileGff(SourceFile):
                 buildLater = False
                 for qualifier_key, qualifier_value in feat.qualifiers.items():
                     keyuri = self.encode_to_rdf_uri(qualifier_key,prefix=self.prefix)
+                  
                     attribute_dict[keyuri] = []
 
                     for val in qualifier_value:
@@ -228,7 +228,6 @@ class SourceFileGff(SourceFile):
 
                         elif qualifier_key in ['Parent', 'Derives_from']:
                             qualifier_key_uri = self.encode_to_rdf_uri(qualifier_key,prefix=self.prefix)
-
                             if not valuri in type_entities:
                                 #raise ValueError("Unknown "+qualifier_key+" ID ["+val+"]")
                                 #build later
@@ -239,7 +238,6 @@ class SourceFileGff(SourceFile):
                             else:
 
                                 keyuri = self.encode_to_rdf_uri(qualifier_key+"_"+type_entities[valuri],prefix=self.prefix)
-
                                 if not keyuri in attribute_dict:
                                     attribute_dict[keyuri] = []
 
@@ -319,17 +317,24 @@ class SourceFileGff(SourceFile):
         """
 
         order_dict = {
-            'Name': '1',
-            'position_ref': '2',
-            'position_start': '3',
-            'position_end': '4',
-            'position_strand': '5',
-            'position_taxon': '6'
+            'Name': '2',
+            'position_ref': '3',
+            'position_start': '4',
+            'position_end': '5',
+            'position_strand': '6',
+            'position_taxon': '7'
         }
 
         ttl =  '#################\n'
         ttl += '#  Abstraction  #\n'
         ttl += '#################\n\n'
+        ttl += '\n'
+        ttl += 'rdfs:label rdf:type owl:DatatypeProperty .\n'
+        ttl += 'rdfs:label askomics:attribute "true"^^xsd:boolean .\n'
+        ttl += 'rdfs:label askomics:attributeOrder "1"^^xsd:decimal .\n'
+        ttl += 'rdfs:label rdfs:label "label" .\n'
+        ttl += 'rdfs:label rdfs:range xsd:string .\n'
+        ttl += '\n'
 
         for entity, attribute_dict in self.abstraction_dict.items():
             ttl += entity + ' ' + 'rdf:type owl:Class ;\n'
@@ -337,6 +342,10 @@ class SourceFileGff(SourceFile):
             ttl += indent + 'rdfs:label \"' + self.decode_to_rdf_uri(entity,prefix=self.prefix) + "\"^^xsd:string ;\n"
             ttl += indent + 'askomics:startPoint \"true\"^^xsd:boolean ;\n'
             ttl += indent + 'askomics:entity \"true\"^^xsd:boolean .\n\n'
+
+            ttl += '\n'
+            ttl += indent + 'rdfs:label rdfs:domain '+entity+' .\n'
+            ttl += '\n'
 
             for type_attr, attr_list in attribute_dict.items():
                 if type_attr == 'pos_attr': # positionable attributes
