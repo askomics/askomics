@@ -10,35 +10,29 @@ class AskomicsResultsView {
     //uri by default is undisplayed
     this.colDisplay             = {};
 
-    this.orderDisplay           = [] ;
-
     //detect node vs attribute
-    for (let i=0;i<this.variates.length;i++) {
-      let nameCol = this.variates[i].replace(/^\?/,"");
+    for (let entite in this.variates) {
+      this.colDisplay[entite] = [];
+      for (let i=0;i<this.variates[entite].length;i++) {
+        let nameCol = this.variates[entite][i].replace(/^\?/,"");
 
-      if (this.variates[i].startsWith("?URI")) {
-        let variable = this.variates[i].replace("?URI","");
-        this.colWithUri[variable] = true ;
-        this.colDisplay[nameCol] = false ;
-      } else {
-        this.colDisplay[nameCol] = true ;
+        if (this.variates[entite][i].startsWith("?URI")) {
+          let variable = this.variates[entite][i].replace("?URI","");
+          this.colWithUri[variable] = true ;
+          this.colDisplay[entite][nameCol] = false ;
+        } else {
+          this.colDisplay[entite][nameCol] = true ;
+        }
       }
     }
 
     //check if node name is present otherwise URI is displayed.
-    for (let v in this.colDisplay) {
-
-      if ( this.colDisplay[v] ) continue;
-      let namenode = v.replace(/^URI/,"");
-      if ( ! (namenode in this.colDisplay) ) this.colDisplay[v] = true;
-    }
-
-    //order to display
-    for (let v in this.colDisplay) {
-      let idx = v.match(/\d+$/)[0];
-      if (idx == undefined) throw "AskomicsResultsView :: Can not retrieve index Node of attribute/node:"+nameCol;
-      if (! (idx in this.orderDisplay) ) this.orderDisplay[idx] = [];
-      this.orderDisplay[idx].push(v);
+    for (let entite in this.colDisplay) {
+      for (let v in this.colDisplay[entite]) {
+        if ( this.colDisplay[entite][v] ) continue;
+        let namenode = v.replace(/^URI/,"");
+        if ( ! (namenode in this.colDisplay[entite]) ) this.colDisplay[entite][v] = true;
+      }
     }
   }
 
@@ -70,11 +64,12 @@ class AskomicsResultsView {
 
     let head = $('<thead></thead>');
     let row = $('<tr></tr>');
-    for (let headLabel in this.colDisplay ) {
-      if ( ! this.colDisplay[headLabel] ) continue ;
-
-        row.append($('<th></th>')
+    for (let entite in this.colDisplay ) {
+      for (let headLabel in this.colDisplay[entite] ) {
+        if ( ! this.colDisplay[entite][headLabel] ) continue ;
+          row.append($('<th></th>')
            .html(headLabel));
+      }
     }
     head.append(row);
     return head;
@@ -90,12 +85,9 @@ class AskomicsResultsView {
 
     for (let i=0;i<this.data.length;i++ ) {
       let row = $('<tr></tr>');
-      for ( let j=0;j<=this.orderDisplay.length;j++) {
-        if (! (j in this.orderDisplay) ) continue ;
-        for ( let jname = 0 ; jname< this.orderDisplay[j].length; jname++ ) {
-      //for (let headerName in this.colDisplay ) {
-          let headerName = this.orderDisplay[j][jname];
-          if (! this.colDisplay[headerName]) continue;
+      for (let entite in this.colDisplay ) {
+        for (let headerName in this.colDisplay[entite] ) {
+          if (! this.colDisplay[entite][headerName]) continue;
           let val = this.data[i][headerName];
 
           if ( headerName in this.colWithUri ) {
@@ -103,7 +95,9 @@ class AskomicsResultsView {
             let url = this.data[i]["URI"+headerName];
             row.append($('<td></td>').html($('<a></a>').attr('href',url).attr('target','_blank').text(valWithPrefix)));
           } else {
-            if ( val.startsWith("http://") ) {
+            if (val === undefined) {
+                row.append($('<td></td>').text(""));
+            } else if ( val.startsWith("http://") ) {
               let valWithPrefix = __ihm.getAbstraction().shortRDF(val);
               row.append($('<td></td>').html($('<a></a>').attr('href',val).attr('target','_blank').text(valWithPrefix)));
             } else

@@ -81,8 +81,6 @@ class SourceFileBedTests(unittest.TestCase):
         source_file_bed = SourceFileBed(self.settings, self.request.session, self.request.session['upload_directory'] + '/bed_example.bed')
         turtle = source_file_bed.get_abstraction()
 
-        assert turtle == '#################\n#  Abstraction  #\n#################\n\n'
-
     def test_get_domain_knowledge(self):
         """Test get_domain_knowledge method"""
 

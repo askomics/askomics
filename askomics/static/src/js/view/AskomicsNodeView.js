@@ -342,10 +342,10 @@ class AskomicsNodeView extends AskomicsObjectView {
 
   changeFilter(sparqlid,value) {
     if ( ! this.node.isRegexpMode(sparqlid) ) {
-      this.node.setFilterAttributes(sparqlid,value,'FILTER ( ?'+sparqlid+' = "'+value+'"^^xsd:string )');
+      this.node.setFilterAttributes(sparqlid,value,'FILTER ( str(?'+sparqlid+') = "'+value+'"^^xsd:string )');
     } else {
       //this.node.setFilterAttributes(sparqlid,value,'FILTER ( regex(str(?'+sparqlid+'), "'+value+'", "i" ))');
-      this.node.setFilterAttributes(sparqlid,value,'FILTER ( contains(?'+sparqlid+', "'+value+'"))');
+      this.node.setFilterAttributes(sparqlid,value,'FILTER ( contains(str(?'+sparqlid+'), "'+value+'"))');
     }
   }
 
@@ -770,7 +770,7 @@ class AskomicsNodeView extends AskomicsObjectView {
 
       /* Label Entity as ID attribute */
       //let lab = $("<label></label>").attr("for",elemId).html(node.label);
-      let lab = $("<label></label>").attr("urinode",node.uri).attr("uri",node.uri).attr("for",node.label).html(node.label);
+      let lab = $("<label></label>").attr("urinode",node.uri).attr("uri",node.uri).attr("for",node.label).html("URI");
       node.switchRegexpMode(node.SPARQLid);
 
       mythis.addPanel(0, $('<div></div>')
@@ -782,7 +782,7 @@ class AskomicsNodeView extends AskomicsObjectView {
              .append(mythis.makeRemoveIcon())
              .append(mythis.makeEyeIcon(node))
              .append(mythis.makeRegExpIcon(node.SPARQLid))
-             .append(mythis.makeNegativeMatchIcon(node.SPARQLid))
+          //   .append(mythis.makeNegativeMatchIcon(node.SPARQLid))
              .append(mythis.makeLinkVariableIcon(node.SPARQLid))
              .append(mythis.buildString(node.SPARQLid))
              .append(mythis.buildLinkVariable(node)));

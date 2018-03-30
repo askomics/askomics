@@ -558,7 +558,9 @@ function loadSourceFile(file_elem, pub, headers) {
                   'uris': tags.uris};
 
     service.post(model, function(data) {
-        new AskomicsJobsViewManager().listJobs();
+      new AskomicsJobsViewManager().loadjob().then(function () {
+        new AskomicsJobsViewManager().update_jobview ();
+      });
     });
 
     __ihm.resetStats();
@@ -609,7 +611,9 @@ function loadSourceFileGff(idfile, pub) {
                   'uri': uri};
 
   service.post(model, function(data) {
-    new AskomicsJobsViewManager().listJobs();
+    new AskomicsJobsViewManager().loadjob().then(function () {
+      new AskomicsJobsViewManager().update_jobview ();
+    });
   });
 }
 
@@ -624,7 +628,9 @@ function loadSourceFileTtl(idfile, pub) {
   };
 
   service.post(model, function(data) {
-    new AskomicsJobsViewManager().listJobs();
+    new AskomicsJobsViewManager().loadjob().then(function () {
+      new AskomicsJobsViewManager().update_jobview ();
+    });
   });
 }
 
@@ -654,6 +660,8 @@ function loadSourceFileBed(idfile, pub) {
                 'uri': uri};
 
   service.post(model, function(data) {
-    new AskomicsJobsViewManager().listJobs();
+    new AskomicsJobsViewManager().loadjob().then(function () {
+      new AskomicsJobsViewManager().update_jobview ();
+    });
   });
 }

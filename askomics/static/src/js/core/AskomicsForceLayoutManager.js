@@ -532,7 +532,7 @@ class AskomicsForceLayoutManager {
             //link = new AskomicsLink(linkbase,source,target);
             link = AskomicsObjectBuilder.instanceLink(linkbase,source,target);
             link.id = __ihm.getGraphBuilder().getId();
-            console.log("1URI SUG:"+JSON.stringify(link));
+            //console.log("1URI SUG:"+JSON.stringify(link));
 
             this.links.push(link);
           }
@@ -566,7 +566,7 @@ class AskomicsForceLayoutManager {
             //link = new AskomicsLink(linkbase,source,target);
             link = AskomicsObjectBuilder.instanceLink(linkbase,source,target);
             link.id = __ihm.getGraphBuilder().getId();
-            console.log("2 URI SUG:"+JSON.stringify(link));
+            //console.log("2 URI SUG:"+JSON.stringify(link));
             this.links.push(link);
           }
         }
@@ -846,7 +846,7 @@ class AskomicsForceLayoutManager {
                 .attr("style", "text-anchor:middle; font: 10px sans-serif; cursor: pointer;")
                 .attr("class", function(d) { return "text"+d.getClassSVG();} )
                 .attr("dy", "-5")
-                .attr('id', function(d) { console.log("-------------IDDDIII:"+d.id);return d.getSvgLabelId();})
+                .attr('id', function(d) { return d.getSvgLabelId();})
                 .style("opacity", function(d) {return d.getTextOpacity();})
                 .append("textPath")
                 .attr("xlink:href",function(d) {return "#"+d.id;})
@@ -855,11 +855,11 @@ class AskomicsForceLayoutManager {
                 .text(function(d){return d.label;})
                 .style('display', function(d){ return currentFL.displayObject(d);})
                 .on('click', function(d) { // Mouse down on a link label
-                  console.log("ID D:"+d.id);
-                  for (let u in currentFL.links) {
-                    console.log("-------------");
-                    console.log(JSON.stringify(currentFL.links[u].id));
-                  }
+                //  console.log("ID D:"+d.id);
+                //  for (let u in currentFL.links) {
+                //    console.log("-------------");
+                //    console.log(JSON.stringify(currentFL.links[u].id));
+                //  }
                   if (d != currentFL.selectLink) { //if link is not selected
                     /* user want a new relation contraint betwwenn two node*/
                     //deselect all nodes and links
@@ -870,8 +870,8 @@ class AskomicsForceLayoutManager {
                     currentFL.setSelectLink(d);
                     if ( d.suggested ) {
 
-                      console.log("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD target sug:"+d.target.suggested);
-                      console.log(JSON.stringify(d));
+              //        console.log("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD target sug:"+d.target.suggested);
+              //        console.log(JSON.stringify(d));
                       let ll = [d];
                       __ihm.getGraphBuilder().instanciateLink(ll);
 

@@ -226,7 +226,7 @@ class AskViewTests(unittest.TestCase):
 
         assert {
             'g': 'urn:sparql:test_askomics:jdoe:people_tsv_' + timestamp_people,
-            'count': '79',
+            'count': '85',
             'access': 'public',
             'owner': 'jdoe',
             'date': timestamp_people,
@@ -239,7 +239,7 @@ class AskViewTests(unittest.TestCase):
         assert {
             'g':
             'urn:sparql:test_askomics:jdoe:instruments_tsv_' + timestamp_instrument,
-            'count': '70',
+            'count': '76',
             'access': 'private',
             'owner': 'jdoe',
             'date': timestamp_instrument,
@@ -440,8 +440,7 @@ class AskViewTests(unittest.TestCase):
                 '?URIPeople1 rdf:type <'+self.settings['askomics.prefix']+'People>',
                 '?URIPeople1 rdfs:label ?People1'
             ], '']], ''],
-            'variates': ['?People1'],
-            'headers': ['People1'],
+            'variates': { 'People1' : ['?People1'] },
             'removeGraph': []
         }
 

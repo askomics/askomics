@@ -70,8 +70,6 @@ class TripleStoreExplorer(ParamManager):
                     private = False
 
                 nodes.append({'endpoint' : endpoint,'g': g, 'uri': uri, 'label': label, 'public': public, 'private': private})
-        print("=============================================")
-        print(nodes)
         return nodes
 
     def getUserAbstraction(self):
