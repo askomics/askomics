@@ -933,7 +933,11 @@ class AskView(object):
             typeRequest = ''
             tse = TripleStoreExplorer(self.settings, self.request.session)
             variates = []
-            [ variates.extend(listValues) for k,listValues in body["variates"].items()]
+
+            if 'variates' in body:
+                if type(body["variates"])==dict:
+                    [ variates.extend(listValues) for k,listValues in body["variates"].items()]
+
             results, query, typeRequest = tse.build_sparql_query_from_json(
                                                  body["endpoints"],
                                                  body["type_endpoints"],
