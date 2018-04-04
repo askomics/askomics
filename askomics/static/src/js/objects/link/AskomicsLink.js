@@ -33,20 +33,20 @@ class AskomicsLink extends GraphLink {
 
     if ( this.sparql !== undefined ) {
         /* shortcut case */
-        let code_sparql = this.sparql.replace(/%in0%/g,'URI'+this.source.SPARQLid);
-        code_sparql = code_sparql.replace(/%out0%/g,'URI'+this.target.SPARQLid);
+        let code_sparql = this.sparql.replace(/%in0%/g,this.source.SPARQLid);
+        code_sparql = code_sparql.replace(/%out0%/g,this.target.SPARQLid);
         blockConstraintByNode.push(code_sparql);
     } else {
        /* classical link case */
       let rel = this.URI();
-      let target = 'URI'+this.target.SPARQLid;
+      let target = this.target.SPARQLid;
       if ( this.subclassof ) {
-        target = 'SubURI'+this.target.SPARQLid;
-        blockConstraintByNode.push("?"+target+" (rdfs:subClassOf*|rdf:type) "+"?"+'URI'+this.target.SPARQLid+" ");
+        target = 'Sub'+this.target.SPARQLid;
+        blockConstraintByNode.push("?"+target+" (rdfs:subClassOf*|rdf:type) "+"?"+this.target.SPARQLid+" ");
       }
 
       if ( this.transitive ) rel += "+";
-      blockConstraintByNode.push("?"+'URI'+this.source.SPARQLid+" "+rel+" "+"?"+target);
+      blockConstraintByNode.push("?"+this.source.SPARQLid+" "+rel+" "+"?"+target);
 
       if ( this.absentrel ) {
         this.target.sparqlgen = true ;
@@ -61,7 +61,7 @@ class AskomicsLink extends GraphLink {
   instanciateVariateSPARQL(variates) {
     if ('shortcut_output_var' in this ) {
       for (let s in this.shortcut_output_var) {
-        let idx = s.replace(/%in0%/g,'URI'+this.source.SPARQLid);
+        let idx = s.replace(/%in0%/g,this.source.SPARQLid);
         variates.push(idx);
         let idxWithouInterrog = idx.replace("?","");
         this.source.additionalShortcutListDisplayVar[idxWithouInterrog] =  this.shortcut_output_var[s];
