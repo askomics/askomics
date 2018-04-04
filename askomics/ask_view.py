@@ -937,6 +937,8 @@ class AskView(object):
             if 'variates' in body:
                 if type(body["variates"])==dict:
                     [ variates.extend(listValues) for k,listValues in body["variates"].items()]
+                elif type(body["variates"])==list:
+                    variates = body["variates"]
 
             results, query, typeRequest = tse.build_sparql_query_from_json(
                                                  body["endpoints"],

@@ -43,33 +43,33 @@ class AskomicsPositionableLink extends AskomicsLink {
     let s = "?s"+node.id+"_"+secondNode.id+"_"+static_count_AskomicsPositionableLink;
     static_count_AskomicsPositionableLink++;
     if (this.same_ref) {
-      blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ "askomics:IsIncludeInRef"+" "+s );
-      blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ "askomics:IsIncludeInRef"+" "+ s);
+      blockConstraint.push("?"+node.SPARQLid+" "+ "askomics:IsIncludeInRef"+" "+s );
+      blockConstraint.push("?"+secondNode.SPARQLid+" "+ "askomics:IsIncludeInRef"+" "+ s);
     } else {
-      blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ "askomics:IsIncludeIn"+" "+ s);
-      blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ "askomics:IsIncludeIn"+" "+ s);
+      blockConstraint.push("?"+node.SPARQLid+" "+ "askomics:IsIncludeIn"+" "+ s);
+      blockConstraint.push("?"+secondNode.SPARQLid+" "+ "askomics:IsIncludeIn"+" "+ s);
     }
 
     /* manage start and end variates */
     this.startNodeVar = node.att_position_active("start") ;
     if ( this.startNodeVar === null  ) {
       this.startNodeVar = "start_"+node.SPARQLid;
-      blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ "faldo:location/faldo:begin/faldo:position"+" "+ "?"+this.startNodeVar);
+      blockConstraint.push("?"+node.SPARQLid+" "+ "faldo:location/faldo:begin/faldo:position"+" "+ "?"+this.startNodeVar);
     }
     this.endNodeVar = node.att_position_active("end") ;
     if ( this.endNodeVar === null ) {
       this.endNodeVar = "end_"+node.SPARQLid ;
-      blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ "faldo:location/faldo:end/faldo:position"+" "+ "?"+this.endNodeVar);
+      blockConstraint.push("?"+node.SPARQLid+" "+ "faldo:location/faldo:end/faldo:position"+" "+ "?"+this.endNodeVar);
     }
     this.startSecondNodeVar = secondNode.att_position_active("start") ;
     if ( this.startSecondNodeVar === null ) {
       this.startSecondNodeVar = "start_"+secondNode.SPARQLid;
-      blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ "faldo:location/faldo:begin/faldo:position"+" "+ "?"+this.startSecondNodeVar);
+      blockConstraint.push("?"+secondNode.SPARQLid+" "+ "faldo:location/faldo:begin/faldo:position"+" "+ "?"+this.startSecondNodeVar);
     }
     this.endSecondNodeVar =  secondNode.att_position_active("end") ;
     if ( this.endSecondNodeVar === null ) {
       this.endSecondNodeVar = "end_"+secondNode.SPARQLid;
-      blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ "faldo:location/faldo:end/faldo:position"+" "+ "?"+this.endSecondNodeVar );
+      blockConstraint.push("?"+secondNode.SPARQLid+" "+ "faldo:location/faldo:end/faldo:position"+" "+ "?"+this.endSecondNodeVar );
     }
 
      this.setFiltersOperator(blockConstraint,this.startNodeVar,this.startSecondNodeVar,this.endNodeVar,this.endSecondNodeVar);
@@ -81,9 +81,9 @@ class AskomicsPositionableLink extends AskomicsLink {
       let att2 = secondNode.att_position_active("ref") ;
       if ( att1 === null && att2 === null) {
       } else if ( att1 === null ) {
-        blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ "faldo:location/faldo:begin/faldo:reference"+" "+ "?URICat"+att2);
+        blockConstraint.push("?"+node.SPARQLid+" "+ "faldo:location/faldo:begin/faldo:reference"+" "+ "?URICat"+att2);
       } else if ( att2 === null ) {
-        blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ "faldo:location/faldo:begin/faldo:reference"+" "+ "?URICat"+att1);
+        blockConstraint.push("?"+secondNode.SPARQLid+" "+ "faldo:location/faldo:begin/faldo:reference"+" "+ "?URICat"+att1);
       } else {
         blockConstraint.push("FILTER ( "+ "?"+att1+"="+"?"+att2+" )");
       }
@@ -94,12 +94,12 @@ class AskomicsPositionableLink extends AskomicsLink {
       let att1 = node.att_position_active("taxon") ;
       let att2 = secondNode.att_position_active("taxon") ;
       if ( att1 === null && att2 === null) {
-        blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ "askomics:position_taxon"+" "+ "?taxon_"+node.SPARQLid+secondNode.SPARQLid);
-        blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ "askomics:position_taxon"+" "+ "?taxon_"+node.SPARQLid+secondNode.SPARQLid);
+        blockConstraint.push("?"+node.SPARQLid+" "+ "askomics:position_taxon"+" "+ "?taxon_"+node.SPARQLid+secondNode.SPARQLid);
+        blockConstraint.push("?"+secondNode.SPARQLid+" "+ "askomics:position_taxon"+" "+ "?taxon_"+node.SPARQLid+secondNode.SPARQLid);
       } else if ( att1 === null ) {
-        blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ "askomics:position_taxon"+" "+ "?"+att2);
+        blockConstraint.push("?"+node.SPARQLid+" "+ "askomics:position_taxon"+" "+ "?"+att2);
       } else if ( att2 === null ) {
-        blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ "askomics:position_taxon"+" "+ "?"+att1);
+        blockConstraint.push("?"+secondNode.SPARQLid+" "+ "askomics:position_taxon"+" "+ "?"+att1);
       } else {
         blockConstraint.push("FILTER ( "+ "?"+att1+"="+"?"+att2+" )");
       }
@@ -110,12 +110,12 @@ class AskomicsPositionableLink extends AskomicsLink {
       let att1 = node.att_position_active("strand") ;
       let att2 = secondNode.att_position_active("strand") ;
       if ( att1 === null && att2 === null) {
-        blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ "askomics:position_strand"+" "+ "?strand_"+node.SPARQLid+secondNode.SPARQLid);
-        blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ "askomics:position_strand"+" "+ "?strand_"+node.SPARQLid+secondNode.SPARQLid);
+        blockConstraint.push("?"+node.SPARQLid+" "+ "askomics:position_strand"+" "+ "?strand_"+node.SPARQLid+secondNode.SPARQLid);
+        blockConstraint.push("?"+secondNode.SPARQLid+" "+ "askomics:position_strand"+" "+ "?strand_"+node.SPARQLid+secondNode.SPARQLid);
       } else if ( att1 === null ) {
-        blockConstraint.push("?"+'URI'+node.SPARQLid+" "+ "askomics:position_strand"+" "+ "?"+att2);
+        blockConstraint.push("?"+node.SPARQLid+" "+ "askomics:position_strand"+" "+ "?"+att2);
       } else if ( att2 === null ) {
-        blockConstraint.push("?"+'URI'+secondNode.SPARQLid+" "+ "askomics:position_strand"+" "+ "?"+att1);
+        blockConstraint.push("?"+secondNode.SPARQLid+" "+ "askomics:position_strand"+" "+ "?"+att1);
       } else {
         blockConstraint.push("FILTER ( "+ "?"+att1+"="+"?"+att2+" )");
       }
