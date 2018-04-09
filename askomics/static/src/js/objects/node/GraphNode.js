@@ -46,11 +46,13 @@ class GraphNode extends GraphObject {
 
   set actif  (__actif) {
     this._actif = __actif;
+/*
     if ( this._actif ) {
       $("#node_" + this.id).css("opacity","1");
     } else {
       $("#node_" + this.id).css("opacity","0.1");
     }
+*/
   }
   get actif () { return this._actif; }
 

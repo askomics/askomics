@@ -342,7 +342,7 @@ class AskomicsNodeView extends AskomicsObjectView {
 
   changeFilter(sparqlid,value) {
     if ( ! this.node.isRegexpMode(sparqlid) ) {
-      this.node.setFilterAttributes(sparqlid,value,'FILTER ( str(?'+sparqlid+') = "'+value+'"^^xsd:string )');
+      this.node.setFilterAttributes(sparqlid,value,'FILTER ( str(?'+sparqlid+') = "'+value+'" )');
     } else {
       //this.node.setFilterAttributes(sparqlid,value,'FILTER ( regex(str(?'+sparqlid+'), "'+value+'", "i" ))');
       this.node.setFilterAttributes(sparqlid,value,'FILTER ( contains(str(?'+sparqlid+'), "'+value+'"))');
@@ -575,6 +575,7 @@ class AskomicsNodeView extends AskomicsObjectView {
       icon.click(function(d) {
         let sparqlid = $(this).attr('sparqlid');
         let hasSelection = mythis.haveSelectionUserValue(this);
+
         // See value of a input selection
         if (icon.hasClass('fa-eye-slash') ) {
           icon.removeClass('fa-eye-slash');
@@ -717,8 +718,9 @@ class AskomicsNodeView extends AskomicsObjectView {
     }
 
  clean_icon(div_attribute,classIcon,defaultIcon) {
+   if ( div_attribute.find("."+classIcon).length <= 0 ) return ;
 
-   while ( ! div_attribute.find("."+classIcon).hasClass(defaultIcon) ) {
+   if ( ! div_attribute.find("."+classIcon).hasClass(defaultIcon) ) {
      div_attribute.find("."+classIcon).trigger('click');
    }
  }
