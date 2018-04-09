@@ -940,6 +940,9 @@ class AskView(object):
                 elif type(body["variates"])==list:
                     variates = body["variates"]
 
+            if len(variates)<= 0 :
+                raise ValueError("No sparql variable was found !")
+
             results, query, typeRequest = tse.build_sparql_query_from_json(
                                                  body["endpoints"],
                                                  body["type_endpoints"],

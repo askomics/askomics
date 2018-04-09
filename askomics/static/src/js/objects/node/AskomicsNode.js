@@ -235,10 +235,12 @@ class AskomicsNode extends GraphNode {
 
   instanciateVariateSPARQL(variates) {
     /* no sparql had been generated ... */
-    if ( (!this.sparqlgen) || (!this.actif) )
+    if ( (!this.sparqlgen) )
       return ;
 
-    variates.push("?"+this.SPARQLid);
+    if (this.actif) {
+      variates.push("?"+this.SPARQLid);
+    }
 
     for (let uri in this.attributes) {
       let SparqlId = this.attributes[uri].SPARQLid;
