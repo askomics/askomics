@@ -141,13 +141,13 @@ class AskomicsNodeView extends AskomicsObjectView {
               if ( v[URISparqlVarId] == selectedValue[isSelected] ) break ;
             }
             if (isSelected<selectedValue.length) {
-              inp.append($("<option></option>").attr("value", v[URISparqlVarId]).attr("selected", "selected").append(v[labelSparqlVarId]));
+              inp.append($("<option></option>").attr("value", v[URISparqlVarId]).attr("selected", "selected").text(v[labelSparqlVarId]));
             } else {
-              inp.append($("<option></option>").attr("value", v[URISparqlVarId]).append(v[labelSparqlVarId]));
+              inp.append($("<option></option>").attr("value", v[URISparqlVarId]).text(v[labelSparqlVarId]));
             }
           }
         } else if (d.values.length == 1) {
-          inp.append($("<option></option>").attr("value", d.values[0][URISparqlVarId]).append(d.values[0][labelSparqlVarId]));
+          inp.append($("<option></option>").attr("value", d.values[0][URISparqlVarId]).text(d.values[0][labelSparqlVarId]));
         }
         __ihm.hideModal();
     });
