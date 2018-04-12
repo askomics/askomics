@@ -10,6 +10,7 @@
 @prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
 @prefix void: <http://rdfs.org/ns/void#> .
 
+@prefix ensemblterms: <http://rdf.ebi.ac.uk/terms/ensembl/> .
 @prefix up:<http://purl.uniprot.org/core/> .
 
 [] a sd:Service ;
@@ -39,8 +40,10 @@ up:Taxon askomics:entity "true"^^xsd:boolean ;
                       rdfs:label "up:Taxon".
 
 up:Simple_Sequence askomics:entity "true"^^xsd:boolean ;
-         askomics:startPoint "true"^^xsd:boolean ;
-                      rdfs:label "up:Simple_Sequence".
+                   rdfs:label "up:Simple_Sequence".
+
+up:Modified_Sequence askomics:entity "true"^^xsd:boolean ;
+                   rdfs:label "up:Modified_Sequence".
 
 up:scientificName askomics:attribute "true"^^xsd:boolean;
             rdf:type owl:DatatypeProperty ;
@@ -62,6 +65,7 @@ up:organism rdf:type owl:ObjectProperty ;
 up:sequence rdf:type owl:ObjectProperty ;
                      rdfs:label ":sequence"^^xsd:string ;
                      rdfs:domain up:Protein ;
+                     rdfs:domain ensemblterms:EnsemblDBEntry ;
                      rdfs:range up:Simple_Sequence .
 
 #

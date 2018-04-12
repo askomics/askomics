@@ -22,9 +22,9 @@
 
 
 [] a sd:Service ;
-    sd:endpoint <https://www.ebi.ac.uk/rdf/services/sparql> ;
-    dcterms:title "Linked Open Data platform for EBI data";
-    dcterms:description "The EBI RDF platform: linked open data for the life sciences - NCBI - NIH.";
+    sd:endpoint <http://www.genome.jp/sparql/linkdb> ;
+    dcterms:title "LinkDB RDF";
+    dcterms:description "LinkDB.";
     sd:supportedLanguage sd:SPARQL11Query ;
     sd:defaultDataset [
         a sd:Dataset ;
@@ -45,57 +45,10 @@ ensemblterms:protein_coding askomics:entity "true"^^xsd:boolean ;
            askomics:startPoint "true"^^xsd:boolean ;
            rdfs:label "ensemblterms:protein".
 
-bpx:BioSource askomics:entity "true"^^xsd:boolean ;
-              askomics:startPoint "false"^^xsd:boolean ;
-              rdfs:label "bpx:BioSource".
-
-ensemblterms:EnsemblDBEntry askomics:entity "true"^^xsd:boolean ;
-                    askomics:startPoint "true"^^xsd:boolean ;
-                    rdfs:label "ensemblterms:EnsemblDBEntry".
-
-dc:description askomics:attribute "true"^^xsd:boolean .
-dc:identifier askomics:attribute "true"^^xsd:boolean .
-dcterms:identifier askomics:attribute "true"^^xsd:boolean .
-skos:altlabel askomics:attribute "true"^^xsd:boolean .
-
-
 dc:description askomics:attribute "true"^^xsd:boolean ;
    rdf:type owl:DatatypeProperty ;
    rdfs:label "dc:description" ;
    rdfs:domain ensemblterms:protein_coding ;
-   rdfs:range xsd:string .
-
-dc:identifier askomics:attribute "true"^^xsd:boolean ;
-   rdf:type owl:DatatypeProperty ;
-   rdfs:label "dc:identifier" ;
-   rdfs:domain ensemblterms:protein_coding ;
-   rdfs:domain bpx:BioSource ;
-   rdfs:range xsd:string .
-
-dcterms:identifier askomics:attribute "true"^^xsd:boolean ;
-   rdf:type owl:DatatypeProperty ;
-   rdfs:label "dcterms:identifier" ;
-   rdfs:domain ensemblterms:protein_coding ;
-   rdfs:range xsd:string .
-
-skos:altlabel askomics:attribute "true"^^xsd:boolean ;
-   rdf:type owl:DatatypeProperty ;
-   rdfs:label "skos:altlabel" ;
-   rdfs:domain ensemblterms:protein_coding ;
-   rdfs:domain bpx:BioSource ;
-   rdfs:range xsd:string .
-
-skos:prefLabel askomics:attribute "true"^^xsd:boolean ;
-   rdf:type owl:DatatypeProperty ;
-   rdfs:label "skos:prefLabel" ;
-   rdfs:domain ensemblterms:protein_coding ;
-   rdfs:domain bpx:BioSource ;
-   rdfs:range xsd:string .
-
-bpx:name askomics:attribute "true"^^xsd:boolean ;
-   rdf:type owl:DatatypeProperty ;
-   rdfs:label "bpx:name" ;
-   rdfs:domain bpx:BioSource ;
    rdfs:range xsd:string .
 
 
