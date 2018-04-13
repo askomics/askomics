@@ -459,8 +459,6 @@ class IHMLocal {
 
     get_add_endpoints_form() {
 
-        console.log(" +++ get_add_endpoints_form +++");
-
         $('#modalTitle').text('Add Askomics endpoint');
         $('.modal-sm').css('width', '55%');
         $('.modal-body').show();
@@ -633,6 +631,10 @@ class IHMLocal {
                 __ihm.set_upload_form();
             });
 
+            $('#upload_from_url').click(function() {
+                __ihm.set_upload_url();
+            });
+
             $('#upload_from_galaxy').click(function() {
                 __ihm.set_upload_galaxy_form(false, true);
             });
@@ -799,6 +801,46 @@ class IHMLocal {
         ).bind('fileuploaddone', function () {__ihm.get_uploaded_files();});
 
       });
+    }
+
+    load_remote_data(public_d) {
+      let service = new RestServiceJs('load_remote_data_into_graph');
+
+      let model = {
+        url:$('#data-url').val(),
+        public: public_d
+      };
+
+      service.post(model, function(data) {
+        new AskomicsJobsViewManager().loadjob().then(function () {
+          new AskomicsJobsViewManager().update_jobview ();
+        });
+        __ihm.displayModal('Loading data...', '', 'Close');
+      });
+    }
+
+    set_upload_url() {
+
+        let template = AskOmics.templates.add_remote_data;
+        let admin = __ihm.user.isAdmin();
+        let context = {admin: admin};
+        let html = template(context);
+
+        $("#content_integration").empty();
+        $("#content_integration").append(html);
+
+        $('#insert_remote_public_data').click(function()
+        {
+          __ihm.load_remote_data(true);
+          $(this).unbind( "click" );
+        });
+
+        $('#insert_remote_private_data').click(function()
+        {
+          __ihm.load_remote_data(false);
+          $(this).unbind( "click" );
+        });
+
     }
 
     loadUsers() {

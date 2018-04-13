@@ -48,6 +48,7 @@ def main(global_config, **settings):
     config.add_route('load_gff_into_graph', '/load_gff_into_graph')
     config.add_route('load_ttl_into_graph', '/load_ttl_into_graph')
     config.add_route('load_bed_into_graph', '/load_bed_into_graph')
+    config.add_route('load_remote_data_into_graph', '/load_remote_data_into_graph')
 
     config.add_route('prefix_uri', '/prefix_uri')
     config.add_route('preview_ttl', '/preview_ttl')

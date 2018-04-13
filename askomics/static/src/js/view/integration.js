@@ -120,9 +120,11 @@ function displayIntegrationForm(data) {
       let html = template(context);
       $("#content_integration").append(html);
     }
+
     if ( data.files === undefined ) return ;
 
     let dataprefix = updatePrefixListFromDatabase();
+
     for (var i = data.files.length - 1; i >= 0; i--) {
         switch (data.files[i].type) {
             case 'tsv':
@@ -167,11 +169,7 @@ function displayTSVForm(file) {
         file.preview_data = cols2rows(file.preview_data);
     }
 
-    // User is admin if administration element is present in navbar
-    let admin = false;
-    if ($('#administration').length) {
-        admin = true;
-    }
+    let admin = __ihm.user.isAdmin();
 
     let template = AskOmics.templates.csv_form;
 
@@ -185,11 +183,7 @@ function displayTSVForm(file) {
 function displayGffForm(file, taxons) {
     let template = AskOmics.templates.gff_form;
 
-    // User is admin if administration element is present in navbar
-    let admin = false;
-    if ($('#administration').length) {
-        admin = true;
-    }
+    let admin = __ihm.user.isAdmin();
 
     if ( ! ('entities' in file) ) {
       let template = AskOmics.templates.error_message;
@@ -217,11 +211,7 @@ function displayGffForm(file, taxons) {
 function displayTtlForm(file) {
     let template = AskOmics.templates.ttl_form;
 
-    // User is admin if administration element is present in navbar
-    let admin = false;
-    if ($('#administration').length) {
-        admin = true;
-    }
+    let admin = __ihm.user.isAdmin();
 
     let context = {idfile: getIdFile(file),file: file, admin: admin};
     let html = template(context);
@@ -235,10 +225,7 @@ function displayTtlForm(file) {
 function displayBedForm(file, taxons) {
     let template = AskOmics.templates.bed_form;
 
-    let admin = false;
-    if ($('#administration').length) {
-        admin = true;
-    }
+    let admin = __ihm.user.isAdmin();
 
     file.label = file.name.replace(/\.[^/.]+$/, "");
 
@@ -336,7 +323,7 @@ function updatePrefixListUriCsvForm(file,data) {
          curSelect.append($("<option></option>").val(data.__default__).html(data.__default__));
       }
       /* if same type entity than the first column maybe a new uri exist... */
-      // modif Mars 2018 => URI modified by user in first column is available on the other 'relation' column 
+      // modif Mars 2018 => URI modified by user in first column is available on the other 'relation' column
       let first_entity = file.headers[0].substring(file.headers[0].indexOf("@")+1);
       //if (first_entity == entity ) {
         curSelect.click(function() {

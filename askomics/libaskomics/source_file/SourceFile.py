@@ -299,7 +299,6 @@ class SourceFile(ParamManager, HaveCachedProperties):
         if not fp.closed:
             fp.flush() # This is required as otherwise, data might not be really written to the file before being sent to triplestore
 
-        sqb = SparqlQueryBuilder(self.settings, self.session)
         ql = QueryLauncher(self.settings, self.session)
 
         if self.is_defined('askomics.load_url'):

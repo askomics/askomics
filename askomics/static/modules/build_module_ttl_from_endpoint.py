@@ -11,9 +11,15 @@ from SPARQLWrapper import SPARQLWrapper, JSON
 #endpoint="https://dbpedia.org/sparql"
 #descriptionEnpoint="DBPEDIA"
 
-nameEnpoint="BNF"
-endpoint="http://data.bnf.fr/sparql"
-descriptionEnpoint="Bibliotheque nationale de France"
+#nameEnpoint="BNF"
+#endpoint="http://data.bnf.fr/sparql"
+#descriptionEnpoint="Bibliotheque nationale de France"
+
+nameEnpoint="homologene"
+endpoint="http://homologene.bio2rdf.org/sparql"
+descriptionEnpoint="homologene.bio2rdf.org"
+
+
 
 #nameEnpoint="Uniprot"
 #endpoint="http://sparql.uniprot.org/sparql"
@@ -38,7 +44,7 @@ numEntityCutOff = 200
 # upper this threshold the script build an ASKOMICS entities with theses relations
 cutoffNbInstancesEntities = 20
 # Sample of elemntt to find relation
-samplesize = 1000
+samplesize = 50
 # to simulate a random
 offset = random.randint(10,samplesize)
 
