@@ -74,21 +74,22 @@ class SourceFileConvertor(ParamManager):
         :rtype: string
         """
         extension = os.path.splitext(filepath)[1]
+
         if extension.lower() in ('.gff', '.gff2', '.gff3'):
             return 'gff'
-        if extension.lower() in ('.ttl'):
+        if extension.lower() == '.ttl':
             return 'ttl'
         if extension.lower() in ('.rdf-xml','.xml','.rdf'):
             return 'application/rdf+xml'
-        if extension.lower() in ('.owl'):
+        if extension.lower() == '.owl':
             return 'owl'
         if extension.lower() in ('.jsonld','.json'):
             return 'json-ld'
-        if extension.lower() in ('.n3'):
+        if extension.lower() == '.n3':
             return 'n3'
-        if extension.lower() in ('.nt'):
+        if extension.lower() == '.nt':
             return 'nt'
-        if extension.lower() in ('.bed', ):
+        if extension.lower() == '.bed':
             return 'bed'
 
         return 'csv'
