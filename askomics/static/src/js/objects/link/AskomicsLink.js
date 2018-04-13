@@ -55,7 +55,18 @@ class AskomicsLink extends GraphLink {
         blockConstraintByNode = [blockConstraintByNode,'FILTER NOT EXISTS'];
       }
     }
+/*
+    let allBlock = [];
+    for ( let graph in __ihm.localUserAbstraction.uriToGraph[this.uri] ) {
+        //alert(JSON.stringify(__ihm.localUserAbstraction.graphToEndpoint[graph]));
+        let endpoint = __ihm.localUserAbstraction.graphToEndpoint[graph];
+        allBlock.push([blockConstraintByNode,'SERVICE <'+endpoint+'>']);
+    }
+    return [allBlock,''] ;
+*/
+//    alert(JSON.stringify(__ihm.localUserAbstraction.uriToGraph));
     return [blockConstraintByNode,''];
+
   }
 
   instanciateVariateSPARQL(variates) {
