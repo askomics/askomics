@@ -29,7 +29,6 @@ requires = [
     'argparse',
     'glob2',
     'psutil',
-    'rdflib',
     'rdflib-jsonld'
     ]
 
