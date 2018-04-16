@@ -803,11 +803,16 @@ class IHMLocal {
       });
     }
 
-    load_remote_data(public_d) {
+    load_remote_data_onclick(public_d,urlarg) {
       let service = new RestServiceJs('load_remote_data_into_graph');
+      let p = public_d;
+
+      if (! __ihm.user.isAdmin() ) {
+        p = false;
+      }
 
       let model = {
-        url:$('#data-url').val(),
+        url:urlarg,
         public: public_d
       };
 
@@ -817,6 +822,11 @@ class IHMLocal {
         });
         __ihm.displayModal('Loading data...', '', 'Close');
       });
+    }
+
+    load_remote_data(public_d) {
+      let url = $('#data-url').val();
+      load_remote_data_onclick(public_d,url);
     }
 
     set_upload_url() {
