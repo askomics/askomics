@@ -20,16 +20,31 @@
  </td>
 </tr>
 </table>
-
-<p>
-<b>Example:</b>
+<br/>
+<h3 class="header-div">Request on some remote SPARQL endpoints</h3>
+<div class="alert alert-success" role="alert">
 <ul>
-  <li> <a target="_blank" href="https://github.com/askomics/askomics/tree/federation/askomics/static/modules">AskOmics module</a>. Click on a file (and 'raw') and get the URL.</li>
+  <li>Request <a onclick="__ihm.load_remote_data_onclick(true,'https://raw.githubusercontent.com/askomics/askomics/federation/askomics/static/modules/dbpedia.ttl');" href="#jobsview">a subset of DBPedia.</a> with AskOmics</li>
+  <li>Request <a onclick="__ihm.load_remote_data_onclick(true,'https://raw.githubusercontent.com/askomics/askomics/federation/askomics/static/modules/biopax.ttl');" href="#jobsview">on the EBI SPARQL endpoint with the BioPAX format.</a></li>
+  <li>Request <a onclick="__ihm.load_remote_data_onclick(true,'https://raw.githubusercontent.com/askomics/askomics/federation/askomics/static/modules/uniprot.ttl');" href="#jobsview">on the UniProt Sparql endpoint.</a></li>
+  <li>Request <a onclick="__ihm.load_remote_data_onclick(true,'https://raw.githubusercontent.com/askomics/askomics/federation/askomics/static/modules/nextprot.ttl');" href="#jobsview">on the neXtProt SnorQL endpoint.</a></li>
+  <!-- <li>Request <a onclick="__ihm.load_remote_data_onclick(true,'https://raw.githubusercontent.com/askomics/askomics/federation/askomics/static/modules/linkdb.ttl');" href="#jobsview">on the GenomeNet LinkDB RDF.</a></li> -->
+</ul>
+</div>
+<br/>
+<br/>
+<h3 class="header-div">Install some ontologies on your local triplestore</h3>
+<div class="alert alert-success" role="alert">
+<ul>
   <li> Manage a local <a target="_blank" href="http://www.geneontology.org/">Gene Ontology</a> database.
     <ul>
-      <li>http://purl.obolibrary.org/obo/go.owl</li>
-      <li>https://raw.githubusercontent.com/askomics/askomics/federation/askomics/static/modules/go_local.ttl)</li>
+      <li>Insert the GO annotation in your local triplestore : <a onclick="__ihm.load_remote_data_onclick(true,'http://purl.obolibrary.org/obo/go.owl');" href="#jobsview">go.owl at EBI</a></li>
+      <li><a onclick="__ihm.load_remote_data_onclick(true,'https://raw.githubusercontent.com/askomics/askomics/federation/askomics/static/modules/go_local.ttl');" href="#jobsview">Askomics abstraction for a local GO.</a></li>
     </ul>
   </li>
 </ul>
-</p>
+</div>
+<h3 class="header-div">Modules</h3>
+<div class="alert alert-success" role="alert">
+  <a target="_blank" href="https://github.com/askomics/askomics/tree/federation/askomics/static/modules">AskOmics modules available</a>.
+</div>
