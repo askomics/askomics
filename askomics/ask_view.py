@@ -36,6 +36,8 @@ from askomics.libaskomics.rdfdb.FederationQueryLauncher import FederationQueryLa
 from askomics.libaskomics.EndpointManager import EndpointManager
 
 from askomics.libaskomics.source_file.SourceFile import SourceFile
+from askomics.libaskomics.source_file.SourceFileURL import SourceFileURL
+
 from askomics.libaskomics.GalaxyConnector import GalaxyConnector
 
 from pyramid.httpexceptions import (
@@ -658,7 +660,7 @@ class AskView(object):
         try:
             self.data = src_file.persist(self.request.host_url, public)
             jm.updateEndSparqlJob(jobid,"Done",nr=0)
-            jm.updatePreviewJob(jobid,"TSV/CSV integration done. ")
+            jm.updatePreviewJob(jobid,"File integration done. ")
         except Exception as e:
             #rollback
             sqb = SparqlQueryBuilder(self.settings, self.request.session)
@@ -671,6 +673,67 @@ class AskView(object):
             jm.updatePreviewJob(jobid,str(e))
 
         return self.data
+
+    @view_config(route_name='load_remote_data_into_graph', request_method='POST')
+    def load_remote_data_into_graph(self):
+        """
+        Load tabulated files to triple store according to the type of the columns set by the user
+        """
+
+        self.checkAuthSession()
+
+        body = self.request.json_body
+        graph = None
+        jobid = -1
+
+        try:
+            public = None
+
+            if 'public' in body:
+                public = body['public']
+            else:
+                raise ValueError("Dev error: Can not find 'public' POST value.")
+
+            uri = None
+            if 'url' in body:
+                url = body['url']
+            else:
+                raise ValueError("Dev error: Can not find 'uri' POST value.")
+
+            jm = JobManager(self.settings, self.request.session)
+            jobid = jm.saveStartSparqlJob(url)
+
+            # Allow data integration in public graph only if user is an admin
+            if public and not self.request.session['admin']:
+                return 'forbidden'
+
+            src_file = SourceFileURL(self.settings, self.request.session,url);
+            graph = src_file.graph
+
+            self.data = src_file.load_data_from_url(url, public)
+            jm.updateEndSparqlJob(jobid,"Done",nr=0)
+            jm.updatePreviewJob(jobid,"URL integration done. ")
+        except Exception as e:
+            #rollback
+            sqb = SparqlQueryBuilder(self.settings, self.request.session)
+            query_laucher = QueryLauncher(self.settings, self.request.session)
+
+            if graph != None:
+                query_laucher.process_query(sqb.get_drop_named_graph(src_file.graph).query)
+                query_laucher.process_query(sqb.get_delete_metadatas_of_graph(src_file.graph).query)
+
+            traceback.print_exc(file=sys.stdout)
+
+            if jobid != -1:
+                jm = JobManager(self.settings, self.request.session)
+                jm.updateEndSparqlJob(jobid,"Error")
+                jm.updatePreviewJob(jobid,str(e))
+
+            self.data['error'] = str(e)
+            self.request.response.status = 400
+
+        return self.data
+
 
     @view_config(route_name='load_gff_into_graph', request_method='POST')
     def load_gff_into_graph(self):

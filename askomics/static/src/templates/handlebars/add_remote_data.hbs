@@ -1,0 +1,35 @@
+<hr/>
+<h3 class="header-div">Import DATA from an URL</h3>
+<hr/>
+
+<table id="data-table-remotedata" class="table table-striped data-table datasets-table">
+<tr>
+  <td>Url</td>
+  <td><input id="data-url" type="text" class="form-control" value="http://" /></td>
+</tr>
+<tr>
+  <td colspan="2">
+    <div class="btn-group" role="group" aria-label="metadata">
+      <label id="insert_remote_private_data" class="btn btn-default"><i class="fa fa-lock text-primary"></i> Insert as a <i class="text-primary">private</i> dataset</label>
+      <input id="insert_remote_private_data" class="btn hidden" value="Insert in private graph" />
+      {{#if admin}}
+      <label id="insert_remote_public_data" class="btn btn-default"><i class="fa fa-globe text-warning"></i> Insert as a <em class="text-warning">public</em> dataset</label>
+      <input id="insert_remote_public_data" class="btn hidden" value="Insert in public graph" />
+      {{/if}}
+  </div>
+ </td>
+</tr>
+</table>
+
+<p>
+<b>Example:</b>
+<ul>
+  <li> <a target="_blank" href="https://github.com/askomics/askomics/tree/federation/askomics/static/modules">AskOmics module</a>. Click on a file (and 'raw') and get the URL.</li>
+  <li> Manage a local <a target="_blank" href="http://www.geneontology.org/">Gene Ontology</a> database.
+    <ul>
+      <li>http://purl.obolibrary.org/obo/go.owl</li>
+      <li>https://raw.githubusercontent.com/askomics/askomics/federation/askomics/static/modules/go_local.ttl)</li>
+    </ul>
+  </li>
+</ul>
+</p>

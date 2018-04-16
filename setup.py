@@ -28,7 +28,8 @@ requires = [
     'configparser',
     'argparse',
     'glob2',
-    'psutil'
+    'psutil',
+    'rdflib-jsonld'
     ]
 
 setup(name='Askomics',

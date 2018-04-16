@@ -169,6 +169,9 @@ class QueryLauncher(ParamManager):
             data_endpoint.setReturnFormat(JSON)
             try:
                 results = data_endpoint.query().convert()
+                if type(results) != dict :
+                     raise ValueError("JSON is not supported by the sparql endpoint. Askomics can not support this format results :"+type(results).__module__+"."+type(results).__name__)
+
             except urllib.error.URLError as URLError:
                 #url error, we disable the endpoint
                 #raise ValueError(URLError.reason)
@@ -177,7 +180,6 @@ class QueryLauncher(ParamManager):
                     em.disable(externalService['id'],str(URLError.reason))
                 results = []
                 #raise ValueError(URLError.reason)
-
             time1 = time.time()
 
         queryTime = time1 - time0

@@ -33,7 +33,7 @@ class AskomicsHelp {
     <p> \
     <ol>\
     <li><a target='_blank' href='https://github.com/askomics/askomics/wiki/Usage#create-an-account'> Create an account </a></li> \
-    <li><a target='_blank' href='https://github.com/askomics/askomics/wiki/Usage#upload-your-data'> Upload your data (TSV/GFF/TTL) </a></li>\
+    <li><a target='_blank' href='https://github.com/askomics/askomics/wiki/Usage#upload-your-data'> Upload your (local or remote) data (TSV/GFF/TTL/OWL/RDF-XML/N3/NT/JSON-LD) </a></li>\
     <li><a target='_blank' href='https://github.com/askomics/askomics/wiki/Usage#query-your-data'> Query your data </a></li>\
     </p>";
   }

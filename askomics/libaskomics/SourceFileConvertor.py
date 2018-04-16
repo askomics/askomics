@@ -22,6 +22,8 @@ class SourceFileConvertor(ParamManager):
     def __init__(self, settings, session):
 
         ParamManager.__init__(self, settings, session)
+
+        self.manage_rdf_format = ['application/rdf+xml','owl','rdf','n3','nt','json-ld']
         self.log = logging.getLogger(__name__)
 
     def get_source_files(self, selectedFiles, forced_type=None, uri_set=None):
@@ -48,10 +50,15 @@ class SourceFileConvertor(ParamManager):
                     files.append(SourceFileGff(self.settings, self.session, path, uri_set=uri_set))
                 elif file_type == 'ttl' or forced_type == 'ttl':
                     files.append(SourceFileTtl(self.settings, self.session, path))
+                elif file_type in self.manage_rdf_format or forced_type in self.manage_rdf_format:
+                    #### TODO: mnage *** forced_type ***
+                    files.append(SourceFileTtl(self.settings, self.session, path, file_type))
                 elif file_type == 'bed' or forced_type == 'bed':
                     files.append(SourceFileBed(self.settings, self.session, path, uri_set=uri_set))
                 elif file_type == 'csv' or forced_type == 'csv':
                     files.append(SourceFileTsv(self.settings, self.session, path, int(self.settings["askomics.overview_lines_limit"]), uri_set=uri_set))
+                else:
+                    raise Exception("AskOmics manage only rdf format file: "+str(self.manage_rdf_format)+ " file_type:"+file_type)
             except Exception as inst:
                 raise Exception(str(inst)+" file:"+filename)
 
@@ -67,11 +74,22 @@ class SourceFileConvertor(ParamManager):
         :rtype: string
         """
         extension = os.path.splitext(filepath)[1]
+
         if extension.lower() in ('.gff', '.gff2', '.gff3'):
             return 'gff'
-        if extension.lower() in ('.ttl', '.rdf'):
+        if extension.lower() == '.ttl':
             return 'ttl'
-        if extension.lower() in ('.bed', ):
+        if extension.lower() in ('.rdf-xml','.xml','.rdf'):
+            return 'application/rdf+xml'
+        if extension.lower() == '.owl':
+            return 'owl'
+        if extension.lower() in ('.jsonld','.json'):
+            return 'json-ld'
+        if extension.lower() == '.n3':
+            return 'n3'
+        if extension.lower() == '.nt':
+            return 'nt'
+        if extension.lower() == '.bed':
             return 'bed'
 
         return 'csv'

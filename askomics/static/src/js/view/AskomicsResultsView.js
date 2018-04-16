@@ -2,36 +2,20 @@
 
 class AskomicsResultsView {
   constructor(data,variates) {
+
     this.data = data ;
     this.variates = variates ;
-
-    //to put href attribute when uri
-    this.colWithUri             = {};
     //uri by default is undisplayed
     this.colDisplay             = {};
 
     //detect node vs attribute
     for (let entite in this.variates) {
-      this.colDisplay[entite] = [];
-      for (let i=0;i<this.variates[entite].length;i++) {
-        let nameCol = this.variates[entite][i].replace(/^\?/,"");
-
-        if (this.variates[entite][i].startsWith("?URI")) {
-          let variable = this.variates[entite][i].replace("?URI","");
-          this.colWithUri[variable] = true ;
-          this.colDisplay[entite][nameCol] = false ;
-        } else {
+      if (this.variates[entite].length>0) {
+        this.colDisplay[entite] = {};
+        for (let i=0;i<this.variates[entite].length;i++) {
+          let nameCol = this.variates[entite][i].replace(/^\?/,"");
           this.colDisplay[entite][nameCol] = true ;
         }
-      }
-    }
-
-    //check if node name is present otherwise URI is displayed.
-    for (let entite in this.colDisplay) {
-      for (let v in this.colDisplay[entite]) {
-        if ( this.colDisplay[entite][v] ) continue;
-        let namenode = v.replace(/^URI/,"");
-        if ( ! (namenode in this.colDisplay[entite]) ) this.colDisplay[entite][v] = true;
       }
     }
   }
@@ -65,6 +49,11 @@ class AskomicsResultsView {
     let head = $('<thead></thead>');
     let row = $('<tr></tr>');
     for (let entite in this.colDisplay ) {
+      row.append($('<th></th>').attr("colspan", Object.keys(this.colDisplay[entite]).length).html(entite));
+    }
+    head.append(row);
+    row = $('<tr></tr>');
+    for (let entite in this.colDisplay ) {
       for (let headLabel in this.colDisplay[entite] ) {
         if ( ! this.colDisplay[entite][headLabel] ) continue ;
           row.append($('<th></th>')
@@ -87,22 +76,15 @@ class AskomicsResultsView {
       let row = $('<tr></tr>');
       for (let entite in this.colDisplay ) {
         for (let headerName in this.colDisplay[entite] ) {
-          if (! this.colDisplay[entite][headerName]) continue;
           let val = this.data[i][headerName];
 
-          if ( headerName in this.colWithUri ) {
+          if (val === undefined) {
+              row.append($('<td></td>').text(""));
+          } else if ( val.startsWith("http://") ) {
             let valWithPrefix = __ihm.getAbstraction().shortRDF(val);
-            let url = this.data[i]["URI"+headerName];
-            row.append($('<td></td>').html($('<a></a>').attr('href',url).attr('target','_blank').text(valWithPrefix)));
-          } else {
-            if (val === undefined) {
-                row.append($('<td></td>').text(""));
-            } else if ( val.startsWith("http://") ) {
-              let valWithPrefix = __ihm.getAbstraction().shortRDF(val);
-              row.append($('<td></td>').html($('<a></a>').attr('href',val).attr('target','_blank').text(valWithPrefix)));
-            } else
-              row.append($('<td></td>').text(val));
-          }
+            row.append($('<td></td>').html($('<a></a>').attr('href',val).attr('target','_blank').text(valWithPrefix)));
+          } else
+            row.append($('<td></td>').text(val));
         }
       }
       body.append(row);
