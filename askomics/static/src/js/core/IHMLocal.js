@@ -661,7 +661,7 @@ class IHMLocal {
             title = 'Get a dataset from Galaxy';
             radio = true;
             input_type = 'checkbox';
-            allowed_files = ['tabular', 'ttl', 'gff', 'gff3', 'gff2', 'bed'];
+            allowed_files = ['tabular', 'tsv' ,'ttl', 'gff', 'gff3', 'gff2', 'bed'];
         }else{
             // Query file upload
             title = 'Get a query from Galaxy';
