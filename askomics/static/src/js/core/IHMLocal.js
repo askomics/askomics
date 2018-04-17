@@ -813,7 +813,7 @@ class IHMLocal {
 
       let model = {
         url:urlarg,
-        public: public_d
+        public: p
       };
 
       service.post(model, function(data) {
