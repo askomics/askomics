@@ -642,22 +642,22 @@ class AskView(object):
         forced_type = None
         if 'forced_type' in body:
             forced_type = body['forced_type']
-
-        jm = JobManager(self.settings, self.request.session)
-        jobid = jm.saveStartSparqlJob(file_name)
-
-        # Allow data integration in public graph only if user is an admin
-        if public and not self.request.session['admin']:
-            return 'forbidden'
-
-        sfc = SourceFileConvertor(self.settings, self.request.session)
-        src_file = sfc.get_source_files([ file_name ], forced_type, uri_set=uris)[0]
-        src_file.set_headers(headers)
-        src_file.set_forced_column_types(col_types)
-        src_file.set_disabled_columns(disabled_columns)
-        src_file.set_key_columns(key_columns)
-
+        jobid = -1
         try:
+            # Allow data integration in public graph only if user is an admin
+            if public and not self.request.session['admin']:
+                raise ValueError("Can not load public data with a non admin account !")
+
+            jm = JobManager(self.settings, self.request.session)
+            jobid = jm.saveStartSparqlJob(file_name)
+
+            sfc = SourceFileConvertor(self.settings, self.request.session)
+            src_file = sfc.get_source_files([ file_name ], forced_type, uri_set=uris)[0]
+            src_file.set_headers(headers)
+            src_file.set_forced_column_types(col_types)
+            src_file.set_disabled_columns(disabled_columns)
+            src_file.set_key_columns(key_columns)
+
             self.data = src_file.persist(self.request.host_url, public)
             jm.updateEndSparqlJob(jobid,"Done",nr=0)
             jm.updatePreviewJob(jobid,"File integration done. ")
@@ -669,8 +669,10 @@ class AskView(object):
             query_laucher.process_query(sqb.get_delete_metadatas_of_graph(src_file.graph).query)
 
             traceback.print_exc(file=sys.stdout)
-            jm.updateEndSparqlJob(jobid,"Error")
-            jm.updatePreviewJob(jobid,str(e))
+            if jobid != -1:
+                jm = JobManager(self.settings, self.request.session)
+                jm.updateEndSparqlJob(jobid,"Error")
+                jm.updatePreviewJob(jobid,str(e))
 
         return self.data
 
@@ -700,12 +702,13 @@ class AskView(object):
             else:
                 raise ValueError("Dev error: Can not find 'uri' POST value.")
 
-            jm = JobManager(self.settings, self.request.session)
-            jobid = jm.saveStartSparqlJob(url)
 
             # Allow data integration in public graph only if user is an admin
             if public and not self.request.session['admin']:
-                return 'forbidden'
+                raise ValueError("Can not import public data with a non admin account !")
+
+            jm = JobManager(self.settings, self.request.session)
+            jobid = jm.saveStartSparqlJob(url)
 
             src_file = SourceFileURL(self.settings, self.request.session,url);
             graph = src_file.graph
@@ -759,20 +762,22 @@ class AskView(object):
         if 'forced_type' in body:
             forced_type = body['forced_type']
 
-        jm = JobManager(self.settings, self.request.session)
-        jobid = jm.saveStartSparqlJob(file_name)
-
-        # Allow data integration in public graph only if user is an admin
-        if public and not self.request.session['admin']:
-            return 'forbidden'
-
-        sfc = SourceFileConvertor(self.settings, self.request.session)
-        src_file_gff = sfc.get_source_files( [file_name], forced_type, uri_set={ 0 : uri } )[0]
-
-        src_file_gff.set_taxon(taxon)
-        src_file_gff.set_entities(entities)
+        jobid = -1
 
         try:
+            # Allow data integration in public graph only if user is an admin
+            if public and not self.request.session['admin']:
+                raise ValueError("Can not import public gff with a non admin account !")
+
+            jm = JobManager(self.settings, self.request.session)
+            jobid = jm.saveStartSparqlJob(file_name)
+
+            sfc = SourceFileConvertor(self.settings, self.request.session)
+            src_file_gff = sfc.get_source_files( [file_name], forced_type, uri_set={ 0 : uri } )[0]
+
+            src_file_gff.set_taxon(taxon)
+            src_file_gff.set_entities(entities)
+
             self.log.debug('--> Parsing GFF')
             src_file_gff.persist(self.request.host_url, public)
             jm.updateEndSparqlJob(jobid,"Done",nr=0)
@@ -786,8 +791,11 @@ class AskView(object):
             query_laucher.process_query(sqb.get_delete_metadatas_of_graph(src_file_gff.graph).query)
 
             traceback.print_exc(file=sys.stdout)
-            jm.updateEndSparqlJob(jobid,"Error")
-            jm.updatePreviewJob(jobid,'Problem when integration of '+file_name+'.</br>'+str(e))
+
+            if jobid != -1:
+                jm = JobManager(self.settings, self.request.session)
+                jm.updateEndSparqlJob(jobid,"Error")
+                jm.updatePreviewJob(jobid,'Problem when integration of '+file_name+'.</br>'+str(e))
 
             self.log.error(str(e))
 
@@ -812,17 +820,19 @@ class AskView(object):
         if 'forced_type' in body:
             forced_type = body['forced_type']
 
-        jm = JobManager(self.settings, self.request.session)
-        jobid = jm.saveStartSparqlJob(file_name)
-
-        # Allow data integration in public graph only if user is an admin
-        if public and not self.request.session['admin']:
-            return 'forbidden'
-
-        sfc = SourceFileConvertor(self.settings, self.request.session)
-        src_file_ttl = sfc.get_source_files( [file_name], forced_type)[0]
+        jobid = -1
 
         try:
+            # Allow data integration in public graph only if user is an admin
+            if public and not self.request.session['admin']:
+                raise ValueError("Can not import public turtle file with a non admin account !")
+
+            jm = JobManager(self.settings, self.request.session)
+            jobid = jm.saveStartSparqlJob(file_name)
+
+            sfc = SourceFileConvertor(self.settings, self.request.session)
+            src_file_ttl = sfc.get_source_files( [file_name], forced_type)[0]
+
             self.data = src_file_ttl.persist(self.request.host_url, public)
             jm.updateEndSparqlJob(jobid,"Done",nr=0)
             jm.updatePreviewJob(jobid,"TTL file integration done. ")
@@ -834,8 +844,11 @@ class AskView(object):
             query_laucher.process_query(sqb.get_drop_named_graph(src_file_ttl.graph).query)
             query_laucher.process_query(sqb.get_delete_metadatas_of_graph(src_file_ttl.graph).query)
 
-            jm.updateEndSparqlJob(jobid,"Error")
-            jm.updatePreviewJob(jobid,'Problem when integration of '+file_name+'.</br>'+str(e))
+            if jobid != -1:
+                jm = JobManager(self.settings, self.request.session)
+                jm.updateEndSparqlJob(jobid,"Error")
+                jm.updatePreviewJob(jobid,'Problem when integration of '+file_name+'.</br>'+str(e))
+
             self.log.error('ERROR: ' + str(e))
 
         self.data['status'] = 'ok'
@@ -862,20 +875,23 @@ class AskView(object):
         if 'forced_type' in body:
             forced_type = body['forced_type']
 
-        # Allow data integration in public graph only if user is an admin
-        if public and not self.request.session['admin']:
-            return 'forbidden'
-
-        sfc = SourceFileConvertor(self.settings, self.request.session)
-        src_file_bed = sfc.get_source_files( [file_name], forced_type, uri_set={ 0 : uri })[0]
-
-        src_file_bed.set_taxon(taxon)
-        src_file_bed.set_entity_name(entity)
-
-        jm = JobManager(self.settings, self.request.session)
-        jobid = jm.saveStartSparqlJob(file_name)
+        jobid = -1
 
         try:
+
+            # Allow data integration in public graph only if user is an admin
+            if public and not self.request.session['admin']:
+                raise ValueError("Can not import public BED file with a non admin account !")
+
+            sfc = SourceFileConvertor(self.settings, self.request.session)
+            src_file_bed = sfc.get_source_files( [file_name], forced_type, uri_set={ 0 : uri })[0]
+
+            src_file_bed.set_taxon(taxon)
+            src_file_bed.set_entity_name(entity)
+
+            jm = JobManager(self.settings, self.request.session)
+            jobid = jm.saveStartSparqlJob(file_name)
+
             self.log.debug('--> Parsing BED')
             src_file_bed.persist(self.request.host_url, public)
             jm.updateEndSparqlJob(jobid,"Done",nr=0)
@@ -889,8 +905,10 @@ class AskView(object):
             query_laucher.process_query(sqb.get_delete_metadatas_of_graph(src_file_bed.graph).query)
 
             traceback.print_exc(file=sys.stdout)
-            jm.updateEndSparqlJob(jobid,"Error")
-            jm.updatePreviewJob(jobid,'Problem when integration of '+file_name+'.</br>'+str(e))
+            if jobid != -1:
+                jm = JobManager(self.settings, self.request.session)
+                jm.updateEndSparqlJob(jobid,"Error")
+                jm.updatePreviewJob(jobid,'Problem when integration of '+file_name+'.</br>'+str(e))
             self.log.error(str(e))
 
         self.data['status'] = 'ok'
@@ -985,14 +1003,16 @@ class AskView(object):
                 persist = True
 
         jobid = -1
-        if persist:
-            jm = JobManager(self.settings, self.request.session)
-            rg = ""
-            if 'requestGraph' in body:
-                rg = body['requestGraph']
-            jobid = jm.saveStartSparqlJob("SPARQL Request",requestGraph=rg,variates=body["variates"])
 
         try:
+            if persist:
+                jm = JobManager(self.settings, self.request.session)
+                rg = ""
+                if 'requestGraph' in body:
+                    rg = body['requestGraph']
+                jobid = jm.saveStartSparqlJob("SPARQL Request",requestGraph=rg,variates=body["variates"])
+
+
             typeRequest = ''
             tse = TripleStoreExplorer(self.settings, self.request.session)
             variates = []
@@ -1042,6 +1062,7 @@ class AskView(object):
             self.data['file'] = ""
 
             if persist:
+                jm = JobManager(self.settings, self.request.session)
                 jm.updateEndSparqlJob(jobid,"Error "+typeRequest)
                 jm.updatePreviewJob(jobid,str(e))
 
@@ -1362,7 +1383,8 @@ class AskView(object):
 
         # Denny access for non loged users or non admin users
         if self.request.session['username'] == '':
-            return 'forbidden'
+            self.data['error'] = 'Need a connexion !'
+            return self.data
 
         body = self.request.json_body
         url = body['url']
