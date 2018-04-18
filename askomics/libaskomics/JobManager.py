@@ -95,6 +95,9 @@ class JobManager(ParamManager):
 
     def updatePreviewJob(self,jobid,preview):
 
+        if type(preview) != str:
+            raise ValueError("updatePreviewJob : wrong type for the preview :"+str(type(preview)))
+
         conn = sqlite3.connect(self.pathdb,uri=True)
         c = conn.cursor()
         preview = preview.replace("'","&#39;")
