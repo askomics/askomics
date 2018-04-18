@@ -2,6 +2,7 @@ from askomics.libaskomics.ParamManager import ParamManager
 
 import logging
 import sqlite3
+import urllib.parse
 
 class JobManager(ParamManager):
     """
@@ -41,7 +42,7 @@ class JobManager(ParamManager):
         conn = sqlite3.connect(self.pathdb,uri=True)
         c = conn.cursor()
 
-        requestGraph = ParamManager.encode(requestGraph)
+        requestGraph = urllib.parse.quote(requestGraph)
         variates = ParamManager.encode(str(variates))
 
         reqSql = "INSERT INTO jobs VALUES ("\
@@ -135,7 +136,7 @@ class JobManager(ParamManager):
                 if row['file'] != None :
                     d['file'] = row['file']
                 d['preview'] = row['preview']
-                d['requestGraph'] = ParamManager.decode(row['requestGraph'])
+                d['requestGraph'] = urllib.parse.unquote(row['requestGraph'])
                 d['variates'] = eval(ParamManager.decode(row['variates']))
                 d['nr'] = row['nr']
 
