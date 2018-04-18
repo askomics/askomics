@@ -114,6 +114,9 @@ Then, test can be run with
 ```
 ./venv/bin/python setup.py nosetests -a '!galaxy'
 ```
+##### Target a single file test
+
+./venv/bin/python setup.py nosetests -a '!galaxy' --tests askomics/test/askView_test.py 
 
 ##### With a html report coverage
 

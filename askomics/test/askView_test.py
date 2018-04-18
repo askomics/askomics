@@ -12,6 +12,7 @@ from pyramid.paster import get_appsettings
 from askomics.libaskomics.TripleStoreExplorer import TripleStoreExplorer
 from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
 from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
+from askomics.libaskomics.EndpointManager import EndpointManager
 from askomics.ask_view import AskView
 
 
@@ -46,6 +47,8 @@ class AskViewTests(unittest.TestCase):
 
         self.request.host_url = 'http://localhost:6543'
 
+        self.request.json_body = {}
+
         # Create the user dir if not exist
         self.temp_directory = self.settings['askomics.files_dir'] + '/upload/' + self.request.session['username']
         if not os.path.isdir(self.temp_directory):
@@ -64,6 +67,9 @@ class AskViewTests(unittest.TestCase):
 
         self.askview = AskView(self.request)
         self.askview.settings = self.settings
+
+        em = EndpointManager(self.settings, self.request.session)
+        em.drop()
 
     def getKeyNode(self,node):
         return node['uri']
@@ -119,9 +125,147 @@ class AskViewTests(unittest.TestCase):
 
     def test_statistics(self):
 
-        #TODO: do the test when ofilangi has repaired the function.
-        pass
+        # empty tps
+        self.tps.clean_up()
 
+        # load a test
+        timestamp_people = self.tps.load_public_people()
+        timestamp_instrument = self.tps.load_instruments()
+        self.askview.statistics()
+
+    def test_add_endpoint(self):
+
+            # empty tps
+            self.tps.clean_up()
+            try:
+                self.askview.add_endpoint()
+                assert False
+            except Exception as e:
+                assert True
+            self.request.json_body['name'] = 'testendp'
+            try:
+                self.askview.add_endpoint()
+                assert False
+            except Exception as e:
+                assert True
+
+            self.request.json_body['url'] = 'https://dbpedia.org/sparql'
+            try:
+                self.askview.add_endpoint()
+                assert False
+            except Exception as e:
+                assert True
+
+            self.request.json_body['auth'] = 'bidon'
+            try:
+                self.askview.add_endpoint()
+                assert False
+            except Exception as e:
+                assert True
+
+            self.request.json_body['auth'] = 'basic'
+            try:
+               self.askview.add_endpoint()
+               assert True
+            except Exception as e:
+               assert False
+
+    def test_zenable_endpoint(self):
+
+            # empty tps
+            self.tps.clean_up()
+            self.request.json_body['name'] = 'testendp'
+            self.request.json_body['url'] = 'https://dbpedia.org/sparql'
+            self.request.json_body['auth'] = 'basic'
+
+            try:
+                self.askview.add_endpoint()
+                assert True
+            except Exception as e:
+                assert False
+
+            try:
+                self.askview.enable_endpoints()
+                assert False
+            except Exception as e:
+                assert True
+
+            self.request.json_body['id'] = 1
+            try:
+                self.askview.enable_endpoints()
+                assert False
+            except Exception as e:
+                assert True
+
+            self.request.json_body['enable'] = True
+            try:
+                self.askview.enable_endpoints()
+                assert True
+            except Exception as e:
+                assert False
+            self.request.json_body['enable'] = False
+            try:
+                self.askview.enable_endpoints()
+                assert True
+            except Exception as e:
+                assert False
+
+            self.tps.clean_up()
+
+    def test_zdelete_endpoint(self):
+
+            # empty tps
+            self.tps.clean_up()
+            self.request.json_body['name'] = 'testendp'
+            self.request.json_body['url'] = 'https://dbpedia.org/sparql'
+            self.request.json_body['auth'] = 'basic'
+
+            try:
+                self.askview.add_endpoint()
+                assert True
+            except Exception as e:
+                assert False
+
+            try:
+                self.askview.delete_endpoints()
+                assert False
+            except Exception as e:
+                assert True
+
+            self.request.json_body['endpoints'] = 'testendp'
+            try:
+                self.askview.delete_endpoints()
+                assert True
+            except Exception as e:
+                print(e)
+                assert False
+
+    def test_list_endpoint(self):
+
+            # empty tps
+            self.tps.clean_up()
+            self.request.json_body['name'] = 'testendp'
+            self.request.json_body['url'] = 'https://dbpedia.org/sparql'
+            self.request.json_body['auth'] = 'basic'
+
+            try:
+                self.askview.add_endpoint()
+                assert True
+            except Exception as e:
+                assert False
+
+            self.askview.list_endpoints()
+
+    def test_guess_csv_header_type(self):
+
+        self.tps.clean_up()
+        try:
+            self.askview.guess_csv_header_type()
+            assert False
+        except Exception as e:
+            assert True
+        self.request.json_body['filename'] = 'people.tsv'
+        self.askview.guess_csv_header_type()
 
     def test_empty_database(self):
         """Test the empty_database method
@@ -288,6 +432,143 @@ class AskViewTests(unittest.TestCase):
 
         assert data == expected
 
+        self.request.json_body = ['transcript.tsv']
+
+        data = self.askview.source_files_overview()
+
+        expected = {
+            "files": [
+                {
+                    "name": "transcript.tsv",
+                    "headers": [
+                        "transcript",
+                        "taxon",
+                        "chromosomeName",
+                        "start",
+                        "end",
+                        "strand",
+                        "biotype"
+                        ],
+                    "column_types": [
+                        "entity_start",
+                        "taxon",
+                        "ref",
+                        "start",
+                        "end",
+                        "strand",
+                        "category"
+                        ],
+                    "preview_data": [
+                        [
+                        "AT3G10490","AT3G13660","AT3G51470","AT3G10460","AT3G22640","AT1G33615","AT5G41905","AT1G57800","AT1G49500","AT5G35334"
+                        ],
+                        [
+                        "Arabidopsis_thaliana","Arabidopsis_thaliana","Arabidopsis_thaliana","Arabidopsis_thaliana","Arabidopsis_thaliana","Arabidopsis_thaliana","Arabidopsis_thaliana","Arabidopsis_thaliana","Arabidopsis_thaliana","Arabidopsis_thaliana"
+                        ],
+                        [
+                        "At3","At3","At3","At3","At3","At1","At5","At1","At1","At5"
+                        ],
+                        [
+                        "3267835","4464908","19097787","3255800","8011724","12193325","16775524","21408623","18321295","13537917"
+                        ],
+                        [
+                        "3270883","4465586","19099275","3256439","8013902","12194374","16775658","21412283","18322284","13538984"
+                        ],
+                        [
+                        "plus",
+                        "plus",
+                        "minus",
+                        "plus",
+                        "minus",
+                        "minus",
+                        "minus",
+                        "minus",
+                        "minus",
+                        "plus"
+                        ],
+                        [
+                        "protein_coding",
+                        "protein_coding",
+                        "protein_coding",
+                        "protein_coding",
+                        "protein_coding",
+                        "ncRNA",
+                        "miRNA",
+                        "protein_coding",
+                        "protein_coding",
+                        "transposable_element"
+                        ]
+                    ],
+                    "type": "tsv"
+                    }
+                ],
+                "taxons": []
+            }
+
+        assert data == expected
+
+        self.request.json_body = ['bed_example.bed']
+        data = self.askview.source_files_overview()
+
+        self.request.json_body = ['turtle_data.ttl']
+        data = self.askview.source_files_overview()
+
+        self.request.json_body = ['small_data.gff3']
+        data = self.askview.source_files_overview()
+
+        self.request.json_body = ['wrong.gff']
+        data = self.askview.source_files_overview()
+
+    def test_prefix_uri(self):
+        """Test preview_ttl method"""
+        self.tps.clean_up()
+        data = self.askview.prefix_uri()
+
+    def test_load_remote_data_into_graph(self):
+        """Test preview_ttl method"""
+        self.tps.clean_up()
+        try:
+            data = self.askview.load_remote_data_into_graph()
+            assert False
+        except Exception as e:
+            assert True
+        self.request.json_body['public'] = True
+        try:
+            data = self.askview.load_remote_data_into_graph()
+            assert False
+        except Exception as e:
+            assert True
+        self.request.json_body['public'] = False
+        try:
+            data = self.askview.load_remote_data_into_graph()
+            assert False
+        except Exception as e:
+            assert True
+
+        self.request.json_body['public'] = False
+        self.request.json_body['url'] = 'bidonurl.ttl'
+        try:
+            data = self.askview.load_remote_data_into_graph()
+            assert 'error' in data
+        except Exception as e:
+            assert True
+
+        self.request.json_body['public'] = True
+        self.request.session['admin'] = False
+        try:
+            data = self.askview.load_remote_data_into_graph()
+            assert False
+        except Exception as e:
+            assert True
+
+        self.request.session['admin'] = True
+        self.request.json_body['public'] = False
+        self.request.json_body['url'] = 'https://raw.githubusercontent.com/askomics/askomics/federation/askomics/static/modules/dbpedia.ttl'
+        try:
+            data = self.askview.load_remote_data_into_graph()
+            assert True
+        except Exception as e:
+            assert False
 
     def test_preview_ttl(self):
         """Test preview_ttl method"""
@@ -354,6 +635,20 @@ class AskViewTests(unittest.TestCase):
         }
 
         data = self.askview.load_gff_into_graph()
+        self.request.json_body['uri'] = 'Bad uri'
+        data = self.askview.load_gff_into_graph()
+
+        self.request.json_body['forced_type'] = 'bad'
+        data = self.askview.load_gff_into_graph()
+
+        self.request.json_body['public'] = True
+        self.request.session['admin'] = False
+        data = self.askview.load_gff_into_graph()
+
+        self.request.json_body['public'] = True
+        self.request.session['admin'] = True
+        data = self.askview.load_gff_into_graph()
+
         #The test can no be OK because no Askomics serveur is available and so the
         # command LOAD <http://localhost:6543/ttl/jdoe/tmp_small_data.gff3sebeuo2e.ttl> INTO GRAPH <urn:sparql:test_askomics:jdoe:small_data.gff3_2017-04-27T14:58:59.676364>
         # can no be work !
@@ -374,11 +669,52 @@ class AskViewTests(unittest.TestCase):
             'method': 'load'
         }
 
+        data = self.askview.load_ttl_into_graph()
+
+        self.request.json_body['forced_type'] = 'bad'
+        data = self.askview.load_ttl_into_graph()
+
+        self.request.json_body['public'] = True
+        self.request.session['admin'] = False
+        data = self.askview.load_ttl_into_graph()
+
         #The load can not be work because none server http run and virtuoso can not find file to http://localhost:6543/file/xxxx.ttl
-        #data = self.askview.load_ttl_into_graph()
+        self.request.json_body['public'] = True
+        self.request.session['admin'] = True
+        data = self.askview.load_ttl_into_graph()
 
-        #assert data == {'status': 'ok'}
+    def test_load_bed_into_graph(self):
+        """Test load_gff_into_graph method
 
+        Load the file turtle_data.ttl and test the results
+        """
+
+        self.tps.clean_up()
+
+        self.request.json_body = {
+            'file_name': 'bed_example.bed',
+            'taxon': 'Arabidopsis_thaliana',
+            'entity_name': 'test',
+            'public': False,
+            'method': 'load'
+        }
+
+        data = self.askview.load_ttl_into_graph()
+
+        self.request.json_body['uri'] = 'test'
+        data = self.askview.load_bed_into_graph()
+
+        self.request.json_body['forced_type'] = 'bad'
+        data = self.askview.load_bed_into_graph()
+
+        self.request.json_body['public'] = True
+        self.request.session['admin'] = False
+        data = self.askview.load_bed_into_graph()
+
+        #The load can not be work because none server http run and virtuoso can not find file to http://localhost:6543/file/xxxx.ttl
+        self.request.json_body['public'] = True
+        self.request.session['admin'] = True
+        data = self.askview.load_bed_into_graph()
 
     def test_get_user_abstraction(self):
         """Test getUser_Abstraction"""
@@ -506,6 +842,39 @@ class AskViewTests(unittest.TestCase):
 
         #TODO:
         pass
+
+    def test_delete_uploaded_files(self):
+        """Test load_gff_into_graph method
+
+        Load the file turtle_data.ttl and test the results
+        """
+
+        self.tps.clean_up()
+        self.askview.delete_uploaded_files()
+        self.request.session['admin'] = True
+        self.askview.delete_uploaded_files()
+        
+    def test_serverinformations(self):
+        """Test load_gff_into_graph method
+
+        Load the file turtle_data.ttl and test the results
+        """
+
+        self.tps.clean_up()
+        self.askview.serverinformations()
+        self.request.session['admin'] = True
+        self.askview.serverinformations()
+
+    def test_cleantmpdirectory(self):
+        """Test load_gff_into_graph method
+
+        Load the file turtle_data.ttl and test the results
+        """
+
+        self.tps.clean_up()
+        self.askview.cleantmpdirectory()
+        self.request.session['admin'] = True
+        self.askview.cleantmpdirectory()
 
     def test_signup(self):
         """Test signup method"""
