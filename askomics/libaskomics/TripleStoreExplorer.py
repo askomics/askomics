@@ -196,8 +196,8 @@ class TripleStoreExplorer(ParamManager):
 
 
                 query_launcher = FederationQueryLauncher(self.settings, self.session,lE)
-
-            results = query_launcher.process_query(sqb.custom_query(fromgraphs, select, query,externalrequest=extreq).query)
+            req = sqb.custom_query(fromgraphs, select, query,externalrequest=extreq).query
+            results = query_launcher.process_query(req)
         else:
             results = []
 

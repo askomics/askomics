@@ -359,6 +359,7 @@
 
       let graphs = {} ;
       let endpoints = {} ;
+      let type_endpoints = {} ;
       for (let g in __ihm.localUserAbstraction.uriToGraph[uri]) {
         if (! (g in graphs)) {
           graphs[g] = 1;
@@ -369,18 +370,20 @@
       for (let g in graphs) {
         let endp = __ihm.localUserAbstraction.graphToEndpoint[g];
         if (! (endp in endpoints)) {
-          endpoints[endp] = __ihm.localUserAbstraction.typeEndpoint[endp];
+          endpoints[endp] = endp ; //__ihm.localUserAbstraction.typeEndpoint[endp];
+          type_endpoints[endp] = __ihm.localUserAbstraction.typeEndpoint[endp];
         }
       }
 
       /* Service endpoints */
       for ( let urlendp in __ihm.localUserAbstraction.classToEndpoint ) {
           if ( uri in __ihm.localUserAbstraction.classToEndpoint[urlendp]) {
-            endpoints[urlendp] = __ihm.localUserAbstraction.typeEndpoint[urlendp];
+            endpoints[urlendp] = urlendp ; //__ihm.localUserAbstraction.typeEndpoint[urlendp];
+            type_endpoints[urlendp] = __ihm.localUserAbstraction.typeEndpoint[urlendp];
           }
       }
 
-      return [Object.keys(endpoints),Object.values(endpoints),Object.keys(graphs)];
+      return [Object.keys(endpoints),Object.values(type_endpoints),Object.keys(graphs)];
     }
 
     /* browse nodes and edges to get graph and endpoints involved */
@@ -391,6 +394,7 @@
 
       let graphs = {} ;
       let endpoints = {} ;
+      let type_endpoints = {} ;
 
       for (let idx=0;idx<dup_node_array.length;idx++) {
         let node = dup_node_array[idx];
@@ -401,6 +405,7 @@
            // console.log("g:"+g);
            // console.log("endp:"+endp);
             endpoints[endp]=endp;
+            type_endpoints[endp] = __ihm.localUserAbstraction.typeEndpoint[endp];
           }
         }
         //console.log("GRAPH--------");
@@ -412,7 +417,8 @@
              // console.log("APPARTIENT A : "+JSON.stringify(__ihm.localUserAbstraction.classToEndpoint[urlendp]));
               if (! (urlendp in endpoints)) {
                 //console.log("1add External Service endpoints:"+urlendp);
-                endpoints[urlendp] = __ihm.localUserAbstraction.typeEndpoint[urlendp];
+                endpoints[urlendp] = urlendp ;//__ihm.localUserAbstraction.typeEndpoint[urlendp];
+                type_endpoints[urlendp] = __ihm.localUserAbstraction.typeEndpoint[urlendp];
               }
             //  console.log("--------");
              // console.log(JSON.stringify(endpoints));
@@ -435,8 +441,9 @@
             if ( link.uri in __ihm.localUserAbstraction.classToEndpoint[urlendp]) {
             //  console.log("link.uri==>"+link.uri);
               if (! (urlendp in endpoints)) {
-              //console.log("2add External Service endpoints:"+urlendp);
-              endpoints[urlendp] = __ihm.localUserAbstraction.typeEndpoint[urlendp];
+                //console.log("2add External Service endpoints:"+urlendp);
+                endpoints[urlendp] = urlendp ;//__ihm.localUserAbstraction.typeEndpoint[urlendp];
+                type_endpoints[urlendp] = __ihm.localUserAbstraction.typeEndpoint[urlendp];
               }
             }
         }
@@ -459,7 +466,7 @@
       console.log("endpoints:"+JSON.stringify(endpoints));
       console.log("graphs:"+JSON.stringify(graphs));
 
-      return [Object.keys(endpoints),Object.values(endpoints),Object.keys(graphs)];
+      return [Object.keys(endpoints),Object.values(type_endpoints),Object.keys(graphs)];
     }
 
     buildConstraintsGraph() {
