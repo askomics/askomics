@@ -1799,44 +1799,48 @@ class AskView(object):
         history = body['history']
         allowed_files = body['allowed_files']
 
-        self.data = {}
+        try:
+            self.data = {}
 
-        # Check if a galaxy is registered
-        security = Security(self.settings, self.request.session, self.request.session['username'], '', '', '')
+            # Check if a galaxy is registered
+            security = Security(self.settings, self.request.session, self.request.session['username'], '', '', '')
 
-        galaxy_auth = security.get_galaxy_infos()
+            galaxy_auth = security.get_galaxy_infos()
 
-        self.log.debug(galaxy_auth)
+            self.log.debug(galaxy_auth)
 
-        if not galaxy_auth:
-            self.data['galaxy'] = False
-            return self.data
+            if not galaxy_auth:
+                self.data['galaxy'] = False
+                return self.data
 
-        # check if the galaxy connection is ok
-        galaxy = GalaxyConnector(self.settings, self.request.session, galaxy_auth['url'], galaxy_auth['key'])
-        if not galaxy.check_galaxy_instance():
-            self.data['error'] = 'Wrong galaxy'
-            self.data['galaxy'] = False
-            return self.data
+            # check if the galaxy connection is ok
+            galaxy = GalaxyConnector(self.settings, self.request.session, galaxy_auth['url'], galaxy_auth['key'])
+            if not galaxy.check_galaxy_instance():
+                self.data['error'] = 'Wrong galaxy'
+                self.data['galaxy'] = False
+                return self.data
 
-        self.data['galaxy'] = True
+            self.data['galaxy'] = True
 
-        # Then, get the datasets
-        results = galaxy.get_datasets_and_histories(allowed_files, history_id=history)
+            # Then, get the datasets
+            results = galaxy.get_datasets_and_histories(allowed_files, history_id=history)
 
-        # Boolean values for handlebars
-        for dataset in results['datasets']:
-            if dataset['state'] == 'ok':
-                dataset['success'] = True
-            elif dataset['state'] == 'queued':
-                dataset['notick'] = False
-                dataset['queued'] = True
-            else:
-                dataset['notick'] = False
-                dataset['error'] = True
+            # Boolean values for handlebars
+            for dataset in results['datasets']:
+                if dataset['state'] == 'ok':
+                    dataset['success'] = True
+                elif dataset['state'] == 'queued':
+                    dataset['notick'] = False
+                    dataset['queued'] = True
+                else:
+                    dataset['notick'] = False
+                    dataset['error'] = True
 
-        self.data['datasets'] = results['datasets']
-        self.data['histories'] = results['histories']
+            self.data['datasets'] = results['datasets']
+            self.data['histories'] = results['histories']
+        except Exception as e:
+            self.data['error'] = str(e)
+
         return self.data
 
     @view_config(route_name='upload_galaxy_files', request_method='POST')
