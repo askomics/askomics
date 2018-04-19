@@ -198,20 +198,21 @@ class SparqlQueryBuilder(ParamManager):
             query += replacement['post_action'] + "\n"
 
         prefixes = self.header_sparql_config(query)
-
         return SparqlQuery(prefixes + query)
 
 
-    def custom_query(self, fromgraph, select, query,externalrequest=False):
+    def custom_query(self, fromgraph, select, query,externalrequest=False,adminrequest=False):
         """
         launch a custom query.
         """
+        exr = externalrequest
+        ar = adminrequest
         self.log.debug('---> custom_query')
         return self.build_query_on_the_fly({
             'from' : fromgraph,
             'select': select,
             'query': query
-        },externalrequest)
+        },externalrequest=exr,adminrequest=ar)
 
     def get_delete_query_string(self, graph):
         """
