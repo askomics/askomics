@@ -74,6 +74,10 @@ class AskViewTests(unittest.TestCase):
     def getKeyNode(self,node):
         return node['uri']
 
+    def test_main(self):
+        import askomics
+        askomics.main(self.config)
+
     def test_start_points(self):
         """Test the start_points method
 
@@ -853,7 +857,7 @@ class AskViewTests(unittest.TestCase):
         self.askview.delete_uploaded_files()
         self.request.session['admin'] = True
         self.askview.delete_uploaded_files()
-        
+
     def test_serverinformations(self):
         """Test load_gff_into_graph method
 

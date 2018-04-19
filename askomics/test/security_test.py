@@ -107,6 +107,52 @@ class SecurityTests(unittest.TestCase):
         assert not security.check_email_in_database()
 
 
+    def test_set_username_by_email(self):
+        self.tps.clean_up()
+        self.tps.add_jdoe_in_users()
+
+        security = Security(self.settings, self.request.session, 'jdoe', 'jdoe@example.com', 'iamjohndoe', 'iamjohndoe')
+        security.set_username_by_email()
+
+    def test_get_owner_of_apikey(self):
+
+        self.tps.clean_up()
+        self.tps.add_jdoe_in_users()
+
+        security = Security(self.settings, self.request.session, 'jdoe', 'jdoe@example.com', 'iamjohndoe', 'iamjohndoe')
+        security.get_owner_of_apikey("test")
+
+    def test_ckeck_key_belong_user(self):
+        self.tps.clean_up()
+        self.tps.add_jdoe_in_users()
+
+        security = Security(self.settings, self.request.session, 'jdoe', 'jdoe@example.com', 'iamjohndoe', 'iamjohndoe')
+        security.ckeck_key_belong_user("test")
+
+    def test_add_del_apikey(self):
+        self.tps.clean_up()
+        self.tps.add_jdoe_in_users()
+
+        security = Security(self.settings, self.request.session, 'jdoe', 'jdoe@example.com', 'iamjohndoe', 'iamjohndoe')
+        security.delete_apikey("test")
+        security.add_apikey("test")
+        security.delete_apikey("test")
+
+    def test_add_del_galaxy(self):
+        self.tps.clean_up()
+        self.tps.add_jdoe_in_users()
+
+        security = Security(self.settings, self.request.session, 'jdoe', 'jdoe@example.com', 'iamjohndoe', 'iamjohndoe')
+
+        try:
+            security.add_galaxy("http://test","test")
+            assert False
+        except Exception as e:
+            assert True
+
+        security.get_galaxy_infos()
+        security.check_galaxy()
+        security.delete_galaxy()
 
     def test_check_email_password(self):
         """Test check_email_password
@@ -176,10 +222,16 @@ class SecurityTests(unittest.TestCase):
         self.tps.clean_up()
 
         security = Security(self.settings, self.request.session, 'jdoe', 'jdoe@example.com', 'iamjohndoe', 'iamjohndoe')
-
+        assert security.get_number_of_users() == 0
         security.persist_user('http://localhost')
 
         assert security.get_number_of_users() == 1
+        #assert security.
+        security = Security(self.settings, self.request.session, 'jdoe2', 'jdoe2@example.com', 'iamjohndoe', 'iamjohndoe')
+
+        security.persist_user('http://localhost')
+
+        assert security.get_number_of_users() == 2
 
 
     def test_send_mails(self):
@@ -250,6 +302,18 @@ class SecurityTests(unittest.TestCase):
         security.set_admin(True)
 
         assert self.request.session['admin']
+
+    def test_set_galaxy(self):
+        """Test set_admin"""
+
+
+        self.tps.clean_up()
+
+        security = Security(self.settings, self.request.session, 'jdoe', '', '', '')
+
+        security.set_galaxy(True)
+
+        assert self.request.session['galaxy']
 
 
     def test_set_blocked(self):

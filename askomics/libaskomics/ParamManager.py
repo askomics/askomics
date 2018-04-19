@@ -223,6 +223,8 @@ class ParamManager(object):
     def get_turtle_template(self,ttl):
 
         #add new prefix if needed
+        if ttl == None:
+            raise ValueError("Turtle is empty.")
 
         regex = re.compile('\s(\w+):')
         listTermPref = regex.findall(ttl)
@@ -261,8 +263,12 @@ class ParamManager(object):
         pref = ":"
         suf  = ""
         if prefix:
+            prefix = prefix.strip()
             if prefix[len(prefix)-1] == ":":
                 pref = prefix
+            elif prefix.startswith("<") and prefix.endswith(">"):
+                pref = prefix[:len(prefix)-1]
+                suf  = ">"
             else:
                 pref = "<" + prefix
                 suf  = ">"
@@ -304,6 +310,9 @@ class ParamManager(object):
     @staticmethod
     def Bool(result):
 
+        if type(result) != str:
+            raise ValueError("Can not convert string to boolean : "+str(result))
+
         if result.lower() == 'false':
             return False
 
@@ -312,8 +321,6 @@ class ParamManager(object):
 
         if result.isdigit():
             return bool(int(result))
-
-        raise ValueError("Can not convert string to boolean : "+str(result))
 
     def send_mails(self, host_url, dests, subject, text):
         import smtplib

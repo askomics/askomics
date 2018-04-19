@@ -68,15 +68,36 @@ class JobManagerTests(unittest.TestCase):
         assert l[0]['state'] == "Hello"
         assert l[0]['file'] == "test.tsv"
 
+        jm.updateEndSparqlJob(jobid,"Hello",file="test.tsv",data={'test': ['t1','t2']})
+        l = jm.listJobs()
+        assert len(l) == 1
+        assert l[0]['state'] == "Hello"
+        assert l[0]['file'] == "test.tsv"
+
         jm.removeJob(jobid)
 
-    def tes_listJobs(self):
+    def test_updatePreviewJob(self):
+        try:
+            jm = JobManager(self.settings, self.request.session)
+            jm.updatePreviewJob(-1,None)
+            assert False
+        except Exception as e:
+            assert True
+
+        jm.updatePreviewJob(-1,"")
+
+    def test_listJobs(self):
         import os
 
         jm = JobManager(self.settings, self.request.session)
-        os.remove(jm.pathdb)
-
         l = jm.listJobs()
+
+        os.remove(jm.pathdb)
+        try:
+            l = jm.listJobs()
+            assert False
+        except Exception as e:
+            assert True
 
     def tes_drop(self):
         import os
