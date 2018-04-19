@@ -8,8 +8,8 @@ class IHMLocal {
     constructor() {
 
       this.chunkSize        =      400000  ;
-      this.sizeFileMaxAdmin =  4000000000  ; // 4Go
-      this.sizeFileMaxUser  =     10000000 ; // 10 Mo
+      this.sizeFileMaxAdmin =  4000000000  ; // 4 Go
+      this.sizeFileMaxUser  =    90000000  ; // 90 Mo
       /* Implement a Singleton */
       if ( __ihm !== undefined ) {
           return __ihm;
