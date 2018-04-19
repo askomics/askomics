@@ -20,6 +20,10 @@ class EndpointManagerTests(unittest.TestCase):
         jm = EndpointManager(self.settings, self.request.session)
         jm.drop()
 
+    def tearDown(self):
+        jm = EndpointManager(self.settings, self.request.session)
+        jm.drop()
+
     def test_saveEndpoint(self):
         jm = EndpointManager(self.settings, self.request.session)
         jm.saveEndpoint("testNameEndpoint","http://www.urlTPS.com",'Digest',True)

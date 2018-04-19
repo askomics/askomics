@@ -12,9 +12,6 @@ from pyramid.paster import get_appsettings
 from askomics.libaskomics.source_file.SourceFile import SourceFile
 from askomics.libaskomics.source_file.SourceFileBed import SourceFileBed
 
-
-
-
 class SourceFileBedTests(unittest.TestCase):
 
 
@@ -65,6 +62,12 @@ class SourceFileBedTests(unittest.TestCase):
 
         source_file_bed = SourceFileBed(self.settings, self.request.session, self.request.session['upload_directory'] + '/bed_example.bed')
         source_file_bed.open_bed()
+        source_file_bed = SourceFileBed(self.settings, self.request.session, self.request.session['upload_directory'] + '/bad.bed')
+        try:
+            source_file_bed.open_bed()
+            assert False
+        except Exception as e:
+            assert True
 
     def test_get_turtle(self):
         """Test get_turtle method"""
@@ -74,17 +77,44 @@ class SourceFileBedTests(unittest.TestCase):
         turtle = source_file_bed.get_turtle()
 
         self.assertIsInstance(turtle, types.GeneratorType)
+        for triple in turtle:
+                pass
+
+        source_file_bed = SourceFileBed(self.settings, self.request.session, self.request.session['upload_directory'] + '/bidon.bed')
+        try:
+            turtle = source_file_bed.get_turtle()
+            for triple in turtle:
+                pass
+            assert False
+        except Exception as e:
+            assert True
+
+        source_file_bed = SourceFileBed(self.settings, self.request.session, self.request.session['upload_directory'] + '/bed_example.bed')
+        source_file_bed.set_taxon('taxon_test')
+        turtle = source_file_bed.get_turtle()
+        for triple in turtle:
+                pass
+        source_file_bed.set_entity_name('name')
+        turtle = source_file_bed.get_turtle()
+        for triple in turtle:
+                pass
+
 
     def test_get_abstraction(self):
         """Test get_abstraction method"""
 
         source_file_bed = SourceFileBed(self.settings, self.request.session, self.request.session['upload_directory'] + '/bed_example.bed')
-        turtle = source_file_bed.get_abstraction()
+        turtle1 = source_file_bed.get_turtle()
+        for triple in turtle1:
+                pass
+        turtle2 = source_file_bed.get_abstraction()
+        #header_ttl = self.get_turtle_template(abstraction_ttl+"\n"+domain_knowledge_ttl)
 
     def test_get_domain_knowledge(self):
         """Test get_domain_knowledge method"""
 
         source_file_bed = SourceFileBed(self.settings, self.request.session, self.request.session['upload_directory'] + '/bed_example.bed')
+        turtle1 = source_file_bed.get_turtle()
+        for triple in turtle1:
+                pass
         turtle = source_file_bed.get_domain_knowledge()
-
-        assert turtle == '######################\n#  Domain knowledge  #\n######################\n\n'
