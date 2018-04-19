@@ -58,7 +58,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
         if self.is_defined('askomics.prefix'):
             pref_uri = self.get_param("askomics.prefix")
 
-        self.uri = [ pref_uri for idx in range(20) ]    
+        self.uri = [ pref_uri for idx in range(20) ]
 
         if uri_set != None:
             for idx,uri in uri_set.items():
@@ -107,25 +107,6 @@ class SourceFile(ParamManager, HaveCachedProperties):
         return the timestamp (use in the tests)
         """
         return self.timestamp
-
-    @cached_property
-    def existing_relations(self):
-        """
-        Fetch from triplestore the existing relations if entities of the same name exist
-
-        :return: a List of relation names
-        :rtype: List
-        """
-        #FIXME: Useless function, always return an empty list
-        self.log.debug("existing_relations")
-        existing_relations = []
-
-        sqg = SparqlQueryGraph(self.settings, self.session)
-        ql = QueryLauncher(self.settings, self.session)
-
-        results = ql.process_query(sqg.get_class_info_from_abstraction(self.headers[0]).query)
-
-        return existing_relations
 
     def persist(self, urlbase, public):
         """
@@ -325,31 +306,6 @@ class SourceFile(ParamManager, HaveCachedProperties):
                 os.remove(fp.name) # Everything ok, remove temp file
 
         return data
-
-    def _print_line_source_file(self,e,filename):
-        from traceback import format_tb, format_exception_only
-        from html import escape
-        import re
-        fexception = format_exception_only(type(e), e)
-        fexception = escape('\n'.join(fexception))
-
-        matchObj = re.search('line\s+([0-9]+):',fexception)
-        errMess = ""
-        if matchObj:
-            linenumber = int(matchObj.group(1))
-            #print(data['error'])
-            #if data["error"] == None :
-            #    data['error'] = ''
-            errMess = "\n<br/><strong>Error line:"+str(linenumber)+"</strong><br/>"
-            errMess += "<pre>"
-            with open(filename, encoding="utf-8", errors="ignore") as f:
-                count = 0
-                for line in f:
-                    count+=1
-                    if abs(linenumber - count) < 10 :
-                        errMess += str(count)+":"+line
-            errMess += "</pre>"
-        return errMess
 
     def _format_exception(self, e, data=None, ctx='loading data'):
         from traceback import format_tb, format_exception_only
