@@ -83,9 +83,16 @@ class EndpointManagerTests(unittest.TestCase):
         listEndp = jm.listEndpoints()
         assert len(listEndp) == 1
         jm.remove("bidon")
-        jm.remove("testNameEndpoint")
+        jm.remove("1")
         listEndp = jm.listEndpoints()
         assert len(listEndp) == 0
+
+    def test_disableUrl(self):
+        jm = EndpointManager(self.settings, self.request.session)
+        jm.disableUrl("bidon","bidon")
+        jm.saveEndpoint("testNameEndpoint","http://www.urlTPS.com",'Digest',True)
+        jm.disableUrl("testNameEndpoint","bidon")
+        jm.remove("1")
 
     def test_raise_SQLException(self):
         jm = EndpointManager(self.settings, self.request.session)
