@@ -820,8 +820,9 @@ class IHMLocal {
         new AskomicsJobsViewManager().loadjob().then(function () {
           new AskomicsJobsViewManager().update_jobview ();
         });
-        __ihm.displayModal('Loading data...', '', 'Close');
       });
+
+      __ihm.displayModal('Loading data...', '', 'Close');
     }
 
     load_remote_data(public_d) {
