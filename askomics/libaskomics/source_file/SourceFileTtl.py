@@ -22,7 +22,11 @@ class SourceFileTtl(SourceFile):
 
     def __init__(self, settings, session, path, file_type='ttl'):
 
-        newfile = self.convert_to_ttl(path,file_type)
+        newfile = path
+        
+        if not file_type == 'ttl':
+            newfile = self.convert_to_ttl(path,file_type)
+
         SourceFile.__init__(self, settings, session, newfile)
 
         self.type = 'ttl'

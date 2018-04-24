@@ -67,7 +67,7 @@ class EndpointManager(ParamManager):
         conn.close()
         return ID
 
-    def enable(self,name):
+    def enable(self,id):
 
         conn = sqlite3.connect(self.pathdb,uri=True)
         c = conn.cursor()
@@ -75,13 +75,13 @@ class EndpointManager(ParamManager):
         reqSql = "UPDATE endpoints SET "\
                 + " enable = 1 ," \
                 + " message = '' " \
-                + " WHERE name = '"+str(name)+"'"
+                + " WHERE id = '"+str(id)+"'"
 
         c.execute(reqSql)
         conn.commit()
         conn.close()
 
-    def disable(self,name,message):
+    def disable(self,id,message):
 
         conn = sqlite3.connect(self.pathdb,uri=True)
         c = conn.cursor()
@@ -89,7 +89,21 @@ class EndpointManager(ParamManager):
         reqSql = "UPDATE endpoints SET "\
                 + " enable = 0 , " \
                 + " message = '"+message+"' " \
-                + " WHERE name = '"+str(name)+"'"
+                + " WHERE id = '"+str(id)+"'"
+
+        c.execute(reqSql)
+        conn.commit()
+        conn.close()
+
+    def disableUrl(self,endp,message):
+
+        conn = sqlite3.connect(self.pathdb,uri=True)
+        c = conn.cursor()
+
+        reqSql = "UPDATE endpoints SET "\
+                + " enable = 0 , " \
+                + " message = '"+message+"' " \
+                + " WHERE url = '"+str(endp)+"'"
 
         c.execute(reqSql)
         conn.commit()
@@ -168,18 +182,19 @@ class EndpointManager(ParamManager):
 
         return data
 
-    def remove(self,name):
-
+    def remove(self,id):
+        print("================================ REMOVE FROM DATABASE ENDPOINT :"+str(id))
         conn = sqlite3.connect(self.pathdb,uri=True)
         c = conn.cursor()
 
-        reqSql = "DELETE FROM endpoints WHERE name = '"+ str(name)+"'"
-
+        reqSql = "DELETE FROM endpoints WHERE id = '"+ str(id)+"'"
+        print(reqSql)
         try:
             c.execute(reqSql)
             conn.commit()
         except sqlite3.OperationalError as e :
             self.log.warn("Jobs database does not exist .")
+            print(e)
 
         conn.close()
 

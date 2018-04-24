@@ -305,16 +305,22 @@ class AskView(object):
         """
 
         """
+        self.data = {}
 
         self.checkAuthSession()
 
-        if 'endpoints' not in self.request.json_body:
-            raise exc.exception_response(404)
+        if 'id_endpoints' not in self.request.json_body:
+            self.data['error'] = 'Devel : id_endpoints value is not defined !'
+            self.request.response.status = 400
+            return self.data
+
+        endpoints = self.request.json_body['id_endpoints']
 
         em = EndpointManager(self.settings, self.request.session)
 
-        for id in self.request.json_body['endpoints']:
-            em.remove(id)
+        for url in endpoints:
+            em.remove(url)
+        ##raise ValueError("ok")
 
     @view_config(route_name='add_endpoint', request_method='POST')
     def add_endpoint(self):
@@ -415,12 +421,16 @@ class AskView(object):
         """
 
         session = {}
+        try:
+            em = EndpointManager(self.settings, self.request.session)
+            session['askomics'] = em.listEndpoints()
 
-        em = EndpointManager(self.settings, self.request.session)
-        session['askomics'] = em.listEndpoints()
+            sqb = SparqlQueryBuilder(self.settings, self.request.session)
+            session['external'] = sqb.getExternalServiceEndpoint()
+        except Exception as e:
+            traceback.print_exc(file=sys.stdout)
+            self.data['error'] = str(e)
 
-        sqb = SparqlQueryBuilder(self.settings, self.request.session)
-        session['external'] = sqb.getExternalServiceEndpoint()
         return session
 
 

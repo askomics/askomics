@@ -10,6 +10,7 @@ import logging
 import urllib.request
 
 from askomics.libaskomics.ParamManager import ParamManager
+from askomics.libaskomics.EndpointManager import EndpointManager
 
 class SPARQLError(RuntimeError):
     """
@@ -170,7 +171,10 @@ class QueryLauncher(ParamManager):
             try:
                 results = data_endpoint.query().convert()
                 if type(results) != dict :
-                     raise ValueError("JSON is not supported by the sparql endpoint. Askomics can not support this format results :"+type(results).__module__+"."+type(results).__name__)
+                    error = "JSON is not supported by the sparql endpoint. Askomics can not support this format results :"+type(results).__module__+"."+type(results).__name__
+                    em = EndpointManager(self.settings, self.session)
+                    em.disableUrl(self.endpoint,error)
+                    results = []
 
             except urllib.error.URLError as URLError:
                 #url error, we disable the endpoint

@@ -423,13 +423,13 @@ class IHMLocal {
                   if ($(this).is(':checked')) {selected.push($(this).attr('name'));}
               });
               let service = new RestServiceJs('delete_endpoints');
-              let model = {'endpoints': selected};
+              let model = {'id_endpoints': selected};
               //show the spinner
               $('#spinner_delete').removeClass('hidden');
               service.post(model, function(data) {
                   __ihm.loadEndpoints();
-                  __ihm.stopSession();
-                  __ihm.resetStats();
+                  //__ihm.stopSession();
+                  //__ihm.resetStats();
               });
           });
 
@@ -820,13 +820,14 @@ class IHMLocal {
         new AskomicsJobsViewManager().loadjob().then(function () {
           new AskomicsJobsViewManager().update_jobview ();
         });
-        __ihm.displayModal('Loading data...', '', 'Close');
       });
+
+      __ihm.displayModal('Loading data...', '', 'Close');
     }
 
     load_remote_data(public_d) {
       let url = $('#data-url').val();
-      load_remote_data_onclick(public_d,url);
+      __ihm.load_remote_data_onclick(public_d,url);
     }
 
     set_upload_url() {

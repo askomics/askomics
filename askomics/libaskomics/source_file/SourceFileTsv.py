@@ -424,7 +424,7 @@ class SourceFileTsv(SourceFile):
             ttl += (" , \n" + indent ).join(map(lambda category : self.encode_to_rdf_uri(category,prefix="askomics:"), categories)) + " .\n"
             for item in categories:
                 if item.strip() != "":
-                    ttl += self.encode_to_rdf_uri(item,prefix="askomics:") + " rdf:type " + self.encode_to_rdf_uri(header,prefix="askomics:") + " ;\n" + len(item) * " " + "  rdfs:label " + self.escape['text'](item,'') + "^^xsd:string .\n"
+                    ttl += self.encode_to_rdf_uri(item,prefix="askomics:") + " rdf:type " + self.encode_to_rdf_uri(header+"CategoryValue",prefix="askomics:") + " ;\n" + len(item) * " " + "  rdfs:label " + self.escape['text'](item,'') + "^^xsd:string .\n"
 
         return ttl
 
