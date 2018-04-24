@@ -67,7 +67,7 @@ class EndpointManager(ParamManager):
         conn.close()
         return ID
 
-    def enable(self,name):
+    def enable(self,id):
 
         conn = sqlite3.connect(self.pathdb,uri=True)
         c = conn.cursor()
@@ -75,12 +75,25 @@ class EndpointManager(ParamManager):
         reqSql = "UPDATE endpoints SET "\
                 + " enable = 1 ," \
                 + " message = '' " \
-                + " WHERE name = '"+str(name)+"'"
+                + " WHERE id = '"+str(id)+"'"
 
         c.execute(reqSql)
         conn.commit()
         conn.close()
 
+    def disable(self,id,message):
+
+        conn = sqlite3.connect(self.pathdb,uri=True)
+        c = conn.cursor()
+
+        reqSql = "UPDATE endpoints SET "\
+                + " enable = 0 , " \
+                + " message = '"+message+"' " \
+                + " WHERE id = '"+str(id)+"'"
+
+        c.execute(reqSql)
+        conn.commit()
+        conn.close()
 
     def disableUrl(self,endp,message):
 
@@ -91,20 +104,6 @@ class EndpointManager(ParamManager):
                 + " enable = 0 , " \
                 + " message = '"+message+"' " \
                 + " WHERE url = '"+str(endp)+"'"
-
-        c.execute(reqSql)
-        conn.commit()
-        conn.close()
-
-    def disable(self,name,message):
-
-        conn = sqlite3.connect(self.pathdb,uri=True)
-        c = conn.cursor()
-
-        reqSql = "UPDATE endpoints SET "\
-                + " enable = 0 , " \
-                + " message = '"+message+"' " \
-                + " WHERE name = '"+str(name)+"'"
 
         c.execute(reqSql)
         conn.commit()

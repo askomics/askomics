@@ -52,7 +52,7 @@ class EndpointManagerTests(unittest.TestCase):
         listActiveEndp = jm.listActiveEndpoints()
         assert len(listActiveEndp) == 0
 
-        jm.enable("testNameEndpoint")
+        jm.enable(1)
         listActiveEndp = jm.listActiveEndpoints()
 
         assert len(listActiveEndp) == 1
@@ -61,7 +61,7 @@ class EndpointManagerTests(unittest.TestCase):
                 and listActiveEndp[0]['endpoint'] == "http://www.urlTPS.com"
                 and listActiveEndp[0]['auth'].lower() == "digest")
 
-        jm.disable("testNameEndpoint","test disable")
+        jm.disable(1,"test disable")
 
         listActiveEndp = jm.listActiveEndpoints()
 

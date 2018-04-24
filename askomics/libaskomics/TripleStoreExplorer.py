@@ -45,7 +45,7 @@ class TripleStoreExplorer(ParamManager):
         ql = MultipleQueryLauncher(self.settings, self.session)
         em = EndpointManager(self.settings, self.session)
 
-        lEndp = em.listEndpoints()
+        lEndp = em.listActiveEndpoints()
         results = ql.process_query(sqg.get_public_start_point().query,lEndp,indexByEndpoint=True)
         r2 = ql.process_query(sqg.get_user_start_point().query,lEndp,indexByEndpoint=True)
 
@@ -85,7 +85,7 @@ class TripleStoreExplorer(ParamManager):
         sqg = SparqlQueryGraph(self.settings, self.session)
         ql = MultipleQueryLauncher(self.settings, self.session)
         em = EndpointManager(self.settings, self.session)
-        lEndp = em.listEndpoints()
+        lEndp = em.listActiveEndpoints()
 
         data['relations'] = ql.process_query(sqg.get_public_abstraction_relation('owl:ObjectProperty').query,lEndp)
         data['relations'] += ql.process_query(sqg.get_user_abstraction_relation('owl:ObjectProperty').query,lEndp)
@@ -207,7 +207,7 @@ class TripleStoreExplorer(ParamManager):
         sqg = SparqlQueryGraph(self.settings, self.session)
         ql = MultipleQueryLauncher(self.settings, self.session)
         em = EndpointManager(self.settings, self.session)
-        rs = ql.process_query(sqg.get_prefix_uri().query,em.listEndpoints())
+        rs = ql.process_query(sqg.get_prefix_uri().query,em.listActiveEndpoints())
         results = {}
         r_buf = {}
 
