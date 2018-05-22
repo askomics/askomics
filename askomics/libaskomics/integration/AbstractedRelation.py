@@ -27,16 +27,24 @@ class AbstractedRelation(object):
     specified class (xsd:string or xsd:numeric) in case of DatatypeProperty.
     """
 
-    def __init__(self, relation_type, identifier, identifier_prefix,rdfs_domain, prefixDomain, rdfs_range, prefixRange):
-        idx = identifier.find("@")
+    def __init__(self, relation_type, identifier, label, identifier_prefix,rdfs_domain, prefixDomain, rdfs_range, prefixRange):
+
         type_range =  identifier
-
+        idx = identifier.find("@")
         if idx > 0:
-            self.label = identifier[0:idx]
+            uridi = identifier[0:idx]
         else:
-            self.label = identifier
+            uridi = identifier
 
-        self.uri = ParamManager.encode_to_rdf_uri(self.label,prefix="askomics:")
+        if label == "":
+            if idx > 0:
+                self.label = identifier[0:idx]
+            else:
+                self.label = identifier
+        else:
+            self.label = label
+
+        self.uri = ParamManager.encode_to_rdf_uri(uridi,prefix="askomics:")
 
         self.rdfs_range = rdfs_range
 
