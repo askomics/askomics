@@ -381,14 +381,19 @@ class SourceFileTsv(SourceFile):
                     rangeRdfs = self.encode_to_rdf_uri(rangeRdfs,prefix=self.uri[key])
 
                 relation_uri = self.headers[key]
+                labelIdx = ""
+
                 if key_type in ('taxon', 'ref', 'strand', 'start', 'end'):
                     relation_uri = 'position_'+key_type
+                    labelIdx  = self.headers[key]
+
+                    if key_type == 'taxon' or key_type == 'ref' or key_type == 'strand':
+                        rangeRdfs = self.encode_to_rdf_uri(key_type+"Category",prefix="askomics:")
+
                 elif key_type == 'category' :
                     rangeRdfs = self.encode_to_rdf_uri(self.headers[key]+"Category",prefix="askomics:")
-                elif key_type == 'taxon' or key_type == 'ref' or key_type == 'strand':
-                    rangeRdfs = self.encode_to_rdf_uri(key_type+"Category",prefix="askomics:")
 
-                ttl += AbstractedRelation(key_type , relation_uri , uriPref, ref_entity, self.uri[0],rangeRdfs,"askomics:").get_turtle()
+                ttl += AbstractedRelation(key_type , relation_uri , labelIdx, uriPref, ref_entity, self.uri[0],rangeRdfs,"askomics:").get_turtle()
 
         # Store the startpoint status
         if self.forced_column_types[0] == 'entity_start':
@@ -425,7 +430,7 @@ class SourceFileTsv(SourceFile):
             for item in categories:
                 if item.strip() != "":
                     ttl += self.encode_to_rdf_uri(item,prefix="askomics:") + " rdf:type " + self.encode_to_rdf_uri(header+"CategoryValue",prefix="askomics:") + " ;\n" + len(item) * " " + "  rdfs:label " + self.escape['text'](item,'') + "^^xsd:string .\n"
-
+            
         return ttl
 
 
