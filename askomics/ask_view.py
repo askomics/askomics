@@ -746,7 +746,6 @@ class AskView(object):
 
         return self.data
 
-
     @view_config(route_name='load_gff_into_graph', request_method='POST')
     def load_gff_into_graph(self):
         """
@@ -774,7 +773,7 @@ class AskView(object):
 
         # Allow data integration in public graph only if user is an admin
         if public and not self.request.session['admin']:
-            raise ValueError("Can not import public gff with a non admin account !")
+            raise ValueError("Cannot import public gff with a non admin account !")
 
         jm = JobManager(self.settings, self.request.session)
         jobid = jm.saveStartSparqlJob(file_name)
@@ -890,7 +889,7 @@ class AskView(object):
 
         # Allow data integration in public graph only if user is an admin
         if public and not self.request.session['admin']:
-            raise ValueError("Can not import public BED file with a non admin account !")
+            raise ValueError("Cannot import public BED file with a non admin account !")
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
         src_file_bed = sfc.get_source_files([file_name], forced_type, uri_set={0: uri})[0]

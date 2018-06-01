@@ -645,9 +645,13 @@ class AskViewTests(unittest.TestCase):
         self.request.json_body['forced_type'] = 'bad'
         data = self.askview.load_gff_into_graph()
 
-        self.request.json_body['public'] = True
-        self.request.session['admin'] = False
-        data = self.askview.load_gff_into_graph()
+        try:
+            self.request.json_body['public'] = True
+            self.request.session['admin'] = False
+            data = self.askview.load_gff_into_graph()
+            assert False  # Expected exception
+        except ValueError:
+            assert True
 
         self.request.json_body['public'] = True
         self.request.session['admin'] = True
@@ -658,9 +662,8 @@ class AskViewTests(unittest.TestCase):
         # can no be work !
         #assert data == {'status': 'ok'}
 
-
     def test_load_ttl_into_graph(self):
-        """Test load_gff_into_graph method
+        """Test load_ttl_into_graph method
 
         Load the file turtle_data.ttl and test the results
         """
@@ -673,22 +676,26 @@ class AskViewTests(unittest.TestCase):
             'method': 'load'
         }
 
-        data = self.askview.load_ttl_into_graph()
+        self.askview.load_ttl_into_graph()
 
         self.request.json_body['forced_type'] = 'bad'
-        data = self.askview.load_ttl_into_graph()
+        self.askview.load_ttl_into_graph()
 
-        self.request.json_body['public'] = True
-        self.request.session['admin'] = False
-        data = self.askview.load_ttl_into_graph()
+        try:
+            self.request.json_body['public'] = True
+            self.request.session['admin'] = False
+            self.askview.load_ttl_into_graph()
+            assert False  # Expected exception
+        except ValueError:
+            assert True
 
-        #The load can not be work because none server http run and virtuoso can not find file to http://localhost:6543/file/xxxx.ttl
+        # The load can't work because no http server is running and virtuoso can not find file to http://localhost:6543/file/xxxx.ttl
         self.request.json_body['public'] = True
         self.request.session['admin'] = True
-        data = self.askview.load_ttl_into_graph()
+        self.askview.load_ttl_into_graph()
 
     def test_load_bed_into_graph(self):
-        """Test load_gff_into_graph method
+        """Test load_bed_into_graph method
 
         Load the file turtle_data.ttl and test the results
         """
@@ -703,22 +710,26 @@ class AskViewTests(unittest.TestCase):
             'method': 'load'
         }
 
-        data = self.askview.load_ttl_into_graph()
+        self.askview.load_ttl_into_graph()
 
         self.request.json_body['uri'] = 'test'
-        data = self.askview.load_bed_into_graph()
+        self.askview.load_bed_into_graph()
 
         self.request.json_body['forced_type'] = 'bad'
-        data = self.askview.load_bed_into_graph()
+        self.askview.load_bed_into_graph()
 
-        self.request.json_body['public'] = True
-        self.request.session['admin'] = False
-        data = self.askview.load_bed_into_graph()
+        try:
+            self.request.json_body['public'] = True
+            self.request.session['admin'] = False
+            self.askview.load_bed_into_graph()
+            assert False  # Expected exception
+        except ValueError:
+            assert True
 
-        #The load can not be work because none server http run and virtuoso can not find file to http://localhost:6543/file/xxxx.ttl
+        # The load can't work because no http server is running and virtuoso can not find file to http://localhost:6543/file/xxxx.ttl
         self.request.json_body['public'] = True
         self.request.session['admin'] = True
-        data = self.askview.load_bed_into_graph()
+        self.askview.load_bed_into_graph()
 
     def test_get_user_abstraction(self):
         """Test getUser_Abstraction"""
@@ -737,7 +748,7 @@ class AskViewTests(unittest.TestCase):
             print(k)
         print(" -- ")
 
-        #FIXME hard to compare wih expected result cause there is a timestamp
+        # FIXME hard to compare wih expected result cause there is a timestamp
         assert len(data) == 8
         assert 'categories' in data
         assert 'endpoints' in data
@@ -752,13 +763,13 @@ class AskViewTests(unittest.TestCase):
         """
 
         """
-        #TODO:
+        # TODO:
         pass
 
     def test_deleteShortcut(self):
         """
         """
-        #TODO:
+        # TODO:
         pass
 
     def test_get_value(self):
