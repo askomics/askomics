@@ -115,8 +115,12 @@ class Security(ParamManager):
 
         result = query_laucher.process_query(sqa.get_password_with_email(self.email).query)
 
-        ts_salt = result[0]['salt']
-        ts_shapw = result[0]['shapw']
+        if len(result) <= 0:
+            ts_salt = ""
+            ts_shapw = ""
+        else:
+            ts_salt = result[0]['salt']
+            ts_shapw = result[0]['shapw']
 
         concat = self.settings["askomics.salt"] + self.passwd + ts_salt
         shapw = hashlib.sha256(concat.encode('utf8')).hexdigest()
