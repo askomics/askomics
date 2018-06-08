@@ -1,6 +1,6 @@
 import os
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 here = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(here, 'README.md')) as f:
@@ -30,20 +30,20 @@ requires = [
     'glob2',
     'psutil',
     'rdflib-jsonld'
-    ]
+]
 
 setup(name='Askomics',
       version='2.0',
       description='Askomics',
       long_description=README + '\n\n' + CHANGES,
       classifiers=[
-        "Programming Language :: Python",
-        "Framework :: Pyramid",
-        "Topic :: Internet :: WWW/HTTP",
-        "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
-        ],
-      maintainer='Olivier Filangi',
-      maintainer_email='olivier.filangi@inra.fr',
+          "Programming Language :: Python",
+          "Framework :: Pyramid",
+          "Topic :: Internet :: WWW/HTTP",
+          "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
+      ],
+      maintainer='Anthony Bretaudeau',
+      maintainer_email='anthony.bretaudeau@inra.fr',
       url='https://github.com/askomics/askomics/',
       keywords='web pyramid pylons',
       packages=find_packages(),
