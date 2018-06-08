@@ -1,0 +1,11 @@
+ID_ATAC_Closest_sds,ID_ATAC_sds,Gene_sds,Distance
+ATAC_closest_1,Region_ATAC_1,CHEK1,54729
+ATAC_closest_2,Region_ATAC_1,EI24,0
+ATAC_closest_3,Region_ATAC_2,DCPS,0
+ATAC_closest_4,Region_ATAC_3,RBBP4,0
+ATAC_closest_5,Region_ATAC_4,AICDA,57450
+ATAC_closest_6,Region_ATAC_5,AICDA,10640
+ATAC_closest_7,Region_ATAC_6,AICDA,31450
+ATAC_closest_8,Region_ATAC_7,CLSPN,0
+ATAC_closest_9,Region_ATAC_8,TM7SF3,31819
+

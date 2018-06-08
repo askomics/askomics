@@ -38,6 +38,7 @@ $(function () {
             headers.push($(this).val());
         });
         loadSourceFile($(event.target).closest('.template-source_file'), false, headers);
+        __ihm.displayModal('Upload TSV file.', '', 'Close');
     });
 
     // Load the tsv file into the public graph
@@ -119,9 +120,11 @@ function displayIntegrationForm(data) {
       let html = template(context);
       $("#content_integration").append(html);
     }
+
     if ( data.files === undefined ) return ;
 
     let dataprefix = updatePrefixListFromDatabase();
+
     for (var i = data.files.length - 1; i >= 0; i--) {
         switch (data.files[i].type) {
             case 'tsv':
@@ -166,11 +169,7 @@ function displayTSVForm(file) {
         file.preview_data = cols2rows(file.preview_data);
     }
 
-    // User is admin if administration element is present in navbar
-    let admin = false;
-    if ($('#administration').length) {
-        admin = true;
-    }
+    let admin = __ihm.user.isAdmin();
 
     let template = AskOmics.templates.csv_form;
 
@@ -184,15 +183,18 @@ function displayTSVForm(file) {
 function displayGffForm(file, taxons) {
     let template = AskOmics.templates.gff_form;
 
-    // User is admin if administration element is present in navbar
-    let admin = false;
-    if ($('#administration').length) {
-        admin = true;
-    }
+    let admin = __ihm.user.isAdmin();
 
     if ( ! ('entities' in file) ) {
       let template = AskOmics.templates.error_message;
-      let context = { message: '['+file.name +']: None entities are defined in this Gff File !' };
+
+      let context = {} ;
+      if ( 'error' in file ) {
+        context = { message: '['+file.name +']: '+file.error };
+      }
+      else
+        context = { message: '['+file.name +']: None entities are defined in this Gff File ' };
+
       let html = template(context);
       $("#content_integration").append(html);
       return;
@@ -209,11 +211,7 @@ function displayGffForm(file, taxons) {
 function displayTtlForm(file) {
     let template = AskOmics.templates.ttl_form;
 
-    // User is admin if administration element is present in navbar
-    let admin = false;
-    if ($('#administration').length) {
-        admin = true;
-    }
+    let admin = __ihm.user.isAdmin();
 
     let context = {idfile: getIdFile(file),file: file, admin: admin};
     let html = template(context);
@@ -227,10 +225,7 @@ function displayTtlForm(file) {
 function displayBedForm(file, taxons) {
     let template = AskOmics.templates.bed_form;
 
-    let admin = false;
-    if ($('#administration').length) {
-        admin = true;
-    }
+    let admin = __ihm.user.isAdmin();
 
     file.label = file.name.replace(/\.[^/.]+$/, "");
 
@@ -304,9 +299,9 @@ function updatePrefixListUriCsvForm(file,data) {
             listAvailableTags[$(this).val()] = 0;
             availableTags.push($(this).val());
           }
-        });
-        $(this).autocomplete({
-          source: availableTags
+          $(this).autocomplete({
+            source: availableTags
+          });
         });
       });
 
@@ -324,12 +319,13 @@ function updatePrefixListUriCsvForm(file,data) {
           data[entity].forEach(function(element) {
             curSelect.append($("<option></option>").val(element).html(element));
           });
-      } else { /* this entity does not exist in database */
+      } else { // this entity does not exist in database
          curSelect.append($("<option></option>").val(data.__default__).html(data.__default__));
       }
       /* if same type entity than the first column maybe a new uri exist... */
+      // modif Mars 2018 => URI modified by user in first column is available on the other 'relation' column
       let first_entity = file.headers[0].substring(file.headers[0].indexOf("@")+1);
-      if (first_entity == entity ) {
+      //if (first_entity == entity ) {
         curSelect.click(function() {
           /* check input uri tag of the current entity definition and propose  */
           let newuri = $('#def-uri-entity-' +idfile).val();
@@ -348,7 +344,7 @@ function updatePrefixListUriCsvForm(file,data) {
                                                    .attr('volatile','true'));
           }
         });
-      }
+      //}
     }
   });
 }
@@ -549,12 +545,12 @@ function loadSourceFile(file_elem, pub, headers) {
                   'uris': tags.uris};
 
     service.post(model, function(data) {
-        new AskomicsJobsViewManager().listJobs();
+      new AskomicsJobsViewManager().loadjob().then(function () {
+        new AskomicsJobsViewManager().update_jobview ();
+      });
     });
 
     __ihm.resetStats();
-
-  new ModulesParametersView().updateModules();
 }
 
 /**
@@ -584,7 +580,14 @@ function loadSourceFileGff(idfile, pub) {
   });
 
   // custom uri
-  let uri = file_elem.find('#def-uri-entity-'+idfile).val();
+  let typeR = file_elem.find('input[name="radio-uri-'+idfile+'"]:checked').val();
+
+  let uri = null;
+  if (typeR == "custom") {
+    uri = file_elem.find('#custom-uri-'+idfile).val();
+    uri = uri.replace("http://","");
+    uri = "http://"+uri;
+  }
 
   let service = new RestServiceJs("load_gff_into_graph");
 
@@ -595,7 +598,9 @@ function loadSourceFileGff(idfile, pub) {
                   'uri': uri};
 
   service.post(model, function(data) {
-    new AskomicsJobsViewManager().listJobs();
+    new AskomicsJobsViewManager().loadjob().then(function () {
+      new AskomicsJobsViewManager().update_jobview ();
+    });
   });
 }
 
@@ -610,7 +615,9 @@ function loadSourceFileTtl(idfile, pub) {
   };
 
   service.post(model, function(data) {
-    new AskomicsJobsViewManager().listJobs();
+    new AskomicsJobsViewManager().loadjob().then(function () {
+      new AskomicsJobsViewManager().update_jobview ();
+    });
   });
 }
 
@@ -640,6 +647,8 @@ function loadSourceFileBed(idfile, pub) {
                 'uri': uri};
 
   service.post(model, function(data) {
-    new AskomicsJobsViewManager().listJobs();
+    new AskomicsJobsViewManager().loadjob().then(function () {
+      new AskomicsJobsViewManager().update_jobview ();
+    });
   });
 }

@@ -1,0 +1,13 @@
+Context	has@Condition
+T1	T1A
+T1	T1K
+T2	T2A
+T2	T2K
+T1A	T1A
+T1K	T1K
+T2A	T2A
+T2K	T2K
+A	T1A
+A	T2A
+K	T1K
+K	T2K

@@ -1,0 +1,79 @@
+<hr/>
+<h3 class="header-div">AskOmics Endpoints</h3>
+<hr/>
+<table id="data-table-endpoints" class="table table-striped data-table datasets-table">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Name</th>
+            <th>Url</th>
+            <th>Auth</th>
+            <th>Message</th>
+            <th>Enable</th>
+        </tr>
+    </thead>
+    <tbody>
+
+        {{#each endpoints}}
+        <tr id="{{this.id}}">
+            <td>
+              {{#if ../admin}}
+                <input class="check_ep check_endpoint" name="{{this.id}}" type="checkbox"></td>
+              {{/if}}
+            <td>{{this.name}}</td>
+            <td>{{this.endpoint}}</td>
+            <td>{{this.auth}}</td>
+            <td>{{this.message}}</td>
+
+            <td>
+            {{#if ../admin}}
+              {{#if this.enable}}
+              <input class="enable-endpoint" type="checkbox" checked>
+                {{else}}
+              <input class="enable-endpoint" type="checkbox">
+              {{/if}}
+
+             {{else}}
+
+              {{#if this.enable}}
+                <input class="enable-endpoint" type="checkbox" disabled checked>
+              {{else}}
+                <input class="enable-endpoint" type="checkbox" disabled>
+              {{/if}}
+
+            {{/if}}
+            </td>
+        </tr>
+        {{/each}}
+    </tbody>
+</table>
+
+{{#if admin}}
+<div class="btn-group" role="group">
+  <button id="delete_endpoints" type="button" class="btn btn-default" disabled><i class="fa fa-trash text-danger"></i> Delete</button>
+  <button id="add_endpoint" type="button" class="btn-uploaded btn btn-default"><i class="fa fa-database text-primary"></i> Add</button>
+</div>
+<i class="hidden fa fa-spinner pulse" id='spinner_delete'></i>
+{{/if}}
+
+<hr/>
+<h3 class="header-div">External Endpoints</h3>
+<hr/>
+<table id="data-table-endpoints" class="table table-striped data-table datasets-table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Url</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#each endpoints_ext}}
+        <tr>
+            <td>{{this.name}}</td>
+            <td>{{this.url}}</td>
+            <td>{{this.description}}</td>
+        </tr>
+        {{/each}}
+    </tbody>
+</table>

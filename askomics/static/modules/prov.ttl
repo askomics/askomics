@@ -1,0 +1,64 @@
+@prefix askomics: <http://www.semanticweb.org/askomics/ontologies/2018/1#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
+@prefix void: <http://www.w3.org/ns/sparql-service-description#> .
+
+@prefix prov: <http://www.w3.org/ns/prov#>.
+
+
+[] a sd:Service ;
+    sd:endpoint <https://???????????????????/sparql> ;
+    dcterms:title "Linked Open Data platform for EBI data";
+    dcterms:description "The platform provides a set of stable services.";
+    sd:supportedLanguage sd:SPARQL11Query ;
+    sd:defaultDataset [
+        a sd:Dataset ;
+        sd:defaultGraph [
+            a sd:Graph ;
+            void:classPartition [ void:class prov:Usage; ];
+            void:classPartition [ void:class prov:Agent; ].
+        ].
+  ].
+
+prov:Usage askomics:entity "true"^^xsd:boolean.
+prov:Agent askomics:entity "true"^^xsd:boolean.
+prov:Agent askomics:startPoint "true"^^xsd:boolean.
+prov:ActivityInfluence askomics:entity "true"^^xsd:boolean.
+prov:ActivityInfluence askomics:startPoint "true"^^xsd:boolean.
+prov:AgentInfluence askomics:entity "true"^^xsd:boolean.
+prov:AgentInfluence askomics:startPoint "true"^^xsd:boolean.
+prov:Derivation askomics:entity "true"^^xsd:boolean.
+prov:Derivation askomics:startPoint "true"^^xsd:boolean.
+prov:Influence askomics:entity "true"^^xsd:boolean.
+prov:Influence askomics:startPoint "true"^^xsd:boolean.
+prov:Activity askomics:entity "true"^^xsd:boolean.
+prov:Activity askomics:startPoint "true"^^xsd:boolean.
+prov:endedAtTime askomics:attribute "true"^^xsd:boolean.
+prov:startedAtTime askomics:attribute "true"^^xsd:boolean.
+prov:EntityInfluence askomics:entity "true"^^xsd:boolean.
+prov:EntityInfluence askomics:startPoint "true"^^xsd:boolean.
+prov:Invalidation askomics:entity "true"^^xsd:boolean.
+prov:Collection askomics:entity "true"^^xsd:boolean.
+prov:Collection askomics:startPoint "true"^^xsd:boolean.
+prov:Start askomics:entity "true"^^xsd:boolean.
+prov:PrimarySource askomics:entity "true"^^xsd:boolean.
+owl:Thing askomics:entity "true"^^xsd:boolean.
+owl:Thing rdfs:label "http://www.w3.org/2002/07/owl#Thing"^^xsd:string.
+prov:Role askomics:entity "true"^^xsd:boolean.
+prov:Plan askomics:entity "true"^^xsd:boolean.
+prov:Attribution askomics:entity "true"^^xsd:boolean.
+prov:End askomics:entity "true"^^xsd:boolean.
+prov:Entity askomics:entity "true"^^xsd:boolean.
+prov:Entity askomics:startPoint "true"^^xsd:boolean.
+prov:generatedAtTime askomics:attribute "true"^^xsd:boolean.
+prov:invalidatedAtTime askomics:attribute "true"^^xsd:boolean.
+prov:Association askomics:entity "true"^^xsd:boolean.
+prov:Association askomics:startPoint "true"^^xsd:boolean.
+prov:Generation askomics:entity "true"^^xsd:boolean.
+prov:Revision askomics:entity "true"^^xsd:boolean.
+prov:Quotation askomics:entity "true"^^xsd:boolean.
+prov:Communication askomics:entity "true"^^xsd:boolean.
+prov:Delegation askomics:entity "true"^^xsd:boolean.

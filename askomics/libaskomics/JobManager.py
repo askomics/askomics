@@ -2,6 +2,7 @@ from askomics.libaskomics.ParamManager import ParamManager
 
 import logging
 import sqlite3
+import urllib.parse
 
 class JobManager(ParamManager):
     """
@@ -28,6 +29,7 @@ class JobManager(ParamManager):
              file text,
              preview string,
              requestGraph string,
+             variates string,
              nr int
              )'''
 
@@ -35,10 +37,13 @@ class JobManager(ParamManager):
         conn.commit()
         conn.close()
 
-    def saveStartSparqlJob(self,typeJob,requestGraph=""):
+    def saveStartSparqlJob(self,typeJob,requestGraph="{}",variates="{}"):
 
         conn = sqlite3.connect(self.pathdb,uri=True)
         c = conn.cursor()
+
+        requestGraph = urllib.parse.quote(requestGraph)
+        variates = ParamManager.encode(str(variates))
 
         reqSql = "INSERT INTO jobs VALUES ("\
                 + "NULL,"     \
@@ -50,6 +55,7 @@ class JobManager(ParamManager):
                 + "''," \
                 + "''," \
                 + "'"+requestGraph+"'," \
+                + "'"+variates+"'," \
                 + "-1" \
                 + ");"
 
@@ -69,7 +75,7 @@ class JobManager(ParamManager):
         d = 'NULL'
 
         if data:
-            d = "'"+json.dumps(data)+"'"
+            d = "'"+ParamManager.encode(json.dumps(data, ensure_ascii=False))+"'"
 
         f = 'NULL'
         if file:
@@ -82,12 +88,15 @@ class JobManager(ParamManager):
                 + " data = "+ d +"," \
                 + " file = "+ f \
                 + " WHERE jobID = "+str(jobid)
-        print(reqSql)
+
         c.execute(reqSql)
         conn.commit()
         conn.close()
 
     def updatePreviewJob(self,jobid,preview):
+
+        if type(preview) != str:
+            raise ValueError("updatePreviewJob : wrong type for the preview :"+str(type(preview)))
 
         conn = sqlite3.connect(self.pathdb,uri=True)
         c = conn.cursor()
@@ -113,7 +122,7 @@ class JobManager(ParamManager):
 
             c = conn.cursor()
 
-            reqSql = """ SELECT jobid, type, state, start, end, data, file, preview, requestGraph, nr FROM jobs"""
+            reqSql = """ SELECT jobid, type, state, start, end, data, file, preview, requestGraph, variates, nr FROM jobs"""
 
             c.execute(reqSql)
             rows = c.fetchall()
@@ -126,11 +135,12 @@ class JobManager(ParamManager):
                 d['start'] = row['start']
                 d['end'] = row['end']
                 if row['data'] != None :
-                    d['data'] = json.loads(row['data'])
+                    d['data'] = json.loads(ParamManager.decode(row['data']))
                 if row['file'] != None :
                     d['file'] = row['file']
                 d['preview'] = row['preview']
-                d['requestGraph'] = row['requestGraph']
+                d['requestGraph'] = urllib.parse.unquote(row['requestGraph'])
+                d['variates'] = eval(ParamManager.decode(row['variates']))
                 d['nr'] = row['nr']
 
                 data.append(d)

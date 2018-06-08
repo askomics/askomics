@@ -327,10 +327,14 @@ var graphFuncMenu = function(menu) {
 
   let listGraph = __ihm.getAbstraction().listGraphAvailable();
 
-  $.each(listGraph, function(g) {
-    let graph = g;
-    let li = buildLiView(graph,__ihm.graphname(graph).name,true);
-    li.on('click',function() {
+  $.each(listGraph, function(endpoint) {
+    let at = $("<li></li>").append($("<span></span>").attr("class","medium").append(endpoint));
+  //  let at = $("<span></span>").attr("class","medium").append(endpoint);
+    $("#"+menu.listObjectMenu).append(at);
+    $.each(listGraph[endpoint], function(g) {
+      let graph = listGraph[endpoint][g];
+      let li = buildLiView(graph,__ihm.graphname(graph).name,true);
+      li.on('click',function() {
         let span = $(this).find(".glyphicon");
         let cur_uri = $(this).attr("uri");
         if ( span.css("visibility") == "visible" ) {
@@ -351,6 +355,7 @@ var graphFuncMenu = function(menu) {
         /* regenerate the graph */
         __ihm.getSVGLayout().update();
       });
-    $("#"+menu.listObjectMenu).append(li).append($("<li></li>"));
+      $("#"+menu.listObjectMenu).append(li).append($("<li></li>"));
+    });
   });
 };

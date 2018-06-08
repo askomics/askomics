@@ -1,7 +1,7 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix rdfg: <http://www.w3.org/2004/03/trix/rdfg-1/> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix displaySetting: <http://www.irisa.fr/dyliss/rdfVisualization/display> .
+@prefix askomics: <http://www.irisa.fr/dyliss/rdfVisualization/display> .
 @prefix dc: <http://purl.org/dc/elements/1.1/> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
@@ -66,65 +66,65 @@
 :transcript rdf:type owl:Class ;
             rdfs:label "transcript" .
 
-:position_taxon displaySetting:attribute "true"^^xsd:boolean .
+:position_taxon askomics:attribute "true"^^xsd:boolean .
 :position_taxon rdf:type owl:ObjectProperty ;
                 rdfs:label "taxon" ;
                 rdfs:domain :transcript ;
                 rdfs:range :taxonCategory .
 
-:featureName displaySetting:attribute "true"^^xsd:boolean .
+:featureName askomics:attribute "true"^^xsd:boolean .
 :featureName rdf:type owl:DatatypeProperty ;
              rdfs:label "featureName" ;
              rdfs:domain :transcript ;
              rdfs:range xsd:string .
 
-:position_ref displaySetting:attribute "true"^^xsd:boolean .
+:position_ref askomics:attribute "true"^^xsd:boolean .
 :position_ref rdf:type owl:ObjectProperty ;
               rdfs:label "chromosomeName" ;
               rdfs:domain :transcript ;
               rdfs:range :chromosomeNameCategory .
 
-:position_start displaySetting:attribute "true"^^xsd:boolean .
+:position_start askomics:attribute "true"^^xsd:boolean .
 :position_start rdf:type owl:DatatypeProperty ;
                 rdfs:label "start" ;
                 rdfs:domain :transcript ;
                 rdfs:range xsd:decimal .
 
-:position_end displaySetting:attribute "true"^^xsd:boolean .
+:position_end askomics:attribute "true"^^xsd:boolean .
 :position_end rdf:type owl:DatatypeProperty ;
               rdfs:label "end" ;
               rdfs:domain :transcript ;
               rdfs:range xsd:decimal .
 
-:featureType displaySetting:attribute "true"^^xsd:boolean .
+:featureType askomics:attribute "true"^^xsd:boolean .
 :featureType rdf:type owl:ObjectProperty ;
              rdfs:label "featureType" ;
              rdfs:domain :transcript ;
              rdfs:range :featureTypeCategory .
 
-:position_strand displaySetting:attribute "true"^^xsd:boolean .
+:position_strand askomics:attribute "true"^^xsd:boolean .
 :position_strand rdf:type owl:ObjectProperty ;
                  rdfs:label "strand" ;
                  rdfs:domain :transcript ;
                  rdfs:range :strandCategory .
 
-:biotype displaySetting:attribute "true"^^xsd:boolean .
+:biotype askomics:attribute "true"^^xsd:boolean .
 :biotype rdf:type owl:ObjectProperty ;
          rdfs:label "biotype" ;
          rdfs:domain :transcript ;
          rdfs:range :biotypeCategory .
 
-:transcript displaySetting:startPoint "true"^^xsd:boolean .
+:transcript askomics:startPoint "true"^^xsd:boolean .
 
 
 ######################
 #  Domain knowledge  #
 ######################
 
-:transcript displaySetting:is_positionable "true"^^xsd:boolean .
+:transcript askomics:is_positionable "true"^^xsd:boolean .
 :is_positionable rdfs:label 'is_positionable' .
 :is_positionable rdf:type owl:ObjectProperty .
-:biotypeCategory displaySetting:category :protein_coding , 
+:biotypeCategory askomics:category :protein_coding , 
                                  :transposable_element , 
                                  :ncRNA , 
                                  :miRNA .
@@ -136,7 +136,7 @@
        rdfs:label "ncRNA" .
 :miRNA rdf:type :biotype ;
        rdfs:label "miRNA" .
-:featureTypeCategory displaySetting:category :miRNA_gene , 
+:featureTypeCategory askomics:category :miRNA_gene , 
                                      :ncRNA_gene , 
                                      :gene .
 :miRNA_gene rdf:type :featureType ;
@@ -145,16 +145,16 @@
             rdfs:label "ncRNA_gene" .
 :gene rdf:type :featureType ;
       rdfs:label "gene" .
-:strandCategory displaySetting:category :plus , 
+:strandCategory askomics:category :plus , 
                                 :minus .
 :plus rdf:type :strand ;
       rdfs:label "plus" .
 :minus rdf:type :strand ;
        rdfs:label "minus" .
-:taxonCategory displaySetting:category :Arabidopsis_thaliana .
+:taxonCategory askomics:category :Arabidopsis_thaliana .
 :Arabidopsis_thaliana rdf:type :taxon ;
                       rdfs:label "Arabidopsis_thaliana" .
-:chromosomeNameCategory displaySetting:category :At5 , 
+:chromosomeNameCategory askomics:category :At5 , 
                                         :At1 , 
                                         :At3 .
 :At5 rdf:type :chromosomeName ;

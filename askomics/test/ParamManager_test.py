@@ -2,6 +2,7 @@
 
 import unittest
 import os.path
+import shutil
 
 from pyramid.paster import get_appsettings
 from pyramid import testing
@@ -30,11 +31,23 @@ class ParamManagerTests(unittest.TestCase):
 
         m = ParamManager(self.settings, self.request.session)
 
+    def test_get_db_directory(self):
+        m = ParamManager(self.settings, self.request.session)
+
+        d = m.get_db_directory()
+        assert os.path.isdir(d)
+        shutil.rmtree(d)
+
+        d = m.get_db_directory()
+        assert os.path.isdir(d)
+
     def test_get_upload_directory(self):
         m = ParamManager(self.settings, self.request.session)
 
         d = m.get_upload_directory()
         assert os.path.isdir(d)
+
+        shutil.rmtree(d)
         del self.request.session['username']
         d = m.get_upload_directory()
         assert os.path.isdir(d)
@@ -43,6 +56,8 @@ class ParamManagerTests(unittest.TestCase):
         m = ParamManager(self.settings, self.request.session)
         d = m.get_user_csv_directory()
         assert os.path.isdir(d)
+        shutil.rmtree(d)
+
         del self.request.session['username']
         d = m.get_user_csv_directory()
         assert os.path.isdir(d)
@@ -51,11 +66,17 @@ class ParamManagerTests(unittest.TestCase):
         m = ParamManager(self.settings, self.request.session)
         d = m.get_rdf_directory()
         assert os.path.isdir(d)
+        shutil.rmtree(d)
+
+        d = m.get_rdf_directory()
+        assert os.path.isdir(d)
 
     def test_get_rdf_user_directory(self):
         m = ParamManager(self.settings, self.request.session)
         d = m.get_rdf_user_directory()
         assert os.path.isdir(d)
+        shutil.rmtree(d)
+
         del self.request.session['username']
         d = m.get_rdf_user_directory()
         assert os.path.isdir(d)
@@ -64,6 +85,8 @@ class ParamManagerTests(unittest.TestCase):
         m = ParamManager(self.settings, self.request.session)
         d = m.get_json_user_directory()
         assert os.path.isdir(d)
+        shutil.rmtree(d)
+
         del self.request.session['username']
         d = m.get_json_user_directory()
         assert os.path.isdir(d)
@@ -72,9 +95,33 @@ class ParamManagerTests(unittest.TestCase):
         m = ParamManager(self.settings, self.request.session)
         d = m.get_database_user_directory()
         assert os.path.isdir(d)
+        shutil.rmtree(d)
+
         del self.request.session['username']
         d = m.get_database_user_directory()
         assert os.path.isdir(d)
+
+    def test_get_common_user_directory(self):
+        m = ParamManager(self.settings, self.request.session)
+        d = m.get_common_user_directory()
+        assert os.path.isdir(d)
+        shutil.rmtree(d)
+
+        d = m.get_common_user_directory()
+        assert os.path.isdir(d)
+
+        del self.request.session['username']
+        d = m.get_common_user_directory()
+        assert os.path.isdir(d)
+
+    def test_get_turtle_template(self):
+        m = ParamManager(self.settings, self.request.session)
+        try:
+            m.get_turtle_template(None)
+            assert False
+        except Exception as e:
+            assert True
+        m.get_turtle_template(":a :b :c.")
 
     def test_set_param(self):
         m = ParamManager(self.settings, self.request.session)
@@ -113,13 +160,44 @@ class ParamManagerTests(unittest.TestCase):
         d = m.remove_prefix("SELECT ?a FROM { ?a a http://www.w3.org/2002/07/owl#Class. }")
         assert d == "SELECT ?a FROM { ?a a owl:Class. }"
 
-    def test_encode_to_rdf_uri(self):
-        r = ParamManager.encode_to_rdf_uri("@&###:::123%%%%!!!")
+    def test_encode(self):
+        r = ParamManager.encode("@&###:::123%%%%!!!")
         assert r != "@&###123%%%%!!!"
 
+    def test_decode(self):
+        r = ParamManager.encode("@&###:::123%%%%!!!")
+        assert ParamManager.decode(r) == "@&###:::123%%%%!!!"
+
+    def test_encode_to_rdf_uri(self):
+        r = ParamManager.encode_to_rdf_uri("A",prefix="http://helloworld/test/")
+        assert r == "<http://helloworld/test/A>"
+        r = ParamManager.encode_to_rdf_uri("A",prefix="<http://helloworld/test/>")
+        assert r == "<http://helloworld/test/A>"
+
+        r = ParamManager.encode_to_rdf_uri("A<A>A",prefix="<http://helloworld/test/>")
+        assert r == "<http://helloworld/test/A_s3_3CA_s3_3EA>"
+
+
     def test_decode_to_rdf_uri(self):
-        r = ParamManager.encode_to_rdf_uri("@&###:::123%%%%!!!")
-        assert ParamManager.decode_to_rdf_uri(r) == "@&###:::123%%%%!!!"
+        r = ParamManager.encode_to_rdf_uri("A",prefix="<http://helloworld/test/>")
+        assert ParamManager.decode_to_rdf_uri(r,prefix="http://helloworld/test/") == "A"
+
+    def test_bool(self):
+        try:
+            ParamManager.Bool(None)
+            assert False
+        except Exception as e:
+            assert True
+        assert not ParamManager.Bool("FALSE")
+        assert not ParamManager.Bool("FaLsE")
+        assert ParamManager.Bool("TRUE")
+        assert ParamManager.Bool("TrUe")
+        assert ParamManager.Bool("1")
+        try:
+            ParamManager.Bool(1)
+            assert False
+        except Exception as e:
+            assert True
 
     def test_send_mails(self):
         m = ParamManager(self.settings, self.request.session)

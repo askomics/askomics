@@ -33,9 +33,9 @@ let instanceAskomicsJobsViewManager ;
     }
 
     static getClassTr(state) {
-      if (state == "Ok" ) return "bg-success";
+      if (state.startsWith("Ok") ) return "bg-success";
       if (state == "Done" ) return "bg-info";
-      if (state == "Error" )return "bg-danger";
+      if (state.startsWith("Error") )return "bg-danger";
       return "bg-warning";
     }
 
@@ -67,6 +67,7 @@ let instanceAskomicsJobsViewManager ;
             job.duration = AskomicsJobsViewManager.getDuration(job.tstart,job.tend) ;
             job.classtr = AskomicsJobsViewManager.getClassTr(job.state) ;
             if ( data[i].requestGraph != '') {
+              //console.log("requestGraph======>"+JSON.stringify(data[i].requestGraph));
               job.stateToReload = btoa(data[i].requestGraph);
             }
             if ( 'file' in data[i] ) {
@@ -76,6 +77,8 @@ let instanceAskomicsJobsViewManager ;
             job.preview = $('<div></div>').html(data[i].preview) ;
             job.data = undefined;
             if ( 'data' in data[i] ) job.data = data[i].data ;
+            job.variates = data[i].variates;
+
             let idx = 0;
             for (idx;idx<ljobs.length;idx++) {
               if ( job.jobid < ljobs[idx] ) break;
@@ -96,7 +99,9 @@ let instanceAskomicsJobsViewManager ;
       };
 
       service.post(model, function(data) {
-        new AskomicsJobsViewManager().listJobs();
+        new AskomicsJobsViewManager().loadjob().then(function () {
+          new AskomicsJobsViewManager().update_jobview ();
+        });
       });
     }
 
@@ -116,13 +121,17 @@ let instanceAskomicsJobsViewManager ;
         //     and launch it according to given parameters.
         //
         //     :lim: LIMIT values for preview
-        console.log('+++ prepareQuery +++');
+        //console.log('+++ prepareQuery +++');
 
         let tab = __ihm.getGraphBuilder().buildConstraintsGraph();
+        let tab2 = __ihm.getGraphBuilder().getEndpointAndGraph();
+
         return {
+                  'endpoints'            : tab2[0],
+                  'type_endpoints'       : tab2[1],
+                  'graphs'               : tab2[2],
                   'variates'             : tab[0],
                   'constraintesRelations': tab[1],
-                  'constraintesFilters'  : tab[2],
                   'removeGraph'          : __ihm.getAbstraction().listUnactivedGraph(),
                   'requestGraph'         : __ihm.getGraphBuilder().getInternalState(),
                   'jobManager'           : true,
@@ -142,34 +151,17 @@ let instanceAskomicsJobsViewManager ;
       let jdata = this.prepareQuery();
       let self = this;
 
-      // Get ordered headers
-      let result_view = new AskomicsResultsView({});
-
-      let struct = JSON.parse(__ihm.getGraphBuilder().getInternalState());
-      let t = __ihm.getGraphBuilder().extractNodesAndLinks(struct[1],struct[2]);
-      let nodes = t[0];
-      let links = t[1];
-
-      result_view.setActivesAttributes(nodes,links);
-      let attributes = result_view.getActivesAttributes();
-      let ordered_headers = [];
-      $.map(attributes, function(value, key) {
-        $.merge(ordered_headers, value);
-      });
-
-      jdata.headers = ordered_headers;
-
       service.post(jdata,function(data) {
-        new AskomicsJobsViewManager().listJobs();
+        new AskomicsJobsViewManager().loadjob().then(function () {
+          new AskomicsJobsViewManager().update_jobview ();
+        });
       });
-
-      this.wait(50).then( function() {
+      this.wait(500).then( function() {
         $("#jobsview").trigger( "click" );
       });
     }
 
-    listJobs() {
-      this.loadjob().then(function () {
+    update_jobview () {
         let __inst = new AskomicsJobsViewManager();
         let template = AskOmics.templates.jobs;
 
@@ -182,8 +174,8 @@ let instanceAskomicsJobsViewManager ;
         for ( let ij in __inst.jobs ) {
 
           if ( __inst.jobs[ij].data != undefined ) {
-            let struct = JSON.parse(atob(__inst.jobs[ij].stateToReload));
-            let prev = new AskomicsResultsView(__inst.jobs[ij].data).getPreviewResults(struct) ;
+          //  let struct = JSON.parse(atob(__inst.jobs[ij].stateToReload));
+            let prev = new AskomicsResultsView(__inst.jobs[ij].data,__inst.jobs[ij].variates).getPreviewResults() ;
             let r = $("#results_table_"+ij);
             r.append(
 
@@ -199,6 +191,5 @@ let instanceAskomicsJobsViewManager ;
             }
           }
         }
-      });
     }
 }
