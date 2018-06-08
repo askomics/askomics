@@ -1,0 +1,108 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfg: <http://www.w3.org/2004/03/trix/rdfg-1/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix askomics: <http://www.semanticweb.org/askomics/ontologies/2018/1#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+@prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
+@prefix void: <http://rdfs.org/ns/void#> .
+
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+@prefix oboInOwl: <http://www.geneontology.org/formats/oboInOwl#> .
+
+@prefix ensembl: <http://rdf.ebi.ac.uk/resource/ensembl/> .
+@prefix ensemblterms: <http://rdf.ebi.ac.uk/terms/ensembl/> .
+@prefix taxon: <http://identifiers.org/taxonomy/>.
+@prefix bpx: <http://www.biopax.org/release/biopax-level3.owl#>.
+@prefix skos: <http://www.w3.org/2004/02/skos/core#>.
+
+
+[] a sd:Service ;
+    sd:endpoint <https://www.ebi.ac.uk/rdf/services/sparql> ;
+    dcterms:title "Linked Open Data platform for EBI data";
+    dcterms:description "The EBI RDF platform: linked open data for the life sciences - NCBI - NIH.";
+    sd:supportedLanguage sd:SPARQL11Query ;
+    sd:defaultDataset [
+        a sd:Dataset ;
+        sd:defaultGraph [
+            a sd:Graph ;
+            void:classPartition [
+               void:class ensemblterms:protein_coding;
+               void:class bpx:BioSource.
+            ].
+        ].
+    ].
+
+
+# Entities
+# -----------
+
+ensemblterms:protein_coding askomics:entity "true"^^xsd:boolean ;
+           askomics:startPoint "true"^^xsd:boolean ;
+           rdfs:label "ensemblterms:protein".
+
+bpx:BioSource askomics:entity "true"^^xsd:boolean ;
+              askomics:startPoint "false"^^xsd:boolean ;
+              rdfs:label "bpx:BioSource".
+
+ensemblterms:EnsemblDBEntry askomics:entity "true"^^xsd:boolean ;
+                    askomics:startPoint "true"^^xsd:boolean ;
+                    rdfs:label "ensemblterms:EnsemblDBEntry".
+
+dc:description askomics:attribute "true"^^xsd:boolean .
+dc:identifier askomics:attribute "true"^^xsd:boolean .
+dcterms:identifier askomics:attribute "true"^^xsd:boolean .
+skos:altlabel askomics:attribute "true"^^xsd:boolean .
+
+
+dc:description askomics:attribute "true"^^xsd:boolean ;
+   rdf:type owl:DatatypeProperty ;
+   rdfs:label "dc:description" ;
+   rdfs:domain ensemblterms:protein_coding ;
+   rdfs:range xsd:string .
+
+dc:identifier askomics:attribute "true"^^xsd:boolean ;
+   rdf:type owl:DatatypeProperty ;
+   rdfs:label "dc:identifier" ;
+   rdfs:domain ensemblterms:protein_coding ;
+   rdfs:domain bpx:BioSource ;
+   rdfs:range xsd:string .
+
+dcterms:identifier askomics:attribute "true"^^xsd:boolean ;
+   rdf:type owl:DatatypeProperty ;
+   rdfs:label "dcterms:identifier" ;
+   rdfs:domain ensemblterms:protein_coding ;
+   rdfs:range xsd:string .
+
+skos:altlabel askomics:attribute "true"^^xsd:boolean ;
+   rdf:type owl:DatatypeProperty ;
+   rdfs:label "skos:altlabel" ;
+   rdfs:domain ensemblterms:protein_coding ;
+   rdfs:domain bpx:BioSource ;
+   rdfs:range xsd:string .
+
+skos:prefLabel askomics:attribute "true"^^xsd:boolean ;
+   rdf:type owl:DatatypeProperty ;
+   rdfs:label "skos:prefLabel" ;
+   rdfs:domain ensemblterms:protein_coding ;
+   rdfs:domain bpx:BioSource ;
+   rdfs:range xsd:string .
+
+bpx:name askomics:attribute "true"^^xsd:boolean ;
+   rdf:type owl:DatatypeProperty ;
+   rdfs:label "bpx:name" ;
+   rdfs:domain bpx:BioSource ;
+   rdfs:range xsd:string .
+
+
+# relations
+# -----------
+
+obo:RO_0002162 rdf:type owl:ObjectProperty ;
+   rdfs:label "Taxon" ;
+   rdfs:domain ensemblterms:protein_coding ;
+   rdfs:range bpx:BioSource .

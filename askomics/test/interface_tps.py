@@ -38,10 +38,10 @@ class InterfaceTPS(object):
         public_graphs = self.list_public_graphs()
 
         for graph in private_graphs:
-            query_laucher.execute_query(sqb.get_delete_query_string(graph).query)
+            query_laucher.process_query(sqb.get_delete_query_string(graph).query)
 
         for graph in public_graphs:
-            query_laucher.execute_query(sqb.get_delete_query_string(graph).query)
+            query_laucher.process_query(sqb.get_delete_query_string(graph).query)
 
     def list_private_graphs(self):
         """List the private graphs
@@ -53,12 +53,12 @@ class InterfaceTPS(object):
         sqb = SparqlQueryGraph(self.settings, self.request.session)
         query_laucher = QueryLauncher(self.settings, self.request.session)
 
-        res = query_laucher.execute_query(sqb.get_user_graph_infos().query)
+        res = query_laucher.process_query(sqb.get_user_graph_infos_with_count().query)
 
         named_graphs = []
 
-        for index_result in range(len(res['results']['bindings'])):
-            named_graphs.append(res['results']['bindings'][index_result]['g']['value'])
+        for index_result in range(len(res)):
+            named_graphs.append(res[index_result]['g'])
 
         return named_graphs
 
@@ -72,12 +72,12 @@ class InterfaceTPS(object):
         sqb = SparqlQueryGraph(self.settings, self.request.session)
         query_laucher = QueryLauncher(self.settings, self.request.session)
 
-        res = query_laucher.execute_query(sqb.get_public_graphs().query)
+        res = query_laucher.process_query(sqb.get_public_graphs().query)
 
         named_graphs = []
-
-        for index_result in range(len(res['results']['bindings'])):
-            named_graphs.append(res['results']['bindings'][index_result]['g']['value'])
+        print(res)
+        for index_result in range(len(res)):
+            named_graphs.append(res[index_result]['g'])
 
         return named_graphs
 
@@ -98,7 +98,7 @@ class InterfaceTPS(object):
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
 
-        src_file = sfc.get_source_file(file)
+        src_file = sfc.get_source_files([file])[0]
 
         src_file.set_forced_column_types(col_types)
         src_file.set_disabled_columns(disabled_columns)
@@ -190,7 +190,7 @@ class InterfaceTPS(object):
         sqb = SparqlQueryGraph(self.settings, self.request.session)
         query_laucher = QueryLauncher(self.settings, self.request.session)
 
-        query_laucher.execute_query(sqb.get_drop_named_graph('urn:sparql:test_askomics:users').query)
+        query_laucher.process_query(sqb.get_drop_named_graph('urn:sparql:test_askomics:users').query)
 
     def delete_askograph(self):
         """Delete the askomics graph"""
@@ -198,7 +198,7 @@ class InterfaceTPS(object):
         sqb = SparqlQueryGraph(self.settings, self.request.session)
         query_laucher = QueryLauncher(self.settings, self.request.session)
 
-        query_laucher.execute_query(sqb.get_drop_named_graph('urn:sparql:test_askomics').query)
+        query_laucher.process_query(sqb.get_drop_named_graph('urn:sparql:test_askomics').query)
 
 
     def add_jdoe_in_users(self):
@@ -318,8 +318,8 @@ class InterfaceTPS(object):
             }
             """)
 
-        res = query_laucher.execute_query(query.query)
+        res = query_laucher.process_query(query.query)
 
-        print(bool(int(res['results']['bindings'][0]['count']['value'])))
+        print(bool(int(res[0]['count'])))
 
-        return bool(int(res['results']['bindings'][0]['count']['value']))
+        return bool(int(res[0]['count']))

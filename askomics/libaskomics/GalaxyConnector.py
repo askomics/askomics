@@ -66,11 +66,14 @@ class GalaxyConnector(ParamManager):
         dataset_list = []
         history_content = galaxy_instance.histories.show_history(history_id, contents=True)
         for dataset in history_content:
+            if 'extension' not in dataset:
+                continue
             if dataset['extension'] not in allowed_files:
                 continue
-            # Don't show deleted datasets
-            if dataset['deleted']:
-                continue
+            if 'deleted' in dataset:
+                # Don't show deleted datasets
+                if dataset['deleted']:
+                    continue
             dataset_list.append(dataset)
 
         results['datasets'] = dataset_list

@@ -1,0 +1,11 @@
+TF_inclusion_ATAC_sds,ID_ATAC_sds,Transcription_Factor_sds
+TF_in_Region_ATAC_1,Region_ATAC_1,RBPJ
+TF_in_Region_ATAC_2,Region_ATAC_1,CUX1
+TF_in_Region_ATAC_3,Region_ATAC_2,ARID5B
+TF_in_Region_ATAC_4,Region_ATAC_3,TFAP2A
+TF_in_Region_ATAC_5,Region_ATAC_4,CDX2
+TF_in_Region_ATAC_6,Region_ATAC_5,HIC1
+TF_in_Region_ATAC_7,Region_ATAC_6,FOXO3
+TF_in_Region_ATAC_8,Region_ATAC_7,IRF1
+TF_in_Region_ATAC_9,Region_ATAC_8,KLF4
+

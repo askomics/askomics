@@ -54,6 +54,12 @@ class SourceFile(ParamManager, HaveCachedProperties):
         self.reset_cache()
 
         self.uri = {}
+        pref_uri = "http://semanticweb.org/askomics/entity/"
+        if self.is_defined('askomics.prefix'):
+            pref_uri = self.get_param("askomics.prefix")
+
+        self.uri = [ pref_uri for idx in range(20) ]
+
         if uri_set != None:
             for idx,uri in uri_set.items():
                 if uri:
@@ -87,6 +93,11 @@ class SourceFile(ParamManager, HaveCachedProperties):
         ttl += '<' + self.graph + '> dc:hasVersion "' + get_distribution('Askomics').version + '" .\n'
         ttl += '<' + self.graph + '> prov:describesService "' + os.uname()[1] + '" .\n'
 
+        if self.is_defined("askomics.endpoint"):
+            ttl += '<' + self.graph + '> prov:atLocation "' + self.get_param("askomics.endpoint") + '" .\n'
+        else:
+            raise ValueError("askomics.endpoint does not exit.")
+
         sparql_header = sqb.header_sparql_config('')
 
         query_laucher.insert_data(ttl, self.graph, sparql_header)
@@ -96,25 +107,6 @@ class SourceFile(ParamManager, HaveCachedProperties):
         return the timestamp (use in the tests)
         """
         return self.timestamp
-
-    @cached_property
-    def existing_relations(self):
-        """
-        Fetch from triplestore the existing relations if entities of the same name exist
-
-        :return: a List of relation names
-        :rtype: List
-        """
-        #FIXME: Useless function, always return an empty list
-        self.log.debug("existing_relations")
-        existing_relations = []
-
-        sqg = SparqlQueryGraph(self.settings, self.session)
-        ql = QueryLauncher(self.settings, self.session)
-
-        results = ql.process_query(sqg.get_class_info_from_abstraction(self.headers[0]).query)
-
-        return existing_relations
 
     def persist(self, urlbase, public):
         """
@@ -269,7 +261,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
                 self.metadatas['server'] = queryResults.info()['server']
             else:
                 self.metadatas['server'] = 'unknown'
-                
+
             data['status'] = 'ok'
             data['total_triple_count'] = total_triple_count
 
@@ -288,7 +280,6 @@ class SourceFile(ParamManager, HaveCachedProperties):
         if not fp.closed:
             fp.flush() # This is required as otherwise, data might not be really written to the file before being sent to triplestore
 
-        sqb = SparqlQueryBuilder(self.settings, self.session)
         ql = QueryLauncher(self.settings, self.session)
 
         if self.is_defined('askomics.load_url'):
@@ -311,35 +302,10 @@ class SourceFile(ParamManager, HaveCachedProperties):
             if self.settings["askomics.debug"]:
                 data['url'] = url
             else:
-                self.log.debug("3source file : load_data_from_file delete =>"+fp.name)
+                self.log.info("Source file : load_data_from_file delete =>"+fp.name)
                 os.remove(fp.name) # Everything ok, remove temp file
 
         return data
-
-    def _print_line_source_file(self,e,filename):
-        from traceback import format_tb, format_exception_only
-        from html import escape
-        import re
-        fexception = format_exception_only(type(e), e)
-        fexception = escape('\n'.join(fexception))
-
-        matchObj = re.search('line\s+([0-9]+):',fexception)
-        errMess = ""
-        if matchObj:
-            linenumber = int(matchObj.group(1))
-            #print(data['error'])
-            #if data["error"] == None :
-            #    data['error'] = ''
-            errMess = "\n<br/><strong>Error line:"+str(linenumber)+"</strong><br/>"
-            errMess += "<pre>"
-            with open(filename, encoding="utf-8", errors="ignore") as f:
-                count = 0
-                for line in f:
-                    count+=1
-                    if abs(linenumber - count) < 10 :
-                        errMess += str(count)+":"+line
-            errMess += "</pre>"
-        return errMess
 
     def _format_exception(self, e, data=None, ctx='loading data'):
         from traceback import format_tb, format_exception_only

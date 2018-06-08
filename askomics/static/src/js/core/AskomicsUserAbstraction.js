@@ -8,11 +8,26 @@
 class AskomicsUserAbstraction {
     constructor() {
       this.prefix = {};
-      this.prefix.xsd = "http://www.w3.org/2001/XMLSchema#";
-      this.prefix.rdf = "http://www.w3.org/2001/XMLSchema#";
-      this.prefix.rdfs = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-      this.prefix.owl = "http://www.w3.org/2002/07/owl#";
-      this.prefix.rdfg = "http://www.w3.org/2004/03/trix/rdfg-1/";
+      this.prefix.xsd          = "http://www.w3.org/2001/XMLSchema#";
+      this.prefix.rdf          = "http://www.w3.org/2001/XMLSchema#";
+      this.prefix.rdfs         = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+      this.prefix.rdfs         = "http://www.w3.org/2000/01/rdf-schema";
+      this.prefix.owl          = "http://www.w3.org/2002/07/owl#";
+      this.prefix.rdfg         = "http://www.w3.org/2004/03/trix/rdfg-1/";
+      this.prefix.obo          = "http://purl.obolibrary.org/obo/";
+      this.prefix.pobo         = "http://purl.obolibrary.org/obo/";
+      this.prefix.oboInOwl     = "http://www.geneontology.org/formats/oboInOwl#";
+      this.prefix.up           = "http://purl.uniprot.org/core/";
+      this.prefix.database     = "http://purl.uniprot.org/database/";
+      this.prefix.taxonomy     = "http://purl.uniprot.org/taxonomy/";
+      this.prefix.biopax       = "http://www.biopax.org/release/biopax-level3.owl#";
+      this.prefix.ensemblterms = "http://rdf.ebi.ac.uk/terms/ensembl/";
+      this.prefix.ensembl      = "http://rdf.ebi.ac.uk/resource/ensembl/";
+      this.prefix.dbpedia      = "http://dbpedia.org/ontology/";
+      this.prefix.dbpediaprop  = "http://dbpedia.org/property/";
+      this.prefix.go           = "http://purl.org/obo/owl/GO#";
+      this.prefix.np           = "http://nextprot.org/rdf#";
+
 
       this.prefix_error = {};
       this.longprefix_error = {};
@@ -47,15 +62,19 @@ class AskomicsUserAbstraction {
     }
 
     getEntities() {
+
       let listE = {} ;
+
       for (let g in this.entityInformationList ) {
         if ( this.isDesactivedGraph(g) ) continue;
+
         for (let e in this.entityInformationList[g]) {
           if (! (e in listE ) ) {
             listE[e]=0;
           }
         }
       }
+
       return JSON.parse(JSON.stringify(listE)) ;
     }
 
@@ -84,7 +103,9 @@ class AskomicsUserAbstraction {
       if ( attributeForUritype.indexOf(this.getPrefix("xsd")) === -1 ) {
           return "category";
       }
-
+      if (attributeForUritype === this.longRDF("xsd:double")) {
+        return "decimal";
+      }
       if (attributeForUritype === this.longRDF("xsd:decimal")) {
         return "decimal";
       }
@@ -144,13 +165,66 @@ class AskomicsUserAbstraction {
       /* All relation are stored in tripletSubjectRelationObject */
       iua.tripletSubjectRelationObject = resultListTripletSubjectRelationObject.relations;
       /* == External Service can add external relation == */
-      //console.log("RELATIONS::"+JSON.stringify(iua.tripletSubjectRelationObject));
 
+      // See TripleStoreExplorer to check which/where/how informations is generated
+      /*
+      console.log(" ================ RELATIONS =======================");
+      console.log("relations::"+JSON.stringify(resultListTripletSubjectRelationObject.relations));
+      console.log("\n ================ SUBCLASSOF =======================");
+      console.log("subclassof::"+JSON.stringify(resultListTripletSubjectRelationObject.subclassof));
+      console.log("\n ================ ENTITIES =======================");
+      console.log("entities::"+JSON.stringify(resultListTripletSubjectRelationObject.entities));
+      console.log("\n ================ ATTRIBUTES =======================");
+      console.log("attributes::"+JSON.stringify(resultListTripletSubjectRelationObject.attributes));
+      console.log("\n ================ CATEGORIES =======================");
+      console.log("categories::"+JSON.stringify(resultListTripletSubjectRelationObject.categories));
+      console.log("\n ================ POSITIONNABLE =======================");
+      console.log("positionable::"+JSON.stringify(resultListTripletSubjectRelationObject.positionable));
+      console.log("\n ================ ENDPOINTS =======================");
+      console.log("endpoints::"+JSON.stringify(resultListTripletSubjectRelationObject.endpoints));
+      console.log("\n ================ ENDPOINT_EXT =======================");
+      console.log("endpoints_ext::"+JSON.stringify(resultListTripletSubjectRelationObject.endpoints_ext));
+      */
       iua.entityInformationList = {};
       iua.entityPositionableInformationList = {};
       iua.attributesEntityList = {};
       iua.entitySubclassof = {} ;
 
+      // to know where (endpoint) wich graph are defined for each uri
+      // [uri]-->list([graph] -> list[endpoint])
+      iua.uriToGraph = {} ;
+      iua.graphToEndpoint = {} ;
+      iua.typeEndpoint = {} ;
+
+      for (let endpoint in resultListTripletSubjectRelationObject.endpoints){
+        iua.typeEndpoint[endpoint] = resultListTripletSubjectRelationObject.endpoints[endpoint].type ;
+        //console.log(endpoint+"=>"+iua.typeEndpoint[endpoint]);
+        if ( 'private' in resultListTripletSubjectRelationObject.endpoints[endpoint]) {
+          for (let igraph in resultListTripletSubjectRelationObject.endpoints[endpoint]['private']){
+            let graph = resultListTripletSubjectRelationObject.endpoints[endpoint]['private'][igraph];
+            //console.log(endpoint+"==>"+graph);
+            iua.graphToEndpoint[graph] = endpoint ;
+          }
+        }
+        for (let igraph in resultListTripletSubjectRelationObject.endpoints[endpoint]['public']){
+          let graph = resultListTripletSubjectRelationObject.endpoints[endpoint]['public'][igraph];
+          //console.log(endpoint+"==>"+graph);
+          iua.graphToEndpoint[graph] = endpoint ;
+        }
+      }
+
+      iua.classToEndpoint = {} ;
+      //console.log("ASKOMICS ENDPOINT:"+JSON.stringify(iua.graphToEndpoint));
+      for (let iservice in resultListTripletSubjectRelationObject.endpoints_ext.entities){
+        let service = resultListTripletSubjectRelationObject.endpoints_ext.entities[iservice];
+        //console.log("iservice:"+iservice + "===>"+JSON.stringify(service))
+        iua.classToEndpoint[iservice] = {};
+        for (let classe in service) {
+            iua.classToEndpoint[iservice][service[classe]] = 1;
+        }
+      }
+      //console.log("iua.classToEndpoint::"+JSON.stringify(iua.classToEndpoint));
+      /***************************** ENTITIES **************************************/
       /* All information about an entity available in TPS are stored in entityInformationList */
       for (let entry in resultListTripletSubjectRelationObject.entities){
         //console.log("ENTITY:"+JSON.stringify(resultListTripletSubjectRelationObject.entities[entry]));
@@ -167,11 +241,32 @@ class AskomicsUserAbstraction {
         }
         iua.entityInformationList[graph][uri][rel] = val;
 
+        if ( ! (uri in iua.uriToGraph) ) {
+          iua.uriToGraph[uri] = {} ;
+        }
+        iua.uriToGraph[uri][graph]=1;
       }
-      //console.log("entityInformationList:"+JSON.stringify(iua.entityInformationList));
+
+      /***************************** RELATIONS **************************************/
+
+      for (let entry in resultListTripletSubjectRelationObject.relations){
+        //console.log("ENTITY:"+JSON.stringify(resultListTripletSubjectRelationObject.entities[entry]));
+        let graph = resultListTripletSubjectRelationObject.relations[entry].g;
+        let uri = resultListTripletSubjectRelationObject.relations[entry].subject;
+        let rel = resultListTripletSubjectRelationObject.relations[entry].relation;
+        let val = resultListTripletSubjectRelationObject.relations[entry].object;
+
+        if ( ! (rel in iua.uriToGraph) ) {
+          iua.uriToGraph[rel] = {} ;
+        }
+        iua.uriToGraph[rel][graph]=1;
+
+      }
+
+      /***************************** ATTRIBUTES **************************************/
 
 	    for (let entry2 in resultListTripletSubjectRelationObject.attributes){
-        console.log("ATTRIBUTE:"+JSON.stringify(resultListTripletSubjectRelationObject.attributes[entry2]));
+        //console.log("ATTRIBUTE:"+JSON.stringify(resultListTripletSubjectRelationObject.attributes[entry2]));
         let graph = resultListTripletSubjectRelationObject.attributes[entry2].g;
         let uri2 = resultListTripletSubjectRelationObject.attributes[entry2].entity;
         let attribute = {};
@@ -194,7 +289,9 @@ class AskomicsUserAbstraction {
         graphIUA[uri2].push(attribute);
       }
 
-        for (let entry3 in resultListTripletSubjectRelationObject.categories){
+      /***************************** CATEGORIES **************************************/
+
+      for (let entry3 in resultListTripletSubjectRelationObject.categories){
           //console.log("CATEGORY:"+JSON.stringify(resultListTripletSubjectRelationObject.categories[entry3]));
           let graph = resultListTripletSubjectRelationObject.categories[entry3].g;
           let uri3 = resultListTripletSubjectRelationObject.categories[entry3].entity;
@@ -214,15 +311,31 @@ class AskomicsUserAbstraction {
           }
 
           iua.attributesEntityList[graph][uri3].push(attribute);
-        }
 
-        for (let entry4 in resultListTripletSubjectRelationObject.positionable){
+          if ( ! (attribute.uri in iua.uriToGraph) ) {
+            iua.uriToGraph[attribute.uri] = {} ;
+          }
+          iua.uriToGraph[attribute.uri][graph]=1;
+
+      }
+/*
+      for (let idx in iua.uriToGraph ) {
+        iua.uriToGraph[idx] = Object.keys(iua.uriToGraph[idx]);
+      }*/
+      /*
+      console.log(" ====================================  ORIGINE  ====================================");
+      console.log(JSON.stringify(iua.uriToGraph));
+      console.log(" ====================================  G -> E  ====================================");
+      console.log(JSON.stringify(iua.graphToEndpoint));
+      console.log(" ====================================  FIN ORIGINE  ====================================");
+      */
+      for (let entry4 in resultListTripletSubjectRelationObject.positionable){
           //console.log('POSITIONABLE:'+JSON.stringify(resultListTripletSubjectRelationObject.positionable[entry4]));
           var uri4 = resultListTripletSubjectRelationObject.positionable[entry4].entity;
           if ( ! (uri4 in iua.entityPositionableInformationList) ) {
               iua.entityPositionableInformationList[uri4] = {};
           } else {
-            throw new Error("URI:"+uri4+" have several taxon,ref, start, end labels... "+JSON.stringify(iua.entityPositionableInformationList[uri4]));
+          //  throw new Error("URI:"+uri4+" have several taxon,ref, start, end labels... "+JSON.stringify(iua.entityPositionableInformationList[uri4]));
           }
         }
         for (let entry in resultListTripletSubjectRelationObject.subclassof){
@@ -233,7 +346,7 @@ class AskomicsUserAbstraction {
           }
           iua.entitySubclassof[duo.uri].push(duo.urisub);
         }
-        console.log(JSON.stringify(iua.entitySubclassof));
+        //console.log(JSON.stringify(iua.entitySubclassof));
         //console.log("=================== attributesEntityList =========================");
         //console.log(JSON.stringify(iua.attributesEntityList));
       });
@@ -243,7 +356,7 @@ class AskomicsUserAbstraction {
       let iua = this;
 
       if (ns in this.prefix_error) {
-        console.log("erreur.........................");
+        //console.log("erreur.........................");
         return ns;
       }
 
@@ -272,26 +385,41 @@ class AskomicsUserAbstraction {
     }
 
     getReversePrefix(uri) {
-
-      if ( uri in this.longprefix_error) {
-        return "";
-      }
-
+      //console.log(JSON.stringify(this.prefix));
       for (let ns in this.prefix) {
-        if ( this.prefix[ns] == uri ) return ns ;
+        if ( uri.startsWith(this.prefix[ns]) ) {
+          return ns+":"+uri.replace(this.prefix[ns],"");
+        }
       }
+
+      let uriprefix = uri ;
+      let pref = "";
+
+      if (uri.lastIndexOf("#")>0) {
+        uriprefix = uri.substring(0,uri.lastIndexOf("#")+1);
+        pref = uri.substring(uri.lastIndexOf("#")+1,uri.length) ;
+      } else if (uri.lastIndexOf("/")>0) {
+        uriprefix = uri.substring(0,uri.lastIndexOf("/")+1);
+        pref = uri.substring(uri.lastIndexOf("/")+1,uri.length) ;
+      }
+
+      if ( uriprefix in this.longprefix_error) {
+        return pref ;
+      }
+
+      //console.log("uri:"+uri);
+      //console.log("prefix:"+uriprefix);
 
       let iua = this;
-
       $.ajaxSetup({async: false});
-      let pref = "" ;
-      $.get( "http://prefix.cc/reverse", { uri:uri.trim() ,format: "json"} )
+
+      $.get( "http://prefix.cc/reverse", { uri:uriprefix.trim() ,format: "json"} )
           .done(function( data ) {
             pref = Object.keys(data)[0];
-            iua.prefix[pref] = uri ;
+            iua.prefix[pref] = uriprefix ;
           })
           .fail( function() {
-            iua.longprefix_error[uri] = true ;
+            iua.longprefix_error[uriprefix] = true ;
           });
       $.ajaxSetup({async: true});
       return pref ;
@@ -339,16 +467,19 @@ class AskomicsUserAbstraction {
      */
 
     getRelationsObjectsAndSubjectsWithURI(UriSelectedNode) {
-
+      //console.log("++++++++ getRelationsObjectsAndSubjectsWithURI ++++++++");
+      //console.log("UriSelectedNode="+UriSelectedNode);
       let objectsTarget = {} ;
       let subjectsTarget = {} ;
 
       let lentities = this.getEntities();
 
       for (let i in this.tripletSubjectRelationObject) {
-        if (this.isDesactivedGraph(this.tripletSubjectRelationObject[i].g) ) continue;
-
+        if (this.isDesactivedGraph(this.tripletSubjectRelationObject[i].g) ) {
+          continue;
+        }
         if ( this.tripletSubjectRelationObject[i].object == UriSelectedNode ) {
+
           /* check if graph is not removed */
           if ( !(this.tripletSubjectRelationObject[i].subject in lentities) ) continue;
 
@@ -361,25 +492,31 @@ class AskomicsUserAbstraction {
             }
         }
         if ( this.tripletSubjectRelationObject[i].subject == UriSelectedNode ) {
+          //console.log("AsSubject:="+JSON.stringify(this.tripletSubjectRelationObject[i]));
+          //console.log("lentities:="+JSON.stringify(lentities));
           /* check if graph is not removed */
           if ( !(this.tripletSubjectRelationObject[i].object in lentities) ) continue;
-
+          //console.log("1");
           if (! (this.tripletSubjectRelationObject[i].object in objectsTarget) ) {
+            //console.log("2");
             objectsTarget[this.tripletSubjectRelationObject[i].object] = {};
           }
-
+          //console.log("3");
           if ( ! (this.tripletSubjectRelationObject[i].relation in objectsTarget[this.tripletSubjectRelationObject[i].object] ) )
             {
+              //console.log("4");
               objectsTarget[this.tripletSubjectRelationObject[i].object][this.tripletSubjectRelationObject[i].relation]=0;
             }
         }
       }
+      //console.log("objectsTarget:"+JSON.stringify(objectsTarget));
       for ( let i in objectsTarget ) {
         objectsTarget[i] = Object.keys(objectsTarget[i]);
       }
       for ( let i in subjectsTarget ) {
         subjectsTarget[i] = Object.keys(subjectsTarget[i]);
       }
+      //console.log("objectsTarget:"+JSON.stringify(objectsTarget));
       return [objectsTarget, subjectsTarget];
     }
 
@@ -448,13 +585,15 @@ class AskomicsUserAbstraction {
     }
 
     listGraphAvailable() {
+
       let listG = {} ;
-      for (let g in this.entityInformationList) {
-        if (! (g in listG ) ) listG[g] = 0;
+      for (let g in this.graphToEndpoint) {
+        if ( ! (this.graphToEndpoint[g] in listG)) {
+          listG[this.graphToEndpoint[g]] = [] ;
+        }
+        listG[this.graphToEndpoint[g]].push(g);
       }
-      for (let g in this.attributesEntityList) {
-        if (! (g in listG ) ) listG[g] = 0;
-      }
+
       return JSON.parse(JSON.stringify(listG));
     }
 

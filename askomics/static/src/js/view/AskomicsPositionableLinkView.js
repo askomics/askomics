@@ -47,33 +47,6 @@ class AskomicsPositionableLinkView extends AskomicsObjectView {
     __ihm.getSVGLayout().setSelectLink(this.link);
   }
 
-  reverseDir() {
-
-    // remove rightview
-    this.remove();
-
-    // remove link
-    var id = this.link.id;
-    var linkid = $('#'+id).attr("id");
-
-    $('#'+id).remove(); // link
-    $('#'+GraphObject.getSvgLabelPrefix()+id).remove(); // link label
-    $('#marker-'+id).remove(); // arrow
-
-    // swap target and source
-    var buf = this.link.source ;
-    this.link.source = this.link.target;
-    this.link.target = buf;
-
-    // new rightview for the reverse link
-    this.create();
-
-    // reload graph (it will recreate the link)
-    __ihm.getSVGLayout().update();
-    //select the link
-    __ihm.getSVGLayout().setSelectLink(this.link);
-  }
-
   changeStrict(strict) {
     this.link.strict = strict;
   }
@@ -95,11 +68,6 @@ class AskomicsPositionableLinkView extends AskomicsObjectView {
     var elemUri = this.link.uri;
 
     this.divPanel() ;
-
-    var reverseArrow = $('<div></div>').attr('id', 'change_dir-div-'+id_link).append($('<span><span>').attr('class', 'glyphicon glyphicon-resize-horizontal')
-                                                                .attr('aria-hidden', 'true')
-                                                                .attr('id', 'change_dir-'+id_link))
-                                       .append('Reverse direction');
 
     var select = $('<select></select>').attr('id', 'type-'+id_link);
 
@@ -137,7 +105,7 @@ class AskomicsPositionableLinkView extends AskomicsObjectView {
          view.changeSameRef(false);
        }
       });
-   
+
     if (this.link.same_tax) {
       checkbox_sametax = $('<label></label>').attr('id', 'taxlab-'+id_link).append($('<input>').attr('type', 'checkbox').attr('id', 'tax-'+id_link).attr('checked', 'checked')).append('Taxon');
     } else {
@@ -176,7 +144,7 @@ class AskomicsPositionableLinkView extends AskomicsObjectView {
                                                                   .attr('value', 'opp'))
                                               .append('opposite').append('<br>')*/
                                               ;
-      
+
       // Onchange function for strand
       radio_samestrand.change(function() {
         let value = $('input[name=strand-'+id_link+']:checked', '#div_strand-'+id_link).val();
@@ -200,7 +168,7 @@ class AskomicsPositionableLinkView extends AskomicsObjectView {
     }
 
     this.details//.append(reverseArrow)
-           .append(relation).append(reverseArrow)
+           .append(relation).append(this.getReverseDirection())
            .append($('<hr>'))
            .append(onTheSame)
            .append($('<hr>'))
@@ -219,10 +187,6 @@ class AskomicsPositionableLinkView extends AskomicsObjectView {
       }else{
         view.changeStrict(false);
       }
-    });
-
-    reverseArrow.click(function() {
-      view.reverseDir();
     });
 
     $("#viewDetails").append(this.details);

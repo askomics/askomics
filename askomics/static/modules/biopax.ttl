@@ -1,0 +1,191 @@
+### suprimer cette premiere ligne
+@prefix  askomics: <http://www.semanticweb.org/askomics/ontologies/2018/1#>.
+@prefix biopax: <http://www.biopax.org/release/biopax-level3.owl#> .
+
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+@prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
+@prefix void: <http://rdfs.org/ns/void#> .
+
+[] a sd:Service ;
+    sd:endpoint <https://www.ebi.ac.uk/rdf/services/sparql> ;
+    dcterms:title "Linked Open Data platform for EBI data";
+    dcterms:description "The EBI RDF platform: linked open data for the life sciences - NCBI - NIH.";
+    sd:supportedLanguage sd:SPARQL11Query ;
+    sd:defaultDataset [
+        a sd:Dataset ;
+        sd:defaultGraph [
+            a sd:Graph ;
+            void:classPartition
+              [
+                void:class biopax:GeneticInteraction  ;
+                void:class biopax:PathwayStep         ;
+                void:class biopax:CellVocabulary      .
+              ].
+        ].
+    ].
+
+biopax:GeneticInteraction askomics:entity "true"^^xsd:boolean.
+biopax:GeneticInteraction rdfs:label "biopax:GeneticInteraction"^^xsd:string.
+biopax:GeneticInteraction askomics:startPoint "true"^^xsd:boolean.
+
+biopax:PathwayStep askomics:entity "true"^^xsd:boolean.
+biopax:PathwayStep rdfs:label "biopax:PathwayStep"^^xsd:string.
+biopax:PathwayStep askomics:startPoint "true"^^xsd:boolean.
+
+biopax:EntityFeature askomics:entity "true"^^xsd:boolean.
+biopax:EntityFeature rdfs:label "biopax:EntityFeature"^^xsd:string.
+biopax:EntityFeature askomics:startPoint "true"^^xsd:boolean.
+
+biopax:Pathway askomics:entity "true"^^xsd:boolean.
+biopax:Pathway rdfs:label "biopax:Pathway"^^xsd:string.
+biopax:Pathway askomics:startPoint "true"^^xsd:boolean.
+
+biopax:KPrime askomics:entity "true"^^xsd:boolean.
+biopax:KPrime rdfs:label "biopax:KPrime"^^xsd:string.
+biopax:kPrime askomics:attribute "true"^^xsd:boolean.
+
+biopax:EntityReferenceTypeVocabulary askomics:entity "true"^^xsd:boolean.
+biopax:EntityReferenceTypeVocabulary rdfs:label "biopax:EntityReferenceTypeVocabulary"^^xsd:string.
+
+biopax:Conversion askomics:entity "true"^^xsd:boolean.
+biopax:Conversion rdfs:label "biopax:Conversion"^^xsd:string.
+biopax:Conversion askomics:startPoint "true"^^xsd:boolean.
+
+biopax:spontaneous askomics:attribute "true"^^xsd:boolean.
+
+biopax:CellVocabulary askomics:entity "true"^^xsd:boolean.
+biopax:CellVocabulary rdfs:label "biopax:CellVocabulary"^^xsd:string.
+
+biopax:SmallMoleculeReference askomics:entity "true"^^xsd:boolean.
+biopax:SmallMoleculeReference rdfs:label "biopax:SmallMoleculeReference"^^xsd:string.
+biopax:SmallMoleculeReference askomics:startPoint "true"^^xsd:boolean.
+
+biopax:chemicalFormula askomics:attribute "true"^^xsd:boolean.
+
+biopax:molecularWeight askomics:attribute "true"^^xsd:boolean.
+
+biopax:ModificationFeature askomics:entity "true"^^xsd:boolean.
+biopax:ModificationFeature rdfs:label "biopax:ModificationFeature"^^xsd:string.
+biopax:ModificationFeature askomics:startPoint "true"^^xsd:boolean.
+
+biopax:Complex askomics:entity "true"^^xsd:boolean.
+biopax:Complex rdfs:label "biopax:Complex"^^xsd:string.
+biopax:Complex askomics:startPoint "true"^^xsd:boolean.
+
+biopax:SequenceModificationVocabulary askomics:entity "true"^^xsd:boolean.
+biopax:SequenceModificationVocabulary rdfs:label "biopax:SequenceModificationVocabulary"^^xsd:string.
+
+biopax:Provenance askomics:entity "true"^^xsd:boolean.
+biopax:Provenance rdfs:label "biopax:Provenance"^^xsd:string.
+
+biopax:ChemicalStructure askomics:entity "true"^^xsd:boolean.
+biopax:ChemicalStructure rdfs:label "biopax:ChemicalStructure"^^xsd:string.
+
+biopax:structureData askomics:attribute "true"^^xsd:boolean.
+
+biopax:EntityReference askomics:entity "true"^^xsd:boolean.
+biopax:EntityReference rdfs:label "biopax:EntityReference"^^xsd:string.
+biopax:EntityReference askomics:startPoint "true"^^xsd:boolean.
+
+biopax:SequenceSite askomics:entity "true"^^xsd:boolean.
+biopax:SequenceSite rdfs:label "biopax:SequenceSite"^^xsd:string.
+biopax:sequencePosition askomics:attribute "true"^^xsd:boolean.
+
+biopax:RelationshipXref askomics:entity "true"^^xsd:boolean.
+biopax:RelationshipXref rdfs:label "biopax:RelationshipXref"^^xsd:string.
+biopax:RelationshipXref askomics:startPoint "true"^^xsd:boolean.
+
+biopax:Evidence askomics:entity "true"^^xsd:boolean.
+biopax:Evidence rdfs:label "biopax:Evidence"^^xsd:string.
+biopax:Evidence askomics:startPoint "true"^^xsd:boolean.
+
+biopax:InteractionVocabulary askomics:entity "true"^^xsd:boolean.
+biopax:InteractionVocabulary rdfs:label "biopax:InteractionVocabulary"^^xsd:string.
+
+biopax:SequenceLocation askomics:entity "true"^^xsd:boolean.
+biopax:SequenceLocation rdfs:label "biopax:SequenceLocation"^^xsd:string.
+
+biopax:BiochemicalReaction askomics:entity "true"^^xsd:boolean.
+biopax:BiochemicalReaction rdfs:label "biopax:BiochemicalReaction"^^xsd:string.
+biopax:BiochemicalReaction askomics:startPoint "true"^^xsd:boolean.
+
+biopax:eCNumber askomics:attribute "true"^^xsd:boolean.
+biopax:deltaH askomics:attribute "true"^^xsd:boolean.
+biopax:deltaS askomics:attribute "true"^^xsd:boolean.
+biopax:Interaction askomics:entity "true"^^xsd:boolean.
+biopax:Interaction rdfs:label "biopax:Interaction"^^xsd:string.
+biopax:Interaction askomics:startPoint "true"^^xsd:boolean.
+biopax:TissueVocabulary askomics:entity "true"^^xsd:boolean.
+biopax:TissueVocabulary rdfs:label "biopax:TissueVocabulary"^^xsd:string.
+biopax:SequenceInterval askomics:entity "true"^^xsd:boolean.
+biopax:SequenceInterval rdfs:label "biopax:SequenceInterval"^^xsd:string.
+biopax:SequenceInterval askomics:startPoint "true"^^xsd:boolean.
+biopax:Stoichiometry askomics:entity "true"^^xsd:boolean.
+biopax:Stoichiometry rdfs:label "biopax:Stoichiometry"^^xsd:string.
+biopax:Stoichiometry askomics:startPoint "true"^^xsd:boolean.
+biopax:stoichiometricCoefficient askomics:attribute "true"^^xsd:boolean.
+biopax:RelationshipTypeVocabulary askomics:entity "true"^^xsd:boolean.
+biopax:RelationshipTypeVocabulary rdfs:label "biopax:RelationshipTypeVocabulary"^^xsd:string.
+biopax:ExperimentalForm askomics:entity "true"^^xsd:boolean.
+biopax:ExperimentalForm rdfs:label "biopax:ExperimentalForm"^^xsd:string.
+biopax:ExperimentalForm askomics:startPoint "true"^^xsd:boolean.
+biopax:PhysicalEntity askomics:entity "true"^^xsd:boolean.
+biopax:PhysicalEntity rdfs:label "biopax:PhysicalEntity"^^xsd:string.
+biopax:PhysicalEntity askomics:startPoint "true"^^xsd:boolean.
+biopax:EvidenceCodeVocabulary askomics:entity "true"^^xsd:boolean.
+biopax:EvidenceCodeVocabulary rdfs:label "biopax:EvidenceCodeVocabulary"^^xsd:string.
+
+biopax:BioSource askomics:entity "true"^^xsd:boolean.
+biopax:BioSource rdfs:label "biopax:BioSource"^^xsd:string.
+biopax:BioSource askomics:startPoint "true"^^xsd:boolean.
+
+biopax:DeltaG askomics:entity "true"^^xsd:boolean.
+
+biopax:DeltaG rdfs:label "biopax:DeltaG"^^xsd:string.
+
+biopax:deltaGPrime0 askomics:attribute "true"^^xsd:boolean.
+
+biopax:CellularLocationVocabulary askomics:entity "true"^^xsd:boolean.
+biopax:CellularLocationVocabulary rdfs:label "biopax:CellularLocationVocabulary"^^xsd:string.
+
+biopax:BindingFeature askomics:entity "true"^^xsd:boolean.
+biopax:BindingFeature rdfs:label "biopax:BindingFeature"^^xsd:string.
+biopax:BindingFeature askomics:startPoint "true"^^xsd:boolean.
+
+biopax:intraMolecular askomics:attribute "true"^^xsd:boolean.
+
+biopax:PhenotypeVocabulary askomics:entity "true"^^xsd:boolean.
+biopax:PhenotypeVocabulary rdfs:label "biopax:PhenotypeVocabulary"^^xsd:string.
+
+biopax:patoData askomics:attribute "true"^^xsd:boolean.
+
+biopax:SequenceRegionVocabulary askomics:entity "true"^^xsd:boolean.
+biopax:SequenceRegionVocabulary rdfs:label "biopax:SequenceRegionVocabulary"^^xsd:string.
+
+biopax:Entity askomics:entity "true"^^xsd:boolean.
+biopax:Entity rdfs:label "biopax:Entity"^^xsd:string.
+biopax:Entity askomics:startPoint "true"^^xsd:boolean.
+
+biopax:availability askomics:attribute "true"^^xsd:boolean.
+
+biopax:Catalysis askomics:entity "true"^^xsd:boolean.
+biopax:Catalysis rdfs:label "biopax:Catalysis"^^xsd:string.
+biopax:Catalysis askomics:startPoint "true"^^xsd:boolean.
+
+biopax:ExperimentalFormVocabulary askomics:entity "true"^^xsd:boolean.
+biopax:ExperimentalFormVocabulary rdfs:label "biopax:ExperimentalFormVocabulary"^^xsd:string.
+
+biopax:Score askomics:entity "true"^^xsd:boolean.
+biopax:Score rdfs:label "biopax:Score"^^xsd:string.
+biopax:Score askomics:startPoint "true"^^xsd:boolean.
+
+biopax:value askomics:attribute "true"^^xsd:boolean.
+
+biopax:BiochemicalPathwayStep askomics:entity "true"^^xsd:boolean.
+biopax:BiochemicalPathwayStep rdfs:label "biopax:BiochemicalPathwayStep"^^xsd:string.
+
+biopax:BiochemicalPathwayStep askomics:startPoint "true"^^xsd:boolean.

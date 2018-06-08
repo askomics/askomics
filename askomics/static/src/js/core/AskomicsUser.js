@@ -24,7 +24,7 @@ class AskomicsUser {
             if ( user.isLogin() ) {
               user.intervalListener = setInterval(function(){
                 user.checkUser();
-              }, 15000);
+              }, 30000);
               __ihm.displayNavbar(true, user.username, user.admin, user.blocked);
             } else {
               if ( user.intervalListener != undefined ) {
@@ -114,8 +114,13 @@ class AskomicsUser {
 
     logout() {
         let service = new RestServiceJs('logout');
-        service.getAll(function() {
+        service.getAll()
+        .done(function(data) {
+            AskomicsUser.cleanHtmlLogin();
             location.reload();
+        })
+        .fail(function(value) {
+            AskomicsUser.cleanHtmlLogin();
         });
 
     }
@@ -123,14 +128,12 @@ class AskomicsUser {
     static cleanHtmlLogin() {
       $('#login_error').hide();
       $('#spinner_login').addClass('hidden');
-      $('#tick_login').removeClass('hidden');
       $('#cross_login').addClass('hidden');
     }
 
     static errorHtmlLogin() {
       $('#login_error').show();
       $('#spinner_login').addClass('hidden');
-      $('#tick_login').addClass('hidden');
       $('#cross_login').removeClass('hidden');
     }
 }

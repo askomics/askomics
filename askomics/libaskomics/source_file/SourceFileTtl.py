@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Classes to import data from a gff3 source files
+Classes to import data from a RDF source files
 """
 
 import os
@@ -20,11 +20,19 @@ class SourceFileTtl(SourceFile):
     Class representing a ttl Source file
     """
 
-    def __init__(self, settings, session, path):
+    def __init__(self, settings, session, path, file_type='ttl'):
 
-        SourceFile.__init__(self, settings, session, path)
+        newfile = path
+        
+        if not file_type == 'ttl':
+            newfile = self.convert_to_ttl(path,file_type)
+
+        SourceFile.__init__(self, settings, session, newfile)
 
         self.type = 'ttl'
+        self.origine_type = file_type
+        #overload name
+        self.name =  os.path.basename(path)
 
     def get_preview_ttl(self):
         """
@@ -70,9 +78,48 @@ class SourceFileTtl(SourceFile):
         self.insert_metadatas(public)
         return data
 
+    @staticmethod
+    def load_data_from_url(self, url,public):
+        """
+        insert the ttl sourcefile in the TS
+
+        """
+
+        data = {}
+
+        ql = QueryLauncher(self.settings, self.session)
+        try:
+            queryResults = ql.load_data(url, self.graph)
+        except Exception as e:
+            self.log.error(self._format_exception(e))
+            raise e
+        finally:
+            if self.settings["askomics.debug"]:
+                data['url'] = url
+
+        data["status"] = "ok"
+
+        self.insert_metadatas(public)
+
+        return data
+
     def file_get_contents(self, filename):
         """
         get the content of a file
         """
         with open(filename) as f:
             return f.read()#.splitlines()
+
+    def convert_to_ttl(self,filepath,file_type):
+        from rdflib import Graph
+        newfilepath = filepath
+
+        newfilepath = os.path.splitext(filepath)[0]+".ttl"
+        g = Graph()
+        if file_type == 'owl':
+            g.parse(filepath)
+        else:
+            g.parse(filepath, format=file_type)
+        #print(g.serialize(format='turtle'))
+        g.serialize(destination=newfilepath, format='turtle')
+        return newfilepath

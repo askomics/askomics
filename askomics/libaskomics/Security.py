@@ -115,8 +115,12 @@ class Security(ParamManager):
 
         result = query_laucher.process_query(sqa.get_password_with_email(self.email).query)
 
-        ts_salt = result[0]['salt']
-        ts_shapw = result[0]['shapw']
+        if len(result) <= 0:
+            ts_salt = ""
+            ts_shapw = ""
+        else:
+            ts_salt = result[0]['salt']
+            ts_shapw = result[0]['shapw']
 
         concat = self.settings["askomics.salt"] + self.passwd + ts_salt
         shapw = hashlib.sha256(concat.encode('utf8')).hexdigest()
@@ -181,7 +185,7 @@ class Security(ParamManager):
         query_laucher = QueryLauncher(self.settings, self.session)
         sqa = SparqlQueryAuth(self.settings, self.session)
 
-        query_laucher.execute_query(sqa.delete_apikey(key).query)
+        query_laucher.process_query(sqa.delete_apikey(key).query)
 
 
     def get_number_of_users(self):
@@ -372,7 +376,7 @@ class Security(ParamManager):
         query_laucher = QueryLauncher(self.settings, self.session)
         sqa = SparqlQueryAuth(self.settings, self.session)
 
-        query_laucher.execute_query(sqa.add_apikey(self.username, keyname).query)
+        query_laucher.process_query(sqa.add_apikey(self.username, keyname).query)
 
     def add_galaxy(self, url, key):
         """Connect a galaxy account to Askomics
@@ -395,7 +399,7 @@ class Security(ParamManager):
         query_laucher = QueryLauncher(self.settings, self.session)
         sqa = SparqlQueryAuth(self.settings, self.session)
 
-        query_laucher.execute_query(sqa.add_galaxy(self.username, url, key).query)
+        query_laucher.process_query(sqa.add_galaxy(self.username, url, key).query)
 
     def get_galaxy_infos(self):
         """Get Galaxy url and apikey of a user"""
@@ -426,4 +430,4 @@ class Security(ParamManager):
         query_laucher = QueryLauncher(self.settings, self.session)
         sqa = SparqlQueryAuth(self.settings, self.session)
 
-        query_laucher.execute_query(sqa.delete_galaxy(self.username).query)
+        query_laucher.process_query(sqa.delete_galaxy(self.username).query)

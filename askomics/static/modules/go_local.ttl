@@ -1,0 +1,78 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfg: <http://www.w3.org/2004/03/trix/rdfg-1/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix askomics: <http://www.semanticweb.org/askomics/ontologies/2018/1#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+@prefix oboInOwl: <http://www.geneontology.org/formats/oboInOwl#> .
+
+@prefix go:<http://purl.org/obo/owl/GO#> .
+
+
+owl:Class rdfs:label "owl:Class"^^xsd:string ;
+          askomics:entity "true"^^xsd:boolean.
+
+oboInOwl:id askomics:attribute "true"^^xsd:boolean .
+oboInOwl:id rdf:type owl:DatatypeProperty ;
+   rdfs:label "ID" ;
+   rdfs:domain owl:Class ;
+   rdfs:range xsd:string .
+
+obo:IAO_0000115 askomics:attribute "true"^^xsd:boolean .
+obo:IAO_0000115 rdf:type owl:DatatypeProperty ;
+   rdfs:label "IAODefinition" ;
+   rdfs:domain owl:Class ;
+   rdfs:range xsd:string .
+
+rdfs:comment askomics:attribute "true"^^xsd:boolean .
+rdfs:comment rdf:type owl:DatatypeProperty ;
+   rdfs:label "Comment" ;
+   rdfs:domain owl:Class ;
+   rdfs:range xsd:string .
+
+oboInOwl:hasDefinition askomics:attribute "true"^^xsd:boolean .
+oboInOwl:hasDefinition rdf:type owl:DatatypeProperty ;
+   rdfs:label "Definition" ;
+   rdfs:domain owl:Class ;
+   rdfs:range xsd:string .
+
+oboInOwl:hasOBONamespace askomics:attribute "true"^^xsd:boolean .
+oboInOwl:hasOBONamespace rdf:type owl:DatatypeProperty ;
+   rdfs:label "OBONamespace" ;
+   rdfs:domain owl:Class ;
+   rdfs:range xsd:string .
+
+oboInOwl:hasBroadSynonym askomics:attribute "true"^^xsd:boolean .
+oboInOwl:hasBroadSynonym rdf:type owl:DatatypeProperty ;
+   rdfs:label "BroadSynonym" ;
+   rdfs:domain owl:Class ;
+   rdfs:range xsd:string .
+
+oboInOwl:hasRelatedSynonym askomics:attribute "true"^^xsd:boolean .
+oboInOwl:hasRelatedSynonym rdf:type owl:DatatypeProperty ;
+   rdfs:label "RelatedSynonym" ;
+   rdfs:domain owl:Class ;
+   rdfs:range xsd:string .
+
+oboInOwl:hasExactSynonym askomics:attribute "true"^^xsd:boolean .
+oboInOwl:hasExactSynonym rdf:type owl:DatatypeProperty ;
+   rdfs:label "ExactSynonym" ;
+   rdfs:domain owl:Class ;
+   rdfs:range xsd:string .
+
+oboInOwl:hasNarrowSynonym askomics:attribute "true"^^xsd:boolean .
+oboInOwl:hasNarrowSynonym rdf:type owl:DatatypeProperty ;
+   rdfs:label "NarrowSynonym" ;
+   rdfs:domain owl:Class ;
+   rdfs:range xsd:string .
+
+oboInOwl:hasDbXref askomics:attribute "true"^^xsd:boolean .
+oboInOwl:hasDbXref rdf:type owl:DatatypeProperty ;
+   rdfs:label "DbXref" ;
+   rdfs:domain owl:Class ;
+   rdfs:range xsd:string .

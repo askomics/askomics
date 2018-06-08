@@ -1,15 +1,21 @@
 <hr/ >
 <h3 class='header-div'>Uploaded files</h3>
 <hr/ >
-{{#if allowed_upload}}
 <div class="btn-group" role="group" aria-label="...">
   <button id="upload_from_computer" type="button" class="btn btn-default"><i class="fa fa-upload"></i> Upload</button>
+  <button id="upload_from_url" type="button" class="btn btn-default"><i class="fa fa-arrow-left"></i> Upload from URL</button>
   {{#if galaxy}}
   <button id="upload_from_galaxy" type="button" class="btn btn-default"><i class="fa fa-arrow-left"></i> Get from Galaxy</button>
   {{/if}}
 </div>
-{{/if}}
-<br/ ><br/ >
+<br/><br/>
+
+<div class="alert alert-success" role="alert">
+  Download some example <a target="_blank" href="https://github.com/askomics/askomics/tree/federation/askomics/static/examples">here</a>.
+  To build your own data, template header are available <a target="_blank" href="https://github.com/askomics/askomics/tree/federation/askomics/static/templates">here</a>.
+</div>
+
+<br/><br/>
 <table class='table uploaded-data-table'>
     <thead>
         <tr>

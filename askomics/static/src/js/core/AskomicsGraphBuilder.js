@@ -355,19 +355,135 @@
       }
     }
 
+    getEndpointAndGraphCategory(uri) {
+
+      let graphs = {} ;
+      let endpoints = {} ;
+      let type_endpoints = {} ;
+      for (let g in __ihm.localUserAbstraction.uriToGraph[uri]) {
+        if (! (g in graphs)) {
+          graphs[g] = 1;
+        }
+      }
+
+      /* endpoints */
+      for (let g in graphs) {
+        let endp = __ihm.localUserAbstraction.graphToEndpoint[g];
+        if (! (endp in endpoints)) {
+          endpoints[endp] = endp ; //__ihm.localUserAbstraction.typeEndpoint[endp];
+          type_endpoints[endp] = __ihm.localUserAbstraction.typeEndpoint[endp];
+        }
+      }
+
+      /* Service endpoints */
+      for ( let urlendp in __ihm.localUserAbstraction.classToEndpoint ) {
+          if ( uri in __ihm.localUserAbstraction.classToEndpoint[urlendp]) {
+            endpoints[urlendp] = urlendp ; //__ihm.localUserAbstraction.typeEndpoint[urlendp];
+            type_endpoints[urlendp] = __ihm.localUserAbstraction.typeEndpoint[urlendp];
+          }
+      }
+
+      return [Object.keys(endpoints),Object.values(type_endpoints),Object.keys(graphs)];
+    }
+
+    /* browse nodes and edges to get graph and endpoints involved */
+    getEndpointAndGraph() {
+      /* copy arrays to avoid to removed nodes and links instancied */
+      let dup_node_array = $.extend(true, [], this._instanciedNodeGraph);
+      let dup_link_array = $.extend(true, [], this._instanciedLinkGraph);
+
+      let graphs = {} ;
+      let endpoints = {} ;
+      let type_endpoints = {} ;
+
+      for (let idx=0;idx<dup_node_array.length;idx++) {
+        let node = dup_node_array[idx];
+        for (let g in __ihm.localUserAbstraction.uriToGraph[node.uri]) {
+          if (! (g in graphs)) {
+            graphs[g] = 1;
+            let endp = __ihm.localUserAbstraction.graphToEndpoint[g];
+           // console.log("g:"+g);
+           // console.log("endp:"+endp);
+            endpoints[endp]=endp;
+            type_endpoints[endp] = __ihm.localUserAbstraction.typeEndpoint[endp];
+          }
+        }
+        //console.log("GRAPH--------");
+        //console.log(JSON.stringify(graphs));
+        /* Check External Service endpoints */
+        for ( let urlendp in __ihm.localUserAbstraction.classToEndpoint ) {
+            if ( node.uri in __ihm.localUserAbstraction.classToEndpoint[urlendp]) {
+             // console.log("==>"+node.uri);
+             // console.log("APPARTIENT A : "+JSON.stringify(__ihm.localUserAbstraction.classToEndpoint[urlendp]));
+              if (! (urlendp in endpoints)) {
+                //console.log("1add External Service endpoints:"+urlendp);
+                endpoints[urlendp] = urlendp ;//__ihm.localUserAbstraction.typeEndpoint[urlendp];
+                type_endpoints[urlendp] = __ihm.localUserAbstraction.typeEndpoint[urlendp];
+              }
+            //  console.log("--------");
+             // console.log(JSON.stringify(endpoints));
+            }
+        }
+      }
+
+      for (let idx=0;idx<dup_link_array.length;idx++) {
+        let link = dup_link_array[idx];
+        for (let g in __ihm.localUserAbstraction.uriToGraph[link.uri]) {
+          if (! (g in graphs)) {
+            graphs[g] = 1;
+          }
+        }
+       // console.log("GRAPH--------");
+       // console.log(JSON.stringify(graphs));
+
+        /* Check External Service endpoints */
+        for ( let urlendp in __ihm.localUserAbstraction.classToEndpoint ) {
+            if ( link.uri in __ihm.localUserAbstraction.classToEndpoint[urlendp]) {
+            //  console.log("link.uri==>"+link.uri);
+              if (! (urlendp in endpoints)) {
+                //console.log("2add External Service endpoints:"+urlendp);
+                endpoints[urlendp] = urlendp ;//__ihm.localUserAbstraction.typeEndpoint[urlendp];
+                type_endpoints[urlendp] = __ihm.localUserAbstraction.typeEndpoint[urlendp];
+              }
+            }
+        }
+      }
+      /*
+      console.log("GRAPH--------");
+      console.log(JSON.stringify(graphs));
+      // Graphs associate with endpoints
+      for (let g in graphs) {
+        if (g in __ihm.localUserAbstraction.graphToEndpoint ) {
+          let endp = __ihm.localUserAbstraction.graphToEndpoint[g];
+
+          if (! (endp in endpoints)) {
+            console.log("add Graph endpoints:"+endp);
+            endpoints[endp] = __ihm.localUserAbstraction.typeEndpoint[endp];
+          }
+        }
+      }
+      */
+      console.log("endpoints:"+JSON.stringify(endpoints));
+      console.log("graphs:"+JSON.stringify(graphs));
+
+      return [Object.keys(endpoints),Object.values(type_endpoints),Object.keys(graphs)];
+    }
+
     buildConstraintsGraph() {
-      let variates        = [] ;
+      let variates        = {} ;
       let blockConstraint = [] ;
 
       /* copy arrays to avoid to removed nodes and links instancied */
       let dup_node_array = $.extend(true, [], this._instanciedNodeGraph);
       let dup_link_array = $.extend(true, [], this._instanciedLinkGraph);
 
-      for (let idx=0;idx<this._instanciedNodeGraph.length;idx++) {
+      for (let idx=0;idx<dup_node_array.length;idx++) {
         let node = dup_node_array[idx];
         /* adding constraints about attributs about the current node */
         blockConstraint.push(node.buildConstraintsSPARQL());
-        node.instanciateVariateSPARQL(variates);
+        let variate_loc =[] ;
+        node.instanciateVariateSPARQL(variate_loc);
+        variates[node.SPARQLid] = variate_loc;
       }
 
       for (let idx=0;idx<this._instanciedNodeGraph.length;idx++) {
@@ -383,8 +499,9 @@
             } else {
               blockConstraint.push(bc);
             }
-            dup_link_array[ilx].instanciateVariateSPARQL(variates);
-
+            let variate_loc =[] ;
+            dup_link_array[ilx].instanciateVariateSPARQL(variate_loc);
+            variates[dup_link_array[ilx].SPARQLid] = variate_loc;
             //remove link to avoid to add two same constraint
             dup_link_array.splice(ilx,1);
           }
@@ -393,29 +510,4 @@
 
       return [variates,[blockConstraint,'']] ;
     }
-
-    countNumberOfSolution(functBefore,functCount) {
-      functBefore();
-      let tab = this.buildConstraintsGraph();
-      let data = {
-        'variates'             : ['(COUNT(DISTINCT *) as ?count)'],
-        'constraintesRelations': tab[1],
-        'constraintesFilters'  : tab[2],
-        'removeGraph'          : __ihm.getAbstraction().listUnactivedGraph(),
-        'limit'                : -1
-      };
-      let service = new RestServiceJs("sparqlquery");
-      service.post(data,function(res) {
-          if ('error' in res) {
-            console.log("Error count:"+res.error);
-            return;
-          }
-          console.log("COUNT = "+JSON.stringify(res));
-          if ( ! ('values' in res) ) return ;
-          if ( res.values.length<= 0 ) return ;
-          if ( ! ('count' in res.values[0]) ) return ;
-          functCount(res.values[0].count);
-      });
-    }
-
   }

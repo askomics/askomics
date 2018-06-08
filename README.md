@@ -1,8 +1,8 @@
 # AskOmics
 
-[![Build Status](https://travis-ci.org/askomics/askomics.svg?branch=master)](https://travis-ci.org/askomics/askomics)
-[![Coverage Status](https://coveralls.io/repos/github/askomics/askomics/badge.svg?branch=master)](https://coveralls.io/github/askomics/askomics?branch=master)
-![Docker Build](https://img.shields.io/docker/pulls/askomics/docker-askomics.svg)
+[![Build Status](https://travis-ci.org/askomics/askomics.svg?branch=federation)](https://travis-ci.org/askomics/askomics)
+[![Coverage Status](https://coveralls.io/repos/github/askomics/askomics/badge.svg?branch=federation)](https://coveralls.io/github/askomics/askomics?branch=federation)
+[![Docker Build](https://img.shields.io/docker/pulls/askomics/askomics.svg)](https://hub.docker.com/r/askomics/askomics/)
 
 ![Askomics logo](static/askomics.png)
 
@@ -114,6 +114,9 @@ Then, test can be run with
 ```
 ./venv/bin/python setup.py nosetests -a '!galaxy'
 ```
+##### Target a single file test
+
+./venv/bin/python setup.py nosetests -a '!galaxy' --tests askomics/test/askView_test.py 
 
 ##### With a html report coverage
 

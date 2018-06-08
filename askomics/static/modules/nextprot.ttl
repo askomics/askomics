@@ -1,0 +1,115 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfg: <http://www.w3.org/2004/03/trix/rdfg-1/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix askomics: <http://www.semanticweb.org/askomics/ontologies/2018/1#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
+@prefix void: <http://rdfs.org/ns/void#> .
+
+@prefix np:<http://nextprot.org/rdf#> .
+
+[] a sd:Service ;
+    sd:endpoint <https://api.nextprot.org/sparql> ;
+    dcterms:title "Linked Open Data platform for neXtProt data";
+    dcterms:description "neXtProt is a comprehensive human-centric discovery platform, offering its users a seamless integration of and navigation through protein-related data.";
+    sd:supportedLanguage sd:SPARQL11Query ;
+    sd:defaultDataset [
+        a sd:Dataset ;
+        sd:defaultGraph [
+            a sd:Graph ;
+            void:classPartition [
+                 void:class np:Entry ;
+                 void:class np:Isoform ;
+                 void:class np:TransmembraneRegion ;
+                 void:class np:Gene
+            ].
+        ].
+    ].
+
+# Entities
+# -----------
+
+np:Entry askomics:entity "true"^^xsd:boolean ;
+           askomics:startPoint "true"^^xsd:boolean ;
+           rdfs:label "np:Entry".
+
+np:Isoform askomics:entity "true"^^xsd:boolean ;
+                      askomics:startPoint "true"^^xsd:boolean ;
+                      rdfs:label "np:Isoform".
+
+np:TransmembraneRegion askomics:entity "true"^^xsd:boolean ;
+                      askomics:startPoint "true"^^xsd:boolean ;
+                      rdfs:label "np:TransmembraneRegion".
+
+np:Gene askomics:entity "true"^^xsd:boolean ;
+        askomics:startPoint "true"^^xsd:boolean ;
+        rdfs:label "np:Gene".
+
+# Attributes
+# ----------
+
+# _______________ Gene _____________________________
+
+np:end askomics:attribute "true"^^xsd:boolean .
+np:end rdf:type owl:DatatypeProperty ;
+   rdfs:label "end" ;
+   rdfs:domain np:Gene ;
+   rdfs:range xsd:string .
+
+np:name askomics:attribute "true"^^xsd:boolean .
+np:name rdf:type owl:DatatypeProperty ;
+   rdfs:label "name" ;
+   rdfs:domain np:Gene ;
+   rdfs:range xsd:string .
+
+np:length askomics:attribute "true"^^xsd:boolean .
+np:length rdf:type owl:DatatypeProperty ;
+      rdfs:label "length" ;
+      rdfs:domain np:Gene ;
+      rdfs:range xsd:string .
+
+np:band askomics:attribute "true"^^xsd:boolean .
+np:band rdf:type owl:DatatypeProperty ;
+      rdfs:label "band" ;
+      rdfs:domain np:Gene ;
+      rdfs:range xsd:string .
+
+np:begin askomics:attribute "true"^^xsd:boolean .
+np:begin rdf:type owl:DatatypeProperty ;
+      rdfs:label "begin" ;
+      rdfs:domain np:Gene ;
+      rdfs:range xsd:string .
+
+np:chromosome askomics:attribute "true"^^xsd:boolean .
+np:chromosome rdf:type owl:DatatypeProperty ;
+      rdfs:label "chromosome" ;
+      rdfs:domain np:Gene ;
+      rdfs:range xsd:string .
+
+np:strand askomics:attribute "true"^^xsd:boolean .
+np:strand rdf:type owl:DatatypeProperty ;
+      rdfs:label "strand" ;
+      rdfs:domain np:Gene ;
+      rdfs:range xsd:string .
+
+# relations
+# -----------
+
+np:isoform rdf:type owl:ObjectProperty ;
+         rdfs:label ":isoform"^^xsd:string ;
+         rdfs:domain np:Entry ;
+         rdfs:range np:Isoform .
+
+np:topology rdf:type owl:ObjectProperty ;
+         rdfs:label ":topology"^^xsd:string ;
+         rdfs:domain np:Isoform ;
+         rdfs:range  np:TransmembraneRegion.
+
+np:gene rdf:type owl:ObjectProperty ;
+                  rdfs:label ":gene"^^xsd:string ;
+                  rdfs:domain np:Entry ;
+                  rdfs:range  np:Gene.

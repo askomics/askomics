@@ -7,41 +7,87 @@ class AskomicsHelp {
 
   }
 
-  static start(){
+  static checkFirstUseAskomics(nStartpoints) {
+    if (__ihm.user.isLogin()) {
+      /* Check if database have starting point */
+      if (nStartpoints<=0) {
+        AskomicsHelp.startIntegration();
+      }
+    } else {
+      /* Check if database have none users */
+      let service = new RestServiceJs('nbUsers');
+      service.getAll()
+      .done(function(data) {
+        if (data.count<=0) {
+          /* Display information to create an account */
+          AskomicsHelp.startUserAccount();
+        }
+      })
+      .fail(function(value) {
+      });
+    }
+  }
+
+  static wikiDocumentation () {
+    return "<h4>User documentation</h4>\
+    <p> \
+    <ol>\
+    <li><a target='_blank' href='https://github.com/askomics/askomics/wiki/Usage#create-an-account'> Create an account </a></li> \
+    <li><a target='_blank' href='https://github.com/askomics/askomics/wiki/Usage#upload-your-data'> Upload your (local or remote) data (TSV/GFF/TTL/OWL/RDF-XML/N3/NT/JSON-LD) </a></li>\
+    <li><a target='_blank' href='https://github.com/askomics/askomics/wiki/Usage#query-your-data'> Query your data </a></li>\
+    </p>";
+  }
+
+
+  static startUserAccount(){
+    introJs().setOptions({
+      //showBullets: false,
+      showStepNumbers: false,
+      steps: [
+
+        {
+          element: '#navbar',
+          intro: "<h3>Need Help to use Askomics ?</h3>                               \
+          <p>AskOmics provide a visual                                               \
+          representation of the user abstraction as a graph.                         \
+          By starting from a node of interest and iteratively selecting its\
+          neighbors, the user creates a path on an abstraction graph.\
+          This path can then be transformed into a SPARQL query that can be\
+          executed on the original dataset.</p>" + AskomicsHelp.wikiDocumentation(),
+        },
+        {
+          element: '#login',
+          intro: "<p>Create an user account to insert your own data</p>\n"+ AskomicsHelp.wikiDocumentation(),
+          position: 'bottom'
+        },
+      ].filter(function (obj) {
+          if ( obj.element === undefined ) return true;
+          return $(obj.element).is(':visible');
+      })
+    }).onbeforechange(function(targetElement) {
+
+      if (targetElement === undefined || $(targetElement).is(':hidden')) // if targetElement does not exist or is hide
+        {
+        //  this.nextStep(); // go to the next step
+        }
+    }).start();
+    return false;
+  }
+
+  static startIntegration(){
 
     introJs().setOptions({
       //showBullets: false,
       showStepNumbers: false,
       steps: [
-/*
-        {
-          intro: "<h2>Need Help to use Askomics ?</h2>\
-          <p>AskOmics provide a visual\
-          representation of the user abstraction as a graph.\
-          By starting from a node of interest and iteratively selecting its\
-          neighbors, the user creates a path on an abstraction graph.\
-          This path can then be transformed into a SPARQL query that can be\
-          executed on the original dataset.</p>"
-        },
-        {
-          intro: "You <b>don't need</b> to define element to focus, this is a floating tooltip."
-        },
-*/
-/* Keep at end */
-/* =============================   NAV BAR ========================================================================*/
-{
-  element: '#login',
-  intro: "Create an user account to insert your own data",
-  position: 'bottom'
-},
 {
   element: '#integration',
-  intro: "Upload your CSV/TSV user files.",
+  intro: "<p>Database is empty. Upload your CSV/TSV/GFF/TTL files !<p>"+ AskomicsHelp.wikiDocumentation(),
   position: 'bottom'
 },
 {
   element: '#interrogation',
-  intro: "Create a request path to build a SPARQL query based on public and your own data.",
+  intro: "<p>Create a request path to build a SPARQL query based on public and your own data.</p>"+ AskomicsHelp.wikiDocumentation(),
   position: 'bottom',
 },
 {
@@ -59,7 +105,7 @@ class AskomicsHelp {
 /*******************************************************************/
         {
           element: '#add_files_upload',
-          intro: "Select CSV/TSV files that you want upload.",
+          intro: "Select CSV/TSV/GFF/TTL files that you want upload.",
           position: 'bottom',
         },
         {
