@@ -72,6 +72,8 @@ case $depmode in
 esac
 
 # Build python virtual environment ------------------------
+# Check if venv is build. If not, build and activate it
+# If yes, just activate it
 activate="$dir_venv/bin/activate"
 
 if [[ ! -f $activate ]]; then
@@ -85,6 +87,7 @@ else
     source $activate
 fi
 
+# Install JS dependancies if not installed ----------------
 if [[ ! -d $dir_node_modules ]]; then
     echo "javascript dependancies : npm install"
     # check binary dependancies
@@ -96,10 +99,10 @@ fi
 # Build config file ---------------------------------------
 config_name="custom.ini"
 config_path="$dir_config/$config_name"
-
-echo "Convert environment variables to ini file ..."
 cp "$dir_config/$depmode.$triplestore.ini" "$config_path"
 
+# Get environment variables -------------------------------
+echo "Convert environment variables to ini file ..."
 # This take ASKO_ env to update config in app:main section, only askomics. key
 printenv | egrep "^ASKO_" | while read setting
 do
@@ -122,7 +125,7 @@ done
 askojs="$dir_askomics/askomics/static/dist/askomics.js"
 
 # deploy JS if not run only option or if there is no js
-if [[ $run == false || ! -f $askojs ]]; then
+if [[ $run == false ]]; then
     echo "deploying javascript ..."
     if [[ $depmode == "development" ]]; then
         gulp $gulpmode &
