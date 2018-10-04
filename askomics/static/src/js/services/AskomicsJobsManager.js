@@ -54,10 +54,6 @@ let instanceAskomicsJobsViewManager ;
 
             let job = {} ;
             job.jobid = data[i].jobid;
-
-
-
-
             job.jobid = data[i].jobid ;
             job.type = data[i].type ;
             job.wait = (data[i].state == "Wait");
