@@ -50,14 +50,28 @@ let instanceAskomicsJobsViewManager ;
           ljobs.splice(0,ljobs.length);
 
           for (let i in data ) {
+            console.log(JSON.stringify(data[i]));
 
             let job = {} ;
+            job.jobid = data[i].jobid;
+
+
+
+
             job.jobid = data[i].jobid ;
             job.type = data[i].type ;
             job.wait = (data[i].state == "Wait");
             job.state = data[i].state ;
             job.tstart = data[i].start*1000 ;
             job.tend = data[i].end*1000 ;
+
+            if ( job.type == "SPARQL Request" ) {
+              job.isquery = true;
+              job.isintegration = false;
+            }else{
+              job.isquery = false;
+              job.isintegration = true;
+            }
 
             job.start = new Date(job.tstart).toLocaleString() ;
 
@@ -153,15 +167,32 @@ let instanceAskomicsJobsViewManager ;
 
       service.post(jdata,function(data) {
         new AskomicsJobsViewManager().loadjob().then(function () {
-          new AskomicsJobsViewManager().update_jobview ();
+          new AskomicsJobsViewManager().update_jobview ("query");
         });
       });
-      this.wait(500).then( function() {
-        $("#jobsview").trigger( "click" );
-      });
+
+      // go to jobs page
+      $('.nav li.active').removeClass('active');
+      $("li#jobsview").addClass('active');
+      if ( ! ( $("li#jobsview").attr('id') in { 'help' : '','admin':'', 'user_menu': '' }) ) {
+        $('.container').hide();
+        $('.container#navbar_content').show();
+        $('.container#content_' + $("li#jobsview").attr('id')).show();
+      } else {
+        $('.container#navbar_content').show();
+      }
     }
 
-    update_jobview () {
+    update_jobview (active_tab) {
+
+        if (!active_tab) {
+          if ($("div#jobs_query").hasClass("active")) {
+            active_tab = "query";
+          }else{
+            active_tab = "integration";
+          }
+        }
+
         let __inst = new AskomicsJobsViewManager();
         let template = AskOmics.templates.jobs;
 
@@ -189,6 +220,15 @@ let instanceAskomicsJobsViewManager ;
             if ( __inst.jobs[ij].preview != undefined ) {
               $("#results_table_"+ij).append(__inst.jobs[ij].preview);
             }
+          }
+
+          // active tab
+          if (active_tab == "integration") {
+            $("#integration-tab").addClass("active");
+            $("#jobs_integration").addClass("in active");
+          }else if (active_tab == "query"){
+            $("#query-tab").addClass("active");
+            $("#jobs_query").addClass("in active");
           }
         }
     }

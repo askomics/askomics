@@ -1234,6 +1234,13 @@ class IHMLocal {
 
         });
 
+        // reload jobs when the button is clicked
+        $("#jobsview").click(function(e) {
+          new AskomicsJobsViewManager().loadjob().then(function() {
+            new AskomicsJobsViewManager().update_jobview("integration");
+          });
+        });
+
         // diplay signup/login form
         $('#show_signup').click(function(e) {
           $('#content_login').hide();
