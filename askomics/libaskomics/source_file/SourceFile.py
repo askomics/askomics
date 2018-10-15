@@ -160,6 +160,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
                     total_triple_count += triple_count
                     triple_count = 0
                     chunk_count += 1
+                    os.remove(fp.name)
 
             # Load the last chunk
             if triple_count > 0:
