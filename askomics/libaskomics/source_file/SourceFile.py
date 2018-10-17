@@ -53,12 +53,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         self.reset_cache()
 
-        self.uri = {}
-        pref_uri = "http://semanticweb.org/askomics/entity/"
-        if self.is_defined('askomics.prefix'):
-            pref_uri = self.get_param("askomics.prefix")
-
-        self.uri = [ pref_uri for idx in range(20) ]
+        self.uri = []
 
         if uri_set != None:
             for idx,uri in uri_set.items():
@@ -66,9 +61,9 @@ class SourceFile(ParamManager, HaveCachedProperties):
                     # uri have to end with # or /
                     if not uri.endswith('#') and not uri.endswith('/'):
                         uri = uri + "/"
-                    self.uri[int(idx)] = uri
+                    self.uri.append(uri)
                 else:
-                    self.uri[int(idx)] = self.get_param("askomics.prefix")
+                    self.uri.append(self.get_param("askomics.prefix"))
 
     def setGraph(self,graph):
         self.graph = graph
