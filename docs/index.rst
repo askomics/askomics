@@ -25,9 +25,9 @@ AskOmics is a visual SPARQL query interface supporting both intuitive data integ
 Some (possibly outdated) documentation is also on the [AskOmics Wiki](https://github.com/askomics/askomics/wiki). It should be imported here some day.
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
 
-   README.md
+   README
    api/askomics
 
 
