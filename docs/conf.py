@@ -1,16 +1,6 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'askomics'))
-
-if 'extensions' in globals():
-    extensions.append("sphinx.ext.autodoc")
-    extensions.append("sphinx.ext.napoleon")
-else:
-    extensions = ['sphinx.ext.autodoc', 'sphinx.ext.napoleon']
-
-master_doc = 'index'
-
 
 def run_apidoc(_):
     from sphinx.apidoc import main
