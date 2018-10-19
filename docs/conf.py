@@ -3,7 +3,12 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'askomics'))
 
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.napoleon']
+if 'extensions' in globals():
+    extensions.append("sphinx.ext.autodoc")
+    extensions.append("sphinx.ext.napoleon")
+else:
+    extensions = ['sphinx.ext.autodoc', 'sphinx.ext.napoleon']
+
 master_doc = 'index'
 
 
@@ -19,7 +24,4 @@ def run_apidoc(_):
 
 
 def setup(app):
-    # overrides for wide tables in RTD theme
-    app.add_stylesheet('theme_overrides.css')
-    # trigger the run_apidoc
     app.connect('builder-inited', run_apidoc)
