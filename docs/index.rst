@@ -26,8 +26,8 @@ Some (possibly outdated) documentation is also on the [AskOmics Wiki](https://gi
 
 .. toctree::
    :maxdepth: 3
-
    README
+   api/askomics
 
 
 Indices and tables
