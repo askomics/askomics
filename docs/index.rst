@@ -27,7 +27,7 @@ Some (possibly outdated) documentation is also on the [AskOmics Wiki](https://gi
 .. toctree::
    :maxdepth: 2
 
-   README
+   README.md
    api/askomics
 
 
