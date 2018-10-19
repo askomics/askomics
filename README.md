@@ -1,7 +1,7 @@
 # AskOmics
 
-[![Build Status](https://travis-ci.org/askomics/askomics.svg?branch=federation)](https://travis-ci.org/askomics/askomics)
-[![Coverage Status](https://coveralls.io/repos/github/askomics/askomics/badge.svg?branch=federation)](https://coveralls.io/github/askomics/askomics?branch=federation)
+[![Build Status](https://travis-ci.org/askomics/askomics.svg?branch=master)](https://travis-ci.org/askomics/askomics)
+[![Coverage Status](https://coveralls.io/repos/github/askomics/askomics/badge.svg?branch=federation)](https://coveralls.io/github/askomics/askomics?branch=master)
 [![Docker Build](https://img.shields.io/docker/pulls/askomics/askomics.svg)](https://hub.docker.com/r/askomics/askomics/)
 
 ![Askomics logo](static/askomics.png)
@@ -10,11 +10,13 @@ AskOmics is a visual SPARQL query interface supporting both intuitive data integ
 
 ![Askomics Homepage](static/askomics_home.png)
 
-## Run AskOmics
+## Running AskOmics
 
 AskOmics is available under two supports : Docker and VM Virtualbox.
 
-https://github.com/askomics/askomics/wiki
+Some (possibly outdated) documentation is on the [AskOmics Wiki](https://github.com/askomics/askomics/wiki)
+
+See the new [AskOmics documentation](https://askomics.readthedocs.io/)
 
 ------------------
 
@@ -24,7 +26,7 @@ https://github.com/askomics/askomics/wiki
 
 If you want to use AskOmics, you will need :
 
-* [Python 3.3](https://www.python.org/downloads/) (or greater)
+* [Python 3.4](https://www.python.org/downloads/) (or greater)
 * [Pyramid 1.5](http://www.pylonsproject.org) (or greater)
 * [SPARQLWrapper](https://rdflib.github.io/sparqlwrapper/) 1.6.4 (or greater)
 
@@ -50,7 +52,7 @@ AskOmics also uses the following bundled libraries:
 
 #### Requirements
 
-+ python3.3
++ python 3.4
 + pip
 + venv
 + npm
@@ -116,7 +118,7 @@ Then, test can be run with
 ```
 ##### Target a single file test
 
-./venv/bin/python setup.py nosetests -a '!galaxy' --tests askomics/test/askView_test.py 
+./venv/bin/python setup.py nosetests -a '!galaxy' --tests askomics/test/askView_test.py
 
 ##### With a html report coverage
 
