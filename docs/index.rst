@@ -6,7 +6,7 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   README
+.. mdinclude:: ../README.md
 
 
 Indices and tables
