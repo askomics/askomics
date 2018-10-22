@@ -60,9 +60,7 @@ class AskView(object):
         self.log = logging.getLogger(__name__)
         self.request = request
         self.settings = request.registry.settings
-        self.log.debug("============================= SESSION =================================")
-        self.log.debug(self.request.session)
-        self.log.debug("==============================================================")
+
         try:
 
             if 'admin' not in self.request.session.keys():

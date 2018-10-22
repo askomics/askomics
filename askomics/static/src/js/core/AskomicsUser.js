@@ -18,22 +18,7 @@ class AskomicsUser {
         let user = this;
 
         /* check if a session is open */
-        this.checkUser().then(
-          function() {
-            /* set timeout to check if session is expired */
-            if ( user.isLogin() ) {
-              user.intervalListener = setInterval(function(){
-                user.checkUser();
-              }, 30000);
-              __ihm.displayNavbar(true, user.username, user.admin, user.blocked);
-            } else {
-              if ( user.intervalListener != undefined ) {
-                clearInterval(user.intervalListener);
-              }
-              __ihm.displayNavbar(false, '');
-            }
-          })
-          .catch (function () {} );
+        this.checkUser();
     }
 
     isAdmin() {
