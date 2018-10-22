@@ -221,7 +221,7 @@ class Security(ParamManager):
             admin = 'false'
             blocked = 'true'
             self.set_admin(False)
-            self.set_blocked(True)
+            self.set_blocked(False)
 
         chunk = ':' + self.username + ' rdf:type foaf:Person ;\n'
         indent = len(self.username) * ' ' + ' '
