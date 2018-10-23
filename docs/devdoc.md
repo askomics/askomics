@@ -37,9 +37,6 @@ Open a pull request against the master branch of askomics. The message of your p
 
 The pull request should pass all the continuous integration tests which are automatically run by Github using Travis CI. The coverage must be at least remain the same (but it's better if it increases)
 
-# API
-[devdoc](https://github.com/askomics/askomics/wiki/devdoc)
-
 ## Tests
 
 AskOmics use nosetests for Python tests. To run the tests, activate the Python virtual environment and run nosetests.
