@@ -9,6 +9,7 @@ dir_node_modules="$dir_askomics/node_modules"
 python_ex="python3"
 pyvenv="$python_ex -m venv"
 pip="$python_ex -m pip"
+gulp="./node_modules/gulp/bin/gulp.js"
 
 python_flags="-s"
 
@@ -125,9 +126,9 @@ askojs="$dir_askomics/askomics/static/dist/askomics.js"
 if [[ $run == false || ! -f $askojs ]]; then
     echo "deploying javascript ..."
     if [[ $depmode == "development" ]]; then
-        gulp $gulpmode &
+        $gulp $gulpmode &
     else
-        gulp $gulpmode
+        $gulp $gulpmode
     fi
 fi
 

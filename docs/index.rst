@@ -28,6 +28,9 @@ Some (possibly outdated) documentation is also on the [AskOmics Wiki](https://gi
    :maxdepth: 2
 
    README
+   deployment
+   usage
+   devdoc
    api/askomics
 
 
