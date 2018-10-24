@@ -16,7 +16,7 @@
                 <th>Start</th>
                 <th>End</th>
                 <th>Duration</th>
-                <th>Number of rows</th>
+                <th>Actions</th>
             </tr>
             {{#each jobs}}
             {{#if this.isintegration}}
@@ -39,11 +39,11 @@
                 {{else}}
                   <td style="cursor: pointer;">{{this.duration}}</td>
                 {{/if}}
-                {{#if this.wait}}
-                  <td style="cursor: pointer;"></td>
-                {{else}}
-                  <td style="cursor: pointer;">{{this.nr}}</td>
-                {{/if}}
+                <td>
+                  <div class="btn-group" role="group">
+                    <button onclick="this.parentNode.parentNode.parentNode.style.display = 'none';new AskomicsJobsViewManager().removeJob({{@index}});event.stopPropagation();" type="button" class="btn btn-default btn-xs"><i class="fa fa-times text-danger"></i> Del</button>
+                  </div>
+                </td>
                </tr>
             {{/if}}
             {{/each}}
