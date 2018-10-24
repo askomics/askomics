@@ -4,6 +4,7 @@ import unittest
 import os
 import tempfile
 import datetime
+import json
 
 from shutil import copyfile
 
@@ -406,33 +407,39 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.source_files_overview()
 
-        expected = {
-            'taxons': [],
-            'files': [{
-                'type': 'tsv',
-                'name': 'people.tsv',
-                'headers': ['People', 'First_name', 'Last_name', 'Sex', 'Age'],
-                'preview_data':
-                [['p1', 'p2', 'p3', 'p4', 'p5', 'p6'],
-                 ['Mike', 'Jean-Michel', 'Roger', 'Matthew', 'Ellen', 'Richard'],
-                 ['Oldfield', 'Jarre', 'Waters', 'Bellamy', 'Fraatz', 'Melville'],
-                 ['M', 'M', 'M', 'M', 'F', 'M'], ['63', '68', '73', '38', '39', '51']],
-                'column_types': ['entity_start', 'text', 'text', 'category', 'numeric']
-            }, {
-                'type': 'tsv',
-                'name': 'instruments.tsv',
-                'headers': ['Instruments', 'Name', 'Class'],
-                'preview_data':
-                [['i1', 'i2', 'i3', 'i4', 'i5', 'i6', 'i7', 'i8', 'i9'], [
-                    'Tubular_Bells', 'Mandolin', 'Electric_guitar', 'Violin',
-                    'Acoustic_guitar', 'Bass_guitar', 'MiniMoog', 'Laser_Harp', 'Piano'
-                ], [
-                    'Percussion', 'String', 'String', 'String', 'String', 'String',
-                    'Electro-analog', 'Electro-analog', 'String'
-                ]],
-                'column_types': ['entity_start', 'text', 'category']
-            }]
-        }
+        expected = {'files': [{'name': 'instruments.tsv',
+           'type': 'tsv',
+           'headers': ['Instruments', 'Name', 'Class'],
+           'preview_data': [['i1', 'i2', 'i3', 'i4', 'i5', 'i6', 'i7', 'i8', 'i9'],
+            ['Tubular_Bells',
+             'Mandolin',
+             'Electric_guitar',
+             'Violin',
+             'Acoustic_guitar',
+             'Bass_guitar',
+             'MiniMoog',
+             'Laser_Harp',
+             'Piano'],
+            ['Percussion',
+             'String',
+             'String',
+             'String',
+             'String',
+             'String',
+             'Electro-analog',
+             'Electro-analog',
+             'String']],
+           'column_types': ['entity_start', 'text', 'category']},
+          {'name': 'people.tsv',
+           'type': 'tsv',
+           'headers': ['People', 'First_name', 'Last_name', 'Sex', 'Age'],
+           'preview_data': [['p1', 'p2', 'p3', 'p4', 'p5', 'p6'],
+            ['Mike', 'Jean-Michel', 'Roger', 'Matthew', 'Ellen', 'Richard'],
+            ['Oldfield', 'Jarre', 'Waters', 'Bellamy', 'Fraatz', 'Melville'],
+            ['M', 'M', 'M', 'M', 'F', 'M'],
+            ['63', '68', '73', '38', '39', '51']],
+           'column_types': ['entity_start', 'text', 'text', 'category', 'numeric']}],
+         'taxons': []}
 
         assert data == expected
 
