@@ -48,6 +48,18 @@ nosetests
 
 Tests needs a Virtuoso instance and a Galaxy instance. You can use docker images.
 
+To skip the Galaxy tests, run
+
+```bash
+nosetests -a '!galaxy'
+```
+
+To target a single file test
+
+```bash
+nosetests -a '!galaxy' --tests askomics/test/askView_test.py
+```
+
 ```bash
 # Virtuoso
 docker pull askomics/virtuoso
