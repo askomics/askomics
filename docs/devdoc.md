@@ -57,7 +57,7 @@ nosetests -a '!galaxy'
 To target a single file test
 
 ```bash
-nosetests -a '!galaxy' --tests askomics/test/askView_test.py
+nosetests --tests askomics/test/askView_test.py
 ```
 
 ```bash
