@@ -16,8 +16,6 @@ class EndpointManager(ParamManager):
         self.create_db()
 
     def create_db(self):
-        print(self)
-
         conn = sqlite3.connect("file:"+self.pathdb,uri=True)
         c = conn.cursor()
         reqSql = '''CREATE TABLE IF NOT EXISTS endpoints
