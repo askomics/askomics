@@ -38,7 +38,9 @@ $(function () {
             headers.push($(this).val());
         });
         loadSourceFile($(event.target).closest('.template-source_file'), false, headers);
-        __ihm.displayModal('Upload TSV file.', '', 'Close');
+        // disable the button and add a message
+        $(this).addClass("disabled", true);
+        form.find($('.alert-info')).html("Loading tsv in private graph").removeClass("hidden");
     });
 
     // Load the tsv file into the public graph
@@ -50,43 +52,57 @@ $(function () {
             headers.push($(this).val());
         });
         loadSourceFile($(event.target).closest('.template-source_file'), true, headers);
-        __ihm.displayModal('Upload TSV file.', '', 'Close');
+        // disable the button and add a message
+        $(this).addClass("disabled", true);
+        form.find($('.alert-info')).html("Loading tsv in public graph").removeClass("hidden");
     });
 
     $("#content_integration").on('click', '.load_data_gff', function() {
         let idfile = $(this).attr('id');
         loadSourceFileGff(idfile, false);
-        __ihm.displayModal('Upload GFF file.', '', 'Close');
+        // disable the button and add a message
+        $(this).addClass("disabled", true);
+        form.find($('.alert-info')).html("Loading gff in private graph").removeClass("hidden");
     });
 
     $("#content_integration").on('click', '.load_data_gff_public', function() {
         let idfile = $(this).attr('id');
         loadSourceFileGff(idfile, true);
-        __ihm.displayModal('Upload GFF file.', '', 'Close');
+        // disable the button and add a message
+        $(this).addClass("disabled", true);
+        form.find($('.alert-info')).html("Loading gff in public graph").removeClass("hidden");
     });
 
     $("#content_integration").on('click', '.load_data_ttl', function() {
         let idfile = $(this).attr('id');
         loadSourceFileTtl(idfile, false);
-        __ihm.displayModal('Upload TTL file.', '', 'Close');
+        // disable the button and add a message
+        $(this).addClass("disabled", true);
+        form.find($('.alert-info')).html("Loading ttl in private graph").removeClass("hidden");
     });
 
     $("#content_integration").on('click', '.load_data_ttl_public', function() {
         let idfile = $(this).attr('id');
         loadSourceFileTtl(idfile, true);
-        __ihm.displayModal('Upload TTL file.', '', 'Close');
+        // disable the button and add a message
+        $(this).addClass("disabled", true);
+        form.find($('.alert-info')).html("Loading ttl in public graph").removeClass("hidden");
     });
 
     $("#content_integration").on('click', '.load_data_bed', function() {
         let idfile = $(this).attr('id');
         loadSourceFileBed(idfile, false);
-        __ihm.displayModal('Upload BED file.', '', 'Close');
+        // disable the button and add a message
+        $(this).addClass("disabled", true);
+        form.find($('.alert-info')).html("Loading bed in private graph").removeClass("hidden");
     });
 
     $("#content_integration").on('click', '.load_data_bed_public', function() {
         let idfile = $(this).attr('id');
         loadSourceFileBed(idfile, true);
-        __ihm.displayModal('Upload BED file.', '', 'Close');
+        // disable the button and add a message
+        $(this).addClass("disabled", true);
+        form.find($('.alert-info')).html("Loading bed in public graph").removeClass("hidden");
     });
 });
 
