@@ -44,6 +44,7 @@ from pyramid.httpexceptions import (
     HTTPForbidden,
     HTTPFound,
     HTTPNotFound,
+    exception_response
     )
 
 from validate_email import validate_email
@@ -86,21 +87,19 @@ class AskView(object):
     def checkAuthSession(self):
         #https://fr.wikipedia.org/wiki/Liste_des_codes_HTTP
 
-        import pyramid.httpexceptions as exc
         # Denny access for non loged users
         if self.request.session['username'] == '':
-            raise exc.exception_response(401)
+            raise exception_response(401)
 
         # Denny for blocked users
         if self.request.session['blocked']:
-            raise exc.exception_response(423)
+            raise exception_response(423)
 
 
     def checkAdminSession(self):
-        import pyramid.httpexceptions as exc
         #Deny access for non admin session
         if not self.request.session['admin'] :
-            raise exc.exception_response(403)
+            raise exception_response(403)
 
 
     @view_config(route_name='start_point', request_method='GET')
@@ -299,7 +298,6 @@ class AskView(object):
 
     @view_config(route_name='delete_endpoints', request_method='POST')
     def delete_endpoints(self):
-        import pyramid.httpexceptions as exc
         """
 
         """
@@ -322,7 +320,6 @@ class AskView(object):
 
     @view_config(route_name='add_endpoint', request_method='POST')
     def add_endpoint(self):
-        import pyramid.httpexceptions as exc
         """
 
         """
@@ -330,11 +327,11 @@ class AskView(object):
         self.checkAuthSession()
 
         if 'name' not in self.request.json_body:
-            raise exc.exception_response(404)
+            raise exception_response(404)
         if 'url' not in self.request.json_body:
-            raise exc.exception_response(404)
+            raise exception_response(404)
         if 'auth' not in self.request.json_body:
-            raise exc.exception_response(404)
+            raise exception_response(404)
 
         name = self.request.json_body['name']
         url = self.request.json_body['url']
@@ -345,7 +342,6 @@ class AskView(object):
 
     @view_config(route_name='enable_endpoints', request_method='POST')
     def enable_endpoints(self):
-        import pyramid.httpexceptions as exc
         """
 
         """
@@ -353,9 +349,9 @@ class AskView(object):
         self.checkAuthSession()
 
         if 'id' not in self.request.json_body:
-           raise exc.exception_response(404)
+           raise exception_response(404)
         if 'enable' not in self.request.json_body:
-           raise exc.exception_response(404)
+           raise exception_response(404)
 
         id = self.request.json_body['id']
         enable = self.request.json_body['enable']
@@ -1681,6 +1677,8 @@ class AskView(object):
         """
         Get all infos about a user
         """
+
+        self.checkAuthSession()
 
 
         sqa = SparqlQueryAuth(self.settings, self.request.session)

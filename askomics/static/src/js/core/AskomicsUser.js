@@ -18,7 +18,14 @@ class AskomicsUser {
         let user = this;
 
         /* check if a session is open */
-        this.checkUser();
+        this.checkUser().then(
+          function(){
+            if (user.isLogin()) {
+              __ihm.displayNavbar(true, user.username, user.admin, user.blocked);
+            }else{
+              __ihm.displayNavbar(false, '');
+            }
+          });
     }
 
     isAdmin() {
@@ -60,7 +67,6 @@ class AskomicsUser {
                 (self.galaxy != data.galaxy)) {
                   if ( self.username != "" && data.username == "") {
                     expired = true;
-                    console.debug("session expired !");
                   }
 
                   self.username = data.username;
@@ -80,10 +86,7 @@ class AskomicsUser {
                     if (expired) {
                       /* redirect to login page when user is disconnect */
                       sessionStorage.expired = "true" ;
-
-                      __ihm.displayModal('Session Expired', '', 'Close').click(function() {
-                        location.reload();
-                      });
+                    location.reload();
                     }
                   }
                 }
@@ -102,7 +105,6 @@ class AskomicsUser {
         service.getAll()
         .done(function(data) {
             AskomicsUser.cleanHtmlLogin();
-            location.reload();
         })
         .fail(function(value) {
             AskomicsUser.cleanHtmlLogin();

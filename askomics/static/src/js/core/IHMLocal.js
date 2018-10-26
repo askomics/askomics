@@ -144,6 +144,8 @@ class IHMLocal {
         } else {
           __ihm.getSVGLayout().startWithQuery(contents);
         }
+
+        this.user.checkUser();
     }
 
     stopSession() {
