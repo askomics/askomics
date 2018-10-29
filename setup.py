@@ -8,29 +8,8 @@ with open(os.path.join(here, 'README.md')) as f:
 with open(os.path.join(here, 'CHANGES.txt')) as f:
     CHANGES = f.read()
 
-requires = [
-    'pyramid==1.9',
-    'pyramid-chameleon',
-    'pyramid-debugtoolbar',
-    'waitress',
-    'SPARQLWrapper',
-    'requests==2.18.4',
-    'Pygments==2.2.0',
-    'nose==1.3.7',
-    'webtest',
-    'coverage',
-    'biopython',
-    'bcbio-gff',
-    'validate_email',
-    'bioblend',
-    'humanize',
-    'pybedtools==0.7.10',
-    'configparser',
-    'argparse',
-    'glob2',
-    'psutil',
-    'rdflib-jsonld'
-]
+with open('requirements.txt') as f:
+    requires = f.read().splitlines()
 
 setup(name='Askomics',
       version='18.10',
