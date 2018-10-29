@@ -9,7 +9,7 @@ dir_node_modules="$dir_askomics/node_modules"
 python_ex="python3"
 pyvenv="$python_ex -m venv"
 pip="$python_ex -m pip"
-gulp="./node_modules/.bin/gulp"
+gulp="$dir_node_modules/.bin/gulp"
 
 python_flags="-s"
 
