@@ -286,7 +286,7 @@ class AskomicsNode extends GraphNode {
     if ( idatt === undefined ) throw "switchRegexpMode : undefined attribute !";
     if (! (idatt in this._isregexp)) {
       /* default value */
-      this._isregexp[idatt] = true;
+      this._isregexp[idatt] = false;
       return;
     }
 
