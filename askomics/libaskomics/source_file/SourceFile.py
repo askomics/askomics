@@ -155,7 +155,6 @@ class SourceFile(ParamManager, HaveCachedProperties):
                     total_triple_count += triple_count
                     triple_count = 0
                     chunk_count += 1
-                    os.remove(fp.name)
 
             # Load the last chunk
             if triple_count > 0:
@@ -168,8 +167,6 @@ class SourceFile(ParamManager, HaveCachedProperties):
                 data = self.load_data_from_file(fp, urlbase)
                 if data['status'] == 'failed':
                     return data
-                self.log.debug("source file : persist delete =>"+fp.name)
-                os.remove(fp.name) # Everything ok, remove previous temp file
 
             total_triple_count += triple_count
 
@@ -192,7 +189,6 @@ class SourceFile(ParamManager, HaveCachedProperties):
                 return data
             data['total_triple_count'] = total_triple_count
             self.log.debug("source file : persist delete =>"+fp.name)
-            os.remove(fp.name)
 
         else:
 
@@ -295,11 +291,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
             raise e
 
         finally:
-            if self.settings["askomics.debug"]:
-                data['url'] = url
-            else:
-                self.log.info("Source file : load_data_from_file delete =>"+fp.name)
-                os.remove(fp.name) # Everything ok, remove temp file
+            os.remove(fp.name)
 
         return data
 
