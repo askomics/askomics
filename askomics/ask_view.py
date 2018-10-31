@@ -1078,7 +1078,8 @@ class AskView(object):
         ''' Get all jobs recorded in database '''
 
         jm = JobManager(self.settings, self.request.session)
-        return jm.listJobs()
+        maxrows = self.settings['askomics.triplestore_results_max_rows'] if 'askomics.triplestore_results_max_rows' in self.settings else None
+        return {'maxrows': maxrows, 'jobs': jm.listJobs()}
 
 
     @view_config(route_name='deljob', request_method='POST')

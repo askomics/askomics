@@ -85,7 +85,11 @@
                 {{#if this.wait}}
                   <td style="cursor: pointer;" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}"></td>
                 {{else}}
-                  <td style="cursor: pointer;" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}">{{this.nr}}</td>
+                  <td style="cursor: pointer;" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}">{{this.nr}}
+                    {{#if this.warn}}
+                        <i class="fa fa-exclamation-triangle" data-toggle="tooltip" title="Triplestore limits his results to {{../maxrows}}, you may have incomplete results"></i>
+                    {{/if}}
+                  </td>
                 {{/if}}
                 <td>
                   <div class="btn-group" role="group">

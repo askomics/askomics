@@ -10,6 +10,7 @@ let instanceAskomicsJobsViewManager ;
 
       this.jobs = [];
       this.npreview=30 ; /* max data to transfert to IHM */
+      this.maxrows=null;
 
       instanceAskomicsJobsViewManager = this;
 
@@ -46,20 +47,21 @@ let instanceAskomicsJobsViewManager ;
         let model = {};
 
         service.post(model, function(data) {
-          let ljobs = new AskomicsJobsViewManager().jobs ;
+          let jobs = data.jobs;
+          let jvm = new AskomicsJobsViewManager();
+          let ljobs = jvm.jobs;
+          jvm.maxrows = data.maxrows;
           ljobs.splice(0,ljobs.length);
 
-          for (let i in data ) {
-            console.log(JSON.stringify(data[i]));
-
+          for (let i in jobs ) {
             let job = {} ;
-            job.jobid = data[i].jobid;
-            job.jobid = data[i].jobid ;
-            job.type = data[i].type ;
-            job.wait = (data[i].state == "Wait");
-            job.state = data[i].state ;
-            job.tstart = data[i].start*1000 ;
-            job.tend = data[i].end*1000 ;
+            job.jobid = jobs[i].jobid;
+            job.jobid = jobs[i].jobid ;
+            job.type = jobs[i].type ;
+            job.wait = (jobs[i].state == "Wait");
+            job.state = jobs[i].state ;
+            job.tstart = jobs[i].start*1000 ;
+            job.tend = jobs[i].end*1000 ;
 
             if ( job.type == "SPARQL Request" ) {
               job.isquery = true;
@@ -73,21 +75,22 @@ let instanceAskomicsJobsViewManager ;
 
             job.end = new Date(job.tend).toLocaleString() ;
 
-            job.nr = data[i].nr ;
+            job.nr = jobs[i].nr ;
+            job.warn = job.nr == data.maxrows ? true : false;
             job.duration = AskomicsJobsViewManager.getDuration(job.tstart,job.tend) ;
             job.classtr = AskomicsJobsViewManager.getClassTr(job.state) ;
-            if ( data[i].requestGraph != '') {
-              //console.log("requestGraph======>"+JSON.stringify(data[i].requestGraph));
-              job.stateToReload = btoa(data[i].requestGraph);
+            if ( jobs[i].requestGraph != '') {
+              //console.log("requestGraph======>"+JSON.stringify(jobs[i].requestGraph));
+              job.stateToReload = btoa(jobs[i].requestGraph);
             }
-            if ( 'file' in data[i] ) {
-              job.csv   = data[i].file;
+            if ( 'file' in jobs[i] ) {
+              job.csv   = jobs[i].file;
             }
 
-            job.preview = $('<div></div>').html(data[i].preview) ;
+            job.preview = $('<div></div>').html(jobs[i].preview) ;
             job.data = undefined;
-            if ( 'data' in data[i] ) job.data = data[i].data ;
-            job.variates = data[i].variates;
+            if ( 'data' in jobs[i] ) job.data = jobs[i].data ;
+            job.variates = jobs[i].variates;
 
             let idx = 0;
             for (idx;idx<ljobs.length;idx++) {
@@ -192,7 +195,7 @@ let instanceAskomicsJobsViewManager ;
         let __inst = new AskomicsJobsViewManager();
         let template = AskOmics.templates.jobs;
 
-        let context = {jobs: __inst.jobs, galaxy: __ihm.user.haveGalaxy()};
+        let context = {jobs: __inst.jobs, galaxy: __ihm.user.haveGalaxy(), maxrows: __inst.maxrows};
         let html = template(context);
 
         $("#content_jobsview").empty();
