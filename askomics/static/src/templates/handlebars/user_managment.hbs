@@ -46,35 +46,19 @@
 <hr/ >
 <h4>API keys</h4>
 <hr/ >
-<p>API keys allow login with the askomics API without giving your password</p>
-<p>You can have up to 5 API keys!</p>
-
-<div class="input-group">
-  <span class="input-group-addon" id="basic-addon1"><i class="fa fa-key" aria-hidden="true"></i></span>
-  <input type="text" class="form-control new_apikey_name" id='{{user.username}}' placeholder="Name of your key" aria-describedby="basic-addon1">
-  <span class="input-group-btn">
-    <button class="btn btn-default get_new_apikey" id='{{user.username}}' type="button">
-      Get API key
-      <i class="hidden fa fa-spinner pulse" id='spiner_apikey'></i>
-      <i class="hidden fa fa-check text-success" id='tick_apikey'></i>
-    </button>
-  </span>
-</div>
-
+<p>API key allow login with the askomics API without giving your password</p>
 <br>
 
-{{#each keys}}
-<br>
 <div class="panel panel-default">
-  <div class="panel-heading">{{this.name}}</div>
+  <div class="panel-heading">API key</div>
   <div class="panel-body">
-    <p class='apikey' id='{{this.key}}'>{{this.key}}<p/>
+    <p class='apikey' id='{{user.apikey}}'>{{user.apikey}}<p/>
     {{!-- buttons --}}
-    <button type="button" class="pull-right btn btn-xs btn-danger del_key" id="{{this.key}}"><i class="fa fa-trash" aria-hidden="true"></i> Delete</button>
-    <button type="button" class="pull-right btn btn-xs btn-default copy_key" data-toggle="tooltip" data-placement="left" title="Copy to Clipboard" id="{{this.key}}"><i class="fa fa-clipboard" aria-hidden="true"></i> Copy</button>
+    <button type="button" class="pull-right btn btn-xs btn-default renew_key" id="{{user.apikey}}"><i class="fa fa-repeat" aria-hidden="true"></i> Renew</button>
+    <button type="button" class="pull-right btn btn-xs btn-default copy_key" data-toggle="tooltip" data-placement="left" title="Copy to Clipboard" id="{{user.apikey}}"><i class="fa fa-clipboard" aria-hidden="true"></i> Copy</button>
   </div>
 </div>
-{{/each}}
+
 
 <hr />
 <h4>Galaxy Account</h4>

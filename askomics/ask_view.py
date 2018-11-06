@@ -39,6 +39,8 @@ from askomics.libaskomics.source_file.SourceFile import SourceFile
 from askomics.libaskomics.source_file.SourceFileURL import SourceFileURL
 
 from askomics.libaskomics.GalaxyConnector import GalaxyConnector
+from askomics.libaskomics.DatabaseConnector import DatabaseConnector
+
 
 from pyramid.httpexceptions import (
     HTTPForbidden,
@@ -1366,21 +1368,13 @@ class AskView(object):
         self.data['sucess'] = 'success'
         return self.data
 
-    @view_config(route_name='del_apikey', request_method='POST')
-    def del_apikey(self):
+    @view_config(route_name='renew_apikey', request_method='GET')
+    def renew_apikey(self):
 
         self.checkAuthSession()
 
-        body = self.request.json_body
-        key = body['key']
-
         security = Security(self.settings, self.request.session, self.request.session['username'], '', '', '')
-
-        # Check the key belong to the user
-        key_belong2user = security.ckeck_key_belong_user(key)
-
-        if key_belong2user:
-            security.delete_apikey(key)
+        security.renew_apikey()
 
     @view_config(route_name='connect_galaxy', request_method='POST')
     def connect_galaxy(self):
@@ -1681,50 +1675,27 @@ class AskView(object):
 
         self.checkAuthSession()
 
+        security = Security(self.settings, self.request.session, self.request.session['username'], '', '', '')
+        infos = security.get_user_infos()
 
-        sqa = SparqlQueryAuth(self.settings, self.request.session)
-        query_laucher = QueryLauncher(self.settings, self.request.session)
+        result = {}
 
-        try:
-            result = query_laucher.process_query(sqa.get_user_infos(self.request.session['username']).query)
-        except Exception as e:
-            self.data['error'] = str(e)
-            self.log.error(str(e))
-            self.request.response.status = 400
-            return self.data
+        result['email'] = infos[0][0]
+        result['username'] = self.request.session['username']
+        result['admin'] = infos[0][1]
+        result['blocked'] = infos[0][2]
+        result['apikey'] = infos[0][3]
 
-
-        apikey_list = []
         galaxy_dict = {}
 
-        for res in result:
-            if 'keyname' in res:
-                self.log.debug(res['keyname'])
-                self.log.debug(res['apikey'])
-                # apikey_dict[res['keyname']] = res['apikey']
-                apikey_list.append({'name': res['keyname'], 'key': res['apikey']})
+        if infos[1]:
+            galaxy_dict = {'url': infos[1][0], 'key': infos[1][1]}
 
-        for res in result:
-            if 'Gurl' in res:
-                self.log.debug(res['Gurl'])
-                self.log.debug(res['Gkey'])
-                galaxy_dict = {'url': res['Gurl'], 'key': res['Gkey']}
-
-        result = result[0]
-        result['email'] = re.sub(r'^mailto:', '', result['email'])
-        result['username'] = self.request.session['username']
-        result['admin'] = ParamManager.Bool(result['admin'])
-        result['blocked'] = ParamManager.Bool(result['blocked'])
-        result.pop('keyname', None)
-        result.pop('apikey', None)
-        result.pop('Gurl', None)
-        result.pop('Gkey', None)
-
-        result['apikeys'] = apikey_list
-        if galaxy_dict:
-            result['galaxy'] = galaxy_dict
+        result['galaxy'] = galaxy_dict
 
         return result
+
+
     @view_config(route_name='update_mail', request_method='POST')
     def update_mail(self):
         """

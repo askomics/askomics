@@ -986,7 +986,7 @@ class IHMLocal {
     userForm() {
       let service = new RestServiceJs('get_my_infos');
       service.getAll(function(d) {
-        // console.log(JSON.stringify(d));
+        console.log(JSON.stringify(d));
         console.log('keys');
         console.log(d.apikeys);
         let template = AskOmics.templates.user_managment;
@@ -1003,9 +1003,6 @@ class IHMLocal {
         });
         $('.update_passwd#' + d.username).click(function() {
           __ihm.updatePasswd(d.username);
-        });
-        $('.get_new_apikey#' + d.username).click(function() {
-          __ihm.get_apikey(d.username, $('.new_apikey_name#' + d.username).val());
         });
         $('.add_galaxy#' + d.username).click(function() {
           __ihm.connect_galaxy($('.galaxy_url#' + d.username).val(), $('.galaxy_key#' + d.username).val());
@@ -1026,17 +1023,16 @@ class IHMLocal {
                  .tooltip('fixTitle');
         });
 
-        // Delete key
-        $('.del_key').click(function() {
-          __ihm.deleteApikey(this.id);
+        // Reniew key
+        $('.renew_key').click(function() {
+          __ihm.renewApikey(this.id);
         });
       });
     }
 
-    deleteApikey(key) {
-      let service = new RestServiceJs('del_apikey');
-      let data = {'key': key};
-      service.post(data, function(d) {
+    renewApikey() {
+      let service = new RestServiceJs('renew_apikey');
+      service.getAll(function(d) {
         __ihm.userForm();
       });
     }
@@ -1101,7 +1097,7 @@ class IHMLocal {
       let email = $('.new_email#' + username).val();
 
       // check if email is valid (to avoid a useless request to the python server)
-      if (!validateEmail(email)) {
+      if (!__ihm.validateEmail(email)) {
         __ihm.manageErrorMessage({'error': 'not a valid email'});
         return;
       }
