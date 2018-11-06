@@ -535,12 +535,12 @@ class AskViewTests(unittest.TestCase):
         data = self.askview.source_files_overview()
 
     def test_prefix_uri(self):
-        """Test preview_ttl method"""
+        """Test prefix_uri method"""
         self.tps.clean_up()
         data = self.askview.prefix_uri()
 
     def test_load_remote_data_into_graph(self):
-        """Test preview_ttl method"""
+        """Test load_remote_data_into_graph method"""
         self.tps.clean_up()
         try:
             data = self.askview.load_remote_data_into_graph()
@@ -578,7 +578,7 @@ class AskViewTests(unittest.TestCase):
 
         self.request.session['admin'] = True
         self.request.json_body['public'] = False
-        self.request.json_body['url'] = 'https://raw.githubusercontent.com/askomics/askomics/federation/askomics/static/modules/dbpedia.ttl'
+        self.request.json_body['url'] = 'https://raw.githubusercontent.com/askomics/askomics/master/askomics/static/modules/dbpedia.ttl'
         try:
             data = self.askview.load_remote_data_into_graph()
             assert True
@@ -595,7 +595,8 @@ class AskViewTests(unittest.TestCase):
             'col_types': [
                 'entity_start', 'text', 'text', 'category', 'numeric'
             ],
-            'disabled_columns': []
+            'disabled_columns': [],
+            'uris': {'0': 'http://www.semanticweb.org/user/ontologies/2018/1#', '1': None, '2': None, '3': None, '4': None}
         }
 
         data = self.askview.preview_ttl()
@@ -621,6 +622,7 @@ class AskViewTests(unittest.TestCase):
             'col_types': [
                 'entity_start', 'text', 'text', 'category', 'numeric'
             ],
+            'uris': {'0': 'http://www.semanticweb.org/user/ontologies/2018/1#', '1': None, '2': None, '3': None, '4': None},
             'disabled_columns': [],
             'public': False,
             'headers': ['People', 'First_name', 'Last_name', 'Sex', 'Age'],

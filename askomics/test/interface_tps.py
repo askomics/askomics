@@ -81,7 +81,7 @@ class InterfaceTPS(object):
 
         return named_graphs
 
-    def load_file(self, file, col_types, public=False):
+    def load_file(self, file, col_types, uri_set, public=False):
         """Load a file into the triplestore
 
         :param file: name of the file without extention
@@ -98,7 +98,7 @@ class InterfaceTPS(object):
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
 
-        src_file = sfc.get_source_files([file])[0]
+        src_file = sfc.get_source_files([file], uri_set=uri_set)[0]
 
         src_file.set_forced_column_types(col_types)
         src_file.set_disabled_columns(disabled_columns)
@@ -115,7 +115,8 @@ class InterfaceTPS(object):
         """
 
         col_types = ['entity_start', 'text', 'text', 'category', 'numeric']
-        return self.load_file("people.tsv", col_types)
+        uri_set = {'0': 'http://www.semanticweb.org/user/ontologies/2018/1#', '1': None, '2': None, '3': None, '4': None}
+        return self.load_file("people.tsv", col_types, uri_set)
 
     def load_instruments(self):
         """Load the file instruments.tsv
@@ -125,7 +126,8 @@ class InterfaceTPS(object):
         """
 
         col_types = ['entity_start', 'text', 'category']
-        return self.load_file("instruments.tsv", col_types)
+        uri_set = {'0': 'http://www.semanticweb.org/user/ontologies/2018/1#', '1': None, '2': None}
+        return self.load_file("instruments.tsv", col_types, uri_set)
 
     def load_play_instrument(self):
         """Load the file play_instruments.tsv
@@ -135,7 +137,8 @@ class InterfaceTPS(object):
         """
 
         col_types = ['entity_start', 'entity', 'category']
-        return self.load_file("play_instrument.tsv", col_types)
+        uri_set = {'0': 'http://www.semanticweb.org/user/ontologies/2018/1#', '1': None, '2': None}
+        return self.load_file("play_instrument.tsv", col_types, uri_set)
 
     def load_public_people(self):
         """Load the file people.tsv as public data
@@ -145,7 +148,8 @@ class InterfaceTPS(object):
         """
 
         col_types = ['entity_start', 'text', 'text', 'category', 'numeric']
-        return self.load_file("people.tsv", col_types, True)
+        uri_set = {'0': 'http://www.semanticweb.org/user/ontologies/2018/1#', '1': None, '2': None, '3': None, '4': None}
+        return self.load_file("people.tsv", col_types, uri_set, True)
 
     def load_transcript(self):
         """Load the file transcript.tsv
@@ -155,7 +159,8 @@ class InterfaceTPS(object):
         """
 
         col_types = ['entity_start', 'taxon', 'ref', 'start', 'end', 'strand', 'category']
-        return self.load_file("transcript.tsv", col_types)
+        uri_set = {'0': 'http://www.semanticweb.org/user/ontologies/2018/1#', '1': None, '2': None, '3': None, '4': None, '5': None, '6': None}
+        return self.load_file("transcript.tsv", col_types, uri_set)
 
     def load_qtl(self):
         """Load the file qtl.tsv
@@ -165,7 +170,8 @@ class InterfaceTPS(object):
         """
 
         col_types = ['entity_start', 'taxon', 'ref', 'start', 'end']
-        return self.load_file("qtl.tsv", col_types)
+        uri_set = {'0': 'http://www.semanticweb.org/user/ontologies/2018/1#', '1': None, '2': None, '3': None, '4': None}
+        return self.load_file("qtl.tsv", col_types, uri_set)
 
     def clean_up(self):
         """Delete all tests data
