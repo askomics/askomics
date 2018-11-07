@@ -972,66 +972,29 @@ class AskViewTests(unittest.TestCase):
         """Test login_api method"""
 
         self.tps.clean_up()
-        # First, create a user
-        self.request.json_body = {
-            'username': 'jdoe',
-            'email': 'jdoe@exemple.com',
-            'password': 'iamjohndoe',
-            'password2': 'iamjohndoe'
-        }
-
-        self.askview.signup()
-
-        # Then, create an API key
-
-        self.request.json_body = {
-            'username': 'jdoe',
-            'keyname': 'test'
-        }
-
-        self.askview.api_key()
-
-        # then, get infos
-        infos = self.askview.get_my_infos()
+        self.tps.add_jdoe_in_users()
 
         # then, try to log with API key
         self.request.json_body = {
-            'apikey': infos['apikeys'][0]['key']
+            'apikey': 'jdoe_apikey'
         }
 
         data = self.askview.login_api()
 
-        assert data == {'admin': True, 'blocked': False, 'username': 'jdoe', 'sucess': 'success', 'error': ''}
+        assert data == {'admin': False, 'blocked': False, 'username': 'jdoe', 'error': ''}
 
     def test_login_api_gie(self):
-        """Test login_api method"""
+        """Test login_api_gie method"""
 
         self.tps.clean_up()
-        # First, create a user
-        self.request.json_body = {
-            'username': 'jdoe',
-            'email': 'jdoe@exemple.com',
-            'password': 'iamjohndoe',
-            'password2': 'iamjohndoe'
-        }
-
-        self.askview.signup()
-
-        # Then, create an API key
-        self.request.json_body = {
-            'username': 'jdoe',
-            'keyname': 'test'
-        }
-
-        self.askview.api_key()
-
-        # then, get infos
-        infos = self.askview.get_my_infos()
+        self.tps.add_jdoe_in_users()
 
         # then, try to log with API key
-        self.request.GET['key'] = infos['apikeys'][0]['key']
+        self.request.json_body = {
+            'apikey': 'jdoe_apikey'
+        }
 
-        self.askview.login_api_gie()
+        self.askview.login_api()
 
     def test_get_users_infos(self):
         """Test get_users_infos"""
@@ -1063,7 +1026,7 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.get_users_infos()
 
-        assert data == {'result': [], 'error': [], 'admin': True, 'blocked': False, 'username': 'jdoe'}
+        assert data == {'result': [{'username': 'jdoe', 'email': 'jdoe@example.com', 'admin': True, 'blocked': False}], 'error': [], 'username': 'jdoe', 'admin': True, 'blocked': False}
 
     def test_lock_user(self):
         """Test lock_user method"""
@@ -1148,36 +1111,18 @@ class AskViewTests(unittest.TestCase):
         """Test get_my_infos"""
 
         self.tps.clean_up()
-
-        # First, insert me
-        self.request.json_body = {
-            'username': 'jdoe',
-            'email': 'jdoe@example.com',
-            'password': 'iamjohndoe',
-            'password2': 'iamjohndoe'
-        }
-
-        self.askview.signup()
+        self.tps.add_jdoe_in_users()
 
         # get my infos
         data = self.askview.get_my_infos()
 
-        assert data == {'email': 'jdoe@example.com', 'username': 'jdoe', 'apikeys': [], 'blocked': False, 'admin': True}
+        assert data == {'email': 'jdoe@example.com', 'username': 'jdoe', 'apikey': 'jdoe_apikey', 'blocked': False, 'admin': False}
 
     def test_update_mail(self):
         """Test update_mail"""
 
         self.tps.clean_up()
-
-        # First, insert me
-        self.request.json_body = {
-            'username': 'jdoe',
-            'email': 'jdoe@example.com',
-            'password': 'iamjohndoe',
-            'password2': 'iamjohndoe'
-        }
-
-        self.askview.signup()
+        self.tps.add_jdoe_in_users()
 
         # And change my email
         self.request.json_body = {
@@ -1187,7 +1132,7 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.update_mail()
 
-        assert data == {'username': 'jdoe', 'error': [], 'success': 'success', 'blocked': False, 'admin': True}
+        assert data == {'success': 'success'}
 
     def test_update_passwd(self):
         """Test update_passwd method"""

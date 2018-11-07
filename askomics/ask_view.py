@@ -1379,10 +1379,7 @@ class AskView(object):
     @view_config(route_name='connect_galaxy', request_method='POST')
     def connect_galaxy(self):
 
-        # Denny access for non loged users or non admin users
-        if self.request.session['username'] == '':
-            self.data['error'] = 'Need a connexion !'
-            return self.data
+        self.checkAuthSession()
 
         body = self.request.json_body
         url = body['url']
@@ -1392,9 +1389,7 @@ class AskView(object):
 
 
         # Check if a galaxy is already registred
-        galaxy_already_registred = security.check_galaxy()
-
-        if galaxy_already_registred:
+        if security.check_galaxy():
             security.delete_galaxy()
             self.request.session['galaxy'] = False
 
@@ -1515,24 +1510,11 @@ class AskView(object):
         self.checkAuthSession()
         self.checkAdminSession()
 
-        sqa = SparqlQueryAuth(self.settings, self.request.session)
-        ql = QueryLauncher(self.settings, self.request.session)
+        security = Security(self.settings, self.request.session, self.request.session['username'], '', '', '')
+        infos = security.get_users_infos()
 
-        try:
-            result = ql.process_query(sqa.get_users_infos(self.request.session['username']).query)
-        except Exception as e:
-            self.data['error'] = str(e)
-            self.log.error(str(e))
-
-        for res in result:
-            res['admin'] = ParamManager.Bool(res['admin'])
-            res['blocked'] = ParamManager.Bool(res['blocked'])
-            res['email'] = re.sub(r'^mailto:', '', res['email'])
-
-        self.log.debug(result)
-
-        self.data['result'] = result
-
+        self.data['result'] = infos
+        self.log.debug(infos)
         return self.data
 
     @view_config(route_name='lockUser', request_method='POST')
@@ -1546,20 +1528,20 @@ class AskView(object):
 
         body = self.request.json_body
 
+        self.data = {}
+
         username = body['username']
         new_status = body['lock']
 
-        # Convert bool to string for the triplestore
+        # Convert bool to string for the database
         if new_status:
             new_status = 'true'
         else:
             new_status = 'false'
 
-        sqb = SparqlQueryBuilder(self.settings, self.request.session)
-        query_laucher = QueryLauncher(self.settings, self.request.session)
-
         try:
-            query_laucher.process_query(sqb.update_blocked_status(new_status, username).query)
+            security = Security(self.settings, self.request.session, self.request.session['username'], '', '', '')
+            security.lock_user(new_status, username)
         except Exception as e:
             self.data['error'] = str(e)
             self.log.error(str(e))
@@ -1583,17 +1565,15 @@ class AskView(object):
         username = body['username']
         new_status = body['admin']
 
-        # Convert bool to string for the triplestore
+        # Convert bool to string for the database
         if new_status:
             new_status = 'true'
         else:
             new_status = 'false'
 
-        sqb = SparqlQueryBuilder(self.settings, self.request.session)
-        query_laucher = QueryLauncher(self.settings, self.request.session)
-
         try:
-            query_laucher.process_query(sqb.update_admin_status(new_status, username).query)
+            security = Security(self.settings, self.request.session, self.request.session['username'], '', '', '')
+            security.admin_user(new_status, username)
         except Exception as e:
             self.data['error'] = str(e)
             self.log.error(str(e))
@@ -1630,7 +1610,7 @@ class AskView(object):
                 self.request.response.status = 400
                 return self.data
 
-
+        security = Security(self.settings, self.request.session, self.request.session['username'], '', '', '')
         sqb = SparqlQueryBuilder(self.settings, self.request.session)
         query_laucher = QueryLauncher(self.settings, self.request.session)
 
@@ -1655,7 +1635,7 @@ class AskView(object):
 
         # Delete user infos
         try:
-            query_laucher.process_query(sqb.delete_user(username).query)
+            security.delete_user(username)
         except Exception as e:
             return 'failed: ' + str(e)
 
@@ -1689,9 +1669,7 @@ class AskView(object):
         galaxy_dict = {}
 
         if infos[1]:
-            galaxy_dict = {'url': infos[1][0], 'key': infos[1][1]}
-
-        result['galaxy'] = galaxy_dict
+            result['galaxy'] = {'url': infos[1][0], 'key': infos[1][1]}
 
         return result
 
@@ -1727,7 +1705,7 @@ class AskView(object):
     @view_config(route_name='update_passwd', request_method='POST')
     def update_passwd(self):
         """
-        Chage email of a user
+        Change password of a user
         """
 
         body = self.request.json_body

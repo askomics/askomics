@@ -347,7 +347,7 @@ class Security(ParamManager):
 
         if len(rows) <= 0:
             results['blocked'] = True
-            results['admin'] = True
+            results['admin'] = False
         else:
             results['blocked'] = ParamManager.Bool(rows[0][1])
             results['admin'] = ParamManager.Bool(rows[0][0])
@@ -389,10 +389,10 @@ class Security(ParamManager):
 
         if len(rows) <= 0:
             results['blocked'] = True
-            results['admin'] = True
+            results['admin'] = False
         else:
             results['blocked'] = ParamManager.Bool(rows[0][1])
-            results['admin'] = ParamManager.Bool(rows[0][1])
+            results['admin'] = ParamManager.Bool(rows[0][0])
 
         return results
 
@@ -461,7 +461,7 @@ class Security(ParamManager):
             NULL,
             "{0}",
             "{1}",
-            "{2}",
+            "{2}"
         )
         '''.format(self.get_user_id_by_username(), url, key)
 
@@ -510,6 +510,30 @@ class Security(ParamManager):
 
         database.execute_sql_query(query)
 
+    def get_users_infos(self):
+        """get all about all user"""
+
+        database = DatabaseConnector(self.settings, self.session)
+        query = '''
+        SELECT username, email, admin, blocked
+        FROM users
+        '''
+
+        rows = database.execute_sql_query(query)
+        results = []
+
+        if rows:
+            for elem in rows:
+                user = {}
+                user['username'] = elem[0]
+                user['email'] = elem[1]
+                user['admin'] = self.Bool(elem[2])
+                user['blocked'] = self.Bool(elem[3])
+                results.append(user)
+
+            return results
+        return []
+
     def get_user_infos(self):
         """get all about a user"""
 
@@ -526,3 +550,38 @@ class Security(ParamManager):
         if rows:
             return [[rows[0][0], self.Bool(rows[0][1]), self.Bool(rows[0][2]), rows[0][3]], galaxy_infos]
         return []
+
+    def lock_user(self, new_status, username):
+        """lock a user"""
+
+        database = DatabaseConnector(self.settings, self.session)
+        query = '''
+        UPDATE users SET
+        blocked="{0}"
+        WHERE username="{1}"
+        '''.format(new_status, username)
+
+        database.execute_sql_query(query)
+
+    def admin_user(self, new_status, username):
+        """adminify a user"""
+
+        database = DatabaseConnector(self.settings, self.session)
+        query = '''
+        UPDATE users SET
+        admin="{0}"
+        WHERE username="{1}"
+        '''.format(new_status, username)
+
+        database.execute_sql_query(query)
+
+    def delete_user(self, username):
+        """delete a user"""
+
+        database = DatabaseConnector(self.settings, self.session)
+        query = '''
+        DELETE FROM users
+        WHERE username="{0}"
+        '''.format(username)
+
+        database.execute_sql_query(query)

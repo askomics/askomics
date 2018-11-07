@@ -129,30 +129,6 @@ class SecurityTests(unittest.TestCase):
         security = Security(self.settings, self.request.session, 'jdoe', 'jdoe@example.com', 'iamjohndoe', 'iamjohndoe')
         security.ckeck_key_belong_user("test")
 
-    def test_add_del_apikey(self):
-        self.tps.clean_up()
-        self.tps.add_jdoe_in_users()
-
-        security = Security(self.settings, self.request.session, 'jdoe', 'jdoe@example.com', 'iamjohndoe', 'iamjohndoe')
-        security.delete_apikey("test")
-        security.add_apikey("test")
-        security.delete_apikey("test")
-
-    def test_add_del_galaxy(self):
-        self.tps.clean_up()
-        self.tps.add_jdoe_in_users()
-
-        security = Security(self.settings, self.request.session, 'jdoe', 'jdoe@example.com', 'iamjohndoe', 'iamjohndoe')
-
-        try:
-            security.add_galaxy("http://test","test")
-            assert False
-        except Exception as e:
-            assert True
-
-        security.get_galaxy_infos()
-        security.check_galaxy()
-        security.delete_galaxy()
 
     def test_check_email_password(self):
         """Test check_email_password
@@ -279,15 +255,15 @@ class SecurityTests(unittest.TestCase):
 
         self.tps.add_admin_in_users()
 
-        assert security.get_admins_emails() == ['admin@example.com']
+        assert security.get_admins_emails() == ['king@example.com']
 
         self.tps.add_another_admin_in_users()
 
         res_emails = security.get_admins_emails()
 
         assert len(res_emails) == 2
-        assert 'admin@example.com' in res_emails
-        assert 'otheradmin@example.com' in res_emails
+        assert 'king@example.com' in res_emails
+        assert 'queen@example.com' in res_emails
 
     def test_set_admin(self):
         """Test set_admin"""
@@ -343,7 +319,7 @@ class SecurityTests(unittest.TestCase):
 
         assert security.get_admin_blocked_by_username() == {'blocked': False, 'admin': False}
 
-        security = Security(self.settings, self.request.session, 'admin', 'admin@example.com', 'iamadmin', 'iamadmin')
+        security = Security(self.settings, self.request.session, 'king', 'king@example.com', 'iamadmin', 'iamadmin')
 
         assert security.get_admin_blocked_by_username() == {'blocked': False, 'admin': True}
 
@@ -359,7 +335,7 @@ class SecurityTests(unittest.TestCase):
 
         assert security.get_admin_blocked_by_email() == {'blocked': False, 'admin': False}
 
-        security = Security(self.settings, self.request.session, 'admin', 'admin@example.com', 'iamadmin', 'iamadmin')
+        security = Security(self.settings, self.request.session, 'king', 'king@example.com', 'iamadmin', 'iamadmin')
 
         assert security.get_admin_blocked_by_email() == {'blocked': False, 'admin': True}
 
@@ -389,11 +365,8 @@ class SecurityTests(unittest.TestCase):
 
         security.update_email()
 
-        graph = 'urn:sparql:test_askomics:users'
-        triple = ':jdoe foaf:mbox <mailto:newemail@example.com>'
-        assert self.tps.test_triple_presence(graph, triple)
-        triple = ':jdoe foaf:mbox <mailto:jdoe@example.com>'
-        assert not self.tps.test_triple_presence(graph, triple)
+        assert self.tps.test_row_presence('users', 'email', ('newemail@example.com', ))
+        assert not self.tps.test_row_presence('users', 'email', ('jdoe@example.com', ))
 
 
     def test_update_passwd(self):
@@ -406,8 +379,5 @@ class SecurityTests(unittest.TestCase):
 
         security.update_passwd()
 
-        graph = 'urn:sparql:test_askomics:users'
-        triple = ':jdoe :password "' + security.get_sha256_pw() + '"'
-        assert self.tps.test_triple_presence(graph, triple)
-        triple = ':jdoe :password "23df582b51c3482b677c8eac54872b8bd0a49bfadc853628b8b8bd4806147b54"'
-        assert not self.tps.test_triple_presence(graph, triple)
+        assert self.tps.test_row_presence('users', 'password', (security.get_sha256_pw(), ))
+        assert not self.tps.test_row_presence('users', 'password', ('23df582b51c3482b677c8eac54872b8bd0a49bfadc853628b8b8bd4806147b54', ))

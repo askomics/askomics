@@ -333,7 +333,6 @@ class IHMLocal {
 
             // Galaxy upload
             $('.import-galaxy-query').click(function(d) {
-                console.log('Display galaxy form');
                 __ihm.set_upload_galaxy_form(false, false);
             });
 
@@ -986,9 +985,6 @@ class IHMLocal {
     userForm() {
       let service = new RestServiceJs('get_my_infos');
       service.getAll(function(d) {
-        console.log(JSON.stringify(d));
-        console.log('keys');
-        console.log(d.apikeys);
         let template = AskOmics.templates.user_managment;
         let context = {user: d, keys: d.apikeys, galaxy: d.galaxy};
         let html = template(context);
