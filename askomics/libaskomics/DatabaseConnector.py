@@ -3,6 +3,7 @@ from askomics.libaskomics.ParamManager import ParamManager
 import logging
 import sqlite3
 import urllib.parse
+import itertools
 
 class DatabaseConnector(ParamManager):
     """
@@ -14,15 +15,13 @@ class DatabaseConnector(ParamManager):
         ParamManager.__init__(self, settings, session)
         self.database_path = self.get_param("askomics.database_path")
 
-        # If database file 
+        # Create tables
         self.create_user_table()
         self.create_galaxy_table()
-        # self.create_integration_table()
-        # self.create_query_table()
+        self.create_integration_table()
+        self.create_query_table()
 
-
-
-    def execute_sql_query(self, query):
+    def execute_sql_query(self, query, get_id=False):
         """
         execute a sql query
         """
@@ -34,6 +33,9 @@ class DatabaseConnector(ParamManager):
         rows = cursor.fetchall()
         connection.commit()
         connection.close()
+
+        if get_id:
+            return cursor.lastrowid
 
         return rows
 
@@ -61,6 +63,43 @@ class DatabaseConnector(ParamManager):
             user_id INTEGER,
             url text,
             apikey text,
+            FOREIGN KEY(user_id) REFERENCES users(user_id)
+        )
+        '''
+        self.execute_sql_query(query)
+
+    def create_integration_table(self):
+
+        query = '''
+        CREATE TABLE IF NOT EXISTS integration (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            filename text,
+            state text,
+            start int,
+            end int,
+            error text,
+            FOREIGN KEY(user_id) REFERENCES users(user_id)
+        )
+        '''
+        self.execute_sql_query(query)
+
+    def create_query_table(self):
+
+        query = '''
+        CREATE TABLE IF NOT EXISTS query (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            state text,
+            start int,
+            end int,
+            data text,
+            file text,
+            preview text,
+            graph text,
+            variates text,
+            nrows int,
+            error text,
             FOREIGN KEY(user_id) REFERENCES users(user_id)
         )
         '''

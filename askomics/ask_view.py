@@ -655,7 +655,7 @@ class AskView(object):
             raise ValueError("Can not load public data with a non admin account !")
 
         jm = JobManager(self.settings, self.request.session)
-        jobid = jm.saveStartSparqlJob(file_name)
+        jobid = jm.save_integration_job(file_name)
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
         src_file = sfc.get_source_files([file_name], forced_type, uri_set=uris)[0]
@@ -666,8 +666,7 @@ class AskView(object):
 
         try:
             self.data = src_file.persist(self.request.host_url, public)
-            jm.updateEndSparqlJob(jobid, "Done", nr=0)
-            jm.updatePreviewJob(jobid, "File integration done.")
+            jm.done_integration_job(jobid)
         except Exception as e:
             # rollback
             sqb = SparqlQueryBuilder(self.settings, self.request.session)
@@ -677,9 +676,7 @@ class AskView(object):
 
             traceback.print_exc(file=sys.stdout)
             if jobid != -1:
-                jm = JobManager(self.settings, self.request.session)
-                jm.updateEndSparqlJob(jobid, "Error")
-                jm.updatePreviewJob(jobid, str(e))
+                jm.set_error_message('integration', str(e), jobid)
 
         return self.data
 
@@ -713,15 +710,14 @@ class AskView(object):
             raise ValueError("Can not import public data with a non admin account !")
 
         jm = JobManager(self.settings, self.request.session)
-        jobid = jm.saveStartSparqlJob(url)
+        jobid = jm.save_integration_job(url)
 
         src_file = SourceFileURL(self.settings, self.request.session, url)
         graph = src_file.graph
 
         try:
             self.data = src_file.load_data_from_url(url, public)
-            jm.updateEndSparqlJob(jobid, "Done", nr=0)
-            jm.updatePreviewJob(jobid, "URL integration done.")
+            jm.done_integration_job(jobid)
         except Exception as e:
             # rollback
             sqb = SparqlQueryBuilder(self.settings, self.request.session)
@@ -734,9 +730,7 @@ class AskView(object):
             traceback.print_exc(file=sys.stdout)
 
             if jobid != -1:
-                jm = JobManager(self.settings, self.request.session)
-                jm.updateEndSparqlJob(jobid, "Error")
-                jm.updatePreviewJob(jobid, str(e))
+                jm.set_error_message('integration', str(e), jobid)
 
             self.request.response.status = 400
 
@@ -772,8 +766,7 @@ class AskView(object):
             raise ValueError("Cannot import public gff with a non admin account !")
 
         jm = JobManager(self.settings, self.request.session)
-        jobid = jm.saveStartSparqlJob(file_name)
-
+        jobid = jm.save_integration_job(url)
         sfc = SourceFileConvertor(self.settings, self.request.session)
         src_file_gff = sfc.get_source_files([file_name], forced_type, uri_set={0: uri})[0]
         graph = src_file_gff.graph
@@ -783,9 +776,7 @@ class AskView(object):
         try:
             self.log.debug('--> Parsing GFF')
             src_file_gff.persist(self.request.host_url, public)
-            jm.updateEndSparqlJob(jobid, "Done", nr=0)
-            jm.updatePreviewJob(jobid, "GFF integration done. <br/>entities :" + ', '.join(entities) + "<br/>taxon :" + taxon)
-
+            jm.done_integration_job(jobid)
         except Exception as e:
             # rollback
             if graph is not None:
@@ -797,10 +788,7 @@ class AskView(object):
             traceback.print_exc(file=sys.stdout)
 
             if jobid != -1:
-                jm = JobManager(self.settings, self.request.session)
-                jm.updateEndSparqlJob(jobid, "Error")
-                jm.updatePreviewJob(jobid, 'Problem when integration of ' + file_name + '.</br>' + str(e))
-
+                jm.set_error_message('integration', str(e), jobid)
             self.log.error(str(e))
 
         self.data['status'] = 'ok'
@@ -830,17 +818,14 @@ class AskView(object):
             raise ValueError("Can not import public turtle file with a non admin account !")
 
         jm = JobManager(self.settings, self.request.session)
-        jobid = jm.saveStartSparqlJob(file_name)
-
+        jobid = jm.save_integration_job(url)
         sfc = SourceFileConvertor(self.settings, self.request.session)
         src_file_ttl = sfc.get_source_files([file_name], forced_type)[0]
         graph = src_file_ttl.graph
 
         try:
             self.data = src_file_ttl.persist(self.request.host_url, public)
-            jm.updateEndSparqlJob(jobid, "Done", nr=0)
-            jm.updatePreviewJob(jobid, "TTL file integration done. ")
-
+            jm.done_integration_job(jobid)
         except Exception as e:
             # rollback
             if graph is not None:
@@ -850,10 +835,7 @@ class AskView(object):
                 query_laucher.process_query(sqb.get_delete_metadatas_of_graph(graph).query)
 
             if jobid != -1:
-                jm = JobManager(self.settings, self.request.session)
-                jm.updateEndSparqlJob(jobid, "Error")
-                jm.updatePreviewJob(jobid, 'Problem when integration of ' + file_name + '.</br>' + str(e))
-
+                jm.set_error_message('integration', str(e), jobid)
             self.log.error('ERROR: ' + str(e))
 
         self.data['status'] = 'ok'
@@ -895,14 +877,11 @@ class AskView(object):
 
         graph = src_file_bed.graph
         jm = JobManager(self.settings, self.request.session)
-        jobid = jm.saveStartSparqlJob(file_name)
-
+        jobid = jm.save_integration_job(url)
         try:
             self.log.debug('--> Parsing BED')
             src_file_bed.persist(self.request.host_url, public)
-            jm.updateEndSparqlJob(jobid, "Done", nr=0)
-            jm.updatePreviewJob(jobid, "BED file integration done.")
-
+            jm.done_integration_job(jobid)
         except Exception as e:
             # rollback
             if graph is not None:
@@ -913,9 +892,8 @@ class AskView(object):
 
             traceback.print_exc(file=sys.stdout)
             if jobid != -1:
-                jm = JobManager(self.settings, self.request.session)
-                jm.updateEndSparqlJob(jobid, "Error")
-                jm.updatePreviewJob(jobid, 'Problem when integration of ' + file_name + '.</br>' + str(e))
+                jm.set_error_message('integration', str(e), jobid)
+
             self.log.error(str(e))
 
         self.data['status'] = 'ok'
@@ -1016,7 +994,7 @@ class AskView(object):
                 rg = ""
                 if 'requestGraph' in body:
                     rg = body['requestGraph']
-                jobid = jm.saveStartSparqlJob("SPARQL Request",requestGraph=rg,variates=body["variates"])
+                jobid = jm.save_query_job(rg, body['variates'])
 
 
             typeRequest = ''
@@ -1057,7 +1035,7 @@ class AskView(object):
                 if "limit" in body:
                     npreview = body["limit"]
 
-                jm.updateEndSparqlJob(jobid,"Ok "+typeRequest,nr=len(results),data=self.data['values'][0:npreview], file=self.data['file'])
+                jm.done_query_job(jobid, len(results), self.data['values'][0:npreview], self.data['file'])
 
         except Exception as e:
             #exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -1067,21 +1045,24 @@ class AskView(object):
             self.data['file'] = ""
 
             if persist:
-                jm = JobManager(self.settings, self.request.session)
-                jm.updateEndSparqlJob(jobid,"Error "+typeRequest)
-                jm.updatePreviewJob(jobid,str(e))
+                jm.done_query_job(jobid, None, None, None)
+                jm.set_error_message('query', str(e), jobid)
 
         self.data['galaxy'] = self.request.session['galaxy']
 
         return self.data
 
-    @view_config(route_name='listjob', request_method='POST')
+    @view_config(route_name='listjob', request_method='GET')
     def listjob(self):
         ''' Get all jobs recorded in database '''
 
-        jm = JobManager(self.settings, self.request.session)
         maxrows = self.settings['askomics.triplestore_results_max_rows'] if 'askomics.triplestore_results_max_rows' in self.settings else None
-        return {'maxrows': maxrows, 'jobs': jm.listJobs()}
+
+        jm = JobManager(self.settings, self.request.session)
+        integration_jobs = jm.list_integration_jobs()
+        query_jobs = jm.list_query_jobs()
+
+        return {'maxrows': maxrows, 'integration': integration_jobs, 'query': query_jobs}
 
 
     @view_config(route_name='deljob', request_method='POST')
@@ -1089,8 +1070,9 @@ class AskView(object):
         ''' Remove job from database '''
 
         body = self.request.json_body
+
         jm = JobManager(self.settings, self.request.session)
-        jm.removeJob(body['jobid'])
+        jm.remove_job(body['table'], body['jobid'])
 
 
     @view_config(route_name='getSparqlQueryInTextFormat', request_method='POST')

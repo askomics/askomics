@@ -10,7 +10,6 @@
     <div id="jobs_integration" class="tab-pane fade">
         <table class="table table-striped">
             <tr>
-                <th>Job-ID</th>
                 <th>File name</th>
                 <th>State</th>
                 <th>Start</th>
@@ -18,11 +17,9 @@
                 <th>Duration</th>
                 <th>Actions</th>
             </tr>
-            {{#each jobs}}
-            {{#if this.isintegration}}
+            {{#each integration}}
             <tr class="clickable">
-                <td style="cursor: pointer;">{{this.jobid}}</td>
-                <td style="cursor: pointer;">{{this.type}}</td>
+                <td style="cursor: pointer;">{{this.filename}}</td>
                 {{#if this.wait}}
                   <td style="cursor: pointer;"><i class="fa fa-spinner pulse"></i></td>
                 {{else}}
@@ -41,11 +38,10 @@
                 {{/if}}
                 <td>
                   <div class="btn-group" role="group">
-                    <button onclick="this.parentNode.parentNode.parentNode.style.display = 'none';new AskomicsJobsViewManager().removeJob({{@index}});event.stopPropagation();" type="button" class="btn btn-default btn-xs"><i class="fa fa-times text-danger"></i> Del</button>
+                    <button onclick="this.parentNode.parentNode.parentNode.style.display = 'none';new AskomicsJobsViewManager().remove_job({{this.id}}, {{@index}}, 'integration');event.stopPropagation();" type="button" class="btn btn-default btn-xs"><i class="fa fa-times text-danger"></i> Del</button>
                   </div>
                 </td>
                </tr>
-            {{/if}}
             {{/each}}
         </table>
     </div>
@@ -54,7 +50,6 @@
     <div id="jobs_query" class="tab-pane fade">
         <table class="table table-striped">
             <tr>
-                <th>Job-ID</th>
                 <th>State</th>
                 <th>Start</th>
                 <th>End</th>
@@ -62,10 +57,8 @@
                 <th>Number of rows</th>
                 <th>Actions</th>
             </tr>
-            {{#each jobs}}
-            {{#if this.isquery}}
+            {{#each query}}
             <tr class="{{this.classtr}}" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}" class="clickable">
-                <td style="cursor: pointer;" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}">{{this.jobid}}</td>
                 {{#if this.wait}}
                   <td style="cursor: pointer;" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}"><i class="fa fa-spinner pulse"></i></td>
                 {{else}}
@@ -85,7 +78,7 @@
                 {{#if this.wait}}
                   <td style="cursor: pointer;" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}"></td>
                 {{else}}
-                  <td style="cursor: pointer;" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}">{{this.nr}}
+                  <td style="cursor: pointer;" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}">{{this.nrows}}
                     {{#if this.warn}}
                         <i class="fa fa-exclamation-triangle" data-toggle="tooltip" title="Triplestore limits his results to {{../maxrows}}, you may have incomplete results"></i>
                     {{/if}}
@@ -93,7 +86,7 @@
                 {{/if}}
                 <td>
                   <div class="btn-group" role="group">
-                    <button onclick="this.parentNode.parentNode.parentNode.style.display = 'none';new AskomicsJobsViewManager().removeJob({{@index}});event.stopPropagation();" type="button" class="btn btn-default btn-xs"><i class="fa fa-times text-danger"></i> Del</button>
+                    <button onclick="this.parentNode.parentNode.parentNode.style.display = 'none';new AskomicsJobsViewManager().remove_job({{this.id}}, {{@index}}, 'query');event.stopPropagation();" type="button" class="btn btn-default btn-xs"><i class="fa fa-times text-danger"></i> Del</button>
                     <button onclick="let st = atob('{{this.stateToReload}}') ; __ihm.stopSession();__ihm.startSession(st);$('#interrogation').trigger( 'click' );" type="button" class="btn btn-default btn-xs"><i class="fa fa-repeat text-warning"></i> Redo</button>
                     <button onclick="location.href='csv/{{this.csv}}';event.stopPropagation();" type="button" class="btn btn-default btn-xs"><i class="fa fa-floppy-o text-primary"></i> Save</button>
                       {{#if ../galaxy}}
@@ -116,7 +109,6 @@
               </div>
              </td>
             </tr>
-            {{/if}}
             {{/each}}
         </table>
     </div>
