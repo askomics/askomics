@@ -9,7 +9,7 @@ from pyramid.paster import get_appsettings
 
 from askomics.libaskomics.source_file.SourceFile import SourceFile
 from askomics.libaskomics.source_file.SourceFileTsv import SourceFileTsv
-from interface_tps import InterfaceTPS
+from interface_tps_db import InterfaceTpsDb
 
 SIMPLE_SOURCE_FILE = os.path.join( os.path.dirname( __file__ ), "..", "test-data", "instruments.tsv" )
 

@@ -7,7 +7,7 @@ from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
 from askomics.libaskomics.SourceFileConvertor import SourceFileConvertor
 from askomics.libaskomics.DatabaseConnector import DatabaseConnector
 
-class InterfaceTPS(object):
+class InterfaceTpsDb(object):
     """Allow communication with the triplestore and the sql database
 
     This class allow the communication with the triplestore
@@ -204,6 +204,16 @@ class InterfaceTPS(object):
         '''
         database.execute_sql_query(query)
 
+        query = '''
+        DROP TABLE IF EXISTS integration
+        '''
+        database.execute_sql_query(query)
+
+        query = '''
+        DROP TABLE IF EXISTS query
+        '''
+        database.execute_sql_query(query)
+
 
     def delete_users(self):
         """Delete the test users graph"""
@@ -357,9 +367,12 @@ class InterfaceTPS(object):
 
         database = DatabaseConnector(self.settings, self.request.session)
         query = '''
-        SELECT "{0}"
-        FROM "{1}"
+        SELECT {0}
+        FROM {1}
         '''.format(cols, table)
         rows = database.execute_sql_query(query)
-
+        # print('---')
+        # print(query)
+        # print(rows)
+        # print('---')
         return res in rows

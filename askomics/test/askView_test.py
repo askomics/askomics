@@ -17,7 +17,7 @@ from askomics.libaskomics.EndpointManager import EndpointManager
 from askomics.ask_view import AskView
 
 
-from interface_tps import InterfaceTPS
+from interface_tps_db import InterfaceTpsDb
 
 class AskViewTests(unittest.TestCase):
     """Test for Askview
@@ -64,7 +64,7 @@ class AskViewTests(unittest.TestCase):
                 dst = self.request.session['upload_directory'] + '/' + file
                 copyfile(src, dst)
 
-        self.tps = InterfaceTPS(self.settings, self.request)
+        self.tps = InterfaceTpsDb(self.settings, self.request)
 
         self.askview = AskView(self.request)
         self.askview.settings = self.settings

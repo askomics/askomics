@@ -7,7 +7,7 @@
 # from askomics.libaskomics.TripleStoreExplorer import TripleStoreExplorer
 
 # import json
-# from interface_tps import InterfaceTPS
+# from interface_tps_db import InterfaceTpsDb
 
 # class tripleStoreExplorerTests(unittest.TestCase):
 #     def setUp( self ):
@@ -19,7 +19,7 @@
 
 #         self.temp_directory = tempfile.mkdtemp()
 
-#         self.it = InterfaceTPS(self.settings,self.request)
+#         self.it = InterfaceTpsDb(self.settings,self.request)
 #         self.it.empty()
 #         self.it.load_test1()
 

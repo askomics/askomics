@@ -10,7 +10,7 @@
 # from askomics.libaskomics.TripleStoreExplorer import TripleStoreExplorer
 
 # import json
-# from interface_tps import InterfaceTPS
+# from interface_tps_db import InterfaceTpsDb
 
 # class ResultsBuilderTests(unittest.TestCase):
 
@@ -24,7 +24,7 @@
 #         self.request.session['upload_directory'] = os.path.join( os.path.dirname( __file__ ), "..", "test-data")
 #         self.temp_directory = tempfile.mkdtemp()
 
-#         self.it = InterfaceTPS(self.settings,self.request)
+#         self.it = InterfaceTpsDb(self.settings,self.request)
 #         self.it.empty()
 #         self.it.load_test1()
 

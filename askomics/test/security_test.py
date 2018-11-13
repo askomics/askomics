@@ -5,7 +5,7 @@ from pyramid.paster import get_appsettings
 from pyramid import testing
 from askomics.libaskomics.Security import Security
 
-from interface_tps import InterfaceTPS
+from interface_tps_db import InterfaceTpsDb
 
 class SecurityTests(unittest.TestCase):
     """Test for the Security class"""
@@ -20,7 +20,7 @@ class SecurityTests(unittest.TestCase):
         self.request.session['admin'] = False
         self.request.session['blocked'] = True
 
-        self.tps = InterfaceTPS(self.settings, self.request)
+        self.tps = InterfaceTpsDb(self.settings, self.request)
 
     def test_get_sha256_pw(self):
         """Test get_sha256_pw"""
