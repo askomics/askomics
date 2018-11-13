@@ -766,7 +766,7 @@ class AskView(object):
             raise ValueError("Cannot import public gff with a non admin account !")
 
         jm = JobManager(self.settings, self.request.session)
-        jobid = jm.save_integration_job(url)
+        jobid = jm.save_integration_job(file_name)
         sfc = SourceFileConvertor(self.settings, self.request.session)
         src_file_gff = sfc.get_source_files([file_name], forced_type, uri_set={0: uri})[0]
         graph = src_file_gff.graph
@@ -818,7 +818,7 @@ class AskView(object):
             raise ValueError("Can not import public turtle file with a non admin account !")
 
         jm = JobManager(self.settings, self.request.session)
-        jobid = jm.save_integration_job(url)
+        jobid = jm.save_integration_job(file_name)
         sfc = SourceFileConvertor(self.settings, self.request.session)
         src_file_ttl = sfc.get_source_files([file_name], forced_type)[0]
         graph = src_file_ttl.graph
@@ -877,7 +877,7 @@ class AskView(object):
 
         graph = src_file_bed.graph
         jm = JobManager(self.settings, self.request.session)
-        jobid = jm.save_integration_job(url)
+        jobid = jm.save_integration_job(file_name)
         try:
             self.log.debug('--> Parsing BED')
             src_file_bed.persist(self.request.host_url, public)

@@ -21,7 +21,7 @@ class DatabaseConnector(ParamManager):
         self.create_integration_table()
         self.create_query_table()
 
-    def execute_sql_query(self, query, get_id=False):
+    def execute_sql_query(self, query, variables=None, get_id=False):
         """
         execute a sql query
         """
@@ -29,7 +29,10 @@ class DatabaseConnector(ParamManager):
         connection = sqlite3.connect("file:" + self.database_path, uri=True)
         cursor = connection.cursor()
 
-        cursor.execute(query)
+        if variables:
+            cursor.execute(query, variables)
+        else:
+            cursor.execute(query)
         rows = cursor.fetchall()
         connection.commit()
         connection.close()

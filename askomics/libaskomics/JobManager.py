@@ -25,16 +25,16 @@ class JobManager(ParamManager):
         query = '''
         INSERT INTO integration VALUES(
             NULL,
-            "{0}",
-            "{1}",
+            ?,
+            ?,
             "wait",
             strftime('%s', 'now'),
             NULL,
             NULL
         )
-        '''.format(userid, filename)
+        '''
 
-        return database.execute_sql_query(query, get_id=True)
+        return database.execute_sql_query(query, (userid, filename), get_id=True)
 
     def save_query_job(self, request_graph, variates):
 
@@ -51,21 +51,21 @@ class JobManager(ParamManager):
         query = '''
         INSERT INTO query VALUES(
             NULL,
-            "{0}",
+            ?,
             "wait",
             strftime('%s', 'now'),
             NULL,
             NULL,
             NULL,
             NULL,
-            "{1}",
-            "{2}",
+            ?,
+            ?,
             NULL,
             NULL
         )
-        '''.format(userid, request_graph, variates)
+        '''
 
-        return database.execute_sql_query(query, get_id=True)
+        return database.execute_sql_query(query, (userid, request_graph, variates), get_id=True)
 
 
     def done_integration_job(self, jobid):
@@ -75,10 +75,10 @@ class JobManager(ParamManager):
         UPDATE integration SET
         state="done",
         end=strftime('%s', 'now')
-        WHERE id={0}
-        '''.format(jobid)
+        WHERE id=?
+        '''
 
-        database.execute_sql_query(query)
+        database.execute_sql_query(query, (jobid, ))
 
     def done_query_job(self, jobid, nrows, data, file):
 
@@ -87,24 +87,27 @@ class JobManager(ParamManager):
         UPDATE query SET
         state="done",
         end=strftime('%s', 'now'),
-        nrows="{0}",
-        data="{1}",
-        file="{2}"
-        WHERE id="{3}"
-        '''.format(nrows, self.encode(json.dumps(data, ensure_ascii=False)), file, jobid)
+        nrows=?,
+        data=?,
+        file=?
+        WHERE id=?
+        '''
 
-        database.execute_sql_query(query)
+        database.execute_sql_query(query, (nrows, self.encode(json.dumps(data, ensure_ascii=False)), file, jobid))
 
     def set_error_message(self, table, message, jobid):
 
         database = DatabaseConnector(self.settings, self.session)
         query = '''
         UPDATE {0} SET
-        error="{1}"
-        WHERE id="{2}"
-        '''.format(table, message, jobid)
+        error=?,
+        state=?
+        WHERE id=?
+        '''.format(table)
 
-        database.execute_sql_query(query)
+        print(query)
+
+        database.execute_sql_query(query, (message, 'error', jobid))
 
 
     def list_integration_jobs(self):
@@ -117,10 +120,10 @@ class JobManager(ParamManager):
         query = '''
         SELECT id, filename, state, start, end, error
         FROM integration
-        WHERE user_id="{0}"
-        '''.format(userid)
+        WHERE user_id=?
+        '''
 
-        res = database.execute_sql_query(query)
+        res = database.execute_sql_query(query, (userid, ))
         result = []
         for job in res:
             dict_job = {}
@@ -145,10 +148,10 @@ class JobManager(ParamManager):
         query = '''
         SELECT id, state, start, end, data, file, preview, graph, variates, nrows, error
         FROM query
-        WHERE user_id="{0}"
-        '''.format(userid)
+        WHERE user_id=?
+        '''
 
-        res = database.execute_sql_query(query)
+        res = database.execute_sql_query(query, (userid, ))
         result = []
         for job in res:
             dict_job = {}
@@ -156,7 +159,9 @@ class JobManager(ParamManager):
             dict_job['state'] = job[1]
             dict_job['start'] = job[2]
             dict_job['end'] = job[3]
-            dict_job['data'] = json.loads(self.decode(job[4]))
+            dict_job['data'] = ''
+            if job[4]:
+                dict_job['data'] = json.loads(self.decode(job[4]))
             dict_job['file'] = job[5]
             dict_job['preview'] = job[6]
             dict_job['graph'] = urllib.parse.unquote(job[7])
@@ -172,7 +177,7 @@ class JobManager(ParamManager):
         database = DatabaseConnector(self.settings, self.session)
         query = '''
         DELETE FROM {0}
-        WHERE id="{1}"
-        '''.format(table, jobid)
+        WHERE id=?
+        '''.format(table)
 
-        database.execute_sql_query(query)
+        database.execute_sql_query(query, (jobid, ))

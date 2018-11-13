@@ -73,10 +73,10 @@ class Security(ParamManager):
         database = DatabaseConnector(self.settings, self.session)
         query = '''
         SELECT username FROM users
-        WHERE username="{0}"
-        '''.format(self.username)
+        WHERE username=?
+        '''
 
-        rows = database.execute_sql_query(query)
+        rows = database.execute_sql_query(query, (self.username, ))
 
         if len(rows) <= 0:
             return False
@@ -90,10 +90,10 @@ class Security(ParamManager):
         database = DatabaseConnector(self.settings, self.session)
         query = '''
         SELECT email FROM users
-        WHERE email="{0}"
-        '''.format(self.email)
+        WHERE email=?
+        '''
 
-        rows = database.execute_sql_query(query)
+        rows = database.execute_sql_query(query, (self.email, ))
 
         if len(rows) <= 0:
             return False
@@ -105,10 +105,10 @@ class Security(ParamManager):
         database = DatabaseConnector(self.settings, self.session)
         query='''
         SELECT username FROM users
-        WHERE email="{0}"
-        '''.format(self.email)
+        WHERE email=?
+        '''
 
-        rows = database.execute_sql_query(query)
+        rows = database.execute_sql_query(query, (self.email, ))
 
         self.username = rows[0][0]
 
@@ -120,9 +120,9 @@ class Security(ParamManager):
         database = DatabaseConnector(self.settings, self.session)
         query = '''
         SELECT password, salt FROM users
-        WHERE email="{0}"
-        '''.format(self.email)
-        rows = database.execute_sql_query(query)
+        WHERE email=?
+        '''
+        rows = database.execute_sql_query(query, (self.email, ))
 
         if len(rows) <= 0:
             db_salt = ""
@@ -144,9 +144,9 @@ class Security(ParamManager):
         database = DatabaseConnector(self.settings, self.session)
         query = '''
         SELECT password, salt FROM users
-        WHERE username="{0}"
-        '''.format(self.username)
-        rows = database.execute_sql_query(query)
+        WHERE username=?
+        '''
+        rows = database.execute_sql_query(query, (self.username, ))
 
         if len(rows) <= 0:
             db_salt = ""
@@ -171,10 +171,10 @@ class Security(ParamManager):
         database = DatabaseConnector(self.settings, self.session)
         query = '''
         SELECT username FROM users
-        WHERE apikey="{0}"
-        '''.format(key)
+        WHERE apikey=?
+        '''
 
-        rows = database.execute_sql_query(query)
+        rows = database.execute_sql_query(query, (key, ))
 
         if rows:
             self.username = rows[0][0]
@@ -185,10 +185,10 @@ class Security(ParamManager):
         database = DatabaseConnector(self.settings, self.session)
         query = '''
         SELECT username FROM users
-        WHERE apikey="{0}"
-        '''.format(key)
+        WHERE apikey=?
+        '''
 
-        rows = database.execute_sql_query(query)
+        rows = database.execute_sql_query(query, (key, ))
 
         if rows:
             return True
@@ -200,11 +200,11 @@ class Security(ParamManager):
         database = DatabaseConnector(self.settings, self.session)
         query = '''
         UPDATE users SET
-        apikey="{0}"
-        WHERE username="{1}"
-        '''.format(self.get_random_string(20), self.username)
+        apikey=?
+        WHERE username=?
+        '''
 
-        database.execute_sql_query(query)
+        database.execute_sql_query(query, (self.get_random_string(20), self.username))
 
 
     @staticmethod
@@ -254,23 +254,22 @@ class Security(ParamManager):
         query = '''
         INSERT INTO users VALUES(
             NULL,
-            "{0}",
-            "{1}",
-            "{2}",
-            "{3}",
-            "{4}",
-            "{5}",
-            "{6}"
+            ?,
+            ?,
+            ?,
+            ?,
+            ?,
+            ?,
+            ?
         )
-        '''.format(self.username, self.email, self.sha256_pw, self.randomsalt, self.get_random_string(20), admin, blocked)
-
-        database.execute_sql_query(query)
+        '''
+        database.execute_sql_query(query, (self.username, self.email, self.sha256_pw, self.randomsalt, self.get_random_string(20), admin, blocked))
 
         # Send a mail to all admins
         emails = self.get_admins_emails()
         body = 'Hello,\n'
         body += 'User \'' + self.username + '\' just created an account on Askomics.\n'
-        body += 'Log into the admin interface in order to unblock this user, or contact him '
+        body += 'Log into the admin interface in order to manage this user, or contact him '
         body += 'at ' + self.email + '.\n\n\n'
         body += host_url + '\n\n'
 
@@ -338,10 +337,10 @@ class Security(ParamManager):
         query = '''
         SELECT admin, blocked
         FROM users
-        WHERE username="{0}"
-        '''.format(self.username)
+        WHERE username=?
+        '''
 
-        rows = database.execute_sql_query(query)
+        rows = database.execute_sql_query(query, (self.username, ))
 
         results = {}
 
@@ -361,10 +360,10 @@ class Security(ParamManager):
         query = '''
         SELECT user_id
         FROM users
-        WHERE username="{0}"
-        '''.format(self.username)
+        WHERE username=?
+        '''
 
-        rows = database.execute_sql_query(query)
+        rows = database.execute_sql_query(query, (self.username, ))
 
         if len(rows) <= 0:
             return 0
@@ -380,10 +379,10 @@ class Security(ParamManager):
         query = '''
         SELECT admin, blocked
         FROM users
-        WHERE email="{0}"
-        '''.format(self.email)
+        WHERE email=?
+        '''
 
-        rows = database.execute_sql_query(query)
+        rows = database.execute_sql_query(query, (self.email, ))
 
         results = {}
 
@@ -415,11 +414,11 @@ class Security(ParamManager):
         database = DatabaseConnector(self.settings, self.session)
         query = '''
         UPDATE users SET
-        email="{0}"
-        WHERE username="{1}"
-        '''.format(self.email, self.username)
+        email=?
+        WHERE username=?
+        '''
 
-        database.execute_sql_query(query)
+        database.execute_sql_query(query, (self.email, self.username))
 
     def update_passwd(self):
         """
@@ -429,12 +428,12 @@ class Security(ParamManager):
         database = DatabaseConnector(self.settings, self.session)
         query = '''
         UPDATE users SET
-        password="{0}",
-        salt="{1}"
-        WHERE username="{2}"
-        '''.format(self.sha256_pw, self.randomsalt, self.username)
+        password=?,
+        salt=?
+        WHERE username=?
+        '''
 
-        database.execute_sql_query(query)
+        database.execute_sql_query(query, (self.sha256_pw, self.randomsalt, self.username))
 
 
     def add_galaxy(self, url, key):
@@ -459,13 +458,13 @@ class Security(ParamManager):
         query = '''
         INSERT INTO galaxy_accounts VALUES(
             NULL,
-            "{0}",
-            "{1}",
-            "{2}"
+            ?,
+            ?,
+            ?
         )
-        '''.format(self.get_user_id_by_username(), url, key)
+        '''
 
-        database.execute_sql_query(query)
+        database.execute_sql_query(query, (self.get_user_id_by_username(), url, key))
 
     def get_galaxy_infos(self):
         """Get Galaxy url and apikey of a user"""
@@ -474,10 +473,10 @@ class Security(ParamManager):
         query = '''
         SELECT url, apikey
         FROM galaxy_accounts
-        WHERE user_id="{0}"
-        '''.format(self.get_user_id_by_username())
+        WHERE user_id=?
+        '''
 
-        rows = database.execute_sql_query(query)
+        rows = database.execute_sql_query(query, (self.get_user_id_by_username(), ))
 
         if rows:
             return [rows[0][0], rows[0][1]]
@@ -490,10 +489,10 @@ class Security(ParamManager):
         query = '''
         SELECT *
         FROM galaxy_accounts
-        WHERE user_id="{0}"
-        '''.format(self.get_user_id_by_username())
+        WHERE user_id=?
+        '''
 
-        rows = database.execute_sql_query(query)
+        rows = database.execute_sql_query(query, (self.get_user_id_by_username(), ))
 
         if rows:
             return True
@@ -505,10 +504,10 @@ class Security(ParamManager):
         database = DatabaseConnector(self.settings, self.session)
         query = '''
         DELETE FROM galaxy_accounts
-        WHERE user_id="{0}"
-        '''.format(self.get_user_id_by_username())
+        WHERE user_id=?
+        '''
 
-        database.execute_sql_query(query)
+        database.execute_sql_query(query, (self.get_user_id_by_username(), ))
 
     def get_users_infos(self):
         """get all about all user"""
@@ -541,10 +540,10 @@ class Security(ParamManager):
         query = '''
         SELECT email, admin, blocked, apikey
         FROM users
-        WHERE username="{0}"
-        '''.format(self.username)
+        WHERE username=?
+        '''
 
-        rows = database.execute_sql_query(query)
+        rows = database.execute_sql_query(query, (self.username, ))
         galaxy_infos = self.get_galaxy_infos()
 
         if rows:
@@ -557,11 +556,11 @@ class Security(ParamManager):
         database = DatabaseConnector(self.settings, self.session)
         query = '''
         UPDATE users SET
-        blocked="{0}"
-        WHERE username="{1}"
-        '''.format(new_status, username)
+        blocked=?
+        WHERE username=?
+        '''
 
-        database.execute_sql_query(query)
+        database.execute_sql_query(query, (new_status, username))
 
     def admin_user(self, new_status, username):
         """adminify a user"""
@@ -569,11 +568,11 @@ class Security(ParamManager):
         database = DatabaseConnector(self.settings, self.session)
         query = '''
         UPDATE users SET
-        admin="{0}"
-        WHERE username="{1}"
-        '''.format(new_status, username)
+        admin=?
+        WHERE username=?
+        '''
 
-        database.execute_sql_query(query)
+        database.execute_sql_query(query, (new_status, username))
 
     def delete_user(self, username):
         """delete a user"""
@@ -581,7 +580,7 @@ class Security(ParamManager):
         database = DatabaseConnector(self.settings, self.session)
         query = '''
         DELETE FROM users
-        WHERE username="{0}"
-        '''.format(username)
+        WHERE username=?
+        '''
 
-        database.execute_sql_query(query)
+        database.execute_sql_query(query, (username, ))
