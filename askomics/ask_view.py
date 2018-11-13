@@ -33,8 +33,6 @@ from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
 from askomics.libaskomics.rdfdb.MultipleQueryLauncher import MultipleQueryLauncher
 from askomics.libaskomics.rdfdb.FederationQueryLauncher import FederationQueryLauncher
 
-from askomics.libaskomics.EndpointManager import EndpointManager
-
 from askomics.libaskomics.source_file.SourceFile import SourceFile
 from askomics.libaskomics.source_file.SourceFileURL import SourceFileURL
 
@@ -158,7 +156,7 @@ class AskView(object):
         public_stats = {}
         private_stats = {}
 
-        lEndp = em.listEndpoints()
+        lEndp = em.list_endpoints()
         # Number of triples
         results_pub = qmlaucher.process_query(sqs.get_number_of_triples('public').query,lEndp)
         results_priv = qlaucher.process_query(sqs.get_number_of_triples('private').query)
@@ -317,7 +315,7 @@ class AskView(object):
         em = EndpointManager(self.settings, self.request.session)
 
         for url in endpoints:
-            em.remove(url)
+            em.remove_endpoint(url)
         ##raise ValueError("ok")
 
     @view_config(route_name='add_endpoint', request_method='POST')
@@ -340,7 +338,7 @@ class AskView(object):
         auth = self.request.json_body['auth']
 
         em = EndpointManager(self.settings, self.request.session)
-        em.saveEndpoint(name,url,auth,True)
+        em.save_endpoint(name,url,auth,True)
 
     @view_config(route_name='enable_endpoints', request_method='POST')
     def enable_endpoints(self):
@@ -419,7 +417,7 @@ class AskView(object):
         session = {}
         try:
             em = EndpointManager(self.settings, self.request.session)
-            session['askomics'] = em.listEndpoints()
+            session['askomics'] = em.list_endpoints()
 
             sqb = SparqlQueryBuilder(self.settings, self.request.session)
             session['external'] = sqb.getExternalServiceEndpoint()
@@ -483,7 +481,7 @@ class AskView(object):
             sqg = SparqlQueryGraph(self.settings, self.request.session)
             ql = MultipleQueryLauncher(self.settings, self.request.session)
             em = EndpointManager(self.settings, self.request.session)
-            res = ql.process_query(sqg.get_all_taxons().query,em.listEndpoints())
+            res = ql.process_query(sqg.get_all_taxons().query,em.list_endpoints())
             taxons_list = []
             for elem in res:
                 taxons_list.append(elem['taxon'])

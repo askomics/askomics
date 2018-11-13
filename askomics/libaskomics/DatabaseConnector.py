@@ -20,6 +20,7 @@ class DatabaseConnector(ParamManager):
         self.create_galaxy_table()
         self.create_integration_table()
         self.create_query_table()
+        self.create_endpoints_table()
 
     def execute_sql_query(self, query, variables=None, get_id=False):
         """
@@ -104,6 +105,20 @@ class DatabaseConnector(ParamManager):
             nrows int,
             error text,
             FOREIGN KEY(user_id) REFERENCES users(user_id)
+        )
+        '''
+        self.execute_sql_query(query)
+
+    def create_endpoints_table(self):
+
+        query = '''
+        CREATE TABLE IF NOT EXISTS endpoints (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name text,
+            url text,
+            auth text,
+            enable boolean,
+            message text
         )
         '''
         self.execute_sql_query(query)

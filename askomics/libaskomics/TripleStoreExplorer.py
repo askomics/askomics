@@ -45,7 +45,7 @@ class TripleStoreExplorer(ParamManager):
         ql = MultipleQueryLauncher(self.settings, self.session)
         em = EndpointManager(self.settings, self.session)
 
-        lEndp = em.listActiveEndpoints()
+        lEndp = em.list_active_endpoints()
         results = ql.process_query(sqg.get_public_start_point().query,lEndp,indexByEndpoint=True)
         r2 = ql.process_query(sqg.get_user_start_point().query,lEndp,indexByEndpoint=True)
 
@@ -85,7 +85,7 @@ class TripleStoreExplorer(ParamManager):
         sqg = SparqlQueryGraph(self.settings, self.session)
         ql = MultipleQueryLauncher(self.settings, self.session)
         em = EndpointManager(self.settings, self.session)
-        lEndp = em.listActiveEndpoints()
+        lEndp = em.list_active_endpoints()
 
         data['relations'] = ql.process_query(sqg.get_public_abstraction_relation('owl:ObjectProperty').query,lEndp)
         data['relations'] += ql.process_query(sqg.get_user_abstraction_relation('owl:ObjectProperty').query,lEndp)
@@ -134,12 +134,12 @@ class TripleStoreExplorer(ParamManager):
             return req
         return ""
 
-    def build_sparql_query_from_json(self,listEndpoints, typeEndpoints, fromgraphs, variates, constraintes_relations,limit, send_request_to_tps=True):
+    def build_sparql_query_from_json(self,list_endpoints, typeEndpoints, fromgraphs, variates, constraintes_relations,limit, send_request_to_tps=True):
         """
         Build a sparql query from JSON constraints
         """
-        if len(typeEndpoints) != len(listEndpoints):
-            self.log.warn("listEndpoints:"+str(listEndpoints))
+        if len(typeEndpoints) != len(list_endpoints):
+            self.log.warn("list_endpoints:"+str(list_endpoints))
             self.log.warn("typeEndpoints:"+str(typeEndpoints))
             raise ValueError("Devel error. Different size for List Endpoints and List type Endpoints. ")
 
@@ -153,23 +153,23 @@ class TripleStoreExplorer(ParamManager):
         #     query += ' LIMIT ' + str(limit)
         self.log.debug("============ build_sparql_query_from_json ========")
         self.log.debug("type_endpoints:"+str(typeEndpoints))
-        self.log.debug("endpoints:"+str(listEndpoints))
+        self.log.debug("endpoints:"+str(list_endpoints))
         self.log.debug("graphs"+str(fromgraphs))
 
         extreq = False
         typeQuery = ''
 
         if send_request_to_tps:
-            if len(listEndpoints) == 0:
+            if len(list_endpoints) == 0:
                 #raise ValueError("None endpoint are defined fo the current SPARLQ query !")
                 query_launcher = QueryLauncher(self.settings, self.session)
-            elif len(listEndpoints)==1:
+            elif len(list_endpoints)==1:
                 self.log.debug("============ QueryLauncher ========")
 
                 endpoint = ''
                 type_endpoint='askomics'
-                if len(listEndpoints) == 1 :
-                    endpoint = listEndpoints[0]
+                if len(list_endpoints) == 1 :
+                    endpoint = list_endpoints[0]
 
                 if typeEndpoints[0] != 'askomics':
                     extreq = True
@@ -183,11 +183,11 @@ class TripleStoreExplorer(ParamManager):
                 lE = []
                 iCount = 0
 
-                for i in range(0, len(listEndpoints)):
+                for i in range(0, len(list_endpoints)):
                     iCount+=1
                     end = {}
                     end['name'] = "endpoint"+str(iCount)
-                    end['endpoint'] =  listEndpoints[i]
+                    end['endpoint'] =  list_endpoints[i]
                     end['askomics'] =  (typeEndpoints[i] == 'askomics')
                     end['auth'] = 'Basic'
                     end['username'] = None
@@ -207,7 +207,7 @@ class TripleStoreExplorer(ParamManager):
         sqg = SparqlQueryGraph(self.settings, self.session)
         ql = MultipleQueryLauncher(self.settings, self.session)
         em = EndpointManager(self.settings, self.session)
-        rs = ql.process_query(sqg.get_prefix_uri().query,em.listActiveEndpoints())
+        rs = ql.process_query(sqg.get_prefix_uri().query,em.list_active_endpoints())
         results = {}
         r_buf = {}
 
