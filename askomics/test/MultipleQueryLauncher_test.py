@@ -21,8 +21,8 @@ class MultipleQueryLauncher(unittest.TestCase):
 
     def test_process_query(self):
         jm = EndpointManager(self.settings, self.request.session)
-        jm.saveEndpoint("testNameEndpoint",'http://localhost:8890/sparql','Digest',True)
-        jm.saveEndpoint("testNameEndpoint2",'http://localhost:8890/sparql','Digest',True)
+        jm.save_endpoint("testNameEndpoint",'http://localhost:8890/sparql','Digest',True)
+        jm.save_endpoint("testNameEndpoint2",'http://localhost:8890/sparql','Digest',True)
         #mql = MultipleQueryLauncher(self.settings, self.request.session)
         try:
 

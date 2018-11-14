@@ -214,6 +214,10 @@ class InterfaceTpsDb(object):
         '''
         database.execute_sql_query(query)
 
+        query = '''
+        DROP TABLE IF EXISTS endpoints
+        '''
+        database.execute_sql_query(query)
 
     def delete_users(self):
         """Delete the test users graph"""

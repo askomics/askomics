@@ -69,8 +69,6 @@ class AskViewTests(unittest.TestCase):
         self.askview = AskView(self.request)
         self.askview.settings = self.settings
 
-        em = EndpointManager(self.settings, self.request.session)
-        em.drop()
 
     def getKeyNode(self,node):
         return node['uri']
