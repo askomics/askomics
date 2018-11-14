@@ -15,6 +15,7 @@ from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
 from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
 from askomics.libaskomics.EndpointManager import EndpointManager
 from askomics.ask_view import AskView
+from SetupTests import SetupTests
 
 
 from interface_tps_db import InterfaceTpsDb
@@ -50,19 +51,7 @@ class AskViewTests(unittest.TestCase):
 
         self.request.json_body = {}
 
-        # Create the user dir if not exist
-        self.temp_directory = self.settings['askomics.files_dir'] + '/upload/' + self.request.session['username']
-        if not os.path.isdir(self.temp_directory):
-            os.makedirs(self.temp_directory)
-        # Set the upload dir
-        self.request.session['upload_directory'] = self.temp_directory
-        # Copy files if directory is empty
-        if not os.listdir(self.temp_directory):
-            files = ['people.tsv', 'instruments.tsv', 'play_instrument.tsv', 'transcript.tsv', 'qtl.tsv', 'small_data.gff3', 'turtle_data.ttl', 'bed_example.bed']
-            for file in files:
-                src = os.path.join(os.path.dirname(__file__), "..", "test-data") + '/' + file
-                dst = self.request.session['upload_directory'] + '/' + file
-                copyfile(src, dst)
+        SetupTests(self.settings, self.request.session)
 
         self.tps = InterfaceTpsDb(self.settings, self.request)
 

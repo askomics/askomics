@@ -5,6 +5,7 @@ from pyramid.paster import get_appsettings
 from pyramid import testing
 from askomics.libaskomics.Security import Security
 
+from SetupTests import SetupTests
 from interface_tps_db import InterfaceTpsDb
 
 class SecurityTests(unittest.TestCase):
@@ -20,14 +21,17 @@ class SecurityTests(unittest.TestCase):
         self.request.session['admin'] = False
         self.request.session['blocked'] = True
 
+        SetupTests(self.settings, self.request.session)
+
         self.tps = InterfaceTpsDb(self.settings, self.request)
+
 
     def test_get_sha256_pw(self):
         """Test get_sha256_pw"""
 
         security = Security(self.settings, self.request.session, 'jdoe', 'jdoe@example.com', 'iamjohndoe', 'iamjohndoe')
 
-        assert len(security.get_sha256_pw()) == 64 # We cant predict the string cause there is random for salt
+        assert len(security.get_sha256_pw()) == 128 # We cant predict the string cause there is random for salt
 
     def test_check_email(self):
         """Test for check_email"""

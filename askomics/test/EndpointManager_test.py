@@ -7,7 +7,7 @@ from pyramid.paster import get_appsettings
 from pyramid import testing
 from askomics.libaskomics.EndpointManager import EndpointManager
 from interface_tps_db import InterfaceTpsDb
-
+from SetupTests import SetupTests
 
 class EndpointManagerTests(unittest.TestCase):
     """Test for the ModuleManager class"""
@@ -23,6 +23,7 @@ class EndpointManagerTests(unittest.TestCase):
         self.request.session['blocked'] = False
         self.request.session['graph'] = "test/nosetest/jdoe"
 
+        SetupTests(self.settings, self.request.session)
         self.tps = InterfaceTpsDb(self.settings, self.request)
 
     def test_save_endpoint(self):
