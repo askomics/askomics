@@ -28,12 +28,12 @@ class Security(ParamManager):
         self.blocked = True
         self.galaxy = False
 
-        # concatenate askmics salt, password and random salt and hash it with sha256 function
+        # concatenate askmics salt, password and random salt and hash it with sha512 function
         # see --"https://en.wikipedia.org/wiki/Salt_(cryptography)"-- for more info about salt
         alpabet = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
         self.randomsalt = ''.join(random.choice(alpabet) for i in range(20))
         salted_pw = self.settings["askomics.salt"] + self.passwd + self.randomsalt
-        self.sha256_pw = hashlib.sha256(salted_pw.encode('utf8')).hexdigest()
+        self.sha256_pw = hashlib.sha512(salted_pw.encode('utf8')).hexdigest()
 
     def get_username(self):
         """get the username"""
@@ -132,7 +132,7 @@ class Security(ParamManager):
             db_shapw = rows[0][0]
 
         concat = self.settings["askomics.salt"] + self.passwd + db_salt
-        shapw = hashlib.sha256(concat.encode('utf8')).hexdigest()
+        shapw = hashlib.sha512(concat.encode('utf8')).hexdigest()
 
         return db_shapw == shapw
 
@@ -156,7 +156,7 @@ class Security(ParamManager):
             db_shapw = rows[0][0]
 
         concat = self.settings["askomics.salt"] + self.passwd + db_salt
-        shapw = hashlib.sha256(concat.encode('utf8')).hexdigest()
+        shapw = hashlib.sha512(concat.encode('utf8')).hexdigest()
 
         return db_shapw == shapw
 
