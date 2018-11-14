@@ -59,6 +59,22 @@ cd askomics
 git checkout 18.10
 ```
 
+If you have installed virtuoso via docker, you have to inform AskOmics that the load url is not localhost:6543, but another ip address (dockers can't access host by http://localhost)
+
+Run
+
+```bash
+docker exec my-virtuoso netstat -nr | grep '^0\.0\.0\.0' | awk '{print $2}'
+```
+
+and add
+
+```ini
+askomics.load_url=http://xxx.xx.x.x:6543
+```
+into `configs/production.virtuoso.ini` and `configs/development.virtuoso.ini` (replace `xxx.xx.x.x` with the ip obtained)
+
+
 Install and run
 
 ```bash
