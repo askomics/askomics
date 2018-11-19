@@ -17,7 +17,7 @@
 #     def setUp( self ):
 
 #         self.temp_directory = tempfile.mkdtemp()
-#         self.settings = get_appsettings('configs/development.ini', name='main')
+#         self.settings = get_appsettings('configs/test.virtuoso.ini', name='main')
 #         self.request = testing.DummyRequest()
 #         self.request.session['username'] = 'jdoe'
 #         self.request.session['group']    = 'base'
