@@ -101,9 +101,9 @@ class IHMLocal {
       $("#queryBuilder").hide();
 
       this.loadStartPoints()
-      .then(function(nbStartPoints) {
-        AskomicsHelp.checkFirstUseAskomics(nbStartPoints);
-      })
+      // .then(function(nbStartPoints) {
+      //   AskomicsHelp.checkFirstUseAskomics(nbStartPoints);
+      // })
       .catch(function (reason) {
         // File read error or JSON SyntaxError
         console.error('An error occurred', reason);
@@ -1197,6 +1197,8 @@ class IHMLocal {
         // Get the overview of files to integrate
         $("#integration").click(function() {
             __ihm.get_uploaded_files();
+            // check user
+            new AskomicsUser('').checkUser();
         });
 
         // Visual effect on active tab (Ask! / Integrate / Credits)
@@ -1288,7 +1290,7 @@ class IHMLocal {
               $('#tick_signup').removeClass('hidden');
               $('#cross_signup').addClass('hidden');
               __ihm.user = new AskomicsUser(data.username, data.admin);
-              __ihm.user.logUser();
+              $('#interrogation').click();
             }
           });
 
@@ -1325,7 +1327,7 @@ class IHMLocal {
               //Success
               AskomicsUser.cleanHtmlLogin();
               __ihm.user = new AskomicsUser(data.username, data.admin);
-              __ihm.user.logUser();
+              $('#interrogation').click();
             }
           });
         });

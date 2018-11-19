@@ -20,13 +20,13 @@ function RestServiceJs(newurl) {
   } ;
 
   this.showLoginForm = function () {
+    __ihm.user.logout();
     $(".container:not(#navbar_content)").hide();
     $('#content_login').show();
     $('.nav li.active').removeClass('active');
     $("#login").addClass('active');
     __ihm.displayNavbar(false, '');
     __ihm.hideModal();
-    __ihm.user.logout();
   } ;
 
   this.displayBadRequest = function () {
@@ -36,9 +36,9 @@ function RestServiceJs(newurl) {
   } ;
 
   this.error_management = function(req, status, ex) {
-    console.debug("req:"+JSON.stringify(req));
-    console.debug("status:"+JSON.stringify(status));
-    console.debug("ex:"+JSON.stringify(ex));
+    console.log("req:"+JSON.stringify(req));
+    console.log("status:"+JSON.stringify(status));
+    console.log("ex:"+JSON.stringify(ex));
     //https://fr.wikipedia.org/wiki/Liste_des_codes_HTTP
 
     $('#error_div').remove();
@@ -48,7 +48,9 @@ function RestServiceJs(newurl) {
       return;
     }
     if ( ex == 'Unauthorized' ) {
+      console.log('show login form');
       this.showLoginForm('');
+      // $("#login").click();
       return;
     }
     if ( ex == 'Forbidden' ) {

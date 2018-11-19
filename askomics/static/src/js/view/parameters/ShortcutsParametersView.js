@@ -145,7 +145,6 @@ class ShortcutsParametersView extends InterfaceParametersView {
     }
     this.updateShortcutsIsDone = true ;
 
-    console.log("!!! update shortcuts !!!");
     this.shortcuts = {};
     let service = new RestServiceJs("sparqlquery");
     let tab2 = __ihm.getGraphBuilder().getEndpointAndGraph();
