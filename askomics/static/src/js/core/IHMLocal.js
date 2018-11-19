@@ -176,9 +176,9 @@ class IHMLocal {
       $("#init").show();
 
       this.loadStartPoints()
-      .then(function(nbStartPoints) {
-          AskomicsHelp.checkFirstUseAskomics(nbStartPoints);
-      })
+      // .then(function(nbStartPoints) {
+          // AskomicsHelp.checkFirstUseAskomics(nbStartPoints);
+      // })
       .catch(function (reason) {
         // File read error or JSON SyntaxError
         console.error('An error occurred', reason);
