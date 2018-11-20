@@ -1190,6 +1190,7 @@ class AskView(object):
             admin_blocked = security.get_admin_blocked_by_username()
             self.data['admin'] = admin_blocked['admin']
             self.data['blocked'] = admin_blocked['blocked']
+            self.data['galaxy'] = security.check_galaxy()
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
             self.data['error'] = "Bad server configuration!"
@@ -1313,6 +1314,7 @@ class AskView(object):
             self.data['username'] = username
             self.data['admin'] = admin_blocked['admin']
             self.data['blocked'] = admin_blocked['blocked']
+            self.data['galaxy'] = self.request.session['galaxy']
 
         except Exception as e:
             self.data['error'] = str(e)
@@ -1864,6 +1866,9 @@ class AskView(object):
 
     @view_config(route_name='get_uploaded_files', request_method="GET")
     def get_uploaded_files(self):
+
+        self.checkAuthSession()
+
         param_manager = ParamManager(self.settings, self.request.session)
         path = param_manager.get_upload_directory()
 

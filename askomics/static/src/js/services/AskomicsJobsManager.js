@@ -167,7 +167,7 @@ let instanceAskomicsJobsViewManager ;
         let __inst = new AskomicsJobsViewManager();
         let template = AskOmics.templates.jobs;
 
-        let context = {integration: __inst.integration_jobs, query: __inst.query_jobs, galaxy: __ihm.user.haveGalaxy(), maxrows: __inst.maxrows};
+        let context = {integration: __inst.integration_jobs, query: __inst.query_jobs, galaxy: __ihm.user.galaxy, maxrows: __inst.maxrows};
 
         let html = template(context);
 

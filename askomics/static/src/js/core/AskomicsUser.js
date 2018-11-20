@@ -7,12 +7,10 @@ class AskomicsUser{
     this.admin = null;
     this.blocked = null;
     this.galaxy = null;
-
-    this.checkUser();
+    this.error = null;
   }
 
   checkUser(){
-    console.log("---> checkUser");
     let self = this;
     return new Promise(
     function(resolve, reject){
@@ -21,7 +19,6 @@ class AskomicsUser{
         if (user.username == "") {
           __ihm.displayNavbar(false, '');
           // redirect to login page
-          $("#login").click();
         }else{
           // there is a user logged
           self.username = user.username;
@@ -39,13 +36,59 @@ class AskomicsUser{
     });
   }
 
+  signup(username, email, password, password2, callback){
+
+    let self = this;
+
+    let service = new RestServiceJs('signup');
+    let model = {'username': username,
+                 'email': email,
+                 'password': password,
+                 'password2': password2 };
+
+    service.post(model, function(data){
+      if(data.error.length !== 0){
+        self.error = data.error;
+      }else{
+        self.username = data.username;
+        self.admin = data.admin;
+        self.blocked = data.blocked;
+        self.galaxy = data.galaxy;
+      }
+      callback(self);
+    });
+
+  }
+
+  login(username_email, password, callback){
+
+    let self = this;
+
+    let service = new RestServiceJs('login');
+    let model = {
+      'username_email': username_email,
+      'password': password
+    };
+    service.post(model, function(data){
+      if (data.error.length !== 0) {
+        self.error = data.error;
+      }else{
+        self.username = data.username;
+        self.admin = data.admin;
+        self.blocked = data.blocked;
+        self.galaxy = data.galaxy;
+      }
+      callback(self);
+    });
+  }
+
   logout(){
     let self = this;
     let service = new RestServiceJs('logout');
-    service.getAll();
-    AskomicsUser.cleanHtmlLogin();
-    __ihm.displayNavbar(false, '');
-    $('#interrogation').click();
+    service.getAll(function(){
+      AskomicsUser.cleanHtmlLogin();
+      __ihm.displayNavbar(false, '');
+    });
   }
 
   static cleanHtmlLogin() {
@@ -61,21 +104,7 @@ class AskomicsUser{
     $('#cross_login').removeClass('hidden');
   }
 
-  isAdmin() {
-      return this.admin;
-  }
-
-  isBlocked() {
-      return this.blocked;
-  }
-
   isLogin() {
       return (this.username != undefined)&&(this.username != "");
   }
-
-  haveGalaxy() {
-      return this.galaxy;
-  }
-
-
 }

@@ -185,7 +185,7 @@ function displayTSVForm(file) {
         file.preview_data = cols2rows(file.preview_data);
     }
 
-    let admin = __ihm.user.isAdmin();
+    let admin = __ihm.user.admin;
 
     let template = AskOmics.templates.csv_form;
 
@@ -199,7 +199,7 @@ function displayTSVForm(file) {
 function displayGffForm(file, taxons) {
     let template = AskOmics.templates.gff_form;
 
-    let admin = __ihm.user.isAdmin();
+    let admin = __ihm.user.admin;
 
     if ( ! ('entities' in file) ) {
       let template = AskOmics.templates.error_message;
@@ -227,7 +227,7 @@ function displayGffForm(file, taxons) {
 function displayTtlForm(file) {
     let template = AskOmics.templates.ttl_form;
 
-    let admin = __ihm.user.isAdmin();
+    let admin = __ihm.user.admin;
 
     let context = {idfile: getIdFile(file),file: file, admin: admin};
     let html = template(context);
@@ -241,7 +241,7 @@ function displayTtlForm(file) {
 function displayBedForm(file, taxons) {
     let template = AskOmics.templates.bed_form;
 
-    let admin = __ihm.user.isAdmin();
+    let admin = __ihm.user.admin;
 
     file.label = file.name.replace(/\.[^/.]+$/, "");
 

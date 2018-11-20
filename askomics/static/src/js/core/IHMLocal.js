@@ -100,6 +100,8 @@ class IHMLocal {
       $("#init").show();
       $("#queryBuilder").hide();
 
+      __ihm.user.checkUser();
+
       this.loadStartPoints()
       // .then(function(nbStartPoints) {
       //   AskomicsHelp.checkFirstUseAskomics(nbStartPoints);
@@ -401,7 +403,7 @@ class IHMLocal {
       let service = new RestServiceJs('list_endpoints');
       service.getAll(function(data) {
           let template = AskOmics.templates.endpoints;
-          let context = { admin: __ihm.user.isAdmin() , endpoints: data.askomics , endpoints_ext: data.external.endpoints};
+          let context = { admin: __ihm.user.admin , endpoints: data.askomics , endpoints_ext: data.external.endpoints};
           let html = template(context);
 
           $('#content_endpoints').empty();
@@ -777,7 +779,7 @@ class IHMLocal {
         // Upload form
         let service = new RestServiceJs("up/");
         service.getAll(function(html) {
-        let size_file_max = __ihm.user.isAdmin()?__ihm.sizeFileMaxAdmin:__ihm.sizeFileMaxUser;
+        let size_file_max = __ihm.user.admin?__ihm.sizeFileMaxAdmin:__ihm.sizeFileMaxUser;
 
         html.html = html.html.replace("___SIZE_UPLOAD____",(size_file_max/(1000*1000))+" Mo");
         $(content).html(html.html);
@@ -808,7 +810,7 @@ class IHMLocal {
       let service = new RestServiceJs('load_remote_data_into_graph');
       let p = public_d;
 
-      if (! __ihm.user.isAdmin() ) {
+      if (! __ihm.user.admin ) {
         p = false;
       }
 
@@ -834,7 +836,7 @@ class IHMLocal {
     set_upload_url() {
 
         let template = AskOmics.templates.add_remote_data;
-        let admin = __ihm.user.isAdmin();
+        let admin = __ihm.user.admin;
         let context = {admin: admin};
         let html = template(context);
 
@@ -1175,175 +1177,144 @@ class IHMLocal {
     }
 
     displayNavbar(loged, username, admin, blocked) {
-        $("#navbar").empty();
-        let template = AskOmics.templates.navbar;
+      // Navbar template
+      $('#navbar').empty();
+      let template = AskOmics.templates.navbar;
+      let context = {name: 'AskOmics', loged: loged, username: username, admin: admin, nonblocked: !blocked};
+      let html = template(context);
+      $('#navbar').append(html);
 
-        let context = {name: 'AskOmics', loged: loged, username: username, admin: admin, nonblocked: !blocked};
-        let html = template(context);
+      // Visual effects on active tabs
+      $('.nav li').on('click', function(event){
+        $('.nav li.active').removeClass('active');
+        $(this).addClass('active');
+        if ( ! ( $(this).attr('id') in { 'help' : '','admin':'', 'user_menu': '' }) ) {
 
-        $("#navbar").append(html);
+          $('.container').hide();
+          $('.container#navbar_content').show();
+          //console.log("===>"+'.container#content_' + $(this).attr('id'));
+          $('.container#content_' + $(this).attr('id')).show();
+        } else {
+          $('.container#navbar_content').show();
+        }
+      });
 
-        // manage navbar button here
-        //TODO: move this function into a navbar class?
+      // diplay signup/login form
+      $('#show_signup').one('click', function(e) {
+        $('#content_login').hide();
+        $('#content_signup').show();
+      });
 
-        /*
+      $('#show_login').one('click', function(e) {
+        $('#content_signup').hide();
+        $('#content_login').show();
+      });
 
-          Click general GU Interface of Askomics :
-          - manage navbar
-          - show/hide content_{section}
+      // trigger signup when enterkey is pressed
+      $('#signup_password2').off().keypress(function (e) {
+        if(e.which == 13)  // the enter key code
+        {
+          $('#signup_button').click();
+        }
+      });
 
-        */
+      // trigger login when enterkey is pressed
+      $('#login_password').off().keypress(function (e) {
+        if(e.which == 13)  // the enter key code
+        {
+          $('#login_button').click();
+        }
+      });
 
-        // Get the overview of files to integrate
-        $("#integration").click(function() {
-            __ihm.get_uploaded_files();
-            // check user
-            new AskomicsUser('').checkUser();
-        });
-
-        // Visual effect on active tab (Ask! / Integrate / Credits)
-        $('.nav li').click(function(e) {
-          //$(this).off();
-
-          //TODO : We can not defined nav li inside otherwise this function apply (define for the min nav ASKOMIS ).....
-          // for now, to avoid a bad behaviours, we need to not defined id in sub nav tag
-          if ( $(this).attr('id')=== undefined) return;
-
-          $('.nav li.active').removeClass('active');
-
-            if (!$(this).hasClass('active')) {
-                $(this).addClass('active');
+      // signup
+      $('#signup_button').off().on('click', function(e){
+        let username = $('#signup_username').val();
+        let email = $('#signup_email').val();
+        let password = $('#signup_password').val();
+        let password2 = $('#signup_password2').val();
+        let user = new AskomicsUser();
+        user.signup(username, email, password, password2, function(user){
+          // Error
+          if (user.error) {
+            $('#signup_error').empty();
+            for (let i = user.error.length - 1; i >= 0; i--) {
+              $('#signup_error').append(user.error[i] + '<br/>');
             }
-
-            //console.log("ID:"+ $(this).attr('id'));
-            if ( ! ( $(this).attr('id') in { 'help' : '','admin':'', 'user_menu': '' }) ) {
-
-              $('.container').hide();
-              $('.container#navbar_content').show();
-              //console.log("===>"+'.container#content_' + $(this).attr('id'));
-              $('.container#content_' + $(this).attr('id')).show();
-            } else {
-              $('.container#navbar_content').show();
-            }
-
-            e.preventDefault();
-
-        });
-
-        // reload jobs when the button is clicked
-        $("#jobsview").click(function(e) {
-          new AskomicsJobsViewManager().loadjob().then(function() {
-            new AskomicsJobsViewManager().update_jobview("integration");
-          });
-        });
-
-        // diplay signup/login form
-        $('#show_signup').click(function(e) {
-          $('#content_login').hide();
-          $('#content_signup').show();
-        });
-
-        $('#show_login').click(function(e) {
-          $('#content_signup').hide();
-          $('#content_login').show();
-        });
-
-        // 'enter' key when password2 was filled !
-        $('#signup_password2').off().keypress(function (e) {
-          if(e.which == 13)  // the enter key code
-          {
-            $('#signup_button').click();
+            $('#signup_error').show();
+            $('#spinner_signup').addClass('hidden');
+            $('#tick_signup').addClass('hidden');
+            $('#cross_signup').removeClass('hidden');
+            return;
           }
-        });
-
-        $('#signup_button').off().click(function(e) {
-          let username = $('#signup_username').val();
-          let email = $('#signup_email').val();
-          let password = $('#signup_password').val();
-          let password2 = $('#signup_password2').val();
-
-          let service = new RestServiceJs("signup");
-          let model = { 'username': username,
-                        'email': email,
-                        'password': password,
-                        'password2': password2  };
-          $('#spinner_signup').removeClass('hidden');
-          $('#tick_signup').addClass('hidden');
+          // Success
+          $('#signup_error').hide();
+          $('#spinner_signup').addClass('hidden');
+          $('#tick_signup').removeClass('hidden');
           $('#cross_signup').addClass('hidden');
-          service.post(model, function(data) {
-            __ihm.hideModal();
-            if (data.error.length !== 0) {
-              $('#signup_error').empty();
-              for (let i = data.error.length - 1; i >= 0; i--) {
-                $('#signup_error').append(data.error[i] + '<br/>');
-              }
-
-              // Error
-              $('#signup_error').show();
-              $('#spinner_signup').addClass('hidden');
-              $('#tick_signup').addClass('hidden');
-              $('#cross_signup').removeClass('hidden');
-            }else{
-              // Success
-              $('#signup_error').hide();
-              $('#spinner_signup').addClass('hidden');
-              $('#tick_signup').removeClass('hidden');
-              $('#cross_signup').addClass('hidden');
-              __ihm.user = new AskomicsUser(data.username, data.admin);
-              $('#interrogation').click();
-            }
-          });
-
+          // Show interrogation
+          $('.nav li.active').removeClass('active');
+          $('#interrogation').addClass('active');
+          $('.container').hide();
+          $('.container#navbar_content').show();
+          $('.container#content_interrogation').show();
+          //reload startpoints
+          __ihm.loadStartPoints();
         });
+      });
 
-        // log next a 'enter' key when password was filled !
-        $('#login_password').keypress(function (e) {
-          if(e.which == 13)  // the enter key code
-          {
-            $('#login_button').click();
+      // login
+      $('#login_button').off().on('click', function(e){
+        let username_email = $('#login_username-email').val();
+        let password = $('#login_password').val();
+        let user = new AskomicsUser();
+
+        user.login(username_email, password, function(user){
+          if(user.error) {
+            $('#login_error').empty();
+            for (let i = user.error.length - 1; i >= 0; i--) {
+              $('#login_error').append(user.error[i] + '<br>');
+            }
+            AskomicsUser.errorHtmlLogin();
+            return;
           }
+          AskomicsUser.cleanHtmlLogin();
+          __ihm.displayNavbar(true, user.username, user.admin, user.blocked);
+          // Show interrogation
+          $('.nav li.active').removeClass('active');
+          $('#interrogation').addClass('active');
+          $('.container').hide();
+          $('.container#navbar_content').show();
+          $('.container#content_interrogation').show();
+          //reload startpoints
+          __ihm.loadStartPoints();
         });
+      });
 
-        $('#login_button').click(function(e) {
-          let username_email = $('#login_username-email').val();
-          let password = $('#login_password').val();
+      // logout
+      $('#logout').on('click', function(e) {
+        __ihm.user.logout();
+      });
 
-          let service = new RestServiceJs('login');
-          let model = {
-            'username_email': username_email,
-            'password': password
-          };
-          $('#spinner_login').removeClass('hidden');
-          $('#cross_login').addClass('hidden');
-          service.post(model, function(data) {
-            if (data.error.length !== 0) {
-              $('#login_error').empty();
-              for (let i = data.error.length - 1; i >= 0; i--) {
-                $('#login_error').append(data.error[i] + '<br>');
-              }
-              // Error
-              AskomicsUser.errorHtmlLogin();
-            }else{
-              //Success
-              AskomicsUser.cleanHtmlLogin();
-              __ihm.user = new AskomicsUser(data.username, data.admin);
-              $('#interrogation').click();
-            }
-          });
+      // admin page
+      $('#administration').one('click', function() {
+        __ihm.loadUsers();
+      });
+
+      // admin page
+      $('#user_info').one('click', function() {
+        __ihm.userForm();
+      });
+
+      // Get the overview of files to integrate
+      $("#integration").click(function() {
+          __ihm.get_uploaded_files();
+      });
+
+      // reload jobs when the button is clicked
+      $("#jobsview").one('click', function(e) {
+        new AskomicsJobsViewManager().loadjob().then(function() {
+          new AskomicsJobsViewManager().update_jobview("integration");
         });
-
-        $('#logout').click(function(e) {
-          __ihm.user.logout();
-        });
-
-        // admin page
-        $('#administration').click(function() {
-          __ihm.loadUsers();
-        });
-
-        // admin page
-        $('#user_info').click(function() {
-          __ihm.userForm();
-        });
+      });
     }
 }
