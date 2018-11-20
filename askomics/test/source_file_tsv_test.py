@@ -17,7 +17,7 @@ SIMPLE_SOURCE_FILE = os.path.join( os.path.dirname( __file__ ), "..", "test-data
 class SourceFileTsvTests(unittest.TestCase):
 
     def setUp( self ):
-        self.settings = get_appsettings('configs/test.virtuoso.ini', name='main')
+        self.settings = get_appsettings('configs/tests.ini', name='main')
         self.settings['askomics.upload_user_data_method'] = 'insert'
         self.request = testing.DummyRequest()
         self.request.session['username'] = 'jdoe'

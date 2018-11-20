@@ -7,19 +7,25 @@
 use = egg:Askomics
 
 # Pyramid debug mode
+askomics.debug = false
 pyramid.reload_templates = false
 pyramid.debug_authorization = false
 pyramid.debug_notfound = false
 pyramid.debug_routematch = false
 pyramid.default_locale_name = en
-askomics.debug=false
-# debugtoolbar.hosts = 127.0.0.1 ::1
+#pyramid.includes = pyramid_debugtoolbar
+#debugtoolbar.hosts = 127.0.0.1 ::1
+
 
 # Triplestore configuration
+# - hack_virtuoso: true if endpoint is virtuoso
+# - load_url: set if the load url is different than askomics url
+# - upload_user_data_method: load or insert
+# - delete_method: DELETE or POST
+askomics.hack_virtuoso = true
 askomics.endpoint = http://localhost:8890/sparql
 askomics.updatepoint = http://localhost:8890/sparql
-askomics.hack_virtuoso = true
-askomics.fdendpoint=http://localhost:4040/fedx
+#askomics.load_url=
 askomics.upload_user_data_method=load
 askomics.max_content_size_to_update_database = 4000
 askomics.graph = urn:sparql:askomics
@@ -28,16 +34,23 @@ askomics.prefix = http://www.semanticweb.org/user/ontologies/2018/1#
 askomics.namespace = http://www.semanticweb.org/askomics/ontologies/2018/1#
 askomics.delete_method = DELETE
 askomics.triplestore_results_max_rows=10000
-#can be POST or DELETE
+
+
+# Fedex Configuration
+askomics.fdendpoint=http://localhost:4040/fedx
+
 
 # AskOmics configuration
+# - files_dir: where AskOmics write user data
 askomics.overview_lines_limit = 200
 askomics.allowed_file_types = 'application/ld+json','text/xml','application/octet-stream','text/turtle','application/x-turtle','text/rdf+n3','text/plain','text/csv','text/tab-separated-values','text/fasta','application/rdf+xml, application/vnd.realvnc.bed'
 askomics.upload_min_size = 1
 askomics.upload_max_size = 200000000
 askomics.files_dir = /tmp/askomics
 
+
 # Authentication
+# Change the salt into a random string
 askomics.salt = AskOmics
 
 # Proxy setting
@@ -64,7 +77,7 @@ askomics.database_path=/tmp/askomics/database.db
 #askomics.smtp_starttls=
 
 ###
-# wsgi server configuration
+#wsgi server configuration
 ###
 
 [server:main]
@@ -87,11 +100,15 @@ keys = console
 keys = generic
 
 [logger_root]
-level = INFO
+# Set the log level
+# - INFO, WARNING or DEBUG
+level = DEBUG
 handlers = console
 
 [logger_askomics]
-level = INFO
+# Set the log level
+# - INFO, WARNING or DEBUG
+level = DEBUG
 handlers =
 qualname = askomics
 

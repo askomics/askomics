@@ -14,7 +14,7 @@ class MultipleQueryLauncher(unittest.TestCase):
     def setUp(self):
         """Set up the settings and session"""
 
-        self.settings = get_appsettings('configs/test.virtuoso.ini', name='main')
+        self.settings = get_appsettings('configs/tests.ini', name='main')
 
         self.request = testing.DummyRequest()
         #self.settings['askomics.fdendpoint'] = 'http://localhost:8890/sparql'

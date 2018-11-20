@@ -15,7 +15,7 @@ class ParamManagerTests(unittest.TestCase):
     def setUp(self):
         """Set up the settings and session"""
 
-        self.settings = get_appsettings('configs/test.virtuoso.ini', name='main')
+        self.settings = get_appsettings('configs/tests.ini', name='main')
         self.settings['askomics.upload_user_data_method'] = 'insert'
 
         self.request = testing.DummyRequest()

@@ -33,7 +33,7 @@ class AskViewTests(unittest.TestCase):
         production data
         """
 
-        self.settings = get_appsettings('configs/test.virtuoso.ini', name='main')
+        self.settings = get_appsettings('configs/tests.ini', name='main')
         self.settings['askomics.upload_user_data_method'] = 'insert'
 
         self.request = testing.DummyRequest()

@@ -14,15 +14,13 @@ gulp="$dir_node_modules/.bin/gulp"
 python_flags="-s"
 
 function usage() {
-    echo "Usage: $0 (-t { fuseki | agraph | virtuoso }) (-d { dev | prod })"
-    echo "    -t     triplestore (default: virtuoso)"
+    echo "Usage: $0 (-d { dev | prod })"
     echo "    -d     deployment mode (default: production)"
     echo "    -r     run only (without build javascript and python)"
     echo "    -b     build only (python and js)"
 }
 
 # Default options
-triplestore="virtuoso"
 run=false
 build=false
 
@@ -32,10 +30,6 @@ while getopts "ht:d:rb" option; do
         h)
             usage
             exit 0
-        ;;
-
-        t)
-            triplestore=$OPTARG
         ;;
 
         d)
@@ -98,9 +92,11 @@ if [[ ! -d $dir_node_modules ]]; then
 fi
 
 # Build config file ---------------------------------------
-config_name="custom.ini"
-config_path="$dir_config/$config_name"
-cp "$dir_config/$depmode.$triplestore.ini" "$config_path"
+config_template_path="$dir_config/askomics.ini.template"
+config_path="$dir_config/askomics.ini"
+if [[ ! -f $config_path ]]; then
+    cp $config_template_path $config_path
+fi
 
 # Get environment variables -------------------------------
 echo "Convert environment variables to ini file ..."

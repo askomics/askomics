@@ -11,7 +11,7 @@ from askomics.upload import FileUpload
 
 class FileUploadTests(unittest.TestCase):
     def setUp(self):
-        self.settings = get_appsettings('configs/test.virtuoso.ini', name='main')
+        self.settings = get_appsettings('configs/tests.ini', name='main')
         self.upload_min_size = self.settings['askomics.upload_min_size']
         self.upload_max_size = self.settings['askomics.upload_max_size']
         self.request = testing.DummyRequest()

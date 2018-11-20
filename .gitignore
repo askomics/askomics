@@ -37,7 +37,7 @@ output_test.log
 .*rc
 
 # custom config file
-configs/custom.ini
+configs/askomics.ini
 
 # docker file
 Dockerfile
