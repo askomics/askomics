@@ -905,7 +905,7 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.signup()
 
-        assert data == {'error': [], 'blocked': False, 'admin': True, 'username': 'jdoe'}
+        assert data == {'error': [], 'blocked': False, 'admin': True, 'username': 'jdoe', 'galaxy': False}
 
     def test_checkuser(self):
         """Test checkuser method"""
@@ -953,7 +953,7 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.login()
 
-        assert data == {'blocked': False, 'admin': True, 'error': [], 'username': 'jdoe'}
+        assert data == {'blocked': False, 'admin': True, 'error': [], 'username': 'jdoe', 'galaxy': False}
 
     def test_login_api(self):
         """Test login_api method"""
@@ -1013,7 +1013,7 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.get_users_infos()
 
-        assert data == {'result': [{'username': 'jdoe', 'email': 'jdoe@example.com', 'admin': True, 'blocked': False}], 'error': [], 'username': 'jdoe', 'admin': True, 'blocked': False}
+        assert data == {'result': [{'username': 'jdoe', 'email': 'jdoe@example.com', 'admin': True, 'blocked': False}], 'error': [], 'username': 'jdoe', 'admin': True, 'blocked': False, 'galaxy': False}
 
     def test_lock_user(self):
         """Test lock_user method"""
@@ -1146,4 +1146,4 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.update_passwd()
 
-        assert data == {'error': [], 'admin': True, 'blocked': False, 'username': 'jdoe', 'success': 'success'}
+        assert data == {'error': [], 'admin': True, 'blocked': False, 'username': 'jdoe', 'success': 'success', 'galaxy': False}
