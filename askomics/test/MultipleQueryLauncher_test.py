@@ -14,15 +14,15 @@ class MultipleQueryLauncher(unittest.TestCase):
     def setUp(self):
         """Set up the settings and session"""
 
-        self.settings = get_appsettings('configs/test.virtuoso.ini', name='main')
+        self.settings = get_appsettings('configs/tests.ini', name='main')
 
         self.request = testing.DummyRequest()
         #self.settings['askomics.fdendpoint'] = 'http://localhost:8890/sparql'
 
     def test_process_query(self):
         jm = EndpointManager(self.settings, self.request.session)
-        jm.saveEndpoint("testNameEndpoint",'http://localhost:8890/sparql','Digest',True)
-        jm.saveEndpoint("testNameEndpoint2",'http://localhost:8890/sparql','Digest',True)
+        jm.save_endpoint("testNameEndpoint",'http://localhost:8890/sparql','Digest',True)
+        jm.save_endpoint("testNameEndpoint2",'http://localhost:8890/sparql','Digest',True)
         #mql = MultipleQueryLauncher(self.settings, self.request.session)
         try:
 

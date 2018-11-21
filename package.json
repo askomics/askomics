@@ -10,7 +10,10 @@
     "type": "git",
     "url": "https://github.com/askomics/askomics.git"
   },
-  "keywords": ["Sementic Web", "Ontology"],
+  "keywords": [
+    "Sementic Web",
+    "Ontology"
+  ],
   "author": "INRA",
   "license": "AGPL-3.0",
   "bugs": {

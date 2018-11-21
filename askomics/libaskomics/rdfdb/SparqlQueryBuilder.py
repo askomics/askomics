@@ -63,7 +63,7 @@ class SparqlQueryBuilder(ParamManager):
         ql = MultipleQueryLauncher(self.settings, self.session)
         em = EndpointManager(self.settings, self.session)
 
-        results = ql.process_query(qu.query,em.listEndpoints(),indexByEndpoint=True)
+        results = ql.process_query(qu.query,em.list_endpoints(),indexByEndpoint=True)
 
         for endpoint in results:
             if endpoint not in settings:
@@ -93,7 +93,7 @@ class SparqlQueryBuilder(ParamManager):
         ql = MultipleQueryLauncher(self.settings, self.session)
         em = EndpointManager(self.settings, self.session)
 
-        results = ql.process_query(qu.query,em.listEndpoints(),indexByEndpoint=True)
+        results = ql.process_query(qu.query,em.list_endpoints(),indexByEndpoint=True)
 
         for endpoint in results:
             for elt in results[endpoint]:
@@ -130,7 +130,7 @@ class SparqlQueryBuilder(ParamManager):
         ql = MultipleQueryLauncher(self.settings, self.session)
         em = EndpointManager(self.settings, self.session)
 
-        results = ql.process_query(qu.query,em.listEndpoints())
+        results = ql.process_query(qu.query,em.list_endpoints())
 
         settings = {}
         settings['endpoints'] = {}

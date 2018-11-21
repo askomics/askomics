@@ -8,8 +8,10 @@ let instanceAskomicsJobsViewManager ;
           return instanceAskomicsJobsViewManager;
       }
 
-      this.jobs = [];
+      this.integration_jobs = [];
+      this.query_jobs = [];
       this.npreview=30 ; /* max data to transfert to IHM */
+      this.maxrows=null;
 
       instanceAskomicsJobsViewManager = this;
 
@@ -43,77 +45,60 @@ let instanceAskomicsJobsViewManager ;
       return new Promise(function(resolve,reject) {
         let service = new RestServiceJs('listjob');
 
-        let model = {};
+        service.getAll(function(data) {
+          let integration_jobs = data.integration;
+          let query_jobs = data.query;
 
-        service.post(model, function(data) {
-          let ljobs = new AskomicsJobsViewManager().jobs ;
-          ljobs.splice(0,ljobs.length);
-
-          for (let i in data ) {
-
-            let job = {} ;
-            job.jobid = data[i].jobid ;
-            job.type = data[i].type ;
-            job.wait = (data[i].state == "Wait");
-            job.state = data[i].state ;
-            job.tstart = data[i].start*1000 ;
-            job.tend = data[i].end*1000 ;
-
-            job.start = new Date(job.tstart).toLocaleString() ;
-
-            job.end = new Date(job.tend).toLocaleString() ;
-
-            job.nr = data[i].nr ;
-            job.duration = AskomicsJobsViewManager.getDuration(job.tstart,job.tend) ;
-            job.classtr = AskomicsJobsViewManager.getClassTr(job.state) ;
-            if ( data[i].requestGraph != '') {
-              //console.log("requestGraph======>"+JSON.stringify(data[i].requestGraph));
-              job.stateToReload = btoa(data[i].requestGraph);
-            }
-            if ( 'file' in data[i] ) {
-              job.csv   = data[i].file;
-            }
-
-            job.preview = $('<div></div>').html(data[i].preview) ;
-            job.data = undefined;
-            if ( 'data' in data[i] ) job.data = data[i].data ;
-            job.variates = data[i].variates;
-
-            let idx = 0;
-            for (idx;idx<ljobs.length;idx++) {
-              if ( job.jobid < ljobs[idx] ) break;
-            }
-
-            ljobs.splice(idx, 0, job);
+          // format integration
+          for (let i in integration_jobs) {
+            integration_jobs[i].wait = (integration_jobs[i].state == "wait");
+            integration_jobs[i].duration = AskomicsJobsViewManager.getDuration(integration_jobs[i].start * 1000, integration_jobs[i].end * 1000);
+            integration_jobs[i].start = new Date(integration_jobs[i].start * 1000).toLocaleString();
+            integration_jobs[i].end = new Date(integration_jobs[i].end * 1000).toLocaleString();
           }
+
+          // format query
+          for (let i in query_jobs){
+            query_jobs[i].wait = (query_jobs[i].state == "wait");
+            query_jobs[i].duration = AskomicsJobsViewManager.getDuration(query_jobs[i].start * 1000, query_jobs[i].end * 1000);
+            query_jobs[i].start = new Date(query_jobs[i].start * 1000).toLocaleString();
+            query_jobs[i].end = new Date(query_jobs[i].end * 1000).toLocaleString();
+            query_jobs[i].classtr = AskomicsJobsViewManager.getClassTr(query_jobs[i].state);
+            query_jobs[i].warn = query_jobs[i].nrow == data.maxrows ? true : false;
+            if (query_jobs[i].graph != '') {
+              query_jobs[i].stateToReload = btoa(query_jobs[i].graph);
+            }
+            query_jobs[i].csv = query_jobs[i].file; // replace
+            query_jobs[i].preview = $('<div></div>').html(query_jobs[i].preview);
+          }
+
+          let job_view_manager = new AskomicsJobsViewManager();
+
+          job_view_manager.integration_jobs = integration_jobs;
+          job_view_manager.query_jobs = query_jobs;
+          job_view_manager.maxrows = data.maxrows;
+
           resolve();
         });
       });
     }
 
-    deletejob(job) {
+
+    remove_job(id, index, table) {
+
+      if (table == 'query') {
+        let service = new RestServiceJs('del_csv/');
+        service.get(this.query_jobs[index].csv);
+      }
+
       let service = new RestServiceJs('deljob');
+      let model = {table: table, jobid: id};
 
-      let model = {
-        jobid : job.jobid
-      };
-
-      service.post(model, function(data) {
-        new AskomicsJobsViewManager().loadjob().then(function () {
-          new AskomicsJobsViewManager().update_jobview ();
+      service.post(model, function(){
+        new AskomicsJobsViewManager().loadjob().then(function(){
+          new AskomicsJobsViewManager().update_jobview();
         });
       });
-    }
-
-    removeJob(index) {
-      if ('csv' in this.jobs[index] ) {
-        let service = new RestServiceJs('del_csv/');//location.href='del_csv/{{this.csv}}';
-        service.get(this.jobs[index].csv);
-      }
-      this.deletejob(this.jobs[index]);
-      this.jobs.splice(index, 1);
-      if (this.jobs.length<=0) $("#interrogation").trigger( "click" );
-
     }
 
     prepareQuery() {
@@ -153,42 +138,72 @@ let instanceAskomicsJobsViewManager ;
 
       service.post(jdata,function(data) {
         new AskomicsJobsViewManager().loadjob().then(function () {
-          new AskomicsJobsViewManager().update_jobview ();
+          new AskomicsJobsViewManager().update_jobview ("query");
         });
       });
-      this.wait(500).then( function() {
-        $("#jobsview").trigger( "click" );
-      });
+
+      // go to jobs page
+      $('.nav li.active').removeClass('active');
+      $("li#jobsview").addClass('active');
+      if ( ! ( $("li#jobsview").attr('id') in { 'help' : '','admin':'', 'user_menu': '' }) ) {
+        $('.container').hide();
+        $('.container#navbar_content').show();
+        $('.container#content_' + $("li#jobsview").attr('id')).show();
+      } else {
+        $('.container#navbar_content').show();
+      }
     }
 
-    update_jobview () {
+    update_jobview (active_tab) {
+
+        if (!active_tab) {
+          if ($("div#jobs_query").hasClass("active")) {
+            active_tab = "query";
+          }else{
+            active_tab = "integration";
+          }
+        }
+
         let __inst = new AskomicsJobsViewManager();
         let template = AskOmics.templates.jobs;
 
-        let context = {jobs: __inst.jobs, galaxy: __ihm.user.haveGalaxy()};
+        let context = {integration: __inst.integration_jobs, query: __inst.query_jobs, galaxy: __ihm.user.galaxy, maxrows: __inst.maxrows};
+
         let html = template(context);
 
         $("#content_jobsview").empty();
         $("#content_jobsview").append(html);
 
-        for ( let ij in __inst.jobs ) {
+        console.log(JSON.stringify(__inst.query_jobs));
 
-          if ( __inst.jobs[ij].data != undefined ) {
-          //  let struct = JSON.parse(atob(__inst.jobs[ij].stateToReload));
-            let prev = new AskomicsResultsView(__inst.jobs[ij].data,__inst.jobs[ij].variates).getPreviewResults() ;
+        for ( let ij in __inst.query_jobs ) {
+
+          if ( __inst.query_jobs[ij].data != undefined ) {
+            console.log("def");
+          //  let struct = JSON.parse(atob(__inst.query_jobs[ij].stateToReload));
+            let prev = new AskomicsResultsView(__inst.query_jobs[ij].data ,__inst.query_jobs[ij].variates).getPreviewResults() ;
             let r = $("#results_table_"+ij);
             r.append(
 
               $("<h3></h3>").addClass("header-div")
                             .css("text-align","center")
-                            .html("Preview ("+Math.min(__inst.npreview,__inst.jobs[ij].nr)+" rows)")
+                            .html("Preview ("+Math.min(__inst.npreview, __inst.query_jobs[ij].nrows)+" rows)")
                           );
 
             r.append(prev);
           } else {
-            if ( __inst.jobs[ij].preview != undefined ) {
-              $("#results_table_"+ij).append(__inst.jobs[ij].preview);
+            if ( __inst.query_jobs[ij].preview != undefined ) {
+              $("#results_table_"+ij).append(__inst.query_jobs[ij].preview);
             }
+          }
+
+          // active tab
+          if (active_tab == "integration") {
+            $("#integration-tab").addClass("active");
+            $("#jobs_integration").addClass("in active");
+          }else if (active_tab == "query"){
+            $("#query-tab").addClass("active");
+            $("#jobs_query").addClass("in active");
           }
         }
     }

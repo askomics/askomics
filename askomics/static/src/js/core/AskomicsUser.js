@@ -1,139 +1,110 @@
 /*jshint esversion: 6 */
 
-window.onload = function() {
-  if ( (sessionStorage.expired !== undefined ) && sessionStorage.expired == "true" ) {
-    $("#login").click();
-    sessionStorage.expired = "false" ;
+class AskomicsUser{
+
+  constructor(){
+    this.username = null;
+    this.admin = null;
+    this.blocked = null;
+    this.galaxy = null;
+    this.error = null;
   }
-};
 
-class AskomicsUser {
+  checkUser(){
+    let self = this;
+    return new Promise(
+    function(resolve, reject){
+      let service = new RestServiceJs('checkuser');
+      service.getAll(function(user){
+        if (user.username == "") {
+          __ihm.displayNavbar(false, '');
+          // redirect to login page
+        }else{
+          // there is a user logged
+          self.username = user.username;
+          self.admin = user.admin;
+          self.blocked = user.blocked;
+          self.galaxy = user.galaxy;
+          __ihm.displayNavbar(true, self.username, self.admin, self.blocked);
+          if (self.galaxy) {
+            AskomicsGalaxyService.show();
+          }
+          AskomicsUser.cleanHtmlLogin();
+          resolve();
+        }
+      });
+    });
+  }
 
-    constructor(username, admin, blocked) {
-        this.username = username===undefined?"":username ;
-        this.admin    = admin===undefined?false:admin;
-        this.blocked  = blocked===undefined?true:blocked;
-        this.galaxy   = false ;
+  signup(username, email, password, password2, callback){
 
-        let user = this;
+    let self = this;
 
-        /* check if a session is open */
-        this.checkUser().then(
-          function() {
-            /* set timeout to check if session is expired */
-            if ( user.isLogin() ) {
-              user.intervalListener = setInterval(function(){
-                user.checkUser();
-              }, 30000);
-              __ihm.displayNavbar(true, user.username, user.admin, user.blocked);
-            } else {
-              if ( user.intervalListener != undefined ) {
-                clearInterval(user.intervalListener);
-              }
-              __ihm.displayNavbar(false, '');
-            }
-          })
-          .catch (function () {} );
-    }
+    let service = new RestServiceJs('signup');
+    let model = {'username': username,
+                 'email': email,
+                 'password': password,
+                 'password2': password2 };
 
-    isAdmin() {
-        return this.admin;
-    }
+    service.post(model, function(data){
+      if(data.error.length !== 0){
+        self.error = data.error;
+      }else{
+        self.username = data.username;
+        self.admin = data.admin;
+        self.blocked = data.blocked;
+        self.galaxy = data.galaxy;
+      }
+      callback(self);
+    });
 
-    isBlocked() {
-        return this.blocked;
-    }
+  }
 
-    isLogin() {
-        return (this.username != undefined)&&(this.username != "");
-    }
+  login(username_email, password, callback){
 
-    haveGalaxy() {
-        return this.galaxy;
-    }
+    let self = this;
 
-    logUser() {
-        $('#interrogation').click();
-    }
+    let service = new RestServiceJs('login');
+    let model = {
+      'username_email': username_email,
+      'password': password
+    };
+    service.post(model, function(data){
+      if (data.error.length !== 0) {
+        self.error = data.error;
+      }else{
+        self.username = data.username;
+        self.admin = data.admin;
+        self.blocked = data.blocked;
+        self.galaxy = data.galaxy;
+      }
+      callback(self);
+    });
+  }
 
-    checkUser() {
+  logout(){
+    let self = this;
+    let service = new RestServiceJs('logout');
+    service.getAll(function(){
+      AskomicsUser.cleanHtmlLogin();
+      __ihm.displayNavbar(false, '');
+    });
+  }
 
-      let self = this;
+  static cleanHtmlLogin() {
+    $('#login_error').hide();
+    $('#spinner_login').addClass('hidden');
+    $('#cross_login').addClass('hidden');
+    $('#login_password').val('');
+  }
 
-      return new Promise(
-        function(resolve,reject) {
-          let service = new RestServiceJs("checkuser");
+  static errorHtmlLogin() {
+    $('#login_error').show();
+    $('#spinner_login').addClass('hidden');
+    $('#cross_login').removeClass('hidden');
+  }
 
-          service.getAll(function(data) {
-
-            let expired = false;
-            let change  = false;
-
-            if ( (self.username != data.username) ||
-                (self.admin != data.admin) ||
-                (self.blocked != data.blocked) ||
-                (self.galaxy != data.galaxy)) {
-                  if ( self.username != "" && data.username == "") {
-                    expired = true;
-                    console.debug("session expired !");
-                  }
-
-                  self.username = data.username;
-                  self.admin = data.admin;
-                  self.blocked = data.blocked;
-                  self.galaxy = data.galaxy;
-                  change  = true;
-                }
-
-                if ( change ) {
-                  if ((data.username != undefined) && (data.username != '') ) {
-
-                    __ihm.displayNavbar(true, self.username, self.admin, self.blocked);
-                  } else {
-                    AskomicsUser.cleanHtmlLogin();
-                    __ihm.displayNavbar(false, '');
-                    if (expired) {
-                      /* redirect to login page when user is disconnect */
-                      sessionStorage.expired = "true" ;
-
-                      __ihm.displayModal('Session Expired', '', 'Close').click(function() {
-                        location.reload();
-                      });
-                    }
-                  }
-                }
-                // Show a galaxy dropdown if user have a galaxy connected
-
-                if (self.haveGalaxy()) {
-                  AskomicsGalaxyService.show();
-                }
-                resolve();
-              });
-            });
-    }
-
-    logout() {
-        let service = new RestServiceJs('logout');
-        service.getAll()
-        .done(function(data) {
-            AskomicsUser.cleanHtmlLogin();
-            location.reload();
-        })
-        .fail(function(value) {
-            AskomicsUser.cleanHtmlLogin();
-        });
-
-    }
-
-    static cleanHtmlLogin() {
-      $('#login_error').hide();
-      $('#spinner_login').addClass('hidden');
-      $('#cross_login').addClass('hidden');
-    }
-
-    static errorHtmlLogin() {
-      $('#login_error').show();
-      $('#spinner_login').addClass('hidden');
-      $('#cross_login').removeClass('hidden');
-    }
+  isLogin() {
+      return (this.username != undefined)&&(this.username != "");
+  }
 }

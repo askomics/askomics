@@ -34,7 +34,7 @@ class ParamManager(object):
             "faldo": """http://biohackathon.org/resource/faldo#"""
         }
 
-        self.userfilesdir = self.get_param('askomics.files_dir') + '/'
+        self.user_dir = self.get_param('askomics.files_dir') + '/'
 
         self.escape = {
             'numeric' : lambda str,str2: str,
@@ -52,14 +52,18 @@ class ParamManager(object):
             'date': lambda str,str2: json.dumps(str)
             }
 
-    def get_db_directory(self):
+    def get_directory(self, name):
+        """Get a named directory of a user, create it if not exist"""
 
-        path = self.userfilesdir+"db/"
+        if 'username' not in self.session:
+            mdir = self.user_dir + '_guest/' + name + '/'
+        else:
+            mdir = self.user_dir + self.session['username'] + '/' + name + '/'
+        if not os.path.isdir(mdir):
+            os.makedirs(mdir)
 
-        if not os.path.isdir(path):
-            os.makedirs(path)
+        return mdir
 
-        return path
 
     def get_upload_directory(self):
         """Get the upload directory of a user, create it if not exist
@@ -67,81 +71,25 @@ class ParamManager(object):
         :returns: The path of the user upload directory
         :rtype: string
         """
-        #if 'username' not in self.session:
-        #    self.session['upload_directory'] = tempfile.mkdtemp(suffix='_tmp', prefix='____')
-        #dir_string = '__' + self.session['username'] + '__'
 
-        #if 'upload_directory' not in self.session.keys() or dir_string not in self.session['upload_directory'] or not os.path.isdir(self.session['upload_directory']):
-        #    self.session['upload_directory'] = tempfile.mkdtemp(suffix='_tmp', prefix='__' + self.session['username'] + '__')
+        return self.get_directory('upload')
 
-        if 'username' not in self.session:
-            path = self.userfilesdir + 'upload/'
-        else:
-            path = self.userfilesdir + 'upload/' + self.session['username'] + '/'
-
-        if not os.path.isdir(path):
-            os.makedirs(path)
-
-        return path
 
     def get_user_csv_directory(self):
 
-        if 'username' not in self.session:
-            mdir = self.userfilesdir+"csv/"
-        else:
-            mdir = self.userfilesdir+"csv/"+self.session['username'] + '/'
-
-        if not os.path.isdir(mdir):
-            os.makedirs(mdir)
-        return mdir
+        return self.get_directory('result')
 
     def get_rdf_directory(self):
 
-        mdir = self.userfilesdir+"rdf/"
+        mdir = self.user_dir+"rdf/"
         if not os.path.isdir(mdir):
             os.makedirs(mdir)
 
         return mdir
 
     def get_rdf_user_directory(self):
-        if 'username' not in self.session:
-            mdir = self.userfilesdir+"rdf/"
-        else:
-            mdir = self.userfilesdir+"rdf/"+self.session['username'] + '/'
-        if not os.path.isdir(mdir):
-            os.makedirs(mdir)
-        return mdir
 
-    def get_json_user_directory(self):
-        if 'username' not in self.session:
-            mdir = self.userfilesdir+"json/"
-        else:
-            mdir = self.userfilesdir+"json/"+self.session['username'] + '/'
-        if not os.path.isdir(mdir):
-            os.makedirs(mdir)
-        return mdir
-
-    def get_database_user_directory(self):
-
-        if 'username' not in self.session:
-            mdir = self.userfilesdir+"db/"
-        else:
-            mdir = self.userfilesdir+"db/"+self.session['username'] + '/'
-        if not os.path.isdir(mdir):
-            os.makedirs(mdir)
-
-        return mdir
-
-    def get_common_user_directory(self):
-
-        if 'username' not in self.session:
-            mdir = self.userfilesdir+"common/"
-        else:
-            mdir = self.userfilesdir+"common/"+self.session['username'] + '/'
-        if not os.path.isdir(mdir):
-            os.makedirs(mdir)
-
-        return mdir
+        return self.get_directory('rdf')
 
     def set_param(self, key,value):
         self.settings[key] = value

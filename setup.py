@@ -12,8 +12,11 @@ with open('requirements.txt') as f:
     requires = f.read().splitlines()
 
 setup(name='Askomics',
-      version='2.0',
-      description='Askomics',
+      version='18.10',
+      description = 
+          'AskOmics is a visual SPARQL query interface supporting both intuitive ' +
+          'data integration and querying while shielding the user from most of the ' +
+          'technical difficulties underlying RDF and SPARQL',
       long_description=README + '\n\n' + CHANGES,
       classifiers=[
           "Programming Language :: Python",
@@ -21,8 +24,8 @@ setup(name='Askomics',
           "Topic :: Internet :: WWW/HTTP",
           "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
       ],
-      maintainer='Anthony Bretaudeau',
-      maintainer_email='anthony.bretaudeau@inra.fr',
+      maintainer='Xavier Garnier',
+      maintainer_email='xavier.garnier@irisa.fr',
       url='https://github.com/askomics/askomics/',
       keywords='web pyramid pylons',
       packages=find_packages(),

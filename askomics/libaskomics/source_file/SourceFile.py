@@ -53,12 +53,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
 
         self.reset_cache()
 
-        self.uri = {}
-        pref_uri = "http://semanticweb.org/askomics/entity/"
-        if self.is_defined('askomics.prefix'):
-            pref_uri = self.get_param("askomics.prefix")
-
-        self.uri = [ pref_uri for idx in range(20) ]
+        self.uri = []
 
         if uri_set != None:
             for idx,uri in uri_set.items():
@@ -66,9 +61,9 @@ class SourceFile(ParamManager, HaveCachedProperties):
                     # uri have to end with # or /
                     if not uri.endswith('#') and not uri.endswith('/'):
                         uri = uri + "/"
-                    self.uri[int(idx)] = uri
+                    self.uri.append(uri)
                 else:
-                    self.uri[int(idx)] = self.get_param("askomics.prefix")
+                    self.uri.append(self.get_param("askomics.prefix"))
 
     def setGraph(self,graph):
         self.graph = graph
@@ -172,8 +167,6 @@ class SourceFile(ParamManager, HaveCachedProperties):
                 data = self.load_data_from_file(fp, urlbase)
                 if data['status'] == 'failed':
                     return data
-                self.log.debug("source file : persist delete =>"+fp.name)
-                os.remove(fp.name) # Everything ok, remove previous temp file
 
             total_triple_count += triple_count
 
@@ -196,7 +189,6 @@ class SourceFile(ParamManager, HaveCachedProperties):
                 return data
             data['total_triple_count'] = total_triple_count
             self.log.debug("source file : persist delete =>"+fp.name)
-            os.remove(fp.name)
 
         else:
 
@@ -299,11 +291,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
             raise e
 
         finally:
-            if self.settings["askomics.debug"]:
-                data['url'] = url
-            else:
-                self.log.info("Source file : load_data_from_file delete =>"+fp.name)
-                os.remove(fp.name) # Everything ok, remove temp file
+            os.remove(fp.name)
 
         return data
 

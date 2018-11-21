@@ -1,72 +1,115 @@
 <hr/>
 <h3 class="header-div">Jobs</h3>
 <hr/>
+ <ul class="nav nav-tabs">
+    <li id="integration-tab"><a data-toggle="tab" href="#jobs_integration">Integration</a></li>
+    <li id="query-tab"><a data-toggle="tab" href="#jobs_query">Query</a></li>
+</ul>
+<div id="jobs_page" class="tab-content">
+    <!--Integration jobs-->
+    <div id="jobs_integration" class="tab-pane fade">
+        <table class="table table-striped">
+            <tr>
+                <th>File name</th>
+                <th>State</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Duration</th>
+                <th>Actions</th>
+            </tr>
+            {{#each integration}}
+            <tr class="clickable">
+                <td style="cursor: pointer;">{{this.filename}}</td>
+                {{#if this.wait}}
+                  <td style="cursor: pointer;"><i class="fa fa-spinner pulse"></i></td>
+                {{else}}
+                  <td style="cursor: pointer;">{{this.state}}</td>
+                {{/if}}
+                <td style="cursor: pointer;">{{this.start}}</td>
+                {{#if this.wait}}
+                  <td style="cursor: pointer;"></td>
+                {{else}}
+                  <td style="cursor: pointer;">{{this.end}}</td>
+                {{/if}}
+                {{#if this.wait}}
+                  <td style="cursor: pointer;"></td>
+                {{else}}
+                  <td style="cursor: pointer;">{{this.duration}}</td>
+                {{/if}}
+                <td>
+                  <div class="btn-group" role="group">
+                    <button onclick="this.parentNode.parentNode.parentNode.style.display = 'none';new AskomicsJobsViewManager().remove_job({{this.id}}, {{@index}}, 'integration');event.stopPropagation();" type="button" class="btn btn-default btn-xs"><i class="fa fa-times text-danger"></i> Del</button>
+                  </div>
+                </td>
+               </tr>
+            {{/each}}
+        </table>
+    </div>
 
-<table class="table table-striped">
-    <tr>
-        <th>Job-ID</th>
-        <th>Type</th>
-        <th>State</th>
-        <th>Start</th>
-        <th>End</th>
-        <th>Duration</th>
-        <th>Number of rows</th>
-        <th>Actions</th>
-    </tr>
-    {{#each jobs}}
-    <tr class="{{this.classtr}}" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}" class="clickable">
-        <td style="cursor: pointer;" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}">{{this.jobid}}</td>
-        <td style="cursor: pointer;" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}">{{this.type}}</td>
-        {{#if this.wait}}
-          <td style="cursor: pointer;" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}"><i class="fa fa-spinner pulse"></i></td>
-        {{else}}
-          <td style="cursor: pointer;" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}">{{this.state}}</td>
-        {{/if}}
-        <td style="cursor: pointer;" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}">{{this.start}}</td>
-        {{#if this.wait}}
-          <td style="cursor: pointer;" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}"></td>
-        {{else}}
-          <td style="cursor: pointer;" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}">{{this.end}}</td>
-        {{/if}}
-        {{#if this.wait}}
-          <td style="cursor: pointer;" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}"></td>
-        {{else}}
-          <td style="cursor: pointer;" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}">{{this.duration}}</td>
-        {{/if}}
-        {{#if this.wait}}
-          <td style="cursor: pointer;" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}"></td>
-        {{else}}
-          {{#if this.csv }}
-            <td style="cursor: pointer;" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}">{{this.nr}}</td>
-          {{else}}
-          <td/>
-          {{/if}}
-        {{/if}}
-        <td>
-          <div class="btn-group" role="group">
-            <button onclick="this.parentNode.parentNode.parentNode.style.display = 'none';new AskomicsJobsViewManager().removeJob({{@index}});event.stopPropagation();" type="button" class="btn btn-default btn-xs"><i class="fa fa-times text-danger"></i> Del</button>
-            {{#if this.csv }}
-            <button onclick="let st = atob('{{this.stateToReload}}') ; __ihm.stopSession();__ihm.startSession(st);$('#interrogation').trigger( 'click' );" type="button" class="btn btn-default btn-xs"><i class="fa fa-repeat text-warning"></i> Redo</button>
-            <button onclick="location.href='csv/{{this.csv}}';event.stopPropagation();" type="button" class="btn btn-default btn-xs"><i class="fa fa-floppy-o text-primary"></i> Save</button>
-              {{#if ../galaxy}}
-                {{#with (lookup ../jobs @index)}}
-                  <button onclick="AskomicsGalaxyService.send2galaxy({{@index}},{{jobid}},{{tstart}},'{{csv}}');event.stopPropagation();" type="button" class="btn btn-default btn-xs"><i class="fa fa-arrow-right text-success"></i> Send to Galaxy</button>
-                {{/with}}
-              {{/if}}
-            {{/if}}
+    <!-- Query jobs -->
+    <div id="jobs_query" class="tab-pane fade">
+        <table class="table table-striped">
+            <tr>
+                <th>State</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Duration</th>
+                <th>Number of rows</th>
+                <th>Actions</th>
+            </tr>
+            {{#each query}}
+            <tr class="{{this.classtr}}" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}" class="clickable">
+                {{#if this.wait}}
+                  <td style="cursor: pointer;" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}"><i class="fa fa-spinner pulse"></i></td>
+                {{else}}
+                  <td style="cursor: pointer;" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}">{{this.state}}</td>
+                {{/if}}
+                <td style="cursor: pointer;" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}">{{this.start}}</td>
+                {{#if this.wait}}
+                  <td style="cursor: pointer;" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}"></td>
+                {{else}}
+                  <td style="cursor: pointer;" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}">{{this.end}}</td>
+                {{/if}}
+                {{#if this.wait}}
+                  <td style="cursor: pointer;" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}"></td>
+                {{else}}
+                  <td style="cursor: pointer;" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}">{{this.duration}}</td>
+                {{/if}}
+                {{#if this.wait}}
+                  <td style="cursor: pointer;" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}"></td>
+                {{else}}
+                  <td style="cursor: pointer;" data-toggle="collapse" data-target="#jobview_accordion_{{@index}}">{{this.nrows}}
+                    {{#if this.warn}}
+                        <i class="fa fa-exclamation-triangle" data-toggle="tooltip" title="Triplestore limits his results to {{../maxrows}}, you may have incomplete results"></i>
+                    {{/if}}
+                  </td>
+                {{/if}}
+                <td>
+                  <div class="btn-group" role="group">
+                    <button onclick="this.parentNode.parentNode.parentNode.style.display = 'none';new AskomicsJobsViewManager().remove_job({{this.id}}, {{@index}}, 'query');event.stopPropagation();" type="button" class="btn btn-default btn-xs"><i class="fa fa-times text-danger"></i> Del</button>
+                    <button onclick="let st = atob('{{this.stateToReload}}') ; __ihm.stopSession();__ihm.startSession(st);$('#interrogation').trigger( 'click' );" type="button" class="btn btn-default btn-xs"><i class="fa fa-repeat text-warning"></i> Redo</button>
+                    <button onclick="location.href='csv/{{this.csv}}';event.stopPropagation();" type="button" class="btn btn-default btn-xs"><i class="fa fa-floppy-o text-primary"></i> Save</button>
+                      {{#if ../galaxy}}
+                        {{#with (lookup ../jobs @index)}}
+                          <button onclick="AskomicsGalaxyService.send2galaxy({{@index}},{{jobid}},{{tstart}},'{{csv}}');event.stopPropagation();" type="button" class="btn btn-default btn-xs"><i class="fa fa-arrow-right text-success"></i> Send to Galaxy</button>
+                        {{/with}}
+                      {{/if}}
 
-          </div>
-            <i class="hidden fa fa-spinner pulse" id="spinner_send_galaxy_{{@index}}"></i>
-            <i class="hidden fa fa-check text-success" id="check_send_galaxy_{{@index}}"></i>
-            <i class="hidden fa fa-times text-danger" id="cross_send_galaxy_{{@index}}"></i>
-        </td>    </tr>
-    <tr>
-     <td colspan="8">
-      <div id="jobview_accordion_{{@index}}" class="collapse">
-        <div id="results_table_{{@index}}">
-        </div>
-      </div>
-     </td>
-    </tr>
-    {{/each}}
-</table>
+                  </div>
+                    <i class="hidden fa fa-spinner pulse" id="spinner_send_galaxy_{{@index}}"></i>
+                    <i class="hidden fa fa-check text-success" id="check_send_galaxy_{{@index}}"></i>
+                    <i class="hidden fa fa-times text-danger" id="cross_send_galaxy_{{@index}}"></i>
+                </td>
+            </tr>
+            <tr>
+             <td colspan="8">
+              <div id="jobview_accordion_{{@index}}" class="collapse">
+                <div id="results_table_{{@index}}">
+                </div>
+              </div>
+             </td>
+            </tr>
+            {{/each}}
+        </table>
+    </div>
+</div>
