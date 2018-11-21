@@ -35,7 +35,7 @@ class SourceFileConvertor(ParamManager):
         """
 
         src_dir = self.get_upload_directory()
-        paths = glob(src_dir + '/*')
+        paths = glob(src_dir + '*')
 
         files = []
 

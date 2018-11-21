@@ -31,16 +31,6 @@ class ParamManagerTests(unittest.TestCase):
 
         m = ParamManager(self.settings, self.request.session)
 
-    def test_get_db_directory(self):
-        m = ParamManager(self.settings, self.request.session)
-
-        d = m.get_db_directory()
-        assert os.path.isdir(d)
-        shutil.rmtree(d)
-
-        d = m.get_db_directory()
-        assert os.path.isdir(d)
-
     def test_get_upload_directory(self):
         m = ParamManager(self.settings, self.request.session)
 
@@ -62,15 +52,6 @@ class ParamManagerTests(unittest.TestCase):
         d = m.get_user_csv_directory()
         assert os.path.isdir(d)
 
-    def test_get_rdf_directory(self):
-        m = ParamManager(self.settings, self.request.session)
-        d = m.get_rdf_directory()
-        assert os.path.isdir(d)
-        shutil.rmtree(d)
-
-        d = m.get_rdf_directory()
-        assert os.path.isdir(d)
-
     def test_get_rdf_user_directory(self):
         m = ParamManager(self.settings, self.request.session)
         d = m.get_rdf_user_directory()
@@ -79,39 +60,6 @@ class ParamManagerTests(unittest.TestCase):
 
         del self.request.session['username']
         d = m.get_rdf_user_directory()
-        assert os.path.isdir(d)
-
-    def test_get_json_user_directory(self):
-        m = ParamManager(self.settings, self.request.session)
-        d = m.get_json_user_directory()
-        assert os.path.isdir(d)
-        shutil.rmtree(d)
-
-        del self.request.session['username']
-        d = m.get_json_user_directory()
-        assert os.path.isdir(d)
-
-    def test_get_database_user_directory(self):
-        m = ParamManager(self.settings, self.request.session)
-        d = m.get_database_user_directory()
-        assert os.path.isdir(d)
-        shutil.rmtree(d)
-
-        del self.request.session['username']
-        d = m.get_database_user_directory()
-        assert os.path.isdir(d)
-
-    def test_get_common_user_directory(self):
-        m = ParamManager(self.settings, self.request.session)
-        d = m.get_common_user_directory()
-        assert os.path.isdir(d)
-        shutil.rmtree(d)
-
-        d = m.get_common_user_directory()
-        assert os.path.isdir(d)
-
-        del self.request.session['username']
-        d = m.get_common_user_directory()
         assert os.path.isdir(d)
 
     def test_get_turtle_template(self):

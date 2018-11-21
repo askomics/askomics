@@ -35,7 +35,7 @@ class FileUploadTests(unittest.TestCase):
         file_upload = FileUpload(self.request)
         result = file_upload.filepath('people.tsv')
 
-        expected_path = self.settings["askomics.files_dir"] + '/upload/jdoe/people.tsv'
+        expected_path = self.settings["askomics.files_dir"] + '/jdoe/upload/people.tsv'
         assert result == expected_path
 
     def test_validate(self):
