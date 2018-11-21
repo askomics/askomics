@@ -104,7 +104,7 @@ class GalaxyConnectorTests(unittest.TestCase):
 
         galaxy_connector.upload_files([self.datasets['hello']['dataset_id']])
 
-        assert self.interface_galaxy.check_uploaded_files(self.settings['askomics.files_dir'] + '/' + session['username'] + '/upload/') is True
+        assert self.interface_galaxy.check_uploaded_files(self.settings['askomics.files_dir'] + '/' + self.session['username'] + '/upload/') is True
 
 
     def test_get_file_content(self):
