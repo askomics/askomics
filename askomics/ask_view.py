@@ -1105,7 +1105,7 @@ class AskView(object):
     def uploadTtl(self):
         pm = ParamManager(self.settings, self.request.session)
         response = FileResponse(
-            pm.get_rdf_directory()+self.request.matchdict['name'],
+            pm.get_rdf_user_directory()+self.request.matchdict['name'],
             content_type='text/turtle'
             )
         return response
@@ -1936,12 +1936,12 @@ class AskView(object):
             self.data['values'].append({ 'key' : 'Disk total', 'value' : str(round(diskinfo.total/(1024**3),2)) + " GB" } )
             self.data['values'].append({ 'key' : 'Disk used', 'value' : str(round(diskinfo.used/(1024**3),2)) + " GB" } )
             self.data['values'].append({ 'key' : 'Disk free', 'value' : str(round(diskinfo.free/(1024**3),2)) + " GB" } )
-            self.data['values'].append({ 'key' : 'temp directory', 'value' : pm.userfilesdir } )
-            self.data['values'].append({ 'key' : 'temp directory size', 'value' : naturalsize(sum(os.path.getsize(x) for x in iglob(pm.userfilesdir+'/**'))) } )
+            self.data['values'].append({ 'key' : 'temp directory', 'value' : pm.user_dir } )
+            self.data['values'].append({ 'key' : 'temp directory size', 'value' : naturalsize(sum(os.path.getsize(x) for x in iglob(pm.user_dir+'/**'))) } )
             self.data['values'].append({ 'key' : 'Upload directory', 'value' : pm.get_upload_directory() } )
             self.data['values'].append({ 'key' : 'Upload directory size', 'value' : naturalsize(sum(os.path.getsize(x) for x in iglob(pm.get_upload_directory()+'/**'))) } )
-            self.data['values'].append({ 'key' : 'Rdf generated files directory', 'value' : pm.get_rdf_directory() } )
-            self.data['values'].append({ 'key' : 'Rdf generated files directory size', 'value' : naturalsize(sum(os.path.getsize(x) for x in iglob(pm.get_rdf_directory()+'/**'))) } )
+            self.data['values'].append({ 'key' : 'Rdf generated files directory', 'value' : pm.get_rdf_user_directory() } )
+            self.data['values'].append({ 'key' : 'Rdf generated files directory size', 'value' : naturalsize(sum(os.path.getsize(x) for x in iglob(pm.get_rdf_user_directory()+'/**'))) } )
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
             self.data['error'] = str(e)
@@ -1959,7 +1959,7 @@ class AskView(object):
             self.checkAdminSession()
             pm = ParamManager(self.settings, self.request.session)
 
-            files = glob2.glob(pm.get_rdf_directory()+'/**')
+            files = glob2.glob(pm.get_rdf_user_directory()+'/**')
             for f in files:
                 if os.path.isfile(f):
                     os.remove(f)

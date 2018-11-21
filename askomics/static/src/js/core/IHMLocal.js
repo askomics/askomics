@@ -1186,8 +1186,11 @@ class IHMLocal {
 
       // Visual effects on active tabs
       $('.nav li').on('click', function(event){
+        if ( $(this).attr('id') === undefined) return;
         $('.nav li.active').removeClass('active');
-        $(this).addClass('active');
+        if (!$(this).hasClass('active')) {
+          $(this).addClass('active');
+        }
         if ( ! ( $(this).attr('id') in { 'help' : '','admin':'', 'user_menu': '' }) ) {
 
           $('.container').hide();
