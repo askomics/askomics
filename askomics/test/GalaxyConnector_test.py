@@ -13,6 +13,7 @@ from pyramid.paster import get_appsettings
 from pyramid import testing
 from askomics.libaskomics.ParamManager import ParamManager
 from askomics.libaskomics.GalaxyConnector import GalaxyConnector
+from SetupTests import SetupTests
 
 from interface_galaxy import InterfaceGalaxy
 from nose.plugins.attrib import attr
@@ -38,20 +39,7 @@ class GalaxyConnectorTests(unittest.TestCase):
         self.request.session['admin'] = False
         self.request.session['blocked'] = True
 
-        # Files
-        # Create the user dir if not exist
-        self.temp_directory = self.settings['askomics.files_dir'] + '/upload/' + self.request.session['username']
-        if not os.path.isdir(self.temp_directory):
-            os.makedirs(self.temp_directory)
-        # Set the upload dir
-        self.request.session['upload_directory'] = self.temp_directory
-        # Copy files if directory is empty
-        if not os.listdir(self.temp_directory):
-            files = ['people.tsv', 'instruments.tsv', 'play_instrument.tsv', 'transcript.tsv', 'qtl.tsv', 'small_data.gff3', 'turtle_data.ttl', 'bed_example.bed']
-            for file in files:
-                src = os.path.join(os.path.dirname(__file__), "..", "test-data") + '/' + file
-                dst = self.request.session['upload_directory'] + '/' + file
-                copyfile(src, dst)
+        SetupTests(self.settings, self.request.session)
 
         # Galaxy
         self.interface_galaxy = InterfaceGalaxy(self.settings, self.request)
@@ -116,7 +104,7 @@ class GalaxyConnectorTests(unittest.TestCase):
 
         galaxy_connector.upload_files([self.datasets['hello']['dataset_id']])
 
-        assert self.interface_galaxy.check_uploaded_files(self.temp_directory) is True
+        assert self.interface_galaxy.check_uploaded_files(self.settings['askomics.files_dir'] + '/' + session['username'] + '/upload/') is True
 
 
     def test_get_file_content(self):
