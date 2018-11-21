@@ -11,7 +11,7 @@ from askomics.upload import FileUpload
 
 class FileUploadTests(unittest.TestCase):
     def setUp(self):
-        self.settings = get_appsettings('configs/development.virtuoso.ini', name='main')
+        self.settings = get_appsettings('configs/tests.ini', name='main')
         self.upload_min_size = self.settings['askomics.upload_min_size']
         self.upload_max_size = self.settings['askomics.upload_max_size']
         self.request = testing.DummyRequest()
@@ -35,7 +35,8 @@ class FileUploadTests(unittest.TestCase):
         file_upload = FileUpload(self.request)
         result = file_upload.filepath('people.tsv')
 
-        assert result == '/tmp/askomics/upload/jdoe/people.tsv'
+        expected_path = self.settings["askomics.files_dir"] + '/jdoe/upload/people.tsv'
+        assert result == expected_path
 
     def test_validate(self):
         """Test the validate method"""

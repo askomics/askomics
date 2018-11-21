@@ -5,9 +5,10 @@ from askomics.libaskomics.rdfdb.SparqlQueryGraph import SparqlQueryGraph
 from askomics.libaskomics.rdfdb.SparqlQueryAuth import SparqlQueryAuth
 from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
 from askomics.libaskomics.SourceFileConvertor import SourceFileConvertor
+from askomics.libaskomics.DatabaseConnector import DatabaseConnector
 
-class InterfaceTPS(object):
-    """Allow communication with the triplestore
+class InterfaceTpsDb(object):
+    """Allow communication with the triplestore and the sql database
 
     This class allow the communication with the triplestore
     during the tests
@@ -81,7 +82,7 @@ class InterfaceTPS(object):
 
         return named_graphs
 
-    def load_file(self, file, col_types, public=False):
+    def load_file(self, file, col_types, uri_set, public=False):
         """Load a file into the triplestore
 
         :param file: name of the file without extention
@@ -98,7 +99,7 @@ class InterfaceTPS(object):
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
 
-        src_file = sfc.get_source_files([file])[0]
+        src_file = sfc.get_source_files([file], uri_set=uri_set)[0]
 
         src_file.set_forced_column_types(col_types)
         src_file.set_disabled_columns(disabled_columns)
@@ -115,7 +116,8 @@ class InterfaceTPS(object):
         """
 
         col_types = ['entity_start', 'text', 'text', 'category', 'numeric']
-        return self.load_file("people.tsv", col_types)
+        uri_set = {'0': 'http://www.semanticweb.org/user/ontologies/2018/1#', '1': None, '2': None, '3': None, '4': None}
+        return self.load_file("people.tsv", col_types, uri_set)
 
     def load_instruments(self):
         """Load the file instruments.tsv
@@ -125,7 +127,8 @@ class InterfaceTPS(object):
         """
 
         col_types = ['entity_start', 'text', 'category']
-        return self.load_file("instruments.tsv", col_types)
+        uri_set = {'0': 'http://www.semanticweb.org/user/ontologies/2018/1#', '1': None, '2': None}
+        return self.load_file("instruments.tsv", col_types, uri_set)
 
     def load_play_instrument(self):
         """Load the file play_instruments.tsv
@@ -135,7 +138,8 @@ class InterfaceTPS(object):
         """
 
         col_types = ['entity_start', 'entity', 'category']
-        return self.load_file("play_instrument.tsv", col_types)
+        uri_set = {'0': 'http://www.semanticweb.org/user/ontologies/2018/1#', '1': None, '2': None}
+        return self.load_file("play_instrument.tsv", col_types, uri_set)
 
     def load_public_people(self):
         """Load the file people.tsv as public data
@@ -145,7 +149,8 @@ class InterfaceTPS(object):
         """
 
         col_types = ['entity_start', 'text', 'text', 'category', 'numeric']
-        return self.load_file("people.tsv", col_types, True)
+        uri_set = {'0': 'http://www.semanticweb.org/user/ontologies/2018/1#', '1': None, '2': None, '3': None, '4': None}
+        return self.load_file("people.tsv", col_types, uri_set, True)
 
     def load_transcript(self):
         """Load the file transcript.tsv
@@ -155,7 +160,8 @@ class InterfaceTPS(object):
         """
 
         col_types = ['entity_start', 'taxon', 'ref', 'start', 'end', 'strand', 'category']
-        return self.load_file("transcript.tsv", col_types)
+        uri_set = {'0': 'http://www.semanticweb.org/user/ontologies/2018/1#', '1': None, '2': None, '3': None, '4': None, '5': None, '6': None}
+        return self.load_file("transcript.tsv", col_types, uri_set)
 
     def load_qtl(self):
         """Load the file qtl.tsv
@@ -165,7 +171,8 @@ class InterfaceTPS(object):
         """
 
         col_types = ['entity_start', 'taxon', 'ref', 'start', 'end']
-        return self.load_file("qtl.tsv", col_types)
+        uri_set = {'0': 'http://www.semanticweb.org/user/ontologies/2018/1#', '1': None, '2': None, '3': None, '4': None}
+        return self.load_file("qtl.tsv", col_types, uri_set)
 
     def clean_up(self):
         """Delete all tests data
@@ -179,10 +186,38 @@ class InterfaceTPS(object):
 
         # Delete users
         self.delete_users()
+        self.clean_database()
 
         # Delete askomics graph
         self.delete_askograph()
 
+    def clean_database(self):
+
+        database = DatabaseConnector(self.settings, self.request.session)
+        query = '''
+        DROP TABLE IF EXISTS users
+        '''
+        database.execute_sql_query(query)
+
+        query = '''
+        DROP TABLE IF EXISTS galaxy_accounts
+        '''
+        database.execute_sql_query(query)
+
+        query = '''
+        DROP TABLE IF EXISTS integration
+        '''
+        database.execute_sql_query(query)
+
+        query = '''
+        DROP TABLE IF EXISTS query
+        '''
+        database.execute_sql_query(query)
+
+        query = '''
+        DROP TABLE IF EXISTS endpoints
+        '''
+        database.execute_sql_query(query)
 
     def delete_users(self):
         """Delete the test users graph"""
@@ -210,19 +245,21 @@ class InterfaceTPS(object):
         not admin and not blocked
         """
 
-        query_laucher = QueryLauncher(self.settings, self.request.session)
-        sqa = SparqlQueryAuth(self.settings, self.request.session)
-        chunk = ':jdoe rdf:type foaf:Person ;\n'
-        indent = len('jdoe') * ' ' + ' '
-        chunk += indent + 'foaf:name \"jdoe\" ;\n'
-        chunk += indent + ':password \"23df582b51c3482b677c8eac54872b8bd0a49bfadc853628b8b8bd4806147b54\" ;\n' #iamjohndoe
-        chunk += indent + 'foaf:mbox <mailto:jdoe@example.com> ;\n'
-        chunk += indent + ':isadmin \"false\"^^xsd:boolean ;\n'
-        chunk += indent + ':isblocked \"false\"^^xsd:boolean ;\n'
-        chunk += indent + ':randomsalt \"00000000000000000000\" .\n'
+        database = DatabaseConnector(self.settings, self.request.session)
+        query='''
+        INSERT INTO users VALUES(
+            NULL,
+            "jdoe",
+            "jdoe@example.com",
+            "f49d76161eb1617568fedf0a0adc92532cc81c1a2626ec0e2d5fa36bd600f55b17f599a4a343a5ccdc907a2831db70c7a390a9f96afbf346190e6fe3d6ed836f",
+            "00000000000000000000",
+            "jdoe_apikey",
+            "false",
+            "false"
+        )
+        '''
 
-        header_ttl = sqa.header_sparql_config(chunk)
-        query_laucher.insert_data(chunk, 'urn:sparql:test_askomics:users', header_ttl)
+        database.execute_sql_query(query)
 
     def add_jsmith_in_users(self):
         """Insert a Jane Smith User
@@ -233,65 +270,71 @@ class InterfaceTPS(object):
         not admin and not blocked
         """
 
-        query_laucher = QueryLauncher(self.settings, self.request.session)
-        sqa = SparqlQueryAuth(self.settings, self.request.session)
-        chunk = ':jsmith rdf:type foaf:Person ;\n'
-        indent = len('jsmith') * ' ' + ' '
-        chunk += indent + 'foaf:name \"jsmith\" ;\n'
-        chunk += indent + ':password \"db64872417dcc1488a72b034cbe75268f52eb2486807af096dd2f4c620694efc\" ;\n' #iamjanesmith
-        chunk += indent + 'foaf:mbox <mailto:jsmith@example.com> ;\n'
-        chunk += indent + ':isadmin \"false\"^^xsd:boolean ;\n'
-        chunk += indent + ':isblocked \"false\"^^xsd:boolean ;\n'
-        chunk += indent + ':randomsalt \"00000000000000000000\" .\n'
+        database = DatabaseConnector(self.settings, self.request.session)
+        query='''
+        INSERT INTO users VALUES(
+            NULL,
+            "jsmith",
+            "jsmith@example.com",
+            "a23fb3f4b3f3448d98db675b1e3e1a5458a4a512c695aed4fbe33b538e8bea18199b96a1b114403013fcfe0d5e3efce65b70bee85be7c4582aeafbaba13cbf12",
+            "00000000000000000000",
+            "jsmith_apikey",
+            "false",
+            "false"
+        )
+        '''
 
-        header_ttl = sqa.header_sparql_config(chunk)
-        query_laucher.insert_data(chunk, 'urn:sparql:test_askomics:users', header_ttl)
+        database.execute_sql_query(query)
 
     def add_admin_in_users(self):
         """Insert an admin User
 
-        username is admin
-        mail is admin@example.com
+        username is king
+        mail is king@example.com
         password is iamadmin
         admin and not blocked
         """
 
-        query_laucher = QueryLauncher(self.settings, self.request.session)
-        sqa = SparqlQueryAuth(self.settings, self.request.session)
-        chunk = ':admin rdf:type foaf:Person ;\n'
-        indent = len('admin') * ' ' + ' '
-        chunk += indent + 'foaf:name \"admin\" ;\n'
-        chunk += indent + ':password \"682cf6a90d94758bdedcf854e8d784e3d5d360a36cd65a2c49eaff214998c23a\" ;\n' #iamadmin
-        chunk += indent + 'foaf:mbox <mailto:admin@example.com> ;\n'
-        chunk += indent + ':isadmin \"true\"^^xsd:boolean ;\n'
-        chunk += indent + ':isblocked \"false\"^^xsd:boolean ;\n'
-        chunk += indent + ':randomsalt \"00000000000000000000\" .\n'
+        database = DatabaseConnector(self.settings, self.request.session)
+        query='''
+        INSERT INTO users VALUES(
+            NULL,
+            "king",
+            "king@example.com",
+            "6fbbcb51c546954459d9cf006f2bf9cf61b732284ec93a19b5b42cefb3731485dbcc89ba366a4f2b74a5cb1ee3cabd1b9baef4ceff54ec93ec7c7249d0a56c63",
+            "00000000000000000000",
+            "admin_apikey",
+            "true",
+            "false"
+        )
+        '''
 
-        header_ttl = sqa.header_sparql_config(chunk)
-        query_laucher.insert_data(chunk, 'urn:sparql:test_askomics:users', header_ttl)
+        database.execute_sql_query(query)
 
     def add_another_admin_in_users(self):
         """Insert an admin User
 
-        username is otheradmin
-        mail is otheradmin@example.com
+        username is queen
+        mail is queen@example.com
         password is iamadmin
         admin and not blocked
         """
 
-        query_laucher = QueryLauncher(self.settings, self.request.session)
-        sqa = SparqlQueryAuth(self.settings, self.request.session)
-        chunk = ':otheradmin rdf:type foaf:Person ;\n'
-        indent = len('otheradmin') * ' ' + ' '
-        chunk += indent + 'foaf:name \"otheradmin\" ;\n'
-        chunk += indent + ':password \"682cf6a90d94758bdedcf854e8d784e3d5d360a36cd65a2c49eaff214998c23a\" ;\n' #iamadmin
-        chunk += indent + 'foaf:mbox <mailto:otheradmin@example.com> ;\n'
-        chunk += indent + ':isadmin \"true\"^^xsd:boolean ;\n'
-        chunk += indent + ':isblocked \"false\"^^xsd:boolean ;\n'
-        chunk += indent + ':randomsalt \"00000000000000000000\" .\n'
+        database = DatabaseConnector(self.settings, self.request.session)
+        query='''
+        INSERT INTO users VALUES(
+            NULL,
+            "queen",
+            "queen@example.com",
+            "6fbbcb51c546954459d9cf006f2bf9cf61b732284ec93a19b5b42cefb3731485dbcc89ba366a4f2b74a5cb1ee3cabd1b9baef4ceff54ec93ec7c7249d0a56c63",
+            "00000000000000000000",
+            "otheradmin_apikey",
+            "true",
+            "false"
+        )
+        '''
 
-        header_ttl = sqa.header_sparql_config(chunk)
-        query_laucher.insert_data(chunk, 'urn:sparql:test_askomics:users', header_ttl)
+        database.execute_sql_query(query)
 
     def test_triple_presence(self, graph, triple):
         """Test the presence of a triple in the triplestore
@@ -323,3 +366,17 @@ class InterfaceTPS(object):
         print(bool(int(res[0]['count'])))
 
         return bool(int(res[0]['count']))
+
+    def test_row_presence(self, table, cols, res):
+
+        database = DatabaseConnector(self.settings, self.request.session)
+        query = '''
+        SELECT {0}
+        FROM {1}
+        '''.format(cols, table)
+        rows = database.execute_sql_query(query)
+        # print('---')
+        # print(query)
+        # print(rows)
+        # print('---')
+        return res in rows

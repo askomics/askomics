@@ -2,6 +2,14 @@
 pyramid.log
 pyramid.pid
 
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
 # Python tools
 .coverage
 venv
@@ -29,7 +37,7 @@ output_test.log
 .*rc
 
 # custom config file
-configs/custom.ini
+configs/askomics.ini
 
 # docker file
 Dockerfile

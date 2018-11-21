@@ -173,7 +173,7 @@ class QueryLauncher(ParamManager):
                 if type(results) != dict :
                     error = "JSON is not supported by the sparql endpoint. Askomics can not support this format results :"+type(results).__module__+"."+type(results).__name__
                     em = EndpointManager(self.settings, self.session)
-                    em.disableUrl(self.endpoint,error)
+                    em.disable_by_url(self.endpoint,error)
                     results = []
 
             except urllib.error.URLError as URLError:

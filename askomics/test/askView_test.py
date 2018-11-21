@@ -15,9 +15,10 @@ from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
 from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
 from askomics.libaskomics.EndpointManager import EndpointManager
 from askomics.ask_view import AskView
+from SetupTests import SetupTests
 
 
-from interface_tps import InterfaceTPS
+from interface_tps_db import InterfaceTpsDb
 
 class AskViewTests(unittest.TestCase):
     """Test for Askview
@@ -32,7 +33,7 @@ class AskViewTests(unittest.TestCase):
         production data
         """
 
-        self.settings = get_appsettings('configs/test.virtuoso.ini', name='main')
+        self.settings = get_appsettings('configs/tests.ini', name='main')
         self.settings['askomics.upload_user_data_method'] = 'insert'
 
         self.request = testing.DummyRequest()
@@ -50,27 +51,13 @@ class AskViewTests(unittest.TestCase):
 
         self.request.json_body = {}
 
-        # Create the user dir if not exist
-        self.temp_directory = self.settings['askomics.files_dir'] + '/upload/' + self.request.session['username']
-        if not os.path.isdir(self.temp_directory):
-            os.makedirs(self.temp_directory)
-        # Set the upload dir
-        self.request.session['upload_directory'] = self.temp_directory
-        # Copy files if directory is empty
-        if not os.listdir(self.temp_directory):
-            files = ['people.tsv', 'instruments.tsv', 'play_instrument.tsv', 'transcript.tsv', 'qtl.tsv', 'small_data.gff3', 'turtle_data.ttl', 'bed_example.bed']
-            for file in files:
-                src = os.path.join(os.path.dirname(__file__), "..", "test-data") + '/' + file
-                dst = self.request.session['upload_directory'] + '/' + file
-                copyfile(src, dst)
+        SetupTests(self.settings, self.request.session)
 
-        self.tps = InterfaceTPS(self.settings, self.request)
+        self.tps = InterfaceTpsDb(self.settings, self.request)
 
         self.askview = AskView(self.request)
         self.askview.settings = self.settings
 
-        em = EndpointManager(self.settings, self.request.session)
-        em.drop()
 
     def getKeyNode(self,node):
         return node['uri']
@@ -535,12 +522,12 @@ class AskViewTests(unittest.TestCase):
         data = self.askview.source_files_overview()
 
     def test_prefix_uri(self):
-        """Test preview_ttl method"""
+        """Test prefix_uri method"""
         self.tps.clean_up()
         data = self.askview.prefix_uri()
 
     def test_load_remote_data_into_graph(self):
-        """Test preview_ttl method"""
+        """Test load_remote_data_into_graph method"""
         self.tps.clean_up()
         try:
             data = self.askview.load_remote_data_into_graph()
@@ -578,7 +565,7 @@ class AskViewTests(unittest.TestCase):
 
         self.request.session['admin'] = True
         self.request.json_body['public'] = False
-        self.request.json_body['url'] = 'https://raw.githubusercontent.com/askomics/askomics/federation/askomics/static/modules/dbpedia.ttl'
+        self.request.json_body['url'] = 'https://raw.githubusercontent.com/askomics/askomics/master/askomics/static/modules/dbpedia.ttl'
         try:
             data = self.askview.load_remote_data_into_graph()
             assert True
@@ -595,7 +582,8 @@ class AskViewTests(unittest.TestCase):
             'col_types': [
                 'entity_start', 'text', 'text', 'category', 'numeric'
             ],
-            'disabled_columns': []
+            'disabled_columns': [],
+            'uris': {'0': 'http://www.semanticweb.org/user/ontologies/2018/1#', '1': None, '2': None, '3': None, '4': None}
         }
 
         data = self.askview.preview_ttl()
@@ -621,6 +609,7 @@ class AskViewTests(unittest.TestCase):
             'col_types': [
                 'entity_start', 'text', 'text', 'category', 'numeric'
             ],
+            'uris': {'0': 'http://www.semanticweb.org/user/ontologies/2018/1#', '1': None, '2': None, '3': None, '4': None},
             'disabled_columns': [],
             'public': False,
             'headers': ['People', 'First_name', 'Last_name', 'Sex', 'Age'],
@@ -916,7 +905,7 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.signup()
 
-        assert data == {'error': [], 'blocked': False, 'admin': True, 'username': 'jdoe'}
+        assert data == {'error': [], 'blocked': False, 'admin': True, 'username': 'jdoe', 'galaxy': False}
 
     def test_checkuser(self):
         """Test checkuser method"""
@@ -964,72 +953,35 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.login()
 
-        assert data == {'blocked': False, 'admin': True, 'error': [], 'username': 'jdoe'}
+        assert data == {'blocked': False, 'admin': True, 'error': [], 'username': 'jdoe', 'galaxy': False}
 
     def test_login_api(self):
         """Test login_api method"""
 
         self.tps.clean_up()
-        # First, create a user
-        self.request.json_body = {
-            'username': 'jdoe',
-            'email': 'jdoe@exemple.com',
-            'password': 'iamjohndoe',
-            'password2': 'iamjohndoe'
-        }
-
-        self.askview.signup()
-
-        # Then, create an API key
-
-        self.request.json_body = {
-            'username': 'jdoe',
-            'keyname': 'test'
-        }
-
-        self.askview.api_key()
-
-        # then, get infos
-        infos = self.askview.get_my_infos()
+        self.tps.add_jdoe_in_users()
 
         # then, try to log with API key
         self.request.json_body = {
-            'apikey': infos['apikeys'][0]['key']
+            'apikey': 'jdoe_apikey'
         }
 
         data = self.askview.login_api()
 
-        assert data == {'admin': True, 'blocked': False, 'username': 'jdoe', 'sucess': 'success', 'error': ''}
+        assert data == {'admin': False, 'blocked': False, 'username': 'jdoe', 'error': ''}
 
     def test_login_api_gie(self):
-        """Test login_api method"""
+        """Test login_api_gie method"""
 
         self.tps.clean_up()
-        # First, create a user
-        self.request.json_body = {
-            'username': 'jdoe',
-            'email': 'jdoe@exemple.com',
-            'password': 'iamjohndoe',
-            'password2': 'iamjohndoe'
-        }
-
-        self.askview.signup()
-
-        # Then, create an API key
-        self.request.json_body = {
-            'username': 'jdoe',
-            'keyname': 'test'
-        }
-
-        self.askview.api_key()
-
-        # then, get infos
-        infos = self.askview.get_my_infos()
+        self.tps.add_jdoe_in_users()
 
         # then, try to log with API key
-        self.request.GET['key'] = infos['apikeys'][0]['key']
+        self.request.json_body = {
+            'apikey': 'jdoe_apikey'
+        }
 
-        self.askview.login_api_gie()
+        self.askview.login_api()
 
     def test_get_users_infos(self):
         """Test get_users_infos"""
@@ -1061,7 +1013,7 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.get_users_infos()
 
-        assert data == {'result': [], 'error': [], 'admin': True, 'blocked': False, 'username': 'jdoe'}
+        assert data == {'result': [{'username': 'jdoe', 'email': 'jdoe@example.com', 'admin': True, 'blocked': False}], 'error': [], 'username': 'jdoe', 'admin': True, 'blocked': False, 'galaxy': False}
 
     def test_lock_user(self):
         """Test lock_user method"""
@@ -1146,36 +1098,18 @@ class AskViewTests(unittest.TestCase):
         """Test get_my_infos"""
 
         self.tps.clean_up()
-
-        # First, insert me
-        self.request.json_body = {
-            'username': 'jdoe',
-            'email': 'jdoe@example.com',
-            'password': 'iamjohndoe',
-            'password2': 'iamjohndoe'
-        }
-
-        self.askview.signup()
+        self.tps.add_jdoe_in_users()
 
         # get my infos
         data = self.askview.get_my_infos()
 
-        assert data == {'email': 'jdoe@example.com', 'username': 'jdoe', 'apikeys': [], 'blocked': False, 'admin': True}
+        assert data == {'email': 'jdoe@example.com', 'username': 'jdoe', 'apikey': 'jdoe_apikey', 'blocked': False, 'admin': False}
 
     def test_update_mail(self):
         """Test update_mail"""
 
         self.tps.clean_up()
-
-        # First, insert me
-        self.request.json_body = {
-            'username': 'jdoe',
-            'email': 'jdoe@example.com',
-            'password': 'iamjohndoe',
-            'password2': 'iamjohndoe'
-        }
-
-        self.askview.signup()
+        self.tps.add_jdoe_in_users()
 
         # And change my email
         self.request.json_body = {
@@ -1185,7 +1119,7 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.update_mail()
 
-        assert data == {'username': 'jdoe', 'error': [], 'success': 'success', 'blocked': False, 'admin': True}
+        assert data == {'success': 'success'}
 
     def test_update_passwd(self):
         """Test update_passwd method"""
@@ -1212,4 +1146,4 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.update_passwd()
 
-        assert data == {'error': [], 'admin': True, 'blocked': False, 'username': 'jdoe', 'success': 'success'}
+        assert data == {'error': [], 'admin': True, 'blocked': False, 'username': 'jdoe', 'success': 'success', 'galaxy': False}

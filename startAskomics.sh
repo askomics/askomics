@@ -9,20 +9,18 @@ dir_node_modules="$dir_askomics/node_modules"
 python_ex="python3"
 pyvenv="$python_ex -m venv"
 pip="$python_ex -m pip"
-gulp="./node_modules/.bin/gulp"
+gulp="$dir_node_modules/.bin/gulp"
 
 python_flags="-s"
 
 function usage() {
-    echo "Usage: $0 (-t { fuseki | agraph | virtuoso }) (-d { dev | prod })"
-    echo "    -t     triplestore (default: virtuoso)"
+    echo "Usage: $0 (-d { dev | prod })"
     echo "    -d     deployment mode (default: production)"
     echo "    -r     run only (without build javascript and python)"
     echo "    -b     build only (python and js)"
 }
 
 # Default options
-triplestore="virtuoso"
 run=false
 build=false
 
@@ -32,10 +30,6 @@ while getopts "ht:d:rb" option; do
         h)
             usage
             exit 0
-        ;;
-
-        t)
-            triplestore=$OPTARG
         ;;
 
         d)
@@ -73,6 +67,8 @@ case $depmode in
 esac
 
 # Build python virtual environment ------------------------
+# Check if venv is build. If not, build and activate it
+# If yes, just activate it
 activate="$dir_venv/bin/activate"
 
 if [[ ! -f $activate ]]; then
@@ -86,6 +82,7 @@ else
     source $activate
 fi
 
+# Install JS dependancies if not installed ----------------
 if [[ ! -d $dir_node_modules ]]; then
     echo "javascript dependancies : npm install"
     # check binary dependancies
@@ -95,12 +92,14 @@ if [[ ! -d $dir_node_modules ]]; then
 fi
 
 # Build config file ---------------------------------------
-config_name="custom.ini"
-config_path="$dir_config/$config_name"
+config_template_path="$dir_config/askomics.ini.template"
+config_path="$dir_config/askomics.ini"
+if [[ ! -f $config_path ]]; then
+    cp $config_template_path $config_path
+fi
 
+# Get environment variables -------------------------------
 echo "Convert environment variables to ini file ..."
-cp "$dir_config/$depmode.$triplestore.ini" "$config_path"
-
 # This take ASKO_ env to update config in app:main section, only askomics. key
 printenv | egrep "^ASKO_" | while read setting
 do
@@ -123,7 +122,7 @@ done
 askojs="$dir_askomics/askomics/static/dist/askomics.js"
 
 # deploy JS if not run only option or if there is no js
-if [[ $run == false || ! -f $askojs ]]; then
+if [[ $run == false ]]; then
     echo "deploying javascript ..."
     if [[ $depmode == "development" ]]; then
         $gulp $gulpmode &

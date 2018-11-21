@@ -22,22 +22,7 @@ class AskomicsMenu {
   }
 
   start() {
-    let menu = this ;
-    $("#"+menu.buttonMenu).prop('disabled', false);
-    $("#"+menu.buttonMenu)
-    .on('mousedown', function(event) {
-      if ( $("#"+menu.listObjectMenu).is(':visible') ) {
-        $("#"+menu.listObjectMenu).slideUp();
-      }
-      else {
-        menu.slideUp();
-        $("#"+menu.listObjectMenu).slideDown();
-      }
-      event.stopPropagation();
-    });
-    menu.func(menu);
-    //hide by default
-    $("#"+menu.listObjectMenu).hide();
+    this.func(this);
   }
 
   slideUp() {
@@ -48,7 +33,7 @@ class AskomicsMenu {
 /**************************************************************************/
 /**/
 /**/
-/* Shortcuts Menu */
+/* File Menu */
 /**/
 /**/
 var fileFuncMenu = function(menu) {
@@ -163,7 +148,7 @@ var shortcutsFuncMenu = function(menu) {
 /**************************************************************************/
 /**/
 /**/
-/* Shortcuts Menu */
+/* View Menu */
 /**/
 /**/
 var entitiesAndRelationsFuncMenu = function(menu) {
@@ -299,7 +284,7 @@ var entitiesAndRelationsFuncMenu = function(menu) {
 /**************************************************************************/
 /**/
 /**/
-/* Shortcuts Menu */
+/* Graph Menu */
 /**/
 /**/
 var graphFuncMenu = function(menu) {

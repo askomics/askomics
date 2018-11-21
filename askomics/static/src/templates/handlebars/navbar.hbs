@@ -6,7 +6,7 @@
         <ul class="nav navbar-nav navbar-right">
             <li id="interrogation" class="active"><a href="#" onclick="__ihm.loadStartPoints();"><span class="glyphicon glyphicon-play"data-toggle="tooltip" title="Query your data !"></span></a></li>
 
-            <li id="jobsview" onclick="new AskomicsJobsViewManager().loadjob().then(function () {new AskomicsJobsViewManager().update_jobview ();});"><a href="#"><span class="glyphicon glyphicon-tasks" data-toggle="tooltip" title="Check your history (upload, query)"></span></a></li>
+            <li id="jobsview"><a href="#"><span id="icon-jobs" class="glyphicon glyphicon-tasks" data-toggle="tooltip" title="Check your history (upload, query)"></span></a></li>
             {{#if loged}}
             {{#if nonblocked}}
             <li id="userdata" class="dropdown">
@@ -24,7 +24,7 @@
             {{/if}}
             <li id="about"><a href="#"><span class="glyphicon glyphicon-info-sign" data-toggle="tooltip" title="About AskOmics project"></span></a></li>
           <!--  <li id="help"><a href="#" onclick="AskomicsHelp.start();"><span class="glyphicon glyphicon-question-sign"></span></a></li>-->
-            <li id="help"><a onclick="window.open('https://github.com/askomics/askomics/wiki', 'test').focus();"><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Wiki documentation"></span></a></li>
+            <li id="help"><a onclick="window.open('https://askomics.readthedocs.io/en/latest/', 'test').focus();"><span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" title="Wiki documentation"></span></a></li>
             {{#if loged}}
 
             <li id="user_menu" class="dropdown">

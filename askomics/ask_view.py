@@ -33,17 +33,18 @@ from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
 from askomics.libaskomics.rdfdb.MultipleQueryLauncher import MultipleQueryLauncher
 from askomics.libaskomics.rdfdb.FederationQueryLauncher import FederationQueryLauncher
 
-from askomics.libaskomics.EndpointManager import EndpointManager
-
 from askomics.libaskomics.source_file.SourceFile import SourceFile
 from askomics.libaskomics.source_file.SourceFileURL import SourceFileURL
 
 from askomics.libaskomics.GalaxyConnector import GalaxyConnector
+from askomics.libaskomics.DatabaseConnector import DatabaseConnector
+
 
 from pyramid.httpexceptions import (
     HTTPForbidden,
     HTTPFound,
     HTTPNotFound,
+    exception_response
     )
 
 from validate_email import validate_email
@@ -60,9 +61,7 @@ class AskView(object):
         self.log = logging.getLogger(__name__)
         self.request = request
         self.settings = request.registry.settings
-        self.log.debug("============================= SESSION =================================")
-        self.log.debug(self.request.session)
-        self.log.debug("==============================================================")
+
         try:
 
             if 'admin' not in self.request.session.keys():
@@ -88,21 +87,19 @@ class AskView(object):
     def checkAuthSession(self):
         #https://fr.wikipedia.org/wiki/Liste_des_codes_HTTP
 
-        import pyramid.httpexceptions as exc
         # Denny access for non loged users
         if self.request.session['username'] == '':
-            raise exc.exception_response(401)
+            raise exception_response(401)
 
         # Denny for blocked users
         if self.request.session['blocked']:
-            raise exc.exception_response(423)
+            raise exception_response(423)
 
 
     def checkAdminSession(self):
-        import pyramid.httpexceptions as exc
         #Deny access for non admin session
         if not self.request.session['admin'] :
-            raise exc.exception_response(403)
+            raise exception_response(403)
 
 
     @view_config(route_name='start_point', request_method='GET')
@@ -159,7 +156,7 @@ class AskView(object):
         public_stats = {}
         private_stats = {}
 
-        lEndp = em.listEndpoints()
+        lEndp = em.list_endpoints()
         # Number of triples
         results_pub = qmlaucher.process_query(sqs.get_number_of_triples('public').query,lEndp)
         results_priv = qlaucher.process_query(sqs.get_number_of_triples('private').query)
@@ -301,7 +298,6 @@ class AskView(object):
 
     @view_config(route_name='delete_endpoints', request_method='POST')
     def delete_endpoints(self):
-        import pyramid.httpexceptions as exc
         """
 
         """
@@ -319,12 +315,11 @@ class AskView(object):
         em = EndpointManager(self.settings, self.request.session)
 
         for url in endpoints:
-            em.remove(url)
+            em.remove_endpoint(url)
         ##raise ValueError("ok")
 
     @view_config(route_name='add_endpoint', request_method='POST')
     def add_endpoint(self):
-        import pyramid.httpexceptions as exc
         """
 
         """
@@ -332,22 +327,21 @@ class AskView(object):
         self.checkAuthSession()
 
         if 'name' not in self.request.json_body:
-            raise exc.exception_response(404)
+            raise exception_response(404)
         if 'url' not in self.request.json_body:
-            raise exc.exception_response(404)
+            raise exception_response(404)
         if 'auth' not in self.request.json_body:
-            raise exc.exception_response(404)
+            raise exception_response(404)
 
         name = self.request.json_body['name']
         url = self.request.json_body['url']
         auth = self.request.json_body['auth']
 
         em = EndpointManager(self.settings, self.request.session)
-        em.saveEndpoint(name,url,auth,True)
+        em.save_endpoint(name,url,auth,True)
 
     @view_config(route_name='enable_endpoints', request_method='POST')
     def enable_endpoints(self):
-        import pyramid.httpexceptions as exc
         """
 
         """
@@ -355,9 +349,9 @@ class AskView(object):
         self.checkAuthSession()
 
         if 'id' not in self.request.json_body:
-           raise exc.exception_response(404)
+           raise exception_response(404)
         if 'enable' not in self.request.json_body:
-           raise exc.exception_response(404)
+           raise exception_response(404)
 
         id = self.request.json_body['id']
         enable = self.request.json_body['enable']
@@ -423,7 +417,7 @@ class AskView(object):
         session = {}
         try:
             em = EndpointManager(self.settings, self.request.session)
-            session['askomics'] = em.listEndpoints()
+            session['askomics'] = em.list_endpoints()
 
             sqb = SparqlQueryBuilder(self.settings, self.request.session)
             session['external'] = sqb.getExternalServiceEndpoint()
@@ -487,7 +481,7 @@ class AskView(object):
             sqg = SparqlQueryGraph(self.settings, self.request.session)
             ql = MultipleQueryLauncher(self.settings, self.request.session)
             em = EndpointManager(self.settings, self.request.session)
-            res = ql.process_query(sqg.get_all_taxons().query,em.listEndpoints())
+            res = ql.process_query(sqg.get_all_taxons().query,em.list_endpoints())
             taxons_list = []
             for elem in res:
                 taxons_list.append(elem['taxon'])
@@ -659,7 +653,7 @@ class AskView(object):
             raise ValueError("Can not load public data with a non admin account !")
 
         jm = JobManager(self.settings, self.request.session)
-        jobid = jm.saveStartSparqlJob(file_name)
+        jobid = jm.save_integration_job(file_name)
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
         src_file = sfc.get_source_files([file_name], forced_type, uri_set=uris)[0]
@@ -670,8 +664,7 @@ class AskView(object):
 
         try:
             self.data = src_file.persist(self.request.host_url, public)
-            jm.updateEndSparqlJob(jobid, "Done", nr=0)
-            jm.updatePreviewJob(jobid, "File integration done.")
+            jm.done_integration_job(jobid)
         except Exception as e:
             # rollback
             sqb = SparqlQueryBuilder(self.settings, self.request.session)
@@ -681,9 +674,7 @@ class AskView(object):
 
             traceback.print_exc(file=sys.stdout)
             if jobid != -1:
-                jm = JobManager(self.settings, self.request.session)
-                jm.updateEndSparqlJob(jobid, "Error")
-                jm.updatePreviewJob(jobid, str(e))
+                jm.set_error_message('integration', str(e), jobid)
 
         return self.data
 
@@ -717,15 +708,14 @@ class AskView(object):
             raise ValueError("Can not import public data with a non admin account !")
 
         jm = JobManager(self.settings, self.request.session)
-        jobid = jm.saveStartSparqlJob(url)
+        jobid = jm.save_integration_job(url)
 
         src_file = SourceFileURL(self.settings, self.request.session, url)
         graph = src_file.graph
 
         try:
             self.data = src_file.load_data_from_url(url, public)
-            jm.updateEndSparqlJob(jobid, "Done", nr=0)
-            jm.updatePreviewJob(jobid, "URL integration done.")
+            jm.done_integration_job(jobid)
         except Exception as e:
             # rollback
             sqb = SparqlQueryBuilder(self.settings, self.request.session)
@@ -738,9 +728,7 @@ class AskView(object):
             traceback.print_exc(file=sys.stdout)
 
             if jobid != -1:
-                jm = JobManager(self.settings, self.request.session)
-                jm.updateEndSparqlJob(jobid, "Error")
-                jm.updatePreviewJob(jobid, str(e))
+                jm.set_error_message('integration', str(e), jobid)
 
             self.request.response.status = 400
 
@@ -776,8 +764,7 @@ class AskView(object):
             raise ValueError("Cannot import public gff with a non admin account !")
 
         jm = JobManager(self.settings, self.request.session)
-        jobid = jm.saveStartSparqlJob(file_name)
-
+        jobid = jm.save_integration_job(file_name)
         sfc = SourceFileConvertor(self.settings, self.request.session)
         src_file_gff = sfc.get_source_files([file_name], forced_type, uri_set={0: uri})[0]
         graph = src_file_gff.graph
@@ -787,9 +774,7 @@ class AskView(object):
         try:
             self.log.debug('--> Parsing GFF')
             src_file_gff.persist(self.request.host_url, public)
-            jm.updateEndSparqlJob(jobid, "Done", nr=0)
-            jm.updatePreviewJob(jobid, "GFF integration done. <br/>entities :" + ', '.join(entities) + "<br/>taxon :" + taxon)
-
+            jm.done_integration_job(jobid)
         except Exception as e:
             # rollback
             if graph is not None:
@@ -801,10 +786,7 @@ class AskView(object):
             traceback.print_exc(file=sys.stdout)
 
             if jobid != -1:
-                jm = JobManager(self.settings, self.request.session)
-                jm.updateEndSparqlJob(jobid, "Error")
-                jm.updatePreviewJob(jobid, 'Problem when integration of ' + file_name + '.</br>' + str(e))
-
+                jm.set_error_message('integration', str(e), jobid)
             self.log.error(str(e))
 
         self.data['status'] = 'ok'
@@ -834,17 +816,14 @@ class AskView(object):
             raise ValueError("Can not import public turtle file with a non admin account !")
 
         jm = JobManager(self.settings, self.request.session)
-        jobid = jm.saveStartSparqlJob(file_name)
-
+        jobid = jm.save_integration_job(file_name)
         sfc = SourceFileConvertor(self.settings, self.request.session)
         src_file_ttl = sfc.get_source_files([file_name], forced_type)[0]
         graph = src_file_ttl.graph
 
         try:
             self.data = src_file_ttl.persist(self.request.host_url, public)
-            jm.updateEndSparqlJob(jobid, "Done", nr=0)
-            jm.updatePreviewJob(jobid, "TTL file integration done. ")
-
+            jm.done_integration_job(jobid)
         except Exception as e:
             # rollback
             if graph is not None:
@@ -854,10 +833,7 @@ class AskView(object):
                 query_laucher.process_query(sqb.get_delete_metadatas_of_graph(graph).query)
 
             if jobid != -1:
-                jm = JobManager(self.settings, self.request.session)
-                jm.updateEndSparqlJob(jobid, "Error")
-                jm.updatePreviewJob(jobid, 'Problem when integration of ' + file_name + '.</br>' + str(e))
-
+                jm.set_error_message('integration', str(e), jobid)
             self.log.error('ERROR: ' + str(e))
 
         self.data['status'] = 'ok'
@@ -899,14 +875,11 @@ class AskView(object):
 
         graph = src_file_bed.graph
         jm = JobManager(self.settings, self.request.session)
-        jobid = jm.saveStartSparqlJob(file_name)
-
+        jobid = jm.save_integration_job(file_name)
         try:
             self.log.debug('--> Parsing BED')
             src_file_bed.persist(self.request.host_url, public)
-            jm.updateEndSparqlJob(jobid, "Done", nr=0)
-            jm.updatePreviewJob(jobid, "BED file integration done.")
-
+            jm.done_integration_job(jobid)
         except Exception as e:
             # rollback
             if graph is not None:
@@ -917,9 +890,8 @@ class AskView(object):
 
             traceback.print_exc(file=sys.stdout)
             if jobid != -1:
-                jm = JobManager(self.settings, self.request.session)
-                jm.updateEndSparqlJob(jobid, "Error")
-                jm.updatePreviewJob(jobid, 'Problem when integration of ' + file_name + '.</br>' + str(e))
+                jm.set_error_message('integration', str(e), jobid)
+
             self.log.error(str(e))
 
         self.data['status'] = 'ok'
@@ -1020,7 +992,7 @@ class AskView(object):
                 rg = ""
                 if 'requestGraph' in body:
                     rg = body['requestGraph']
-                jobid = jm.saveStartSparqlJob("SPARQL Request",requestGraph=rg,variates=body["variates"])
+                jobid = jm.save_query_job(rg, body['variates'])
 
 
             typeRequest = ''
@@ -1061,7 +1033,7 @@ class AskView(object):
                 if "limit" in body:
                     npreview = body["limit"]
 
-                jm.updateEndSparqlJob(jobid,"Ok "+typeRequest,nr=len(results),data=self.data['values'][0:npreview], file=self.data['file'])
+                jm.done_query_job(jobid, len(results), self.data['values'][0:npreview], self.data['file'])
 
         except Exception as e:
             #exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -1071,20 +1043,24 @@ class AskView(object):
             self.data['file'] = ""
 
             if persist:
-                jm = JobManager(self.settings, self.request.session)
-                jm.updateEndSparqlJob(jobid,"Error "+typeRequest)
-                jm.updatePreviewJob(jobid,str(e))
+                jm.done_query_job(jobid, None, None, None)
+                jm.set_error_message('query', str(e), jobid)
 
         self.data['galaxy'] = self.request.session['galaxy']
 
         return self.data
 
-    @view_config(route_name='listjob', request_method='POST')
+    @view_config(route_name='listjob', request_method='GET')
     def listjob(self):
         ''' Get all jobs recorded in database '''
 
+        maxrows = self.settings['askomics.triplestore_results_max_rows'] if 'askomics.triplestore_results_max_rows' in self.settings else None
+
         jm = JobManager(self.settings, self.request.session)
-        return jm.listJobs()
+        integration_jobs = jm.list_integration_jobs()
+        query_jobs = jm.list_query_jobs()
+
+        return {'maxrows': maxrows, 'integration': integration_jobs, 'query': query_jobs}
 
 
     @view_config(route_name='deljob', request_method='POST')
@@ -1092,8 +1068,9 @@ class AskView(object):
         ''' Remove job from database '''
 
         body = self.request.json_body
+
         jm = JobManager(self.settings, self.request.session)
-        jm.removeJob(body['jobid'])
+        jm.remove_job(body['table'], body['jobid'])
 
 
     @view_config(route_name='getSparqlQueryInTextFormat', request_method='POST')
@@ -1128,7 +1105,7 @@ class AskView(object):
     def uploadTtl(self):
         pm = ParamManager(self.settings, self.request.session)
         response = FileResponse(
-            pm.get_rdf_directory()+self.request.matchdict['name'],
+            pm.get_rdf_user_directory()+self.request.matchdict['name'],
             content_type='text/turtle'
             )
         return response
@@ -1213,6 +1190,7 @@ class AskView(object):
             admin_blocked = security.get_admin_blocked_by_username()
             self.data['admin'] = admin_blocked['admin']
             self.data['blocked'] = admin_blocked['blocked']
+            self.data['galaxy'] = security.check_galaxy()
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
             self.data['error'] = "Bad server configuration!"
@@ -1336,6 +1314,7 @@ class AskView(object):
             self.data['username'] = username
             self.data['admin'] = admin_blocked['admin']
             self.data['blocked'] = admin_blocked['blocked']
+            self.data['galaxy'] = self.request.session['galaxy']
 
         except Exception as e:
             self.data['error'] = str(e)
@@ -1371,29 +1350,18 @@ class AskView(object):
         self.data['sucess'] = 'success'
         return self.data
 
-    @view_config(route_name='del_apikey', request_method='POST')
-    def del_apikey(self):
+    @view_config(route_name='renew_apikey', request_method='GET')
+    def renew_apikey(self):
 
         self.checkAuthSession()
 
-        body = self.request.json_body
-        key = body['key']
-
         security = Security(self.settings, self.request.session, self.request.session['username'], '', '', '')
-
-        # Check the key belong to the user
-        key_belong2user = security.ckeck_key_belong_user(key)
-
-        if key_belong2user:
-            security.delete_apikey(key)
+        security.renew_apikey()
 
     @view_config(route_name='connect_galaxy', request_method='POST')
     def connect_galaxy(self):
 
-        # Denny access for non loged users or non admin users
-        if self.request.session['username'] == '':
-            self.data['error'] = 'Need a connexion !'
-            return self.data
+        self.checkAuthSession()
 
         body = self.request.json_body
         url = body['url']
@@ -1403,9 +1371,7 @@ class AskView(object):
 
 
         # Check if a galaxy is already registred
-        galaxy_already_registred = security.check_galaxy()
-
-        if galaxy_already_registred:
+        if security.check_galaxy():
             security.delete_galaxy()
             self.request.session['galaxy'] = False
 
@@ -1526,24 +1492,11 @@ class AskView(object):
         self.checkAuthSession()
         self.checkAdminSession()
 
-        sqa = SparqlQueryAuth(self.settings, self.request.session)
-        ql = QueryLauncher(self.settings, self.request.session)
+        security = Security(self.settings, self.request.session, self.request.session['username'], '', '', '')
+        infos = security.get_users_infos()
 
-        try:
-            result = ql.process_query(sqa.get_users_infos(self.request.session['username']).query)
-        except Exception as e:
-            self.data['error'] = str(e)
-            self.log.error(str(e))
-
-        for res in result:
-            res['admin'] = ParamManager.Bool(res['admin'])
-            res['blocked'] = ParamManager.Bool(res['blocked'])
-            res['email'] = re.sub(r'^mailto:', '', res['email'])
-
-        self.log.debug(result)
-
-        self.data['result'] = result
-
+        self.data['result'] = infos
+        self.log.debug(infos)
         return self.data
 
     @view_config(route_name='lockUser', request_method='POST')
@@ -1557,20 +1510,20 @@ class AskView(object):
 
         body = self.request.json_body
 
+        self.data = {}
+
         username = body['username']
         new_status = body['lock']
 
-        # Convert bool to string for the triplestore
+        # Convert bool to string for the database
         if new_status:
             new_status = 'true'
         else:
             new_status = 'false'
 
-        sqb = SparqlQueryBuilder(self.settings, self.request.session)
-        query_laucher = QueryLauncher(self.settings, self.request.session)
-
         try:
-            query_laucher.process_query(sqb.update_blocked_status(new_status, username).query)
+            security = Security(self.settings, self.request.session, self.request.session['username'], '', '', '')
+            security.lock_user(new_status, username)
         except Exception as e:
             self.data['error'] = str(e)
             self.log.error(str(e))
@@ -1594,17 +1547,15 @@ class AskView(object):
         username = body['username']
         new_status = body['admin']
 
-        # Convert bool to string for the triplestore
+        # Convert bool to string for the database
         if new_status:
             new_status = 'true'
         else:
             new_status = 'false'
 
-        sqb = SparqlQueryBuilder(self.settings, self.request.session)
-        query_laucher = QueryLauncher(self.settings, self.request.session)
-
         try:
-            query_laucher.process_query(sqb.update_admin_status(new_status, username).query)
+            security = Security(self.settings, self.request.session, self.request.session['username'], '', '', '')
+            security.admin_user(new_status, username)
         except Exception as e:
             self.data['error'] = str(e)
             self.log.error(str(e))
@@ -1641,7 +1592,7 @@ class AskView(object):
                 self.request.response.status = 400
                 return self.data
 
-
+        security = Security(self.settings, self.request.session, self.request.session['username'], '', '', '')
         sqb = SparqlQueryBuilder(self.settings, self.request.session)
         query_laucher = QueryLauncher(self.settings, self.request.session)
 
@@ -1666,7 +1617,7 @@ class AskView(object):
 
         # Delete user infos
         try:
-            query_laucher.process_query(sqb.delete_user(username).query)
+            security.delete_user(username)
         except Exception as e:
             return 'failed: ' + str(e)
 
@@ -1684,50 +1635,27 @@ class AskView(object):
         Get all infos about a user
         """
 
+        self.checkAuthSession()
 
-        sqa = SparqlQueryAuth(self.settings, self.request.session)
-        query_laucher = QueryLauncher(self.settings, self.request.session)
+        security = Security(self.settings, self.request.session, self.request.session['username'], '', '', '')
+        infos = security.get_user_infos()
 
-        try:
-            result = query_laucher.process_query(sqa.get_user_infos(self.request.session['username']).query)
-        except Exception as e:
-            self.data['error'] = str(e)
-            self.log.error(str(e))
-            self.request.response.status = 400
-            return self.data
+        result = {}
 
+        result['email'] = infos[0][0]
+        result['username'] = self.request.session['username']
+        result['admin'] = infos[0][1]
+        result['blocked'] = infos[0][2]
+        result['apikey'] = infos[0][3]
 
-        apikey_list = []
         galaxy_dict = {}
 
-        for res in result:
-            if 'keyname' in res:
-                self.log.debug(res['keyname'])
-                self.log.debug(res['apikey'])
-                # apikey_dict[res['keyname']] = res['apikey']
-                apikey_list.append({'name': res['keyname'], 'key': res['apikey']})
-
-        for res in result:
-            if 'Gurl' in res:
-                self.log.debug(res['Gurl'])
-                self.log.debug(res['Gkey'])
-                galaxy_dict = {'url': res['Gurl'], 'key': res['Gkey']}
-
-        result = result[0]
-        result['email'] = re.sub(r'^mailto:', '', result['email'])
-        result['username'] = self.request.session['username']
-        result['admin'] = ParamManager.Bool(result['admin'])
-        result['blocked'] = ParamManager.Bool(result['blocked'])
-        result.pop('keyname', None)
-        result.pop('apikey', None)
-        result.pop('Gurl', None)
-        result.pop('Gkey', None)
-
-        result['apikeys'] = apikey_list
-        if galaxy_dict:
-            result['galaxy'] = galaxy_dict
+        if infos[1]:
+            result['galaxy'] = {'url': infos[1][0], 'key': infos[1][1]}
 
         return result
+
+
     @view_config(route_name='update_mail', request_method='POST')
     def update_mail(self):
         """
@@ -1759,7 +1687,7 @@ class AskView(object):
     @view_config(route_name='update_passwd', request_method='POST')
     def update_passwd(self):
         """
-        Chage email of a user
+        Change password of a user
         """
 
         body = self.request.json_body
@@ -1938,6 +1866,9 @@ class AskView(object):
 
     @view_config(route_name='get_uploaded_files', request_method="GET")
     def get_uploaded_files(self):
+
+        self.checkAuthSession()
+
         param_manager = ParamManager(self.settings, self.request.session)
         path = param_manager.get_upload_directory()
 
@@ -2005,12 +1936,12 @@ class AskView(object):
             self.data['values'].append({ 'key' : 'Disk total', 'value' : str(round(diskinfo.total/(1024**3),2)) + " GB" } )
             self.data['values'].append({ 'key' : 'Disk used', 'value' : str(round(diskinfo.used/(1024**3),2)) + " GB" } )
             self.data['values'].append({ 'key' : 'Disk free', 'value' : str(round(diskinfo.free/(1024**3),2)) + " GB" } )
-            self.data['values'].append({ 'key' : 'temp directory', 'value' : pm.userfilesdir } )
-            self.data['values'].append({ 'key' : 'temp directory size', 'value' : naturalsize(sum(os.path.getsize(x) for x in iglob(pm.userfilesdir+'/**'))) } )
+            self.data['values'].append({ 'key' : 'temp directory', 'value' : pm.user_dir } )
+            self.data['values'].append({ 'key' : 'temp directory size', 'value' : naturalsize(sum(os.path.getsize(x) for x in iglob(pm.user_dir+'/**'))) } )
             self.data['values'].append({ 'key' : 'Upload directory', 'value' : pm.get_upload_directory() } )
             self.data['values'].append({ 'key' : 'Upload directory size', 'value' : naturalsize(sum(os.path.getsize(x) for x in iglob(pm.get_upload_directory()+'/**'))) } )
-            self.data['values'].append({ 'key' : 'Rdf generated files directory', 'value' : pm.get_rdf_directory() } )
-            self.data['values'].append({ 'key' : 'Rdf generated files directory size', 'value' : naturalsize(sum(os.path.getsize(x) for x in iglob(pm.get_rdf_directory()+'/**'))) } )
+            self.data['values'].append({ 'key' : 'Rdf generated files directory', 'value' : pm.get_rdf_user_directory() } )
+            self.data['values'].append({ 'key' : 'Rdf generated files directory size', 'value' : naturalsize(sum(os.path.getsize(x) for x in iglob(pm.get_rdf_user_directory()+'/**'))) } )
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
             self.data['error'] = str(e)
@@ -2028,7 +1959,7 @@ class AskView(object):
             self.checkAdminSession()
             pm = ParamManager(self.settings, self.request.session)
 
-            files = glob2.glob(pm.get_rdf_directory()+'/**')
+            files = glob2.glob(pm.get_rdf_user_directory()+'/**')
             for f in files:
                 if os.path.isfile(f):
                     os.remove(f)

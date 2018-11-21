@@ -6,7 +6,8 @@ import os.path
 from pyramid.paster import get_appsettings
 from pyramid import testing
 from askomics.libaskomics.EndpointManager import EndpointManager
-
+from interface_tps_db import InterfaceTpsDb
+from SetupTests import SetupTests
 
 class EndpointManagerTests(unittest.TestCase):
     """Test for the ModuleManager class"""
@@ -14,90 +15,125 @@ class EndpointManagerTests(unittest.TestCase):
     def setUp(self):
         """Set up the settings and session"""
 
-        self.settings = get_appsettings('configs/test.virtuoso.ini', name='main')
+        self.settings = get_appsettings('configs/tests.ini', name='main')
         self.request = testing.DummyRequest()
+        self.request.session['username'] = 'jdoe'
+        self.request.session['group'] = 'base'
+        self.request.session['admin'] = False
+        self.request.session['blocked'] = False
+        self.request.session['graph'] = "test/nosetest/jdoe"
 
-        jm = EndpointManager(self.settings, self.request.session)
-        jm.drop()
+        SetupTests(self.settings, self.request.session)
+        self.tps = InterfaceTpsDb(self.settings, self.request)
 
-    def tearDown(self):
-        jm = EndpointManager(self.settings, self.request.session)
-        jm.drop()
+    def test_save_endpoint(self):
 
-    def test_saveEndpoint(self):
-        jm = EndpointManager(self.settings, self.request.session)
-        jm.saveEndpoint("testNameEndpoint","http://www.urlTPS.com",'Digest',True)
-        jm.saveEndpoint("testNameEndpoint2","http://www.urlTPS.com",None,True)
-        try:
-            jm.saveEndpoint("testNameEndpoint3","http://www.urlTPS.com",'BIDON',False)
-            assert False
-        except ValueError:
-            assert True
-        jm.saveEndpoint("testNameEndpoint4","http://www.urlTPS.com",None,False)
-        jm.drop()
+        self.tps.clean_up()
+        self.tps.add_jdoe_in_users()
+
+        endpoint_manager = EndpointManager(self.settings, self.request.session)
+        assert endpoint_manager.save_endpoint('endpoint1', 'http://endpoint./sparql') == 1
+
+    def test_enable(self):
+
+        self.tps.clean_up()
+        self.tps.add_jdoe_in_users()
+
+        endpoint_manager = EndpointManager(self.settings, self.request.session)
+        endpoint_manager.enable(endpoint_manager.save_endpoint('endpoint1', 'http://endpoint/sparql'))
+
+        assert self.tps.test_row_presence('endpoints', 'id, name, url, auth, enable, message', (1, 'endpoint1', 'http://endpoint/sparql', 'BASIC', 1, None))
 
 
-    def test_disable_enable(self):
-        jm = EndpointManager(self.settings, self.request.session)
-        listActiveEndp = jm.listActiveEndpoints()
-        assert len(listActiveEndp) == 0
-        # no effect
-        jm.enable(0)
-        listActiveEndp = jm.listActiveEndpoints()
-        assert len(listActiveEndp) == 0
+    def test_disable(self):
 
-        jm.saveEndpoint("testNameEndpoint","http://www.urlTPS.com",'Digest',False)
-        # no effect
-        jm.enable(0)
-        listActiveEndp = jm.listActiveEndpoints()
-        assert len(listActiveEndp) == 0
+        self.tps.clean_up()
+        self.tps.add_jdoe_in_users()
 
-        jm.enable(1)
-        listActiveEndp = jm.listActiveEndpoints()
+        endpoint_manager = EndpointManager(self.settings, self.request.session)
+        endpoint_id = endpoint_manager.save_endpoint('endpoint1', 'http://endpoint/sparql', isenable=True)
 
-        assert len(listActiveEndp) == 1
-        assert (listActiveEndp[0]['name'] == "testNameEndpoint"
-                and listActiveEndp[0]['enable']
-                and listActiveEndp[0]['endpoint'] == "http://www.urlTPS.com"
-                and listActiveEndp[0]['auth'].lower() == "digest")
+        assert self.tps.test_row_presence('endpoints', 'id, name, url, auth, enable, message', (1, 'endpoint1', 'http://endpoint/sparql', 'BASIC', 1, None))
 
-        jm.disable(1,"test disable")
+        endpoint_manager.disable(endpoint_id, 'message')
 
-        listActiveEndp = jm.listActiveEndpoints()
+        assert self.tps.test_row_presence('endpoints', 'id, name, url, auth, enable, message', (1, 'endpoint1', 'http://endpoint/sparql', 'BASIC', 0, 'message'))
 
-        assert len(listActiveEndp) == 0
+    def test_disable_by_url(self):
 
-        listEndp = jm.listEndpoints()
-        assert len(listEndp) == 1
+        self.tps.clean_up()
+        self.tps.add_jdoe_in_users()
 
-        assert (listEndp[0]['name'] == "testNameEndpoint"
-                and not listEndp[0]['enable']
-                and listEndp[0]['endpoint'] == "http://www.urlTPS.com"
-                and listEndp[0]['auth'].lower() == "digest")
-        jm.drop()
+        endpoint_manager = EndpointManager(self.settings, self.request.session)
+        endpoint_manager.save_endpoint('endpoint1', 'http://endpoint/sparql', isenable=True)
 
-    def test_listEndpoints(self):
-        jm = EndpointManager(self.settings, self.request.session)
-        jm.remove("bidon")
-        jm.saveEndpoint("testNameEndpoint","http://www.urlTPS.com",'Digest',True)
-        listEndp = jm.listEndpoints()
-        assert len(listEndp) == 1
-        jm.remove("bidon")
-        jm.remove("1")
-        listEndp = jm.listEndpoints()
-        assert len(listEndp) == 0
+        assert self.tps.test_row_presence('endpoints', 'id, name, url, auth, enable, message', (1, 'endpoint1', 'http://endpoint/sparql', 'BASIC', 1, None))
 
-    def test_disableUrl(self):
-        jm = EndpointManager(self.settings, self.request.session)
-        jm.disableUrl("bidon","bidon")
-        jm.saveEndpoint("testNameEndpoint","http://www.urlTPS.com",'Digest',True)
-        jm.disableUrl("testNameEndpoint","bidon")
-        jm.remove("1")
+        endpoint_manager.disable_by_url('http://endpoint/sparql', 'message')
 
-    def test_raise_SQLException(self):
-        jm = EndpointManager(self.settings, self.request.session)
-        jm.drop()
-        listEndp = jm.listEndpoints()
-        listEndp = jm.listActiveEndpoints()
-        jm.remove("bidon")
-        jm.drop()
+        assert self.tps.test_row_presence('endpoints', 'id, name, url, auth, enable, message', (1, 'endpoint1', 'http://endpoint/sparql', 'BASIC', 0, 'message'))
+
+    def test_list_endpoints(self):
+
+        self.tps.clean_up()
+        self.tps.add_jdoe_in_users()
+
+        endpoint_manager = EndpointManager(self.settings, self.request.session)
+        endpoint1 = endpoint_manager.save_endpoint('endpoint1', 'http://endpoint/sparql', isenable=True)
+        endpoint2 = endpoint_manager.save_endpoint('endpoint2', 'http://other_endpoint/sparql', isenable=True)
+
+        list_endpoints = endpoint_manager.list_endpoints()
+
+        assert list_endpoints == [{
+            'id': 1,
+            'name': 'endpoint1',
+            'endpoint': 'http://endpoint/sparql',
+            'auth': 'BASIC',
+            'enable': True,
+            'message': None
+        },
+        {
+            'id': 2,
+            'name': 'endpoint2',
+            'endpoint': 'http://other_endpoint/sparql',
+            'auth': 'BASIC',
+            'enable': True,
+            'message': None
+        }]
+
+
+    def test_list_active_endpoints(self):
+
+        self.tps.clean_up()
+        self.tps.add_jdoe_in_users()
+
+        endpoint_manager = EndpointManager(self.settings, self.request.session)
+        endpoint1 = endpoint_manager.save_endpoint('endpoint1', 'http://endpoint/sparql', isenable=True)
+        endpoint2 = endpoint_manager.save_endpoint('endpoint2', 'http://other_endpoint/sparql', isenable=False)
+
+        list_endpoints = endpoint_manager.list_active_endpoints()
+
+        assert list_endpoints == [{
+            'id': 1,
+            'name': 'endpoint1',
+            'endpoint': 'http://endpoint/sparql',
+            'auth': 'BASIC',
+            'enable': True,
+            'message': None
+        }]
+
+
+
+    def test_remove_endpoint(self):
+
+        self.tps.clean_up()
+        self.tps.add_jdoe_in_users()
+
+        endpoint_manager = EndpointManager(self.settings, self.request.session)
+        endpoint = endpoint_manager.save_endpoint('endpoint1', 'http://endpoint/sparql')
+        
+        assert self.tps.test_row_presence('endpoints', 'id, name, url, auth, enable, message', (1, 'endpoint1', 'http://endpoint/sparql', 'BASIC', 0, None))
+
+        endpoint_manager.remove_endpoint(endpoint)
+
+        assert not self.tps.test_row_presence('endpoints', 'id, name, url, auth, enable, message', (1, 'endpoint1', 'http://endpoint/sparql', 'BASIC', 0, None))

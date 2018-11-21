@@ -502,23 +502,23 @@ class AskomicsNodeView extends AskomicsObjectView {
               .attr('aria-hidden','true')
               .addClass('makeRegExpIcon')
               .addClass('fa')
-              .addClass('fa-filter')
+              .addClass('fa-font')
               .addClass('display')
               .attr('data-toggle', 'tooltip')
               .attr('data-placement', 'bottom')
-              .attr('title', 'Exact filter');
+              .attr('title', 'Regexp filter');
 
       let mythis = this;
 
       icon.click(function(d) {
-          if (icon.hasClass('fa-filter')) {
-                icon.removeClass('fa-filter');
-                icon.addClass('fa-font');
-                icon.attr('title', 'Regexp filter');
-          } else {
+          if (icon.hasClass('fa-font')) {
                 icon.removeClass('fa-font');
                 icon.addClass('fa-filter');
                 icon.attr('title', 'Exact filter');
+          } else {
+                icon.removeClass('fa-filter');
+                icon.addClass('fa-font');
+                icon.attr('title', 'Regexp filter');
           }
 
           var sparqlid  = $(this).attr('sparqlid');

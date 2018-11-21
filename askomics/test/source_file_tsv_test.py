@@ -9,14 +9,15 @@ from pyramid.paster import get_appsettings
 
 from askomics.libaskomics.source_file.SourceFile import SourceFile
 from askomics.libaskomics.source_file.SourceFileTsv import SourceFileTsv
-from interface_tps import InterfaceTPS
+from interface_tps_db import InterfaceTpsDb
+from SetupTests import SetupTests
 
 SIMPLE_SOURCE_FILE = os.path.join( os.path.dirname( __file__ ), "..", "test-data", "instruments.tsv" )
 
 class SourceFileTsvTests(unittest.TestCase):
 
     def setUp( self ):
-        self.settings = get_appsettings('configs/test.virtuoso.ini', name='main')
+        self.settings = get_appsettings('configs/tests.ini', name='main')
         self.settings['askomics.upload_user_data_method'] = 'insert'
         self.request = testing.DummyRequest()
         self.request.session['username'] = 'jdoe'
@@ -24,23 +25,9 @@ class SourceFileTsvTests(unittest.TestCase):
         self.request.session['admin'] = False
         self.request.session['blocked'] = True
 
-        # Files
-        # Create the user dir if not exist
-        self.temp_directory = self.settings['askomics.files_dir'] + '/upload/' + self.request.session['username']
-        if not os.path.isdir(self.temp_directory):
-            os.makedirs(self.temp_directory)
-        # Set the upload dir
-        self.request.session['upload_directory'] = self.temp_directory
-        # Copy files if directory is empty
 
-        files = ['people.tsv', 'instruments.tsv', 'play_instrument.tsv', 'transcript.tsv', 'qtl.tsv']
-        for file in files:
-            src = os.path.join(os.path.dirname(__file__), "..", "test-data") + '/' + file
-            dst = self.request.session['upload_directory'] + '/' + file
-            copyfile(src, dst)
+        SetupTests(self.settings, self.request.session)
 
-    def tearDown(self):
-        shutil.rmtree( self.temp_directory )
 
     def test_setGraph(self):
         source_file = SourceFileTsv(self.settings, self.request.session, self.request.session['upload_directory'] + '/instruments.tsv',preview_limit=1)

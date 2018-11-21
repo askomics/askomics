@@ -7,20 +7,25 @@
 use = egg:Askomics
 
 # Pyramid debug mode
-pyramid.reload_templates = true
+askomics.debug = false
+pyramid.reload_templates = false
 pyramid.debug_authorization = false
 pyramid.debug_notfound = false
 pyramid.debug_routematch = false
 pyramid.default_locale_name = en
-pyramid.includes = pyramid_debugtoolbar
-askomics.debug = true
-# debugtoolbar.hosts = 127.0.0.1 ::1
+#pyramid.includes = pyramid_debugtoolbar
+#debugtoolbar.hosts = 127.0.0.1 ::1
+
 
 # Triplestore configuration
+# - hack_virtuoso: true if endpoint is virtuoso
+# - load_url: set if the load url is different than askomics url
+# - upload_user_data_method: load or insert
+# - delete_method: DELETE or POST
+askomics.hack_virtuoso = true
 askomics.endpoint = http://localhost:8890/sparql
 askomics.updatepoint = http://localhost:8890/sparql
-askomics.fdendpoint=http://localhost:4040/fedx
-askomics.hack_virtuoso = true
+#askomics.load_url=
 askomics.upload_user_data_method=load
 askomics.max_content_size_to_update_database = 4000
 askomics.graph = urn:sparql:askomics
@@ -28,16 +33,24 @@ askomics.users_graph = urn:sparql:askomics:users
 askomics.prefix = http://www.semanticweb.org/user/ontologies/2018/1#
 askomics.namespace = http://www.semanticweb.org/askomics/ontologies/2018/1#
 askomics.delete_method = DELETE
-#can be POST or DELETE
+askomics.triplestore_results_max_rows=10000
+
+
+# Fedex Configuration
+askomics.fdendpoint=http://localhost:4040/fedx
+
 
 # AskOmics configuration
+# - files_dir: where AskOmics write user data
 askomics.overview_lines_limit = 200
-askomics.allowed_file_types = 'application/ld+json','text/xml','application/octet-stream','text/turtle','application/x-turtle','text/rdf+n3','text/plain','text/csv','text/tab-separated-values','text/fasta','application/rdf+xml'
+askomics.allowed_file_types = 'application/ld+json','text/xml','application/octet-stream','text/turtle','application/x-turtle','text/rdf+n3','text/plain','text/csv','text/tab-separated-values','text/fasta','application/rdf+xml, application/vnd.realvnc.bed'
 askomics.upload_min_size = 1
 askomics.upload_max_size = 200000000
 askomics.files_dir = /tmp/askomics
 
+
 # Authentication
+# Change the salt into a random string
 askomics.salt = AskOmics
 
 # Proxy setting
@@ -51,6 +64,10 @@ askomics.proxy_http = http://www.example.com:3128/
 askomics.proxy_https = https://www.example.com:3129/
 askomics.proxy_username = username
 askomics.proxy_password = password
+
+# Database
+askomics.database=sqlite
+askomics.database_path=/tmp/askomics/database.db
 
 # SMTP Server
 #askomics.smtp_host=
@@ -83,10 +100,14 @@ keys = console
 keys = generic
 
 [logger_root]
+# Set the log level
+# - INFO, WARNING or DEBUG
 level = DEBUG
 handlers = console
 
 [logger_askomics]
+# Set the log level
+# - INFO, WARNING or DEBUG
 level = DEBUG
 handlers =
 qualname = askomics

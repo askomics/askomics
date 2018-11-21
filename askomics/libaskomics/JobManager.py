@@ -1,8 +1,11 @@
 from askomics.libaskomics.ParamManager import ParamManager
+from askomics.libaskomics.DatabaseConnector import DatabaseConnector
+from askomics.libaskomics.Security import Security
 
 import logging
 import sqlite3
 import urllib.parse
+import json
 
 class JobManager(ParamManager):
     """
@@ -10,174 +13,171 @@ class JobManager(ParamManager):
     """
     def __init__(self, settings, session):
         ParamManager.__init__(self, settings, session)
-        self.log = logging.getLogger(__name__)
-        self.databasename = "jobs.db"
-        self.pathdb = self.get_database_user_directory()+"/"+self.databasename
 
-        self.log.info(" ==> "+ self.pathdb +"<==");
+    def save_integration_job(self, filename):
 
-        conn = sqlite3.connect("file:"+self.pathdb,uri=True)
-        c = conn.cursor()
-        reqSql = '''CREATE TABLE IF NOT EXISTS jobs
-             (
-             jobID INTEGER PRIMARY KEY AUTOINCREMENT,
-             type text,
-             state text,
-             start int,
-             end int ,
-             data text,
-             file text,
-             preview string,
-             requestGraph string,
-             variates string,
-             nr int
-             )'''
+        database = DatabaseConnector(self.settings, self.session)
 
-        c.execute(reqSql)
-        conn.commit()
-        conn.close()
+        # get userid
+        security = Security(self.settings, self.session, self.session['username'], '', '', '')
+        userid = security.get_user_id_by_username()
 
-    def saveStartSparqlJob(self,typeJob,requestGraph="{}",variates="{}"):
+        query = '''
+        INSERT INTO integration VALUES(
+            NULL,
+            ?,
+            ?,
+            "wait",
+            strftime('%s', 'now'),
+            NULL,
+            NULL
+        )
+        '''
 
-        conn = sqlite3.connect(self.pathdb,uri=True)
-        c = conn.cursor()
+        return database.execute_sql_query(query, (userid, filename), get_id=True)
 
-        requestGraph = urllib.parse.quote(requestGraph)
-        variates = ParamManager.encode(str(variates))
+    def save_query_job(self, request_graph, variates):
 
-        reqSql = "INSERT INTO jobs VALUES ("\
-                + "NULL,"     \
-                +"'"+typeJob+"'," \
-                + "'Wait',"     \
-                + "strftime('%s','now'),"\
-                + "0,"\
-                + "NULL,"\
-                + "''," \
-                + "''," \
-                + "'"+requestGraph+"'," \
-                + "'"+variates+"'," \
-                + "-1" \
-                + ");"
+        database = DatabaseConnector(self.settings, self.session)
 
-        c.execute(reqSql)
-        ID = c.lastrowid
+        # get userid
+        security = Security(self.settings, self.session, self.session['username'], '', '', '')
+        userid = security.get_user_id_by_username()
 
-        conn.commit()
-        conn.close()
-        return ID
+        # Format strings
+        request_graph = urllib.parse.quote(request_graph)
+        variates = self.encode(str(variates))
 
-    def updateEndSparqlJob(self,jobid,state,nr=-1, data=None, file=None):
-        import json
+        query = '''
+        INSERT INTO query VALUES(
+            NULL,
+            ?,
+            "wait",
+            strftime('%s', 'now'),
+            NULL,
+            NULL,
+            NULL,
+            NULL,
+            ?,
+            ?,
+            NULL,
+            NULL
+        )
+        '''
 
-        conn = sqlite3.connect(self.pathdb,uri=True)
-        c = conn.cursor()
-
-        d = 'NULL'
-
-        if data:
-            d = "'"+ParamManager.encode(json.dumps(data, ensure_ascii=False))+"'"
-
-        f = 'NULL'
-        if file:
-            f = "'"+file+"'"
-
-        reqSql = "UPDATE jobs SET "\
-                + " state = '"+ state +"'," \
-                + " end = strftime('%s','now'),"\
-                + " nr = "+str(nr)+","\
-                + " data = "+ d +"," \
-                + " file = "+ f \
-                + " WHERE jobID = "+str(jobid)
-
-        c.execute(reqSql)
-        conn.commit()
-        conn.close()
-
-    def updatePreviewJob(self,jobid,preview):
-
-        if type(preview) != str:
-            raise ValueError("updatePreviewJob : wrong type for the preview :"+str(type(preview)))
-
-        conn = sqlite3.connect(self.pathdb,uri=True)
-        c = conn.cursor()
-        preview = preview.replace("'","&#39;")
-
-        reqSql = "UPDATE jobs SET "\
-                + "preview = '" + preview +"'"\
-                + " WHERE jobID = "+str(jobid)
+        return database.execute_sql_query(query, (userid, request_graph, variates), get_id=True)
 
 
-        c.execute(reqSql)
-        conn.commit()
-        conn.close()
+    def done_integration_job(self, jobid):
+
+        database = DatabaseConnector(self.settings, self.session)
+        query = '''
+        UPDATE integration SET
+        state="done",
+        end=strftime('%s', 'now')
+        WHERE id=?
+        '''
+
+        database.execute_sql_query(query, (jobid, ))
+
+    def done_query_job(self, jobid, nrows, data, file):
+
+        database = DatabaseConnector(self.settings, self.session)
+        query = '''
+        UPDATE query SET
+        state="done",
+        end=strftime('%s', 'now'),
+        nrows=?,
+        data=?,
+        file=?
+        WHERE id=?
+        '''
+
+        database.execute_sql_query(query, (nrows, self.encode(json.dumps(data, ensure_ascii=False)), file, jobid))
+
+    def set_error_message(self, table, message, jobid):
+
+        database = DatabaseConnector(self.settings, self.session)
+        query = '''
+        UPDATE {0} SET
+        error=?,
+        state=?
+        WHERE id=?
+        '''.format(table)
+
+        print(query)
+
+        database.execute_sql_query(query, (message, 'error', jobid))
 
 
-    def listJobs(self):
-        import json
+    def list_integration_jobs(self):
 
-        data = []
-        try:
-            conn = sqlite3.connect(self.pathdb,uri=True)
-            conn.row_factory = sqlite3.Row
+        # get userid
+        security = Security(self.settings, self.session, self.session['username'], '', '', '')
+        userid = security.get_user_id_by_username()
 
-            c = conn.cursor()
+        database = DatabaseConnector(self.settings, self.session)
+        query = '''
+        SELECT id, filename, state, start, end, error
+        FROM integration
+        WHERE user_id=?
+        '''
 
-            reqSql = """ SELECT jobid, type, state, start, end, data, file, preview, requestGraph, variates, nr FROM jobs"""
+        res = database.execute_sql_query(query, (userid, ))
+        result = []
+        for job in res:
+            dict_job = {}
+            dict_job['id'] = job[0]
+            dict_job['filename'] = job[1]
+            dict_job['state'] = job[2]
+            dict_job['start'] = job[3]
+            dict_job['end'] = job[4]
+            dict_job['error'] = job[5]
+            result.append(dict_job)
 
-            c.execute(reqSql)
-            rows = c.fetchall()
+        return result
 
-            for row in rows:
-                d = {}
-                d['jobid'] = row['jobid']
-                d['type'] = row['type']
-                d['state'] = row['state']
-                d['start'] = row['start']
-                d['end'] = row['end']
-                if row['data'] != None :
-                    d['data'] = json.loads(ParamManager.decode(row['data']))
-                if row['file'] != None :
-                    d['file'] = row['file']
-                d['preview'] = row['preview']
-                d['requestGraph'] = urllib.parse.unquote(row['requestGraph'])
-                d['variates'] = eval(ParamManager.decode(row['variates']))
-                d['nr'] = row['nr']
-
-                data.append(d)
-
-        except sqlite3.OperationalError as e :
-            self.log.info("Jobs database does not exist .")
+    def list_query_jobs(self):
 
 
-        c.execute(reqSql)
-        conn.commit()
-        conn.close()
-        return data
+        # get userid
+        security = Security(self.settings, self.session, self.session['username'], '', '', '')
+        userid = security.get_user_id_by_username()
 
-    def removeJob(self,jobid):
-        conn = sqlite3.connect(self.pathdb,uri=True)
-        c = conn.cursor()
+        database = DatabaseConnector(self.settings, self.session)
+        query = '''
+        SELECT id, state, start, end, data, file, preview, graph, variates, nrows, error
+        FROM query
+        WHERE user_id=?
+        '''
 
-        reqSql = "DELETE FROM jobs WHERE jobid = "+ str(jobid)
+        res = database.execute_sql_query(query, (userid, ))
+        result = []
+        for job in res:
+            dict_job = {}
+            dict_job['id'] = job[0]
+            dict_job['state'] = job[1]
+            dict_job['start'] = job[2]
+            dict_job['end'] = job[3]
+            dict_job['data'] = ''
+            if job[4]:
+                dict_job['data'] = json.loads(self.decode(job[4]))
+            dict_job['file'] = job[5]
+            dict_job['preview'] = job[6]
+            dict_job['graph'] = urllib.parse.unquote(job[7])
+            dict_job['variates'] = eval(self.decode(job[8]))
+            dict_job['nrows'] = job[9]
+            dict_job['error'] = job[10]
+            result.append(dict_job)
 
-        try:
-            c.execute(reqSql)
-            conn.commit()
-        except sqlite3.OperationalError as e :
-            self.log.info("Jobs database does not exist .")
+        return result
 
-        conn.close()
+    def remove_job(self, table, jobid):
 
-    def drop(self):
-        conn = sqlite3.connect(self.pathdb,uri=True)
-        c = conn.cursor()
+        database = DatabaseConnector(self.settings, self.session)
+        query = '''
+        DELETE FROM {0}
+        WHERE id=?
+        '''.format(table)
 
-        reqSql = "DROP table jobs;"
-
-        try:
-            c.execute(reqSql)
-            conn.commit()
-        except sqlite3.OperationalError as e :
-            self.log.info("Jobs database does not exist .")
-
-        conn.close()
+        database.execute_sql_query(query, (jobid, ))

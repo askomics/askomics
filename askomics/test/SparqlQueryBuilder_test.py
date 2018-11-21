@@ -11,7 +11,7 @@
 # class SparqlQueryBuilderTests(unittest.TestCase):
 #     def setUp(self):
 #         self.config = testing.setUp()
-#         self.settings = get_appsettings('configs/development.ini', name='main')
+#         self.settings = get_appsettings('configs/tests.ini', name='main')
 #         self.request = testing.DummyRequest()
 #         self.request.session['username'] = 'jdoe'
 #         self.request.session['group']    = 'base'
