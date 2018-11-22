@@ -55,10 +55,11 @@ class ParamManager(object):
     def get_directory(self, name):
         """Get a named directory of a user, create it if not exist"""
 
-        if 'username' not in self.session:
-            mdir = self.user_dir + '_guest/' + name + '/'
-        else:
-            mdir = self.user_dir + self.session['username'] + '/' + name + '/'
+        mdir = self.user_dir + '_guest/' + name + '/'
+        if 'username' in self.session:
+            if self.session['username'] != '':
+                mdir = self.user_dir + self.session['username'] + '/' + name + '/'
+
         if not os.path.isdir(mdir):
             os.makedirs(mdir)
 
