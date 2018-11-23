@@ -1235,8 +1235,7 @@ class IHMLocal {
         let email = $('#signup_email').val();
         let password = $('#signup_password').val();
         let password2 = $('#signup_password2').val();
-        let user = new AskomicsUser();
-        user.signup(username, email, password, password2, function(user){
+        __ihm.user.signup(username, email, password, password2, function(user){
           // Error
           if (user.error) {
             $('#signup_error').empty();
@@ -1269,9 +1268,7 @@ class IHMLocal {
       $('#login_button').off().on('click', function(e){
         let username_email = $('#login_username-email').val();
         let password = $('#login_password').val();
-        let user = new AskomicsUser();
-
-        user.login(username_email, password, function(user){
+        __ihm.user.login(username_email, password, function(user){
           if(user.error) {
             $('#login_error').empty();
             for (let i = user.error.length - 1; i >= 0; i--) {
@@ -1281,7 +1278,7 @@ class IHMLocal {
             return;
           }
           AskomicsUser.cleanHtmlLogin();
-          __ihm.displayNavbar(true, user.username, user.admin, user.blocked);
+          __ihm.displayNavbar(true, __ihm.user.username, __ihm.user.admin, __ihm.user.blocked);
           // Show interrogation
           $('.nav li.active').removeClass('active');
           $('#interrogation').addClass('active');
