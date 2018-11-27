@@ -1,16 +1,18 @@
-var gulp = require('gulp');
-var util = require('gulp-util');
-var jshint = require('gulp-jshint');
-var concat = require('gulp-concat');
-var babel = require('gulp-babel');
-var uglify = require('gulp-uglify');
-var uglifycss = require('gulp-uglifycss');
-var handlebars = require('gulp-handlebars');
-var wrap = require('gulp-wrap');
-var declare = require('gulp-declare');
-var pump = require('pump');
+const { task, watch, series, parallel, src, dest } = require('gulp');
+const pump = require('pump');
+const jshint = require('gulp-jshint');
+const args = require('minimist')(process.argv.slice(2));
+const concat = require('gulp-concat');
+const noop = require("gulp-noop");
+const terser = require('gulp-terser');
+const handlebars = require('gulp-handlebars');
+const wrap = require('gulp-wrap');
+const declare = require('gulp-declare');
+const uglifycss = require('gulp-uglifycss');
+const del = require('del');
+const babel = require('gulp-babel');
 
-var askomicsSourceFiles = [
+let javascripts_files = [
         'askomics/static/src/js/help/AskomicsHelp.js',
         'askomics/static/src/js/services/AskomicsRestManagement.js',
         'askomics/static/src/js/core/AskomicsUserAbstraction.js',
@@ -20,7 +22,6 @@ var askomicsSourceFiles = [
         'askomics/static/src/js/view/AskomicsPanelViewBuilder.js',
         'askomics/static/src/js/view/integration.js',
         'askomics/static/src/js/view/AskomicsResultsView.js',
-        'askomics/static/src/js/query-handler.js',
         'askomics/static/src/js/objects/GraphObject.js',
         'askomics/static/src/js/objects/node/GraphNode.js',
         'askomics/static/src/js/objects/node/AskomicsNode.js',
@@ -45,167 +46,55 @@ var askomicsSourceFiles = [
         'askomics/static/src/js/core/IHMLocal.js'
     ];
 
-var askomicsCssFiles = ['askomics/static/src/css/*.css'];
+let css_files = ['askomics/static/src/css/*.css'];
+let templates_files = ['askomics/static/src/templates/handlebars/*.hbs'];
+let build_dir = 'askomics/static/dist/'
 
-var askomicsTemplateFiles = ['askomics/static/src/templates/handlebars/*.hbs'];
+function clean(cb) {
+  del(build_dir + '*');
+  cb();
+}
 
-var prod = !!util.env.prod;
-var reload = !!util.env.reload;
-
-prod ? console.log('---> Production') : console.log('---> Development');
-reload ? console.log('---> Reload') : util.noop();
-
-// Default task : run build task, if `gulp --reload`, watch AskOmics file and run build when a file is modified
-gulp.task('default', ['javascript', 'css', 'templates'], function () {
-  reload ?gulp.watch(askomicsSourceFiles, ['javascript']) : util.noop() ;
-  reload ?gulp.watch(askomicsCssFiles, ['css']) : util.noop() ;
-  reload ?gulp.watch(askomicsTemplateFiles, ['templates']) : util.noop() ;
-});
-
-// Concat all js files, uglyfy if --prod
-gulp.task('javascript', function(cb) {
+function css(cb) {
     pump([
-        gulp.src(askomicsSourceFiles),
+        src(css_files),
+        concat('askomics.css'),
+        args['prod'] ? uglifycss() : noop(),
+        dest(build_dir)
+    ], cb)
+}
+
+function javascript(cb) {
+    pump([
+        src(javascripts_files),
         jshint(),
         jshint.reporter('default'),
-        babel({presets: ['es2015']}),
+        babel({presets: ['@babel/env']}),
         concat('askomics.js'),
-        prod ? uglify() : util.noop(),
-        gulp.dest('askomics/static/dist/')
+        args['prod'] ? terser() : noop(),
+        dest(build_dir)
     ], cb);
-});
+}
 
-// Concat all css files, uglyfy if --prod
-gulp.task('css', function(cb) {
+function template(cb){
     pump([
-        gulp.src(askomicsCssFiles),
-        concat('askomics.css'),
-        prod ? uglifycss() : util.noop(),
-        gulp.dest('askomics/static/dist/')
-    ], cb);
-});
-
-// Concat all handlebars files, uglyfy if --prod
-gulp.task('templates', function(cb) {
-    pump([
-        gulp.src(askomicsTemplateFiles),
-        handlebars({
-            handlebars: require('handlebars')
-        }),
+        src(templates_files),
+        handlebars({handlebars: require('handlebars')}),
         wrap('Handlebars.template(<%= contents %>)'),
         declare({
             namespace: 'AskOmics.templates',
             noRedeclare: true
         }),
         concat('templates.js'),
-        prod ? uglify() : util.noop(),
-        gulp.dest('askomics/static/dist/')
-    ], cb)
-});
+        args['prod'] ? terser() : noop(),
+        dest(build_dir)
+    ], cb);
+}
 
+if (args['reload']) {
+    watch(javascripts_files, javascript);
+    watch(css_files, css);
+    watch(templates_files, template);
+}
 
-
-var coverageFile = './.coverage-js/coverage.json';
-var mochaPhantomOpts = {
-  reporter: 'spec',
-  dump:'output_test.log',
-  //https://github.com/ariya/phantomjs/wiki/API-Reference-WebPage#webpage-settings
-  phantomjs: {
-    useColors: true,
-    hooks: 'mocha-phantomjs-istanbul',
-    coverageFile: coverageFile,
-    settings: {
-      //userName,password
-      webSecurityEnabled : false
-    },
-    browserConsoleLogOptions: true
-  },
-  suppressStdout: false,
-  suppressStderr: false,
-  globals: ['script*', 'jQuery*']
-};
-
-//https://github.com/willembult/gulp-istanbul-report
-gulp.task('pre-test', function () {
-  var istanbul = require('gulp-istanbul');
-  return gulp.src(askomicsSourceFiles, {base: "askomics/static/js"})
-  //  .pipe(sourcemaps.init())
-    .pipe(babel({presets: ['es2015']}))
-    // Covering files
-    .pipe(istanbul({coverageVariable: '__coverage__'}))
-  //  .pipe(sourcemaps.write('.'))
-    // Write the covered files to a temporary directory
-    .pipe(gulp.dest('askomics/test/client/js/istanbul/'));
-});
-
-// Askomics test files
-var askomicsTestSourceFiles = ['askomics/test/client/js/*.js'];
-gulp.task('pre-test-srctest', function () {
-  return gulp.src(askomicsTestSourceFiles)
-    .pipe(babel({presets: ['es2015']}))
-    // Write the covered files to a temporary directory
-    .pipe(gulp.dest('askomics/test/client/js/istanbul/test'));
-});
-
-// writing dependancies about node_modules test framework
-var testFrameworkFiles=[
-  'node_modules/mocha/mocha.js',
-  'node_modules/mocha/mocha.css',
-  'node_modules/should/should.js',
-  'node_modules/chai/chai.js',
-  'node_modules/jquery/dist/jquery.js',
-  'node_modules/intro.js/intro.js',
-  'askomics/static/js/third-party/jquery.dataTables.min.js',
-  'askomics/static/js/third-party/jQuery-contextMenu-2.30/jquery.contextMenu.min.js',
-  'askomics/static/js/third-party/jQuery-contextMenu-2.30/jquery.ui.position.min.js',
-];
-// New Askomics files instrumented for coverage
-var askomicsInstrumentedSourceFiles = askomicsSourceFiles.slice();
-askomicsInstrumentedSourceFiles.forEach(function(element, index) {
-  askomicsInstrumentedSourceFiles[index] = askomicsInstrumentedSourceFiles[index].replace('askomics/static/js','askomics/test/client/js/istanbul');
-});
-
-
-
-gulp.task('test', ['default','pre-test','pre-test-srctest'],function () {
-    var inject = require('gulp-inject');
-    var mochaPhantomJS = require('gulp-mocha-phantomjs');
-    var istanbulReport = require('gulp-istanbul-report');
-    return gulp
-    .src('askomics/test/client/index_tpl.html')
-    .pipe(inject(gulp.src(testFrameworkFiles, {read: false}) , {relative: true, name: 'testFramework'}))
-    .pipe(inject(gulp.src(askomicsInstrumentedSourceFiles, {read: false}), {relative: true, name: 'askomics'}))
-    .pipe(inject(gulp.src(['askomics/test/client/js/istanbul/test/*.js'], {read: false}) , {relative: true, name: 'askomicsTestFiles'}))
-    //.pipe(rename('index.html'))
-    .pipe(gulp.dest('askomics/test/client/'))
-    .pipe(mochaPhantomJS(mochaPhantomOpts))
-    .on('finish', function() {
-      gulp.src(coverageFile)
-        .pipe(istanbulReport({
-          reporterOpts: {
-            dir: './coverage'
-          },
-          includeAllSources: true,
-          includeUntested : true,
-          reporters: [
-            'text',
-            'text-summary',
-            {'name': 'lcovonly', file: 'frontend.lcov'},
-            {'name': 'lcovonly', file: 'lcov.info'}, // atom plugin lcov-info
-            {'name': 'json', file: 'frontend.json'} // -> ./jsonCov/cov.json
-          ]
-        }));
-    });
-});
-/*
-gulp.task('remap-istanbul', function () {
-    return gulp.src('coverage/frontend.json')
-        .pipe(remapIstanbul({
-            fail: true,
-            reports: {
-                'json': 'coverage.json',
-                'html': 'html-report'
-            }
-        }));
-});
-*/
+exports.default = series(clean, parallel(css, javascript, template));
