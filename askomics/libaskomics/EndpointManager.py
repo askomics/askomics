@@ -23,7 +23,7 @@ class EndpointManager(ParamManager):
             NULL
         )
         '''
-        return database.execute_sql_query(query, (name, url, auth, isenable), get_id=True)
+        return database.execute_sql_query(query, (name, url, auth.upper(), isenable), get_id=True)
 
     def enable(self, id):
 
