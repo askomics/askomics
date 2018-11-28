@@ -52,13 +52,17 @@ class ParamManager(object):
             'date': lambda str,str2: json.dumps(str)
             }
 
-    def get_directory(self, name):
+    def get_directory(self, name, force_username=None):
         """Get a named directory of a user, create it if not exist"""
 
-        mdir = self.user_dir + '_guest/' + name + '/'
-        if 'username' in self.session:
-            if self.session['username'] != '':
-                mdir = self.user_dir + self.session['username'] + '/' + name + '/'
+        if force_username:
+            username = force_username
+        elif 'username' in self.session:
+            username = self.session['username']
+        else:
+            username = '_guest'
+
+        mdir = self.user_dir + username + '/' + name + '/'
 
         if not os.path.isdir(mdir):
             os.makedirs(mdir)
