@@ -61,6 +61,7 @@ class IHMLocal {
       //TODO: Manage all view in a array with a generic way
       this.shortcutsView           = new  ShortcutsParametersView()           ;
       this.serverInfosView         = new  ServerInformationsView()            ;
+      this.jobsview = new AskomicsJobsViewManager();
 
       this.menus = {} ;
       this.menus.menuFile = new AskomicsMenu("menuFile","buttonViewFile","viewMenuFile",fileFuncMenu,false);
@@ -819,9 +820,9 @@ class IHMLocal {
         public: p
       };
 
-      service.post(model, function(data) {
-        new AskomicsJobsViewManager().loadjob().then(function () {
-          new AskomicsJobsViewManager().update_jobview ();
+      service.post(model, (data) => {
+        this.jobsview.loadjob().then( () => {
+          this.jobsview.update_jobview ();
         });
       });
 
@@ -1311,9 +1312,9 @@ class IHMLocal {
       });
 
       // reload jobs when the button is clicked
-      $("#jobsview").one('click', function(e) {
-        new AskomicsJobsViewManager().loadjob().then(function() {
-          new AskomicsJobsViewManager().update_jobview("integration");
+      $("#jobsview").one('click', (e) => {
+        this.jobsview.loadjob().then(() => {
+          this.jobsview.update_jobview("integration");
         });
       });
     }

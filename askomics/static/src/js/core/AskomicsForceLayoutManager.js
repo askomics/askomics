@@ -184,7 +184,7 @@ class AskomicsForceLayoutManager {
 
           // If enter is pressed, launch the query
           if (e.keyCode == 13 && $('#queryBuilder').is(':visible') && !this.enterPressed) {
-            new AskomicsJobsViewManager().createJob();
+            __ihm.jobsview.createJob();
             currentFL.enterPressed = true;
           }
         });

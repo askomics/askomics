@@ -38,7 +38,7 @@
                 {{/if}}
                 <td>
                   <div class="btn-group" role="group">
-                    <button onclick="this.parentNode.parentNode.parentNode.style.display = 'none';new AskomicsJobsViewManager().remove_job({{this.id}}, {{@index}}, 'integration');event.stopPropagation();" type="button" class="btn btn-default btn-xs"><i class="fa fa-times text-danger"></i> Del</button>
+                    <button onclick="this.parentNode.parentNode.parentNode.style.display = 'none';__ihm.jobsview.remove_job({{this.id}}, {{@index}}, 'integration');event.stopPropagation();" type="button" class="btn btn-default btn-xs"><i class="fa fa-times text-danger"></i> Del</button>
                   </div>
                 </td>
                </tr>
@@ -86,7 +86,7 @@
                 {{/if}}
                 <td>
                   <div class="btn-group" role="group">
-                    <button onclick="this.parentNode.parentNode.parentNode.style.display = 'none';new AskomicsJobsViewManager().remove_job({{this.id}}, {{@index}}, 'query');event.stopPropagation();" type="button" class="btn btn-default btn-xs"><i class="fa fa-times text-danger"></i> Del</button>
+                    <button onclick="this.parentNode.parentNode.parentNode.style.display = 'none';__ihm.jobsview.remove_job({{this.id}}, {{@index}}, 'query');event.stopPropagation();" type="button" class="btn btn-default btn-xs"><i class="fa fa-times text-danger"></i> Del</button>
                     <button onclick="let st = atob('{{this.stateToReload}}') ; __ihm.stopSession();__ihm.startSession(st);$('#interrogation').trigger( 'click' );" type="button" class="btn btn-default btn-xs"><i class="fa fa-repeat text-warning"></i> Redo</button>
                     <button onclick="location.href='csv/{{this.csv}}';event.stopPropagation();" type="button" class="btn btn-default btn-xs"><i class="fa fa-floppy-o text-primary"></i> Save</button>
                       {{#if ../galaxy}}
