@@ -3,7 +3,6 @@ import random
 # from pprint import pformat
 # from string import Template
 
-# from askomics.libaskomics.rdfdb.SparqlQuery import SparqlQuery
 # from askomics.libaskomics.ParamManager import ParamManager
 from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
 

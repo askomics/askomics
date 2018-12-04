@@ -46,8 +46,8 @@ class TripleStoreExplorer(ParamManager):
         em = EndpointManager(self.settings, self.session)
 
         lEndp = em.list_active_endpoints()
-        results = ql.process_query(sqg.get_public_start_point().query,lEndp,indexByEndpoint=True)
-        r2 = ql.process_query(sqg.get_user_start_point().query,lEndp,indexByEndpoint=True)
+        results = ql.process_query(sqg.get_public_start_point(),lEndp,indexByEndpoint=True)
+        r2 = ql.process_query(sqg.get_user_start_point(),lEndp,indexByEndpoint=True)
 
         for key, value in r2.items():
             if key in results:
@@ -87,16 +87,16 @@ class TripleStoreExplorer(ParamManager):
         em = EndpointManager(self.settings, self.session)
         lEndp = em.list_active_endpoints()
 
-        data['relations'] = ql.process_query(sqg.get_public_abstraction_relation('owl:ObjectProperty').query,lEndp)
-        data['relations'] += ql.process_query(sqg.get_user_abstraction_relation('owl:ObjectProperty').query,lEndp)
-        data['subclassof'] = ql.process_query(sqg.get_isa_relation_entities().query,lEndp)
-        data['entities'] = ql.process_query(sqg.get_public_abstraction_entity().query,lEndp)
-        data['entities'] += ql.process_query(sqg.get_user_abstraction_entity().query,lEndp)
-        data['attributes'] = ql.process_query(sqg.get_public_abstraction_attribute_entity().query,lEndp)
-        data['attributes'] += ql.process_query(sqg.get_user_abstraction_attribute_entity().query,lEndp)
-        data['categories'] = ql.process_query(sqg.get_public_abstraction_category_entity().query,lEndp)
-        data['categories'] += ql.process_query(sqg.get_user_abstraction_category_entity().query,lEndp)
-        data['positionable'] = ql.process_query(sqg.get_abstraction_positionable_entity().query,lEndp)
+        data['relations'] = ql.process_query(sqg.get_public_abstraction_relation('owl:ObjectProperty'),lEndp)
+        data['relations'] += ql.process_query(sqg.get_user_abstraction_relation('owl:ObjectProperty'),lEndp)
+        data['subclassof'] = ql.process_query(sqg.get_isa_relation_entities(),lEndp)
+        data['entities'] = ql.process_query(sqg.get_public_abstraction_entity(),lEndp)
+        data['entities'] += ql.process_query(sqg.get_user_abstraction_entity(),lEndp)
+        data['attributes'] = ql.process_query(sqg.get_public_abstraction_attribute_entity(),lEndp)
+        data['attributes'] += ql.process_query(sqg.get_user_abstraction_attribute_entity(),lEndp)
+        data['categories'] = ql.process_query(sqg.get_public_abstraction_category_entity(),lEndp)
+        data['categories'] += ql.process_query(sqg.get_user_abstraction_category_entity(),lEndp)
+        data['positionable'] = ql.process_query(sqg.get_abstraction_positionable_entity(),lEndp)
         data['endpoints'] = sqg.getGraphUser()
         data['endpoints_ext'] = sqg.getExternalServiceEndpoint()
 
@@ -196,18 +196,18 @@ class TripleStoreExplorer(ParamManager):
 
 
                 query_launcher = FederationQueryLauncher(self.settings, self.session,lE)
-            req = sqb.custom_query(fromgraphs, select, query,externalrequest=extreq).query
+            req = sqb.custom_query(fromgraphs, select, query,externalrequest=extreq)
             results = query_launcher.process_query(req)
         else:
             results = []
 
-        return results, sqb.custom_query(fromgraphs, select, query).query,typeQuery
+        return results, sqb.custom_query(fromgraphs, select, query),typeQuery
 
     def get_prefix_uri(self):
         sqg = SparqlQueryGraph(self.settings, self.session)
         ql = MultipleQueryLauncher(self.settings, self.session)
         em = EndpointManager(self.settings, self.session)
-        rs = ql.process_query(sqg.get_prefix_uri().query,em.list_active_endpoints())
+        rs = ql.process_query(sqg.get_prefix_uri(),em.list_active_endpoints())
         results = {}
         r_buf = {}
 
