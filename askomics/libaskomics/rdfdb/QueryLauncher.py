@@ -430,20 +430,3 @@ class QueryLauncher(QueryLauncher_):
 
         return res
 # QueryLauncher
-
-# ----------------------------------------
-
-if __name__ == '__main__':
-    #for debug purpose
-    #~ ep = 'https://sparql.uniprot.org/sparql'
-    ep = 'http://example.com'
-    o_ = QueryLauncher( {}, {}, endpoint=ep )
-
-    # logging does not work.
-    #~ fh = logging.FileHandler('debug.log')
-    #~ fh.setLevel(logging.DEBUG)
-    #~ o_.log.addHandler(fh)
-
-    #~ o_.log.info( "info EP : " + o_.endpoint )
-
-    print( o_.debug() )

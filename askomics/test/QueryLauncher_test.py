@@ -88,9 +88,3 @@ class QueryLauncherTests( unittest.TestCase ):
         ep_uri = 'http://aqw.com/'
         o_ql = QueryLauncher_( {},{}, endpoint=ep_uri )
         self.assertRaises( NotEndpoint, o_ql.test_endpoint )
-
-#QueryLauncherTests
-
-# ================================================
-if __name__ == '__main__':
-    unittest.main()
