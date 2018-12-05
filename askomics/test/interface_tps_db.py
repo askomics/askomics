@@ -39,10 +39,10 @@ class InterfaceTpsDb(object):
         public_graphs = self.list_public_graphs()
 
         for graph in private_graphs:
-            query_laucher.process_query(sqb.get_delete_query_string(graph).query)
+            query_laucher.process_query(sqb.get_delete_query_string(graph))
 
         for graph in public_graphs:
-            query_laucher.process_query(sqb.get_delete_query_string(graph).query)
+            query_laucher.process_query(sqb.get_delete_query_string(graph))
 
     def list_private_graphs(self):
         """List the private graphs
@@ -54,7 +54,7 @@ class InterfaceTpsDb(object):
         sqb = SparqlQueryGraph(self.settings, self.request.session)
         query_laucher = QueryLauncher(self.settings, self.request.session)
 
-        res = query_laucher.process_query(sqb.get_user_graph_infos_with_count().query)
+        res = query_laucher.process_query(sqb.get_user_graph_infos_with_count())
 
         named_graphs = []
 
@@ -73,7 +73,7 @@ class InterfaceTpsDb(object):
         sqb = SparqlQueryGraph(self.settings, self.request.session)
         query_laucher = QueryLauncher(self.settings, self.request.session)
 
-        res = query_laucher.process_query(sqb.get_public_graphs().query)
+        res = query_laucher.process_query(sqb.get_public_graphs())
 
         named_graphs = []
         print(res)
@@ -225,7 +225,7 @@ class InterfaceTpsDb(object):
         sqb = SparqlQueryGraph(self.settings, self.request.session)
         query_laucher = QueryLauncher(self.settings, self.request.session)
 
-        query_laucher.process_query(sqb.get_drop_named_graph('urn:sparql:test_askomics:users').query)
+        query_laucher.process_query(sqb.get_drop_named_graph('urn:sparql:test_askomics:users'))
 
     def delete_askograph(self):
         """Delete the askomics graph"""
@@ -233,7 +233,7 @@ class InterfaceTpsDb(object):
         sqb = SparqlQueryGraph(self.settings, self.request.session)
         query_laucher = QueryLauncher(self.settings, self.request.session)
 
-        query_laucher.process_query(sqb.get_drop_named_graph('urn:sparql:test_askomics').query)
+        query_laucher.process_query(sqb.get_drop_named_graph('urn:sparql:test_askomics'))
 
 
     def add_jdoe_in_users(self):
@@ -361,7 +361,7 @@ class InterfaceTpsDb(object):
             }
             """)
 
-        res = query_laucher.process_query(query.query)
+        res = query_laucher.process_query(query)
 
         print(bool(int(res[0]['count'])))
 

@@ -18,8 +18,9 @@
         <tr id="{{this.id}}">
             <td>
               {{#if ../admin}}
-                <input class="check_ep check_endpoint" name="{{this.id}}" type="checkbox"></td>
+                <input class="check_ep check_endpoint" name="{{this.id}}" type="checkbox">
               {{/if}}
+            </td>
             <td>{{this.name}}</td>
             <td>{{this.endpoint}}</td>
             <td>{{this.auth}}</td>
@@ -59,6 +60,7 @@
 <hr/>
 <h3 class="header-div">External Endpoints</h3>
 <hr/>
+<!-- <table id="data-table-endpoints-ext" class="table table-striped data-table datasets-table"> -->
 <table id="data-table-endpoints" class="table table-striped data-table datasets-table">
     <thead>
         <tr>
