@@ -20,16 +20,32 @@ class SPARQLError(RuntimeError):
         self.status_code = response.status_code
         super().__init__(response.text)
 
-class QueryLauncher(ParamManager):
+class EndpointError(RuntimeError):
+    def __init__(self, ep_uri, msg=''):
+        msg_ = "There was a pb with Endpoint {}.\n".format(ep_uri)
+        msg_ += self._message()
+        msg_ += msg
+        super().__init__(msg_)
+
+class NotEndpoint(EndpointError):
+    def _message(self):
+        msg = "The URI does not seem to point to a valid endpoint."
+        return msg
+
+# ========================================
+class QueryLauncher_(ParamManager):
     """
-    The QueryLauncher process sparql queries:
+    The QueryLauncher_ process sparql queries:
         - execute_query send the query to the sparql endpoint specified in params.
         - parse_results preformat the query results
         - format_results_csv write in the tabulated result file a table obtained
           from these preformated results using a ResultsBuilder instance.
+    It is a generalization of QueryLauncher, but that fit any endpoint
     """
-
-    def __init__(self, settings, session, name = None, endpoint = None ,username=None, password=None,urlupdate=None,auth='Basic'):
+    def __init__(self, settings, session,
+                 name = None, endpoint = None,
+                 username=None, password=None,
+                 urlupdate=None):
         ParamManager.__init__(self, settings, session)
         self.log = logging.getLogger(__name__)
 
@@ -38,11 +54,7 @@ class QueryLauncher(ParamManager):
         self.username = username
         self.password = password
         self.urlupdate = urlupdate
-        self.auth = auth
         self.allowUpdate = False
-
-        if self.auth != 'Basic' and self.auth != 'Digest':
-            raise ValueError("Invalid Auth parameter :"+self.auth)
 
     def setUserDatastore(self):
         """
@@ -64,9 +76,6 @@ class QueryLauncher(ParamManager):
 
         if self.is_defined("askomics.endpoint_passwd"):
             self.password = self.get_param("askomics.endpoint_passwd")
-
-        if self.is_defined("askomics.endpoint.auth"):
-            self.auth = self.get_param("askomics.endpoint.auth")
 
     def setup_opener(self, proxy_config):
         """
@@ -121,8 +130,6 @@ class QueryLauncher(ParamManager):
             raise ValueError("passwd is not defined")
         elif self.password:
             raise ValueError("username is not defined")
-
-        data_endpoint.setHTTPAuth(self.auth) # Basic or Digest
 
         return data_endpoint
 
@@ -234,7 +241,6 @@ class QueryLauncher(ParamManager):
                 self.log.debug("----------- RESULTS --------------\n%s", log_res)
         return parsed
 
-
     def process_query(self, query, parseResults=True):
         '''
             Execute query and parse the results if exist
@@ -250,8 +256,27 @@ class QueryLauncher(ParamManager):
         if parseResults:
             results = self.parse_results(json_query)
 
-
         return results
+
+    def test_endpoint(self):
+        """Test endpoint existance by sending a dummy query."""
+        D,P,R = 'domain','prop','range'
+        query = "SELECT * WHERE {{ ?{} ?{} ?{} }} LIMIT 1".format(D,P,R)
+        prefixes  = self.get_sparql_prefixes(query)
+
+        full_query = prefixes + "\n" + query + "\n"
+        self.log.debug( 'dummy query:\n' + full_query )
+
+        try:
+            # query should return one record, a dictionnary with the 3 keys
+            d_res = self.process_query( full_query )[0]
+            if D not in d_res.keys() \
+                    and P not in d_res.keys() \
+                    and R not in d_res.keys():
+                msg = "response : {}\n".format( str(d_res) )
+                raise EndpointError(self.endpoint, msg)
+        except IndexError as e:
+            raise NotEndpoint(self.endpoint)
 
     def format_results_csv(self, data):
         """write the csv result file from a data ist
@@ -284,6 +309,52 @@ class QueryLauncher(ParamManager):
                 writer.writerow(row)
 
         return filename
+
+
+    def debug( self ):
+        self.log.debug( self.endpoint )
+        return self.test_endpoint() or 'Fin.'
+# QueryLauncher_
+
+
+class QueryLauncher(QueryLauncher_):
+    """
+    Specialization of QueryLauncher_.
+    For now, insert/load query are kept here.
+        Public endpoint may not be writable.
+        This can change in future version.
+    """
+
+    def __init__(self, settings, session,
+                 name = None, endpoint = None,
+                username=None, password=None,
+                urlupdate=None,auth='Basic'):
+        super().__init__(settings, session,
+                         name, endpoint, username, password, urlupdate)
+        self.log = logging.getLogger(__name__)
+
+        self.auth = auth
+        if self.auth != 'Basic' and self.auth != 'Digest':
+            raise ValueError("Invalid Auth parameter :"+self.auth)
+
+    def setUserDatastore(self):
+        """
+            initialize endpoint with user configuration file
+        """
+        super().setUserDatastore()
+
+        if self.is_defined("askomics.endpoint.auth"):
+            self.auth = self.get_param("askomics.endpoint.auth")
+
+    def setupSPARQLWrapper(self):
+        """
+            Setup SPARQLWrapper to reach url endpoint
+        """
+        data_endpoint = super().setupSPARQLWrapper()
+        data_endpoint.setHTTPAuth(self.auth) # Basic or Digest
+
+        return data_endpoint
+
 
     # TODO see if we can make a rollback in case of malformed data
     def load_data(self, url, graphName):
@@ -332,7 +403,6 @@ class QueryLauncher(ParamManager):
 
         return response
 
-
     # TODO see if we can make a rollback in case of malformed data
     def insert_data(self, ttl_string, graph, ttl_header=""):
         """
@@ -359,3 +429,4 @@ class QueryLauncher(ParamManager):
         res = self._execute_query(query_string)
 
         return res
+# QueryLauncher
