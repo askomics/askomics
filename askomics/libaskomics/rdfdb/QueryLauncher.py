@@ -128,7 +128,7 @@ class QueryLauncher(ParamManager):
 
     def _execute_query(self, query, log_raw_results=True, externalService=None):
         """Params:
-            - libaskomics.rdfdb.SparqlQuery
+            - sparql query string
             - log_raw_results: if True the raw json response is logged. Set to False
             if you're doing a select and parsing the results with parse_results.
         """

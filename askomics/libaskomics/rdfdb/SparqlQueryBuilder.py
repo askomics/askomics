@@ -4,7 +4,6 @@ import logging
 # from pprint import pformat
 from string import Template
 
-from askomics.libaskomics.rdfdb.SparqlQuery import SparqlQuery
 from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
 from askomics.libaskomics.rdfdb.MultipleQueryLauncher import MultipleQueryLauncher
 from askomics.libaskomics.ParamManager import ParamManager
@@ -13,7 +12,7 @@ from askomics.libaskomics.EndpointManager import EndpointManager
 
 class SparqlQueryBuilder(ParamManager):
     """
-    SparqlQueryBuilder create a SparqlQuery instance containing the query
+    SparqlQueryBuilder generate a Sparql query string containing the query
     corresponding to an AskOmics graph (with load_from_query_json) or the
     pre-written query of a template file (with load_from_file).
     """
@@ -27,7 +26,7 @@ class SparqlQueryBuilder(ParamManager):
         settings = {}
         #finding all private graph graph
 
-        qu = self.build_query_on_the_fly({
+        query = self.build_query_on_the_fly({
             'select': '?g',
             'query': 'GRAPH ?g {\n'+\
             "?g dc:creator '" + self.session['username'] + "' .\n"+
@@ -37,7 +36,7 @@ class SparqlQueryBuilder(ParamManager):
         }, True)
 
         ql = QueryLauncher(self.settings, self.session)
-        results = ql.process_query(qu.query)
+        results = ql.process_query(query)
         endpoint = self.get_param("askomics.endpoint")
         settings[endpoint] = {}
         settings[endpoint]['private'] = []
@@ -51,7 +50,7 @@ class SparqlQueryBuilder(ParamManager):
             settings[endpoint]['private'].append(elt['g'])
 
         #finding all public graph on all Askomics endpoint
-        qu = self.build_query_on_the_fly({
+        query = self.build_query_on_the_fly({
             'select': '?g',
             'query': 'GRAPH ?g {\n'+
             "?g :accessLevel 'public'. \n"+
@@ -63,7 +62,7 @@ class SparqlQueryBuilder(ParamManager):
         ql = MultipleQueryLauncher(self.settings, self.session)
         em = EndpointManager(self.settings, self.session)
 
-        results = ql.process_query(qu.query,em.list_endpoints(),indexByEndpoint=True)
+        results = ql.process_query(query,em.list_endpoints(),indexByEndpoint=True)
 
         for endpoint in results:
             if endpoint not in settings:
@@ -78,7 +77,7 @@ class SparqlQueryBuilder(ParamManager):
 
 
         #finding all external graph on all remote endpoint
-        qu = self.build_query_on_the_fly({
+        query = self.build_query_on_the_fly({
             'select': '?g ?endpoint',
             'query': 'GRAPH ?g {\n'+
             " { { ?g :accessLevel 'public'. } \n"+
@@ -93,7 +92,7 @@ class SparqlQueryBuilder(ParamManager):
         ql = MultipleQueryLauncher(self.settings, self.session)
         em = EndpointManager(self.settings, self.session)
 
-        results = ql.process_query(qu.query,em.list_endpoints(),indexByEndpoint=True)
+        results = ql.process_query(query,em.list_endpoints(),indexByEndpoint=True)
 
         for endpoint in results:
             for elt in results[endpoint]:
@@ -113,7 +112,7 @@ class SparqlQueryBuilder(ParamManager):
         """
             Get all external endpoint finding in all askomics endpoint
         """
-        qu = self.build_query_on_the_fly({
+        query = self.build_query_on_the_fly({
             'select': '?name ?url ?description ?class',
             'query': ''+
             "?service a sd:Service .\n"+
@@ -130,7 +129,7 @@ class SparqlQueryBuilder(ParamManager):
         ql = MultipleQueryLauncher(self.settings, self.session)
         em = EndpointManager(self.settings, self.session)
 
-        results = ql.process_query(qu.query,em.list_endpoints())
+        results = ql.process_query(query,em.list_endpoints())
 
         settings = {}
         settings['endpoints'] = {}
@@ -198,7 +197,7 @@ class SparqlQueryBuilder(ParamManager):
             query += replacement['post_action'] + "\n"
 
         prefixes = self.header_sparql_config(query)
-        return SparqlQuery(prefixes + query)
+        return prefixes + query
 
 
     def custom_query(self, fromgraph, select, query,externalrequest=False,adminrequest=False):
@@ -306,4 +305,4 @@ class SparqlQueryBuilder(ParamManager):
         query = Template(template).substitute(replacement)
 
         prefixes = self.header_sparql_config(query)
-        return SparqlQuery(prefixes + query)
+        return prefixes + query
