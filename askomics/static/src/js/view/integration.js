@@ -560,9 +560,9 @@ function loadSourceFile(file_elem, pub, headers) {
                   'public': pub,
                   'uris': tags.uris};
 
-    service.post(model, function(data) {
-      new AskomicsJobsViewManager().loadjob().then(function () {
-        new AskomicsJobsViewManager().update_jobview ();
+    service.post(model, (data) => {
+      __ihm.jobsview.loadjob().then(function () {
+        __ihm.jobsview.update_jobview ();
       });
     });
 
@@ -613,9 +613,9 @@ function loadSourceFileGff(idfile, pub) {
                   'public': pub,
                   'uri': uri};
 
-  service.post(model, function(data) {
-    new AskomicsJobsViewManager().loadjob().then(function () {
-      new AskomicsJobsViewManager().update_jobview ();
+  service.post(model, (data) => {
+    __ihm.jobsview.loadjob().then(function () {
+      __ihm.jobsview.update_jobview ();
     });
   });
 }
@@ -630,9 +630,9 @@ function loadSourceFileTtl(idfile, pub) {
       'public': pub
   };
 
-  service.post(model, function(data) {
-    new AskomicsJobsViewManager().loadjob().then(function () {
-      new AskomicsJobsViewManager().update_jobview ();
+  service.post(model, (data) => {
+    __ihm.jobsview.loadjob().then(function () {
+      __ihm.jobsview.update_jobview ();
     });
   });
 }
@@ -662,9 +662,9 @@ function loadSourceFileBed(idfile, pub) {
                 'public': pub,
                 'uri': uri};
 
-  service.post(model, function(data) {
-    new AskomicsJobsViewManager().loadjob().then(function () {
-      new AskomicsJobsViewManager().update_jobview ();
+  service.post(model, (data) => {
+    __ihm.jobsview.loadjob().then(function () {
+      __ihm.jobsview.update_jobview ();
     });
   });
 }

@@ -1103,11 +1103,16 @@ class AskView(object):
 
     @view_config(route_name='ttl', request_method='GET')
     def uploadTtl(self):
-        pm = ParamManager(self.settings, self.request.session)
-        response = FileResponse(
-            pm.get_rdf_user_directory()+self.request.matchdict['name'],
-            content_type='text/turtle'
-            )
+        param_manager = ParamManager(self.settings, self.request.session)
+
+        splited = os.path.split(self.request.matchdict['name'])
+        username = splited[0]
+        filename = splited[1]
+        rdf_path = param_manager.get_directory('rdf', force_username=username)
+
+        path_url = rdf_path + filename
+
+        response = FileResponse(path_url, content_type='text/turtle')
         return response
 
     @view_config(route_name='csv', request_method='GET')

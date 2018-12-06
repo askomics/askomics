@@ -278,7 +278,7 @@ class SourceFile(ParamManager, HaveCachedProperties):
             urlbase = self.settings['askomics.load_url']
 
         url = urlbase+"/ttl/"+ self.session['username'] + '/' + os.path.basename(fp.name)
-        self.log.debug(url)
+
         data = {}
         data["status"] = "ok"
         try:

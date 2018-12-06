@@ -52,13 +52,11 @@ case $depmode in
         depmode="production"
         gulpmode="--prod"
         pserve_flags="-q"
-        python_flags="$python_flags"
     ;;
     dev|development)
         depmode="development"
         gulpmode="--reload"
         pserve_flags="--reload"
-        python_flags="$python_flags -bb -Wall"
     ;;
     *)
         echo "-d $depmode: wrong deployment mode"
@@ -119,7 +117,6 @@ do
 done
 
 # Build Javascript ----------------------------------------
-askojs="$dir_askomics/askomics/static/dist/askomics.js"
 
 # deploy JS if not run only option or if there is no js
 if [[ $run == false ]]; then
@@ -127,6 +124,7 @@ if [[ $run == false ]]; then
     if [[ $depmode == "development" ]]; then
         $gulp $gulpmode &
     else
+        echo "$gulp $gulpmode"
         $gulp $gulpmode
     fi
 fi
