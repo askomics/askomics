@@ -27,7 +27,7 @@ Here i show you the minimal information to provide as an abstraction.
             askomics:startPoint "true"^^xsd:boolean ;
 .
 ```
-### <entity> --relation--> value
+### \<entity> --relation--> value
 ```
 # attribute DatatypeProperty
 <First_name>
@@ -38,7 +38,7 @@ Here i show you the minimal information to provide as an abstraction.
             rdfs:range  xsd:string ;
 .
 ```
-### <entity> --relation--> category=short list
+### \<entity> --relation--> category=short list
 ```
 # attribute DatatypeProperty
 <Sex>
@@ -59,7 +59,7 @@ Here i show you the minimal information to provide as an abstraction.
 .
 
 ```
-### <entity> --relation--> <entity>
+### \<entity> --relation--> \<entity>
 ```
 # attribute ObjectProperty
 <PlayWith>
