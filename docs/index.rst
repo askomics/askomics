@@ -31,6 +31,7 @@ Some (possibly outdated) documentation is also on the `AskOmics Wiki <https://gi
    deployment
    usage
    devdoc
+   abstraction
    api/askomics
 
 

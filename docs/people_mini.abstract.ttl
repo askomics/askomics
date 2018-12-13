@@ -1,0 +1,49 @@
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+@prefix askomics: <askomics_is_good#> .
+@base <scrap#> .
+
+# entity (startpoint to have a start, can be avoid in standard entity)
+<People>    rdfs:label "People"^^xsd:string ;
+            askomics:entity     "true"^^xsd:boolean ;
+            askomics:startPoint "true"^^xsd:boolean ;
+.
+
+# attribute DatatypeProperty = <entity> --relation--> value
+<First_name>
+                askomics:attribute "true"^^xsd:boolean ;
+                rdf:type    owl:DatatypeProperty ;
+                rdfs:label  "First_name"^^xsd:string ;
+                rdfs:domain <People> ;
+                rdfs:range  xsd:string ;
+.
+
+# attribute DatatypeProperty = <entity> --relation--> category=short list
+<Sex>
+        askomics:attribute "true"^^xsd:boolean ;
+        rdf:type    owl:DatatypeProperty ;
+        rdfs:label  "Sex"^^xsd:string ;
+        rdfs:domain <People> ;
+        rdfs:range  <SexCategory> ;
+.
+
+<SexCategory>
+        askomics:category <M>, <F> ;
+.
+<M>
+    rdfs:label "M"^^xsd:string ;
+.
+<F>
+    rdfs:label "F"^^xsd:string ;
+.
+
+# attribute ObjectProperty = <entity> --relation--> <entity>
+<PlayWith>
+        askomics:attribute "true"^^xsd:boolean ;
+        rdf:type    owl:ObjectProperty ;
+        rdfs:label  "joue avec"^^xsd:string ;
+        rdfs:domain <People> ;
+        rdfs:range  <People> ;
+.
