@@ -12,9 +12,9 @@ Its prefix is "askomics:".
 Here i show you the minimal information to provide as an abstraction.
 ### prefixes
 ```
-@prefix xsd:<http://www.w3.org/2001/XMLSchema#>
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:      <http://www.w3.org/2001/XMLSchema#>
+@prefix owl:      <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:     <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix askomics: <askomics_is_good#> .
 @base <scrap#> .
 ```
@@ -32,10 +32,10 @@ Here i show you the minimal information to provide as an abstraction.
 # attribute DatatypeProperty
 <First_name>
             askomics:attribute "true"^^xsd:boolean ;
-            rdf:type owl:DatatypeProperty ;
-            rdfs:label "First_name"^^xsd:string ;
+            rdf:type    owl:DatatypeProperty ;
+            rdfs:label  "First_name"^^xsd:string ;
             rdfs:domain <People> ;
-            rdfs:range xsd:string ;
+            rdfs:range  xsd:string ;
 .
 ```
 ### <entity> --relation--> category=short list
@@ -43,10 +43,10 @@ Here i show you the minimal information to provide as an abstraction.
 # attribute DatatypeProperty
 <Sex>
         askomics:attribute "true"^^xsd:boolean ;
-        rdf:type owl:DatatypeProperty ;
-        rdfs:label "Sex"^^xsd:string ;
+        rdf:type    owl:DatatypeProperty ;
+        rdfs:label  "Sex"^^xsd:string ;
         rdfs:domain <People> ;
-        rdfs:range <SexCategory> ;
+        rdfs:range  <SexCategory> ;
 .
 <SexCategory>
         askomics:category <M>, <F> ;
@@ -64,10 +64,10 @@ Here i show you the minimal information to provide as an abstraction.
 # attribute ObjectProperty
 <PlayWith>
         askomics:attribute "true"^^xsd:boolean ;
-        rdf:type owl:ObjectProperty ;
-        rdfs:label "play with"^^xsd:string ;
+        rdf:type    owl:ObjectProperty ;
+        rdfs:label  "play with"^^xsd:string ;
         rdfs:domain <People> ;
-        rdfs:range <People> ;
+        rdfs:range  <People> ;
 .
 ```
 
