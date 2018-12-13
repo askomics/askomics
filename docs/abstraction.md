@@ -71,7 +71,7 @@ Here i show you the minimal information to provide as an abstraction.
 .
 ```
 
-full file in [people_mini.abstract.ttl](./people_mini.abstract.ttl)
+full file in [people_mini.abstract.ttl](https://github.com/askomics/askomics/blob/master/docs/people_mini.abstract.ttl)
 
 ## Python Management Code
 As seen abose, we have 2 kinds of class, "entity" and "attribute"/relation.
