@@ -247,7 +247,7 @@ class Security(ParamManager):
             self.set_blocked(False)
         else:
             admin = 'false'
-            blocked = 'true'
+            blocked = self.settings['askomics.locked_account']
             self.set_admin(False)
             self.set_blocked(False)
 
