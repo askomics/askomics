@@ -11,22 +11,20 @@ class AskomicsUser{
   }
 
   checkUser(){
-    let self = this;
-    return new Promise(
-    function(resolve, reject){
+    return new Promise((resolve, reject) => {
       let service = new RestServiceJs('checkuser');
-      service.getAll(function(user){
+      service.getAll((user) => {
         if (user.username == "") {
           __ihm.displayNavbar(false, '');
           // redirect to login page
         }else{
           // there is a user logged
-          self.username = user.username;
-          self.admin = user.admin;
-          self.blocked = user.blocked;
-          self.galaxy = user.galaxy;
-          __ihm.displayNavbar(true, self.username, self.admin, self.blocked);
-          if (self.galaxy) {
+          this.username = user.username;
+          this.admin = user.admin;
+          this.blocked = user.blocked;
+          this.galaxy = user.galaxy;
+          __ihm.displayNavbar(true, this.username, this.admin, this.blocked);
+          if (this.galaxy) {
             AskomicsGalaxyService.show();
           }
           AskomicsUser.cleanHtmlLogin();
@@ -38,56 +36,52 @@ class AskomicsUser{
 
   signup(username, email, password, password2, callback){
 
-    let self = this;
-
     let service = new RestServiceJs('signup');
     let model = {'username': username,
                  'email': email,
                  'password': password,
                  'password2': password2 };
 
-    service.post(model, function(data){
+    service.post(model, (data) => {
       if(data.error.length !== 0){
-        self.error = data.error;
+        this.error = data.error;
       }else{
-        self.username = data.username;
-        self.admin = data.admin;
-        self.blocked = data.blocked;
-        self.galaxy = data.galaxy;
+        this.username = data.username;
+        this.admin = data.admin;
+        this.blocked = data.blocked;
+        this.galaxy = data.galaxy;
       }
-      callback(self);
+      callback(this);
     });
 
   }
 
   login(username_email, password, callback){
 
-    let self = this;
-
     let service = new RestServiceJs('login');
     let model = {
       'username_email': username_email,
       'password': password
     };
-    service.post(model, function(data){
+    service.post(model, (data) => {
       if (data.error.length !== 0) {
-        self.error = data.error;
+        this.error = data.error;
       }else{
-        self.username = data.username;
-        self.admin = data.admin;
-        self.blocked = data.blocked;
-        self.galaxy = data.galaxy;
+        this.username = data.username;
+        this.admin = data.admin;
+        this.blocked = data.blocked;
+        this.galaxy = data.galaxy;
       }
-      callback(self);
+      callback(this);
     });
   }
 
-  logout(){
-    let self = this;
+  logout(callback){
     let service = new RestServiceJs('logout');
-    service.getAll(function(){
+    service.getAll(() => {
       AskomicsUser.cleanHtmlLogin();
       __ihm.displayNavbar(false, '');
+      callback(this);
     });
   }
 
@@ -105,6 +99,6 @@ class AskomicsUser{
   }
 
   isLogin() {
-      return (this.username != undefined)&&(this.username != "");
+      return (this.username != undefined) && (this.username != "");
   }
 }

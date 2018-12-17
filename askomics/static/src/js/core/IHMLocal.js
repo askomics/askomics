@@ -1186,36 +1186,36 @@ class IHMLocal {
       $('#navbar').append(html);
 
       // Visual effects on active tabs
-      $('.nav li').on('click', function(event){
-        if ( $(this).attr('id') === undefined) return;
+      $('.nav li').on('click', (event) => {
+        if ( $(event.currentTarget).attr('id') === undefined) return;
         $('.nav li.active').removeClass('active');
-        if (!$(this).hasClass('active')) {
-          $(this).addClass('active');
+        if (!$(event.currentTarget).hasClass('active')) {
+          $(event.currentTarget).addClass('active');
         }
-        if ( ! ( $(this).attr('id') in { 'help' : '','admin':'', 'user_menu': '' }) ) {
+        if ( ! ( $(event.currentTarget).attr('id') in { 'help' : '','admin':'', 'user_menu': '' }) ) {
 
           $('.container').hide();
           $('.container#navbar_content').show();
           //console.log("===>"+'.container#content_' + $(this).attr('id'));
-          $('.container#content_' + $(this).attr('id')).show();
+          $('.container#content_' + $(event.currentTarget).attr('id')).show();
         } else {
           $('.container#navbar_content').show();
         }
       });
 
       // diplay signup/login form
-      $('#show_signup').one('click', function(e) {
+      $('#show_signup').one('click', () => {
         $('#content_login').hide();
         $('#content_signup').show();
       });
 
-      $('#show_login').one('click', function(e) {
+      $('#show_login').one('click', () => {
         $('#content_signup').hide();
         $('#content_login').show();
       });
 
       // trigger signup when enterkey is pressed
-      $('#signup_password2').off().keypress(function (e) {
+      $('#signup_password2').off().keypress((e) => {
         if(e.which == 13)  // the enter key code
         {
           $('#signup_button').click();
@@ -1223,7 +1223,7 @@ class IHMLocal {
       });
 
       // trigger login when enterkey is pressed
-      $('#login_password').off().keypress(function (e) {
+      $('#login_password').off().keypress((e) => {
         if(e.which == 13)  // the enter key code
         {
           $('#login_button').click();
@@ -1231,29 +1231,23 @@ class IHMLocal {
       });
 
       // signup
-      $('#signup_button').off().on('click', function(e){
+      $('#signup_button').off().on('click', () => {
         let username = $('#signup_username').val();
         let email = $('#signup_email').val();
         let password = $('#signup_password').val();
         let password2 = $('#signup_password2').val();
-        __ihm.user.signup(username, email, password, password2, function(user){
+        __ihm.user.signup(username, email, password, password2, (user) => {
           // Error
-          if (user.error) {
+          if(user.error) {
             $('#signup_error').empty();
             for (let i = user.error.length - 1; i >= 0; i--) {
-              $('#signup_error').append(user.error[i] + '<br/>');
+              $('#signup_error').append(user.error[i] + '<br>');
             }
-            $('#signup_error').show();
-            $('#spinner_signup').addClass('hidden');
-            $('#tick_signup').addClass('hidden');
-            $('#cross_signup').removeClass('hidden');
+            AskomicsUser.errorHtmlLogin();
             return;
           }
-          // Success
-          $('#signup_error').hide();
-          $('#spinner_signup').addClass('hidden');
-          $('#tick_signup').removeClass('hidden');
-          $('#cross_signup').addClass('hidden');
+          AskomicsUser.cleanHtmlLogin();
+          __ihm.displayNavbar(true, __ihm.user.username, __ihm.user.admin, __ihm.user.blocked);
           // Show interrogation
           $('.nav li.active').removeClass('active');
           $('#interrogation').addClass('active');
@@ -1266,10 +1260,10 @@ class IHMLocal {
       });
 
       // login
-      $('#login_button').off().on('click', function(e){
+      $('#login_button').off().on('click', (e) => {
         let username_email = $('#login_username-email').val();
         let password = $('#login_password').val();
-        __ihm.user.login(username_email, password, function(user){
+        __ihm.user.login(username_email, password, (user) => {
           if(user.error) {
             $('#login_error').empty();
             for (let i = user.error.length - 1; i >= 0; i--) {
@@ -1292,27 +1286,35 @@ class IHMLocal {
       });
 
       // logout
-      $('#logout').on('click', function(e) {
-        __ihm.user.logout();
+      $('#logout').on('click', () => {
+        __ihm.user.logout((user) => {
+          __ihm.loadStartPoints();
+          // Show interrogation
+          $('.nav li.active').removeClass('active');
+          $('#interrogation').addClass('active');
+          $('.container').hide();
+          $('.container#navbar_content').show();
+          $('.container#content_interrogation').show();
+        });
       });
 
       // admin page
-      $('#administration').one('click', function() {
+      $('#administration').one('click', () => {
         __ihm.loadUsers();
       });
 
       // admin page
-      $('#user_info').one('click', function() {
+      $('#user_info').one('click', () => {
         __ihm.userForm();
       });
 
       // Get the overview of files to integrate
-      $("#integration").click(function() {
+      $("#integration").click(() => {
           __ihm.get_uploaded_files();
       });
 
       // reload jobs when the button is clicked
-      $("#jobsview").one('click', (e) => {
+      $("#jobsview").one('click', () => {
         this.jobsview.loadjob().then(() => {
           this.jobsview.update_jobview("integration");
         });
