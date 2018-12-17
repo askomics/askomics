@@ -1289,6 +1289,7 @@ class IHMLocal {
       $('#logout').on('click', () => {
         __ihm.user.logout((user) => {
           __ihm.loadStartPoints();
+          __ihm.stopSession();
           // Show interrogation
           $('.nav li.active').removeClass('active');
           $('#interrogation').addClass('active');
