@@ -132,7 +132,12 @@ class Security(ParamManager):
             db_shapw = rows[0][0]
 
         concat = self.settings["askomics.salt"] + self.passwd + db_salt
-        shapw = hashlib.sha512(concat.encode('utf8')).hexdigest()
+        if len(db_shapw) == 64:
+            # Use sha256 (old askomics database use sha256)
+            shapw = hashlib.sha256(concat.encode('utf8')).hexdigest()
+        else:
+            # Use sha512
+            shapw = hashlib.sha512(concat.encode('utf8')).hexdigest()
 
         return db_shapw == shapw
 
@@ -156,7 +161,12 @@ class Security(ParamManager):
             db_shapw = rows[0][0]
 
         concat = self.settings["askomics.salt"] + self.passwd + db_salt
-        shapw = hashlib.sha512(concat.encode('utf8')).hexdigest()
+        if len(db_shapw) == 64:
+            # Use sha256 (old askomics database use sha256)
+            shapw = hashlib.sha256(concat.encode('utf8')).hexdigest()
+        else:
+            # Use sha512
+            shapw = hashlib.sha512(concat.encode('utf8')).hexdigest()
 
         return db_shapw == shapw
 
