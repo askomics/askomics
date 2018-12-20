@@ -962,6 +962,9 @@ class IHMLocal {
                                      .addClass('fa-lock')
                                      .addClass('unlock_user')
                                      .css('color', 'red');
+
+            $('.padlock#' + username).children().text('0');
+
           }else{
             $('.padlock#' + username).removeClass('hidden')
                                      .removeClass('fa-lock')
@@ -969,6 +972,9 @@ class IHMLocal {
                                      .addClass('fa-unlock')
                                      .addClass('lock_user')
                                      .css('color', 'green');
+
+            $('.padlock#' + username).children().text('1');
+
           }
         }else{
           __ihm.manageErrorMessage({'error': d});
@@ -1006,6 +1012,8 @@ class IHMLocal {
                                      .addClass('glyphicon-king')
                                      .addClass('unset_admin')
                                      .css('color', 'orange');
+          $('.chess-piece#' + username).children().text('1');
+
           }else{
             $('.chess-piece#' + username).removeClass('hidden')
                                      .removeClass('glyphicon-king')
@@ -1013,6 +1021,8 @@ class IHMLocal {
                                      .addClass('glyphicon-pawn')
                                      .addClass('set_admin')
                                      .css('color', 'grey');
+          $('.chess-piece#' + username).children().text('0');
+
           }
         }else{
           __ihm.manageErrorMessage({'error': d});
