@@ -1206,6 +1206,13 @@ class AskView(object):
     @view_config(route_name='checkuser', request_method='GET')
     def checkuser(self):
 
+        if self.request.session['username'] != '':
+            # User connected, get admin and blocked status
+            security = Security(self.settings, self.request.session, self.request.session['username'], '', '', '')
+            admin_blocked_status = security.get_admin_blocked_by_username()
+            self.request.session['admin'] = admin_blocked_status['admin']
+            self.request.session['blocked'] = admin_blocked_status['blocked']
+
         self.data['username'] = self.request.session['username']
         self.data['admin'] = self.request.session['admin']
         self.data['blocked'] = self.request.session['blocked']
