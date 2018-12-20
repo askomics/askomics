@@ -34,7 +34,7 @@ askomics.prefix = http://www.semanticweb.org/user/ontologies/2018/1#
 askomics.namespace = http://www.semanticweb.org/askomics/ontologies/2018/1#
 askomics.delete_method = DELETE
 askomics.triplestore_results_max_rows=10000
-
+askomics.preview_rows=30
 
 # Fedex Configuration
 askomics.fdendpoint=http://localhost:4040/fedx
@@ -50,8 +50,10 @@ askomics.files_dir = /tmp/askomics
 
 
 # Authentication
-# Change the salt into a random string
+# - salt: Change the salt into a random string
+# - locked_account: new account are locked a creation (true or false)
 askomics.salt = AskOmics
+askomics.locked_account = false
 
 # Proxy setting
 # Set askomics.proxy to:

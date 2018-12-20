@@ -863,22 +863,19 @@ class IHMLocal {
       service.getAll(function(data) {
         $("#Users_adm").empty();
         let template = AskOmics.templates.admin_users;
-        let context = {users: data.result};
+        let context = {users: data.result, me: data.me};
         let html = template(context);
 
         $("#Users_adm").append(html);
-        $('.lock_user').click(function() {
-          __ihm.lockUser(this.id, true);
+
+        $('.padlock').click(function() {
+          __ihm.lockUser(this.id);
         });
-        $('.unlock_user').click(function() {
-          __ihm.lockUser(this.id, false);
+
+        $('.chess-piece').click(function() {
+          __ihm.setAdmin(this.id);
         });
-        $('.set_admin').click(function() {
-          __ihm.setAdmin(this.id, true);
-        });
-        $('.unset_admin').click(function() {
-          __ihm.setAdmin(this.id, false);
-        });
+
         $('.del_user').click(function() {
           __ihm.delUser(this.id);
         });
@@ -938,22 +935,47 @@ class IHMLocal {
       });
     }
 
-    lockUser(username, lock) {
+    lockUser(username) {
       let service = new RestServiceJs('lockUser');
-      let data = {'username': username, 'lock': lock};
 
-        // Show the spinner
-      $('.spinner_lock#' + username).removeClass('hidden');
-      if (lock) {
-        $('.lock_user#' + username).addClass('hidden');
-      }else{
-        $('.unlock_user#' + username).addClass('hidden');
+      let lock = false;
+      if ($('.padlock#' + username).hasClass('lock_user')) {
+        lock = true;
       }
 
-      service.post(data, function(d) {
-        // Reload users
+      let data = {'username': username, 'lock': lock};
+
+      // Show the spinner
+      $('.spinner_lock#' + username).removeClass('hidden');
+      // Remove padlock
+      $('.padlock#' + username).addClass('hidden');
+
+      service.post(data, (d) => {
         if (d == 'success') {
-          __ihm.loadUsers();
+          // remove spinner
+          $('.spinner_lock#' + username).addClass('hidden');
+          // Show padlock
+          if (lock) {
+            $('.padlock#' + username).removeClass('hidden')
+                                     .removeClass('fa-unlock')
+                                     .removeClass('lock_user')
+                                     .addClass('fa-lock')
+                                     .addClass('unlock_user')
+                                     .css('color', 'red');
+
+            $('.padlock#' + username).children().text('0');
+
+          }else{
+            $('.padlock#' + username).removeClass('hidden')
+                                     .removeClass('fa-lock')
+                                     .removeClass('unlock_user')
+                                     .addClass('fa-unlock')
+                                     .addClass('lock_user')
+                                     .css('color', 'green');
+
+            $('.padlock#' + username).children().text('1');
+
+          }
         }else{
           __ihm.manageErrorMessage({'error': d});
           return;
@@ -962,22 +984,46 @@ class IHMLocal {
     }
 
 
-    setAdmin(username, admin) {
+    setAdmin(username) {
       let service = new RestServiceJs('setAdmin');
+
+      let admin = false;
+      if ($('.chess-piece#' + username).hasClass('set_admin')) {
+        admin = true;
+      }
+
       let data = {'username': username, 'admin': admin};
+
 
       // Show the spinner
       $('.spinner_admin#' + username).removeClass('hidden');
-      if (admin) {
-        $('.set_admin#' + username).addClass('hidden');
-      }else{
-        $('.unset_admin#' + username).addClass('hidden');
-      }
+      // Remove chess piece
+      $('.chess-piece#' + username).addClass('hidden');
 
       service.post(data, function(d) {
-        // Reload users
         if (d == 'success') {
-          __ihm.loadUsers();
+          // remove spinner
+          $('.spinner_admin#' + username).addClass('hidden');
+          // Show chess-piece
+          if (admin) {
+            $('.chess-piece#' + username).removeClass('hidden')
+                                     .removeClass('glyphicon-pawn')
+                                     .removeClass('set_admin')
+                                     .addClass('glyphicon-king')
+                                     .addClass('unset_admin')
+                                     .css('color', 'orange');
+          $('.chess-piece#' + username).children().text('1');
+
+          }else{
+            $('.chess-piece#' + username).removeClass('hidden')
+                                     .removeClass('glyphicon-king')
+                                     .removeClass('unset_admin')
+                                     .addClass('glyphicon-pawn')
+                                     .addClass('set_admin')
+                                     .css('color', 'grey');
+          $('.chess-piece#' + username).children().text('0');
+
+          }
         }else{
           __ihm.manageErrorMessage({'error': d});
           return;
@@ -1186,36 +1232,36 @@ class IHMLocal {
       $('#navbar').append(html);
 
       // Visual effects on active tabs
-      $('.nav li').on('click', function(event){
-        if ( $(this).attr('id') === undefined) return;
+      $('.nav li').on('click', (event) => {
+        if ( $(event.currentTarget).attr('id') === undefined) return;
         $('.nav li.active').removeClass('active');
-        if (!$(this).hasClass('active')) {
-          $(this).addClass('active');
+        if (!$(event.currentTarget).hasClass('active')) {
+          $(event.currentTarget).addClass('active');
         }
-        if ( ! ( $(this).attr('id') in { 'help' : '','admin':'', 'user_menu': '' }) ) {
+        if ( ! ( $(event.currentTarget).attr('id') in { 'help' : '','admin':'', 'user_menu': '' }) ) {
 
           $('.container').hide();
           $('.container#navbar_content').show();
           //console.log("===>"+'.container#content_' + $(this).attr('id'));
-          $('.container#content_' + $(this).attr('id')).show();
+          $('.container#content_' + $(event.currentTarget).attr('id')).show();
         } else {
           $('.container#navbar_content').show();
         }
       });
 
       // diplay signup/login form
-      $('#show_signup').one('click', function(e) {
+      $('#show_signup').one('click', () => {
         $('#content_login').hide();
         $('#content_signup').show();
       });
 
-      $('#show_login').one('click', function(e) {
+      $('#show_login').one('click', () => {
         $('#content_signup').hide();
         $('#content_login').show();
       });
 
       // trigger signup when enterkey is pressed
-      $('#signup_password2').off().keypress(function (e) {
+      $('#signup_password2').off().keypress((e) => {
         if(e.which == 13)  // the enter key code
         {
           $('#signup_button').click();
@@ -1223,7 +1269,7 @@ class IHMLocal {
       });
 
       // trigger login when enterkey is pressed
-      $('#login_password').off().keypress(function (e) {
+      $('#login_password').off().keypress((e) => {
         if(e.which == 13)  // the enter key code
         {
           $('#login_button').click();
@@ -1231,29 +1277,23 @@ class IHMLocal {
       });
 
       // signup
-      $('#signup_button').off().on('click', function(e){
+      $('#signup_button').off().on('click', () => {
         let username = $('#signup_username').val();
         let email = $('#signup_email').val();
         let password = $('#signup_password').val();
         let password2 = $('#signup_password2').val();
-        __ihm.user.signup(username, email, password, password2, function(user){
+        __ihm.user.signup(username, email, password, password2, (user) => {
           // Error
-          if (user.error) {
+          if(user.error) {
             $('#signup_error').empty();
             for (let i = user.error.length - 1; i >= 0; i--) {
-              $('#signup_error').append(user.error[i] + '<br/>');
+              $('#signup_error').append(user.error[i] + '<br>');
             }
-            $('#signup_error').show();
-            $('#spinner_signup').addClass('hidden');
-            $('#tick_signup').addClass('hidden');
-            $('#cross_signup').removeClass('hidden');
+            AskomicsUser.errorHtmlLogin();
             return;
           }
-          // Success
-          $('#signup_error').hide();
-          $('#spinner_signup').addClass('hidden');
-          $('#tick_signup').removeClass('hidden');
-          $('#cross_signup').addClass('hidden');
+          AskomicsUser.cleanHtmlLogin();
+          __ihm.displayNavbar(true, __ihm.user.username, __ihm.user.admin, __ihm.user.blocked);
           // Show interrogation
           $('.nav li.active').removeClass('active');
           $('#interrogation').addClass('active');
@@ -1266,10 +1306,10 @@ class IHMLocal {
       });
 
       // login
-      $('#login_button').off().on('click', function(e){
+      $('#login_button').off().on('click', (e) => {
         let username_email = $('#login_username-email').val();
         let password = $('#login_password').val();
-        __ihm.user.login(username_email, password, function(user){
+        __ihm.user.login(username_email, password, (user) => {
           if(user.error) {
             $('#login_error').empty();
             for (let i = user.error.length - 1; i >= 0; i--) {
@@ -1292,27 +1332,36 @@ class IHMLocal {
       });
 
       // logout
-      $('#logout').on('click', function(e) {
-        __ihm.user.logout();
+      $('#logout').on('click', () => {
+        __ihm.user.logout((user) => {
+          __ihm.loadStartPoints();
+          __ihm.stopSession();
+          // Show interrogation
+          $('.nav li.active').removeClass('active');
+          $('#interrogation').addClass('active');
+          $('.container').hide();
+          $('.container#navbar_content').show();
+          $('.container#content_interrogation').show();
+        });
       });
 
       // admin page
-      $('#administration').one('click', function() {
+      $('#administration').on('click', () => {
         __ihm.loadUsers();
       });
 
       // admin page
-      $('#user_info').one('click', function() {
+      $('#user_info').on('click', () => {
         __ihm.userForm();
       });
 
       // Get the overview of files to integrate
-      $("#integration").click(function() {
+      $("#integration").click(() => {
           __ihm.get_uploaded_files();
       });
 
       // reload jobs when the button is clicked
-      $("#jobsview").one('click', (e) => {
+      $("#jobsview").one('click', () => {
         this.jobsview.loadjob().then(() => {
           this.jobsview.update_jobview("integration");
         });

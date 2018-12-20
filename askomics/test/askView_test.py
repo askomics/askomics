@@ -914,7 +914,7 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.checkuser()
 
-        assert data == {'admin': False, 'username': 'jdoe', 'blocked': False, 'galaxy': False}
+        assert data == {'admin': False, 'username': 'jdoe', 'blocked': True, 'galaxy': False}
 
 
     def test_logout(self):
@@ -999,7 +999,7 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.get_users_infos()
 
-        assert data == {'result': []} #result is empty cause there is no user
+        assert data == {'result': [], 'me': 'jdoe'} #result is empty cause there is no user
 
         #test with user
         self.request.json_body = {
@@ -1013,7 +1013,7 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.get_users_infos()
 
-        assert data == {'result': [{'username': 'jdoe', 'email': 'jdoe@example.com', 'admin': True, 'blocked': False}], 'error': [], 'username': 'jdoe', 'admin': True, 'blocked': False, 'galaxy': False}
+        assert data == {'me': 'jdoe', 'result': [{'username': 'jdoe', 'email': 'jdoe@example.com', 'admin': True, 'blocked': False}], 'error': [], 'username': 'jdoe', 'admin': True, 'blocked': False, 'galaxy': False}
 
     def test_lock_user(self):
         """Test lock_user method"""
