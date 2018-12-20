@@ -1508,7 +1508,8 @@ class AskView(object):
         infos = security.get_users_infos()
 
         self.data['result'] = infos
-        self.log.debug(infos)
+        self.data['me'] = self.request.session['username']
+
         return self.data
 
     @view_config(route_name='lockUser', request_method='POST')

@@ -863,22 +863,19 @@ class IHMLocal {
       service.getAll(function(data) {
         $("#Users_adm").empty();
         let template = AskOmics.templates.admin_users;
-        let context = {users: data.result};
+        let context = {users: data.result, me: data.me};
         let html = template(context);
 
         $("#Users_adm").append(html);
-        $('.lock_user').click(function() {
-          __ihm.lockUser(this.id, true);
+
+        $('.padlock').click(function() {
+          __ihm.lockUser(this.id);
         });
-        $('.unlock_user').click(function() {
-          __ihm.lockUser(this.id, false);
+
+        $('.chess-piece').click(function() {
+          __ihm.setAdmin(this.id);
         });
-        $('.set_admin').click(function() {
-          __ihm.setAdmin(this.id, true);
-        });
-        $('.unset_admin').click(function() {
-          __ihm.setAdmin(this.id, false);
-        });
+
         $('.del_user').click(function() {
           __ihm.delUser(this.id);
         });
@@ -938,22 +935,41 @@ class IHMLocal {
       });
     }
 
-    lockUser(username, lock) {
+    lockUser(username) {
       let service = new RestServiceJs('lockUser');
-      let data = {'username': username, 'lock': lock};
 
-        // Show the spinner
-      $('.spinner_lock#' + username).removeClass('hidden');
-      if (lock) {
-        $('.lock_user#' + username).addClass('hidden');
-      }else{
-        $('.unlock_user#' + username).addClass('hidden');
+      let lock = false;
+      if ($('.padlock#' + username).hasClass('lock_user')) {
+        lock = true;
       }
 
-      service.post(data, function(d) {
-        // Reload users
+      let data = {'username': username, 'lock': lock};
+
+      // Show the spinner
+      $('.spinner_lock#' + username).removeClass('hidden');
+      // Remove padlock
+      $('.padlock#' + username).addClass('hidden');
+
+      service.post(data, (d) => {
         if (d == 'success') {
-          __ihm.loadUsers();
+          // remove spinner
+          $('.spinner_lock#' + username).addClass('hidden');
+          // Show padlock
+          if (lock) {
+            $('.padlock#' + username).removeClass('hidden')
+                                     .removeClass('fa-unlock')
+                                     .removeClass('lock_user')
+                                     .addClass('fa-lock')
+                                     .addClass('unlock_user')
+                                     .css('color', 'red');
+          }else{
+            $('.padlock#' + username).removeClass('hidden')
+                                     .removeClass('fa-lock')
+                                     .removeClass('unlock_user')
+                                     .addClass('fa-unlock')
+                                     .addClass('lock_user')
+                                     .css('color', 'green');
+          }
         }else{
           __ihm.manageErrorMessage({'error': d});
           return;
@@ -962,22 +978,42 @@ class IHMLocal {
     }
 
 
-    setAdmin(username, admin) {
+    setAdmin(username) {
       let service = new RestServiceJs('setAdmin');
+
+      let admin = false;
+      if ($('.chess-piece#' + username).hasClass('set_admin')) {
+        admin = true;
+      }
+
       let data = {'username': username, 'admin': admin};
+
 
       // Show the spinner
       $('.spinner_admin#' + username).removeClass('hidden');
-      if (admin) {
-        $('.set_admin#' + username).addClass('hidden');
-      }else{
-        $('.unset_admin#' + username).addClass('hidden');
-      }
+      // Remove chess piece
+      $('.chess-piece#' + username).addClass('hidden');
 
       service.post(data, function(d) {
-        // Reload users
         if (d == 'success') {
-          __ihm.loadUsers();
+          // remove spinner
+          $('.spinner_admin#' + username).addClass('hidden');
+          // Show chess-piece
+          if (admin) {
+            $('.chess-piece#' + username).removeClass('hidden')
+                                     .removeClass('glyphicon-pawn')
+                                     .removeClass('set_admin')
+                                     .addClass('glyphicon-king')
+                                     .addClass('unset_admin')
+                                     .css('color', 'orange');
+          }else{
+            $('.chess-piece#' + username).removeClass('hidden')
+                                     .removeClass('glyphicon-king')
+                                     .removeClass('unset_admin')
+                                     .addClass('glyphicon-pawn')
+                                     .addClass('set_admin')
+                                     .css('color', 'grey');
+          }
         }else{
           __ihm.manageErrorMessage({'error': d});
           return;
@@ -1300,12 +1336,12 @@ class IHMLocal {
       });
 
       // admin page
-      $('#administration').one('click', () => {
+      $('#administration').on('click', () => {
         __ihm.loadUsers();
       });
 
       // admin page
-      $('#user_info').one('click', () => {
+      $('#user_info').on('click', () => {
         __ihm.userForm();
       });
 
