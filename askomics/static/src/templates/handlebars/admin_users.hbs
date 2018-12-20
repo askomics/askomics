@@ -12,25 +12,21 @@
 </thead>
 <tbody>
     {{#each users}}
-    {{#if this.blocked}}
-    <tr class="danger">
-    {{else}}
     <tr>
-    {{/if}}
         <td>{{this.username}}</td>
         <td><a href="mailto:{{this.email}}">{{this.email}}</a></td>
         <td>
         {{#if this.admin}}
-        <span style="color:orange" class="glyphicon glyphicon-king unset_admin" id={{this.username}}></span>
+        <span style="color:orange" class="glyphicon glyphicon-king unset_admin chess-piece" id={{this.username}}><span class='sorter hidden'>1</span></span>
         {{else}}
-        <span style="color:grey" class="glyphicon glyphicon-pawn set_admin" id={{this.username}}></span>
+        <span style="color:grey" class="glyphicon glyphicon-pawn set_admin chess-piece" id={{this.username}}><span class='sorter hidden'>0</span></span>
         {{/if}}
         <i class="hidden fa fa-spinner pulse spinner_admin" id='{{this.username}}'></i>
         </td>
         <td>{{#if this.blocked}}
-        <i style="color:red" class="fa fa-lock unlock_user" id="{{this.username}}"></i>
+        <i style="color:red" class="fa fa-lock unlock_user padlock" id="{{this.username}}"><span class='sorter hidden'>0</span></i>
         {{else}}
-        <i style="color:green" class="fa fa-unlock lock_user" id="{{this.username}}"></i>
+        <i style="color:green" class="fa fa-unlock lock_user padlock" id="{{this.username}}"><span class='sorter hidden'>1</span></i>
         {{/if}}
         <i class="hidden fa fa-spinner pulse spinner_lock" id='{{this.username}}'></i>
         </td>
