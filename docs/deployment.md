@@ -95,7 +95,7 @@ docker pull askomics/askomics:18.10
 Run
 
 ```bash
-docker run askomics/askomics -p 6543:6543
+docker run -p 6543:6543 askomics/askomics
 ```
 
 AskOmics is available at [localhost:6543](localhost:6543)
