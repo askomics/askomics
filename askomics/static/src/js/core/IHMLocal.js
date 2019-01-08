@@ -1290,24 +1290,25 @@ class IHMLocal {
         let password2 = $('#signup_password2').val();
         __ihm.user.signup(username, email, password, password2, (user) => {
           // Error
-          if(user.error) {
+          if(user.error.length > 0) {
             $('#signup_error').empty();
             for (let i = user.error.length - 1; i >= 0; i--) {
               $('#signup_error').append(user.error[i] + '<br>');
             }
             AskomicsUser.errorHtmlLogin();
             return;
+          } else {
+            AskomicsUser.cleanHtmlLogin();
+            __ihm.displayNavbar(true, __ihm.user.username, __ihm.user.admin, __ihm.user.blocked);
+            // Show interrogation
+            $('.nav li.active').removeClass('active');
+            $('#interrogation').addClass('active');
+            $('.container').hide();
+            $('.container#navbar_content').show();
+            $('.container#content_interrogation').show();
+            //reload startpoints
+            __ihm.loadStartPoints();
           }
-          AskomicsUser.cleanHtmlLogin();
-          __ihm.displayNavbar(true, __ihm.user.username, __ihm.user.admin, __ihm.user.blocked);
-          // Show interrogation
-          $('.nav li.active').removeClass('active');
-          $('#interrogation').addClass('active');
-          $('.container').hide();
-          $('.container#navbar_content').show();
-          $('.container#content_interrogation').show();
-          //reload startpoints
-          __ihm.loadStartPoints();
         });
       });
 
@@ -1316,24 +1317,24 @@ class IHMLocal {
         let username_email = $('#login_username-email').val();
         let password = $('#login_password').val();
         __ihm.user.login(username_email, password, (user) => {
-          if(user.error) {
+          if(user.error.length > 0) {
             $('#login_error').empty();
             for (let i = user.error.length - 1; i >= 0; i--) {
               $('#login_error').append(user.error[i] + '<br>');
             }
             AskomicsUser.errorHtmlLogin();
-            return;
+          } else {
+            AskomicsUser.cleanHtmlLogin();
+            __ihm.displayNavbar(true, __ihm.user.username, __ihm.user.admin, __ihm.user.blocked);
+            // Show interrogation
+            $('.nav li.active').removeClass('active');
+            $('#interrogation').addClass('active');
+            $('.container').hide();
+            $('.container#navbar_content').show();
+            $('.container#content_interrogation').show();
+            //reload startpoints
+            __ihm.loadStartPoints();
           }
-          AskomicsUser.cleanHtmlLogin();
-          __ihm.displayNavbar(true, __ihm.user.username, __ihm.user.admin, __ihm.user.blocked);
-          // Show interrogation
-          $('.nav li.active').removeClass('active');
-          $('#interrogation').addClass('active');
-          $('.container').hide();
-          $('.container#navbar_content').show();
-          $('.container#content_interrogation').show();
-          //reload startpoints
-          __ihm.loadStartPoints();
         });
       });
 

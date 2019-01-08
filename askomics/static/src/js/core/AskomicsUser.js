@@ -46,6 +46,7 @@ class AskomicsUser{
       if(data.error.length !== 0){
         this.error = data.error;
       }else{
+        this.error = [];
         this.username = data.username;
         this.admin = data.admin;
         this.blocked = data.blocked;
@@ -67,6 +68,7 @@ class AskomicsUser{
       if (data.error.length !== 0) {
         this.error = data.error;
       }else{
+        this.error = [];
         this.username = data.username;
         this.admin = data.admin;
         this.blocked = data.blocked;
