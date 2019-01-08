@@ -1664,7 +1664,7 @@ class AskView(object):
         galaxy_dict = {}
 
         if infos[1]:
-            result['galaxy'] = {'url': infos[1][0], 'key': infos[1][1]}
+            result['galaxy'] = {'url': infos[1]['url'], 'key': infos[1]['key']}
 
         return result
 
