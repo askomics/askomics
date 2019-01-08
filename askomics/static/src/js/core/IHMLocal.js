@@ -694,8 +694,14 @@ class IHMLocal {
         // If a Galaxy instance is connected, show the form to get data from the Galaxy history
         let service = new RestServiceJs('get_data_from_galaxy');
         let model = {history: history_id, allowed_files: allowed_files};
+        console.log(JSON.stringify(model));
         service.post(model, function(data) {
-            if (!data.galaxy) return;
+            if (data.error) {
+              // display error
+              $("#galaxy_div").empty();
+              $("#galaxy_error").append(data.error).show();
+              return;
+            }
             let template = AskOmics.templates.galaxy_datasets;
             let context = {datasets: data.datasets, histories: data.histories, radio: radio, input_type: input_type};
             let html = template(context);

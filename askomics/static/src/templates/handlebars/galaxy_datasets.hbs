@@ -1,3 +1,5 @@
+<div id='galaxy_div'>
+
 <p>Select a galaxy history: </p>
 <select id="change_history">
   {{#each histories}}
@@ -51,3 +53,7 @@
 
 <button id="upload_galaxy" type="button" class="btn btn-default"><i class="fa fa-cloud-upload text-primary"></i> Upload to AskOmics</button>
 <i class="hidden fa fa-spinner pulse" id='spinner_galaxy-upload'></i>
+
+</div>
+
+<div id='galaxy_error' class="alert alert-danger" role="alert" hidden></div>

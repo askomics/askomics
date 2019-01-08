@@ -489,8 +489,8 @@ class Security(ParamManager):
         rows = database.execute_sql_query(query, (self.get_user_id_by_username(), ))
 
         if rows:
-            return [rows[0][0], rows[0][1]]
-        return []
+            return {'url': rows[0][0], 'key': rows[0][1]}
+        return {}
 
     def check_galaxy(self):
         """Check if user have a galaxy account"""
