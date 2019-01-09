@@ -12,7 +12,7 @@ with open('requirements.txt') as f:
     requires = f.read().splitlines()
 
 setup(name='Askomics',
-      version='18.10',
+      version='18.10.1',
       description = 
           'AskOmics is a visual SPARQL query interface supporting both intuitive ' +
           'data integration and querying while shielding the user from most of the ' +

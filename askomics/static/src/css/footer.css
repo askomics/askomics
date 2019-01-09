@@ -1,0 +1,19 @@
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  /* Set the fixed height of the footer here */
+  height: 30px;
+  line-height: 30px; /* Vertically center the text there */
+  background-color: #f8f8f8;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.footer-right {
+  float: right;
+}
+
+.footer-left {
+  float: left;
+}

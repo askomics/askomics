@@ -7,7 +7,7 @@ class AskomicsUser{
     this.admin = null;
     this.blocked = null;
     this.galaxy = null;
-    this.error = null;
+    this.error = [];
   }
 
   checkUser(){

@@ -48,6 +48,9 @@ askomics.upload_min_size = 1
 askomics.upload_max_size = 200000000
 askomics.files_dir = /tmp/askomics
 
+# footer messages
+askomics.footer_message = 
+askomics.footer_version = 18.10.1
 
 # Authentication
 # - salt: Change the salt into a random string

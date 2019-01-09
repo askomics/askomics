@@ -1229,13 +1229,34 @@ class IHMLocal {
       });
     }
 
-    displayNavbar(loged, username, admin, blocked) {
+    displayNavbar(logged, username, admin, blocked) {
       // Navbar template
       $('#navbar').empty();
-      let template = AskOmics.templates.navbar;
-      let context = {name: 'AskOmics', loged: loged, username: username, admin: admin, nonblocked: !blocked};
-      let html = template(context);
-      $('#navbar').append(html);
+      let template_navbar = AskOmics.templates.navbar;
+      let context_navbar = {name: 'AskOmics', logged: logged, username: username, admin: admin, nonblocked: !blocked};
+      let html_navbar = template_navbar(context_navbar);
+      $('#navbar').append(html_navbar);
+
+      let service = new RestServiceJs('footer');
+      service.getAll((footer_infos) => {
+
+        let version_differ = (footer_infos.current_version != footer_infos.latest_version)?true:false;
+
+        $('#footer-div').empty();
+        let template_footer = AskOmics.templates.footer;
+        let context_footer = {
+          current_version: footer_infos.current_version,
+          latest_version: footer_infos.latest_version,
+          version_differ: version_differ,
+          latest_version_url: footer_infos.latest_version_url,
+          admin: admin,
+          logged: logged,
+          message: footer_infos.message
+        };
+
+        let html_footer = template_footer(context_footer);
+        $('#footer-div').append(html_footer);
+      });
 
       // Visual effects on active tabs
       $('.nav li').on('click', (event) => {
@@ -1246,7 +1267,7 @@ class IHMLocal {
         }
         if ( ! ( $(event.currentTarget).attr('id') in { 'help' : '','admin':'', 'user_menu': '' }) ) {
 
-          $('.container').hide();
+          $('.container:not(#footer-div)').hide();
           $('.container#navbar_content').show();
           //console.log("===>"+'.container#content_' + $(this).attr('id'));
           $('.container#content_' + $(event.currentTarget).attr('id')).show();
@@ -1303,7 +1324,7 @@ class IHMLocal {
             // Show interrogation
             $('.nav li.active').removeClass('active');
             $('#interrogation').addClass('active');
-            $('.container').hide();
+            $('.container:not(#footer-div)').hide();
             $('.container#navbar_content').show();
             $('.container#content_interrogation').show();
             //reload startpoints
@@ -1329,7 +1350,7 @@ class IHMLocal {
             // Show interrogation
             $('.nav li.active').removeClass('active');
             $('#interrogation').addClass('active');
-            $('.container').hide();
+            $('.container:not(#footer-div)').hide();
             $('.container#navbar_content').show();
             $('.container#content_interrogation').show();
             //reload startpoints
@@ -1346,7 +1367,7 @@ class IHMLocal {
           // Show interrogation
           $('.nav li.active').removeClass('active');
           $('#interrogation').addClass('active');
-          $('.container').hide();
+          $('.container:not(#footer-div)').hide();
           $('.container#navbar_content').show();
           $('.container#content_interrogation').show();
         });

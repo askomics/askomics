@@ -341,6 +341,15 @@
             </div><!-- /.modal-content -->
           </div><!-- /.modal-dialog -->
         </div><!-- /.modal -->
+
+        <!-- footer -->
+        <div class="footer-content">
+          <footer class="footer">
+            <div id="footer-div" class="container"></div>
+          </footer>
+        </div>
+
+
     </body>
     <script>
         new IHMLocal().start();

@@ -13,6 +13,8 @@ import textwrap
 import datetime
 import humanize
 
+from github import Github
+
 from pygments import highlight
 from pygments.lexers import TurtleLexer
 from pygments.formatters import HtmlFormatter
@@ -1241,6 +1243,30 @@ class AskView(object):
 
         return self.data
 
+    @view_config(route_name='footer', request_method='GET')
+    def footer(self):
+
+        current_version = self.settings['askomics.footer_version']
+        message = self.settings['askomics.footer_message']
+
+        try:
+            github = Github()
+            repo = github.get_repo("askomics/askomics")
+            latest_release = repo.get_latest_release()
+            latest_version = latest_release.tag_name
+            latest_version_url = latest_release.html_url
+        except Exception as e:
+            self.log.debug("unable to fetch Github")
+            self.log.debug(e)
+            latest_version = current_version
+            latest_version_url =''
+
+        return {
+            'current_version': current_version,
+            'latest_version': latest_version,
+            'latest_version_url': latest_version_url,
+            'message': message
+        }
 
     @view_config(route_name='logout', request_method='GET')
     def logout(self):

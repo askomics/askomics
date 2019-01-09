@@ -36,6 +36,7 @@ def main(global_config, **settings):
     config.add_route('getUserAbstraction', '/userAbstraction')
     config.add_route('sparqlquery', '/sparqlquery')
     config.add_route('getSparqlQueryInTextFormat', '/getSparqlQueryInTextFormat')
+    config.add_route('footer', '/footer')
 
     # Job persistance management
     config.add_route('listjob', '/listjob')
