@@ -343,12 +343,9 @@
         </div><!-- /.modal -->
 
         <!-- footer -->
-        <div class="footer-content">
-          <footer class="footer">
-            <div id="footer-div" class="container"></div>
-          </footer>
-        </div>
-
+        <footer class="footer footer-content">
+          <div id="footer-div" class="container"></div>
+        </footer>
 
     </body>
     <script>
