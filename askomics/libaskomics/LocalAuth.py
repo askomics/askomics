@@ -403,7 +403,7 @@ class LocalAuth(ParamManager):
         if rows:
             for elem in rows:
                 user = {}
-                user['auth_type'] = 'ldap' if elem[2] is None else 'local'
+                user['ldap'] = True if elem[2] is None else False
                 user['username'] = elem[0]
                 user['email'] = elem[1]
                 user['admin'] = self.Bool(elem[3])

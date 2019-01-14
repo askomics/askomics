@@ -14,7 +14,13 @@
 <tbody>
     {{#each users}}
     <tr>
-        <td>{{this.auth_type}}</td>
+        <td>
+            {{#if this.ldap}}
+            Ldap
+            {{else}}
+            Local
+            {{/if}}
+        </td>
         <td>{{this.username}}</td>
         <td><a href="mailto:{{this.email}}">{{this.email}}</a></td>
         <td>
