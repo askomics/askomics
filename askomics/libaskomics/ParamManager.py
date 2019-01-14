@@ -52,6 +52,17 @@ class ParamManager(object):
             'date': lambda str,str2: json.dumps(str)
             }
 
+    def get_user_dir_path(self, force_username=None):
+
+        if force_username:
+            username = force_username
+        elif 'username' in self.session:
+            username = self.session['username']
+        else:
+            username = '_guest'
+
+        return self.user_dir + username
+
     def get_directory(self, name, force_username=None):
         """Get a named directory of a user, create it if not exist"""
 
@@ -297,6 +308,15 @@ class ParamManager(object):
 
         if result.isdigit():
             return bool(int(result))
+
+    def get_size(self, path):
+        total_size = 0
+        for dirpath, dirnames, filenames in os.walk(path):
+            for f in filenames:
+                fp = os.path.join(dirpath, f)
+                total_size += os.path.getsize(fp)
+
+        return total_size
 
     def send_mails(self, host_url, dests, subject, text):
         import smtplib

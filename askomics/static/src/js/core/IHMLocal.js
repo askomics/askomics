@@ -885,7 +885,12 @@ class IHMLocal {
         $('.del_user').click(function() {
           __ihm.delUser(this.id);
         });
-        $('.table-user').DataTable();
+        $('.table-user').DataTable({
+                'order': [[1, 'asc']],
+                'columnDefs': [
+                    { "type": "file-size", targets: 6 }
+                ]
+        });
       });
 
       this.shortcutsView.updateShortcuts(true);

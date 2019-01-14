@@ -10,7 +10,7 @@ from askomics.libaskomics.GalaxyConnector import GalaxyConnector
 from askomics.libaskomics.DatabaseConnector import DatabaseConnector
 
 from validate_email import validate_email
-
+import humanize
 
 class LocalAuth(ParamManager):
     """[summary]
@@ -392,9 +392,14 @@ class LocalAuth(ParamManager):
         """get all about all user"""
 
         database = DatabaseConnector(self.settings, self.session)
+
         query = '''
-        SELECT username, email, password, admin, blocked
-        FROM users
+        SELECT u.username, u.email, u.password, u.admin, u.blocked, g.url, COUNT(distinct q.id) AS nquery, COUNT(distinct i.id) AS nintegration
+        FROM users u
+        LEFT JOIN galaxy_accounts g ON u.user_id=g.user_id
+        LEFT JOIN query q ON u.user_id=q.user_id
+        LEFT JOIN integration i ON u.user_id=i.user_id
+        GROUP BY u.username, u.email, u.admin, u.blocked
         '''
 
         rows = database.execute_sql_query(query)
@@ -402,12 +407,18 @@ class LocalAuth(ParamManager):
 
         if rows:
             for elem in rows:
+                dir_size = self.get_size(self.get_user_dir_path(elem[0]))
                 user = {}
                 user['ldap'] = True if elem[2] is None else False
                 user['username'] = elem[0]
                 user['email'] = elem[1]
                 user['admin'] = self.Bool(elem[3])
                 user['blocked'] = self.Bool(elem[4])
+                user['gurl'] = elem[5] if elem[5] else None
+                user['nquery'] = elem[6]
+                user['nintegration'] = elem[7]
+                user['dirsize'] = dir_size
+                user['hdirsize'] = humanize.naturalsize(dir_size)
                 results.append(user)
 
             return results
