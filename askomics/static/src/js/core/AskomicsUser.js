@@ -14,7 +14,7 @@ class AskomicsUser{
     return new Promise((resolve, reject) => {
       let service = new RestServiceJs('checkuser');
       service.getAll((user) => {
-        if (user.username == "") {
+        if ($.isEmptyObject(user)) {
           __ihm.displayNavbar(false, '');
           // redirect to login page
         }else{
