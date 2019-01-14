@@ -1708,7 +1708,7 @@ class AskView(object):
             self.data.error[e]
             return self.data
 
-        self.data['sucess'] = 'success'
+        self.data['success'] = 'success'
         return self.data
 
 
