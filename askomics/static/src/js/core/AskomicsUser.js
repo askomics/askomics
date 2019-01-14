@@ -27,7 +27,7 @@ class AskomicsUser{
           if (this.galaxy) {
             AskomicsGalaxyService.show();
           }
-          AskomicsUser.cleanHtmlLogin();
+          AskomicsUser.cleanHtmlLoginSignup();
           resolve();
         }
       });
@@ -81,23 +81,35 @@ class AskomicsUser{
   logout(callback){
     let service = new RestServiceJs('logout');
     service.getAll(() => {
-      AskomicsUser.cleanHtmlLogin();
+      AskomicsUser.cleanHtmlLoginSignup();
       __ihm.displayNavbar(false, '');
       callback(this);
     });
   }
 
-  static cleanHtmlLogin() {
+  static cleanHtmlLoginSignup() {
     $('#login_error').hide();
     $('#spinner_login').addClass('hidden');
     $('#cross_login').addClass('hidden');
     $('#login_password').val('');
+
+    $('#signup_error').hide();
+    $('#spinner_signup').addClass('hidden');
+    $('#cross_signup').addClass('hidden');
+    $('#signup_password').val('');
+    $('#signup_password2').val('');
   }
 
   static errorHtmlLogin() {
     $('#login_error').show();
     $('#spinner_login').addClass('hidden');
     $('#cross_login').removeClass('hidden');
+  }
+
+  static errorHtmlSignup() {
+    $('#signup_error').show();
+    $('#spinner_signup').addClass('hidden');
+    $('#cross_signup').removeClass('hidden');
   }
 
   isLogin() {

@@ -55,8 +55,29 @@ askomics.footer_version = 18.10.1
 # Authentication
 # - salt: Change the salt into a random string
 # - locked_account: new account are locked a creation (true or false)
+# - password_length: the minimum passsword length required
+# - password_must_contain_maj: password must contain at least one maj (true or false)
+# - password_must_contain_num: password must contain at least one number (true or false)
+# - password_must_contain_symbol: password must contain at least one symbol (!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~) (true or false)
 askomics.salt = AskOmics
 askomics.locked_account = false
+askomics.password_length = 8
+askomics.password_must_contain_maj = true
+askomics.password_must_contain_num = true
+askomics.password_must_contain_symbol = true
+
+# Ldap authentication
+# - ldap_auth: set to true to enable ldap authentication
+askomics.ldap_auth = false
+# askomics.ldap.message = login with your ldap credentials
+# askomics.ldap_host = localhost
+# askomics.ldap_port = 389
+# askomics.ldap_bind_dn = cn=admin,dc=example,dc=org
+# askomics.ldap_bind_passwd = admin
+# askomics.ldap_user_search_base = ou=Users,dc=example,dc=org
+# askomics.ldap_user_filter = (&(objectClass=person)(|(uid=%s)(mail=%s)))
+# askomics.ldap_username_attr = uid
+# askomics.ldap_email_attr = mail
 
 # Proxy setting
 # Set askomics.proxy to:

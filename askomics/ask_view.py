@@ -51,7 +51,8 @@ from pyramid.httpexceptions import (
 
 from validate_email import validate_email
 
-from askomics.libaskomics.Security import Security
+from askomics.libaskomics.LocalAuth import LocalAuth
+from askomics.libaskomics.LdapAuth import LdapAuth
 
 @view_defaults(renderer='json', route_name='start_point')
 class AskView(object):
@@ -655,7 +656,7 @@ class AskView(object):
             raise ValueError("Can not load public data with a non admin account !")
 
         jm = JobManager(self.settings, self.request.session)
-        jobid = jm.save_integration_job(file_name)
+        jobid = jm.save_integration_job(file_name, self.request.session['user_id'])
 
         sfc = SourceFileConvertor(self.settings, self.request.session)
         src_file = sfc.get_source_files([file_name], forced_type, uri_set=uris)[0]
@@ -710,7 +711,7 @@ class AskView(object):
             raise ValueError("Can not import public data with a non admin account !")
 
         jm = JobManager(self.settings, self.request.session)
-        jobid = jm.save_integration_job(url)
+        jobid = jm.save_integration_job(url, self.request.session['user_id'])
 
         src_file = SourceFileURL(self.settings, self.request.session, url)
         graph = src_file.graph
@@ -766,7 +767,7 @@ class AskView(object):
             raise ValueError("Cannot import public gff with a non admin account !")
 
         jm = JobManager(self.settings, self.request.session)
-        jobid = jm.save_integration_job(file_name)
+        jobid = jm.save_integration_job(file_name, self.request.session['user_id'])
         sfc = SourceFileConvertor(self.settings, self.request.session)
         src_file_gff = sfc.get_source_files([file_name], forced_type, uri_set={0: uri})[0]
         graph = src_file_gff.graph
@@ -818,7 +819,7 @@ class AskView(object):
             raise ValueError("Can not import public turtle file with a non admin account !")
 
         jm = JobManager(self.settings, self.request.session)
-        jobid = jm.save_integration_job(file_name)
+        jobid = jm.save_integration_job(file_name, self.request.session['user_id'])
         sfc = SourceFileConvertor(self.settings, self.request.session)
         src_file_ttl = sfc.get_source_files([file_name], forced_type)[0]
         graph = src_file_ttl.graph
@@ -877,7 +878,7 @@ class AskView(object):
 
         graph = src_file_bed.graph
         jm = JobManager(self.settings, self.request.session)
-        jobid = jm.save_integration_job(file_name)
+        jobid = jm.save_integration_job(file_name, self.request.session['user_id'])
         try:
             self.log.debug('--> Parsing BED')
             src_file_bed.persist(self.request.host_url, public)
@@ -994,7 +995,7 @@ class AskView(object):
                 rg = ""
                 if 'requestGraph' in body:
                     rg = body['requestGraph']
-                jobid = jm.save_query_job(rg, body['variates'])
+                jobid = jm.save_query_job(rg, body['variates'], self.request.session['user_id'])
 
 
             typeRequest = ''
@@ -1059,8 +1060,8 @@ class AskView(object):
         maxrows = self.settings['askomics.triplestore_results_max_rows'] if 'askomics.triplestore_results_max_rows' in self.settings else None
 
         jm = JobManager(self.settings, self.request.session)
-        integration_jobs = jm.list_integration_jobs()
-        query_jobs = jm.list_query_jobs()
+        integration_jobs = jm.list_integration_jobs(self.request.session['user_id'])
+        query_jobs = jm.list_query_jobs(self.request.session['user_id'])
 
         return {'maxrows': maxrows, 'integration': integration_jobs, 'query': query_jobs}
 
@@ -1145,63 +1146,84 @@ class AskView(object):
         email = body['email']
         password = body['password']
         password2 = body['password2']
+        self.data['error'] = []
+        error = False
 
-        self.log.debug('==== user info ====')
-        self.log.debug('username: ' + username)
-        self.log.debug('email: ' + email)
+        local_auth = LocalAuth(self.settings, self.request.session)
 
+        if not validate_email(email):
+            self.log.debug('Email is not valid')
+            self.data['error'].append('Passwords are not identical')
+            error = True
 
+        if not password == password2:
+            self.log.debug('Email is not valid')
+            self.data['error'].append('Passwords are not identical')
+            error = True
+
+        if len(password) < int(self.settings['askomics.password_length']):
+            self.log.debug('Password must be at least {} characters'.format(self.settings['askomics.password_length']))
+            self.data['error'].append('Password must be at least {} characters'.format(self.settings['askomics.password_length']))
+            error = True
+
+        if self.settings['askomics.password_must_contain_maj'] == 'true' and password.islower():
+            self.log.debug('Password must contain at least one capital letter')
+            self.data['error'].append('Password must contain at least one capital letter')
+            error = True
+
+        if self.settings['askomics.password_must_contain_num'] == 'true' and not any(char.isdigit() for char in password):
+            self.log.debug('Password must contain at least one number')
+            self.data['error'].append('Password must contain at least one number')
+            error = True
+
+        if self.settings['askomics.password_must_contain_symbol'] == 'true' and not any(char in set('!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~') for char in password):
+            self.log.debug('Password must contain at least one special character')
+            self.data['error'].append('Password must contain at least one special character')
+            error = True
+
+        if local_auth.is_username_in_db(username):
+            self.log.debug('Username is taken')
+            self.data['error'].append('Username is taken')
+            error = True
+
+        if local_auth.is_email_in_db(email):
+            self.log.debug('Email is already registered')
+            self.data['error'].append('Email is already registered')
+            error = True
+
+        if error:
+            return self.data
+
+        self.data['error'] = []
 
         try:
-            security = Security(self.settings, self.request.session, username, email, password, password2)
-
-            is_valid_email = security.check_email()
-            are_passwords_identical = security.check_passwords()
-            is_pw_enough_longer = security.check_password_length()
-            is_username_already_exist = security.check_username_in_database()
-            is_email_already_exist = security.check_email_in_database()
-
-            self.data['error'] = []
-            error = False
-
-            if not is_valid_email:
-                self.data['error'].append('Email is not valid')
-                error = True
-
-            if not are_passwords_identical:
-                self.data['error'].append('Passwords are not identical')
-                error = True
-
-            if not is_pw_enough_longer:
-                self.data['error'].append('Password must be at least 8 characters')
-                error = True
-
-            if is_username_already_exist:
-                self.data['error'].append('Username already exist')
-                error = True
-
-            if is_email_already_exist:
-                self.data['error'].append('Email already exist')
-                error = True
-
-            if error:
-                return self.data
-
-            self.data['error'] = []
-
-            security.persist_user(self.request.host_url)
-            security.create_user_graph()
-            security.log_user(self.request)
-
-            self.data['username'] = username
-            admin_blocked = security.get_admin_blocked_by_username()
-            self.data['admin'] = admin_blocked['admin']
-            self.data['blocked'] = admin_blocked['blocked']
-            self.data['galaxy'] = security.check_galaxy()
+            local_user = local_auth.persist_user(username, email, password)
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
-            self.data['error'] = "Bad server configuration!"
+            self.data['error'] = "Database problem"
             self.request.response.status = 400
+
+        try:
+            local_auth.create_user_graph(username)
+        except Exception as e:
+            traceback.print_exc(file=sys.stdout)
+            self.data['error'] = "Triplestore problem"
+            self.request.response.status = 400
+
+        self.request.session['user_id'] = local_user['id']
+        self.request.session['username'] = local_user['username']
+        self.request.session['email'] = local_user['email']
+        self.request.session['admin'] = local_user['admin']
+        self.request.session['blocked'] = local_user['blocked']
+        self.request.session['graph'] = self.settings['askomics.graph'] + ':' + local_user['username']
+        self.request.session['galaxy'] = local_user['galaxy']
+
+        self.data['user_id'] = local_user['id']
+        self.data['username'] = local_user['username']
+        self.data['email'] = local_user['email']
+        self.data['admin'] = local_user['admin']
+        self.data['blocked'] = local_user['blocked']
+        self.data['galaxy'] = local_user['galaxy']
 
         return self.data
 
@@ -1209,19 +1231,34 @@ class AskView(object):
     def checkuser(self):
 
         if self.request.session['username'] != '':
-            # User connected, get admin and blocked status
-            security = Security(self.settings, self.request.session, self.request.session['username'], '', '', '')
-            admin_blocked_status = security.get_admin_blocked_by_username()
-            self.request.session['admin'] = admin_blocked_status['admin']
-            self.request.session['blocked'] = admin_blocked_status['blocked']
+            # a user is connected, return it
+            local_auth = LocalAuth(self.settings, self.request.session)
+            try:
+                local_user = local_auth.get_user_infos(self.request.session['username'])
+            except Exception as e:
+                self.log.debug("Database probleme")
+                raise e
 
-        self.data['username'] = self.request.session['username']
-        self.data['admin'] = self.request.session['admin']
-        self.data['blocked'] = self.request.session['blocked']
-        self.data['galaxy'] = self.request.session['galaxy']
+            if local_user:
+
+                self.request.session['user_id'] = local_user['id']
+                self.request.session['username'] = local_user['username']
+                self.request.session['email'] = local_user['email']
+                self.request.session['admin'] = local_user['admin']
+                self.request.session['blocked'] = local_user['blocked']
+                self.request.session['graph'] = self.settings['askomics.graph'] + ':' + local_user['username']
+                self.request.session['galaxy'] = local_user['galaxy']
+
+                self.data['user_id'] = local_user['id']
+                self.data['username'] = local_user['username']
+                self.data['email'] = local_user['email']
+                self.data['admin'] = local_user['admin']
+                self.data['blocked'] = local_user['blocked']
+                self.data['galaxy'] = local_user['galaxy']
 
         return self.data
 
+    # TODO: rewrite this. used only in askomics help, whitch is dead for now
     @view_config(route_name='nbUsers', request_method='GET')
     def nbUsers(self):
 
@@ -1274,10 +1311,13 @@ class AskView(object):
         Log out the user, reset the session
         """
 
+        self.request.session['user_id'] = ''
         self.request.session['username'] = ''
+        self.request.session['email'] = ''
         self.request.session['admin'] = ''
+        self.request.session['blocked'] = ''
         self.request.session['graph'] = ''
-        self.request.session['galaxy'] = False
+        self.request.session['galaxy'] = {}
         self.request.session = {}
 
         return
@@ -1286,115 +1326,72 @@ class AskView(object):
     def login(self):
 
         body = self.request.json_body
-        username_email = body['username_email']
+        login = body['username_email']
         password = body['password']
-        username = ''
-        email = ''
-
+        auth_type = 'local'
+        auth_success = False
         self.data['error'] = []
 
-        if validate_email(username_email):
-            email = username_email
-            auth_type = 'email'
+        local_auth = LocalAuth(self.settings, self.request.session)
+        local_user = local_auth.get_user_infos(login)
+
+        if not local_user:
+            # No user in db with this login. Try ldap
+            ldap = LdapAuth(self.settings, self.request.session)
+            ldap_user = ldap.authenticate_user(login, password)
+
+            if ldap_user:
+                # login is registered in the ldap, store him in localdb
+                self.log.debug(ldap_user)
+                auth_type = 'ldap'
+                local_auth.set_auth_type(auth_type)
+                local_user = local_auth.persist_user(ldap_user['username'], ldap_user['mail'])
         else:
-            username = username_email
-            auth_type = 'username'
+            auth_type = local_user['auth_type']
 
-        security = Security(self.settings, self.request.session, username, email, password, password)
+        # Now, authenticate the user
+        if auth_type == 'local':
+            auth_success = local_auth.authenticate_user(login, password)
+        elif auth_type == 'ldap':
+            ldap = LdapAuth(self.settings, self.request.session)
+            auth_success = bool(ldap.authenticate_user(login, password))
 
-        if auth_type == 'email':
-            email_in_ts = security.check_email_in_database()
+        if auth_success:
 
-            if not email_in_ts:
-                self.data['error'].append('email is not registered')
-                return self.data
+            self.request.session['user_id'] = local_user['id']
+            self.request.session['username'] = local_user['username']
+            self.request.session['email'] = local_user['email']
+            self.request.session['admin'] = local_user['admin']
+            self.request.session['blocked'] = local_user['blocked']
+            self.request.session['graph'] = self.settings['askomics.graph'] + ':' + local_user['username']
+            self.request.session['galaxy'] = local_user['galaxy']
 
-            password_is_correct = security.check_email_password()
+            self.data['user_id'] = local_user['id']
+            self.data['username'] = local_user['username']
+            self.data['email'] = local_user['email']
+            self.data['admin'] = local_user['admin']
+            self.data['blocked'] = local_user['blocked']
+            self.data['galaxy'] = local_user['galaxy']
 
-            if not password_is_correct:
-                self.data['error'].append('Password is incorrect')
-                return self.data
-
-            # Set username
-            security.set_username_by_email()
-
-            # Get the admin and blocked status
-            admin_blocked = security.get_admin_blocked_by_email()
-            security.set_admin(admin_blocked['admin'])
-            security.set_blocked(admin_blocked['blocked'])
-
-
-        elif auth_type == 'username':
-            username_in_ts = security.check_username_in_database()
-
-            if not username_in_ts:
-                self.data['error'].append('username is not registered')
-                return self.data
-
-            # Get the admin and blocked status
-            admin_blocked = security.get_admin_blocked_by_username()
-            security.set_admin(admin_blocked['admin'])
-            security.set_blocked(admin_blocked['blocked'])
-
-            # Get if user has a connected Galaxy account
-            galaxy = security.check_galaxy()
-            security.set_galaxy(galaxy)
-
-            password_is_correct = security.check_username_password()
-
-            if not password_is_correct:
-                self.data['error'].append('Password is incorrect')
-                return self.data
-
-        # User pass the authentication, log him
-        try:
-            security.log_user(self.request)
-            self.data['username'] = username
-            self.data['admin'] = admin_blocked['admin']
-            self.data['blocked'] = admin_blocked['blocked']
-            self.data['galaxy'] = self.request.session['galaxy']
-
-        except Exception as e:
-            self.data['error'] = str(e)
-            self.request.response.status = 400
-            return self.data
-
-        param_manager = ParamManager(self.settings, self.request.session)
-        param_manager.get_upload_directory()
+        else:
+            self.data['error'].append('Wrong username or password')
 
         return self.data
 
-    @view_config(route_name='api_key', request_method='POST')
-    def api_key(self):
-
-        self.checkAuthSession()
-
-        body = self.request.json_body
-        self.log.debug(body)
-        username = body['username']
-        keyname = body['keyname']
-
-        security = Security(self.settings, self.request.session, username, '', '', '')
-
-        try:
-            security.add_apikey(keyname)
-            # query_laucher.process_query(sqa.add_apikey(username, keyname))
-        except Exception as e:
-            self.log.debug(str(e))
-            self.data['error'] = str(e)
-            self.request.response.status = 400
-            return self.data
-
-        self.data['sucess'] = 'success'
-        return self.data
 
     @view_config(route_name='renew_apikey', request_method='GET')
     def renew_apikey(self):
 
         self.checkAuthSession()
 
-        security = Security(self.settings, self.request.session, self.request.session['username'], '', '', '')
-        security.renew_apikey()
+        local_auth = LocalAuth(self.settings, self.request.session)
+
+        try:
+            local_auth.renew_apikey(self.request.session['username'])
+        except Exception as e:
+            self.log.debug("Database problem")
+            raise e
+
 
     @view_config(route_name='connect_galaxy', request_method='POST')
     def connect_galaxy(self):
@@ -1405,26 +1402,29 @@ class AskView(object):
         url = body['url']
         key = body['key']
 
-        security = Security(self.settings, self.request.session, self.request.session['username'], '', '', '')
+        local_auth = LocalAuth(self.settings, self.request.session)
 
+        # First, delete galaxy
+        try:
+            local_auth.delete_galaxy(self.request.session['user_id'])
+        except Exception as e:
+            self.log.debug('Database problem')
+            raise e
 
-        # Check if a galaxy is already registred
-        if security.check_galaxy():
-            security.delete_galaxy()
-            self.request.session['galaxy'] = False
-
-        # If url or apikey are empty, do nothing (only deletion)
+        # then, add the new (if there is a new)
         if not url or not key:
+            # delete galaxy
             self.data['success'] = 'deleted'
+            self.request.session['galaxy'] = {}
             return self.data
 
         # Insert the new Galaxy
         try:
-            security.add_galaxy(url, key)
-            self.request.session['galaxy'] = True
+            local_auth.add_galaxy(url, key, self.request.session['user_id'])
+            self.request.session['galaxy'] = {}
         except Exception as e:
-
             self.data['error'] = 'Connection to Galaxy failed'
+            self.log.debug('Connection to Galaxy failed')
             return self.data
 
         self.data['success'] = 'inserted'
@@ -1438,37 +1438,20 @@ class AskView(object):
 
         self.data['error'] = ''
 
-        security = Security(self.settings, self.request.session, '', '', '', '')
+        local_auth = LocalAuth(self.settings, self.request.session)
+        local_user = local_auth.get_user_infos_api_key(apikey)
 
-        # Check if API key exist, and if yes, get the user
-        security.get_owner_of_apikey(apikey)
-
-        if not security.get_username():
+        if local_user:
+            self.request.session['user_id'] = local_user['id']
+            self.request.session['username'] = local_user['username']
+            self.request.session['email'] = local_user['email']
+            self.request.session['admin'] = local_user['admin']
+            self.request.session['blocked'] = local_user['blocked']
+            self.request.session['graph'] = self.settings['askomics.graph'] + ':' + local_user['username']
+            self.request.session['galaxy'] = local_user['galaxy']
+        else:
             self.data['error'] = 'API key belong to nobody'
             return self.data
-
-        # Get the admin and blocked status
-        admin_blocked = security.get_admin_blocked_by_username()
-        security.set_admin(admin_blocked['admin'])
-        security.set_blocked(admin_blocked['blocked'])
-        # Get if user has a connected Galaxy account
-        galaxy = security.check_galaxy()
-        security.set_galaxy(galaxy)
-
-        # Log the user
-        try:
-            security.log_user(self.request)
-            self.data['username'] = security.get_username()
-            self.data['admin'] = admin_blocked['admin']
-            self.data['blocked'] = admin_blocked['blocked']
-
-        except Exception as e:
-            self.data['error'] = str(e)
-            self.log.error(str(e))
-            return self.data
-
-        param_manager = ParamManager(self.settings, self.request.session)
-        param_manager.get_upload_directory()
 
         if self.request.application_url.endswith('/'):
             return HTTPFound(self.request.application_url)
@@ -1476,46 +1459,34 @@ class AskView(object):
         return HTTPFound(self.request.application_url + '/')
 
 
-    @view_config(route_name='login_api', request_method='POST')
+    @view_config(route_name='login_api', request_method='GET')
     def login_api(self):
 
-        body = self.request.json_body
-        apikey = body['apikey']
+        apikey = self.request.GET['key']
 
         self.data['error'] = ''
 
-        security = Security(self.settings, self.request.session, '', '', '', '')
+        local_auth = LocalAuth(self.settings, self.request.session)
+        local_user = local_auth.get_user_infos_api_key(apikey)
 
-        # Check if API key exist, and if yes, get the user
-        security.get_owner_of_apikey(apikey)
+        if local_user:
+            self.request.session['user_id'] = local_user['id']
+            self.request.session['username'] = local_user['username']
+            self.request.session['email'] = local_user['email']
+            self.request.session['admin'] = local_user['admin']
+            self.request.session['blocked'] = local_user['blocked']
+            self.request.session['graph'] = self.settings['askomics.graph'] + ':' + local_user['username']
+            self.request.session['galaxy'] = local_user['galaxy']
 
-        if not security.get_username():
+            self.data['user_id'] = local_user['id']
+            self.data['username'] = local_user['username']
+            self.data['email'] = local_user['email']
+            self.data['admin'] = local_user['admin']
+            self.data['blocked'] = local_user['blocked']
+            self.data['galaxy'] = local_user['galaxy']
+
+        else:
             self.data['error'] = 'API key belong to nobody'
-            return self.data
-
-        # Get the admin and blocked status
-        admin_blocked = security.get_admin_blocked_by_username()
-        security.set_admin(admin_blocked['admin'])
-        security.set_blocked(admin_blocked['blocked'])
-        # Get if user has a connected Galaxy account
-        galaxy = security.check_galaxy()
-        security.set_galaxy(galaxy)
-
-        # Log the user
-        try:
-            security.log_user(self.request)
-            self.data['username'] = security.get_username()
-            self.data['admin'] = admin_blocked['admin']
-            self.data['blocked'] = admin_blocked['blocked']
-
-        except Exception as e:
-            self.data['error'] = str(e)
-            self.log.error(str(e))
-            self.request.response.status = 400
-            return self.data
-
-        param_manager = ParamManager(self.settings, self.request.session)
-        param_manager.get_upload_directory()
 
         return self.data
 
@@ -1530,10 +1501,10 @@ class AskView(object):
         self.checkAuthSession()
         self.checkAdminSession()
 
-        security = Security(self.settings, self.request.session, self.request.session['username'], '', '', '')
-        infos = security.get_users_infos()
+        local_auth = LocalAuth(self.settings, self.request.session)
+        all_users = local_auth.get_all_users_infos()
 
-        self.data['result'] = infos
+        self.data['result'] = all_users
         self.data['me'] = self.request.session['username']
 
         return self.data
@@ -1561,8 +1532,8 @@ class AskView(object):
             new_status = 'false'
 
         try:
-            security = Security(self.settings, self.request.session, self.request.session['username'], '', '', '')
-            security.lock_user(new_status, username)
+            local_auth = LocalAuth(self.settings, self.request.session)
+            local_auth.lock_user(new_status, username)
         except Exception as e:
             self.data['error'] = str(e)
             self.log.error(str(e))
@@ -1593,8 +1564,8 @@ class AskView(object):
             new_status = 'false'
 
         try:
-            security = Security(self.settings, self.request.session, self.request.session['username'], '', '', '')
-            security.admin_user(new_status, username)
+            local_auth = LocalAuth(self.settings, self.request.session)
+            local_auth.admin_user(new_status, username)
         except Exception as e:
             self.data['error'] = str(e)
             self.log.error(str(e))
@@ -1619,19 +1590,28 @@ class AskView(object):
         passwd = body['passwd']
         confirmation = body['passwd_conf']
 
+        local_auth = LocalAuth(self.settings, self.request.session)
+
         # Non admin can only delete himself
         if self.request.session['username'] != username and not self.request.session['admin']:
             raise Exception('forbidden')
 
         # If confirmation, check the user passwd
         if confirmation:
-            security = Security(self.settings, self.request.session, username, '', passwd, passwd)
-            if not security.check_username_password():
+            local_user = local_auth.get_user_infos(self.request.session['username'])
+
+            if local_user['auth_type'] == 'local':
+                auth_success = local_auth.authenticate_user(self.request.session['username'], passwd)
+            else: #ldap
+                ldap = LdapAuth(self.settings, self.request.session)
+                auth_success = ldap.authenticate_user(self.request.session['username'], passwd)
+
+            if not auth_success:
                 self.data['error'] = 'Wrong password'
                 self.request.response.status = 400
                 return self.data
 
-        security = Security(self.settings, self.request.session, self.request.session['username'], '', '', '')
+
         sqb = SparqlQueryBuilder(self.settings, self.request.session)
         query_laucher = QueryLauncher(self.settings, self.request.session)
 
@@ -1656,7 +1636,7 @@ class AskView(object):
 
         # Delete user infos
         try:
-            security.delete_user(username)
+            local_auth.delete_user(username)
         except Exception as e:
             return 'failed: ' + str(e)
 
@@ -1676,23 +1656,18 @@ class AskView(object):
 
         self.checkAuthSession()
 
-        security = Security(self.settings, self.request.session, self.request.session['username'], '', '', '')
-        infos = security.get_user_infos()
+        local_auth = LocalAuth(self.settings, self.request.session)
+        local_user = local_auth.get_user_infos(self.request.session['username'])
 
-        result = {}
+        self.data['user_id'] = local_user['id']
+        self.data['username'] = local_user['username']
+        self.data['email'] = local_user['email']
+        self.data['admin'] = local_user['admin']
+        self.data['blocked'] = local_user['blocked']
+        self.data['apikey'] = local_user['apikey']
+        self.data['galaxy'] = local_user['galaxy']
 
-        result['email'] = infos[0][0]
-        result['username'] = self.request.session['username']
-        result['admin'] = infos[0][1]
-        result['blocked'] = infos[0][2]
-        result['apikey'] = infos[0][3]
-
-        galaxy_dict = {}
-
-        if infos[1]:
-            result['galaxy'] = {'url': infos[1]['url'], 'key': infos[1]['key']}
-
-        return result
+        return self.data
 
 
     @view_config(route_name='update_mail', request_method='POST')
@@ -1703,25 +1678,32 @@ class AskView(object):
 
         body = self.request.json_body
         username = body['username']
-        email = body['email']
+        new_email = body['email']
 
-        # Check email
 
-        security = Security(self.settings, self.request.session, username, email, '', '')
+        local_auth = LocalAuth(self.settings, self.request.session)
+        local_user = local_auth.get_user_infos(self.request.session['username'])
 
-        if not security.check_email():
-            self.data['error'] = 'Not a valid email'
+        # If user is ldap, deny
+        if local_user['auth_type'] == 'ldap':
+            self.data['error'] = "Ldap users can't change their email"
+            return self.data
+
+        # Check new email
+        if not validate_email(new_email):
+            self.data['error'] = 'Not a valid mail'
+            self.log.debug('not a valid mail')
             return self.data
 
         try:
-            security.update_email()
+            local_auth.update_email(self.request.session['username'], new_email)
         except Exception as e:
-            self.data['error'] = 'error when updating mail: ' + str(e)
+            self.data.error[e]
             return self.data
 
-        self.data['success'] = 'success'
-
+        self.data['sucess'] = 'success'
         return self.data
+
 
     @view_config(route_name='update_passwd', request_method='POST')
     def update_passwd(self):
@@ -1734,28 +1716,51 @@ class AskView(object):
         passwd = body['passwd']
         passwd2 = body['passwd2']
         current_passwd = body['current_passwd']
+        error = False
 
-        security1 = Security(self.settings, self.request.session, username, '', current_passwd, current_passwd)
+        local_auth = LocalAuth(self.settings, self.request.session)
+        local_user = local_auth.get_user_infos(self.request.session['username'])
 
-        if not security1.check_username_password():
+        if local_user['auth_type'] == 'ldap':
+            self.data['error'] = "ldap users can't change their password"
+            return self.data
+
+        auth_success = local_auth.authenticate_user(self.request.session['username'], current_passwd)
+
+        if not auth_success:
             self.data['error'] = 'Current password is wrong'
+            error = True
+
+        if not passwd == passwd2:
+            self.log.debug('Email is not valid')
+            self.data['error'].append('Passwords are not identical')
+            error = True
+
+        if len(passwd) < int(self.settings['askomics.password_length']):
+            self.log.debug('Password must be at least {} characters'.format(self.settings['askomics.password_length']))
+            self.data['error'].append('Password must be at least {} characters'.format(self.settings['askomics.password_length']))
+            error = True
+
+        if self.settings['askomics.password_must_contain_maj'] == 'true' and passwd.islower():
+            self.log.debug('Password must contain at least one capital letter')
+            self.data['error'].append('Password must contain at least one capital letter')
+            error = True
+
+        if self.settings['askomics.password_must_contain_num'] == 'true' and not any(char.isdigit() for char in passwd):
+            self.log.debug('Password must contain at least one number')
+            self.data['error'].append('Password must contain at least one number')
+            error = True
+
+        if self.settings['askomics.password_must_contain_symbol'] == 'true' and not any(char in set('!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~') for char in passwd):
+            self.log.debug('Password must contain at least one special character')
+            self.data['error'].append('Password must contain at least one special character')
+            error = True
+
+        if error:
             return self.data
-
-        security = Security(self.settings, self.request.session, username, '', passwd, passwd2)
-
-
-        # check if the passwd are identical
-        if not security.check_passwords():
-            self.data['error'] = 'Passwords are not identical'
-            return self.data
-
-        if not security.check_password_length():
-            self.data['error'] = 'Password is too small (8char min)'
-            return self.data
-
 
         try:
-            security.update_passwd()
+            local_auth.update_password(self.request.session['username'], passwd)
         except Exception as e:
             self.data['error'] = 'error when updating password: ' + str(e)
             return self.data
@@ -1773,66 +1778,98 @@ class AskView(object):
         history = body['history']
         allowed_files = body['allowed_files']
 
+        local_auth = LocalAuth(self.settings, self.request.session)
+
         try:
-            self.data = {}
-
-            # Check if a galaxy is registered
-            security = Security(self.settings, self.request.session, self.request.session['username'], '', '', '')
-
-            galaxy_auth = security.get_galaxy_infos()
-
-            if not galaxy_auth:
-                self.data['error'] = 'No galaxy account registered'
-                return self.data
-
-            # check if the galaxy connection is ok
-            galaxy = GalaxyConnector(self.settings, self.request.session, galaxy_auth['url'], galaxy_auth['key'])
-            if not galaxy.check_galaxy_instance():
-                self.data['error'] = 'Impossible to connect the galaxy instance. Check url and api key'
-                return self.data
-
-            # Then, get the datasets
-            results = galaxy.get_datasets_and_histories(allowed_files, history_id=history)
-
-            # Boolean values for handlebars
-            for dataset in results['datasets']:
-                if dataset['state'] == 'ok':
-                    dataset['success'] = True
-                elif dataset['state'] == 'queued':
-                    dataset['notick'] = False
-                    dataset['queued'] = True
-                else:
-                    dataset['notick'] = False
-                    dataset['error'] = True
-
-            self.data['datasets'] = results['datasets']
-            self.data['histories'] = results['histories']
+            galaxy_credentials = local_auth.get_galaxy_infos(self.request.session['user_id'])
         except Exception as e:
-            self.data['error'] = str(e)
+            self.log.error(e)
+            self.data['error'] = 'Database error: ' + str(e)
+            return self.data
+
+        if not galaxy_credentials:
+            self.data.error = 'No Galaxy account registered'
+            return self.data
+
+        # Check the galaxy account
+        galaxy = GalaxyConnector(self.settings, self.request.session, galaxy_credentials['url'], galaxy_credentials['key'])
+
+        try:
+            valid_galaxy = galaxy.check_galaxy_instance()
+        except Exception as e:
+            self.log.error(e)
+            self.data['error'] = 'Galaxy error: ' + str(e)
+            return self.data
+
+
+        if not valid_galaxy:
+            self.data['error'] = 'Impossible to connect the Galaxy instance, check url and api key'
+            return self.data
+
+        # Get the datasets
+        try:
+            galaxy_datasets = galaxy.get_datasets_and_histories(allowed_files, history_id=history)
+        except Exception as e:
+            self.log.error(e)
+            self.data['error'] = 'Galaxy error: ' + str(e)
+            return self.data
+
+
+        # Boolean values for handlebars
+        for dataset in galaxy_datasets['datasets']:
+            if dataset['state'] == 'ok':
+                dataset['success'] = True
+            elif dataset['state'] == 'queued':
+                dataset['notick'] = False
+                dataset['queued'] = True
+            else:
+                dataset['notick'] = False
+                dataset['error'] = True
+
+        self.data['datasets'] = galaxy_datasets['datasets']
+        self.data['histories'] = galaxy_datasets['histories']
 
         return self.data
 
     @view_config(route_name='upload_galaxy_files', request_method='POST')
     def upload_galaxy_file(self):
 
-        self.data = {}
-
         body = self.request.json_body
 
-        # get galaxy infos
-        security = Security(self.settings, self.request.session, self.request.session['username'], '', '', '')
+        local_auth = LocalAuth(self.settings, self.request.session)
 
-        galaxy_auth = security.get_galaxy_infos()
+        # get galaxy credentials
+        try:
+            galaxy_credentials = local_auth.get_galaxy_infos(self.request.session['user_id'])
+        except Exception as e:
+            self.log.error(e)
+            self.data['error'] = 'Database error: ' + str(e)
+            return self.data
 
-        if not galaxy_auth:
-            self.data['error'] = 'No Galaxy'
+        if not galaxy_credentials:
+            self.data.error = 'No Galaxy account registered'
+            return self.data
+
+        # Check the galaxy account
+        galaxy = GalaxyConnector(self.settings, self.request.session, galaxy_credentials['url'], galaxy_credentials['key'])
+
+        try:
+            valid_galaxy = galaxy.check_galaxy_instance()
+        except Exception as e:
+            self.log.error(e)
+            self.data['error'] = 'Galaxy error: ' + str(e)
+            return self.data
+
+
+        if not valid_galaxy:
+            self.data['error'] = 'Impossible to connect the Galaxy instance, check url and api key'
             return self.data
 
         # Upload files
         try:
-            galaxy = GalaxyConnector(self.settings, self.request.session, galaxy_auth['url'], galaxy_auth['key'])
             galaxy.upload_files(body['datasets'])
         except Exception as e:
+            self.log.error(e)
             self.data['error'] = 'Error during galaxy upload: ' + str(e)
             return self.data
 
@@ -1842,24 +1879,42 @@ class AskView(object):
     @view_config(route_name='get_galaxy_file_content', request_method='POST')
     def get_galaxy_file_content(self):
 
-        self.data = {}
         body = self.request.json_body
         dataset_id = body['dataset']
 
-        # get galaxy infos
-        security = Security(self.settings, self.request.session, self.request.session['username'], '', '', '')
+        local_auth = LocalAuth(self.settings, self.request.session)
 
-        galaxy_auth = security.get_galaxy_infos()
+        # get galaxy credentials
+        try:
+            galaxy_credentials = local_auth.get_galaxy_infos(self.request.session['user_id'])
+        except Exception as e:
+            self.log.error(e)
+            self.data['error'] = 'Database error: ' + str(e)
+            return self.data
 
-        if not galaxy_auth:
-            self.data['error'] = 'No Galaxy'
+        if not galaxy_credentials:
+            self.data.error = 'No Galaxy account registered'
+            return self.data
+
+        # Check the galaxy account
+        galaxy = GalaxyConnector(self.settings, self.request.session, galaxy_credentials['url'], galaxy_credentials['key'])
+
+        try:
+            valid_galaxy = galaxy.check_galaxy_instance()
+        except Exception as e:
+            self.log.error(e)
+            self.data['error'] = 'Galaxy error: ' + str(e)
+            return self.data
+
+        if not valid_galaxy:
+            self.data['error'] = 'Impossible to connect the Galaxy instance, check url and api key'
             return self.data
 
         # Get the file content
         try:
-            galaxy = GalaxyConnector(self.settings, self.request.session, galaxy_auth['url'], galaxy_auth['key'])
             self.data['json_query'] = galaxy.get_file_content(dataset_id)
         except Exception as e:
+            self.log.error(e)
             self.data['error'] = 'Error during galaxy upload: ' + str(e)
             return self.data
 
@@ -1871,18 +1926,36 @@ class AskView(object):
 
         body = self.request.json_body
 
-        # get Galaxy infos
-        security = Security(self.settings, self.request.session, self.request.session['username'], '', '', '')
+        local_auth = LocalAuth(self.settings, self.request.session)
 
-        galaxy_auth = security.get_galaxy_infos()
+        # get galaxy credentials
+        try:
+            galaxy_credentials = local_auth.get_galaxy_infos(self.request.session['user_id'])
+        except Exception as e:
+            self.log.error(e)
+            self.data['error'] = 'Database error: ' + str(e)
+            return self.data
 
-        if not galaxy_auth:
-            self.data['error'] = 'No Galaxy'
+        if not galaxy_credentials:
+            self.data.error = 'No Galaxy account registered'
+            return self.data
+
+        # Check the galaxy account
+        galaxy = GalaxyConnector(self.settings, self.request.session, galaxy_credentials['url'], galaxy_credentials['key'])
+
+        try:
+            valid_galaxy = galaxy.check_galaxy_instance()
+        except Exception as e:
+            self.log.error(e)
+            self.data['error'] = 'Galaxy error: ' + str(e)
+            return self.data
+
+        if not valid_galaxy:
+            self.data['error'] = 'Impossible to connect the Galaxy instance, check url and api key'
             return self.data
 
         # Send the file to Galaxy
         try:
-            galaxy = GalaxyConnector(self.settings, self.request.session, galaxy_auth['url'], galaxy_auth['key'])
             if 'json' in body:
                 galaxy.send_json_to_history(body['json'])
             else:
@@ -1891,10 +1964,11 @@ class AskView(object):
                 name = body['name']
                 galaxy.send_to_history(path, name, body['type'])
         except Exception as e:
+            self.log.error(e)
             self.data['error'] = 'Error during sending: ' + str(e)
             return self.data
 
-        self.data['success'] = 'path successfully sended in Galaxy'
+        self.data['success'] = 'Path successfully sent in Galaxy'
         return self.data
 
 

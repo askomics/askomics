@@ -1170,23 +1170,6 @@ class IHMLocal {
       });
     }
 
-    get_apikey(username, keyname) {
-      let service = new RestServiceJs('api_key');
-      let data = {'username': username, 'keyname': keyname};
-      $('#spinner_apikey').removeClass('hidden');
-      $('#tick_apikey').addClass('hidden');
-
-      service.post(data, function(d) {
-        if (!__ihm.manageErrorMessage(d)) {
-          return;
-        }
-        // reload
-        __ihm.userForm();
-      });
-
-
-    }
-
     connect_galaxy(url, key) {
       let service = new RestServiceJs('connect_galaxy');
       let data = {'url': url, 'key': key};
@@ -1316,10 +1299,9 @@ class IHMLocal {
             for (let i = user.error.length - 1; i >= 0; i--) {
               $('#signup_error').append(user.error[i] + '<br>');
             }
-            AskomicsUser.errorHtmlLogin();
-            return;
+            AskomicsUser.errorHtmlSignup();
           } else {
-            AskomicsUser.cleanHtmlLogin();
+            AskomicsUser.cleanHtmlLoginSignup();
             __ihm.displayNavbar(true, __ihm.user.username, __ihm.user.admin, __ihm.user.blocked);
             // Show interrogation
             $('.nav li.active').removeClass('active');
@@ -1345,7 +1327,7 @@ class IHMLocal {
             }
             AskomicsUser.errorHtmlLogin();
           } else {
-            AskomicsUser.cleanHtmlLogin();
+            AskomicsUser.cleanHtmlLoginSignup();
             __ihm.displayNavbar(true, __ihm.user.username, __ihm.user.admin, __ihm.user.blocked);
             // Show interrogation
             $('.nav li.active').removeClass('active');

@@ -95,7 +95,6 @@ def main(global_config, **settings):
     config.add_route('get_my_infos', 'get_my_infos')
     config.add_route('update_mail', 'update_mail')
     config.add_route('update_passwd', 'update_passwd')
-    config.add_route('api_key', '/api_key')
     config.add_route('renew_apikey', '/renew_apikey')
 
     config.add_route('serverinformations', '/serverinformations')

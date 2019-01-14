@@ -20,3 +20,4 @@ glob2
 psutil
 rdflib-jsonld
 PyGithub
+python-ldap
