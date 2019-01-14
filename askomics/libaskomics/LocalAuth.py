@@ -393,7 +393,7 @@ class LocalAuth(ParamManager):
 
         database = DatabaseConnector(self.settings, self.session)
         query = '''
-        SELECT username, email, admin, blocked
+        SELECT username, email, password, admin, blocked
         FROM users
         '''
 
@@ -403,10 +403,11 @@ class LocalAuth(ParamManager):
         if rows:
             for elem in rows:
                 user = {}
+                user['auth_type'] = 'ldap' if elem[2] is None else 'local'
                 user['username'] = elem[0]
                 user['email'] = elem[1]
-                user['admin'] = self.Bool(elem[2])
-                user['blocked'] = self.Bool(elem[3])
+                user['admin'] = self.Bool(elem[3])
+                user['blocked'] = self.Bool(elem[4])
                 results.append(user)
 
             return results
