@@ -280,6 +280,9 @@
         <div id="content_login" class="container" hidden>
           <h3 class="header-div">Login</h3>
           <hr/>
+
+          <div tal:condition="python:login_message != ''" class="alert alert-info" role="alert">${login_message}</div>
+
           <label for="username">Username or email adress</label><br/>
           <input id='login_username-email' name="username" type="text" placeholder="Username or email adress" required autofocus><br/><br/>
 
@@ -290,7 +293,7 @@
           <i class="hidden fa fa-spinner pulse" id='spinner_login'></i>
           <i class="hidden fa fa-times text-danger" id='cross_login'></i>
 
-          <p>(or <a id='show_signup' href="#">sign up</a> if you don't have an account)</p>
+          <p tal:condition="python:signup == 'true'">(or <a id='show_signup' href="#">sign up</a> if you don't have an account)</p>
           <!-- error message -->
             <div id='login_error' class="alert alert-danger" role="alert" hidden>
             </div>

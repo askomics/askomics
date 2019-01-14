@@ -53,12 +53,14 @@ askomics.footer_message =
 askomics.footer_version = 18.10.1
 
 # Authentication
+# - locked_account: new account are locked a creation (true or false, default: true)
 # - salt: Change the salt into a random string
 # - locked_account: new account are locked a creation (true or false)
 # - password_length: the minimum passsword length required
 # - password_must_contain_maj: password must contain at least one maj (true or false)
 # - password_must_contain_num: password must contain at least one number (true or false)
 # - password_must_contain_symbol: password must contain at least one symbol (!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~) (true or false)
+askomics.enable_account_creation = true
 askomics.salt = AskOmics
 askomics.locked_account = false
 askomics.password_length = 8
