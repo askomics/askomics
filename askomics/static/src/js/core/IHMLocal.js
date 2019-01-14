@@ -1041,7 +1041,7 @@ class IHMLocal {
       let service = new RestServiceJs('get_my_infos');
       service.getAll(function(d) {
         let template = AskOmics.templates.user_managment;
-        let context = {user: d, keys: d.apikeys, galaxy: d.galaxy};
+        let context = {user: d};
         let html = template(context);
         $('#content_user_info').empty();
         $('#content_user_info').append(html);

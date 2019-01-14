@@ -1657,7 +1657,13 @@ class AskView(object):
         self.checkAuthSession()
 
         local_auth = LocalAuth(self.settings, self.request.session)
-        local_user = local_auth.get_user_infos(self.request.session['username'])
+
+        try:
+            local_user = local_auth.get_user_infos(self.request.session['username'])
+        except Exception as e:
+            self.log.error(e)
+            self.data.error = 'Database error: ' + str(e)
+            return self.data
 
         self.data['user_id'] = local_user['id']
         self.data['username'] = local_user['username']
@@ -1665,7 +1671,8 @@ class AskView(object):
         self.data['admin'] = local_user['admin']
         self.data['blocked'] = local_user['blocked']
         self.data['apikey'] = local_user['apikey']
-        self.data['galaxy'] = local_user['galaxy']
+        self.data['galaxy'] = local_user['galaxy'] if local_user['galaxy'] else None
+        self.data['ldap'] = True if local_user['password'] == None else False
 
         return self.data
 
