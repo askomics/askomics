@@ -75,7 +75,7 @@ class LocalAuth(ParamManager):
                 'admin': self.Bool(rows[0][5]),
                 'blocked': self.Bool(rows[0][6]),
                 'apikey': rows[0][7],
-                'galaxy': galaxy_infos,
+                'galaxy': galaxy_infos if galaxy_infos else None,
                 'auth_type': auth_type
             }
 
@@ -108,7 +108,7 @@ class LocalAuth(ParamManager):
                 'admin': self.Bool(rows[0][5]),
                 'blocked': self.Bool(rows[0][6]),
                 'apikey': rows[0][7],
-                'galaxy': galaxy_infos,
+                'galaxy': galaxy_infos if galaxy_infos else None,
                 'auth_type': auth_type
             }
 
@@ -219,7 +219,7 @@ class LocalAuth(ParamManager):
             sha512_pw = None
 
         # Store user in db
-        user_id = database.execute_sql_query(query, (username, email, sha512_pw, salt, api_key, admin, blocked))
+        user_id = database.execute_sql_query(query, (username, email, sha512_pw, salt, api_key, admin, blocked), True)
         # Return user infos
         return {
             'id': user_id,
@@ -230,7 +230,7 @@ class LocalAuth(ParamManager):
             'admin': self.Bool(admin),
             'blocked': self.Bool(blocked),
             'apikey': api_key,
-            'galaxy': {},
+            'galaxy': None,
             'auth_type': self.auth_type
         }
 

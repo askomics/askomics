@@ -164,3 +164,13 @@ class JobManager(ParamManager):
         '''.format(table)
 
         database.execute_sql_query(query, (jobid, ))
+
+    def remove_all_user_jobs(self, table, user_id):
+
+        database = DatabaseConnector(self.settings, self.session)
+        query = '''
+        DELETE FROM {0}
+        WHERE user_id=?
+        '''.format(table)
+
+        database.execute_sql_query(query, (user_id, ))

@@ -9,6 +9,7 @@ import json
 import tempfile
 import logging
 import urllib.parse
+import shutil
 
 class ParamManager(object):
     """
@@ -79,6 +80,10 @@ class ParamManager(object):
             os.makedirs(mdir)
 
         return mdir
+
+    def delete_user_directory(self, username):
+
+        shutil.rmtree(self.user_dir + username)
 
 
     def get_upload_directory(self):

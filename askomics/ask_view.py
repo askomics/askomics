@@ -1236,8 +1236,9 @@ class AskView(object):
             try:
                 local_user = local_auth.get_user_infos(self.request.session['username'])
             except Exception as e:
-                self.log.debug("Database probleme")
-                raise e
+                self.log.error(e)
+                self.data['error'] = 'Database problem: ' + str(e)
+
 
             if local_user:
 
@@ -1591,6 +1592,14 @@ class AskView(object):
         confirmation = body['passwd_conf']
 
         local_auth = LocalAuth(self.settings, self.request.session)
+        jobs = JobManager(self.settings, self.request.session)
+
+        try:
+            local_user = local_auth.get_user_infos(username)
+        except Exception as e:
+            self.data.error(e)
+            self.data['error'] = 'Database error: ' + str(e)
+            return self.data
 
         # Non admin can only delete himself
         if self.request.session['username'] != username and not self.request.session['admin']:
@@ -1598,8 +1607,6 @@ class AskView(object):
 
         # If confirmation, check the user passwd
         if confirmation:
-            local_user = local_auth.get_user_infos(self.request.session['username'])
-
             if local_user['auth_type'] == 'local':
                 auth_success = local_auth.authenticate_user(self.request.session['username'], passwd)
             else: #ldap
@@ -1614,6 +1621,7 @@ class AskView(object):
 
         sqb = SparqlQueryBuilder(self.settings, self.request.session)
         query_laucher = QueryLauncher(self.settings, self.request.session)
+        pm = ParamManager(self.settings, self.request.session)
 
         # Get all graph of a user
         res = query_laucher.process_query(sqb.get_graph_of_user(username))
@@ -1633,12 +1641,28 @@ class AskView(object):
                 self.request.response.status = 400
                 return self.data
 
-
         # Delete user infos
         try:
+            # user
             local_auth.delete_user(username)
+            # Galaxy credentials
+            local_auth.delete_galaxy(local_user['id'])
+            # jobs
+            jobs.remove_all_user_jobs('integration', local_user['id'])
+            jobs.remove_all_user_jobs('query', local_user['id'])
+
         except Exception as e:
-            return 'failed: ' + str(e)
+            self.log.error(e)
+            self.data['error'] = 'Database problem: ' + str(e)
+            return self.data
+
+        # Delete data directory
+        try:
+            pm.delete_user_directory(username)
+        except Exception as e:
+            self.log.error(e)
+            self.data['error'] = e
+            return self.data
 
         # Is user delete himself, delog him
         if self.request.session['username'] == username:
