@@ -909,7 +909,7 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.signup()
 
-        assert data == {'error': [], 'user_id': [], 'username': 'jdoe', 'email': 'jdoe@example.com', 'admin': True, 'blocked': False, 'galaxy': {}}
+        assert data == {'error': [], 'user_id': 1, 'username': 'jdoe', 'email': 'jdoe@example.com', 'admin': True, 'blocked': False, 'galaxy': None}
 
     def test_checkuser(self):
         """Test checkuser method"""
@@ -919,7 +919,7 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.checkuser()
 
-        assert data == {'user_id': 1, 'username': 'jdoe', 'email': 'jdoe@example.com', 'admin': False, 'blocked': False, 'galaxy': {}}
+        assert data == {'user_id': 1, 'username': 'jdoe', 'email': 'jdoe@example.com', 'admin': False, 'blocked': False, 'galaxy': None}
 
 
     def test_logout(self):
@@ -958,7 +958,7 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.login()
 
-        assert data == {'error': [], 'user_id': 1, 'username': 'jdoe', 'email': 'jdoe@example.com', 'admin': True, 'blocked': False, 'galaxy': {}}
+        assert data == {'error': [], 'user_id': 1, 'username': 'jdoe', 'email': 'jdoe@example.com', 'admin': True, 'blocked': False, 'galaxy': None}
 
     def test_login_api(self):
         """Test login_api method"""
@@ -970,7 +970,7 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.login_api()
 
-        assert data == {'error': '', 'user_id': 1, 'username': 'jdoe', 'email': 'jdoe@example.com', 'admin': False, 'blocked': False, 'galaxy': {}}
+        assert data == {'error': '', 'user_id': 1, 'username': 'jdoe', 'email': 'jdoe@example.com', 'admin': False, 'blocked': False, 'galaxy': None}
 
     def test_login_api_gie(self):
         """Test login_api_gie method"""
@@ -1017,7 +1017,7 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.get_users_infos()
 
-        assert data == {'result': [{'ldap': False, 'username': 'jdoe', 'email': 'jdoe@example.com', 'admin': True, 'blocked': False, 'gurl': None, 'nquery': 0, 'nintegration': 0, 'dirsize': dir_size, 'hdirsize': human_dir_size}], 'me': 'jdoe', 'error': [], 'user_id': [], 'username': 'jdoe', 'email': 'jdoe@example.com', 'admin': True, 'blocked': False, 'galaxy': {}}
+        assert data == {'result': [{'ldap': False, 'username': 'jdoe', 'email': 'jdoe@example.com', 'admin': True, 'blocked': False, 'gurl': None, 'nquery': 0, 'nintegration': 0, 'dirsize': dir_size, 'hdirsize': human_dir_size}], 'me': 'jdoe', 'error': [], 'user_id': 1, 'username': 'jdoe', 'email': 'jdoe@example.com', 'admin': True, 'blocked': False, 'galaxy': None}
 
     def test_lock_user(self):
         """Test lock_user method"""
@@ -1150,4 +1150,4 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.update_passwd()
 
-        assert data == {'error': [], 'user_id': [], 'username': 'jdoe', 'email': 'jdoe@example.com', 'admin': True, 'blocked': False, 'galaxy': {}, 'success': 'success'}
+        assert data == {'error': [], 'user_id': 1, 'username': 'jdoe', 'email': 'jdoe@example.com', 'admin': True, 'blocked': False, 'galaxy': None, 'success': 'success'}
