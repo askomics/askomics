@@ -1,5 +1,8 @@
 """Contain InterfaceTps class"""
 
+import os
+import shutil
+
 from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
 from askomics.libaskomics.rdfdb.SparqlQueryGraph import SparqlQueryGraph
 from askomics.libaskomics.rdfdb.SparqlQueryAuth import SparqlQueryAuth
@@ -181,6 +184,9 @@ class InterfaceTpsDb(object):
         data used for the tests
         """
 
+        # Remove directories
+        self.remove_users_directories()
+
         # Delete all data
         self.empty()
 
@@ -190,6 +196,15 @@ class InterfaceTpsDb(object):
 
         # Delete askomics graph
         self.delete_askograph()
+
+    def remove_users_directories(self):
+
+        list_dir = os.listdir(self.settings['askomics.files_dir'])
+
+        for dirname in list_dir:
+            if dirname != os.path.basename(self.settings['askomics.database_path']):
+                shutil.rmtree(self.settings['askomics.files_dir'] + '/' + dirname)
+
 
     def clean_database(self):
 
@@ -254,6 +269,32 @@ class InterfaceTpsDb(object):
             "f49d76161eb1617568fedf0a0adc92532cc81c1a2626ec0e2d5fa36bd600f55b17f599a4a343a5ccdc907a2831db70c7a390a9f96afbf346190e6fe3d6ed836f",
             "00000000000000000000",
             "jdoe_apikey",
+            "false",
+            "false"
+        )
+        '''
+
+        database.execute_sql_query(query)
+
+
+    def add_ldap_jdoe_user_in_users(self):
+        """Insert an ldap_jdoe User
+
+        username is ldap_jdoe
+        mail is ldap_jdoe@example.com
+        no password (ldap auth)
+        not admin and not blocked
+        """
+
+        database = DatabaseConnector(self.settings, self.request.session)
+        query='''
+        INSERT INTO users VALUES(
+            NULL,
+            "ldap_jdoe",
+            "ldap_jdoe@example.com",
+            null,
+            null,
+            "ldap_jdoe_apikey",
             "false",
             "false"
         )
@@ -331,6 +372,20 @@ class InterfaceTpsDb(object):
             "otheradmin_apikey",
             "true",
             "false"
+        )
+        '''
+
+        database.execute_sql_query(query)
+
+    def add_galaxy_account(self):
+
+        database = DatabaseConnector(self.settings, self.request.session)
+        query = '''
+        INSERT INTO galaxy_accounts VALUES(
+            NULL,
+            1,
+            "http://locahost/galaxy",
+            "fake_api_key"
         )
         '''
 

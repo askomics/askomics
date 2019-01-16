@@ -157,7 +157,7 @@ class LocalAuth(ParamManager):
             return self.is_email_in_db(login)
         return self.is_username_in_db(login)
 
-    def get_auth_type(self, login):
+    def get_auth_type(self, username):
 
         database = DatabaseConnector(self.settings, self.session)
         query = '''
@@ -166,7 +166,7 @@ class LocalAuth(ParamManager):
         WHERE password IS NULL and username=?
         '''
 
-        result = database.execute_sql_query(query, (self.username, ))
+        result = database.execute_sql_query(query, (username, ))
 
         if result[0][0] == 1:
             return 'ldap'
@@ -495,22 +495,6 @@ class LocalAuth(ParamManager):
         '''
 
         database.execute_sql_query(query, (sha512_pw, salt, username))
-
-    def get_galaxy_infos(self, user_id):
-        """Get Galaxy url and apikey of a user"""
-
-        database = DatabaseConnector(self.settings, self.session)
-        query = '''
-        SELECT url, apikey
-        FROM galaxy_accounts
-        WHERE user_id=?
-        '''
-
-        rows = database.execute_sql_query(query, (user_id, ))
-
-        if rows:
-            return {'url': rows[0][0], 'key': rows[0][1]}
-        return {}
 
     @staticmethod
     def get_random_string(number):
