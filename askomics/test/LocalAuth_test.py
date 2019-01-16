@@ -1,4 +1,6 @@
+import os
 import unittest
+import humanize
 from pyramid.paster import get_appsettings
 from pyramid import testing
 from askomics.libaskomics.LocalAuth import LocalAuth
@@ -218,7 +220,16 @@ class LocalAuthTests(unittest.TestCase):
         local_auth = LocalAuth(self.settings, self.request.session)
         all_users = local_auth.get_all_users_infos()
 
-        assert all_users == [{'ldap': False, 'username': 'jdoe', 'email': 'jdoe@example.com', 'admin': False, 'blocked': False, 'gurl': None, 'nquery': 0, 'nintegration': 0, 'dirsize': 0, 'hdirsize': '0 Bytes'}, {'ldap': False, 'username': 'jsmith', 'email': 'jsmith@example.com', 'admin': False, 'blocked': False, 'gurl': None, 'nquery': 0, 'nintegration': 0, 'dirsize': 0, 'hdirsize': '0 Bytes'}, {'ldap': True, 'username': 'ldap_jdoe', 'email': 'ldap_jdoe@example.com', 'admin': False, 'blocked': False, 'gurl': None, 'nquery': 0, 'nintegration': 0, 'dirsize': 0, 'hdirsize': '0 Bytes'}]
+        # Get dir size
+        path = self.settings['askomics.files_dir'] + '/jdoe'
+        size = 0
+        for dirpath, dirnames, filenames in os.walk(path):
+            for f in filenames:
+                fp = os.path.join(dirpath, f)
+                size += os.path.getsize(fp)
+        hsize = humanize.naturalsize(size)
+
+        assert all_users == [{'ldap': False, 'username': 'jdoe', 'email': 'jdoe@example.com', 'admin': False, 'blocked': False, 'gurl': None, 'nquery': 0, 'nintegration': 0, 'dirsize': size, 'hdirsize': hsize}, {'ldap': False, 'username': 'jsmith', 'email': 'jsmith@example.com', 'admin': False, 'blocked': False, 'gurl': None, 'nquery': 0, 'nintegration': 0, 'dirsize': 0, 'hdirsize': '0 Bytes'}, {'ldap': True, 'username': 'ldap_jdoe', 'email': 'ldap_jdoe@example.com', 'admin': False, 'blocked': False, 'gurl': None, 'nquery': 0, 'nintegration': 0, 'dirsize': 0, 'hdirsize': '0 Bytes'}]
 
     def test_lock_user(self):
 

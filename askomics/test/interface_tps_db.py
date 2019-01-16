@@ -184,9 +184,6 @@ class InterfaceTpsDb(object):
         data used for the tests
         """
 
-        # Remove directories
-        self.remove_users_directories()
-
         # Delete all data
         self.empty()
 
@@ -196,14 +193,6 @@ class InterfaceTpsDb(object):
 
         # Delete askomics graph
         self.delete_askograph()
-
-    def remove_users_directories(self):
-
-        list_dir = os.listdir(self.settings['askomics.files_dir'])
-
-        for dirname in list_dir:
-            if dirname != os.path.basename(self.settings['askomics.database_path']):
-                shutil.rmtree(self.settings['askomics.files_dir'] + '/' + dirname)
 
 
     def clean_database(self):

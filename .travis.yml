@@ -13,8 +13,10 @@ install:
 before_script:
   - docker pull tenforce/virtuoso
   - docker pull bgruening/galaxy-stable
+  - docker pull xgaia/simple-ldap
   - sudo docker run -d --name virtuoso -p 127.0.0.1:8890:8890 -p 127.0.0.1:1111:1111  -e DBA_PASSWORD=dba -e SPARQL_UPDATE=true -e DEFAULT_GRAPH=http://localhost:8890/DAV --net="host" -t tenforce/virtuoso
   - sudo docker run -d --name galaxy -p 8080:80 -p 8021:21 -p 8022:22 bgruening/galaxy-stable
+  - sudo docker run -d --name simple-ldap -p 9189:389 -e ORGANISATION_NAME="AskoTests" -e SUFFIX="dc=askotest,dc=org" -e ROOT_USER="admin" -e ROOT_PW_CLEAR="askotest" -e FIRST_USER="true" -e USER_UID="jwick" -e USER_GIVEN_NAME="John" -e USER_SURNAME="Wick" -e USER_EMAIL="jwick@askotset.org" -e USER_PW_CLEAR="iamjohnwick" xgaia/simple-ldap
   - sleep 1m
   - docker ps -a
   - docker logs galaxy
