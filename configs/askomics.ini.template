@@ -74,10 +74,8 @@ askomics.ldap_auth = false
 # askomics.ldap.message = login with your ldap credentials
 # askomics.ldap_host = localhost
 # askomics.ldap_port = 389
-# askomics.ldap_bind_dn = cn=admin,dc=example,dc=org
-# askomics.ldap_bind_passwd = admin
 # askomics.ldap_user_search_base = ou=Users,dc=example,dc=org
-# askomics.ldap_user_filter = (&(objectClass=person)(|(uid=%s)(mail=%s)))
+# askomics.ldap_user_filter = (&(objectClass=person)(|(uid=%%s)(mail=%%s)))
 # askomics.ldap_username_attr = uid
 # askomics.ldap_email_attr = mail
 

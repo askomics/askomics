@@ -32,8 +32,8 @@ class LdapAuth(ParamManager):
         try:
             connect = ldap.initialize('ldap://' + self.ldap_server + ':' + self.ldap_port)
             connect.set_option(ldap.OPT_REFERRALS, 0)
-            connect.simple_bind_s(self.ldap_bind_dn , self.ldap_bind_passwd)
-            search_filter=self.ldap_user_filter % (login, login)
+            # connect.simple_bind_s(self.ldap_bind_dn , self.ldap_bind_passwd)
+            search_filter=self.ldap_user_filter.replace('%s', login)
             ldap_user = connect.search_s(self.ldap_user_search_base, ldap.SCOPE_SUBTREE, search_filter, [self.ldap_username_attr, self.ldap_email_attr])
         except ldap.INVALID_CREDENTIALS as e:
             self.log.debug('Invalid ldap bind credentials')
