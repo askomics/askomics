@@ -54,6 +54,7 @@
           for (let i in query_jobs){
             query_jobs[i].wait = (query_jobs[i].state == "wait");
             query_jobs[i].duration = this.getDuration(query_jobs[i].start * 1000, query_jobs[i].end * 1000);
+            query_jobs[i].start_timestamp = query_jobs[i].start;
             query_jobs[i].start = new Date(query_jobs[i].start * 1000).toLocaleString();
             query_jobs[i].end = new Date(query_jobs[i].end * 1000).toLocaleString();
             query_jobs[i].classtr = this.getClassTr(query_jobs[i].state);

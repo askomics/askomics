@@ -5,11 +5,13 @@ import os
 import tempfile
 import datetime
 import json
+import humanize
 
 from shutil import copyfile
 
 from pyramid import testing
 from pyramid.paster import get_appsettings
+from askomics.libaskomics.ParamManager import ParamManager
 from askomics.libaskomics.TripleStoreExplorer import TripleStoreExplorer
 from askomics.libaskomics.rdfdb.SparqlQueryBuilder import SparqlQueryBuilder
 from askomics.libaskomics.rdfdb.QueryLauncher import QueryLauncher
@@ -42,9 +44,11 @@ class AskViewTests(unittest.TestCase):
         self.config.add_route('load_data_into_graph', '/load_data_into_graph')
         self.config.scan()
 
+        self.request.session['user_id'] = 1
         self.request.session['username'] = 'jdoe'
+        self.request.session['email'] = 'jdoe@example.com'
+        self.request.session['admin'] = True
         self.request.session['blocked'] = False
-        self.request.session['group'] = 'base'
         self.request.session['graph'] = 'urn:sparql:test_askomics:jdoe'
 
         self.request.host_url = 'http://localhost:6543'
@@ -905,16 +909,17 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.signup()
 
-        assert data == {'error': [], 'blocked': False, 'admin': True, 'username': 'jdoe', 'galaxy': False}
+        assert data == {'error': [], 'user_id': 1, 'username': 'jdoe', 'email': 'jdoe@example.com', 'admin': True, 'blocked': False, 'galaxy': None}
 
     def test_checkuser(self):
         """Test checkuser method"""
 
         self.tps.clean_up()
+        self.tps.add_jdoe_in_users()
 
         data = self.askview.checkuser()
 
-        assert data == {'admin': False, 'username': 'jdoe', 'blocked': True, 'galaxy': False}
+        assert data == {'user_id': 1, 'username': 'jdoe', 'email': 'jdoe@example.com', 'admin': False, 'blocked': False, 'galaxy': None}
 
 
     def test_logout(self):
@@ -953,7 +958,7 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.login()
 
-        assert data == {'blocked': False, 'admin': True, 'error': [], 'username': 'jdoe', 'galaxy': False}
+        assert data == {'error': [], 'user_id': 1, 'username': 'jdoe', 'email': 'jdoe@example.com', 'admin': True, 'blocked': False, 'galaxy': None}
 
     def test_login_api(self):
         """Test login_api method"""
@@ -961,14 +966,11 @@ class AskViewTests(unittest.TestCase):
         self.tps.clean_up()
         self.tps.add_jdoe_in_users()
 
-        # then, try to log with API key
-        self.request.json_body = {
-            'apikey': 'jdoe_apikey'
-        }
+        self.request.GET['key'] = 'jdoe_apikey'
 
         data = self.askview.login_api()
 
-        assert data == {'admin': False, 'blocked': False, 'username': 'jdoe', 'error': ''}
+        assert data == {'error': '', 'user_id': 1, 'username': 'jdoe', 'email': 'jdoe@example.com', 'admin': False, 'blocked': False, 'galaxy': None}
 
     def test_login_api_gie(self):
         """Test login_api_gie method"""
@@ -976,10 +978,7 @@ class AskViewTests(unittest.TestCase):
         self.tps.clean_up()
         self.tps.add_jdoe_in_users()
 
-        # then, try to log with API key
-        self.request.json_body = {
-            'apikey': 'jdoe_apikey'
-        }
+        self.request.GET['key'] = 'jdoe_apikey'
 
         self.askview.login_api()
 
@@ -1009,11 +1008,16 @@ class AskViewTests(unittest.TestCase):
             'password2': 'iamjohndoe'
         }
 
+        # get dir size
+        pm = ParamManager(self.settings, self.request.session)
+        dir_size = pm.get_size(pm.get_user_dir_path())
+        human_dir_size = humanize.naturalsize(dir_size)
+
         self.askview.signup()
 
         data = self.askview.get_users_infos()
 
-        assert data == {'me': 'jdoe', 'result': [{'username': 'jdoe', 'email': 'jdoe@example.com', 'admin': True, 'blocked': False}], 'error': [], 'username': 'jdoe', 'admin': True, 'blocked': False, 'galaxy': False}
+        assert data == {'result': [{'ldap': False, 'username': 'jdoe', 'email': 'jdoe@example.com', 'admin': True, 'blocked': False, 'gurl': None, 'nquery': 0, 'nintegration': 0, 'dirsize': dir_size, 'hdirsize': human_dir_size}], 'me': 'jdoe', 'error': [], 'user_id': 1, 'username': 'jdoe', 'email': 'jdoe@example.com', 'admin': True, 'blocked': False, 'galaxy': None}
 
     def test_lock_user(self):
         """Test lock_user method"""
@@ -1103,7 +1107,7 @@ class AskViewTests(unittest.TestCase):
         # get my infos
         data = self.askview.get_my_infos()
 
-        assert data == {'email': 'jdoe@example.com', 'username': 'jdoe', 'apikey': 'jdoe_apikey', 'blocked': False, 'admin': False}
+        assert data == {'user_id': 1, 'username': 'jdoe', 'email': 'jdoe@example.com', 'admin': False, 'blocked': False, 'apikey': 'jdoe_apikey', 'galaxy': None, 'ldap': False}
 
     def test_update_mail(self):
         """Test update_mail"""
@@ -1146,4 +1150,4 @@ class AskViewTests(unittest.TestCase):
 
         data = self.askview.update_passwd()
 
-        assert data == {'error': [], 'admin': True, 'blocked': False, 'username': 'jdoe', 'success': 'success', 'galaxy': False}
+        assert data == {'error': [], 'user_id': 1, 'username': 'jdoe', 'email': 'jdoe@example.com', 'admin': True, 'blocked': False, 'galaxy': None, 'success': 'success'}

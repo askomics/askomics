@@ -694,8 +694,14 @@ class IHMLocal {
         // If a Galaxy instance is connected, show the form to get data from the Galaxy history
         let service = new RestServiceJs('get_data_from_galaxy');
         let model = {history: history_id, allowed_files: allowed_files};
+        console.log(JSON.stringify(model));
         service.post(model, function(data) {
-            if (!data.galaxy) return;
+            if (data.error) {
+              // display error
+              $("#galaxy_div").empty();
+              $("#galaxy_error").append(data.error).show();
+              return;
+            }
             let template = AskOmics.templates.galaxy_datasets;
             let context = {datasets: data.datasets, histories: data.histories, radio: radio, input_type: input_type};
             let html = template(context);
@@ -879,7 +885,12 @@ class IHMLocal {
         $('.del_user').click(function() {
           __ihm.delUser(this.id);
         });
-        $('.table-user').DataTable();
+        $('.table-user').DataTable({
+                'order': [[1, 'asc']],
+                'columnDefs': [
+                    { "type": "file-size", targets: 6 }
+                ]
+        });
       });
 
       this.shortcutsView.updateShortcuts(true);
@@ -1035,7 +1046,7 @@ class IHMLocal {
       let service = new RestServiceJs('get_my_infos');
       service.getAll(function(d) {
         let template = AskOmics.templates.user_managment;
-        let context = {user: d, keys: d.apikeys, galaxy: d.galaxy};
+        let context = {user: d};
         let html = template(context);
         $('#content_user_info').empty();
         $('#content_user_info').append(html);
@@ -1164,23 +1175,6 @@ class IHMLocal {
       });
     }
 
-    get_apikey(username, keyname) {
-      let service = new RestServiceJs('api_key');
-      let data = {'username': username, 'keyname': keyname};
-      $('#spinner_apikey').removeClass('hidden');
-      $('#tick_apikey').addClass('hidden');
-
-      service.post(data, function(d) {
-        if (!__ihm.manageErrorMessage(d)) {
-          return;
-        }
-        // reload
-        __ihm.userForm();
-      });
-
-
-    }
-
     connect_galaxy(url, key) {
       let service = new RestServiceJs('connect_galaxy');
       let data = {'url': url, 'key': key};
@@ -1223,13 +1217,34 @@ class IHMLocal {
       });
     }
 
-    displayNavbar(loged, username, admin, blocked) {
+    displayNavbar(logged, username, admin, blocked) {
       // Navbar template
       $('#navbar').empty();
-      let template = AskOmics.templates.navbar;
-      let context = {name: 'AskOmics', loged: loged, username: username, admin: admin, nonblocked: !blocked};
-      let html = template(context);
-      $('#navbar').append(html);
+      let template_navbar = AskOmics.templates.navbar;
+      let context_navbar = {name: 'AskOmics', logged: logged, username: username, admin: admin, nonblocked: !blocked};
+      let html_navbar = template_navbar(context_navbar);
+      $('#navbar').append(html_navbar);
+
+      let service = new RestServiceJs('footer');
+      service.getAll((footer_infos) => {
+
+        let version_differ = (footer_infos.current_version != footer_infos.latest_version)?true:false;
+
+        $('#footer-div').empty();
+        let template_footer = AskOmics.templates.footer;
+        let context_footer = {
+          current_version: footer_infos.current_version,
+          latest_version: footer_infos.latest_version,
+          version_differ: version_differ,
+          latest_version_url: footer_infos.latest_version_url,
+          admin: admin,
+          logged: logged,
+          message: footer_infos.message
+        };
+
+        let html_footer = template_footer(context_footer);
+        $('#footer-div').append(html_footer);
+      });
 
       // Visual effects on active tabs
       $('.nav li').on('click', (event) => {
@@ -1240,7 +1255,7 @@ class IHMLocal {
         }
         if ( ! ( $(event.currentTarget).attr('id') in { 'help' : '','admin':'', 'user_menu': '' }) ) {
 
-          $('.container').hide();
+          $('.container:not(#footer-div)').hide();
           $('.container#navbar_content').show();
           //console.log("===>"+'.container#content_' + $(this).attr('id'));
           $('.container#content_' + $(event.currentTarget).attr('id')).show();
@@ -1284,24 +1299,24 @@ class IHMLocal {
         let password2 = $('#signup_password2').val();
         __ihm.user.signup(username, email, password, password2, (user) => {
           // Error
-          if(user.error) {
+          if(user.error.length > 0) {
             $('#signup_error').empty();
             for (let i = user.error.length - 1; i >= 0; i--) {
               $('#signup_error').append(user.error[i] + '<br>');
             }
-            AskomicsUser.errorHtmlLogin();
-            return;
+            AskomicsUser.errorHtmlSignup();
+          } else {
+            AskomicsUser.cleanHtmlLoginSignup();
+            __ihm.displayNavbar(true, __ihm.user.username, __ihm.user.admin, __ihm.user.blocked);
+            // Show interrogation
+            $('.nav li.active').removeClass('active');
+            $('#interrogation').addClass('active');
+            $('.container:not(#footer-div)').hide();
+            $('.container#navbar_content').show();
+            $('.container#content_interrogation').show();
+            //reload startpoints
+            __ihm.loadStartPoints();
           }
-          AskomicsUser.cleanHtmlLogin();
-          __ihm.displayNavbar(true, __ihm.user.username, __ihm.user.admin, __ihm.user.blocked);
-          // Show interrogation
-          $('.nav li.active').removeClass('active');
-          $('#interrogation').addClass('active');
-          $('.container').hide();
-          $('.container#navbar_content').show();
-          $('.container#content_interrogation').show();
-          //reload startpoints
-          __ihm.loadStartPoints();
         });
       });
 
@@ -1310,24 +1325,24 @@ class IHMLocal {
         let username_email = $('#login_username-email').val();
         let password = $('#login_password').val();
         __ihm.user.login(username_email, password, (user) => {
-          if(user.error) {
+          if(user.error.length > 0) {
             $('#login_error').empty();
             for (let i = user.error.length - 1; i >= 0; i--) {
               $('#login_error').append(user.error[i] + '<br>');
             }
             AskomicsUser.errorHtmlLogin();
-            return;
+          } else {
+            AskomicsUser.cleanHtmlLoginSignup();
+            __ihm.displayNavbar(true, __ihm.user.username, __ihm.user.admin, __ihm.user.blocked);
+            // Show interrogation
+            $('.nav li.active').removeClass('active');
+            $('#interrogation').addClass('active');
+            $('.container:not(#footer-div)').hide();
+            $('.container#navbar_content').show();
+            $('.container#content_interrogation').show();
+            //reload startpoints
+            __ihm.loadStartPoints();
           }
-          AskomicsUser.cleanHtmlLogin();
-          __ihm.displayNavbar(true, __ihm.user.username, __ihm.user.admin, __ihm.user.blocked);
-          // Show interrogation
-          $('.nav li.active').removeClass('active');
-          $('#interrogation').addClass('active');
-          $('.container').hide();
-          $('.container#navbar_content').show();
-          $('.container#content_interrogation').show();
-          //reload startpoints
-          __ihm.loadStartPoints();
         });
       });
 
@@ -1339,7 +1354,7 @@ class IHMLocal {
           // Show interrogation
           $('.nav li.active').removeClass('active');
           $('#interrogation').addClass('active');
-          $('.container').hide();
+          $('.container:not(#footer-div)').hide();
           $('.container#navbar_content').show();
           $('.container#content_interrogation').show();
         });

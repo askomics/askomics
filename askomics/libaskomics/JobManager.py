@@ -1,6 +1,5 @@
 from askomics.libaskomics.ParamManager import ParamManager
 from askomics.libaskomics.DatabaseConnector import DatabaseConnector
-from askomics.libaskomics.Security import Security
 
 import logging
 import sqlite3
@@ -14,13 +13,9 @@ class JobManager(ParamManager):
     def __init__(self, settings, session):
         ParamManager.__init__(self, settings, session)
 
-    def save_integration_job(self, filename):
+    def save_integration_job(self, filename, user_id):
 
         database = DatabaseConnector(self.settings, self.session)
-
-        # get userid
-        security = Security(self.settings, self.session, self.session['username'], '', '', '')
-        userid = security.get_user_id_by_username()
 
         query = '''
         INSERT INTO integration VALUES(
@@ -34,15 +29,11 @@ class JobManager(ParamManager):
         )
         '''
 
-        return database.execute_sql_query(query, (userid, filename), get_id=True)
+        return database.execute_sql_query(query, (user_id, filename), get_id=True)
 
-    def save_query_job(self, request_graph, variates):
+    def save_query_job(self, request_graph, variates, user_id):
 
         database = DatabaseConnector(self.settings, self.session)
-
-        # get userid
-        security = Security(self.settings, self.session, self.session['username'], '', '', '')
-        userid = security.get_user_id_by_username()
 
         # Format strings
         request_graph = urllib.parse.quote(request_graph)
@@ -65,7 +56,7 @@ class JobManager(ParamManager):
         )
         '''
 
-        return database.execute_sql_query(query, (userid, request_graph, variates), get_id=True)
+        return database.execute_sql_query(query, (user_id, request_graph, variates), get_id=True)
 
 
     def done_integration_job(self, jobid):
@@ -110,11 +101,7 @@ class JobManager(ParamManager):
         database.execute_sql_query(query, (message, 'error', jobid))
 
 
-    def list_integration_jobs(self):
-
-        # get userid
-        security = Security(self.settings, self.session, self.session['username'], '', '', '')
-        userid = security.get_user_id_by_username()
+    def list_integration_jobs(self, user_id):
 
         database = DatabaseConnector(self.settings, self.session)
         query = '''
@@ -123,7 +110,7 @@ class JobManager(ParamManager):
         WHERE user_id=?
         '''
 
-        res = database.execute_sql_query(query, (userid, ))
+        res = database.execute_sql_query(query, (user_id, ))
         result = []
         for job in res:
             dict_job = {}
@@ -137,12 +124,8 @@ class JobManager(ParamManager):
 
         return result
 
-    def list_query_jobs(self):
+    def list_query_jobs(self, user_id):
 
-
-        # get userid
-        security = Security(self.settings, self.session, self.session['username'], '', '', '')
-        userid = security.get_user_id_by_username()
 
         database = DatabaseConnector(self.settings, self.session)
         query = '''
@@ -151,7 +134,7 @@ class JobManager(ParamManager):
         WHERE user_id=?
         '''
 
-        res = database.execute_sql_query(query, (userid, ))
+        res = database.execute_sql_query(query, (user_id, ))
         result = []
         for job in res:
             dict_job = {}
@@ -181,3 +164,13 @@ class JobManager(ParamManager):
         '''.format(table)
 
         database.execute_sql_query(query, (jobid, ))
+
+    def remove_all_user_jobs(self, table, user_id):
+
+        database = DatabaseConnector(self.settings, self.session)
+        query = '''
+        DELETE FROM {0}
+        WHERE user_id=?
+        '''.format(table)
+
+        database.execute_sql_query(query, (user_id, ))

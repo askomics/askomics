@@ -3,18 +3,36 @@
 <table class="table table-striped table-user">
 <thead>
     <tr>
+        <th>Auth type</th>
         <th>Username</th>
         <th>Email</th>
+        <th>Galaxy</th>
+        <th>Integrations</th>
+        <th>Queries</th>
+        <th>Dir size</th>
         <th>Admin</th>
         <th>Locked</th>
-        <th>Delete account</th>
+        <th>Delete</th>
     </tr>
 </thead>
 <tbody>
     {{#each users}}
     <tr>
+        <td>
+            {{#if this.ldap}}
+            Ldap
+            {{else}}
+            Local
+            {{/if}}
+        </td>
         <td>{{this.username}}</td>
         <td><a href="mailto:{{this.email}}">{{this.email}}</a></td>
+        <td>
+            {{#if this.gurl}}<a href="{{this.gurl}}" target="_newtab">{{this.gurl}}</a>{{else}}{{/if}}
+        </td>
+        <td>{{this.nintegration}}</td>
+        <td>{{this.nquery}}</td>
+        <td>{{this.hdirsize}}</td>
         <td>
         {{#if this.admin}}
         <span style="color:orange" class="glyphicon glyphicon-king unset_admin chess-piece" id={{this.username}}><span class='sorter hidden'>1</span></span>

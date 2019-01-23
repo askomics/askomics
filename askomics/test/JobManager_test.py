@@ -35,7 +35,7 @@ class JobManagerTests(unittest.TestCase):
         self.tps.add_jdoe_in_users()
 
         job_manager = JobManager(self.settings, self.request.session)
-        job_manager.save_integration_job('file.tsv')
+        job_manager.save_integration_job('file.tsv', 1)
 
         assert self.tps.test_row_presence('integration', 'user_id, filename, state, end, error', (1, 'file.tsv', 'wait', None, None))
 
@@ -46,7 +46,7 @@ class JobManagerTests(unittest.TestCase):
         self.tps.add_jdoe_in_users()
 
         job_manager = JobManager(self.settings, self.request.session)
-        job_manager.save_query_job('graph_string', '_s3_7B_s3_27variate_s3_27_s3_3A_s3_20_s3_5B_s3_27_s3_3Fvariate_s3_27_s3_5D_s3_7D')
+        job_manager.save_query_job('graph_string', '_s3_7B_s3_27variate_s3_27_s3_3A_s3_20_s3_5B_s3_27_s3_3Fvariate_s3_27_s3_5D_s3_7D', 1)
 
         assert self.tps.test_row_presence('query', 'user_id, state, end, data, file, preview, graph, variates, nrows, error', (1, 'wait', None, None, None, None, 'graph_string', '_s3_7B_s3_27variate_s3_27_s3_3A_s3_20_s3_5B_s3_27_s3_3Fvariate_s3_27_s3_5D_s3_7D', None, None))
 
@@ -56,7 +56,7 @@ class JobManagerTests(unittest.TestCase):
         self.tps.add_jdoe_in_users()
 
         job_manager = JobManager(self.settings, self.request.session)
-        job_manager.save_integration_job('file.tsv')
+        job_manager.save_integration_job('file.tsv', 1)
         job_manager.done_integration_job(1)
 
         assert self.tps.test_row_presence('integration', 'user_id, filename, state, error', (1, 'file.tsv', 'done', None))
@@ -68,7 +68,7 @@ class JobManagerTests(unittest.TestCase):
         self.tps.add_jdoe_in_users()
 
         job_manager = JobManager(self.settings, self.request.session)
-        job_manager.save_query_job('graph_string', '_s3_7B_s3_27variate_s3_27_s3_3A_s3_20_s3_5B_s3_27_s3_3Fvariate_s3_27_s3_5D_s3_7D')
+        job_manager.save_query_job('graph_string', '_s3_7B_s3_27variate_s3_27_s3_3A_s3_20_s3_5B_s3_27_s3_3Fvariate_s3_27_s3_5D_s3_7D', 1)
         job_manager.done_query_job(1, 15, 'data_string', 'file_string')
 
         assert self.tps.test_row_presence('query', 'user_id, state, data, file, preview, graph, variates, nrows, error', (1, 'done', '_s3_22data_string_s3_22', 'file_string', None, 'graph_string', '_s3_7B_s3_27variate_s3_27_s3_3A_s3_20_s3_5B_s3_27_s3_3Fvariate_s3_27_s3_5D_s3_7D', 15, None))
@@ -79,7 +79,7 @@ class JobManagerTests(unittest.TestCase):
         self.tps.add_jdoe_in_users()
 
         job_manager = JobManager(self.settings, self.request.session)
-        job_manager.save_integration_job('error_file.tsv')
+        job_manager.save_integration_job('error_file.tsv', 1)
         job_manager.set_error_message('integration', 'error_string', 1)
 
         assert self.tps.test_row_presence('integration', 'user_id, filename, state, end, error', (1, 'error_file.tsv', 'error', None, 'error_string'))
@@ -90,11 +90,11 @@ class JobManagerTests(unittest.TestCase):
         self.tps.add_jdoe_in_users()
 
         job_manager = JobManager(self.settings, self.request.session)
-        job_manager.save_integration_job('file.tsv')
-        job_manager.save_integration_job('file2.tsv')
+        job_manager.save_integration_job('file.tsv', 1)
+        job_manager.save_integration_job('file2.tsv', 1)
         job_manager.done_integration_job(2)
 
-        result = job_manager.list_integration_jobs()
+        result = job_manager.list_integration_jobs(1)
 
         assert len(result) == 2
 
@@ -104,11 +104,11 @@ class JobManagerTests(unittest.TestCase):
         self.tps.add_jdoe_in_users()
 
         job_manager = JobManager(self.settings, self.request.session)
-        job_manager.save_query_job('graph_string', '_s3_7B_s3_27variate_s3_27_s3_3A_s3_20_s3_5B_s3_27_s3_3Fvariate_s3_27_s3_5D_s3_7D')
-        job_manager.save_query_job('graph_string2', '_s3_7B_s3_27variate_s3_27_s3_3A_s3_20_s3_5B_s3_27_s3_3Fvariate_s3_27_s3_5D_s3_7D')
+        job_manager.save_query_job('graph_string', '_s3_7B_s3_27variate_s3_27_s3_3A_s3_20_s3_5B_s3_27_s3_3Fvariate_s3_27_s3_5D_s3_7D', 1)
+        job_manager.save_query_job('graph_string2', '_s3_7B_s3_27variate_s3_27_s3_3A_s3_20_s3_5B_s3_27_s3_3Fvariate_s3_27_s3_5D_s3_7D', 1)
         job_manager.done_query_job(2, 15, 'data_string2', 'file_string2')
 
-        result = job_manager.list_query_jobs()
+        result = job_manager.list_query_jobs(1)
 
         assert len(result) == 2
 
@@ -117,7 +117,7 @@ class JobManagerTests(unittest.TestCase):
         self.tps.clean_up()
         self.tps.add_jdoe_in_users()
         job_manager = JobManager(self.settings, self.request.session)
-        job_manager.save_integration_job('file.tsv')
+        job_manager.save_integration_job('file.tsv', 1)
         assert self.tps.test_row_presence('integration', 'user_id, filename, state, end, error', (1, 'file.tsv', 'wait', None, None))
         job_manager.remove_job('integration', 1)
         assert not self.tps.test_row_presence('integration', 'user_id, filename, state, end, error', (1, 'file.tsv', 'wait', None, None))
