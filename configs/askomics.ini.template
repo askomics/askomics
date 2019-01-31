@@ -50,7 +50,7 @@ askomics.files_dir = /tmp/askomics
 
 # footer messages
 askomics.footer_message = 
-askomics.footer_version = 18.10.1
+askomics.footer_version = 19.01
 
 # Authentication
 # - locked_account: new account are locked a creation (true or false, default: true)
