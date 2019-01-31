@@ -16,8 +16,8 @@ class LdapAuth(ParamManager):
 
         self.ldap_server = self.settings['askomics.ldap_host']
         self.ldap_port = self.settings['askomics.ldap_port']
-        self.ldap_bind_dn = self.settings['askomics.ldap_bind_dn']
-        self.ldap_bind_passwd = self.settings['askomics.ldap_bind_passwd']
+        # self.ldap_bind_dn = self.settings['askomics.ldap_bind_dn']
+        # self.ldap_bind_passwd = self.settings['askomics.ldap_bind_passwd']
         self.ldap_user_search_base = self.settings['askomics.ldap_user_search_base']
         self.ldap_user_filter = self.settings['askomics.ldap_user_filter']
         self.ldap_username_attr = self.settings['askomics.ldap_username_attr']
