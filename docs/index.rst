@@ -29,9 +29,9 @@ Some (possibly outdated) documentation is also on the `AskOmics Wiki <https://gi
 
    README
    deployment
-   usage
-   devdoc
+   tutorial
    abstraction
+   devdoc
    api/askomics
 
 
