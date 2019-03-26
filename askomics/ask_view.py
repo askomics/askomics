@@ -79,6 +79,9 @@ class AskView(object):
             if 'username' not in self.request.session.keys():
                 self.request.session['username'] = ''
 
+            if 'user_id' not in self.request.session.keys():
+                self.request.session['user_id'] = ''
+
             if 'galaxy' not in self.request.session.keys():
                 self.request.session['galaxy'] = False
 
