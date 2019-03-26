@@ -113,7 +113,7 @@ do
     section=$(echo $sed_setting | egrep -o "^ASKOCONFIG_[^=]+" | sed 's/^.\{11\}//g' | cut -d "_" -f 1)
     key=$(echo $sed_setting | egrep -o "^ASKOCONFIG_[^=]+" | sed 's/^.\{11\}//g' | sed "s/$section\_//g")
     value=$(echo $sed_setting | egrep -o "=.*$" | sed 's/^=//g')
-    $python_ex config_updater.py -p $config_path -s $section -k $key -v $value
+    $python_ex config_updater.py -p $config_path -s "${section}" -k "${key}" -v "${value}"
 done
 
 # Build Javascript ----------------------------------------
