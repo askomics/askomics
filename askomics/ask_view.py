@@ -645,9 +645,17 @@ class AskView(object):
         key_columns = body["key_columns"]
         public = body['public']
         headers = body['headers']
-        uris = None
+        uris = {}
         if 'uris' in body:
             uris = body['uris']
+        else:
+            index = 0
+            for header in headers:
+                if index == 0:
+                    uris["0"] = self.settings['askomics.prefix']
+                else:
+                    uris[str(index)] = "None"
+                index += 1
 
         forced_type = None
         if 'forced_type' in body:
