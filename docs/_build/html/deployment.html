@@ -1,0 +1,218 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Deployment &#8212; AskOmics 19.01.3 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Tutorial" href="tutorial.html" />
+    <link rel="prev" title="AskOmics" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="deployment">
+<h1>Deployment<a class="headerlink" href="#deployment" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="user">
+<h2>User<a class="headerlink" href="#user" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="dependencies">
+<h3>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h3>
+<p>AskOmics need the Virtuoso triplestore to work.</p>
+<p><a class="reference external" href="https://github.com/openlink/virtuoso-opensource/blob/develop/7/README">Compile virtuoso</a></p>
+<p>or install via docker</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker pull askomics/virtuoso
+
+docker run --name my-virtuoso <span class="se">\ </span>                                                                                                                             
+    -p <span class="m">8890</span>:8890 -p <span class="m">1111</span>:1111 <span class="se">\</span>
+    -e <span class="nv">SPARQL_UPDATE</span><span class="o">=</span><span class="nb">true</span> <span class="se">\ </span>
+    -v /tmp/virtuoso_data:/data <span class="se">\ </span>        
+    -d askomics/virtuoso
+</pre></div>
+</div>
+<p>replace <code class="docutils literal notranslate"><span class="pre">/tmp/virtuoso</span></code> with a directory of your choice.</p>
+<p>Your virtuoso is available at <a class="reference external" href="localhost:8890">localhost:8890</a>.</p>
+</div>
+<div class="section" id="manual-installation">
+<h3>Manual installation<a class="headerlink" href="#manual-installation" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id1">
+<h4>Dependencies<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h4>
+<p>Installation needs some dependencies,</p>
+<p>Ubuntu 18.04</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo apt install -y python3 python3-venv python3-dev zlib1g-dev npm
+</pre></div>
+</div>
+<p>Fedora 28</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo dnf install -y gcc gcc-c++ redhat-rpm-config zlib-devel bzip2 python3-devel npm
+</pre></div>
+</div>
+</div>
+<div class="section" id="installation">
+<h4>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h4>
+<p>Get the latest stable version of AskOmics : 18.10</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wget https://github.com/askomics/askomics/archive/18.10.zip
+unzip <span class="m">18</span>.10.zip
+<span class="nb">cd</span> askomics
+</pre></div>
+</div>
+<p>Or clone the repository</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/askomics/askomics.git
+<span class="nb">cd</span> askomics
+git checkout <span class="m">18</span>.10
+</pre></div>
+</div>
+<p>If you have installed virtuoso via docker, you have to inform AskOmics that the load url is not localhost:6543, but another ip address (dockers can’t access host by http://localhost)</p>
+<p>Run</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker <span class="nb">exec</span> my-virtuoso netstat -nr <span class="p">|</span> grep <span class="s1">&#39;^0\.0\.0\.0&#39;</span> <span class="p">|</span> awk <span class="s1">&#39;{print $2}&#39;</span>
+</pre></div>
+</div>
+<p>and add</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">askomics.load_url</span><span class="o">=</span><span class="s">http://xxx.xx.x.x:6543</span>
+</pre></div>
+</div>
+<p>into <code class="docutils literal notranslate"><span class="pre">configs/production.virtuoso.ini</span></code> and <code class="docutils literal notranslate"><span class="pre">configs/development.virtuoso.ini</span></code> (replace <code class="docutils literal notranslate"><span class="pre">xxx.xx.x.x</span></code> with the ip obtained)</p>
+<p>Install and run</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./startAskomics.sh -d prod -t virtuoso
+</pre></div>
+</div>
+<p>AskOmics is available at <a class="reference external" href="localhost:6543">localhost:6543</a></p>
+</div>
+</div>
+<div class="section" id="installation-with-docker">
+<h3>Installation with docker<a class="headerlink" href="#installation-with-docker" title="Permalink to this headline">¶</a></h3>
+<p>Pull the latest stable version of AskOmics</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker pull askomics/askomics:18.10
+</pre></div>
+</div>
+<p>Run</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker run -p <span class="m">6543</span>:6543 askomics/askomics
+</pre></div>
+</div>
+<p>AskOmics is available at <a class="reference external" href="localhost:6543">localhost:6543</a></p>
+</div>
+<div class="section" id="installation-with-docker-compose">
+<h3>Installation with docker-compose<a class="headerlink" href="#installation-with-docker-compose" title="Permalink to this headline">¶</a></h3>
+<p>Clone the askomics-docker-compose repository</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/askomics/askomics-docker-compose
+</pre></div>
+</div>
+<p>Choose which services you need and run with the docker-compose command. for example, if you need askomics+virtuoso :</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> askomics-docker-compose/virtuoso
+docker-compose up
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="developer">
+<h2>Developer<a class="headerlink" href="#developer" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="https://help.github.com/articles/fork-a-repo/">Fork</a> the askomics repository</p>
+<p>then, clone your fork</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/USERNAME/askomics.git
+</pre></div>
+</div>
+<p><a class="reference external" href="#manual-installation">Install AskOmics</a></p>
+<p>Run it with dev mod</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./startAskomics.sh -d dev -t virtuoso
+</pre></div>
+</div>
+<p>AskOmics is available at <a class="reference external" href="localhost:6543">localhost:6543</a></p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">AskOmics</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Deployment</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#user">User</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#developer">Developer</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="abstraction.html">Abstraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="devdoc.html">Contribute to AskOmics</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">AskOmics</a></li>
+      <li>Next: <a href="tutorial.html" title="next chapter">Tutorial</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Xavier Garnier.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/deployment.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -21,3 +21,4 @@ psutil
 rdflib-jsonld
 PyGithub
 python-ldap
+sphinx
