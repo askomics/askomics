@@ -29,7 +29,7 @@ Some (possibly outdated) documentation is also on the `AskOmics Wiki <https://gi
    :caption: Contents:
 
    deployment
-   tutorial
+   tutorials
    abstraction
    devdoc
    api/askomics

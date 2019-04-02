@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>Deployment &#8212; AskOmics 19.01.3 documentation</title>
+    <title>Deployment &#8212; Python  documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -14,7 +14,7 @@
     <script type="text/javascript" src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Tutorial" href="tutorial.html" />
+    <link rel="next" title="AskOmics tutorial" href="tutorials.html" />
     <link rel="prev" title="AskOmics" href="index.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -59,26 +59,22 @@ docker run --name my-virtuoso <span class="se">\ </span>
 <h4>Dependencies<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h4>
 <p>Installation needs some dependencies,</p>
 <p>Ubuntu 18.04</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo apt install -y python3 python3-venv python3-dev zlib1g-dev npm
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo apt update
+sudo apt install -y git python3 python3-venv python3-dev zlib1g-dev libsasl2-dev libldap2-dev npm
 </pre></div>
 </div>
-<p>Fedora 28</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo dnf install -y gcc gcc-c++ redhat-rpm-config zlib-devel bzip2 python3-devel npm
+<p>Fedora 28/29</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo dnf install -y git gcc gcc-c++ redhat-rpm-config zlib-devel bzip2 python3-devel openldap-devel npm
 </pre></div>
 </div>
 </div>
 <div class="section" id="installation">
 <h4>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h4>
-<p>Get the latest stable version of AskOmics : 18.10</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wget https://github.com/askomics/askomics/archive/18.10.zip
-unzip <span class="m">18</span>.10.zip
-<span class="nb">cd</span> askomics
-</pre></div>
-</div>
-<p>Or clone the repository</p>
+<p>Clone the AskOmics repository, and checkout the latest version</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/askomics/askomics.git
 <span class="nb">cd</span> askomics
-git checkout <span class="m">18</span>.10
+<span class="c1"># chekout the latest version</span>
+git checkout <span class="k">$(</span>git describe --abbrev<span class="o">=</span><span class="m">0</span> --tags<span class="k">)</span>
 </pre></div>
 </div>
 <p>If you have installed virtuoso via docker, you have to inform AskOmics that the load url is not localhost:6543, but another ip address (dockers can’t access host by http://localhost)</p>
@@ -97,18 +93,29 @@ git checkout <span class="m">18</span>.10
 </div>
 <p>AskOmics is available at <a class="reference external" href="localhost:6543">localhost:6543</a></p>
 </div>
+<div class="section" id="upgrade">
+<h4>Upgrade<a class="headerlink" href="#upgrade" title="Permalink to this headline">¶</a></h4>
+<p>Checkout the latest version is the AskOmics git directory.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git checkout <span class="k">$(</span>git describe --abbrev<span class="o">=</span><span class="m">0</span> --tags<span class="k">)</span>
+</pre></div>
+</div>
+</div>
 </div>
 <div class="section" id="installation-with-docker">
 <h3>Installation with docker<a class="headerlink" href="#installation-with-docker" title="Permalink to this headline">¶</a></h3>
 <p>Pull the latest stable version of AskOmics</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker pull askomics/askomics:18.10
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker pull askomics/askomics
 </pre></div>
 </div>
 <p>Run</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker run -p <span class="m">6543</span>:6543 askomics/askomics
 </pre></div>
 </div>
-<p>AskOmics is available at <a class="reference external" href="localhost:6543">localhost:6543</a></p>
+<p>AskOmics is available at <a class="reference external" href="http://localhost:6543">localhost:6543</a></p>
+<p>Upgrade with</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker pull askomics/askomics
+</pre></div>
+</div>
 </div>
 <div class="section" id="installation-with-docker-compose">
 <h3>Installation with docker-compose<a class="headerlink" href="#installation-with-docker-compose" title="Permalink to this headline">¶</a></h3>
@@ -118,16 +125,28 @@ git checkout <span class="m">18</span>.10
 </div>
 <p>Choose which services you need and run with the docker-compose command. for example, if you need askomics+virtuoso :</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> askomics-docker-compose/virtuoso
-docker-compose up
+docker-compose up -d
+</pre></div>
+</div>
+<p>AskOmics is available at <a class="reference external" href="http://localhost/askomics">localhost/askomics</a></p>
+<p>Upgrade with</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Stop dockers</span>
+docker-compose down
+<span class="c1"># upgrade the repo</span>
+git pull
+<span class="c1"># upgrade dockers</span>
+docker-compose pull
+<span class="c1"># start AskOmics</span>
+docker-compose up -d
 </pre></div>
 </div>
 </div>
 </div>
 <div class="section" id="developer">
 <h2>Developer<a class="headerlink" href="#developer" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="https://help.github.com/articles/fork-a-repo/">Fork</a> the askomics repository</p>
+<p><a class="reference external" href="https://help.github.com/articles/fork-a-repo/">Fork</a> the AskOmics repository</p>
 <p>then, clone your fork</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/USERNAME/askomics.git
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/USERNAME/askomics.git <span class="c1"># replace USERNAME with your github username</span>
 </pre></div>
 </div>
 <p><a class="reference external" href="#manual-installation">Install AskOmics</a></p>
@@ -146,7 +165,7 @@ docker-compose up
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="index.html">AskOmics</a></h1>
+<h1 class="logo"><a href="index.html">Python</a></h1>
 
 
 
@@ -163,7 +182,7 @@ docker-compose up
 <li class="toctree-l2"><a class="reference internal" href="#developer">Developer</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">AskOmics tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="abstraction.html">Abstraction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="devdoc.html">Contribute to AskOmics</a></li>
 </ul>
@@ -173,7 +192,7 @@ docker-compose up
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="index.html" title="previous chapter">AskOmics</a></li>
-      <li>Next: <a href="tutorial.html" title="next chapter">Tutorial</a></li>
+      <li>Next: <a href="tutorials.html" title="next chapter">AskOmics tutorial</a></li>
   </ul></li>
 </ul>
 </div>
@@ -200,7 +219,7 @@ docker-compose up
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2019, Xavier Garnier.
+      &copy;.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.0</a>

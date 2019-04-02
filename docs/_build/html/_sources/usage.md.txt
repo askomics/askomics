@@ -1,3 +1,180 @@
-# Usage
+# User tutorial
 
-TODO
+## User
+
+### Account management
+
+#### Signup
+
+To use AskOmics, you will need an account. Go to the signup page by clicking to the login tab.
+
+![buttons1](_static/images/buttons1.png)
+
+Then, click to the signup link.
+
+![login](_static/images/login.png)
+
+fill in the form with the requested information.
+
+#### Login
+
+If you have already an account (or if the instance use ldap authentication), login using the login form.
+
+#### Manage your account
+
+To manage your account, use the account management tab.
+
+![account_management_tab](_static/images/account_management_tab.png)
+
+##### Update your infos
+
+This section allow you to change your email address and your password.
+
+##### API key
+
+the API key ensures the connection of AskOmics with third-party applications (like Galaxy).
+
+Updating the API key will revoke existing accesses.
+
+##### Galaxy account
+
+Add a Galaxy account to use Galaxy datasets into AskOmics.
+
+##### Remove account
+
+The account deletion is final, all your information, as well as all your data will be deleted.
+
+### Integrate and query your data
+
+AskOmics is a web software that uses the semantic web technologies (RDF/SPARQL) to **integrate** multiple data formats, and **query** them through a user-friendly interface.
+
+During **integration**, AskOmics take input files in CSV/TSV, GFF3 and BED format. This files are converted into a **dataset** of RDF triples, and stored into a triplestore.
+
+Then, you can query all the integrated datasets by using the AskOmics **query builder** to navigate through your data.
+
+#### Prepare your CSV/TSV files
+
+AskOmics can integrate CSV/TSV data with a specific structure.
+
+##### Simple entity
+
+A CSV file describe an **entity**. The entity name is on the first columns of the header.
+
+Instance of this entity are described on the other lines of the first columns.
+
+Here, the entity is *gene* and *AT001* is an instance of the gene entity.
+
+Other columns describes **attributes** of the entity. For example, *gene* have 5 attributes: *organism*, *chromosome*, *strand*, *start* and *end*.
+
+##### Entity with relation
+
+Entities can also have relation to other entities. To specify a relation, use the syntaxe *relation_name@target_entity*.
+
+![orthgroup_tsv](_static/images/orthgroup_tsv.png)
+
+Here, the *orthogroup* entity have a *concerns* relation to the *gene* entity.
+
+#### Data upload
+
+First step is to upload your data into the AskOmics server. Use the upload tab
+
+![upload_tab](_static/images/upload_tab.png)
+
+Use the Upload button, and add files into the upload queue. Then, start uploading the files.
+
+You data file are now uploaded into AskOmics. The next step is to integrate the files.
+
+#### Data integration
+
+On the upload page, select the file to integrate, and click to the Integrate button.
+
+##### CSV/TSV
+
+During CSV integration, AskOmics shows you an overview of your file. You can update some information before integration.
+
+![gene_tsv](_static/images/gene_tsv.png)
+
+On the first line, you can disable columns of the file by uncheck them. The second line is the header. You can update entity and attributes name.
+
+The first columns describes your entity. Each entity instance have to be unique. You can create unique entity id by concatenate columns with the key checkbox.
+
+Next line of the table describe the type of each header. The first is the entity. It can be *entity* or *entity start*. an entity start will be displayed as a start point on the query page.
+
+Attributes can be one of the following types:
+
+- Attributes
+    * Numeric
+    * Text
+    * Category
+    * Date/time
+- Positionable attributes
+    * Taxon
+    * Chromosome
+    * Strand
+    * Start
+    * End
+- Relation
+    * General relation to entity
+    * Symmetric relation to entity
+
+Attributes types are automatically detected by AskOmics, but you can override them if you want.
+
+##### GFF
+
+
+##### BED
+
+
+##### Integrate!
+
+Once your input files are correctly parsed, integrate them using the *Integrate as a private dataset* button. A private dataset will only be visible by you.
+
+Integration may take some times. To check the advancement, go to the job page 
+
+![jobs](_static/images/jobs.png)
+
+This page show the jobs progression (integrations and queries). You can stop them if you need.
+
+##### Datasets management
+
+To manage the integrated dataset, use the *Datasets* button, under the cog tab
+
+![cog](_static/images/cog.png)
+
+You can delete datasets here. Deleting a dataset will remove all the triples from the triplestore.
+
+
+#### Data query
+
+To interrogate you integrated data, go to the *ask* page
+
+![ask](_static/images/ask.png)
+
+The Ask page show you all the **entity start** integrated. To start a query, choose an entity and click on *Start*.
+
+![startpoints](_static/images/startpoints.png)
+
+The **query builder** is composed of two view. The **left view** and the **right view**.
+
+The left view is a graph representing the selected entity, and the relation between others. The right view show entity's attributes.
+
+![query_gene](_static/images/query_gene.png)
+
+Here, we see our *gene* entity as a node on the left view, and its attributes on the right view. On the left view, the *gene* node is selected. We see another transparent node: *orthogroup*. This node isn't instantiated. If we *launch query*, the result will be all instances of gene.
+
+
+
+
+
+ We also see a transparent *orthgroup* node  linked to *gene*. The transparent node is a proposed node.
+
+
+## Maintainer
+
+### Admin account
+
+
+
+
+
+
