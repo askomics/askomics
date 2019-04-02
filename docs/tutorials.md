@@ -6,11 +6,11 @@
 
 To use AskOmics, you will need an account. Go to the signup page by clicking to the login tab.
 
-![buttons1](_static/images/buttons1.png)
+![buttons1](static/images/buttons1.png)
 
 Then, click to the signup link.
 
-![login](_static/images/login.png)
+![login](static/images/login.png)
 
 fill the form with the requested information.
 
@@ -18,7 +18,7 @@ fill the form with the requested information.
 
 To manage your account, use the account management tab.
 
-![account_management_tab](_static/images/account_management_tab.png)
+![account_management_tab](static/images/account_management_tab.png)
 
 #### Update information
 
@@ -60,7 +60,7 @@ Other headers describe the entity **attributes** and **relations**. An attribute
 
 First step is to upload your CSV files into AskOmics. Click on the *upload* tab to go to the upload page.
 
-![upload_tab](_static/images/upload_tab.png)
+![upload_tab](static/images/upload_tab.png)
 
 On the upload page, use the *Upload* button, and add files into the upload queue. Then, start uploading the files.
 
@@ -71,7 +71,7 @@ The CSV files are now uploaded on AskOmics.
 On the upload page, select the file to integrate, and click to the *Integrate* button. AskOmics shows an overview of the file.
 
 
-![gene_tsv](_static/images/gene_tsv.png)
+![gene_tsv](static/images/gene_tsv.png)
 
 1. Columns disabler: ucheck columns to ignore them
 2. Header updater: optionally update entity or attribute names
