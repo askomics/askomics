@@ -110,7 +110,8 @@ class AskViewTests(unittest.TestCase):
                     'private': True,
                     'endpoint': 'http://localhost:8890/sparql'
                 }
-            }
+            },
+            'galaxy': False
         }
 
         assert len(data["nodes"]) == 2
