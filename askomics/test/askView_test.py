@@ -287,7 +287,7 @@ class AskViewTests(unittest.TestCase):
         askview2.settings = self.settings
         data = askview2.start_points()
 
-        assert data == {'nodes': {}}
+        assert data == {'nodes': {}, 'galaxy': False}
 
 
     def test_delete_graph(self):
@@ -334,7 +334,8 @@ class AskViewTests(unittest.TestCase):
                     'urn:sparql:test_askomics:jdoe:instruments_tsv_' + timestamp_instruments,
                     'endpoint': 'http://localhost:8890/sparql'
                 }
-            }
+            },
+            'galaxy': False
         }
 
         assert data == expected_result

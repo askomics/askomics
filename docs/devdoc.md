@@ -27,26 +27,41 @@ Commit and push your modification to your [fork](https://help.github.com/article
 
 Write tests for your changes, and make sure that they [passes](#tests).
 
-```bash
-cd askomics
-source venv/bin/activate
-nosetests
-```
-
 Open a pull request against the master branch of askomics. The message of your pull request should describe your modifications (why and how).
 
 The pull request should pass all the continuous integration tests which are automatically run by Github using Travis CI. The coverage must be at least remain the same (but it's better if it increases)
 
 ## Tests
 
-AskOmics use nosetests for Python tests. To run the tests, activate the Python virtual environment and run nosetests.
+AskOmics use `nosetests` for Python tests.
+
+### Dependencies
+
+Tests needs some services to work.
+
+- A virtuoso instance
+- A galaxy instance
+- A Ldap server with some entry
+
+You can use some docker images
+
+```bash
+# Virtuoso
+sudo docker run -d --name test_virtuoso -p 127.0.0.1:8890:8890 -p 127.0.0.1:1111:1111  -e DBA_PASSWORD=dba -e SPARQL_UPDATE=true -e DEFAULT_GRAPH=http://localhost:8890/DAV --net="host" -t tenforce/virtuoso
+# Galaxy
+sudo docker run -d --name galaxy -p 8080:80 -p 8021:21 -p 8022:22 bgruening/galaxy-stable
+#ldap
+sudo docker run -d --name simple-ldap -p 9189:389 -e ORGANISATION_NAME="AskoTests" -e SUFFIX="dc=askotest,dc=org" -e ROOT_USER="admin" -e ROOT_PW_CLEAR="askotest" -e FIRST_USER="true" -e USER_UID="jwick" -e USER_GIVEN_NAME="John" -e USER_SURNAME="Wick" -e USER_EMAIL="jwick@askotest.org" -e USER_PW_CLEAR="iamjohnwick" xgaia/simple-ldap
+```
+
+### Run tests
+
+Activate the Python virtual environment and run nosetests.
 
 ```bash
 source venv/bin/activate
 nosetests
 ```
-
-Tests needs a Virtuoso instance and a Galaxy instance. You can use docker images.
 
 To skip the Galaxy tests, run
 
@@ -60,14 +75,6 @@ To target a single file test
 nosetests --tests askomics/test/askView_test.py
 ```
 
-```bash
-# Virtuoso
-docker pull askomics/virtuoso
-docker run -d -p :8890:8890 -e DBA_PASSWORD=dba -e SPARQL_UPDATE=true -e DEFAULT_GRAPH=http://localhost:8890/DAV --net="host" -t tenforce/virtuoso
-# Galaxy
-docker pull bgruening/galaxy-stable
-docker run -d -p 8080:80 bgruening/galaxy-stable
-```
 
 The testing configuration is set in the `askomics/config/test.virtuoso.ini` INI file. You can see that the Galaxy account API key is `admin`. The docker image `bgruening/galaxy-stable` have a default admin account with this API key. If you use another galaxy instance, change the url and API key.
 
@@ -90,3 +97,20 @@ We follow [PEP-8](https://www.python.org/dev/peps/pep-0008/), with particular em
 ### Javascript
 
 We follow [W3 JavaScript Style Guide and Coding Conventions](https://www.w3schools.com/js/js_conventions.asp)
+
+## Contribute to docs
+
+all the documentation (including what you are reading) can be found [here](https://askomics.readthedocs.io). Files are on the [AskOmics repository](https://github.com/askomics/askomics/tree/master/docs).
+
+To preview the docs, run
+
+```bash
+cd askomics
+# source the askomics virtual env
+source venv/bin/activate
+cd docs
+make html
+```
+
+html files are in `build` directory.
+
