@@ -157,7 +157,7 @@ class SourceFileTsv(SourceFile):
 
         types = {
             'ref': ('chrom', ),
-            'taxon': ('taxon', 'species'),
+            'taxon': ('taxon', 'species', 'organism'),
             'strand': ('strand', ),
             'start': ('start', 'begin'),
             'end': ('end', 'stop'),
@@ -425,12 +425,16 @@ class SourceFileTsv(SourceFile):
 
             indent = len(header) * " " + len("askomics:category") * " " + 3 * " "
 
-            ttl += self.encode_to_rdf_uri(header+"Category",prefix="askomics:") + " askomics:category "
+            if self.forced_column_types[ic] in ('taxon', 'ref', 'strand'):
+                ttl += self.encode_to_rdf_uri(self.forced_column_types[ic]+"Category",prefix="askomics:") + " askomics:category "
+            else:
+                ttl += self.encode_to_rdf_uri(header+"Category",prefix="askomics:") + " askomics:category "
+
             ttl += (" , \n" + indent ).join(map(lambda category : self.encode_to_rdf_uri(category,prefix="askomics:"), categories)) + " .\n"
             for item in categories:
                 if item.strip() != "":
                     ttl += self.encode_to_rdf_uri(item,prefix="askomics:") + " rdf:type " + self.encode_to_rdf_uri(header+"CategoryValue",prefix="askomics:") + " ;\n" + len(item) * " " + "  rdfs:label " + self.escape['text'](item,'') + "^^xsd:string .\n"
-            
+
         return ttl
 
 

@@ -8,6 +8,7 @@ use = egg:Askomics
 
 # Pyramid debug mode
 askomics.debug = false
+askomics.debug_ttl = false
 pyramid.reload_templates = false
 pyramid.debug_authorization = false
 pyramid.debug_notfound = false
