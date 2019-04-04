@@ -281,7 +281,7 @@ class IHMLocal {
 
             $("#init").empty();
             let template = AskOmics.templates.startpoints;
-            let context = {startpoints: start_points.nodes};
+            let context = {startpoints: start_points.nodes, galaxy: start_points.galaxy};
             let html = template(context);
             $('#init').append(html);
             let nbStartPoints = Object.keys(start_points.nodes).length;

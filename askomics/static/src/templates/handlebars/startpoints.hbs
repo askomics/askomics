@@ -45,6 +45,8 @@
         <span>Load query</span>
         <input id="uploadInput" type="file" class="upload">
     </div>
-  <button type="button" class="import-galaxy-query btn btn-default">Load query from Galaxy</button>
+    {{#if galaxy}}
+    <button type="button" class="import-galaxy-query btn btn-default">Load query from Galaxy</button>
+    {{/if}}
 </div>
 </div>
