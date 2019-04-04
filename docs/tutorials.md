@@ -1,42 +1,42 @@
-# AskOmics tutorial
+# AskOmics tutorials
 
 ## User account
 
 ### Account creation
 
-To use AskOmics, you will need an account. Go to the signup page by clicking to the login tab.
+To use AskOmics, you will need an account. Go to the sign-up page by clicking on the login icon.
 
 ![](static/images/buttons1.png)
 
-Then, click to the signup link.
+Then, click on the "sign up" link:
 
 ![](static/images/login.png)
 
-fill the form with the requested information.
+Fill the form with the requested information.
 
 ### Account management
 
-To manage your account, use the account management tab.
+To manage your account, use the account management icon.
 
 ![](static/images/account_management_tab.png)
 
 #### Update information
 
-This section allow you to change your email address and your password.
+This section allows you to change your email address and your password.
 
 #### API key
 
-the API key ensures the connection of AskOmics with third-party applications (like Galaxy).
+Your API key allows third-party applications (like Galaxy) to access AskOmics programmatically without revealing your personal password.
 
-Updating the API key will revoke existing accesses.
+When updating your API key, old ones will no longer work.
 
 #### Galaxy account
 
-Link a Galaxy account to use Galaxy datasets into AskOmics.
+Link a Galaxy account to load Galaxy datasets into AskOmics.
 
 #### Account deletion
 
-The account deletion is final, all your information, as well as all your data will be deleted.
+The account deletion is permanent, all your information, as well as all your data will be deleted. There is no way back.
 
 ## Use case 1: Gene expression
 
@@ -44,21 +44,23 @@ All files needed for the tutorial are available [here](https://github.com/askomi
 
 3 files are provided:
 
-- gene.tsv: Gene location on a genome
-- orthogroup.tsv: group of ortholog genes
-- differential_expression.tsv: results of differential expression experiences
+- gene.tsv: Genes locations on a genome
+- orthogroup.tsv: Groups of ortholog genes
+- differential_expression.tsv: Results of differential expression analysis
 
 ### Files organization
 
-AskOmics take as inputs CSV files. But these files have to respect a certain structure.
+AskOmics takes as inputs CSV (Comma-Separated Values) files. But these files have to respect a certain structure.
 
-A CSV file describe an **entity**. The entity name is displayed in the first header on the file. Entity name of the file `gene.tsv` is *Gene*.
+A CSV file describes an **entity**. The entity name is the header of the first column of the CSV file (e.g. the entity name of the file `gene.tsv` is *Gene*).
 
-Other headers describe the entity **attributes** and **relations**. An attributes is a simple columns one a file. For example, *Gene* have 5 attributes: *organism*, *chromosome*, *strand*, *start* and *end*. A relation is described by a header like *relation_name@entity*. On the `orthogroup.tsv` file, *Orthogroup* entity have a *concerns* relation. This relation target the *Gene* entity.
+Other column headers describe the entity **attributes** and **relations**:
+ - An attribute is a simple column in the CSV file. For example, *Gene* have 5 attributes: *organism*, *chromosome*, *strand*, *start* and *end*.
+ - A relation allows to create a link between an entity and another one. It is described by a header like *relation_name@entity*. On the `orthogroup.tsv` file, *Orthogroup* entity have a *concerns* relation. This relation targets the *Gene* entity.
 
-### Upload files
+### Uploading files
 
-First step is to upload your CSV files into AskOmics. Click on the *upload* tab to go to the upload page.
+The first step is to upload your CSV files into AskOmics. Click on the *upload* icon to go to the upload page.
 
 ![](static/images/upload_tab.png)
 
@@ -66,18 +68,17 @@ On the upload page, use the *Upload* button, and add the 3 files into the upload
 
 The CSV files are now uploaded on AskOmics.
 
-### Integrate files
+### Integrating files
 
-On the upload page, select the file to integrate, and click to the *Integrate* button. AskOmics shows an overview of the file.
-
+On the upload page, select the Gene file to integrate, and click to the *Integrate* button. AskOmics shows an overview of the file.
 
 ![](static/images/gene_tsv.png)
 
-1. Columns disabler: ucheck columns to ignore them
+1. Columns disabler: uncheck columns to ignore them (their content will not be loaded at all)
 2. Header updater: optionally update entity or attribute names
 3. Key columns: check several columns to create a new one by concatenate the columns checked
-4. Entity type: choose between simple entity or entity start (default). An entity start will be displayed one the startpoint page.
-5. Attributes types: select the attributes types (see bellow)
+4. Entity type: choose between simple `entity` or `entity start` (default). An `entity start` will be displayed on the startpoint page.
+5. Attributes types: select the attributes types (see below)
 6. Custom URI: update the attributes URI (advanced feature)
 
 Attributes can be one of the following types:
@@ -97,14 +98,15 @@ Attributes can be one of the following types:
     * General relation to entity
     * Symmetric relation to entity
 
-Types are automatically detected by AskOmics, but you can override them if needed.
+Types are automatically detected by AskOmics, but you can override them if needed. Depending on the type you choose, different options will be available in the query builder.
 
+You can then integrate the 2 remaining files.
 
-### Interrogate datasets
+### Interrogating datasets
 
 Once you have integrated all the datasets, it's time to query them.
 
-Click on the *Ask* button
+Click on the *Ask* icon
 
 ![](static/images/ask_tab.png)
 
@@ -112,13 +114,13 @@ The page show you the starting points of you query. Select The *Gene* entity and
 
 ![](static/images/startpoints.png)
 
-The *query builder* is composed of two view: the *left view*, representing entities and their relations, and the *right view*, representing attributes of the selected entity.
+The *query builder* is composed of two panels: the *left panel*, representing entities and their relations, and the *right panel*, representing attributes of the selected entity.
 
 ![](static/images/query_builder_gene.png)
 
-On the left view, the *Gene* entity is selected. We see two transparent node: *Orthogroup* and *DE*. This two node are proposed, but not instantiated.
+On the left panel, the *Gene* entity is selected. We see two transparent node: *Orthogroup* and *DE*. These two nodes are proposed, but not instantiated.
 
-On the right view, attributes of *Gene* are displayed on **attributes cells**.
+On the right panel, attributes of *Gene* are displayed on **attributes cells**.
 
 
 #### Simple query
@@ -285,7 +287,3 @@ Result can be send into galaxy on the job page. Use the *Send to Galaxy* button.
 
 
 ![](static/images/send_result_galaxy.png)
-
-
-
-
