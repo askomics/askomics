@@ -122,6 +122,7 @@ class AskView(object):
             nodes = tse.get_start_points()
 
             self.data['nodes'] = {}
+            self.data['galaxy'] = self.request.session['galaxy']
 
             for node in nodes:
                 if node['uri'] in self.data['nodes'].keys():

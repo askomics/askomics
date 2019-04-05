@@ -8,6 +8,7 @@ use = egg:Askomics
 
 # Pyramid debug mode
 askomics.debug = false
+askomics.debug_ttl = false
 pyramid.reload_templates = false
 pyramid.debug_authorization = false
 pyramid.debug_notfound = false
@@ -50,7 +51,7 @@ askomics.files_dir = /tmp/askomics
 
 # footer messages
 askomics.footer_message = 
-askomics.footer_version = 19.01.02
+askomics.footer_version = 19.01.3
 
 # Authentication
 # - locked_account: new account are locked a creation (true or false, default: true)

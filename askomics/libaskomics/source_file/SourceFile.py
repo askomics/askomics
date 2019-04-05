@@ -188,7 +188,6 @@ class SourceFile(ParamManager, HaveCachedProperties):
             if data['status'] == 'failed':
                 return data
             data['total_triple_count'] = total_triple_count
-            self.log.debug("source file : persist delete =>"+fp.name)
 
         else:
 
@@ -291,7 +290,8 @@ class SourceFile(ParamManager, HaveCachedProperties):
             raise e
 
         finally:
-            os.remove(fp.name)
+            if self.settings['askomics.debug_ttl'] != 'true':
+                os.remove(fp.name)
 
         return data
 
