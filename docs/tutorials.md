@@ -125,7 +125,7 @@ On the right panel, attributes of *Gene* are displayed on **attributes cells**.
 
 #### Simple query
 
-Click on *Launch query* to perform a query. It leads to the job page, query section. Click on the query to display an preview of the results.
+Click on the *Launch query* button to perform a query. It leads to the job page, query section. Click on the query to display a preview of the results.
 
 Results show all the *gene* URI present on the triplestore.
 
@@ -140,27 +140,21 @@ On the right view, all attributes have button. Click on the *eye* button to disp
 ![](static/images/organism_visible.png)
 
 
-The eye take 3 states:
+The eye has 3 states:
 
-- closed eye: hide the attribute
-- open eye: show the attribute
-- question mark: show the attribute, even if there is not
+- closed eye: the attribute won't appear in the results
+- open eye:  the attribute will appear in the results
+- question mark: show the attribute, even if there is no value
 
 Show the *organism*, *start* and *end* and launch the query.
 
-Results are all gene with their *organism*, *start* and *end*.
+Results show all the genes with their *organism*, *start* and *end*.
 
 ![](static/images/results_2.png)
 
 ### Filter on attributes
 
-Attributes can be filtered according their type (numeric, categorical or text). Some filtering functionality are common to all the attributes
-
-- Negation: the + icon
-- canel filter: use the rubber icon to reset the field
-- Link: the chain link link an attributes to the same attributes on another node
-
-
+Attributes can be filtered in different ways depending on their type (numeric, categorical or text).
 
 #### Text
 
@@ -168,10 +162,10 @@ Go back to the query builder. To filter on a text attributes, enter some test in
 
 ![](static/images/filter_label.png)
 
-Here, we ask for all entity that match the string `AT001`. This query will return one result.
+Here, we ask for all entities that match exactly the string `AT001`. This query will return one result.
 
 
-You can also perform a regular expression filter by clicking on the A icon (this will change the icon into a funnel).
+You can also use a regular expression filter by clicking on the A icon (this will change the icon into a funnel).
 
 ![](static/images/regexp_filter.png)
 
@@ -198,6 +192,13 @@ On the query builder, filter the organism to get all *Arabidopsis thaliana* gene
 
 5 genes are returned.
 
+#### Other filtering features
+
+ Some other filtering functionalities are common to all the attributes:
+
+- Negation: the + icon (e.g. if you want to find attributes with a value different to the one you entered)
+- Cancel filter: use the rubber icon to reset the attribute filtering
+- Link: the chain link link an attributes to the same attributes on another node
 
 ### Link data
 
