@@ -173,9 +173,9 @@ We ask for all genes whose label contains the `AT` string. This will return 5 re
 
 #### Numeric
 
-go back to the query builder and reset the label filter by clicking to the rubber icon.
+Go back to the query builder and reset the label filter by clicking to the rubber icon.
 
-Filter the start attribute to get all genes with a start position larger than 6000.
+Filter the start attribute to get all genes with a start position greater than 6000.
 
 ![](static/images/num_filter.png)
 
@@ -183,8 +183,7 @@ Filter the start attribute to get all genes with a start position larger than 60
 
 #### Category
 
-Category is an attributes that have a limited number of value. Here, *strand* , *chromosome* and *taxon* are categories.
-
+Attributes of type Category have a limited number of text value. Here, *strand* , *chromosome* and *taxon* are categories.
 
 On the query builder, filter the organism to get all *Arabidopsis thaliana* gene.
 
@@ -204,27 +203,27 @@ On the query builder, filter the organism to get all *Arabidopsis thaliana* gene
 
 Back on the query builder, we will now cross *Gene* with *DE* and *Orthogroup*
 
-Reset the query by clicking on the *Reset* button.
+Start to design a new query from scratch by clicking on the *Reset* button.
 
-Start a new query with *DE*. This datasets contain results of differentials expressions that concerns genes. Display Dpi (day post infection) and trend by clicking the eye on the attributes cells.
+Start a new query with *DE*. This datasets contain results of gene differential expression analysis. Display Dpi (day post infection) and trend by clicking the eye on the attributes cells.
 
 Then, instantiate the *Gene* node by clicking on it. Display *organism* and filter only the *Arabidopsis thaliana genes*.
 
 ![](static/images/complexe_query.png)
 
-This query gives you all differentials expressions measures that concerns *Arabisopsis thaliana* species.
+This query gives you all differential expression measures that concern *Arabisopsis thaliana* species.
 
 Go back to the *DE* node and filter attributes to get only genes that are overexpressed at day 7.
 
 ![](static/images/complexe_query_2.png)
 
-This query return 5 results.
+This query returns 5 results.
 
 
 ![](static/images/complexe_query_2_results.png)
 
 
-Now, we want genes of *Brassica napus* that are ortholog the the *Arabidopsis thaliana* genes that are overexpressed at day 7.
+Now, we want genes of *Brassica napus* that are ortholog to the *Arabidopsis thaliana* genes that are overexpressed at day 7.
 
 
 Instanciate a *Orthogroup* node from the *Gene*. From this *Orthogroup* node, instanciate another *Gene* node, and filter it with *Brassica napus*.
@@ -240,22 +239,22 @@ We have 2 genes returned
 
 
 
-Well done, you have complete the AskOmics tutorial! Now try with your data.
+Well done, you have completed the AskOmics tutorial! Now try with your own data.
 
 
-### Save a query state
+### Saving a query state
 
-On the query builder page, use the *Files > Save Query* to save the graph state into your computer. This file represent the state of the query.
+When you are proud of one of your query, you can save it for future reuse.
+On the query builder page, use the *Files > Save Query* to save the query state into your computer. This file represents the state of the query.
 
 ![](static/images/save_query.png)
 
-Then, on the ask page, you can upload a query file to work on your query again.
-
+Later, on the ask page, you can upload this query file to work on your query again.
 
 
 ### Download the results
 
-The job page show you only a preview of the results. To download the full results, click on *Save* to download a CSV file with the results.
+The job page only shows you a preview of the results. To download the full results, click on *Save* to download the complete CSV file.
 
 
 ## Use AskOmics with Galaxy
@@ -266,7 +265,7 @@ The job page show you only a preview of the results. To download the full result
 
 In you galaxy account, copy your Galaxy API key (User > Preferences > Manage API key).
 
-Back in AskOmics, go to Account Management and add the Galaxy URL and Galaxy API key
+Back in AskOmics, go to Account Management and add the Galaxy server URL and Galaxy API key
 
 ![](static/images/galaxy_askomics.png)
 
@@ -276,7 +275,7 @@ On the upload page, you can now upload a Galaxy datasets with the button *Get fr
 
 ![](static/images/upload_galaxy.png)
 
-### Save query state into Galaxy history
+### Save a query into Galaxy history
 
 On the query builder page, you can save a query state into a galaxy history. You can also start a query with a saved state from galaxy on the ask page.
 
@@ -284,7 +283,7 @@ On the query builder page, you can save a query state into a galaxy history. You
 
 ### Save query results into Galaxy history
 
-Result can be send into galaxy on the job page. Use the *Send to Galaxy* button.
+Result can be sent into galaxy on the job page. Use the *Send to Galaxy* button.
 
 
 ![](static/images/send_result_galaxy.png)
