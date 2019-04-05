@@ -10,9 +10,9 @@ AskOmics
 .. image:: https://img.shields.io/docker/pulls/askomics/askomics.svg
     :target: https://hub.docker.com/r/askomics/askomics/
 
-.. image:: https://readthedocs.org/projects/askomics/badge/?version=latest
-    :target: http://askomics.readthedocs.io/en/latest/?badge=latest
-
+.. image:: https://readthedocs.org/projects/askomics/badge/?version=master
+    :target: https://askomics.readthedocs.io/en/master/?badge=master
+    :alt: Documentation Status
 
 .. image:: ../static/askomics.png
    :alt: Askomics logo
