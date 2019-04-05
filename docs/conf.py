@@ -16,16 +16,16 @@ source_parsers = {
 }
 
 
-# def run_apidoc(_):
-#     from sphinx.apidoc import main
-#     parent_folder = os.path.join(os.path.dirname(__file__), '..')
-#     cur_dir = os.path.abspath(os.path.dirname(__file__))
-#     sys.path.append(parent_folder)
+def run_apidoc(_):
+    from sphinx.apidoc import main
+    parent_folder = os.path.join(os.path.dirname(__file__), '..')
+    cur_dir = os.path.abspath(os.path.dirname(__file__))
+    sys.path.append(parent_folder)
 
-#     module = os.path.join(parent_folder, 'askomics')
-#     output_path = os.path.join(cur_dir, 'api')
-#     main(['-e', '-f', '-o', output_path, module])
+    module = os.path.join(parent_folder, 'askomics')
+    output_path = os.path.join(cur_dir, 'api')
+    main(['-e', '-f', '-o', output_path, module])
 
 
-# def setup(app):
-#     app.connect('builder-inited', run_apidoc)
+def setup(app):
+    app.connect('builder-inited', run_apidoc)
