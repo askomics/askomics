@@ -293,7 +293,7 @@
 
     instanciateNode(node) {
       node.suggested = false;
-      node.actif     = true ;
+      node.actif     = false ;
       node           = this.setSPARQLVariateId(node);
       this._instanciedNodeGraph.push(node);
       return node;

@@ -96,6 +96,9 @@ class GraphNode extends GraphObject {
 
     /* by default all attributes is ask */
     AttOrCatArray[attributeForUri.uri].actif = false ;
+    if (attributeForUri.uri == "http://www.w3.org/2000/01/rdf-schema#label") {
+      AttOrCatArray[attributeForUri.uri].actif = true;
+    }
 
     return AttOrCatArray[attributeForUri.uri];
   }
