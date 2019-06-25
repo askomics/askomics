@@ -67,12 +67,12 @@ class SourceFileBed(SourceFile):
 
         taxon_entity = ':unknown'
         if self.taxon != '':
-            taxon_entity = self.encode_to_rdf_uri(self.taxon.strip(),prefix='askomics:')
+            taxon_entity = self.encode_to_rdf_uri(self.taxon.strip(),prefix=':')
 
         self.get_label_from_uri[taxon_entity] = self.taxon.strip()
-        self.get_label_from_uri['askomics:plus'] = 'plus'
-        self.get_label_from_uri['askomics:minus'] = 'minus'
-        self.get_label_from_uri['askomics:none'] = ''
+        self.get_label_from_uri[':plus'] = 'plus'
+        self.get_label_from_uri[':minus'] = 'minus'
+        self.get_label_from_uri[':none'] = ''
 
         blockbase = 10000
 
@@ -113,13 +113,13 @@ class SourceFileBed(SourceFile):
             # Strand
             faldo_strand = ''
             if feature.strand == '+':
-                strand_entity = 'askomics:plus'
+                strand_entity = ':plus'
                 faldo_strand = "faldo:ForwardStrandPosition"
             elif feature.strand == '-':
-                strand_entity = 'askomics:minus'
+                strand_entity = ':minus'
                 faldo_strand = "faldo:ReverseStrandPosition"
             else:
-                strand_entity = 'askomics:none'
+                strand_entity = ':none'
                 faldo_strand = "faldo:BothStrandPosition"
 
             # Score
@@ -137,6 +137,7 @@ class SourceFileBed(SourceFile):
             ttl += indent + 'rdfs:label "' + name_entity + '"^^xsd:string ;\n'
             ttl += indent + 'askomics:position_taxon ' + taxon_entity + ' ;\n'
             ttl += indent + 'askomics:position_strand ' + strand_entity + ' ;\n'
+            ttl += indent + 'askomics:position_ref ' + ref_entity + ' ;\n'
 
             if score_entity is not None:
                 ttl += indent + ':score ' + score_entity + ' ;\n'
