@@ -605,7 +605,7 @@ class AskomicsNodeView extends AskomicsObjectView {
 
           $(this).parent().find("select").prop('disabled', true);
           $(this).parent().find("input").prop('disabled', true);
-          $(this).parent().find(".fa").hide();
+          $(this).parent().find(".fa").prop('disabled', true);
           $(this).show();
         } else {
             icon.removeClass('fa-question-circle');
@@ -618,7 +618,7 @@ class AskomicsNodeView extends AskomicsObjectView {
                 $(this).parent().find('select[linkvar!="true"]').prop('disabled', false);
                 $(this).parent().find('input[linkvar!="true"]').prop('disabled', false);
             }
-            $(this).parent().find(".fa").show();
+            $(this).parent().find(".fa").prop('disabled', false);
             mythis.node.setActiveAttribute(sparqlid,false,false);
           }
         mythis.updateNodeView();

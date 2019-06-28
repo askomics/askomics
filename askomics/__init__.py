@@ -8,13 +8,13 @@ from pyramid.session import SignedCookieSessionFactory
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """
-    my_session_factory = SignedCookieSessionFactory('itsaseekreet')
+    my_session_factory = SignedCookieSessionFactory('itsaseekreet', timeout=360000)
 
     config = Configurator(settings=settings)
     config.set_session_factory(my_session_factory)
 
     config.include('pyramid_chameleon')
-    config.add_static_view('static', 'static')
+    config.add_static_view('static', 'static', cache_max_age=3600)
 
     # Security policies
     # authn_policy = AuthTktAuthenticationPolicy(settings['askomics.secret'])
