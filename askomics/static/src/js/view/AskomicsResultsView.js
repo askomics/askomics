@@ -64,6 +64,11 @@ class AskomicsResultsView {
     return head;
   }
 
+  isValidURL(string) {
+    let res = string.match(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g);
+    return (res !== null);
+  }
+
   build_body_results() {
 
     this.is_valid();
@@ -80,9 +85,9 @@ class AskomicsResultsView {
 
           if (val === undefined) {
               row.append($('<td></td>').text(""));
-          } else if ( val.startsWith("http://") ) {
+          } else if ( this.isValidURL(val) ) {
             let valWithPrefix = __ihm.getAbstraction().shortRDF(val);
-            row.append($('<td></td>').html($('<a></a>').attr('href',val).attr('target','_blank').text(valWithPrefix)));
+            row.append($('<td></td>').html($('<a></a>').attr('href', val).attr('target','_blank').text(val.split('#')[1])));
           } else
             row.append($('<td></td>').text(val));
         }

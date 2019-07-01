@@ -564,15 +564,15 @@ class SourceFileTsv(SourceFile):
                                     value = row[i]
                                 elif current_type == 'taxon':
                                     relation_name = 'askomics:position_taxon'
-                                    value = self.encode_to_rdf_uri(row[i],prefix="askomics:")
+                                    value = self.encode_to_rdf_uri(row[i],prefix=":")
                                 elif current_type == 'ref':
                                     relation_name = 'askomics:position_ref'
                                     reference_faldo = row[i]
-                                    value = self.encode_to_rdf_uri(row[i],prefix="askomics:")
+                                    value = self.encode_to_rdf_uri(row[i],prefix=":")
                                 elif current_type == 'strand':
                                     strand_faldo = row[i]
                                     relation_name = 'askomics:position_strand'
-                                    value = self.encode_to_rdf_uri(self.get_strand(row[i]),prefix="askomics:")
+                                    value = self.encode_to_rdf_uri(self.get_strand(row[i]),prefix=":")
 
 
                                 ttl += indent + " "+ relation_name + " " + self.delims[current_type][0] + self.escape[current_type](value,cur_prefix_uri) + self.delims[current_type][1] + " ;\n"
@@ -598,8 +598,8 @@ class SourceFileTsv(SourceFile):
 
                     for sliceb in range(block_idxstart, block_idxend + 1):
                         if reference_faldo:
-                            uriFaldoReferenceSlice = self.encode_to_rdf_uri("askomics:"+reference_faldo+"_"+str(sliceb))
-                            uriFaldoReference = self.encode_to_rdf_uri("askomics:"+reference_faldo)
+                            uriFaldoReferenceSlice = self.encode_to_rdf_uri(":"+reference_faldo+"_"+str(sliceb))
+                            uriFaldoReference = self.encode_to_rdf_uri(":"+reference_faldo)
                             ttl += indent + ' askomics:IsIncludeInRef ' +  uriFaldoReferenceSlice +' ;\n'
 
                         ttl += indent + ' askomics:IsIncludeIn ' + str(sliceb) +' ;\n'

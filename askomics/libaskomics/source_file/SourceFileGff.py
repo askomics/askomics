@@ -97,20 +97,20 @@ class SourceFileGff(SourceFile):
         lEntities = {}
         toBuild = []
 
-        taxon_entity = 'askomics:unknown'
+        taxon_entity = ':unknown'
         if self.taxon != '' :
-            taxon_entity = self.encode_to_rdf_uri(self.taxon.strip(),'askomics:')
+            taxon_entity = self.encode_to_rdf_uri(self.taxon.strip(),':')
 
         self.getLabelFromUri[taxon_entity] = self.taxon.strip()
-        self.getLabelFromUri['askomics:plus'] = 'plus'
-        self.getLabelFromUri['askomics:minus'] = 'minus'
-        self.getLabelFromUri['askomics:none'] = ''
+        self.getLabelFromUri[':plus'] = 'plus'
+        self.getLabelFromUri[':minus'] = 'minus'
+        self.getLabelFromUri[':none'] = ''
 
         blockbase=10000
 
         for rec in GFF.parse(handle, limit_info=limit, target_lines=1):
             # Reference have to be common with other reference of other taxon => askomics:
-            ref_entity =  self.encode_to_rdf_uri(str(rec.id),prefix='askomics:')
+            ref_entity =  self.encode_to_rdf_uri(str(rec.id),prefix=':')
             if ref_entity not in self.getLabelFromUri:
                 self.getLabelFromUri[ref_entity] = str(rec.id)
 
@@ -147,13 +147,13 @@ class SourceFileGff(SourceFile):
                 faldo_strand =""
 
                 if int(feat.location.strand == 1):
-                    strand_entity = 'askomics:plus'
+                    strand_entity = ':plus'
                     faldo_strand = "faldo:ForwardStrandPosition"
                 elif int(feat.location.strand == -1):
-                    strand_entity = 'askomics:minus'
+                    strand_entity = ':minus'
                     faldo_strand = "faldo:ReverseStrandPosition"
                 else:
-                    strand_entity = 'askomics:none'
+                    strand_entity = ':none'
                     faldo_strand = "faldo:BothStrandPosition"
 
                 block_idxstart = int(start_entity) // blockbase
@@ -161,7 +161,7 @@ class SourceFileGff(SourceFile):
                 listSliceRef = []
                 listSlice = []
                 for sliceb in range(block_idxstart,block_idxend+1):
-                        listSliceRef.append(self.encode_to_rdf_uri("askomics:"+str(rec.id)+"_"+str(sliceb)))
+                        listSliceRef.append(self.encode_to_rdf_uri(":"+str(rec.id)+"_"+str(sliceb)))
                         listSlice.append(str(sliceb))
 
                 attribute_dict = {
