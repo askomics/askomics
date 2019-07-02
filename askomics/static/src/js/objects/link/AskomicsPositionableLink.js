@@ -11,7 +11,7 @@ class AskomicsPositionableLink extends AskomicsLink {
     this.label        = 'included in';
     this.same_tax     =  false;
     this.same_ref     =  true;
-    this.which_strand =  'both'; // same/opp;
+    this.which_strand =  'same'; // same/opp;
     this.strict       =  true ;
 
     this.startNodeVar = null ;
