@@ -1,6 +1,6 @@
 # AskOmics
 
-/!\ This repository is now **deprecated**. Next version of AskOmics are [here](https://github.com/askomics/flaskomics) /!\ 
+## /!\ This repository is now **deprecated**. Next version of AskOmics are [here](https://github.com/askomics/flaskomics) /!\ 
 
 [![Build Status](https://travis-ci.org/askomics/askomics.svg?branch=master)](https://travis-ci.org/askomics/askomics)
 [![Coverage Status](https://coveralls.io/repos/github/askomics/askomics/badge.svg?branch=master)](https://coveralls.io/github/askomics/askomics?branch=master)
