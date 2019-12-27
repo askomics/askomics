@@ -34,7 +34,7 @@
     "gulp-uglifycss": "^1.1.0",
     "gulp-declare": "^0.3.0",
     "gulp-handlebars": "^5.0.2",
-    "handlebars": "^4.0.12",
+    "handlebars": "^4.3.0",
     "gulp-wrap": "^0.14.0",
     "gulp-noop": "^1.0.0",
     "pump": "^3.0.0",
